@@ -1,0 +1,4 @@
+# Local Codex/agent metadata
+.codex/
+.agent/
+.agents/
