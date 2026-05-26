@@ -1,0 +1,522 @@
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  GraduationCap, Building2, Database, BarChart3, ShieldCheck, 
+  Menu, X, ArrowRight, CheckCircle2, User, Briefcase, 
+  FileText, Users, Settings, Bell, LogOut, Upload, 
+  Plus, AlertCircle, TrendingUp, Search
+} from 'lucide-react';
+
+// ==========================================
+// 1. DYNAMIC SHARED LAYOUT SYSTEM
+// ==========================================
+function DashboardLayout({ children, title, role, navItems }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex text-slate-800 antialiased font-sans">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
+      )}
+
+      {/* Sidebar Navigation */}
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-50 transform lg:transform-none lg:opacity-100 transition-all duration-300 flex flex-col justify-between ${
+        sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div>
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md">
+                <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
+              </div>
+              <div>
+                <span className="font-extrabold text-md tracking-tight text-[#003366] block">ASTU-AMS</span>
+                <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block">{role}</span>
+              </div>
+            </Link>
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-slate-400 hover:text-slate-600">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="p-4 space-y-1">
+            {navItems.map((item, idx) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={idx}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                    isActive 
+                      ? 'bg-[#003366]/5 text-[#003366] shadow-sm border-l-4 border-[#003366]' 
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-[#003366]' : 'text-slate-400'}`} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer Account Section */}
+        <div className="p-4 border-t border-slate-100">
+          <Link to="/" className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all">
+            <LogOut className="h-4 w-4" />
+            Exit Workspace
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Workspace Frame */}
+      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
+        {/* Top Management Navbar */}
+        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 shadow-sm">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
+              <Menu className="h-5 w-5" />
+            </button>
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-xl relative shadow-sm">
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#CC0033] rounded-full"></span>
+            </button>
+            <div className="h-8 w-[1px] bg-slate-200"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-xl bg-slate-200 flex items-center justify-center font-bold text-sm text-[#003366] border border-slate-300">
+                U
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* View Frame Container */}
+        <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 2. LANDING COMPONENT VIEW
+// ==========================================
+function LandingPage() {
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen bg-slate-50 antialiased font-sans">
+      {/* Structural Navbar */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 py-4 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md">
+              <GraduationCap className="h-6 w-6 text-[#FFCC00]" />
+            </div>
+            <div>
+              <span className="font-extrabold text-xl tracking-tight text-[#003366] block">ASTU-AMS</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#CC0033] font-bold block -mt-1">Alumni Ecosystem</span>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 shadow-sm flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Infrastructure Secure
+          </span>
+        </div>
+      </nav>
+
+      {/* Hero Header */}
+      <header className="py-16 text-center max-w-4xl mx-auto px-4 space-y-6">
+        <h1 className="text-4xl sm:text-5xl font-black text-[#003366] tracking-tight leading-tight">
+          ASTU-AMS Enterprise Portal Entry
+        </h1>
+        <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto">
+          Welcome to the Adama Science and Technology University Digital Ecosystem. Choose your designated gateway module below to manage profiles, verify records, or access analytics.
+        </p>
+      </header>
+
+      {/* Portal Path Grid */}
+      <section className="max-w-7xl mx-auto px-4 pb-24 grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        {[
+          { title: "Alumni Portal", desc: "Update professional resumes and fill tracking questionnaires.", path: "/alumni", icon: GraduationCap },
+          { title: "Registrar Hub", desc: "Process graduate Excel arrays and handle credentials validations.", path: "/registrar", icon: Database },
+          { title: "Employer Panel", desc: "Publish operational career opportunities and post feedback arrays.", path: "/employer", icon: Building2 },
+          { title: "Department Analytics", desc: "Isolate structural technological curriculum discrepancies.", path: "/department", icon: BarChart3 },
+          { title: "System Governance", desc: "Manage overarching access controls and cron schedules.", path: "/admin", icon: ShieldCheck },
+        ].map((p, i) => (
+          <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group transform hover:-translate-y-1">
+            <div className="space-y-4">
+              <div className="bg-slate-50 text-[#003366] p-3 rounded-xl w-fit group-hover:bg-[#003366] group-hover:text-white transition-all shadow-sm">
+                <p.icon className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">{p.title}</h3>
+              <p className="text-slate-500 text-xs leading-relaxed">{p.desc}</p>
+            </div>
+            <button onClick={() => navigate(p.path)} className="mt-6 w-full flex items-center justify-center gap-2 bg-slate-50 text-slate-700 hover:bg-[#003366] hover:text-white py-2.5 font-bold text-xs rounded-xl border border-slate-200 transition-all shadow-sm">
+              Launch Portal <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
+
+// ==========================================
+// 3. PORTAL 1: ALUMNI INSTANCE
+// ==========================================
+function AlumniPortal() {
+  const navItems = [
+    { label: "Overview", path: "/alumni", icon: User },
+    { label: "Tracer Surveys", path: "/alumni/surveys", icon: FileText },
+    { label: "Jobs Board", path: "/alumni/jobs", icon: Briefcase }
+  ];
+
+  return (
+    <DashboardLayout title="Alumni Hub Dashboard" role="Alumni Account" navItems={navItems}>
+      <Routes>
+        <Route path="/" element={
+          <div className="space-y-6">
+            {/* Profile Highlight Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-[#003366]/10 text-[#003366] font-black rounded-2xl flex items-center justify-center text-lg shadow-inner">
+                  JD
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">John Doe</h2>
+                  <p className="text-xs text-slate-500 font-medium">B.Sc. Software Engineering • Class of 2025</p>
+                </div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm">
+                <AlertCircle className="text-amber-600 h-5 w-5 flex-shrink-0" />
+                <div className="text-xs">
+                  <span className="font-bold text-amber-900 block">Pending Mandatory Survey</span>
+                  <span className="text-amber-700 block">6-Month Tracer Questionnaires must be answered.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Metrics Panels */}
+            <div className="grid sm:grid-cols-3 gap-6">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
+                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Profile Completeness</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-black text-slate-900">85%</span>
+                  <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div className="bg-[#003366] h-full" style={{ width: '85%' }}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
+                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Active Job Matches</span>
+                <span className="text-2xl font-black text-slate-900 block">14 Matches</span>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
+                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block mb-1">Verification Status</span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 inline-block mt-1 shadow-sm">
+                  ✓ VERIFIED BY REGISTRAR
+                </span>
+              </div>
+            </div>
+          </div>
+        } />
+        <Route path="/surveys" element={
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
+            <div>
+              <h2 className="text-lg font-black text-[#003366]">6-Month Mandatory Employment Tracer</h2>
+              <p className="text-xs text-slate-500">This validation feeds directly into the university accreditation module.</p>
+            </div>
+            <form className="space-y-4 max-w-xl border-t border-slate-100 pt-4" onSubmit={e => e.preventDefault()}>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 block">Current Employment Parameters</label>
+                <select className="w-full text-sm rounded-xl border-slate-200 shadow-sm focus:border-[#003366] focus:ring-[#003366]">
+                  <option>Employed Full-Time (Industry Aligned)</option>
+                  <option>Self-Employed / Entrepreneur</option>
+                  <option>Unemployed / Seeking Placement</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 block">Time to Professional Hire</label>
+                <select className="w-full text-sm rounded-xl border-slate-200 shadow-sm focus:border-[#003366] focus:ring-[#003366]">
+                  <option>Secured Before Graduation</option>
+                  <option>0 - 3 Months Post-Graduation</option>
+                  <option>3 - 6 Months Post-Graduation</option>
+                </select>
+              </div>
+              <button type="button" className="bg-[#003366] hover:bg-slate-800 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md transition-all">
+                Submit Responses
+              </button>
+            </form>
+          </div>
+        } />
+        <Route path="/jobs" element={
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-md flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-900">Cloud Infrastructure Engineer</h3>
+                <p className="text-xs text-slate-500">Ethio Telecom • Addis Ababa (Hybrid)</p>
+              </div>
+              <button className="bg-[#003366] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-800 transition-all">
+                Apply Now
+              </button>
+            </div>
+          </div>
+        } />
+      </Routes>
+    </DashboardLayout>
+  );
+}
+
+// ==========================================
+// 4. PORTAL 2: REGISTRAR HUBS
+// ==========================================
+function RegistrarPortal() {
+  const navItems = [
+    { label: "Records Batching", path: "/registrar", icon: Database },
+    { label: "Data Import Pipeline", path: "/registrar/import", icon: Upload }
+  ];
+
+  return (
+    <DashboardLayout title="Registrar Verification Hub" role="Registrar Admin" navItems={navItems}>
+      <Routes>
+        <Route path="/" element={
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <div>
+                <h2 className="text-md font-bold text-slate-900">Alumni Baseline Registry Ledger</h2>
+                <p className="text-xs text-slate-500">Definitive university baseline records for validation processing.</p>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead className="bg-slate-50 text-slate-500 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="p-4">Student ID</th>
+                    <th className="p-4">Full Name</th>
+                    <th className="p-4">Department Program</th>
+                    <th className="p-4">CGPA Metric</th>
+                    <th className="p-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  <tr>
+                    <td className="p-4 text-xs font-mono font-bold text-slate-900">ASTU/1024/18</td>
+                    <td className="p-4">Abdi Kebede</td>
+                    <td className="p-4">Electrical Engineering</td>
+                    <td className="p-4 font-mono">3.84</td>
+                    <td className="p-4"><span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Synced</span></td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-xs font-mono font-bold text-slate-900">ASTU/4592/18</td>
+                    <td className="p-4">Chala Bekele</td>
+                    <td className="p-4">Computer Science</td>
+                    <td className="p-4 font-mono">3.62</td>
+                    <td className="p-4"><span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Synced</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        } />
+        <Route path="/import" element={
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
+            <div>
+              <h2 className="text-lg font-black text-[#003366]">Excel Data Import Pipeline</h2>
+              <p className="text-xs text-slate-500">Upload official graduate roster files from the student information system to create accounts.</p>
+            </div>
+            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center bg-slate-50 hover:bg-slate-100/50 transition-all cursor-pointer group shadow-inner">
+              <Upload className="mx-auto h-10 w-10 text-slate-400 group-hover:text-[#003366] transition-colors mb-4" />
+              <span className="font-bold text-sm text-slate-700 block mb-1">Drag and drop graduates_ratios.xlsx</span>
+              <span className="text-xs text-slate-400 block">Supports standard column templates (Student ID, Name, Department, Year, CGPA)</span>
+            </div>
+          </div>
+        } />
+      </Routes>
+    </DashboardLayout>
+  );
+}
+
+// ==========================================
+// 5. PORTAL 3: EMPLOYER WORKSPACE
+// ==========================================
+function EmployerPortal() {
+  const navItems = [
+    { label: "Dashboard", path: "/employer", icon: Building2 },
+    { label: "Publish Opportunities", path: "/employer/post", icon: Plus }
+  ];
+
+  return (
+    <DashboardLayout title="Industry Talent Sourcing Pipeline" role="Partner Employer" navItems={navItems}>
+      <Routes>
+        <Route path="/" element={
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-900">Safaricom Ethiopia Workspace</h2>
+                <p className="text-xs text-slate-500">Verified corporate partner recruiter instance.</p>
+              </div>
+              <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-xs px-3 py-1 rounded-full shadow-sm">
+                Verified Recruiter
+              </span>
+            </div>
+            
+            {/* Competency Input Sheet Info Block */}
+            <div className="bg-gradient-to-r from-[#003366] to-slate-900 rounded-2xl p-6 text-white shadow-lg space-y-3">
+              <h3 className="font-bold text-sm text-[#FFCC00] uppercase tracking-wider">Curriculum Competency Rating Requested</h3>
+              <p className="text-xs text-slate-200 max-w-2xl leading-relaxed">
+                Provide feedback on your hires' skillsets. Your input automatically flags missing practical technical skills for department heads.
+              </p>
+              <button className="bg-[#CC0033] hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md">
+                Launch Evaluation Sheet
+              </button>
+            </div>
+          </div>
+        } />
+        <Route path="/post" element={
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
+            <h2 className="text-md font-black text-slate-900 border-b border-slate-100 pb-3">Publish New Placement Opportunity</h2>
+            <form className="space-y-4 max-w-xl" onSubmit={e => e.preventDefault()}>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 block">Job Title / Designation</label>
+                <input type="text" placeholder="e.g. Junior DevOps Associate" className="w-full text-sm rounded-xl border-slate-200 shadow-sm focus:border-[#003366] focus:ring-[#003366]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 block">Target ASTU Academic Departments</label>
+                <input type="text" placeholder="e.g. Computer Science, Software Engineering" className="w-full text-sm rounded-xl border-slate-200 shadow-sm focus:border-[#003366] focus:ring-[#003366]" />
+              </div>
+              <button type="button" className="bg-[#003366] text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md">
+                Deploy Placement Post
+              </button>
+            </form>
+          </div>
+        } />
+      </Routes>
+    </DashboardLayout>
+  );
+}
+
+// ==========================================
+// 6. PORTAL 4: DEPARTMENT HEAD DASHBOARD
+// ==========================================
+function DepartmentPortal() {
+  const navItems = [
+    { label: "Curriculum Analytics", path: "/department", icon: BarChart3 }
+  ];
+
+  return (
+    <DashboardLayout title="Department Program Assessment Dashboard" role="Dept Head" navItems={navItems}>
+      <div className="space-y-6">
+        {/* Core Analysis Summary Rows */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md space-y-2">
+            <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block">Software Engineering Placement Speed</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900">3.4 Months</span>
+              <span className="text-xs font-bold text-emerald-600">Avg to secure hire</span>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md space-y-2">
+            <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block">Tracer Survey Completion</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900">79.2%</span>
+              <span className="text-xs font-bold text-slate-500">Roster feedback loop</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Missing Practical Skill Set Alerts Array */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-4">
+          <div>
+            <h3 className="text-md font-bold text-slate-900">Industry-Flagged Technical Skill Deficiencies</h3>
+            <p className="text-xs text-slate-500">Skill gaps generated automatically from corporate partner feedback metrics.</p>
+          </div>
+          
+          <div className="space-y-3 pt-2">
+            {[
+              { skill: "Cloud Architecture Models (AWS / Azure Deployments)", gap: "88% of tracking employers flag as mandatory requirement" },
+              { skill: "Automated Production Testing & CI/CD Pipelines", gap: "72% of tracking employers notice curriculum discrepancy" }
+            ].map((g, i) => (
+              <div key={i} className="bg-rose-50/50 border border-rose-100 rounded-xl p-4 flex items-start gap-3 shadow-sm">
+                <AlertCircle className="text-[#CC0033] h-5 w-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-sm text-rose-950 block">{g.skill}</span>
+                  <span className="text-xs text-[#CC0033] block font-medium">{g.gap}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+// ==========================================
+// 7. PORTAL 5: ROOT SYSTEM GOVERNANCE
+// ==========================================
+function AdminPortal() {
+  const navItems = [
+    { label: "Universal Configurations", path: "/admin", icon: Settings }
+  ];
+
+  return (
+    <DashboardLayout title="Overarching Ecosystem Management Control Panel" role="Root Admin" navItems={navItems}>
+      <div className="space-y-6">
+        {/* Core Settings Grid */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
+          <div>
+            <h2 className="text-md font-bold text-slate-900">Automated Tracer Outreach Scheduler (Cron Jobs)</h2>
+            <p className="text-xs text-slate-500">Configure time triggers for automated student messaging.</p>
+          </div>
+          
+          <div className="divide-y divide-slate-100 border-t border-slate-100">
+            <div className="py-4 flex justify-between items-center">
+              <div>
+                <span className="font-bold text-sm text-slate-800 block">6-Month Tracer Email Script</span>
+                <span className="text-xs text-slate-400 block">Triggers exactly 180 calendar days post graduation date array records.</span>
+              </div>
+              <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">ACTIVE</span>
+            </div>
+            <div className="py-4 flex justify-between items-center">
+              <div>
+                <span className="font-bold text-sm text-slate-800 block">12-Month Alignment Review Script</span>
+                <span className="text-xs text-slate-400 block">Triggers exactly 365 calendar days post graduation date array records.</span>
+              </div>
+              <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">ACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+// ==========================================
+// 8. CORE APPLICATION EXPORT MODULE
+// ==========================================
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Gateway System Root */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Portal Cluster Ecosystem Routing Entryways */}
+        <Route path="/alumni/*" element={<AlumniPortal />} />
+        <Route path="/registrar/*" element={<RegistrarPortal />} />
+        <Route path="/employer/*" element={<EmployerPortal />} />
+        <Route path="/department/*" element={<DepartmentPortal />} />
+        <Route path="/admin/*" element={<AdminPortal />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

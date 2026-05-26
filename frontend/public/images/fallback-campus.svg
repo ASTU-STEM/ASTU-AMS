@@ -1,0 +1,17 @@
+<svg width="1200" height="700" viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="700" fill="#0A254A"/>
+  <rect x="0" y="0" width="1200" height="700" fill="url(#g)"/>
+  <rect x="140" y="160" width="920" height="380" rx="22" fill="#12386A" opacity="0.9"/>
+  <rect x="190" y="220" width="820" height="260" rx="14" fill="#17457E"/>
+  <circle cx="215" cy="195" r="8" fill="#E31E24"/>
+  <circle cx="241" cy="195" r="8" fill="#F3C300"/>
+  <circle cx="267" cy="195" r="8" fill="#2DA44E"/>
+  <text x="600" y="338" text-anchor="middle" fill="#FFFFFF" font-size="52" font-family="Arial, sans-serif" font-weight="700">ASTU-AMS</text>
+  <text x="600" y="382" text-anchor="middle" fill="#C8D6EA" font-size="24" font-family="Arial, sans-serif">Alumni Management System</text>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1200" y2="700" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#003366"/>
+      <stop offset="1" stop-color="#001D3D"/>
+    </linearGradient>
+  </defs>
+</svg>
