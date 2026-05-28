@@ -10,20 +10,73 @@ import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
 import DepartmentDashboard from "./features/departments/pages/DepartmentDashboard";
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<SignupPage />} />
-        <Route path="/alumni/dashboard" element={<AlumniDashboard />} />
-        <Route path="/employer/dashboard" element={<EmployerDashboard />} />
-        <Route path="/registrar/dashboard" element={<RegistrarDashboard />} />
-        <Route path="/department/dashboard" element={<DepartmentDashboard />} />
-        <Route path="/depthead/dashboard" element={<DepartmentDashboard />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+        {/* Role-protected routes */}
+        <Route
+          path="/alumni/dashboard"
+          element={
+            <ProtectedRoute
+              element={<AlumniDashboard />}
+              allowedRoles={["alumni"]}
+            />
+          }
+        />
+        <Route
+          path="/employer/dashboard"
+          element={
+            <ProtectedRoute
+              element={<EmployerDashboard />}
+              allowedRoles={["employer"]}
+            />
+          }
+        />
+        <Route
+          path="/registrar/dashboard"
+          element={
+            <ProtectedRoute
+              element={<RegistrarDashboard />}
+              allowedRoles={["registrar"]}
+            />
+          }
+        />
+        <Route
+          path="/department/dashboard"
+          element={
+            <ProtectedRoute
+              element={<DepartmentDashboard />}
+              allowedRoles={["department", "admin"]}
+            />
+          }
+        />
+        <Route
+          path="/depthead/dashboard"
+          element={
+            <ProtectedRoute
+              element={<DepartmentDashboard />}
+              allowedRoles={["department", "admin"]}
+            />
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute
+              element={<AdminDashboard />}
+              allowedRoles={["admin"]}
+            />
+          }
+        />
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

@@ -26,6 +26,8 @@ import {
 
 // Tabs Sub-components
 import { CompanyProfileTab } from '../components/CompanyProfileTab';
+import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { JobPostingTab } from '../components/JobPostingTab';
 import { ApplicationsTab } from '../components/ApplicationsTab';
 import { TalentSearchTab } from '../components/TalentSearchTab';
@@ -521,6 +523,55 @@ const EmployerDashboard = () => {
                   ))}
                 </div>
               </section>
+
+              {/* Employer Analytics Graphs Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <AnalyticsChart
+                  type="area"
+                  title="Application Submissions"
+                  subtitle="Candidate applications received over last 6 months"
+                  data={[
+                    { month: 'Jan', applications: 12 },
+                    { month: 'Feb', applications: 19 },
+                    { month: 'Mar', applications: 25 },
+                    { month: 'Apr', applications: 32 },
+                    { month: 'May', applications: 40 },
+                    { month: 'Jun', applications: 54 },
+                  ]}
+                  xKey="month"
+                  series={[{ key: 'applications', label: 'Applications Received' }]}
+                  height={200}
+                  darkMode={darkMode}
+                />
+                <AnalyticsChart
+                  type="pie"
+                  title="Evaluation Ratings"
+                  subtitle="Corporate evaluation of hired graduates"
+                  data={[
+                    { name: 'Exceeds Expectations', value: 45 },
+                    { name: 'Fully Competent', value: 38 },
+                    { name: 'Needs Development', value: 12 },
+                  ]}
+                  xKey="name"
+                  series={[{ key: 'value', label: 'Graduates Count' }]}
+                  height={200}
+                  darkMode={darkMode}
+                />
+              </div>
+
+              {/* Employer Activity Timeline */}
+              <div>
+                <ActivityTimeline
+                  activities={[
+                    { id: 1, type: 'job', title: 'New application received', description: 'Abebe Yosef applied for the Senior React Developer opening.', timestamp: '10m ago', unread: true },
+                    { id: 2, type: 'message', title: 'Private message from mentor', description: 'Hilina Sileshi sent a query regarding talent placement programs.', timestamp: '2h ago', unread: true },
+                    { id: 3, type: 'survey', title: 'Curriculum evaluation submitted', description: 'Shared skill feedback with ASTU Computer Science department.', timestamp: '1d ago' },
+                    { id: 4, type: 'event', title: 'Internship job offer accepted', description: 'Graduate Bekele Kebede signed the Software Dev Intern letter.', timestamp: '3d ago' }
+                  ] as ActivityEntry[]}
+                  darkMode={darkMode}
+                  onViewAll={() => setActiveTab('messages')}
+                />
+              </div>
 
               {/* Quick actions panel */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

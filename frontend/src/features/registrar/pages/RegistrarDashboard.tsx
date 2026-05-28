@@ -21,6 +21,8 @@ import { VerificationTab } from '../components/VerificationTab';
 import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
+import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 
 const RegistrarDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -460,6 +462,56 @@ const RegistrarDashboard = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Charts & Graphs Section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <AnalyticsChart
+                      type="bar"
+                      title="Graduate Import Trends"
+                      subtitle="Volume of graduates synchronized from SIS per batch"
+                      data={[
+                        { batch: '2021', graduates: 3200 },
+                        { batch: '2022', graduates: 3450 },
+                        { batch: '2023', graduates: 3800 },
+                        { batch: '2024', graduates: 4100 },
+                        { batch: '2025', graduates: 4324 },
+                      ]}
+                      xKey="batch"
+                      series={[{ key: 'graduates', label: 'Synced Graduates' }]}
+                      height={200}
+                      darkMode={darkMode}
+                    />
+                    <AnalyticsChart
+                      type="line"
+                      title="Tracer Survey Submissions Rate"
+                      subtitle="Interactive timeline tracking response rate percentage"
+                      data={[
+                        { month: 'Jan', rate: 45 },
+                        { month: 'Feb', rate: 58 },
+                        { month: 'Mar', rate: 68 },
+                        { month: 'Apr', rate: 76 },
+                        { month: 'May', rate: 84 },
+                      ]}
+                      xKey="month"
+                      series={[{ key: 'rate', label: 'Response Rate %' }]}
+                      height={200}
+                      darkMode={darkMode}
+                    />
+                  </div>
+
+                  {/* Registrar Activity Timeline */}
+                  <div className="mt-6">
+                    <ActivityTimeline
+                      activities={[
+                        { id: 1, type: 'verification', title: 'Alumni registration approved', description: 'Abebe Bikila successfully cleared identity checks.', timestamp: '1 hour ago', unread: true },
+                        { id: 2, type: 'document', title: 'Transcript verification complete', description: 'Dean approved digital credential hash for student ID UG/12839/14.', timestamp: '3 hours ago', unread: true },
+                        { id: 3, type: 'broadcast', title: 'Global tracer study published', description: 'Launched 24-month feedback inquiry to Class of 2024.', timestamp: '1 day ago' },
+                        { id: 4, type: 'alert', title: 'SIS Database backup', description: 'Cloud replication completed successfully.', timestamp: '2 days ago' }
+                      ] as ActivityEntry[]}
+                      darkMode={darkMode}
+                      onViewAll={() => setActiveTab('messages')}
+                    />
                   </div>
 
                 </div>

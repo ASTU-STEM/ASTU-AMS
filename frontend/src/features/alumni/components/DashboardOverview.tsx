@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone } from '../types/alumni.types';
 import toast from 'react-hot-toast';
+import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -380,6 +382,53 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
 
       </div>
+
+      {/* Analytics Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AnalyticsChart
+          type="area"
+          title="Employment Rate Trend"
+          subtitle="Graduate employment rates over recent years"
+          data={[
+            { year: '2020', rate: 72 },
+            { year: '2021', rate: 76 },
+            { year: '2022', rate: 79 },
+            { year: '2023', rate: 83 },
+            { year: '2024', rate: 87 },
+            { year: '2025', rate: 91 },
+          ]}
+          xKey="year"
+          series={[{ key: 'rate', label: 'Employment %' }]}
+          height={220}
+        />
+        <AnalyticsChart
+          type="pie"
+          title="Skills Distribution"
+          subtitle="Top skills reported by alumni"
+          data={[
+            { name: 'Software Engineering', value: 340 },
+            { name: 'Data Science', value: 180 },
+            { name: 'DevOps & Cloud', value: 120 },
+            { name: 'Electrical Eng.', value: 95 },
+            { name: 'Civil Eng.', value: 75 },
+          ]}
+          xKey="name"
+          series={[{ key: 'value', label: 'Alumni Count' }]}
+          height={220}
+        />
+      </div>
+
+      {/* Activity Timeline */}
+      <ActivityTimeline
+        activities={[
+          { id: 1, type: 'job', title: 'New job match: Senior React Developer', description: 'Chapa Financial Technologies posted a role matching your profile.', timestamp: '2h ago', unread: true },
+          { id: 2, type: 'survey', title: 'Tracer Survey reminder', description: '12-month tracer survey is due by June 30, 2026.', timestamp: '1d ago', unread: true },
+          { id: 3, type: 'event', title: 'ASTU Alumni Meetup 2026', description: 'Annual networking event at ASTU Main Campus on July 15.', timestamp: '3d ago' },
+          { id: 4, type: 'document', title: 'Transcript request approved', description: 'Your official transcript has been digitally signed.', timestamp: '5d ago' },
+          { id: 5, type: 'message', title: 'Message from HR Manager', description: 'Hilina Sileshi sent you a message about the developer opening.', timestamp: '1w ago' },
+        ] as ActivityEntry[]}
+        onViewAll={() => onTabChange('messages')}
+      />
 
       {/* Quick Actions */}
       <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60">
