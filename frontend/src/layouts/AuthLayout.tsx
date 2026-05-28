@@ -6,9 +6,10 @@ interface AuthLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle: string;
+  showLogo?: boolean;
 }
 
-export default function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
+export default function AuthLayout({ children, title, subtitle, showLogo = true }: AuthLayoutProps) {
   const features = [
     {
       icon: Users,
@@ -103,6 +104,26 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
         {/* Right Side - Auth Form */}
         <div className="flex w-full items-center justify-center bg-surface p-4 lg:w-1/2 lg:p-12">
           <div className="w-full max-w-md">
+            {/* Logo */}
+            {showLogo && (
+              <div className="flex justify-center mb-4">
+                <img 
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
+                  alt="ASTU Logo" 
+                  className="h-32 w-32 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.src = "/images/astu-logo.jpeg";
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Title and Subtitle */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-astu-navy mb-2">{title}</h1>
+              <p className="text-sm text-on-surface-variant">{subtitle}</p>
+            </div>
+
             {/* Mobile Header */}
             <div className="mb-8 text-center lg:hidden">
               <div className="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-astu-navy/10">
@@ -118,11 +139,6 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
 
             {/* Auth Card */}
             <div className="rounded-xl border border-outline-variant bg-white p-8 shadow-md">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-astu-navy">{title}</h2>
-                <p className="mt-1 text-sm text-on-surface-variant">{subtitle}</p>
-              </div>
-
               {children}
             </div>
 

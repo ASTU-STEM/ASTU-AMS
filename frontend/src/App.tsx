@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./features/auth/pages/LoginPage";
-import SignupPage from "./features/auth/pages/SignupPage";
+import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
+import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
+import EmployersPage from "./features/auth/pages/EmployersPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -19,7 +21,9 @@ function App() {
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<SignupPage />} />
+        <Route path="/register" element={<AlumniRegistrationPage />} />
+        <Route path="/activate-account" element={<AlumniActivationPage />} />
+        <Route path="/employers" element={<EmployersPage />} />
 
         {/* Role-protected routes */}
         <Route
@@ -76,7 +80,6 @@ function App() {
             />
           }
         />
-
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import toast from 'react-hot-toast';
 import AuthLayout from '../../../layouts/AuthLayout';
@@ -68,17 +68,15 @@ export default function LoginPage() {
     <AuthLayout
       title="Welcome Back"
       subtitle="Sign in to access your alumni or administrative workspace"
+      showLogo={true}
     >
-      <div className="flex justify-center mb-6">
-        <img 
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
-          alt="ASTU Logo" 
-          className="h-16 w-16 object-contain rounded-full border border-slate-100 p-1 shadow-sm"
-          onError={(e) => {
-            // fallback if logo is not loading
-            e.currentTarget.src = "/images/astu-logo.jpeg";
-          }}
-        />
+      <div className="rounded-lg bg-astu-navy/5 p-4 mb-6">
+        <p className="text-xs text-on-surface-variant">
+          <strong>Note:</strong> For employer login, please use the{' '}
+          <Link to="/employers" className="font-semibold text-astu-navy hover:underline">
+            Employers Portal
+          </Link>.
+        </p>
       </div>
 
       <Formik
@@ -153,8 +151,8 @@ export default function LoginPage() {
             </AuthButton>
 
             <AuthFooterLink
-              text="Don't have an account?"
-              linkText="Create your verified alumni account"
+              text="Alumni? Join the network"
+              linkText="Register Now"
               to="/register"
             />
           </Form>

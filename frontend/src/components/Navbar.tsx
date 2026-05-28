@@ -274,16 +274,22 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
           {!user ? (
             <div className="hidden items-center gap-3 sm:flex">
               <Link
+                to="/employers"
+                className="rounded-md border border-outline-variant px-5 py-2 text-sm md:text-[15px] font-bold text-astu-navy hover:bg-surface-container-low hover:text-astu-red transition-all duration-200"
+              >
+                Employers
+              </Link>
+              <Link
                 to="/login"
                 className="rounded-md border border-outline-variant px-5 py-2 text-sm md:text-[15px] font-bold text-astu-navy hover:bg-surface-container-low hover:text-astu-red transition-all duration-200"
               >
-                Sign In
+                Login
               </Link>
               <Link
                 to="/register"
                 className="rounded-md bg-astu-navy px-5 py-2 text-sm md:text-[15px] font-bold text-white hover:brightness-110 hover:shadow-md transition-all duration-200"
               >
-                Register
+                Join Alumni Network
               </Link>
             </div>
           ) : (
@@ -358,7 +364,16 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
           </div>
           <div className="mt-4 pt-3 border-t border-outline-variant/60">
             {!user ? (
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    navigate("/employers");
+                  }}
+                  className="rounded-md border border-outline-variant px-3 py-2 text-sm font-semibold text-astu-navy text-center"
+                >
+                  Employers
+                </button>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
@@ -366,7 +381,7 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
                   }}
                   className="rounded-md border border-outline-variant px-3 py-2 text-sm font-semibold text-astu-navy text-center"
                 >
-                  Sign In
+                  Login
                 </button>
                 <button
                   onClick={() => {
@@ -375,7 +390,7 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
                   }}
                   className="rounded-md bg-astu-navy px-3 py-2 text-sm font-semibold text-white text-center"
                 >
-                  Create Account
+                  Join Alumni Network
                 </button>
               </div>
             ) : (
