@@ -51,6 +51,9 @@ const AlumniDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
+  // Theme Dark / Light mode
+  const [darkMode, setDarkMode] = useState(false);
+
   // Core Data States
   const [profile, setProfile] = useState<AlumniProfile>(getAlumniProfile());
   const [jobs, setJobs] = useState<JobMatch[]>(getJobMatches());
@@ -307,11 +310,15 @@ const AlumniDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen text-on-surface font-body-md overflow-x-hidden">
+    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col transition-all duration-300 ${
+      darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
+    }`}>
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-full flex flex-col z-40 bg-astu-navy shadow-2xl w-[280px] hidden md:flex">
+      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${
+        darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+      }`}>
         <div className="p-6 mt-6">
           <div className="flex items-center gap-3">
             <img
@@ -376,12 +383,16 @@ const AlumniDashboard = () => {
       <main className="md:ml-[280px] min-h-screen flex flex-col">
         
         {/* Header Section */}
-        <header className="sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${
+          darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
+        }`}>
           <div className="flex-1 max-w-xl">
             <div className="relative group">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
               <input
-                className="w-full pl-10 pr-4 py-2 bg-gray-100/80 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:bg-white transition-all duration-300"
+                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${
+                  darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
+                }`}
                 placeholder="Search alumni, companies, or mentors..."
                 type="text"
                 onChange={(e) => {
@@ -394,6 +405,22 @@ const AlumniDashboard = () => {
           </div>
 
           <div className="flex items-center gap-4 ml-6 relative">
+            {/* Dark Mode Toggle Switch */}
+            <button
+              onClick={() => {
+                setDarkMode(!darkMode);
+                toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
+              }}
+              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${
+                darkMode ? 'text-amber-400' : 'text-slate-600'
+              }`}
+              title="Toggle Dark/Light Mode"
+            >
+              <span className="material-symbols-outlined text-xl">
+                {darkMode ? 'light_mode' : 'dark_mode'}
+              </span>
+            </button>
+
             {/* Notification Bell */}
             <button 
               onClick={() => {
@@ -410,9 +437,11 @@ const AlumniDashboard = () => {
 
             {/* Notification Dropdown Portal */}
             {showNotifications && (
-              <div className="absolute right-12 top-12 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 p-4 space-y-3">
-                <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                  <h4 className="font-bold text-sm text-gray-900">Notifications</h4>
+              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${
+                darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
+              }`}>
+                <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
+                  <h4 className="font-bold text-sm">Notifications</h4>
                   <button 
                     onClick={() => setNotifications([])} 
                     className="text-xs text-astu-red hover:underline"
@@ -422,9 +451,9 @@ const AlumniDashboard = () => {
                 </div>
                 <div className="space-y-2.5 max-h-60 overflow-y-auto">
                   {notifications.map(notif => (
-                    <div key={notif.id} className="flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div key={notif.id} className="flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50/10 transition-colors">
                       <div className="space-y-0.5">
-                        <p className="text-xs text-gray-800 leading-normal">{notif.text}</p>
+                        <p className="text-xs leading-normal">{notif.text}</p>
                         <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
                       </div>
                       <button 
@@ -450,7 +479,7 @@ const AlumniDashboard = () => {
               className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
             >
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-gray-900">{profile.fullName}</p>
+                <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{profile.fullName}</p>
                 <p className="text-xs text-gray-500 font-semibold">{profile.batch}</p>
               </div>
               <img
