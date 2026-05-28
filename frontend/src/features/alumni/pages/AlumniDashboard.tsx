@@ -43,6 +43,7 @@ import { MentorshipTab } from '../components/MentorshipTab';
 import { DocumentServicesTab } from '../components/DocumentServicesTab';
 import { SettingsTab } from '../components/SettingsTab';
 import { JobDetailsModal } from '../components/JobDetailsModal';
+import { MessagingTab } from '../components/MessagingTab';
 
 const AlumniDashboard = () => {
   const navigate = useNavigate();
@@ -343,6 +344,7 @@ const AlumniDashboard = () => {
               { id: 'jobs', label: 'Jobs', icon: 'work', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
               { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
               { id: 'documents', label: 'Document Services', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
               { id: 'settings', label: 'Settings', icon: 'settings', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
             ].map((item) => (
               <button
@@ -550,6 +552,10 @@ const AlumniDashboard = () => {
               documentRequests={documents}
               onRequestDocument={handleRequestDocument}
             />
+          )}
+
+          {activeTab === 'messages' && (
+            <MessagingTab darkMode={darkMode} />
           )}
 
           {activeTab === 'settings' && (

@@ -21,6 +21,11 @@ import {
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 
+import astuLogo from "../assets/logos/astu-icon.jpeg";
+import gallery1 from "../assets/imgs/astu-building.jpg";
+import gallery2 from "../assets/imgs/campus-2.jpeg";
+import gallery3 from "../assets/imgs/astu-logo.jpeg";
+
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
 const stakeholders = [
@@ -116,12 +121,6 @@ const events = [
   },
 ];
 
-const galleryImages = [
-  { src: gallery1, title: "ASTU Main Campus" },
-  { src: gallery2, title: "Innovation and Collaboration" },
-  { src: gallery3, title: "ASTU Alumni Identity" },
-];
-
 const proposalBlocks = [
   {
     title: "Background & Rationale",
@@ -179,10 +178,11 @@ const proposalBlocks = [
   },
 ];
 
-import astuLogo from "../assets/logos/astu-icon.jpeg";
-import gallery1 from "../assets/imgs/astu-building.jpg";
-import gallery2 from "../assets/imgs/campus-2.jpeg";
-import gallery3 from "../assets/imgs/astu-logo.jpeg";
+const galleryImages = [
+  { src: gallery1, title: "ASTU Main Campus" },
+  { src: gallery2, title: "Innovation and Collaboration" },
+  { src: gallery3, title: "ASTU Alumni Identity" },
+];
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -256,7 +256,7 @@ export default function HomePage() {
     return () => window.removeEventListener("storage", checkUserSession);
   }, []);
 
-  const handleImageError = (event) => {
+  const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
     event.currentTarget.src = FALLBACK_IMAGE;
   };
 

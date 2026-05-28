@@ -20,6 +20,7 @@ import { DataIntegrationTab } from '../components/DataIntegrationTab';
 import { VerificationTab } from '../components/VerificationTab';
 import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
+import { MessagingTab } from '../components/MessagingTab';
 
 const RegistrarDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -239,7 +240,8 @@ const RegistrarDashboard = () => {
                 { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                 { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                 { id: 'documents', label: 'Document Queue', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
+                { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
               ].map(item => (
                 <button
                   key={item.id}
@@ -495,6 +497,10 @@ const RegistrarDashboard = () => {
 
               {activeTab === 'reporting' && (
                 <ReportingTab />
+              )}
+
+              {activeTab === 'messages' && (
+                <MessagingTab darkMode={darkMode} />
               )}
             </div>
           </div>
