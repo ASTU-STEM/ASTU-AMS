@@ -21,6 +21,29 @@ export default function LoginPage() {
     rememberMe: false,
   };
 
+  const handleLoginSuccess = (role: string) => {
+    // Redirect based on role
+    switch (role) {
+      case 'ALUMNI':
+        navigate('/alumni/dashboard');
+        break;
+      case 'EMPLOYER':
+        navigate('/employer/dashboard');
+        break;
+      case 'REGISTRAR':
+        navigate('/registrar/dashboard');
+        break;
+      case 'DEPARTMENT_HEAD':
+        navigate('/department/dashboard');
+        break;
+      case 'ADMIN':
+        navigate('/admin/dashboard');
+        break;
+      default:
+        navigate('/');
+    }
+  };
+
   const handleSubmit = async (values: LoginFormData) => {
     setIsLoading(true);
     try {
@@ -32,28 +55,7 @@ export default function LoginPage() {
 
       if (response.success && response.data) {
         toast.success('Login successful!');
-        
-        // Redirect based on role
-        const role = response.data.user.role;
-        switch (role) {
-          case 'ALUMNI':
-            navigate('/alumni/dashboard');
-            break;
-          case 'EMPLOYER':
-            navigate('/employer/dashboard');
-            break;
-          case 'REGISTRAR':
-            navigate('/registrar/dashboard');
-            break;
-          case 'DEPARTMENT_HEAD':
-            navigate('/department/dashboard');
-            break;
-          case 'ADMIN':
-            navigate('/admin/dashboard');
-            break;
-          default:
-            navigate('/');
-        }
+        handleLoginSuccess(response.data.user.role);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed. Please try again.');
@@ -69,11 +71,16 @@ export default function LoginPage() {
     >
       <div className="flex justify-center mb-6">
         <img 
-          src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg" 
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
           alt="ASTU Logo" 
-          className="h-20 w-20 object-contain"
+          className="h-16 w-16 object-contain rounded-full border border-slate-100 p-1 shadow-sm"
+          onError={(e) => {
+            // fallback if logo is not loading
+            e.currentTarget.src = "/images/astu-logo.jpeg";
+          }}
         />
       </div>
+
       <Formik
         initialValues={initialValues}
         validationSchema={loginSchema}
@@ -129,7 +136,6 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  // TODO: Implement forgot password flow
                   toast('Password reset feature coming soon', { icon: 'ℹ️' });
                 }}
                 className="text-sm font-semibold text-astu-navy hover:underline"

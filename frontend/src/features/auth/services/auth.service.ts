@@ -34,7 +34,6 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      // Redirect to login (handled by component)
     }
     return Promise.reject(error);
   }

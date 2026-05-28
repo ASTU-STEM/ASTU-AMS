@@ -1,28 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Bell,
   BookOpen,
   Briefcase,
   Building2,
   CalendarDays,
   CheckCircle2,
   ChevronRight,
-  CircleUserRound,
   Globe,
   GraduationCap,
   Handshake,
   Leaf,
   Layers,
   LineChart,
-  Menu,
   ShieldCheck,
-  Search,
   Target,
   Users,
-  X,
   BarChart3,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import Navbar from "../components/Navbar";
 
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
@@ -189,48 +186,75 @@ import gallery3 from "../assets/imgs/astu-logo.jpeg";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const searchWrapRef = useRef(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [user, setUser] = useState<any>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const filteredSearch = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return [];
+  const slides = useMemo(() => [
+    {
+      image: gallery1, // real astu-building.jpg
+      tagline: "Quality Assurance & Accreditation",
+      title: "Connecting ASTU's Excellence to the Global Industry",
+      description: "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University.",
+    },
+    {
+      image: gallery2, // real campus-2.jpeg
+      tagline: "Enterprise Networking & Placement",
+      title: "Empowering ASTU Graduates in Modern Workspaces",
+      description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement.",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80", // third beautiful campus photo
+      tagline: "Academic Innovation & Tracer Feedback",
+      title: "Coordinating Strategic Tracer Studies & Skill Gaps",
+      description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.",
     }
+  ], []);
 
-    return searchItems
-      .filter((item) => item.label.toLowerCase().includes(searchQuery.toLowerCase()))
-      .slice(0, 6);
-  }, [searchQuery]);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
 
-  const goToSection = (id) => {
-    const node = document.getElementById(id);
-    if (node) {
-      node.scrollIntoView({ behavior: "smooth", block: "start" });
-      setIsMobileNavOpen(false);
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const getDashboardRoute = (role: string) => {
+    switch (role) {
+      case 'ALUMNI': return '/alumni/dashboard';
+      case 'EMPLOYER': return '/employer/dashboard';
+      case 'REGISTRAR': return '/registrar/dashboard';
+      case 'DEPARTMENT_HEAD': return '/department/dashboard';
+      case 'ADMIN': return '/admin/dashboard';
+      default: return '/';
     }
   };
 
-  const handleSearchSelect = (item) => {
-    setSearchQuery("");
-    setIsSearchOpen(false);
-    if (item.type === "section") {
-      goToSection(item.id);
-      return;
-    }
+  useEffect(() => {
+    const checkUserSession = () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          setUser(null);
+        }
+      } catch (e) {
+        console.error("Failed to parse user session", e);
+      }
+    };
 
-    if (item.type === "route") {
-      navigate(item.route);
-    }
-  };
-
-  const handleSearchKeyDown = (event) => {
-    if (event.key === "Enter" && filteredSearch.length > 0) {
-      handleSearchSelect(filteredSearch[0]);
-    }
-  };
+    checkUserSession();
+    window.addEventListener("storage", checkUserSession);
+    return () => window.removeEventListener("storage", checkUserSession);
+  }, []);
 
   const handleImageError = (event) => {
     event.currentTarget.src = FALLBACK_IMAGE;
@@ -276,174 +300,116 @@ export default function HomePage() {
     return () => sectionObserver.disconnect();
   }, []);
 
-  useEffect(() => {
-    const closeOnOutside = (event) => {
-      if (searchWrapRef.current && !searchWrapRef.current.contains(event.target)) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    window.addEventListener("click", closeOnOutside);
-    return () => window.removeEventListener("click", closeOnOutside);
-  }, []);
+  // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <header className="sticky top-0 z-50 border-b border-outline-variant bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-8">
-          <Link to="/" className="flex min-w-fit items-center gap-3">
-            <div className="rounded-full border border-outline-variant bg-white p-1">
-              <img src={astuLogo} alt="ASTU logo" className="h-9 w-9 rounded-full object-cover" />
-            </div>
-            <div>
-              <p className="text-base font-bold leading-none text-astu-navy md:text-lg">ASTU-AMS</p>
-              <p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant">Alumni Ecosystem</p>
-            </div>
-          </Link>
-
-          <div ref={searchWrapRef} className="relative hidden flex-1 max-w-xl md:block">
-            <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
-            <input
-              value={searchQuery}
-              onChange={(event) => {
-                setSearchQuery(event.target.value);
-                setIsSearchOpen(true);
-              }}
-              onFocus={() => setIsSearchOpen(true)}
-              onKeyDown={handleSearchKeyDown}
-              className="w-full rounded-md border border-outline-variant bg-surface-container-low py-2 pl-9 pr-3 text-sm focus:border-astu-navy focus:outline-none"
-              placeholder="Search sections or portals..."
-              type="text"
-            />
-
-            {isSearchOpen && filteredSearch.length > 0 ? (
-              <div className="absolute top-12 w-full overflow-hidden rounded-md border border-outline-variant bg-white shadow-lg">
-                {filteredSearch.map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => handleSearchSelect(item)}
-                    className="flex w-full items-center justify-between border-b border-outline-variant px-3 py-2 text-left text-sm last:border-b-0 hover:bg-surface-container-low"
-                  >
-                    <span>{item.label}</span>
-                    <ChevronRight className="h-4 w-4 text-on-surface-variant" />
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <nav className="hidden items-center gap-6 xl:flex">
-            {navSections.map((item) => (
-              <button
-                key={item.id}
-                className={`text-xs font-semibold transition-colors ${
-                  activeSection === item.id
-                    ? "text-astu-navy"
-                    : "text-on-surface-variant hover:text-astu-navy"
-                }`}
-                onClick={() => goToSection(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2 md:gap-3">
-            <button
-              aria-label="notifications"
-              className="rounded-full p-2.5 hover:bg-surface-container-low"
-              onClick={() => navigate("/alumni/dashboard")}
-            >
-              <Bell className="h-5 w-5" />
-            </button>
-            <button
-              aria-label="mobile navigation"
-              className="rounded-full p-2.5 hover:bg-surface-container-low xl:hidden"
-              onClick={() => setIsMobileNavOpen((prev) => !prev)}
-            >
-              {isMobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-            <button
-              aria-label="profile"
-              className="rounded-full border border-outline-variant p-2 hover:bg-surface-container-low"
-              onClick={() => navigate("/alumni/dashboard")}
-            >
-              <CircleUserRound className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {isMobileNavOpen ? (
-          <div className="border-t border-outline-variant bg-white px-4 py-4 xl:hidden">
-            <div className="space-y-2">
-              {navSections.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => goToSection(item.id)}
-                  className="block w-full rounded-md border border-outline-variant px-3 py-2 text-left text-sm font-semibold text-astu-navy"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              <button
-                onClick={() => navigate("/alumni/dashboard")}
-                className="rounded-md bg-astu-navy px-3 py-2 text-sm font-semibold text-white"
-              >
-                Alumni Portal
-              </button>
-              <button
-                onClick={() => navigate("/employer/dashboard")}
-                className="rounded-md border border-outline-variant px-3 py-2 text-sm font-semibold"
-              >
-                Employer Portal
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </header>
+      <Navbar activeSection={activeSection} />
 
       <main id="home">
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0">
-            <img
-              alt="ASTU campus"
-              className="h-full w-full object-cover"
-              src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80"
-              onError={handleImageError}
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,51,102,0.84),rgba(0,30,64,0.94))]" />
+        <section className="relative overflow-hidden h-[580px] md:h-[620px] lg:h-[680px] bg-slate-950">
+          {/* Background Slides */}
+          <div className="absolute inset-0 w-full h-full">
+            {slides.map((slide, idx) => (
+              <div
+                key={idx}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                  idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+                }`}
+              >
+                {/* Background image - zoomed out for clear visibility */}
+                <img
+                  alt={slide.title}
+                  className="h-full w-full object-cover object-[center_30%]"
+                  src={slide.image}
+                  onError={handleImageError}
+                />
+                {/* Gentle overlay for rich aesthetic with high photo transparency */}
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,25,50,0.55),rgba(0,10,25,0.78))]" />
+              </div>
+            ))}
           </div>
 
-          <div className="relative z-10 mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28 lg:py-32">
-            <div className="max-w-3xl reveal">
+          {/* Spacious clean text - exactly like the original large layout */}
+          <div className="relative z-20 mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28 lg:py-32 h-full flex items-center">
+            <div className="max-w-3xl space-y-6">
+              <span className="inline-block rounded-full bg-astu-red px-4 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-md">
+                {slides[currentSlide].tagline}
+              </span>
               <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-                Connecting ASTU&apos;s
+                {slides[currentSlide].title.split(" to the ")[0]}
                 <br />
-                Excellence to the <span className="text-astu-green">Global Industry</span>
+                {slides[currentSlide].title.includes(" to the ") ? (
+                  <>
+                    to the <span className="text-astu-green">{slides[currentSlide].title.split(" to the ")[1]}</span>
+                  </>
+                ) : (
+                  slides[currentSlide].title
+                )}
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-100 md:text-base">
-                A unified gateway for alumni, employers, and departments to foster professional growth,
-                talent acquisition, and academic innovation at Adama Science and Technology University.
+                {slides[currentSlide].description}
               </p>
+              
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
-                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-6 py-3 text-sm font-semibold text-white hover:brightness-110"
-                  onClick={() => navigate("/alumni/dashboard")}
+                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-6 py-3 text-sm font-semibold text-white hover:brightness-110 transition-all shadow"
+                  onClick={() => {
+                    if (user) {
+                      navigate(getDashboardRoute(user.role));
+                    } else {
+                      navigate("/login");
+                    }
+                  }}
                 >
-                  Alumni Portal Login
+                  {user ? "Go to My Dashboard" : "Alumni Portal Login"}
                   <ChevronRight className="h-4 w-4" />
                 </button>
                 <button
-                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20"
-                  onClick={() => navigate("/employer/dashboard")}
+                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20 transition-all"
+                  onClick={() => {
+                    if (user) {
+                      navigate(getDashboardRoute(user.role));
+                    } else {
+                      navigate("/login");
+                    }
+                  }}
                 >
-                  Employer Partnership
+                  {user ? "Employer Services" : "Employer Partnership"}
                   <Handshake className="h-4 w-4" />
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Left/Right navigation arrow buttons */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-105 transition-all duration-200 backdrop-blur-sm hidden sm:block shadow"
+            aria-label="Previous slide"
+          >
+            <ChevronRight className="h-5 w-5 rotate-180" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-105 transition-all duration-200 backdrop-blur-sm hidden sm:block shadow"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Bottom active slide indicator dots */}
+          <div className="absolute bottom-6 left-1/2 z-35 flex -translate-x-1/2 gap-2.5">
+            {slides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  idx === currentSlide ? "w-6 bg-[#FFD700]" : "w-2.5 bg-white/40 hover:bg-white/60"
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
           </div>
         </section>
 
@@ -503,7 +469,14 @@ export default function HomePage() {
                   </ul>
                   <button
                     className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy hover:text-astu-red"
-                    onClick={() => navigate(item.route)}
+                    onClick={() => {
+                      if (user) {
+                        navigate(item.route);
+                      } else {
+                        toast("Please log in to access this portal.", { icon: "🔒" });
+                        navigate("/login");
+                      }
+                    }}
                   >
                     {item.cta}
                     <ChevronRight className="h-4 w-4" />
@@ -742,51 +715,93 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="border-t border-[#1f4f86] bg-[#003366] py-10 text-white">
-        <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-4 md:px-8">
-          <div>
-            <h5 className="text-sm font-bold text-[#FFD700]">ASTU-AMS</h5>
-            <p className="mt-2 text-xs text-slate-200">
-              The ASTU Alumni Management System connects graduates, employers, and departments in one platform.
+      <footer className="border-t-2 border-astu-green/20 bg-gradient-to-b from-[#002244] to-[#000F22] py-16 text-white">
+        <div className="mx-auto grid max-w-[1440px] gap-10 px-4 md:grid-cols-4 md:px-8">
+          <div className="space-y-4">
+            <h5 className="text-xl font-black text-[#FFD700] tracking-wider uppercase">ASTU-AMS</h5>
+            <p className="text-sm leading-relaxed text-slate-300">
+              The ASTU Alumni Management System connects graduates, employers, and departments in one platform. Empowering professional networks, industry placement, and curriculum enhancement.
             </p>
-            <div className="mt-4 flex gap-2">
-              <button className="rounded-md border border-[#FFD700]/50 px-2 py-1 text-xs text-[#FFD700] transition-colors hover:bg-[#FFD700] hover:text-[#003366]">FB</button>
-              <button className="rounded-md border border-[#FFD700]/50 px-2 py-1 text-xs text-[#FFD700] transition-colors hover:bg-[#FFD700] hover:text-[#003366]">X</button>
-              <button className="rounded-md border border-[#FFD700]/50 px-2 py-1 text-xs text-[#FFD700] transition-colors hover:bg-[#FFD700] hover:text-[#003366]">IN</button>
+            <div className="flex gap-3 pt-2">
+              <button className="rounded-lg border border-[#FFD700]/30 px-3.5 py-1.5 text-xs font-bold text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-[#000F22] hover:scale-105">Facebook</button>
+              <button className="rounded-lg border border-[#FFD700]/30 px-3.5 py-1.5 text-xs font-bold text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-[#000F22] hover:scale-105">Twitter</button>
+              <button className="rounded-lg border border-[#FFD700]/30 px-3.5 py-1.5 text-xs font-bold text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-[#000F22] hover:scale-105">LinkedIn</button>
             </div>
           </div>
 
           <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFD700]">Resources</h6>
-            <ul className="mt-3 space-y-2 text-xs text-slate-200">
-              <li><button className="transition-colors hover:text-[#FFD700]" onClick={() => navigate("/alumni/dashboard")}>Career Portal</button></li>
-              <li><button className="transition-colors hover:text-[#FFD700]" onClick={() => navigate("/alumni/dashboard")}>Tracer Survey</button></li>
-              <li><button className="transition-colors hover:text-[#FFD700]" onClick={() => navigate("/alumni/dashboard")}>Mentorship</button></li>
+            <h6 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-[#1f4f86]/40 pb-2 mb-4">Resources</h6>
+            <ul className="space-y-3 text-sm text-slate-300">
+              <li>
+                <button
+                  className="flex items-center gap-1 transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
+                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                >
+                  Career Portal
+                </button>
+              </li>
+              <li>
+                <button
+                  className="flex items-center gap-1 transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
+                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                >
+                  Tracer Survey
+                </button>
+              </li>
+              <li>
+                <button
+                  className="flex items-center gap-1 transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
+                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                >
+                  Mentorship Support
+                </button>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFD700]">University</h6>
-            <ul className="mt-3 space-y-2 text-xs text-slate-200">
-              <li><button className="transition-colors hover:text-[#FFD700]">Official Website</button></li>
-              <li><button className="transition-colors hover:text-[#FFD700]">Research Centers</button></li>
-              <li><button className="transition-colors hover:text-[#FFD700]">Accreditation</button></li>
+            <h6 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-[#1f4f86]/40 pb-2 mb-4">University</h6>
+            <ul className="space-y-3 text-sm text-slate-300">
+              <li><button className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left">Official Website</button></li>
+              <li><button className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left">Research Centers</button></li>
+              <li><button className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left">Accreditation outcomes</button></li>
             </ul>
           </div>
 
           <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#FFD700]">Support</h6>
-            <ul className="mt-3 space-y-2 text-xs text-slate-200">
-              <li><button className="transition-colors hover:text-[#FFD700]" onClick={() => navigate("/registrar/dashboard")}>Help Center</button></li>
-              <li><button className="transition-colors hover:text-[#FFD700]" onClick={() => navigate("/admin/dashboard")}>Privacy Policy</button></li>
-              <li><button className="transition-colors hover:text-[#FFD700]" onClick={() => navigate("/registrar/dashboard")}>Contact Us</button></li>
+            <h6 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-[#1f4f86]/40 pb-2 mb-4">Support & Contact</h6>
+            <ul className="space-y-3 text-sm text-slate-300">
+              <li>
+                <button
+                  className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
+                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                >
+                  Help Center
+                </button>
+              </li>
+              <li>
+                <button
+                  className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
+                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                >
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button
+                  className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
+                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                >
+                  Contact Us
+                </button>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mx-auto mt-8 flex max-w-[1440px] flex-col justify-between gap-2 border-t border-[#1f4f86] px-4 pt-5 text-xs text-slate-300 md:flex-row md:px-8">
+        <div className="mx-auto mt-12 flex max-w-[1440px] flex-col justify-between gap-4 border-t border-[#1f4f86]/50 px-4 pt-8 text-sm text-slate-400 md:flex-row md:px-8">
           <p>© 2026 Adama Science and Technology University. All rights reserved.</p>
-          <p className="text-[#FFD700]">Designed for ASTU ICT and Tracer Study Coordination.</p>
+          <p className="text-[#FFD700] font-semibold">Designed and built for ASTU ICT and Tracer Study Coordination.</p>
         </div>
       </footer>
     </div>
