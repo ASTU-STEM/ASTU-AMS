@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/db';
-import { env } from '../../config/env.ts';
+import { env } from '../../config/env';
 import { EmailService } from '../../services/email.service';
 import { Role, SyncStatus } from '@prisma/client';
 import { registrarAPI } from '../../services/registrar-api.service';

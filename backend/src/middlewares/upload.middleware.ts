@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { env } from '../config/env.ts';
+import { env } from '../config/env';
 
 // Ensure folders exist
 const uploadDirs = ['uploads/cvs', 'uploads/profiles', 'uploads/documents', 'uploads/excel'];

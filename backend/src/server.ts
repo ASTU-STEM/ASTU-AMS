@@ -1,5 +1,5 @@
 import app from './app';
-import { env } from './config/env.ts';
+import { env } from './config/env';
 import prisma, { initPrisma } from './config/db';
 import { CronService } from './services/cron.service';
 import { Logger } from './utils/logger.utils';

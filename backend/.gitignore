@@ -49,3 +49,4 @@ coverage/
 *.log.lzo
 *.log.zlib
 *.log.brotli
+.env.example

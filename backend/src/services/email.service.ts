@@ -1,4 +1,4 @@
-import { env } from '../config/env.ts';
+import { env } from '../config/env';
 
 export class EmailService {
   static async sendEmail(to: string, subject: string, html: string): Promise<boolean> {

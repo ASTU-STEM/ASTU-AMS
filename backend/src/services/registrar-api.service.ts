@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import axiosRetry from 'axios-retry';
-import { env } from '../config/env.ts';
+import { env } from '../config/env';
 
 export class RegistrarAPIService {
   private client: AxiosInstance;
