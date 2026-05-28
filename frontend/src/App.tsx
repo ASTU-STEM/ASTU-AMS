@@ -2,8 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./features/auth/pages/LoginPage";
+import SignupPage from "./features/auth/pages/SignupPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -17,7 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register" element={<SignupPage />} />
         <Route path="/alumni/dashboard" element={<AlumniDashboard />} />
         <Route path="/employer/dashboard" element={<EmployerDashboard />} />
         <Route path="/registrar/dashboard" element={<RegistrarDashboard />} />
