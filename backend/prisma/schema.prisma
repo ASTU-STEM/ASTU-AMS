@@ -1,0 +1,246 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  ALUMNI
+  EMPLOYER
+  DEPARTMENT_HEAD
+  REGISTRAR
+}
+
+enum SyncStatus {
+  SUCCESS
+  FAILED
+}
+
+enum ApplicationStatus {
+  PENDING
+  SHORTLISTED
+  REJECTED
+  ACCEPTED
+}
+
+enum DocumentRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  password         String
+  role             Role
+  isActive         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  alumniProfile    AlumniProfile?
+  employerProfile  EmployerProfile?
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+}
+
+model Department {
+  id             String            @id @default(uuid())
+  name           String            @unique
+  code           String            @unique // e.g. SWE, MEG, ECE
+  alumniProfiles AlumniProfile[]
+  createdAt      DateTime          @default(now())
+}
+
+model AlumniProfile {
+  id             String            @id @default(uuid())
+  userId         String            @unique
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId      String            @unique
+  fullName       String
+  phone          String?
+  cgpa           Float
+  graduationYear Int
+  gender         String
+  dateOfBirth    DateTime?
+  departmentId   String
+  department     Department        @relation(fields: [departmentId], references: [id])
+  profilePicture String?
+  skills         String[]          // Array of skills
+  resumeUrl      String?
+  linkedIn       String?
+  gitHub         String?
+  portfolio      String?
+  telegram       String?
+  isVerified     Boolean           @default(false)
+  experiences    WorkExperience[]
+  applications   JobApplication[]
+  surveyResponses SurveyResponse[]
+  documentRequests DocumentRequest[]
+  employerFeedback EmployerFeedback[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model WorkExperience {
+  id          String        @id @default(uuid())
+  alumniId    String
+  alumni      AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  companyName String
+  position    String
+  industry    String
+  salaryRange String?       // e.g. "20k-30k", "50k+"
+  location    String?       // e.g. "Addama", "Addis Ababa", "Remote"
+  isCurrent   Boolean       @default(false)
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime      @default(now())
+}
+
+model EmployerProfile {
+  id          String             @id @default(uuid())
+  userId      String             @unique
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  industry    String
+  website     String?
+  location    String
+  hrContact   String
+  logoUrl     String?
+  isVerified  Boolean            @default(false)
+  jobs        Job[]
+  feedbacks   EmployerFeedback[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model Job {
+  id                 String           @id @default(uuid())
+  employerId         String
+  employer           EmployerProfile  @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  salary             String?
+  deadline           DateTime
+  experienceRequired Int              @default(0) // in years
+  skillsRequired     String[]
+  location           String
+  employmentType     String           // e.g. "FULL_TIME", "PART_TIME", "INTERNSHIP"
+  isActive           Boolean          @default(true)
+  applications       JobApplication[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model JobApplication {
+  id          String            @id @default(uuid())
+  jobId       String
+  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  alumniId    String
+  alumni      AlumniProfile     @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  resumeUrl   String?
+  coverLetter String?
+  status      ApplicationStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Survey {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  type        String           // "SIX_MONTH" | "TWELVE_MONTH" | "TWENTY_FOUR_MONTH"
+  isActive    Boolean          @default(true)
+  questions   SurveyQuestion[]
+  responses   SurveyResponse[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model SurveyQuestion {
+  id           String         @id @default(uuid())
+  surveyId     String
+  survey       Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  questionText String
+  questionType String         // "TEXT" | "SINGLE_CHOICE" | "MULTI_CHOICE" | "RATING"
+  options      String[]       // List of choices (if choice type)
+  order        Int
+  answers      SurveyAnswer[]
+}
+
+model SurveyResponse {
+  id          String         @id @default(uuid())
+  surveyId    String
+  survey      Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  alumniId    String
+  alumni      AlumniProfile  @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  answers     SurveyAnswer[]
+  submittedAt DateTime       @default(now())
+}
+
+model SurveyAnswer {
+  id         String         @id @default(uuid())
+  responseId String
+  response   SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId String
+  question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerText String         // User input or selected option
+}
+
+model EmployerFeedback {
+  id                 String        @id @default(uuid())
+  employerId         String
+  employer           EmployerProfile @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  alumniId           String
+  alumni             AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  technicalSkill     Int           // 1 to 10 rating
+  communicationSkill Int           // 1 to 10 rating
+  leadershipSkill    Int           // 1 to 10 rating
+  teamworkSkill      Int           // 1 to 10 rating
+  problemSolvingSkill Int          // 1 to 10 rating
+  innovationSkill    Int           // 1 to 10 rating
+  feedbackText       String?
+  createdAt          DateTime      @default(now())
+}
+
+model DocumentRequest {
+  id                     String                @id @default(uuid())
+  alumniId               String
+  alumni                 AlumniProfile         @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  documentType           String                // "TRANSCRIPT" | "DEGREE_VERIFICATION" | "RECOMMENDATION"
+  status                 DocumentRequestStatus @default(PENDING)
+  additionalInstructions String?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+}
+
+model RegistrarSyncLog {
+  id           String     @id @default(uuid())
+  syncedAt     DateTime   @default(now())
+  recordsCount Int
+  status       SyncStatus
+  errors       String?
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  details   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,56 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import path from 'path';
+import apiRouter from './routes/api.routes';
+import { globalErrorHandler } from './middlewares/error.middleware';
+
+const app = express();
+
+// 1. Basic Security Headers (Helmet)
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Permit loading uploaded local files on frontend
+}));
+
+// 2. CORS Policy Configuration
+app.use(cors({
+  origin: '*', // In production, replace with specific frontend URL (e.g. env.FRONTEND_URL)
+  credentials: true,
+}));
+
+// 3. API Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 300 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
+
+// 4. Request Body Parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 5. Static Files Route for Uploads (CVs, profile images)
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// 6. Mount Main API Router
+app.use('/api', apiRouter);
+
+// 7. Base API Health Check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// 8. 404 Fallback Route
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.url}` });
+});
+
+// 9. Global Error Handler Middleware
+app.use(globalErrorHandler);
+
+export default app;
+export { app };
