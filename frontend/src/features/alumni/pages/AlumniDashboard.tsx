@@ -1,313 +1,544 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+
+// Types
+import { 
+  JobMatch, 
+  AlumniProfile, 
+  TracerSurvey, 
+  Mentor, 
+  CareerEvent, 
+  DocumentRequest, 
+  AlumniPreferences,
+  MentorshipSession 
+} from '../types/alumni.types';
+
+// Mock Services
+import {
+  getAlumniProfile,
+  saveAlumniProfile,
+  getJobMatches,
+  saveJobMatches,
+  getTracerSurveys,
+  saveTracerSurveys,
+  getMentors,
+  saveMentors,
+  getCareerEvents,
+  saveCareerEvents,
+  getDocumentRequests,
+  saveDocumentRequests,
+  getAlumniPreferences,
+  saveAlumniPreferences,
+  calculateCompletion
+} from '../services/mockAlumniData';
+
+// Subcomponents
+import { DashboardOverview } from '../components/DashboardOverview';
+import { ProfileTab } from '../components/ProfileTab';
+import { CareerTab } from '../components/CareerTab';
+import { SurveysTab } from '../components/SurveysTab';
+import { JobsTab } from '../components/JobsTab';
+import { MentorshipTab } from '../components/MentorshipTab';
+import { DocumentServicesTab } from '../components/DocumentServicesTab';
+import { SettingsTab } from '../components/SettingsTab';
+import { JobDetailsModal } from '../components/JobDetailsModal';
 
 const AlumniDashboard = () => {
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const navigate = useNavigate();
+
+  // Active Tab State
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  // Core Data States
+  const [profile, setProfile] = useState<AlumniProfile>(getAlumniProfile());
+  const [jobs, setJobs] = useState<JobMatch[]>(getJobMatches());
+  const [surveys, setSurveys] = useState<TracerSurvey[]>(getTracerSurveys());
+  const [mentors, setMentors] = useState<Mentor[]>(getMentors());
+  const [events, setEvents] = useState<CareerEvent[]>(getCareerEvents());
+  const [documents, setDocuments] = useState<DocumentRequest[]>(getDocumentRequests());
+  const [preferences, setPreferences] = useState<AlumniPreferences>(getAlumniPreferences());
+
+  // Interactivity States
+  const [selectedJobForModal, setSelectedJobForModal] = useState<JobMatch | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: 'Tracer Survey 2026 launched! Complete before March 15.', unread: true, time: '2 hours ago' },
+    { id: 2, text: 'New job matches released for Computer Science graduates.', unread: true, time: '1 day ago' },
+    { id: 3, text: 'Helina Sileshi accepted your mentorship interest.', unread: false, time: '3 days ago' },
+  ]);
+
+  // Derived Stats
+  const profileCompletion = calculateCompletion(profile);
+  const pendingSurveysCount = surveys.filter(s => s.status === 'PENDING').length;
+  const matchCount = jobs.filter(j => !j.applied).length;
+  const connectedMentorsCount = mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length + 347;
 
   const stats = [
     {
       id: 1,
       label: 'Profile Status',
-      value: '85%',
+      value: `${profileCompletion}%`,
       color: 'astu-navy',
       icon: 'account_circle',
       bgGradient: 'from-blue-50 to-indigo-50',
-      trend: '+5% this month',
+      trend: 'Complete fields to boost',
       trendIcon: 'trending_up',
       trendColor: 'astu-green'
     },
     {
       id: 2,
       label: 'Job Matches',
-      value: '12',
+      value: `${matchCount}`,
       color: 'astu-green',
       icon: 'work',
       bgGradient: 'from-emerald-50 to-green-50',
-      trend: '+3 new matches',
+      trend: '+3 new placements',
       trendIcon: 'trending_up',
       trendColor: 'astu-green'
     },
     {
       id: 3,
       label: 'Pending Surveys',
-      value: '2',
+      value: `${pendingSurveysCount}`,
       color: 'astu-red',
       icon: 'assignment',
       bgGradient: 'from-red-50 to-orange-50',
-      trend: 'Complete by Mar 15',
-      trendIcon: 'schedule',
-      trendColor: 'astu-red'
+      trend: pendingSurveysCount > 0 ? 'Urgent Tracer studies' : 'All studies submitted',
+      trendIcon: pendingSurveysCount > 0 ? 'schedule' : 'check_circle',
+      trendColor: pendingSurveysCount > 0 ? 'astu-red' : 'astu-green'
     },
     {
       id: 4,
       label: 'Network Peers',
-      value: '347',
+      value: `${connectedMentorsCount}`,
       color: 'purple-600',
       icon: 'people',
       bgGradient: 'from-purple-50 to-pink-50',
-      trend: '+28 this month',
+      trend: '+28 peers connected',
       trendIcon: 'trending_up',
       trendColor: 'astu-green'
     }
   ];
 
-  const recentJobs = [
-    {
-      id: 1,
-      title: 'Senior Software Engineer',
-      company: 'Ethio Telecom Innovation Lab',
-      location: 'Addis Ababa',
-      salary: '120K - 150K ETB/mo',
-      postedDate: '2 days ago',
-      match: '92%'
-    },
-    {
-      id: 2,
-      title: 'Product Manager',
-      company: 'GetirGetyar Tech',
-      location: 'Remote',
-      salary: '100K - 130K ETB/mo',
-      postedDate: '5 days ago',
-      match: '87%'
-    },
-    {
-      id: 3,
-      title: 'Data Scientist',
-      company: 'DataCon Africa',
-      location: 'Addis Ababa',
-      salary: '110K - 140K ETB/mo',
-      postedDate: '1 week ago',
-      match: '89%'
+  // Sync state mutations with LocalStorage
+  const handleSaveProfile = (updatedProfile: AlumniProfile) => {
+    setProfile(updatedProfile);
+    saveAlumniProfile(updatedProfile);
+  };
+
+  const handleUpdateEmploymentStatus = (role: string, company: string, salary: string) => {
+    const updatedProfile = {
+      ...profile,
+      currentRole: role,
+      company: company,
+      salaryRange: salary
+    };
+    setProfile(updatedProfile);
+    saveAlumniProfile(updatedProfile);
+  };
+
+  const handleApplyJob = (jobId: number) => {
+    const updatedJobs = jobs.map(j => j.id === jobId ? { 
+      ...j, 
+      applied: true, 
+      applicationStatus: 'Under Review' as const 
+    } : j);
+    setJobs(updatedJobs);
+    saveJobMatches(updatedJobs);
+
+    // Push new notification
+    const appliedJob = jobs.find(j => j.id === jobId);
+    if (appliedJob) {
+      toast.success(`Application sent to ${appliedJob.company}!`);
+      setNotifications(prev => [
+        {
+          id: Date.now(),
+          text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`,
+          unread: true,
+          time: 'Just now'
+        },
+        ...prev
+      ]);
     }
-  ];
+  };
+
+  const handleToggleSaveJob = (jobId: number) => {
+    const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, saved: !j.saved } : j);
+    setJobs(updatedJobs);
+    saveJobMatches(updatedJobs);
+  };
+
+  const handleCompleteSurvey = (surveyId: number, answers: Record<string, string>) => {
+    const updatedSurveys = surveys.map(s => 
+      s.id === surveyId 
+        ? { ...s, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() } 
+        : s
+    );
+    setSurveys(updatedSurveys);
+    saveTracerSurveys(updatedSurveys);
+
+    setNotifications(prev => [
+      {
+        id: Date.now(),
+        text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`,
+        unread: true,
+        time: 'Just now'
+      },
+      ...prev
+    ]);
+  };
+
+  const handleRegisterEvent = (eventId: number) => {
+    const updatedEvents = events.map(e => e.id === eventId ? { ...e, registered: true } : e);
+    setEvents(updatedEvents);
+    saveCareerEvents(updatedEvents);
+
+    setNotifications(prev => [
+      {
+        id: Date.now(),
+        text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`,
+        unread: true,
+        time: 'Just now'
+      },
+      ...prev
+    ]);
+  };
+
+  const handleRequestMentorship = (mentorId: number) => {
+    const updatedMentors = mentors.map(m => m.id === mentorId ? { ...m, status: 'REQUEST_PENDING' as const } : m);
+    setMentors(updatedMentors);
+    saveMentors(updatedMentors);
+
+    setNotifications(prev => [
+      {
+        id: Date.now(),
+        text: `Requested mentorship connection with ${mentors.find(m => m.id === mentorId)?.name}.`,
+        unread: true,
+        time: 'Just now'
+      },
+      ...prev
+    ]);
+  };
+
+  const handleScheduleSession = (mentorId: number, sessionDetails: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => {
+    const updatedMentors = mentors.map(m => {
+      if (m.id === mentorId) {
+        const nextSessionId = (m.sessions?.length || 0) + 1;
+        const newSession: MentorshipSession = {
+          id: nextSessionId,
+          ...sessionDetails,
+          status: 'Scheduled',
+          meetLink: `https://meet.google.com/astu-mentor-${mentorId}-${nextSessionId}`
+        };
+        return {
+          ...m,
+          sessions: [...(m.sessions || []), newSession]
+        };
+      }
+      return m;
+    });
+
+    setMentors(updatedMentors);
+    saveMentors(updatedMentors);
+
+    setNotifications(prev => [
+      {
+        id: Date.now(),
+        text: `Scheduled mentorship session with ${mentors.find(m => m.id === mentorId)?.name}.`,
+        unread: true,
+        time: 'Just now'
+      },
+      ...prev
+    ]);
+  };
+
+  const handleRequestDocument = (type: DocumentRequest['type'], notes?: string) => {
+    const newDoc: DocumentRequest = {
+      id: documents.length + 1,
+      type,
+      requestDate: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }),
+      status: 'Pending',
+      notes: notes || 'Awaiting registrar verification.'
+    };
+
+    const updatedDocs = [newDoc, ...documents];
+    setDocuments(updatedDocs);
+    saveDocumentRequests(updatedDocs);
+
+    setNotifications(prev => [
+      {
+        id: Date.now(),
+        text: `Submitted official request for: ${type}.`,
+        unread: true,
+        time: 'Just now'
+      },
+      ...prev
+    ]);
+  };
+
+  const handleSavePreferences = (updatedPrefs: AlumniPreferences) => {
+    setPreferences(updatedPrefs);
+    saveAlumniPreferences(updatedPrefs);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    toast.success('Logged out successfully');
+    navigate('/login');
+  };
+
+  // Reset notifications unread badge
+  const handleMarkNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
+  // Clear a specific notification
+  const handleClearNotification = (id: number) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen text-on-surface font-body-md overflow-x-hidden">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full flex flex-col z-40 bg-astu-navy shadow-2xl w-[280px]">
+      <Toaster position="top-right" reverseOrder={false} />
+
+      {/* Sidebar Navigation */}
+      <aside className="fixed left-0 top-0 h-full flex flex-col z-40 bg-astu-navy shadow-2xl w-[280px] hidden md:flex">
         <div className="p-6 mt-6">
           <div className="flex items-center gap-3">
             <img
               alt="ASTU Logo"
-              className="h-12 w-12 object-contain drop-shadow-lg"
+              className="h-12 w-12 object-contain drop-shadow-lg rounded-lg"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
             />
             <div>
-              <h1 className="text-headline-md font-bold text-on-primary">ASTU Alumni</h1>
-              <p className="text-label-sm text-primary-fixed-dim/70 uppercase tracking-widest">Management System</p>
+              <h1 className="text-xl font-bold text-white">ASTU Alumni</h1>
+              <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management System</p>
             </div>
           </div>
         </div>
 
-        <nav className="mt-10 flex-grow px-3">
+        <nav className="mt-8 flex-grow px-3">
           <div className="space-y-1">
-            <a href="#" className="flex items-center gap-4 bg-white/15 text-astu-green border-l-4 border-astu-green px-6 py-3 rounded-r-xl hover:bg-white/20 transition-all duration-300 shadow-lg">
-              <span className="material-symbols-outlined">dashboard</span>
-              <span className="text-label-md font-medium">Dashboard</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">account_circle</span>
-              <span className="text-label-md font-medium">Profile</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">school</span>
-              <span className="text-label-md font-medium">Career Center</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">assignment</span>
-              <span className="text-label-md font-medium">Surveys</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">work</span>
-              <span className="text-label-md font-medium">Jobs</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">diversity_3</span>
-              <span className="text-label-md font-medium">Mentorship</span>
-            </a>
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'profile', label: 'Profile', icon: 'account_circle', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'career', label: 'Career Center', icon: 'school', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'surveys', label: 'Surveys', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'jobs', label: 'Jobs', icon: 'work', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'documents', label: 'Document Services', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'settings', label: 'Settings', icon: 'settings', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${
+                  activeTab === item.id 
+                    ? item.activeColor + ' font-bold shadow-md' 
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span className="material-symbols-outlined">{item.icon}</span>
+                <span className="text-sm font-medium">{item.label}</span>
+              </button>
+            ))}
           </div>
         </nav>
 
-        <div className="p-6 border-t border-white/20">
-          <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white mb-4 transition-all duration-300">
-            <span className="material-symbols-outlined">help</span>
-            <span className="text-label-md">Help Center</span>
-          </a>
-          <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white transition-all duration-300">
-            <span className="material-symbols-outlined">logout</span>
-            <span className="text-label-md">Logout</span>
-          </a>
+        <div className="p-6 border-t border-white/10">
+          <button 
+            onClick={() => setActiveTab('career')} 
+            className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
+          >
+            <span className="material-symbols-outlined text-md">help</span>
+            <span className="text-sm font-medium">Help Center</span>
+          </button>
+          <button 
+            onClick={handleLogout} 
+            className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
+          >
+            <span className="material-symbols-outlined text-md">logout</span>
+            <span className="text-sm font-medium">Logout</span>
+          </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="md:ml-[280px] min-h-screen">
-        {/* Header */}
-        <header className="sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 bg-white/95 backdrop-blur-md border-b border-outline-variant/50 shadow-sm">
+      {/* Main Content Area */}
+      <main className="md:ml-[280px] min-h-screen flex flex-col">
+        
+        {/* Header Section */}
+        <header className="sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
           <div className="flex-1 max-w-xl">
             <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
               <input
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-100/80 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 focus:bg-white transition-all duration-300"
-                placeholder="Search for alumni, companies, or mentors..."
+                className="w-full pl-10 pr-4 py-2 bg-gray-100/80 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:bg-white transition-all duration-300"
+                placeholder="Search alumni, companies, or mentors..."
                 type="text"
+                onChange={(e) => {
+                  if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
+                    setActiveTab('jobs');
+                  }
+                }}
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-4 ml-6">
-            <button className="p-2 text-on-surface-variant hover:bg-gray-100 rounded-full relative transition-all duration-300 hover:scale-110">
+          <div className="flex items-center gap-4 ml-6 relative">
+            {/* Notification Bell */}
+            <button 
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                if (!showNotifications) handleMarkNotificationsRead();
+              }}
+              className="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative transition-all duration-300 hover:scale-105"
+            >
               <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white"></span>
+              {unreadNotificationsCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white animate-pulse"></span>
+              )}
             </button>
-            <button className="p-2 text-on-surface-variant hover:bg-gray-100 rounded-full transition-all duration-300 hover:scale-110">
-              <span className="material-symbols-outlined">apps</span>
-            </button>
-            <div className="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
-            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900">Abebe Bikila</p>
-                <p className="text-xs text-on-surface-variant">Class of '18</p>
+
+            {/* Notification Dropdown Portal */}
+            {showNotifications && (
+              <div className="absolute right-12 top-12 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 p-4 space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                  <h4 className="font-bold text-sm text-gray-900">Notifications</h4>
+                  <button 
+                    onClick={() => setNotifications([])} 
+                    className="text-xs text-astu-red hover:underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="space-y-2.5 max-h-60 overflow-y-auto">
+                  {notifications.map(notif => (
+                    <div key={notif.id} className="flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="space-y-0.5">
+                        <p className="text-xs text-gray-800 leading-normal">{notif.text}</p>
+                        <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
+                      </div>
+                      <button 
+                        onClick={() => handleClearNotification(notif.id)}
+                        className="text-gray-300 hover:text-gray-500"
+                      >
+                        <span className="material-symbols-outlined text-sm">close</span>
+                      </button>
+                    </div>
+                  ))}
+                  {notifications.length === 0 && (
+                    <p className="text-xs text-gray-500 italic text-center py-4">No notifications yet.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
+            
+            {/* Header User Profile Display */}
+            <div 
+              onClick={() => setActiveTab('profile')}
+              className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
+            >
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold text-gray-900">{profile.fullName}</p>
+                <p className="text-xs text-gray-500 font-semibold">{profile.batch}</p>
               </div>
               <img
                 alt="Profile"
-                className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-md hover:shadow-lg transition-shadow"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7rhHWBnOkWV1xWVC1HCSOzZwYhELqmvpSOzjKGmJ3QT9TkogaTK1A-VFzyS2wFdRCyz1RPhDUnlP_MiltJbq474wk-J0Hy58LqjlIXdUewPZ7RW2ySloQgh-_OSmwjVC1CDIGlrJYVf-girKkZdSApD6aHXWeguIrLeNIpZr62hAY5d6aFvI83jB92w3mmbGBsn4lIuvqN0WRJVdQ_EoXDHNzeJEbPEco-5mwZoLz4ZRrnorLI2LyJrUdUUoGmyjMYj7_ay9KPUjw"
+                className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-sm object-cover"
+                src={profile.avatarUrl}
               />
             </div>
           </div>
         </header>
 
-        <div className="p-4 md:p-10 space-y-8">
-          {/* Welcome Banner */}
-          <section className="relative bg-gradient-to-r from-astu-navy via-blue-800 to-blue-900 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-2xl">
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-astu-green/10 rounded-full blur-3xl -z-10"></div>
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
+        {/* Dynamic Inner Tab View */}
+        <div className="p-4 md:p-10 flex-grow">
+          {activeTab === 'dashboard' && (
+            <DashboardOverview
+              profile={profile}
+              completion={profileCompletion}
+              stats={stats}
+              recentJobs={jobs}
+              surveys={surveys}
+              onTabChange={setActiveTab}
+              onViewJob={setSelectedJobForModal}
+              setHoveredCard={setHoveredCard}
+              hoveredCard={hoveredCard}
+              onUpdateEmploymentStatus={handleUpdateEmploymentStatus}
+            />
+          )}
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-              <div className="max-w-2xl">
-                <h2 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Welcome back, Abebe! 👋</h2>
-                <p className="text-lg opacity-95 leading-relaxed mb-6">Your profile is nearly complete. Boost visibility with employers by finishing your profile.</p>
+          {activeTab === 'profile' && (
+            <ProfileTab
+              profile={profile}
+              onSave={handleSaveProfile}
+            />
+          )}
 
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold opacity-90">Profile Completion: 85%</p>
-                  <div className="w-48 bg-white/20 h-3 rounded-full overflow-hidden backdrop-blur-sm">
-                    <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full w-[85%] shadow-lg"></div>
-                  </div>
-                </div>
-              </div>
-              <button className="bg-gradient-to-r from-astu-green to-emerald-500 hover:from-astu-green hover:to-emerald-600 px-10 py-4 rounded-2xl font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 whitespace-nowrap flex items-center gap-2">
-                <span className="material-symbols-outlined">check</span>
-                Complete Profile
-              </button>
-            </div>
-          </section>
+          {activeTab === 'career' && (
+            <CareerTab
+              events={events}
+              onRegisterEvent={handleRegisterEvent}
+            />
+          )}
 
-          {/* Stats Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat) => (
-              <div
-                key={stat.id}
-                onMouseEnter={() => setHoveredCard(stat.id)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className={`relative bg-white rounded-2xl p-6 border border-gray-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group ${hoveredCard === stat.id ? 'translate-y-[-8px]' : ''}`}
-              >
-                {/* Background gradient */}
-                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${stat.bgGradient}`}></div>
+          {activeTab === 'surveys' && (
+            <SurveysTab
+              surveys={surveys}
+              onCompleteSurvey={handleCompleteSurvey}
+            />
+          )}
 
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}/20 to-${stat.color}/10`}>
-                      <span className={`material-symbols-outlined text-2xl text-${stat.color}`}>{stat.icon}</span>
-                    </div>
-                    <span className="text-xs font-semibold text-astu-green bg-astu-green/15 px-3 py-1 rounded-full">+5%</span>
-                  </div>
+          {activeTab === 'jobs' && (
+            <JobsTab
+              jobs={jobs}
+              onViewJob={setSelectedJobForModal}
+              onToggleSaveJob={handleToggleSaveJob}
+            />
+          )}
 
-                  <p className="text-sm text-gray-600 font-medium mb-2">{stat.label}</p>
-                  <p className={`text-4xl font-bold text-${stat.color} mb-3`}>{stat.value}</p>
+          {activeTab === 'mentorship' && (
+            <MentorshipTab
+              mentors={mentors}
+              onRequestMentorship={handleRequestMentorship}
+              onScheduleSession={handleScheduleSession}
+            />
+          )}
 
-                  <div className="flex items-center gap-1 text-astu-green text-sm font-medium">
-                    <span className="material-symbols-outlined text-lg">{stat.trendIcon}</span>
-                    {stat.trend}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {activeTab === 'documents' && (
+            <DocumentServicesTab
+              documentRequests={documents}
+              onRequestDocument={handleRequestDocument}
+            />
+          )}
 
-          {/* Recent Job Matches */}
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">Recent Job Matches</h3>
-                <p className="text-sm text-gray-600">Opportunities tailored to your profile</p>
-              </div>
-              <button className="flex items-center gap-2 text-astu-navy font-semibold hover:text-astu-navy/80 transition-colors">
-                View All <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {recentJobs.map((job, index) => (
-                <div
-                  key={job.id}
-                  className="p-6 bg-gradient-to-r from-gray-50 to-white border border-gray-200/60 rounded-2xl hover:shadow-lg hover:border-astu-navy/30 transition-all duration-300 group cursor-pointer"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{job.title}</h4>
-                        <span className="px-3 py-1 bg-astu-green/15 text-astu-green text-sm font-semibold rounded-full">{job.match} Match</span>
-                      </div>
-                      <p className="text-sm text-gray-600 font-medium mb-2">{job.company}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-base">location_on</span>
-                          {job.location}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-base">paid</span>
-                          {job.salary}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-base">schedule</span>
-                          {job.postedDate}
-                        </span>
-                      </div>
-                    </div>
-                    <button className="px-6 py-3 bg-astu-navy text-white rounded-xl font-semibold hover:bg-astu-navy/90 transition-all duration-300 transform group-hover:scale-105">
-                      View Job
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Quick Actions */}
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Recommended Next Steps</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { icon: 'edit', title: 'Update Skills', desc: 'Add new technical and soft skills' },
-                { icon: 'photo_camera', title: 'Upload Photo', desc: 'Add a professional profile picture' },
-                { icon: 'description', title: 'Update Resume', desc: 'Upload your latest resume' }
-              ].map((action, idx) => (
-                <div
-                  key={idx}
-                  className="group p-6 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-2xl hover:shadow-lg hover:border-astu-navy/30 transition-all duration-300 cursor-pointer text-center"
-                >
-                  <div className="mx-auto w-14 h-14 rounded-2xl bg-astu-navy/10 flex items-center justify-center mb-4 group-hover:bg-astu-navy/20 transition-colors">
-                    <span className="material-symbols-outlined text-2xl text-astu-navy">{action.icon}</span>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{action.title}</h4>
-                  <p className="text-sm text-gray-600">{action.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+          {activeTab === 'settings' && (
+            <SettingsTab
+              preferences={preferences}
+              onSavePreferences={handleSavePreferences}
+            />
+          )}
         </div>
+
       </main>
+
+      {/* JOB DETAILS MODAL PORTAL */}
+      <JobDetailsModal
+        job={selectedJobForModal}
+        onClose={() => setSelectedJobForModal(null)}
+        onApply={handleApplyJob}
+      />
     </div>
   );
 };
