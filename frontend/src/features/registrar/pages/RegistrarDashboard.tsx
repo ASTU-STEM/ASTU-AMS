@@ -1,313 +1,528 @@
 import React, { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+
+// Types
+import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
+
+// Services
+import {
+  getGraduates,
+  saveGraduates,
+  getVerifications,
+  saveVerifications,
+  getDocumentRequests,
+  saveDocumentRequests
+} from '../services/mockRegistrarData';
+
+// Tabs
+import { RecordsTab } from '../components/RecordsTab';
+import { DataIntegrationTab } from '../components/DataIntegrationTab';
+import { VerificationTab } from '../components/VerificationTab';
+import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
+import { ReportingTab } from '../components/ReportingTab';
 
 const RegistrarDashboard = () => {
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  // Notifications Bell dropdown
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
+    { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
+    { id: 3, text: 'Duplicate record warnings resolved in class batch 2024.', unread: false, time: '3 days ago' },
+  ]);
+
+  // Core Data States
+  const [graduates, setGraduates] = useState<GraduateRecord[]>(getGraduates());
+  const [verifications, setVerifications] = useState<VerificationRequest[]>(getVerifications());
+  const [documents, setDocuments] = useState<DocumentProcessingRequest[]>(getDocumentRequests());
+
+  // Count active stats
+  const totalGraduatesCount = graduates.length + 23800; // Mock database counts + local states
+  const verifiedAlumniCount = graduates.filter(g => g.identityVerified).length + 18200;
+  const pendingVerificationsCount = verifications.filter(v => v.status === 'Pending').length;
+  const documentRequestsCount = documents.filter(d => d.status === 'Pending').length;
 
   const stats = [
     {
       id: 1,
-      label: 'Total Alumni',
-      value: '24,000+',
+      label: 'SIS Graduate DB',
+      value: totalGraduatesCount.toLocaleString(),
       color: 'astu-navy',
-      icon: 'people',
+      icon: 'database',
       bgGradient: 'from-blue-50 to-indigo-50',
-      trend: '+1,200 this year',
-      trendIcon: 'trending_up'
+      trend: '+1,200 this batch',
+      trendIcon: 'trending_up',
+      trendColor: 'astu-green'
     },
     {
       id: 2,
-      label: 'Active Surveys',
-      value: '12',
+      label: 'Verified Alumni',
+      value: verifiedAlumniCount.toLocaleString(),
       color: 'astu-green',
-      icon: 'assignment',
+      icon: 'verified_user',
       bgGradient: 'from-emerald-50 to-green-50',
-      trend: '68% response rate',
-      trendIcon: 'check_circle'
+      trend: '76% validation rate',
+      trendIcon: 'check_circle',
+      trendColor: 'astu-green'
     },
     {
       id: 3,
-      label: 'Reports Generated',
-      value: '34',
+      label: 'Pending Approvals',
+      value: `${pendingVerificationsCount}`,
       color: 'astu-red',
-      icon: 'description',
+      icon: 'gavel',
       bgGradient: 'from-red-50 to-orange-50',
-      trend: '+8 this month',
-      trendIcon: 'trending_up'
+      trend: 'Awaiting graduation confirm',
+      trendIcon: 'schedule',
+      trendColor: 'astu-red'
     },
     {
       id: 4,
-      label: 'Data Quality',
-      value: '94%',
+      label: 'Document Queue',
+      value: `${documentRequestsCount}`,
       color: 'purple-600',
-      icon: 'verified_user',
+      icon: 'description',
       bgGradient: 'from-purple-50 to-pink-50',
-      trend: 'Excellent',
-      trendIcon: 'star'
+      trend: 'Transcript requests',
+      trendIcon: 'schedule',
+      trendColor: 'astu-red'
     }
   ];
 
-  const activeSurveys = [
-    {
-      id: 1,
-      title: '6-Month Employment Tracer Study',
-      target: 'Class of 2023',
-      responseRate: 68,
-      status: 'Active',
-      started: 'Jan 15, 2024',
-      ends: 'Mar 15, 2024'
-    },
-    {
-      id: 2,
-      title: 'Curriculum Feedback Survey',
-      target: 'All Departments',
-      responseRate: 45,
-      status: 'Active',
-      started: 'Feb 1, 2024',
-      ends: 'Apr 30, 2024'
+  // Callbacks
+  const handleAddGraduate = (newGradDetails: Omit<GraduateRecord, 'id' | 'identityVerified' | 'status'>) => {
+    const nextGradId = graduates.length + 1;
+    const newGrad: GraduateRecord = {
+      id: nextGradId,
+      ...newGradDetails,
+      identityVerified: false,
+      status: 'Active'
+    };
+
+    const updatedGrads = [newGrad, ...graduates];
+    setGraduates(updatedGrads);
+    saveGraduates(updatedGrads);
+
+    // Push verification request automatically
+    const newVerRequest: VerificationRequest = {
+      id: verifications.length + 1,
+      studentId: newGradDetails.studentId,
+      fullName: newGradDetails.fullName,
+      email: newGradDetails.email,
+      department: newGradDetails.department,
+      graduationYear: newGradDetails.graduationYear,
+      type: 'Alumni Registration',
+      status: 'Pending',
+      requestDate: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    };
+    const updatedVerifications = [newVerRequest, ...verifications];
+    setVerifications(updatedVerifications);
+    saveVerifications(updatedVerifications);
+  };
+
+  const handleEditGraduate = (updatedGrad: GraduateRecord) => {
+    const updatedGrads = graduates.map(g => g.id === updatedGrad.id ? updatedGrad : g);
+    setGraduates(updatedGrads);
+    saveGraduates(updatedGrads);
+  };
+
+  const handleArchiveGraduate = (id: number) => {
+    const updatedGrads = graduates.map(g => 
+      g.id === id ? { ...g, status: 'Archived' as const } : g
+    );
+    setGraduates(updatedGrads);
+    saveGraduates(updatedGrads);
+    toast.success('SIS record archived successfully.');
+  };
+
+  const handleVerifyIdentity = (id: number) => {
+    const updatedGrads = graduates.map(g => 
+      g.id === id ? { ...g, identityVerified: true } : g
+    );
+    setGraduates(updatedGrads);
+    saveGraduates(updatedGrads);
+    toast.success('Identity status verified successfully!');
+  };
+
+  const handleBatchInsert = (records: any[]) => {
+    const nextIdStart = graduates.length + 1;
+    const newGrads: GraduateRecord[] = records.map((r, index) => ({
+      id: nextIdStart + index,
+      studentId: r.studentId,
+      fullName: r.fullName,
+      email: r.email,
+      department: r.department,
+      graduationYear: r.graduationYear,
+      cgpa: r.cgpa,
+      identityVerified: true,
+      status: 'Active'
+    }));
+
+    const updatedGrads = [...newGrads, ...graduates];
+    setGraduates(updatedGrads);
+    saveGraduates(updatedGrads);
+  };
+
+  const handleVerifyRequestAction = (id: number, status: 'Approved' | 'Rejected') => {
+    const updatedVerifications = verifications.map(req => 
+      req.id === id ? { ...req, status } : req
+    );
+    setVerifications(updatedVerifications);
+    saveVerifications(updatedVerifications);
+
+    // If approved, update identityVerified flag in graduates database
+    if (status === 'Approved') {
+      const targetRequest = verifications.find(req => req.id === id);
+      if (targetRequest) {
+        const updatedGrads = graduates.map(g => 
+          g.studentId === targetRequest.studentId ? { ...g, identityVerified: true } : g
+        );
+        setGraduates(updatedGrads);
+        saveGraduates(updatedGrads);
+      }
     }
-  ];
+  };
+
+  const handleProcessDocumentAction = (id: number, status: 'Approved' | 'Rejected' | 'In Progress') => {
+    const updatedDocuments = documents.map(doc => 
+      doc.id === id ? { ...doc, status } : doc
+    );
+    setDocuments(updatedDocuments);
+    saveDocumentRequests(updatedDocuments);
+  };
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen text-on-surface font-body-md overflow-x-hidden">
-      {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-full flex flex-col z-40 bg-astu-navy shadow-2xl w-[280px] hidden md:flex">
-        <div className="p-6 mt-6">
-          <div className="flex items-center gap-3">
-            <img
-              alt="ASTU Official Logo"
-              className="h-12 w-12 object-contain drop-shadow-lg"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-            />
-            <div>
-              <h1 className="text-headline-md font-bold text-on-primary">ASTU Registrar</h1>
-              <p className="text-label-sm text-primary-fixed-dim/70 uppercase tracking-widest">Management Hub</p>
-            </div>
-          </div>
-        </div>
+    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen text-on-surface font-body-md overflow-x-hidden flex flex-col justify-between">
+      <Toaster position="top-right" reverseOrder={false} />
 
-        <nav className="mt-10 flex-grow px-3">
-          <div className="space-y-1">
-            <a href="#" className="flex items-center gap-4 bg-white/15 text-astu-green border-l-4 border-astu-green px-6 py-3 rounded-r-xl hover:bg-white/20 transition-all duration-300 shadow-lg">
-              <span className="material-symbols-outlined">dashboard</span>
-              <span className="text-label-md font-medium">Dashboard</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">people</span>
-              <span className="text-label-md font-medium">Alumni Records</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">assignment</span>
-              <span className="text-label-md font-medium">Surveys</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">description</span>
-              <span className="text-label-md font-medium">Reports</span>
-            </a>
-            <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white hover:bg-white/10 px-6 py-3 rounded-xl transition-all duration-300">
-              <span className="material-symbols-outlined">settings</span>
-              <span className="text-label-md font-medium">Settings</span>
-            </a>
-          </div>
-
-          <div className="mt-10 px-6">
-            <button className="w-full bg-gradient-to-r from-astu-red to-red-600 hover:from-astu-red hover:to-red-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined">add</span>
-              Create Survey
-            </button>
-          </div>
-        </nav>
-
-        <div className="p-6 border-t border-white/20 mt-auto">
-          <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white mb-4 transition-all duration-300">
-            <span className="material-symbols-outlined">help</span>
-            <span className="text-label-md">Help Center</span>
-          </a>
-          <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white transition-all duration-300">
-            <span className="material-symbols-outlined">logout</span>
-            <span className="text-label-md">Logout</span>
-          </a>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="md:ml-[280px] min-h-screen">
-        {/* Top Navbar */}
-        <header className="sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 bg-white/95 backdrop-blur-md border-b border-outline-variant/50 shadow-sm">
-          <div className="flex-1 max-w-xl">
-            <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
-              <input
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-100/80 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 focus:bg-white transition-all duration-300"
-                placeholder="Search alumni records, surveys..."
-                type="text"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 ml-6">
-            <button className="p-2 text-on-surface-variant hover:bg-gray-100 rounded-full relative transition-all duration-300 hover:scale-110">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white"></span>
-            </button>
-            <button className="p-2 text-on-surface-variant hover:bg-gray-100 rounded-full transition-all duration-300 hover:scale-110">
-              <span className="material-symbols-outlined">apps</span>
-            </button>
-            <div className="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
-            <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900">Dr. Abebe Assefa</p>
-                <p className="text-xs text-on-surface-variant">Registrar</p>
-              </div>
+      <div className="flex-grow">
+        {/* Sidebar navigation */}
+        <aside className="fixed left-0 top-0 h-full flex flex-col z-40 bg-astu-navy shadow-2xl w-[280px] hidden md:flex">
+          <div className="p-6 mt-6">
+            <div className="flex items-center gap-3">
               <img
-                alt="Profile"
-                className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-md hover:shadow-lg transition-shadow"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7rhHWBnOkWV1xWVC1HCSOzZwYhELqmvpSOzjKGmJ3QT9TkogaTK1A-VFzyS2wFdRCyz1RPhDUnlP_MiltJbq474wk-J0Hy58LqjlIXdUewPZ7RW2ySloQgh-_OSmwjVC1CDIGlrJYVf-girKkZdSApD6aHXWeguIrLeNIpZr62hAY5d6aFvI83jB92w3mmbGBsn4lIuvqN0WRJVdQ_EoXDHNzeJEbPEco-5mwZoLz4ZRrnorLI2LyJrUdUUoGmyjMYj7_ay9KPUjw"
+                alt="ASTU Official Logo"
+                className="h-12 w-12 object-contain drop-shadow-lg rounded-lg"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
               />
-            </div>
-          </div>
-        </header>
-
-        <div className="p-4 md:p-10 space-y-8">
-          {/* Welcome Banner */}
-          <section className="relative bg-gradient-to-r from-astu-navy via-blue-800 to-blue-900 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-2xl">
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-astu-green/10 rounded-full blur-3xl -z-10"></div>
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
-
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-              <div className="max-w-2xl">
-                <h2 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Registrar Dashboard 📊</h2>
-                <p className="text-lg opacity-95 leading-relaxed">Manage alumni records, conduct tracer studies, and generate comprehensive institutional reports to drive continuous improvement.</p>
-              </div>
-              <button className="bg-gradient-to-r from-astu-red to-red-600 hover:from-astu-red hover:to-red-700 px-10 py-4 rounded-2xl font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 whitespace-nowrap flex items-center gap-2">
-                <span className="material-symbols-outlined">add</span>
-                Create Survey
-              </button>
-            </div>
-          </section>
-
-          {/* Stats Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat) => (
-              <div
-                key={stat.id}
-                onMouseEnter={() => setHoveredCard(stat.id)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className={`relative bg-white rounded-2xl p-6 border border-gray-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group ${hoveredCard === stat.id ? 'translate-y-[-8px]' : ''}`}
-              >
-                {/* Background gradient */}
-                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${stat.bgGradient}`}></div>
-
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}/20 to-${stat.color}/10`}>
-                      <span className={`material-symbols-outlined text-2xl text-${stat.color}`}>{stat.icon}</span>
-                    </div>
-                    <span className="text-xs font-semibold text-astu-green bg-astu-green/15 px-3 py-1 rounded-full">Top</span>
-                  </div>
-
-                  <p className="text-sm text-gray-600 font-medium mb-2">{stat.label}</p>
-                  <p className={`text-4xl font-bold text-${stat.color} mb-3`}>{stat.value}</p>
-
-                  <div className="flex items-center gap-1 text-astu-green text-sm font-medium">
-                    <span className="material-symbols-outlined text-lg">{stat.trendIcon}</span>
-                    {stat.trend}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Action Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: 'people', title: 'Alumni Records', desc: 'View and manage comprehensive alumni database', color: 'astu-navy' },
-              { icon: 'assignment', title: 'Create Survey', desc: 'Launch new tracer studies and surveys', color: 'astu-red' },
-              { icon: 'description', title: 'Generate Report', desc: 'Create comprehensive institutional reports', color: 'astu-green' }
-            ].map((action, idx) => (
-              <div
-                key={idx}
-                className="group p-8 bg-white border border-gray-200/60 rounded-2xl hover:shadow-lg hover:border-astu-navy/30 transition-all duration-300 cursor-pointer text-center"
-              >
-                <div className={`mx-auto w-16 h-16 rounded-2xl bg-${action.color}/10 flex items-center justify-center mb-6 group-hover:bg-${action.color}/20 transition-colors`}>
-                  <span className={`material-symbols-outlined text-3xl text-${action.color}`}>{action.icon}</span>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{action.title}</h3>
-                <p className="text-sm text-gray-600">{action.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Active Surveys */}
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60">
-            <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">Active Surveys</h3>
-                <p className="text-sm text-gray-600">Monitor ongoing tracer studies and feedback collection</p>
+                <h1 className="text-lg font-bold text-white">ASTU Registrar</h1>
+                <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management Hub</p>
               </div>
-              <button className="flex items-center gap-2 text-astu-navy font-semibold hover:text-astu-navy/80 transition-colors">
-                View All <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
             </div>
+          </div>
 
-            <div className="space-y-4">
-              {activeSurveys.map((survey) => (
-                <div
-                  key={survey.id}
-                  className="p-6 bg-gradient-to-r from-gray-50 to-white border border-gray-200/60 rounded-2xl hover:shadow-lg hover:border-astu-navy/30 transition-all duration-300 group cursor-pointer"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{survey.title}</h4>
-                        <span className="px-3 py-1 bg-astu-green/15 text-astu-green text-sm font-semibold rounded-full">{survey.status}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 font-medium mb-3">{survey.target}</p>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Response Rate: <span className="font-semibold">{survey.responseRate}%</span></span>
-                          <span className="text-gray-600">{survey.started} - {survey.ends}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
-                          <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full" style={{ width: `${survey.responseRate}%` }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    <button className="px-6 py-3 bg-astu-navy text-white rounded-xl font-semibold hover:bg-astu-navy/90 transition-all duration-300 transform group-hover:scale-105 whitespace-nowrap flex items-center gap-2">
-                      <span className="material-symbols-outlined">manage_search</span>
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Key Metrics  */}
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Key Insights</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <nav className="mt-8 flex-grow px-3">
+            <div className="space-y-1">
               {[
-                { title: 'Data Completeness', stat: '94%', icon: 'verified_user', color: 'astu-green' },
-                { title: 'Alumni Engaged', stat: '18,420', icon: 'people_alt', color: 'astu-navy' }
-              ].map((metric, idx) => (
-                <div key={idx} className="p-6 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-2xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 font-medium mb-2">{metric.title}</p>
-                      <p className={`text-4xl font-bold text-${metric.color}`}>{metric.stat}</p>
-                    </div>
-                    <div className={`w-14 h-14 rounded-2xl bg-${metric.color}/10 flex items-center justify-center`}>
-                      <span className={`material-symbols-outlined text-2xl text-${metric.color}`}>{metric.icon}</span>
-                    </div>
-                  </div>
-                </div>
+                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'records', label: 'Alumni Records', icon: 'people', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'documents', label: 'Document Queue', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
+              ].map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${
+                    activeTab === item.id 
+                      ? item.activeColor + ' font-bold shadow-md' 
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                  <span className="text-sm font-medium">{item.label}</span>
+                </button>
               ))}
             </div>
-          </section>
-        </div>
-      </main>
+          </nav>
+
+          <div className="p-6 border-t border-white/10 mt-auto">
+            <button 
+              onClick={() => setActiveTab('reporting')}
+              className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-all duration-300 text-left"
+            >
+              <span className="material-symbols-outlined text-md">help</span>
+              <span className="text-sm font-medium">Help Center</span>
+            </button>
+            <button 
+              onClick={() => toast.success('Mock logout triggered.')} 
+              className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-all duration-300 text-left"
+            >
+              <span className="material-symbols-outlined text-md">logout</span>
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="md:ml-[280px] min-h-screen flex flex-col justify-between">
+          <div>
+            {/* Header bar */}
+            <header className="sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+              <div className="flex-1 max-w-xl">
+                <div className="relative group">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                  <input
+                    className="w-full pl-10 pr-4 py-2 bg-gray-100/80 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:bg-white transition-all duration-300"
+                    placeholder="Search verified records, transcripts, or graduates..."
+                    type="text"
+                    onChange={(e) => {
+                      if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
+                        setActiveTab('records');
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 ml-6 relative">
+                {/* Notification bell */}
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 text-gray-400 hover:bg-gray-100/10 rounded-full relative transition-all duration-300 hover:scale-105"
+                >
+                  <span className="material-symbols-outlined">notifications</span>
+                  {unreadNotificationsCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white animate-pulse"></span>
+                  )}
+                </button>
+
+                {/* Notifications Dropdown card */}
+                {showNotifications && (
+                  <div className="absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 bg-white border-gray-200 text-gray-900">
+                    <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                      <h4 className="font-bold text-sm">Registrar Notifications</h4>
+                      <button 
+                        onClick={handleClearNotifications} 
+                        className="text-xs text-astu-red hover:underline font-bold"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    <div className="space-y-2.5 max-h-60 overflow-y-auto">
+                      {notifications.map(notif => (
+                        <div key={notif.id} className="flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                          <div className="space-y-0.5">
+                            <p className="text-xs leading-normal">{notif.text}</p>
+                            <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {notifications.length === 0 && (
+                        <p className="text-xs text-gray-500 italic text-center py-4">No new recruit alerts.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="h-8 w-[1px] bg-gray-250 mx-2"></div>
+                
+                {/* Registrar Head */}
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
+                >
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-bold">Dr. Abebe Assefa</p>
+                    <p className="text-xs text-gray-500 font-semibold">Dean of Registrar</p>
+                  </div>
+                  <img
+                    alt="Profile"
+                    className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-sm object-cover"
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80"
+                  />
+                </div>
+              </div>
+            </header>
+
+            {/* Dynamic tabs routing */}
+            <div className="p-4 md:p-10 flex-grow">
+              {activeTab === 'dashboard' && (
+                <div className="space-y-8">
+                  
+                  {/* Welcome banner */}
+                  <section className="relative bg-gradient-to-r from-astu-navy via-emerald-900 to-emerald-950 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-xl">
+                    <div className="absolute right-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+                      <div className="max-w-2xl space-y-3">
+                        <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU SIS Integration</span>
+                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Institutional Registrar Panel 🏛️</h2>
+                        <p className="text-sm opacity-90 leading-relaxed">
+                          Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => setActiveTab('data_integration')}
+                        className="bg-gradient-to-r from-astu-red to-red-600 hover:scale-105 px-6 py-3 rounded-xl font-extrabold text-xs tracking-wide text-white shadow-md transition-all whitespace-nowrap flex items-center gap-1.5"
+                      >
+                        <span className="material-symbols-outlined">cloud_upload</span>
+                        Batch Upload CSV
+                      </button>
+                    </div>
+                  </section>
+
+                  {/* Stats Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {stats.map((stat) => (
+                      <div
+                        key={stat.id}
+                        onMouseEnter={() => setHoveredCard(stat.id)}
+                        onMouseLeave={() => setHoveredCard(null)}
+                        onClick={() => {
+                          if (stat.id === 1) setActiveTab('records');
+                          if (stat.id === 3) setActiveTab('verification');
+                          if (stat.id === 4) setActiveTab('documents');
+                        }}
+                        className={`relative bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm transition-all duration-300 cursor-pointer overflow-hidden group ${hoveredCard === stat.id ? '-translate-y-2 shadow-md' : ''}`}
+                      >
+                        <div className="relative z-10 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="p-2.5 rounded-xl bg-astu-navy/10 text-astu-navy">
+                              <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
+                            </div>
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">SIS Verified</span>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                            <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t">
+                            <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
+                            {stat.trend}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Action Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                      { icon: 'people', title: 'SIS Records Management', desc: 'Browse full lists, edit academic GPAs, or archive old folders.', tab: 'records' },
+                      { icon: 'cloud_upload', title: 'Excel/CSV Scaffolding', desc: 'Process bulk file datasets and send automated sign-up emails.', tab: 'data_integration' },
+                      { icon: 'description', title: 'Document Processing Queue', desc: 'Authorize official transcripts and degree verifications.', tab: 'documents' }
+                    ].map((act, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setActiveTab(act.tab)}
+                        className="group p-6 bg-white border border-gray-200/60 rounded-3xl hover:shadow-md hover:border-astu-navy/30 transition-all cursor-pointer text-center space-y-4"
+                      >
+                        <div className="mx-auto w-12 h-12 rounded-2xl bg-astu-navy/10 flex items-center justify-center group-hover:bg-astu-navy/20 transition-colors text-astu-navy">
+                          <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-sm">{act.title}</h3>
+                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{act.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              )}
+
+              {activeTab === 'records' && (
+                <RecordsTab
+                  graduates={graduates}
+                  onAddGraduate={handleAddGraduate}
+                  onEditGraduate={handleEditGraduate}
+                  onArchiveGraduate={handleArchiveGraduate}
+                  onVerifyIdentity={handleVerifyIdentity}
+                />
+              )}
+
+              {activeTab === 'data_integration' && (
+                <DataIntegrationTab
+                  onBatchInsert={handleBatchInsert}
+                />
+              )}
+
+              {activeTab === 'verification' && (
+                <VerificationTab
+                  verifications={verifications}
+                  onVerify={handleVerifyRequestAction}
+                />
+              )}
+
+              {activeTab === 'documents' && (
+                <DocumentProcessingTab
+                  documents={documents}
+                  onProcessDocument={handleProcessDocumentAction}
+                />
+              )}
+
+              {activeTab === 'reporting' && (
+                <ReportingTab />
+              )}
+            </div>
+          </div>
+
+          {/* Premium Footer Enhancement */}
+          <footer className="mt-12 bg-astu-navy text-slate-300 py-10 px-6 border-t border-white/10 relative overflow-hidden">
+            <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    alt="ASTU Official Emblem"
+                    className="h-10 w-10 object-contain rounded-lg bg-white/10 p-1"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                  />
+                  <div>
+                    <h4 className="font-bold text-white text-sm">Adama Science and Technology University</h4>
+                    <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Office of the Registrar</p>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-400 max-w-md leading-relaxed">
+                  The ASTU Alumni Management System bridges engineering graduates with industry recruiters, securing transcripts verification, and providing continuous tracer study reports to the dean boards.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-8 text-xs">
+                <div className="space-y-2">
+                  <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">Helpful Channels</h5>
+                  <ul className="space-y-1 text-slate-400 font-medium">
+                    <li><a href="#" className="hover:text-white transition-colors">Curriculum Review Committee</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">SIS Technical Assistance</a></li>
+                    <li><a href="#" className="hover:text-white transition-colors">API Sync Integration Docs</a></li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">System Info</h5>
+                  <p className="text-[10px] text-slate-400">Version: <strong>v1.4.0 (Enterprise)</strong></p>
+                  <p className="text-[10px] text-slate-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+                    SIS Sync Heartbeat: <strong>Active</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-500 font-semibold gap-4">
+              <p>&copy; {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
+              <div className="flex gap-4">
+                <a href="#" className="hover:text-slate-300">Privacy Policy</a>
+                <span>&bull;</span>
+                <a href="#" className="hover:text-slate-300">Terms of Use</a>
+              </div>
+            </div>
+          </footer>
+        </main>
+      </div>
+
     </div>
   );
 };
