@@ -1,0 +1,23 @@
+{
+  "users": [
+    {
+      "email": "alumni@example.com",
+      "password": "$2a$10$QekauzC3KOOu7Z9UGBHd4.dxnCWfKh77j/U..GqnmJZH3.zK3yelq",
+      "role": "ALUMNI",
+      "isActive": false,
+      "id": "dev-1779994894043-352"
+    }
+  ],
+  "alumniProfiles": [],
+  "employerProfiles": [],
+  "auditLogs": [
+    {
+      "userId": "dev-1779994894043-352",
+      "action": "REGISTER_ALUMNI",
+      "details": "Alumni account created and pending admin approval",
+      "ipAddress": "::1",
+      "id": "dev-log-1779994894046",
+      "createdAt": "2026-05-28T19:01:34.046Z"
+    }
+  ]
+}

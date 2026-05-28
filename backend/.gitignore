@@ -50,3 +50,7 @@ coverage/
 *.log.zlib
 *.log.brotli
 .env.example
+AUTH_SYSTEM_DOCUMENTATION
+AUTH_TESTING_GUIDE
+AUTH_TESTING_GUIDE.md
+AUTH_SYSTEM_DOCUMENTATION.md

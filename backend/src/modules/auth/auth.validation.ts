@@ -6,6 +6,13 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
+export const registerAlumniSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  fullName: z.string().min(2, 'Full name is required'),
+  phone: z.string().optional(),
+});
+
 export const registerEmployerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
@@ -14,6 +21,12 @@ export const registerEmployerSchema = z.object({
   website: z.string().url('Invalid website URL').optional().or(z.literal('')),
   location: z.string().min(2, 'Location is required'),
   hrContact: z.string().min(5, 'HR contact details are required'),
+});
+
+export const createUserByAdminSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  role: z.enum([Role.REGISTRAR, Role.DEPARTMENT_HEAD], { errorMap: () => ({ message: 'Role must be REGISTRAR or DEPARTMENT_HEAD' }) }),
+  fullName: z.string().optional(),
 });
 
 export const activateAlumniSchema = z.object({
