@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Types
-import { 
-  CompanyProfile, 
-  EmployerJob, 
-  CandidateApplication, 
-  GraduateFeedback, 
-  Message 
+import {
+  CompanyProfile,
+  EmployerJob,
+  CandidateApplication,
+  GraduateFeedback,
+  Message
 } from '../types/employer.types';
 
 // Services
@@ -39,7 +39,7 @@ const EmployerDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Theme Dark / Light mode
   const [darkMode, setDarkMode] = useState(false);
 
@@ -144,9 +144,9 @@ const EmployerDashboard = () => {
   };
 
   const handleToggleJobStatus = (jobId: number) => {
-    const updatedJobs = jobs.map(j => 
-      j.id === jobId 
-        ? { ...j, status: (j.status === 'Open' ? 'Closed' : 'Open') as EmployerJob['status'] } 
+    const updatedJobs = jobs.map(j =>
+      j.id === jobId
+        ? { ...j, status: (j.status === 'Open' ? 'Closed' : 'Open') as EmployerJob['status'] }
         : j
     );
     setJobs(updatedJobs);
@@ -154,7 +154,7 @@ const EmployerDashboard = () => {
   };
 
   const handleUpdateApplicationStatus = (appId: number, status: CandidateApplication['status']) => {
-    const updatedApps = applications.map(app => 
+    const updatedApps = applications.map(app =>
       app.id === appId ? { ...app, status } : app
     );
     setApplications(updatedApps);
@@ -240,15 +240,13 @@ const EmployerDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <div className={`min-h-screen font-body-md overflow-x-hidden transition-all duration-300 ${
-      darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
-    }`}>
+    <div className={`min-h-screen font-body-md overflow-x-hidden transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
+      }`}>
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar navigation */}
-      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${
-        darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
-      }`}>
+      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+        }`}>
         <div className="p-6 mt-6">
           <div className="flex items-center gap-3">
             <img
@@ -278,11 +276,10 @@ const EmployerDashboard = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${
-                  activeTab === item.id 
-                    ? item.activeColor + ' font-bold shadow-md' 
+                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
+                    ? item.activeColor + ' font-bold shadow-md'
                     : 'text-slate-300 hover:text-white hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined">{item.icon}</span>
                 <span className="text-sm font-medium">{item.label}</span>
@@ -292,15 +289,20 @@ const EmployerDashboard = () => {
         </nav>
 
         <div className="p-6 border-t border-white/10 mt-auto">
-          <button 
+          <button
             onClick={() => setActiveTab('feedback')}
             className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-all duration-300 text-left"
           >
             <span className="material-symbols-outlined text-md">help</span>
             <span className="text-sm font-medium">Help Center</span>
           </button>
-          <button 
-            onClick={() => toast.success('Mock logout triggered.')} 
+          <button
+            onClick={() => {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+            }}
             className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-all duration-300 text-left"
           >
             <span className="material-symbols-outlined text-md">logout</span>
@@ -311,18 +313,16 @@ const EmployerDashboard = () => {
 
       {/* Main content pane */}
       <main className="md:ml-[280px] min-h-screen flex flex-col">
-        
+
         {/* Header bar */}
-        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${
-          darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
-        }`}>
+        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
+          }`}>
           <div className="flex-1 max-w-xl">
             <div className="relative group">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
               <input
-                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${
-                  darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white'
-                }`}
+                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white'
+                  }`}
                 placeholder="Global Search: search candidates, departments, or postings..."
                 value={searchQuery}
                 onChange={(e) => {
@@ -342,9 +342,8 @@ const EmployerDashboard = () => {
                 setDarkMode(!darkMode);
                 toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
               }}
-              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${
-                darkMode ? 'text-amber-400' : 'text-slate-600'
-              }`}
+              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
+                }`}
               title="Toggle Dark/Light Mode"
             >
               <span className="material-symbols-outlined text-xl">
@@ -353,7 +352,7 @@ const EmployerDashboard = () => {
             </button>
 
             {/* Notification bell */}
-            <button 
+            <button
               onClick={() => {
                 setShowNotifications(!showNotifications);
                 if (!showNotifications) handleMarkNotificationsRead();
@@ -368,13 +367,12 @@ const EmployerDashboard = () => {
 
             {/* Notifications Dropdown card */}
             {showNotifications && (
-              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${
-                darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-              }`}>
+              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
+                }`}>
                 <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
                   <h4 className="font-bold text-sm">Recruiter Notifications</h4>
-                  <button 
-                    onClick={handleClearAllNotifications} 
+                  <button
+                    onClick={handleClearAllNotifications}
                     className="text-xs text-astu-red hover:underline font-bold"
                   >
                     Clear All
@@ -387,7 +385,7 @@ const EmployerDashboard = () => {
                         <p className="text-xs leading-normal">{notif.text}</p>
                         <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
                       </div>
-                      <button 
+                      <button
                         onClick={() => handleRemoveNotification(notif.id)}
                         className="text-gray-400 hover:text-gray-600"
                       >
@@ -403,9 +401,9 @@ const EmployerDashboard = () => {
             )}
 
             <div className="h-8 w-[1px] bg-gray-250 mx-2"></div>
-            
+
             {/* Company profile head */}
-            <div 
+            <div
               onClick={() => setActiveTab('profile')}
               className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
             >
@@ -426,7 +424,7 @@ const EmployerDashboard = () => {
         <div className="p-4 md:p-10 flex-grow">
           {activeTab === 'dashboard' && (
             <div className="space-y-8">
-              
+
               {/* Welcome banner */}
               <section className="relative bg-gradient-to-r from-astu-navy via-indigo-900 to-indigo-950 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-xl">
                 <div className="absolute right-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
@@ -435,11 +433,11 @@ const EmployerDashboard = () => {
                     <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU Corporate Network</span>
                     <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Welcome back, {profile.name}! 👋</h2>
                     <p className="text-sm opacity-90 leading-relaxed">
-                      Your current vacancy listings have collected <span className="font-bold text-astu-green">{totalApplicationsCount} candidate files</span>. 
+                      Your current vacancy listings have collected <span className="font-bold text-astu-green">{totalApplicationsCount} candidate files</span>.
                       Complete your graduate feedback forms to help align our technical curricula with industry standards.
                     </p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setActiveTab('post_job')}
                     className="bg-gradient-to-r from-astu-red to-red-600 hover:scale-105 px-6 py-3 rounded-xl font-extrabold text-xs tracking-wide text-white shadow-md transition-all whitespace-nowrap flex items-center gap-1.5"
                   >
@@ -461,9 +459,8 @@ const EmployerDashboard = () => {
                       if (stat.id === 2) setActiveTab('candidates');
                       if (stat.id === 4) setActiveTab('feedback');
                     }}
-                    className={`relative rounded-3xl p-6 border shadow-sm transition-all duration-300 cursor-pointer overflow-hidden group ${
-                      darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
-                    } ${hoveredCard === stat.id ? '-translate-y-2 shadow-md' : ''}`}
+                    className={`relative rounded-3xl p-6 border shadow-sm transition-all duration-300 cursor-pointer overflow-hidden group ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
+                      } ${hoveredCard === stat.id ? '-translate-y-2 shadow-md' : ''}`}
                   >
                     <div className="relative z-10 space-y-3">
                       <div className="flex items-start justify-between">
@@ -486,15 +483,14 @@ const EmployerDashboard = () => {
               </div>
 
               {/* Active Jobs list overview */}
-              <section className={`p-8 border rounded-3xl shadow-sm ${
-                darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-              }`}>
+              <section className={`p-8 border rounded-3xl shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                }`}>
                 <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-150">
                   <div>
                     <h3 className="text-lg font-bold">Your Posted Positions</h3>
                     <p className="text-xs text-gray-500 font-semibold">Quick updates on recent vacancies</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setActiveTab('post_job')}
                     className="text-xs font-bold text-astu-navy hover:underline"
                   >
@@ -506,9 +502,8 @@ const EmployerDashboard = () => {
                   {jobs.slice(0, 2).map((job) => (
                     <div
                       key={job.id}
-                      className={`p-5 border rounded-2xl transition-all ${
-                        darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50/50 border-gray-200'
-                      }`}
+                      className={`p-5 border rounded-2xl transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50/50 border-gray-200'
+                        }`}
                     >
                       <div className="flex justify-between items-start">
                         <div>
@@ -575,30 +570,29 @@ const EmployerDashboard = () => {
 
               {/* Quick actions panel */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <section className={`p-6 border rounded-3xl shadow-sm ${
-                  darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-                }`}>
+                <section className={`p-6 border rounded-3xl shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                  }`}>
                   <h3 className="font-bold text-md mb-4">Recruitment Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-4 text-xs font-bold">
-                    <button 
+                    <button
                       onClick={() => setActiveTab('post_job')}
                       className="p-4 bg-astu-navy text-white rounded-2xl text-center hover:scale-102 transition-transform"
                     >
                       Post Placement Vacancy
                     </button>
-                    <button 
+                    <button
                       onClick={() => setActiveTab('candidates')}
                       className="p-4 bg-astu-green text-white rounded-2xl text-center hover:scale-102 transition-transform"
                     >
                       Review Candidate Logs
                     </button>
-                    <button 
+                    <button
                       onClick={() => setActiveTab('search_talent')}
                       className="p-4 bg-purple-600 text-white rounded-2xl text-center hover:scale-102 transition-transform"
                     >
                       Search Talent Directory
                     </button>
-                    <button 
+                    <button
                       onClick={() => setActiveTab('feedback')}
                       className="p-4 bg-astu-red text-white rounded-2xl text-center hover:scale-102 transition-transform"
                     >
@@ -607,12 +601,11 @@ const EmployerDashboard = () => {
                   </div>
                 </section>
 
-                <section className={`p-6 border rounded-3xl shadow-sm ${
-                  darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-                }`}>
+                <section className={`p-6 border rounded-3xl shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                  }`}>
                   <h3 className="font-bold text-md mb-4 font-body-md">Recruitment Partner Perks</h3>
                   <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                    Get access to verified academic records directly from the ASTU Registrar office. 
+                    Get access to verified academic records directly from the ASTU Registrar office.
                     Your feedback provides high-value guidelines to the dean board during curriculum modernization cycles.
                   </p>
                   <div className="p-3 bg-gray-50/5 border border-gray-100/5 rounded-xl text-xs flex items-center gap-2">

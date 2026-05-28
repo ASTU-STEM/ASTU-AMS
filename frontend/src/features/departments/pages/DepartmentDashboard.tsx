@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const DepartmentDashboard = () => {
-    const [hoveredCard, setHoveredCard] = useState(null);
+    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
     const stats = [
         {
@@ -122,10 +122,19 @@ const DepartmentDashboard = () => {
                         <span className="material-symbols-outlined">help</span>
                         <span className="text-label-md">Help Center</span>
                     </a>
-                    <a href="#" className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white transition-all duration-300">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('refreshToken');
+                            localStorage.removeItem('user');
+                            window.location.href = '/login';
+                        }}
+                        className="flex items-center gap-4 text-primary-fixed-dim/80 hover:text-white transition-all duration-300"
+                    >
                         <span className="material-symbols-outlined">logout</span>
                         <span className="text-label-md">Logout</span>
-                    </a>
+                    </button>
                 </div>
             </aside>
 

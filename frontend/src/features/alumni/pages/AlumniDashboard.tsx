@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Types
-import { 
-  JobMatch, 
-  AlumniProfile, 
-  TracerSurvey, 
-  Mentor, 
-  CareerEvent, 
-  DocumentRequest, 
+import {
+  JobMatch,
+  AlumniProfile,
+  TracerSurvey,
+  Mentor,
+  CareerEvent,
+  DocumentRequest,
   AlumniPreferences,
-  MentorshipSession 
+  MentorshipSession
 } from '../types/alumni.types';
 
 // Mock Services
@@ -144,10 +144,10 @@ const AlumniDashboard = () => {
   };
 
   const handleApplyJob = (jobId: number) => {
-    const updatedJobs = jobs.map(j => j.id === jobId ? { 
-      ...j, 
-      applied: true, 
-      applicationStatus: 'Under Review' as const 
+    const updatedJobs = jobs.map(j => j.id === jobId ? {
+      ...j,
+      applied: true,
+      applicationStatus: 'Under Review' as const
     } : j);
     setJobs(updatedJobs);
     saveJobMatches(updatedJobs);
@@ -175,9 +175,9 @@ const AlumniDashboard = () => {
   };
 
   const handleCompleteSurvey = (surveyId: number, answers: Record<string, string>) => {
-    const updatedSurveys = surveys.map(s => 
-      s.id === surveyId 
-        ? { ...s, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() } 
+    const updatedSurveys = surveys.map(s =>
+      s.id === surveyId
+        ? { ...s, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() }
         : s
     );
     setSurveys(updatedSurveys);
@@ -292,8 +292,9 @@ const AlumniDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
     localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     toast.success('Logged out successfully');
     navigate('/login');
   };
@@ -311,15 +312,13 @@ const AlumniDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col transition-all duration-300 ${
-      darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
-    }`}>
+    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
+      }`}>
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${
-        darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
-      }`}>
+      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+        }`}>
         <div className="p-6 mt-6">
           <div className="flex items-center gap-3">
             <img
@@ -350,11 +349,10 @@ const AlumniDashboard = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${
-                  activeTab === item.id 
-                    ? item.activeColor + ' font-bold shadow-md' 
+                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
+                    ? item.activeColor + ' font-bold shadow-md'
                     : 'text-slate-300 hover:text-white hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined">{item.icon}</span>
                 <span className="text-sm font-medium">{item.label}</span>
@@ -364,15 +362,15 @@ const AlumniDashboard = () => {
         </nav>
 
         <div className="p-6 border-t border-white/10">
-          <button 
-            onClick={() => setActiveTab('career')} 
+          <button
+            onClick={() => setActiveTab('career')}
             className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
           >
             <span className="material-symbols-outlined text-md">help</span>
             <span className="text-sm font-medium">Help Center</span>
           </button>
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
           >
             <span className="material-symbols-outlined text-md">logout</span>
@@ -383,18 +381,16 @@ const AlumniDashboard = () => {
 
       {/* Main Content Area */}
       <main className="md:ml-[280px] min-h-screen flex flex-col">
-        
+
         {/* Header Section */}
-        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${
-          darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
-        }`}>
+        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
+          }`}>
           <div className="flex-1 max-w-xl">
             <div className="relative group">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
               <input
-                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${
-                  darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
-                }`}
+                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
+                  }`}
                 placeholder="Search alumni, companies, or mentors..."
                 type="text"
                 onChange={(e) => {
@@ -413,9 +409,8 @@ const AlumniDashboard = () => {
                 setDarkMode(!darkMode);
                 toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
               }}
-              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${
-                darkMode ? 'text-amber-400' : 'text-slate-600'
-              }`}
+              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
+                }`}
               title="Toggle Dark/Light Mode"
             >
               <span className="material-symbols-outlined text-xl">
@@ -424,7 +419,7 @@ const AlumniDashboard = () => {
             </button>
 
             {/* Notification Bell */}
-            <button 
+            <button
               onClick={() => {
                 setShowNotifications(!showNotifications);
                 if (!showNotifications) handleMarkNotificationsRead();
@@ -439,13 +434,12 @@ const AlumniDashboard = () => {
 
             {/* Notification Dropdown Portal */}
             {showNotifications && (
-              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${
-                darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-              }`}>
+              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
+                }`}>
                 <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
                   <h4 className="font-bold text-sm">Notifications</h4>
-                  <button 
-                    onClick={() => setNotifications([])} 
+                  <button
+                    onClick={() => setNotifications([])}
                     className="text-xs text-astu-red hover:underline"
                   >
                     Clear All
@@ -458,7 +452,7 @@ const AlumniDashboard = () => {
                         <p className="text-xs leading-normal">{notif.text}</p>
                         <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
                       </div>
-                      <button 
+                      <button
                         onClick={() => handleClearNotification(notif.id)}
                         className="text-gray-300 hover:text-gray-500"
                       >
@@ -474,9 +468,9 @@ const AlumniDashboard = () => {
             )}
 
             <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
-            
+
             {/* Header User Profile Display */}
-            <div 
+            <div
               onClick={() => setActiveTab('profile')}
               className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
             >

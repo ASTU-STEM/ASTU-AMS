@@ -1,16 +1,34 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  GraduationCap, Building2, Database, BarChart3, ShieldCheck, 
-  Menu, X, ArrowRight, CheckCircle2, User, Briefcase, 
-  FileText, Users, Settings, Bell, LogOut, Upload, 
+import {
+  GraduationCap, Building2, Database, BarChart3, ShieldCheck,
+  Menu, X, ArrowRight, CheckCircle2, User, Briefcase,
+  FileText, Users, Settings, Bell, LogOut, Upload,
   Plus, AlertCircle, TrendingUp, Search
 } from 'lucide-react';
+
+// No backend call here (logout is purely local for now)
+const logoutLocally = () => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+};
+
 
 // ==========================================
 // 1. DYNAMIC SHARED LAYOUT SYSTEM
 // ==========================================
-function DashboardLayout({ children, title, role, navItems }) {
+function DashboardLayout({
+  children,
+  title,
+  role,
+  navItems,
+}: {
+  children: React.ReactNode;
+  title: string;
+  role: string;
+  navItems: Array<{ path: string; label: string; icon: React.ComponentType<any> }>;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -22,9 +40,8 @@ function DashboardLayout({ children, title, role, navItems }) {
       )}
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-50 transform lg:transform-none lg:opacity-100 transition-all duration-300 flex flex-col justify-between ${
-        sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-50 transform lg:transform-none lg:opacity-100 transition-all duration-300 flex flex-col justify-between ${sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0'
+        }`}>
         <div>
           {/* Sidebar Header */}
           <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -44,18 +61,17 @@ function DashboardLayout({ children, title, role, navItems }) {
 
           {/* Navigation Links */}
           <nav className="p-4 space-y-1">
-            {navItems.map((item, idx) => {
+            {navItems.map((item: { path: string; label: string; icon: React.ComponentType<any> }, idx: number) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={idx}
                   to={item.path}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                    isActive 
-                      ? 'bg-[#003366]/5 text-[#003366] shadow-sm border-l-4 border-[#003366]' 
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive
+                    ? 'bg-[#003366]/5 text-[#003366] shadow-sm border-l-4 border-[#003366]'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-[#003366]' : 'text-slate-400'}`} />
                   {item.label}
@@ -67,10 +83,17 @@ function DashboardLayout({ children, title, role, navItems }) {
 
         {/* Sidebar Footer Account Section */}
         <div className="p-4 border-t border-slate-100">
-          <Link to="/" className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all">
+          <button
+            type="button"
+            onClick={() => {
+              logoutLocally();
+              window.location.href = '/login';
+            }}
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all"
+          >
             <LogOut className="h-4 w-4" />
             Exit Workspace
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -84,7 +107,7 @@ function DashboardLayout({ children, title, role, navItems }) {
             </button>
             <h1 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <button className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-xl relative shadow-sm">
               <Bell className="h-4 w-4" />
@@ -368,7 +391,7 @@ function EmployerPortal() {
                 Verified Recruiter
               </span>
             </div>
-            
+
             {/* Competency Input Sheet Info Block */}
             <div className="bg-gradient-to-r from-[#003366] to-slate-900 rounded-2xl p-6 text-white shadow-lg space-y-3">
               <h3 className="font-bold text-sm text-[#FFCC00] uppercase tracking-wider">Curriculum Competency Rating Requested</h3>
@@ -439,7 +462,7 @@ function DepartmentPortal() {
             <h3 className="text-md font-bold text-slate-900">Industry-Flagged Technical Skill Deficiencies</h3>
             <p className="text-xs text-slate-500">Skill gaps generated automatically from corporate partner feedback metrics.</p>
           </div>
-          
+
           <div className="space-y-3 pt-2">
             {[
               { skill: "Cloud Architecture Models (AWS / Azure Deployments)", gap: "88% of tracking employers flag as mandatory requirement" },
@@ -477,7 +500,7 @@ function AdminPortal() {
             <h2 className="text-md font-bold text-slate-900">Automated Tracer Outreach Scheduler (Cron Jobs)</h2>
             <p className="text-xs text-slate-500">Configure time triggers for automated student messaging.</p>
           </div>
-          
+
           <div className="divide-y divide-slate-100 border-t border-slate-100">
             <div className="py-4 flex justify-between items-center">
               <div>

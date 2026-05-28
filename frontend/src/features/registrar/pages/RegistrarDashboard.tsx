@@ -27,7 +27,7 @@ import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTim
 const RegistrarDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  
+
   // Theme Dark / Light mode
   const [darkMode, setDarkMode] = useState(false);
 
@@ -139,7 +139,7 @@ const RegistrarDashboard = () => {
   };
 
   const handleArchiveGraduate = (id: number) => {
-    const updatedGrads = graduates.map(g => 
+    const updatedGrads = graduates.map(g =>
       g.id === id ? { ...g, status: 'Archived' as const } : g
     );
     setGraduates(updatedGrads);
@@ -148,7 +148,7 @@ const RegistrarDashboard = () => {
   };
 
   const handleVerifyIdentity = (id: number) => {
-    const updatedGrads = graduates.map(g => 
+    const updatedGrads = graduates.map(g =>
       g.id === id ? { ...g, identityVerified: true } : g
     );
     setGraduates(updatedGrads);
@@ -176,7 +176,7 @@ const RegistrarDashboard = () => {
   };
 
   const handleVerifyRequestAction = (id: number, status: 'Approved' | 'Rejected') => {
-    const updatedVerifications = verifications.map(req => 
+    const updatedVerifications = verifications.map(req =>
       req.id === id ? { ...req, status } : req
     );
     setVerifications(updatedVerifications);
@@ -186,7 +186,7 @@ const RegistrarDashboard = () => {
     if (status === 'Approved') {
       const targetRequest = verifications.find(req => req.id === id);
       if (targetRequest) {
-        const updatedGrads = graduates.map(g => 
+        const updatedGrads = graduates.map(g =>
           g.studentId === targetRequest.studentId ? { ...g, identityVerified: true } : g
         );
         setGraduates(updatedGrads);
@@ -196,7 +196,7 @@ const RegistrarDashboard = () => {
   };
 
   const handleProcessDocumentAction = (id: number, status: 'Approved' | 'Rejected' | 'In Progress') => {
-    const updatedDocuments = documents.map(doc => 
+    const updatedDocuments = documents.map(doc =>
       doc.id === id ? { ...doc, status } : doc
     );
     setDocuments(updatedDocuments);
@@ -210,16 +210,14 @@ const RegistrarDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col justify-between transition-all duration-300 ${
-      darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
-    }`}>
+    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col justify-between transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
+      }`}>
       <Toaster position="top-right" reverseOrder={false} />
 
       <div className="flex-grow">
         {/* Sidebar navigation */}
-        <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${
-          darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
-        }`}>
+        <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+          }`}>
           <div className="p-6 mt-6">
             <div className="flex items-center gap-3">
               <img
@@ -248,11 +246,10 @@ const RegistrarDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${
-                    activeTab === item.id 
-                      ? item.activeColor + ' font-bold shadow-md' 
+                  className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
+                      ? item.activeColor + ' font-bold shadow-md'
                       : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   <span className="material-symbols-outlined">{item.icon}</span>
                   <span className="text-sm font-medium">{item.label}</span>
@@ -262,15 +259,20 @@ const RegistrarDashboard = () => {
           </nav>
 
           <div className="p-6 border-t border-white/10 mt-auto">
-            <button 
+            <button
               onClick={() => setActiveTab('reporting')}
               className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-all duration-300 text-left"
             >
               <span className="material-symbols-outlined text-md">help</span>
               <span className="text-sm font-medium">Help Center</span>
             </button>
-            <button 
-              onClick={() => toast.success('Mock logout triggered.')} 
+            <button
+              onClick={() => {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+              }}
               className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-all duration-300 text-left"
             >
               <span className="material-symbols-outlined text-md">logout</span>
@@ -283,16 +285,14 @@ const RegistrarDashboard = () => {
         <main className="md:ml-[280px] min-h-screen flex flex-col justify-between">
           <div>
             {/* Header bar */}
-            <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${
-              darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
-            }`}>
+            <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
+              }`}>
               <div className="flex-1 max-w-xl">
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                   <input
-                    className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${
-                      darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
-                    }`}
+                    className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
+                      }`}
                     placeholder="Search verified records, transcripts, or graduates..."
                     type="text"
                     onChange={(e) => {
@@ -311,9 +311,8 @@ const RegistrarDashboard = () => {
                     setDarkMode(!darkMode);
                     toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
                   }}
-                  className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${
-                    darkMode ? 'text-amber-400' : 'text-slate-600'
-                  }`}
+                  className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
+                    }`}
                   title="Toggle Dark/Light Mode"
                 >
                   <span className="material-symbols-outlined text-xl">
@@ -322,7 +321,7 @@ const RegistrarDashboard = () => {
                 </button>
 
                 {/* Notification bell */}
-                <button 
+                <button
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="p-2 text-gray-400 hover:bg-gray-100/10 rounded-full relative transition-all duration-300 hover:scale-105"
                 >
@@ -334,13 +333,12 @@ const RegistrarDashboard = () => {
 
                 {/* Notifications Dropdown card */}
                 {showNotifications && (
-                  <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${
-                    darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-                  }`}>
+                  <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
+                    }`}>
                     <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
                       <h4 className="font-bold text-sm">Registrar Notifications</h4>
-                      <button 
-                        onClick={handleClearNotifications} 
+                      <button
+                        onClick={handleClearNotifications}
                         className="text-xs text-astu-red hover:underline font-bold"
                       >
                         Clear All
@@ -363,9 +361,9 @@ const RegistrarDashboard = () => {
                 )}
 
                 <div className="h-8 w-[1px] bg-gray-250 mx-2"></div>
-                
+
                 {/* Registrar Head */}
-                <div 
+                <div
                   className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
                 >
                   <div className="text-right hidden sm:block">
@@ -385,7 +383,7 @@ const RegistrarDashboard = () => {
             <div className="p-4 md:p-10 flex-grow">
               {activeTab === 'dashboard' && (
                 <div className="space-y-8">
-                  
+
                   {/* Welcome banner */}
                   <section className="relative bg-gradient-to-r from-astu-navy via-emerald-900 to-emerald-950 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-xl">
                     <div className="absolute right-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
@@ -397,7 +395,7 @@ const RegistrarDashboard = () => {
                           Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
                         </p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => setActiveTab('data_integration')}
                         className="bg-gradient-to-r from-astu-red to-red-600 hover:scale-105 px-6 py-3 rounded-xl font-extrabold text-xs tracking-wide text-white shadow-md transition-all whitespace-nowrap flex items-center gap-1.5"
                       >

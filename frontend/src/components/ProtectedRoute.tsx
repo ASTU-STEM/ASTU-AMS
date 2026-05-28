@@ -18,15 +18,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
   redirectTo = '/',
 }) => {
-  const { isAuthenticated, hasPermission } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!hasPermission(allowedRoles)) {
-    return <Navigate to={redirectTo} replace />;
-  }
+  // --- TEMPORARILY BYPASSED FOR FRONTEND TESTING (Uncomment when backend auth is integrated) ---
+  // const { isAuthenticated, hasPermission } = useAuth();
+  //
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
+  //
+  // if (!hasPermission(allowedRoles)) {
+  //   return <Navigate to={redirectTo} replace />;
+  // }
+  // ---------------------------------------------------------------------------------------------
 
   return element;
 };
