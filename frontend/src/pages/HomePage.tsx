@@ -715,93 +715,136 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer className="border-t-2 border-astu-green/20 bg-gradient-to-b from-[#002244] to-[#000F22] py-16 text-white">
-        <div className="mx-auto grid max-w-[1440px] gap-10 px-4 md:grid-cols-4 md:px-8">
-          <div className="space-y-4">
-            <h5 className="text-xl font-black text-[#FFD700] tracking-wider uppercase">ASTU-AMS</h5>
-            <p className="text-sm leading-relaxed text-slate-300">
-              The ASTU Alumni Management System connects graduates, employers, and departments in one platform. Empowering professional networks, industry placement, and curriculum enhancement.
-            </p>
-            <div className="flex gap-3 pt-2">
-              <button className="rounded-lg border border-[#FFD700]/30 px-3.5 py-1.5 text-xs font-bold text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-[#000F22] hover:scale-105">Facebook</button>
-              <button className="rounded-lg border border-[#FFD700]/30 px-3.5 py-1.5 text-xs font-bold text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-[#000F22] hover:scale-105">Twitter</button>
-              <button className="rounded-lg border border-[#FFD700]/30 px-3.5 py-1.5 text-xs font-bold text-[#FFD700] transition-all duration-300 hover:bg-[#FFD700] hover:text-[#000F22] hover:scale-105">LinkedIn</button>
+      <footer className="border-t-2 border-astu-green/30 bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 py-16 text-slate-300">
+        <div className="mx-auto max-w-[1440px] px-4 md:px-8 space-y-12">
+          
+          {/* Top Panel: Newsletter Registration */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-10 border-b border-white/5">
+            <div className="max-w-md">
+              <h5 className="text-base font-bold text-white uppercase tracking-wider">Stay Connected with ASTU</h5>
+              <p className="text-xs text-slate-400 mt-1">Get updates on annual reunions, tech career expos, and graduate employment reports.</p>
+            </div>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                toast.success('Thank you! You are subscribed to ASTU Alumni newsletter.');
+                (e.target as HTMLFormElement).reset();
+              }}
+              className="flex w-full lg:w-auto max-w-md gap-2"
+            >
+              <input
+                type="email"
+                placeholder="Enter email for campus news..."
+                className="w-full lg:w-64 text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFD700]/30 text-white"
+                required
+              />
+              <button
+                type="submit"
+                className="px-5 py-3 bg-[#FFD700] hover:bg-[#FFD700]/95 text-indigo-950 font-bold text-xs rounded-xl hover:scale-105 transition-all shadow-md whitespace-nowrap"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+
+          {/* Middle Panel: Four Column Information Links */}
+          <div className="grid gap-10 md:grid-cols-4">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <img
+                  alt="ASTU Official Emblem"
+                  className="h-12 w-12 object-contain rounded-xl bg-white/10 p-1.5 border border-white/10 shadow-md"
+                  src={astuLogo}
+                />
+                <div>
+                  <h5 className="text-lg font-black text-white tracking-wider uppercase">ASTU-AMS</h5>
+                  <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Alumni Network</p>
+                </div>
+              </div>
+              <p className="text-xs leading-relaxed text-slate-400">
+                Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.
+              </p>
+              <div className="flex gap-2 pt-2">
+                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Facebook</button>
+                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Twitter</button>
+                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">LinkedIn</button>
+              </div>
+            </div>
+
+            <div>
+              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Resources & Portals</h6>
+              <ul className="space-y-3 text-xs text-slate-400">
+                <li>
+                  <button
+                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
+                    onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                  >
+                    Career Placement Portal
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
+                    onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                  >
+                    Tracer Survey Hub
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
+                    onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                  >
+                    Mentorship Scheduling
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Official Contact Details</h6>
+              <ul className="space-y-3 text-xs text-slate-400">
+                <li className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-sm mt-0.5 text-astu-green">location_on</span>
+                  <span>Adama, Oromia, Ethiopia</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm text-astu-green">phone</span>
+                  <span>+251-221-110000</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm text-astu-green">mail</span>
+                  <a href="mailto:alumni.office@astu.edu.et" className="hover:text-white transition-colors">alumni.office@astu.edu.et</a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Accreditation Support</h6>
+              <ul className="space-y-3 text-xs text-slate-400">
+                <li><button className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left">Quality Assurance Deans</button></li>
+                <li><button className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left">Accreditation Outcomes</button></li>
+                <li><button className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left">Institutional Research</button></li>
+              </ul>
             </div>
           </div>
 
-          <div>
-            <h6 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-[#1f4f86]/40 pb-2 mb-4">Resources</h6>
-            <ul className="space-y-3 text-sm text-slate-300">
-              <li>
-                <button
-                  className="flex items-center gap-1 transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
-                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-                >
-                  Career Portal
-                </button>
-              </li>
-              <li>
-                <button
-                  className="flex items-center gap-1 transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
-                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-                >
-                  Tracer Survey
-                </button>
-              </li>
-              <li>
-                <button
-                  className="flex items-center gap-1 transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
-                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-                >
-                  Mentorship Support
-                </button>
-              </li>
-            </ul>
+          {/* Bottom Panel: Copyright and Back to Top button */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/5 pt-8 text-xs text-slate-500 font-semibold">
+            <div className="flex flex-wrap items-center gap-3">
+              <p>© {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
+              <span>&bull;</span>
+              <p className="text-astu-green">Tracer Study & ICT Coordination</p>
+            </div>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="flex items-center gap-1 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-slate-300 hover:text-white transition-all hover:scale-105"
+            >
+              Back to Top
+              <span className="material-symbols-outlined text-sm">arrow_upward</span>
+            </button>
           </div>
 
-          <div>
-            <h6 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-[#1f4f86]/40 pb-2 mb-4">University</h6>
-            <ul className="space-y-3 text-sm text-slate-300">
-              <li><button className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left">Official Website</button></li>
-              <li><button className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left">Research Centers</button></li>
-              <li><button className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left">Accreditation outcomes</button></li>
-            </ul>
-          </div>
-
-          <div>
-            <h6 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-[#1f4f86]/40 pb-2 mb-4">Support & Contact</h6>
-            <ul className="space-y-3 text-sm text-slate-300">
-              <li>
-                <button
-                  className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
-                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-                >
-                  Help Center
-                </button>
-              </li>
-              <li>
-                <button
-                  className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
-                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-                >
-                  Privacy Policy
-                </button>
-              </li>
-              <li>
-                <button
-                  className="transition-all duration-300 hover:text-[#FFD700] hover:translate-x-1.5 text-left"
-                  onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-                >
-                  Contact Us
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-12 flex max-w-[1440px] flex-col justify-between gap-4 border-t border-[#1f4f86]/50 px-4 pt-8 text-sm text-slate-400 md:flex-row md:px-8">
-          <p>© 2026 Adama Science and Technology University. All rights reserved.</p>
-          <p className="text-[#FFD700] font-semibold">Designed and built for ASTU ICT and Tracer Study Coordination.</p>
         </div>
       </footer>
     </div>
