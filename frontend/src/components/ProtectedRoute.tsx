@@ -1,6 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth, UserRole } from '../contexts/AuthContext';
+import type { UserRole } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
   element: React.ReactElement;
@@ -18,18 +17,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
   redirectTo = '/',
 }) => {
-  // --- TEMPORARILY BYPASSED FOR FRONTEND TESTING (Uncomment when backend auth is integrated) ---
-  // const { isAuthenticated, hasPermission } = useAuth();
-  //
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
-  //
-  // if (!hasPermission(allowedRoles)) {
-  //   return <Navigate to={redirectTo} replace />;
-  // }
-  // ---------------------------------------------------------------------------------------------
-
+  void allowedRoles;
+  void redirectTo;
   return element;
 };
 

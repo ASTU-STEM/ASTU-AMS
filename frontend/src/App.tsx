@@ -10,9 +10,9 @@ import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
 import DepartmentDashboard from "./features/departments/pages/DepartmentDashboard";
-import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoutes from "./routes/adminRoutes";
 
 function App() {
   return (
@@ -72,13 +72,8 @@ function App() {
           }
         />
         <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute
-              element={<AdminDashboard />}
-              allowedRoles={["admin"]}
-            />
-          }
+          path="/admin/*"
+          element={<AdminRoutes />}
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
