@@ -2,6 +2,39 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-page: #f4f6fa;
+  --bg-card: #ffffff;
+  --bg-sidebar: #0a1628;
+  --bg-navbar: #ffffff;
+  --border-color: #e8edf5;
+  --text-primary: #0a0e1a;
+  --text-secondary: #5a6278;
+  --text-muted: #9ba3b8;
+}
+
+.dark {
+  --bg-page: #0f1117;
+  --bg-card: #1a1d27;
+  --bg-sidebar: #080d18;
+  --bg-navbar: #13161f;
+  --border-color: #2a2d3a;
+  --text-primary: #f1f3f9;
+  --text-secondary: #8b91a8;
+  --text-muted: #555b72;
+}
+
+.light {
+  --bg-page: #f4f6fa;
+  --bg-card: #ffffff;
+  --bg-sidebar: #0a1628;
+  --bg-navbar: #ffffff;
+  --border-color: #e8edf5;
+  --text-primary: #0a0e1a;
+  --text-secondary: #5a6278;
+  --text-muted: #9ba3b8;
+}
+
 html,
 body,
 #root {
@@ -15,6 +48,8 @@ html {
 
 body {
   font-family: "Hanken Grotesk", sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
 }
 
 ::-webkit-scrollbar {
@@ -34,6 +69,92 @@ a,
 button,
 input {
   font: inherit;
+}
+
+.admin-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.admin-shell main > * {
+  animation: admin-shell-fade 180ms ease-out both;
+}
+
+.admin-shell main section,
+.admin-shell main article,
+.admin-shell main .admin-card,
+.admin-shell main .shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.06\)\],
+.admin-shell main .shadow-\[0_4px_16px_rgba\(0\,0\,0\,0\.08\)\] {
+  animation: admin-float-in 260ms ease-out both;
+}
+
+.admin-shell main section:hover,
+.admin-shell main article:hover,
+.admin-shell main .admin-card:hover {
+  transform: translateY(-1px);
+}
+
+.dark .admin-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.dark .admin-shell .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .admin-shell .bg-slate-50 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dark .admin-shell .bg-slate-100 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .admin-shell .border-slate-200,
+.dark .admin-shell .border-slate-100 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .admin-shell .text-slate-900,
+.dark .admin-shell .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+.dark .admin-shell .text-slate-700,
+.dark .admin-shell .text-slate-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .admin-shell .text-slate-500,
+.dark .admin-shell .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+.dark .admin-shell .shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.06\)\],
+.dark .admin-shell .shadow-\[0_4px_16px_rgba\(0\,0\,0\,0\.08\)\] {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
+}
+
+.dark table tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark table thead {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background: #1e2130;
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark .admin-shell input::placeholder,
+.dark .admin-shell textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .reveal {
@@ -59,5 +180,37 @@ input {
   }
   100% {
     transform: translateX(-100%);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes admin-shell-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
