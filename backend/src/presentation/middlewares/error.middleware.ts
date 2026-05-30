@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendError } from '../../shared/utils/response.utils';
 import { ZodError } from 'zod';
+import { ApiError } from '../../shared/utils/ApiError';
 
 export const globalErrorHandler = (
   err: any,
@@ -21,6 +22,10 @@ export const globalErrorHandler = (
   // Handle Prisma unique constraint or other database errors if needed
   if (err.code && err.code.startsWith('P')) {
     return sendError(res, 'Database operation failed', { code: err.code, meta: err.meta }, 500);
+  }
+
+  if (err instanceof ApiError) {
+    return sendError(res, err.message, err.details || null, err.statusCode);
   }
 
   const statusCode = err.status || err.statusCode || 500;

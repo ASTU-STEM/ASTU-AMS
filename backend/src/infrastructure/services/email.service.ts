@@ -32,6 +32,17 @@ ${html.replace(/<[^>]*>/g, ' ')}
     return this.sendEmail(email, subject, html);
   }
 
+  static async sendVerificationCode(email: string, name: string, code: string) {
+    const subject = 'ASTU-AMS Alumni Registration Verification Code';
+    const html = `
+      <h1>Hello, ${name}!</h1>
+      <p>Your verification code to complete ASTU Alumni registration is:</p>
+      <h2>${code}</h2>
+      <p>This code expires in 15 minutes. If you did not request alumni registration, please ignore this message.</p>
+    `;
+    return this.sendEmail(email, subject, html);
+  }
+
   static async sendSurveyReminder(email: string, name: string, surveyTitle: string) {
     const surveyLink = `http://localhost:3000/surveys`;
     const subject = `Tracer Study Pending: ${surveyTitle}`;

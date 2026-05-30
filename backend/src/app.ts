@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import apiRouter from './presentation/routes/api.routes';
+import { HealthController } from './presentation/controllers/HealthController';
 import { globalErrorHandler } from './presentation/middlewares/error.middleware';
 
 const app = express();
@@ -40,9 +41,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/api', apiRouter);
 
 // 7. Base API Health Check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
-});
+app.get('/health', HealthController.getHealth);
 
 // 8. 404 Fallback Route
 app.use((req, res) => {

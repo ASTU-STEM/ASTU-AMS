@@ -7,8 +7,10 @@ import { asyncHandler } from '../../../shared/utils/asyncHandler';
 const router = Router();
 
 // ============ PUBLIC ROUTES ============
-// Alumni public registration (pending admin approval)
+// Alumni public registration (pending email or national ID verification)
 router.post('/register', asyncHandler(AuthController.registerAlumni));
+router.post('/register/verify-code', asyncHandler(AuthController.verifyAlumniRegistration));
+router.post('/register/verify-national-id', asyncHandler(AuthController.verifyAlumniNationalId));
 
 // Main system login (alumni, registrar, department head, admin)
 router.post('/login', asyncHandler(AuthController.login));

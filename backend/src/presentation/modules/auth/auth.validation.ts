@@ -7,11 +7,21 @@ export const loginSchema = z.object({
 });
 
 export const registerAlumniSchema = z.object({
-  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
   fullName: z.string().min(2, 'Full name is required'),
   studentId: z.string().min(1, 'Student ID is required'),
   phone: z.string().optional(),
+});
+
+export const verifyRegistrationSchema = z.object({
+  studentId: z.string().min(1, 'Student ID is required'),
+  code: z.string().min(4, 'Verification code is required'),
+});
+
+export const nationalIdVerificationSchema = z.object({
+  studentId: z.string().min(1, 'Student ID is required'),
+  nationalId: z.string().min(5, 'National ID is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters long').optional(),
 });
 
 export const registerEmployerSchema = z.object({

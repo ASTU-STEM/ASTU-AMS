@@ -26,6 +26,8 @@ export class RegistrarService {
     let rawRecords: any[] = [];
     const errors: string[] = [];
     let successCount = 0;
+    const currentYear = new Date().getFullYear();
+    const allowedYears = [currentYear, currentYear - 1];
 
     try {
       const fetched: any = await registrarAPI.fetchGraduates();
@@ -49,6 +51,10 @@ export class RegistrarService {
 
     for (const raw of rawRecords) {
       const record = this.normalizeRegistrarRecord(raw);
+      if (!allowedYears.includes(record.graduationYear)) {
+        continue;
+      }
+
       const validation = this.validateRegistrarRecord(record);
       if (!validation.valid) {
         errors.push(`${record.studentId || 'unknown'} - ${validation.reason}`);
@@ -56,10 +62,25 @@ export class RegistrarService {
       }
 
       try {
-        await prisma.registrarStudent.upsert({
-          where: { studentId: record.studentId },
-          create: this.buildRegistrarStudentData(record, 'API'),
-          update: this.buildRegistrarStudentData(record, 'API'),
+        const department = await this.findOrCreateDepartment(record.department, record.departmentCode);
+        const existing = await prisma.alumniProfile.findUnique({ where: { studentId: record.studentId } });
+        if (existing) {
+          continue; // Already fetched
+        }
+
+        await prisma.alumniProfile.create({
+          data: {
+            studentId: record.studentId,
+            fullName: record.fullName,
+            email: record.email,
+            phone: record.phone || null,
+            cgpa: record.cgpa,
+            graduationYear: record.graduationYear,
+            gender: record.source || 'UNKNOWN',
+            departmentId: department.id,
+            status: 'INACTIVE',
+            isVerified: false,
+          },
         });
         successCount += 1;
       } catch (err: any) {
@@ -104,10 +125,25 @@ export class RegistrarService {
       }
 
       try {
-        await prisma.registrarStudent.upsert({
-          where: { studentId: record.studentId },
-          create: this.buildRegistrarStudentData(record, 'UPLOAD'),
-          update: this.buildRegistrarStudentData(record, 'UPLOAD'),
+        const department = await this.findOrCreateDepartment(record.department, record.departmentCode);
+        const existing = await prisma.alumniProfile.findUnique({ where: { studentId: record.studentId } });
+        if (existing) {
+          continue;
+        }
+
+        await prisma.alumniProfile.create({
+          data: {
+            studentId: record.studentId,
+            fullName: record.fullName,
+            email: record.email,
+            phone: record.phone || null,
+            cgpa: record.cgpa,
+            graduationYear: record.graduationYear,
+            gender: record.source || 'UNKNOWN',
+            departmentId: department.id,
+            status: 'INACTIVE',
+            isVerified: false,
+          },
         });
         imported += 1;
       } catch (err: any) {
@@ -136,19 +172,19 @@ export class RegistrarService {
    * Export registrar student records to CSV or XLSX.
    */
   static async exportGraduates(res: Response, format: string = 'csv') {
-    const students = (await prisma.registrarStudent.findMany()) as any[];
+    const students = await prisma.alumniProfile.findMany({ include: { department: true } });
     const rows = students.map((record: any) => ({
       student_id: record.studentId,
       full_name: record.fullName,
-      department: record.department,
-      department_code: record.departmentCode,
+      department: record.department?.name || '',
+      department_code: record.department?.code || '',
       cgpa: record.cgpa,
       graduation_year: record.graduationYear,
-      graduation_date: record.graduationDate ? record.graduationDate.toISOString().split('T')[0] : '',
+      graduation_date: '',
       email: record.email || '',
       phone: record.phone || '',
-      source: record.source || '',
-      imported_at: record.importedAt.toISOString(),
+      status: record.status,
+      created_at: record.createdAt.toISOString(),
     }));
 
     if (format === 'xlsx') {
@@ -180,14 +216,14 @@ export class RegistrarService {
   }
 
   static async getStudentRecord(studentId: string) {
-    return prisma.registrarStudent.findUnique({ where: { studentId } });
+    return prisma.alumniProfile.findUnique({ where: { studentId } });
   }
 
-  static async verifyStudent(studentId: string, email?: string) {
-    const record = await prisma.registrarStudent.findUnique({ where: { studentId } });
-    if (!record) return { valid: false, reason: 'Student ID not found in registrar records' };
-    if (email && record.email && record.email.toLowerCase() !== email.toLowerCase()) {
-      return { valid: false, reason: 'Email does not match registrar record' };
+  static async verifyStudent(studentId: string, fullName?: string) {
+    const record = await prisma.alumniProfile.findUnique({ where: { studentId } });
+    if (!record) return { valid: false, reason: 'Student ID not found in alumni profile records' };
+    if (fullName && record.fullName.toLowerCase() !== fullName.trim().toLowerCase()) {
+      return { valid: false, reason: 'Full name does not match alumni profile record' };
     }
     return { valid: true, record };
   }
@@ -273,9 +309,8 @@ export class RegistrarService {
     const inactiveAlumni = await prisma.alumniProfile.count({ where: { status: 'INACTIVE' } });
     const suspendedAlumni = await prisma.alumniProfile.count({ where: { status: 'SUSPENDED' } });
 
-    const totalGraduates = await prisma.registrarStudent.count();
-    const importedGraduates = await prisma.alumniProfile.count({
-      where: { registrarRecordId: { not: null } },
+    const profilesWithoutAccount = await prisma.alumniProfile.count({
+      where: { userId: null },
     });
 
     const lastSyncLog = await prisma.registrarSyncLog.findFirst({
@@ -294,9 +329,8 @@ export class RegistrarService {
         suspended: suspendedAlumni,
       },
       graduates: {
-        total: totalGraduates,
-        imported: importedGraduates,
-        notYetAccountCreated: totalGraduates - importedGraduates,
+        total: totalAlumni,
+        pendingAccounts: profilesWithoutAccount,
       },
       sync: {
         lastSync: lastSyncLog?.syncedAt || null,
@@ -308,19 +342,15 @@ export class RegistrarService {
     };
   }
 
-  private static buildRegistrarStudentData(record: RegistrarGraduate, source: string) {
-    return {
-      studentId: record.studentId,
-      fullName: record.fullName,
-      department: record.department,
-      departmentCode: record.departmentCode,
-      cgpa: record.cgpa,
-      graduationDate: record.graduationDate || null,
-      graduationYear: record.graduationYear,
-      email: record.email,
-      phone: record.phone || null,
-      source,
-    };
+  private static async findOrCreateDepartment(department: string, departmentCode: string) {
+    const existing = await prisma.department.findUnique({ where: { code: departmentCode } });
+    if (existing) return existing;
+    return prisma.department.create({
+      data: {
+        code: departmentCode,
+        name: department,
+      },
+    });
   }
 
   private static normalizeRegistrarRecord(raw: any): RegistrarGraduate {

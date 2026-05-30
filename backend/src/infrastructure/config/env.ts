@@ -12,6 +12,8 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
   REGISTRAR_API_URL: z.string().url().default('https://registrar.astu.edu.et/api/v1'),
   REGISTRAR_API_KEY: z.string().default('astu_ams_registrar_secret_sync_key'),
+  DIDIT_API_URL: z.string().url().default('https://api.didit.me/v1'),
+  DIDIT_API_KEY: z.string().default('didit_api_key_here'),
   SMTP_HOST: z.string().default('smtp.mailtrap.io'),
   SMTP_PORT: z.coerce.number().default(2525),
   SMTP_USER: z.string().default('mock_user'),

@@ -4,13 +4,17 @@ import prisma from '../../../infrastructure/config/db';
 import { 
   loginSchema, 
   registerAlumniSchema, 
+  verifyRegistrationSchema,
+  nationalIdVerificationSchema,
   registerEmployerSchema, 
   createUserByAdminSchema, 
   activateAlumniSchema 
 } from './auth.validation';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../../shared/utils/jwt.utils';
 import { sendSuccess, sendError } from '../../../shared/utils/response.utils';
+import { BaseController } from '../../controllers/BaseController';
 import { EmailService } from '../../../infrastructure/services/email.service';
+import { diditService } from '../../../infrastructure/services/didit.service';
 import { Role } from '@prisma/client';
 
 // Helper: Generate random password
@@ -23,7 +27,7 @@ function generateTempPassword(length: number = 12): string {
   return password;
 }
 
-export class AuthController {
+export class AuthController extends BaseController {
   /**
    * Alumni Public Registration (Pending Admin Approval).
    * Route: POST /api/auth/register
@@ -33,115 +37,282 @@ export class AuthController {
     try {
       const parsedData = registerAlumniSchema.parse(req.body);
 
-      const existingUser = await prisma.user.findUnique({
-        where: { email: parsedData.email.toLowerCase() },
-      });
-
-      if (existingUser) {
-        return sendError(res, 'Email address already registered', null, 400);
-      }
-
-      const registrarRecord = await prisma.registrarStudent.findUnique({
+      const profile = await prisma.alumniProfile.findUnique({
         where: { studentId: parsedData.studentId },
+        include: { user: true },
       });
 
-      if (!registrarRecord) {
+      if (!profile) {
         return sendError(
           res,
-          'Student ID not found in Registrar records. Please ask the Registrar office to import graduate data first.',
+          'Student ID not found in alumni records. Please ask the Registrar office to import graduate data first.',
           null,
           400
         );
       }
 
-      if (registrarRecord.email && registrarRecord.email.toLowerCase() !== parsedData.email.toLowerCase()) {
+      if (profile.status === 'ACTIVE' || profile.userId) {
+        return sendError(res, 'An active alumni account already exists for this Student ID.', null, 400);
+      }
+
+      const normalizedRequestName = parsedData.fullName.trim().toLowerCase();
+      const normalizedProfileName = profile.fullName.trim().toLowerCase();
+
+      if (normalizedRequestName !== normalizedProfileName) {
         return sendError(
           res,
-          'The email provided does not match the Registrar record. Use the official email or contact the Registrar office.',
+          'The full name does not match the alumni record. Please make sure you entered the name exactly as in the registrar data.',
           null,
           400
         );
       }
 
-      const existingStudent = await prisma.alumniProfile.findUnique({
-        where: { studentId: parsedData.studentId },
-      });
-
-      if (existingStudent) {
-        return sendError(res, 'An alumni account already exists for this Student ID', null, 400);
+      if (!profile.email) {
+        return sendError(
+          res,
+          'No student email is available for this record. Please use national ID verification instead.',
+          null,
+          400
+        );
       }
 
-      const hashedPassword = await bcrypt.hash(parsedData.password, 10);
+      const pendingPasswordHash = await bcrypt.hash(parsedData.password, 10);
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      const deptCode = registrarRecord.departmentCode.toUpperCase();
-      let department = await prisma.department.findUnique({ where: { code: deptCode } });
-      if (!department) {
-        department = await prisma.department.create({
-          data: { code: deptCode, name: registrarRecord.department },
-        });
-      }
-
-      const newUser = await prisma.user.create({
+      await prisma.alumniProfile.update({
+        where: { id: profile.id },
         data: {
-          email: parsedData.email.toLowerCase(),
-          password: hashedPassword,
-          role: Role.ALUMNI,
-          isActive: true, // Auto-activate since Student ID is verified
-        },
-      });
-
-      await prisma.alumniProfile.create({
-        data: {
-          userId: newUser.id,
-          studentId: parsedData.studentId,
-          fullName: parsedData.fullName,
-          phone: parsedData.phone || registrarRecord.phone || null,
-          cgpa: registrarRecord.cgpa,
-          graduationYear: registrarRecord.graduationYear,
-          gender: registrarRecord.source || 'UNKNOWN',
-          departmentId: department.id,
-          isVerified: true,
-          status: 'ACTIVE', // Auto-active since verified via registrar records
-          registrarRecordId: registrarRecord.id,
+          pendingPasswordHash,
+          pendingVerificationCode: verificationCode,
+          verificationCodeExpiresAt: expiresAt,
+          verificationChannel: 'EMAIL',
+          isVerified: false,
+          status: 'INACTIVE',
         },
       });
 
       await prisma.auditLog.create({
         data: {
-          userId: newUser.id,
-          action: 'REGISTER_ALUMNI',
-          details: `Alumni account created and auto-activated via registrar verification`,
+          userId: profile.userId || 'SYSTEM',
+          action: 'REQUEST_ALUMNI_VERIFICATION',
+          details: `Alumni registration requested for studentId ${parsedData.studentId}`,
           ipAddress: req.ip,
         },
       });
 
-      // Send confirmation email
+      try {
+        await EmailService.sendVerificationCode(profile.email, profile.fullName, verificationCode);
+      } catch (emailErr: any) {
+        console.warn('Failed to send registration verification code:', emailErr.message);
+      }
+
+      return sendSuccess(
+        res,
+        'Verification code sent to the registered student email address. Enter the code to complete registration.',
+        { studentId: parsedData.studentId },
+        200
+      );
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async verifyAlumniRegistration(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsedData = verifyRegistrationSchema.parse(req.body);
+
+      const profile = await prisma.alumniProfile.findUnique({
+        where: { studentId: parsedData.studentId },
+        include: { user: true },
+      });
+
+      if (!profile) {
+        return sendError(res, 'Student ID not found in alumni records.', null, 404);
+      }
+
+      if (!profile.pendingVerificationCode || !profile.verificationCodeExpiresAt) {
+        return sendError(res, 'No pending verification request found for this student.', null, 400);
+      }
+
+      if (profile.verificationCodeExpiresAt < new Date()) {
+        return sendError(res, 'Verification code has expired. Please request a new registration verification.', null, 400);
+      }
+
+      if (profile.pendingVerificationCode !== parsedData.code) {
+        return sendError(res, 'Invalid verification code.', null, 400);
+      }
+
+      const email = profile.email;
+      if (!email) {
+        return sendError(res, 'No email associated with this alumni profile.', null, 400);
+      }
+
+      const passwordHash = profile.pendingPasswordHash;
+      if (!passwordHash) {
+        return sendError(res, 'No pending password was saved for this registration request.', null, 400);
+      }
+
+      let user = profile.user;
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: email.toLowerCase(),
+            password: passwordHash,
+            role: Role.ALUMNI,
+            isActive: true,
+          },
+        });
+      } else {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isActive: true, password: passwordHash },
+        });
+      }
+
+      await prisma.alumniProfile.update({
+        where: { id: profile.id },
+        data: {
+          userId: user.id,
+          isVerified: true,
+          status: 'ACTIVE',
+          pendingVerificationCode: null,
+          verificationCodeExpiresAt: null,
+          pendingPasswordHash: null,
+          verificationChannel: 'EMAIL',
+        },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          userId: user.id,
+          action: 'VERIFY_ALUMNI_EMAIL',
+          details: `Alumni email verification completed for studentId ${parsedData.studentId}`,
+          ipAddress: req.ip,
+        },
+      });
+
       try {
         await EmailService.sendEmail(
-          newUser.email,
-          'Welcome to ASTU Alumni Management System',
+          email,
+          'Your Alumni Account is Now Active',
           `
             <h2>Welcome to ASTU Alumni Management System</h2>
-            <p>Your alumni account has been successfully created and verified through official Registrar records.</p>
+            <p>Your alumni account has been successfully verified and activated.</p>
             <p>You can now login with your email and password.</p>
-            <p>Profile Details:</p>
-            <ul>
-              <li>Full Name: ${parsedData.fullName}</li>
-              <li>Student ID: ${parsedData.studentId}</li>
-              <li>Department: ${department.name}</li>
-              <li>CGPA: ${registrarRecord.cgpa}</li>
-            </ul>
           `
         );
       } catch (emailErr: any) {
-        console.warn('Failed to send welcome email:', emailErr.message);
+        console.warn('Failed to send activation email:', emailErr.message);
       }
 
-      return sendSuccess(res, 
-        'Alumni account created and activated successfully! You can now login.', 
-        { userId: newUser.id, email: newUser.email, status: 'ACTIVE' }, 
-        201
-      );
+      return sendSuccess(res, 'Alumni registration verified and account activated successfully.', {
+        userId: user.id,
+        email: user.email,
+        status: 'ACTIVE',
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async verifyAlumniNationalId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsedData = nationalIdVerificationSchema.parse(req.body);
+
+      const profile = await prisma.alumniProfile.findUnique({
+        where: { studentId: parsedData.studentId },
+        include: { user: true },
+      });
+
+      if (!profile) {
+        return sendError(res, 'Student ID not found in alumni records.', null, 404);
+      }
+
+      if (profile.status === 'ACTIVE' && profile.userId) {
+        return sendError(res, 'Alumni account is already active.', null, 400);
+      }
+
+      if (!profile.email) {
+        return sendError(res, 'No email is available on the alumni profile. Cannot create login account.', null, 400);
+      }
+
+      const verification = await diditService.verifyNationalId(parsedData.nationalId);
+
+      if (!verification.valid) {
+        return sendError(res, 'National ID verification failed. Please check your details and try again.', null, 400);
+      }
+
+      const normalizedProfileName = profile.fullName.trim().toLowerCase();
+      const normalizedDiditName = (verification.name || '').trim().toLowerCase();
+      if (normalizedProfileName !== normalizedDiditName) {
+        return sendError(
+          res,
+          'The name returned by national ID verification does not match the alumni record.',
+          null,
+          400
+        );
+      }
+
+      const passwordHash = parsedData.password
+        ? await bcrypt.hash(parsedData.password, 10)
+        : profile.pendingPasswordHash;
+
+      if (!passwordHash) {
+        return sendError(res, 'Password is required to complete account creation.', null, 400);
+      }
+
+      const existingUserByEmail = await prisma.user.findUnique({
+        where: { email: profile.email.toLowerCase() },
+      });
+      if (existingUserByEmail && existingUserByEmail.id !== profile.userId) {
+        return sendError(res, 'A user already exists with the alumni profile email. Please contact support.', null, 400);
+      }
+
+      let user = profile.user;
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: profile.email.toLowerCase(),
+            password: passwordHash,
+            role: Role.ALUMNI,
+            isActive: true,
+          },
+        });
+      } else {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isActive: true, password: passwordHash },
+        });
+      }
+
+      await prisma.alumniProfile.update({
+        where: { id: profile.id },
+        data: {
+          userId: user.id,
+          isVerified: true,
+          status: 'ACTIVE',
+          pendingVerificationCode: null,
+          verificationCodeExpiresAt: null,
+          pendingPasswordHash: null,
+          verificationChannel: 'NATIONAL_ID',
+        },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          userId: user.id,
+          action: 'VERIFY_ALUMNI_NATIONAL_ID',
+          details: `Alumni national ID verification completed for studentId ${parsedData.studentId}`,
+          ipAddress: req.ip,
+        },
+      });
+
+      return sendSuccess(res, 'National ID verification succeeded. Alumni account activated.', {
+        userId: user.id,
+        email: user.email,
+        status: 'ACTIVE',
+      });
     } catch (err: any) {
       next(err);
     }

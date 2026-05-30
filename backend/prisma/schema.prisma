@@ -63,10 +63,11 @@ model Department {
 
 model AlumniProfile {
   id             String            @id @default(uuid())
-  userId         String            @unique
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?           @unique
+  user           User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
   studentId      String            @unique
   fullName       String
+  email          String?
   phone          String?
   cgpa           Float
   graduationYear Int
@@ -77,6 +78,12 @@ model AlumniProfile {
   registrarRecordId String?       @unique
   registrarRecord   RegistrarStudent? @relation(fields: [registrarRecordId], references: [id])
   status         AlumniStatus      @default(INACTIVE)
+  isVerified     Boolean           @default(false)
+  pendingVerificationCode String?
+  verificationCodeExpiresAt DateTime?
+  pendingPasswordHash String?
+  verificationChannel String?
+  pendingVerificationAttempts Int @default(0)
   profilePicture String?
   skills         String[]          // Array of skills
   resumeUrl      String?

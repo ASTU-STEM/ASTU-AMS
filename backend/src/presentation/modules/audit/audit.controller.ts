@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import prisma from '../../../../infrastructure/config/db';
-import { sendSuccess } from '../../../../shared/utils/response.utils';
+﻿import { Request, Response, NextFunction } from 'express';
+import prisma from '../../../infrastructure/config/db';
+import { sendSuccess } from '../../../shared/utils/response.utils';
 
 export class AuditController {
   static async recent(req: Request, res: Response, next: NextFunction) {
