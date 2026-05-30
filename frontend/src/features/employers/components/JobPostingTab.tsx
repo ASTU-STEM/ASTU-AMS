@@ -6,11 +6,15 @@ interface JobPostingTabProps {
   jobs: EmployerJob[];
   onPostJob: (job: Omit<EmployerJob, 'id' | 'applicationsCount' | 'shortlistedCount' | 'viewsCount' | 'postedDate'>) => void;
   onToggleJobStatus: (jobId: number) => void;
+  onUpdateJob: (job: EmployerJob) => void;
+  onDeleteJob: (jobId: number) => void;
   darkMode: boolean;
 }
 
-export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, onToggleJobStatus, darkMode }) => {
+export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, onToggleJobStatus, onUpdateJob, onDeleteJob, darkMode }) => {
   const [isPosting, setIsPosting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingJobId, setEditingJobId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     type: 'Full-Time' as EmployerJob['type'],
@@ -28,16 +32,45 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
       .map(s => s.trim())
       .filter(s => s.length > 0);
 
-    onPostJob({
-      title: formData.title,
-      type: formData.type,
-      location: formData.location,
-      salaryRange: formData.salaryRange,
-      experienceRequired: formData.experienceRequired,
-      description: formData.description,
-      skillsRequired: skills,
-      status: 'Open'
-    });
+    if (isEditing && editingJobId !== null) {
+      // Find the original job to preserve certain fields
+      const originalJob = jobs.find(job => job.id === editingJobId);
+      
+      // Update existing job
+      const updatedJob: EmployerJob = {
+        id: editingJobId,
+        title: formData.title,
+        type: formData.type,
+        location: formData.location,
+        salaryRange: formData.salaryRange,
+        experienceRequired: formData.experienceRequired,
+        description: formData.description,
+        skillsRequired: skills,
+        status: originalJob?.status || 'Open', // Preserve existing status
+        applicationsCount: originalJob?.applicationsCount || 0, // Preserve existing count
+        shortlistedCount: originalJob?.shortlistedCount || 0, // Preserve existing count
+        viewsCount: originalJob?.viewsCount || 0, // Preserve existing count
+        postedDate: originalJob?.postedDate || '' // Preserve existing date
+      };
+      
+      onUpdateJob(updatedJob);
+      toast.success('Job listing updated successfully!');
+      setIsEditing(false);
+      setEditingJobId(null);
+    } else {
+      // Create new job
+      onPostJob({
+        title: formData.title,
+        type: formData.type,
+        location: formData.location,
+        salaryRange: formData.salaryRange,
+        experienceRequired: formData.experienceRequired,
+        description: formData.description,
+        skillsRequired: skills,
+        status: 'Open'
+      });
+      toast.success('New job listing posted successfully!');
+    }
 
     setIsPosting(false);
     setFormData({
@@ -49,7 +82,21 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
       description: '',
       skillsInput: ''
     });
-    toast.success('New job listing posted successfully!');
+  };
+
+  const populateFormForEdit = (job: EmployerJob) => {
+    setIsEditing(true);
+    setIsPosting(true);
+    setEditingJobId(job.id);
+    setFormData({
+      title: job.title,
+      type: job.type,
+      location: job.location,
+      salaryRange: job.salaryRange,
+      experienceRequired: job.experienceRequired,
+      description: job.description,
+      skillsInput: job.skillsRequired.join(', ')
+    });
   };
 
   return (
@@ -58,8 +105,12 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
       {/* Header Panel */}
       <div className="flex justify-between items-center pb-4 border-b border-gray-200/50">
         <div>
-          <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Job Posting Scaffolder</h3>
-          <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>Create, close, and manage active career postings</p>
+          <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            {isEditing ? 'Edit Job Listing' : 'Job Posting Scaffolder'}
+          </h3>
+          <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
+            {isEditing ? 'Modify existing job posting details' : 'Create, close, and manage active career postings'}
+          </p>
         </div>
         <button
           onClick={() => setIsPosting(!isPosting)}
@@ -187,7 +238,20 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={() => setIsPosting(false)}
+              onClick={() => {
+                setIsPosting(false);
+                setIsEditing(false);
+                setEditingJobId(null);
+                setFormData({
+                  title: '',
+                  type: 'Full-Time',
+                  location: '',
+                  salaryRange: '30,001 - 60,000 ETB/mo',
+                  experienceRequired: '1-3 years',
+                  description: '',
+                  skillsInput: ''
+                });
+              }}
               className="flex-1 py-3 border border-gray-300 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
             >
               Cancel
@@ -196,7 +260,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
               type="submit"
               className="flex-1 py-3 bg-astu-navy text-white rounded-xl font-bold transition-all shadow-md"
             >
-              Post Career Opening
+              {isEditing ? 'Update Job' : 'Post Career Opening'}
             </button>
           </div>
         </form>
@@ -247,14 +311,33 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
               </div>
             </div>
 
-            {/* Toggle Status action */}
+            {/* Job Actions */}
             <div className="flex md:flex-col gap-2">
+              <button
+                onClick={() => populateFormForEdit(job)}
+                className="px-3 py-2 bg-blue-50 border border-blue-200 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors"
+              >
+                <span className="material-symbols-outlined">edit</span>
+                Edit
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this job listing?')) {
+                    onDeleteJob(job.id);
+                    toast.success('Job listing deleted successfully!');
+                  }
+                }}
+                className="px-3 py-2 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors"
+              >
+                <span className="material-symbols-outlined">delete</span>
+                Delete
+              </button>
               <button
                 onClick={() => {
                   onToggleJobStatus(job.id);
                   toast.success(`Job status changed to: ${job.status === 'Open' ? 'Closed' : 'Open'}`);
                 }}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                   job.status === 'Open' 
                     ? 'bg-red-50 border border-red-200 text-astu-red hover:bg-red-100' 
                     : 'bg-green-50 border border-green-200 text-green-700 hover:bg-green-100'

@@ -1,8 +1,19 @@
-* {
-  box-sizing: border-box;
-}
-
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL SPACING SCALE & THEME TOKENS (4px base unit)
+   4px/8px/12px/16px/20px/24px/32px/40px
+   ═══════════════════════════════════════════════════════════ */
 :root {
+  /* Spacing scale - 4px base unit */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Theme colors */
   --bg-page: #f4f6fa;
   --bg-card: #ffffff;
   --bg-sidebar: #0a1628;
@@ -11,8 +22,17 @@
   --text-primary: #0a0e1a;
   --text-secondary: #5a6278;
   --text-muted: #9ba3b8;
+
+  /* Dashboard layout tokens - standardized spacing */
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --content-padding: 16px;
+  --section-gap: 16px;
+  --grid-gap: 16px;
+  --card-padding: 16px;
 }
 
+/* Dark theme overrides */
 .dark {
   --bg-page: #0f1117;
   --bg-card: #1a1d27;
@@ -35,10 +55,23 @@
   --text-muted: #9ba3b8;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   BASE RESET
+   ═══════════════════════════════════════════════════════════ */
+* {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+}
+
 html,
 body,
 #root {
-  margin: 0;
   min-height: 100%;
 }
 
@@ -71,6 +104,157 @@ input {
   font: inherit;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL DASHBOARD SPACING NORMALIZATION
+   Ensures all dashboard shells use consistent spacing.
+   Applies to admin-shell, role-shell, and any dashboard layout.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Normalize main content padding across all shells ── */
+.admin-shell > div > main,
+.role-shell > div > main,
+.role-shell main,
+.admin-shell .flex-grow,
+.role-shell .flex-grow {
+  padding: var(--content-padding) !important;
+}
+
+/* ── Normalize content inner wrapper gap ── */
+.admin-shell .flex-grow > div,
+.role-shell .flex-grow > div {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* ── Standardize vertical section spacing ── */
+.admin-shell .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.role-shell .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.admin-shell .flex-grow .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.role-shell .flex-grow .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.admin-shell .p-4.md\:p-6 .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.role-shell .p-4.md\:p-6 .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: var(--section-gap) !important;
+}
+
+.admin-shell .space-y-4 > :not([hidden]) ~ :not([hidden]),
+.role-shell .space-y-4 > :not([hidden]) ~ :not([hidden]),
+.admin-shell .flex-grow .space-y-4 > :not([hidden]) ~ :not([hidden]),
+.role-shell .flex-grow .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 16px !important;
+}
+
+.admin-shell .space-y-8 > :not([hidden]) ~ :not([hidden]),
+.role-shell .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: var(--section-gap) !important;
+}
+
+/* ── Standardize grid/flex gaps ── */
+.admin-shell .gap-6,
+.role-shell .gap-6,
+.admin-shell .flex-grow .gap-6,
+.role-shell .flex-grow .gap-6 {
+  gap: var(--grid-gap) !important;
+}
+
+.admin-shell .gap-8,
+.role-shell .gap-8,
+.admin-shell .flex-grow .gap-8,
+.role-shell .flex-grow .gap-8 {
+  gap: var(--grid-gap) !important;
+}
+
+.admin-shell .gap-4,
+.role-shell .gap-4,
+.admin-shell .flex-grow .gap-4,
+.role-shell .flex-grow .gap-4 {
+  gap: var(--grid-gap) !important;
+}
+
+/* ── Standardize card/section padding ── */
+.admin-shell .p-6,
+.role-shell .p-6,
+.admin-shell .flex-grow .p-6,
+.role-shell .flex-grow .p-6 {
+  padding: var(--card-padding) !important;
+}
+
+.admin-shell .p-8,
+.role-shell .p-8,
+.admin-shell .flex-grow .p-8,
+.role-shell .flex-grow .p-8 {
+  padding: var(--card-padding) !important;
+}
+
+.admin-shell .p-5,
+.role-shell .p-5,
+.admin-shell .flex-grow .p-5,
+.role-shell .flex-grow .p-5 {
+  padding: var(--card-padding) !important;
+}
+
+.admin-shell .p-4,
+.role-shell .p-4,
+.admin-shell .flex-grow .p-4,
+.role-shell .flex-grow .p-4 {
+  padding: 16px !important;
+}
+
+/* ── Standardize responsive padding ── */
+@media (min-width: 768px) {
+  .admin-shell .md\:p-8,
+  .role-shell .md\:p-8,
+  .admin-shell .md\:p-10,
+  .role-shell .md\:p-10,
+  .admin-shell .md\:p-12,
+  .role-shell .md\:p-12 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-shell .lg\:p-10,
+  .role-shell .lg\:p-10 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+/* ── Standardize border radius ── */
+.admin-shell .rounded-3xl,
+.role-shell .rounded-3xl {
+  border-radius: 10px !important;
+}
+
+.admin-shell .rounded-2xl,
+.role-shell .rounded-2xl {
+  border-radius: 8px !important;
+}
+
+/* ── Remove max-width constraints that cause content gaps ── */
+.admin-shell .max-w-3xl,
+.admin-shell .max-w-4xl,
+.admin-shell .max-w-7xl,
+.role-shell .max-w-3xl,
+.role-shell .max-w-4xl,
+.role-shell .max-w-7xl {
+  max-width: none !important;
+}
+
+/* ── Remove centering that creates side gaps ── */
+.admin-shell .mx-auto,
+.role-shell .mx-auto {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* ── Ensure tight sidebar-content alignment ── */
+.admin-shell .flex-col.justify-between,
+.role-shell .flex-col.justify-between {
+  gap: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN CARD SYSTEM
+   ═══════════════════════════════════════════════════════════ */
 .admin-card {
   background: var(--bg-card);
   border-color: var(--border-color);
@@ -94,6 +278,17 @@ input {
   transform: translateY(-1px);
 }
 
+/* ═══ SMOOTH SIDEBAR-CONTENT TRANSITION ══ */
+.admin-shell > div,
+.role-shell > div {
+  transition: margin-left 250ms ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Admin shell dark mode */
 .dark .admin-card {
   background: var(--bg-card);
   border-color: var(--border-color);
@@ -157,65 +352,9 @@ input {
   color: var(--text-muted);
 }
 
+/* Role shell dark mode - main content background */
 .role-shell main > div {
   background: var(--bg-page);
-}
-
-.role-shell .space-y-8 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 1.5rem !important;
-}
-
-.role-shell .gap-8 {
-  gap: 1rem !important;
-}
-
-.role-shell .gap-6 {
-  gap: 1rem !important;
-}
-
-.role-shell .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 1rem !important;
-}
-
-.role-shell .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 0.875rem !important;
-}
-
-.role-shell .rounded-3xl {
-  border-radius: 10px !important;
-}
-
-.role-shell .rounded-2xl {
-  border-radius: 8px !important;
-}
-
-.role-shell .p-8 {
-  padding: 1.25rem !important;
-}
-
-.role-shell .p-6 {
-  padding: 1.25rem !important;
-}
-
-.role-shell .max-w-3xl,
-.role-shell .max-w-4xl,
-.role-shell .max-w-7xl {
-  max-width: none !important;
-}
-
-.role-shell .mx-auto {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-@media (min-width: 768px) {
-  .role-shell .md\:p-10 {
-    padding: 1.5rem !important;
-  }
-
-  .role-shell .md\:p-12 {
-    padding: 1.5rem !important;
-  }
 }
 
 .dark .role-shell .bg-white,
@@ -270,6 +409,9 @@ input {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
 .reveal {
   opacity: 0;
   transform: translateY(24px);

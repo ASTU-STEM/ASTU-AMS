@@ -9,10 +9,12 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleUserRound,
+  FileCheck2,
   Globe,
   GraduationCap,
   Handshake,
   LineChart,
+  LockKeyhole,
   Menu,
   Search,
   Users,
@@ -23,40 +25,65 @@ const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
 const stakeholders = [
   {
-    title: "For Alumni",
+    title: "Alumni",
     icon: Users,
     points: [
-      "Build your profile and access job opportunities.",
-      "Complete tracer studies and improve ASTU programs.",
-      "Mentor students and join the alumni network.",
+      "Create and maintain your professional profile.",
+      "Access verified job listings and internship opportunities.",
+      "Complete tracer surveys to guide curriculum development.",
+      "Mentor current students and connect with peers.",
     ],
-    cta: "Join Network",
+    cta: "Access Alumni Portal",
     route: "/alumni/dashboard",
     tint: "text-astu-navy bg-astu-navy/10",
   },
   {
-    title: "For Employers",
+    title: "Employers",
     icon: Briefcase,
     points: [
-      "Post jobs and internships for ASTU graduates.",
-      "Search alumni by skills and department.",
-      "Share feedback to strengthen curriculum alignment.",
+      "Post employment opportunities for ASTU graduates.",
+      "Search alumni by expertise, skills, and department.",
+      "Provide feedback to enhance curriculum relevance.",
     ],
-    cta: "Partner With Us",
+    cta: "Partner With ASTU",
     route: "/employer/dashboard",
     tint: "text-astu-red bg-astu-red/10",
   },
   {
-    title: "For Departments",
+    title: "Departments",
     icon: LineChart,
     points: [
-      "Track employment rates and time-to-hire.",
-      "Analyze skill gaps from employer input.",
+      "Monitor graduate employment outcomes and metrics.",
+      "Identify skill gaps through employer analytics.",
       "Generate accreditation-ready reports.",
     ],
-    cta: "View Analytics",
+    cta: "View Department Analytics",
     route: "/department/dashboard",
     tint: "text-astu-green bg-astu-green/10",
+  },
+  {
+    title: "Registrar",
+    icon: FileCheck2,
+    points: [
+      "Validate alumni credentials against SIS records.",
+      "Process transcript and certificate requests.",
+      "Send tracer study reminders and audit notifications.",
+    ],
+    cta: "Open Registrar Portal",
+    route: "/registrar/dashboard",
+    tint: "text-[#B87900] bg-[#E8A020]/15",
+  },
+  {
+    title: "Administrator",
+    icon: LockKeyhole,
+    points: [
+      "Manage users, roles, and department records.",
+      "Monitor system logs, backups, and security protocols.",
+      "Oversee institutional analytics and accreditation reports.",
+    ],
+    cta: "Admin Console",
+    route: "/admin/dashboard",
+    tint: "text-violet-700 bg-violet-100",
   },
 ];
 
@@ -356,7 +383,7 @@ export default function LandingPage() {
                   onClick={() => navigate("/alumni/dashboard")}
                 >
                   Alumni Portal Login
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-5 w-5" />
                 </button>
                 <button
                   className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20"
@@ -398,28 +425,28 @@ export default function LandingPage() {
 
         <section id="stakeholders" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">A Platform for Every Stakeholder</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Stakeholder Portals</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Specialized tools to empower our alumni network, industry collaboration, and data-driven academic excellence.
+              Dedicated interfaces for alumni, employers, departments, registrar, and administrators.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {stakeholders.map((item) => {
+          <div className="grid gap-6 md:grid-cols-3 xl:grid-cols-5">
+{stakeholders.map((item) => {
               const Icon = item.icon;
               return (
                 <article
                   key={item.title}
                   className="reveal rounded-xl border border-outline-variant bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <div className={`mb-5 inline-flex rounded-lg p-3 ${item.tint}`}>
-                    <Icon className="h-5 w-5" />
+                  <div className={`mb-5 inline-flex rounded-lg p-3.5 ${item.tint}`}>
+                    <Icon className="h-6 w-6" />
                   </div>
                   <h4 className="mb-4 text-lg font-semibold text-astu-navy">{item.title}</h4>
                   <ul className="space-y-3">
                     {item.points.map((point) => (
                       <li key={point} className="flex items-start gap-2 text-sm text-on-surface-variant">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-astu-green" />
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-astu-green" />
                         <span>{point}</span>
                       </li>
                     ))}
@@ -429,7 +456,7 @@ export default function LandingPage() {
                     onClick={() => navigate(item.route)}
                   >
                     {item.cta}
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5" />
                   </button>
                 </article>
               );
@@ -526,11 +553,11 @@ export default function LandingPage() {
                 <div className="mt-3 space-y-3 text-sm">
                   <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
                     <span>Meta Finetec PLC</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5" />
                   </button>
                   <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
                     <span>Summit Devs</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5" />
                   </button>
                 </div>
               </article>

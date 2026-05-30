@@ -114,3 +114,40 @@ export interface AlumniPreferences {
   profileVisibleToEmployers: boolean;
   profileVisibleToPeers: boolean;
 }
+
+export interface AlumniNotification {
+  id: number;
+  text: string;
+  time: string;
+  unread: boolean;
+  category: 'jobs' | 'survey' | 'documents' | 'mentorship' | 'profile';
+}
+
+export interface AlumniDashboardSummary {
+  profileCompletion: number;
+  openJobMatches: number;
+  savedJobs: number;
+  appliedJobs: number;
+  pendingSurveys: number;
+  documentRequests: number;
+  activeMentorships: number;
+}
+
+export interface AlumniJobFilters {
+  query: string;
+  type: 'All' | JobMatch['type'];
+  location: string;
+  minimumMatch?: number;
+  savedOnly?: boolean;
+}
+
+export interface AlumniDocumentRequestInput {
+  type: DocumentRequest['type'];
+  notes?: string;
+}
+
+export interface AlumniEmploymentUpdate {
+  currentRole: string;
+  company: string;
+  salaryRange: string;
+}

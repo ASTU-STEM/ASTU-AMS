@@ -31,3 +31,52 @@ export interface DocumentProcessingRequest {
   status: 'Pending' | 'Approved' | 'Rejected' | 'In Progress';
   requestDate: string;
 }
+
+export interface RegistrarDashboardSummary {
+  totalGraduateRecords: number;
+  verifiedGraduateRecords: number;
+  pendingVerifications: number;
+  pendingDocuments: number;
+  activeRecords: number;
+  archivedRecords: number;
+  verificationRate: number;
+}
+
+export interface BatchImportRecord {
+  studentId: string;
+  fullName: string;
+  email: string;
+  department: string;
+  graduationYear: string;
+  cgpa: string;
+}
+
+export interface BatchImportResult {
+  accepted: number;
+  duplicates: number;
+  rejected: number;
+  records: GraduateRecord[];
+}
+
+export interface RegistrarNotification {
+  id: number;
+  text: string;
+  time: string;
+  unread: boolean;
+  category: 'records' | 'verification' | 'documents' | 'reports' | 'audit';
+}
+
+export interface RegistrarAuditEvent {
+  id: number;
+  actor: string;
+  action: string;
+  target: string;
+  timestamp: string;
+  severity: 'Info' | 'Warning' | 'Critical';
+}
+
+export interface DataExportRequest {
+  format: 'CSV' | 'Excel' | 'PDF' | 'Stata';
+  scope: 'Graduate Records' | 'Verifications' | 'Documents' | 'Tracer Summary';
+  includeArchived: boolean;
+}

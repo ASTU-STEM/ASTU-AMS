@@ -7,131 +7,311 @@ interface DocumentServicesTabProps {
   onRequestDocument: (type: DocumentRequest['type'], notes?: string) => void;
 }
 
+const DOC_TYPES: { value: DocumentRequest['type']; icon: string; desc: string }[] = [
+  { value: 'Official Transcript', icon: '📜', desc: 'Official academic transcript with grades and coursework' },
+  { value: 'Degree Verification', icon: '🎓', desc: 'Degree completion and verification letter' },
+  { value: 'Temporary Certificate', icon: '📋', desc: 'Provisional graduation certificate' },
+  { value: 'English Medium Certificate', icon: '🌐', desc: 'Medium of instruction certificate' },
+];
+
+const STATUS_CONFIG: Record<DocumentRequest['status'], { bg: string; text: string; dot: string; border: string }> = {
+  'Approved': { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', border: 'border-emerald-200' },
+  'In Progress': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500', border: 'border-blue-200' },
+  'Dispatched': { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500', border: 'border-violet-200' },
+  'Pending': { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500', border: 'border-amber-200' },
+};
+
 export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
   documentRequests,
   onRequestDocument,
 }) => {
   const [docType, setDocType] = useState<DocumentRequest['type']>('Official Transcript');
   const [reason, setReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onRequestDocument(docType, reason);
-    setReason('');
-    toast.success(`${docType} requested successfully! Track status in the table below.`);
+    setIsSubmitting(true);
+    setTimeout(() => {
+      onRequestDocument(docType, reason);
+      setReason('');
+      setIsSubmitting(false);
+      toast.success(`${docType} requested successfully! Track status below.`);
+    }, 600);
   };
 
   const getStatusBadge = (status: DocumentRequest['status']) => {
-    switch (status) {
-      case 'Approved':
-        return 'bg-green-100 text-green-800 border border-green-200';
-      case 'In Progress':
-        return 'bg-blue-100 text-blue-800 border border-blue-200';
-      case 'Dispatched':
-        return 'bg-purple-100 text-purple-800 border border-purple-200';
-      case 'Pending':
-      default:
-        return 'bg-amber-100 text-amber-800 border border-amber-200';
-    }
+    const config = STATUS_CONFIG[status] || STATUS_CONFIG['Pending'];
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${config.bg} ${config.text} border ${config.border}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${config.dot} ${status === 'Pending' ? 'animate-pulse' : ''}`}></span>
+        {status}
+      </span>
+    );
   };
 
+  const pendingCount = documentRequests.filter(d => d.status === 'Pending').length;
+  const approvedCount = documentRequests.filter(d => d.status === 'Approved' || d.status === 'Dispatched').length;
+
   return (
-    <div className="space-y-8">
-      {/* Intro Banner */}
-      <section className="bg-gradient-to-r from-[#003366] via-slate-900 to-astu-navy rounded-3xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute right-0 bottom-0 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
-        <div className="max-w-3xl relative z-10 space-y-4">
-          <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU Registrar Services</span>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Digital Document Services Portal 📑</h2>
-          <p className="text-md opacity-90 leading-relaxed">
-            Request verified official academic transcripts, degree verification files, or temporary certificates online. Your documents are verified and dispatched securely to employers, international credential agencies, or universities.
-          </p>
+    <div className="space-y-6">
+      {/* Enhanced Hero Banner */}
+      <section className="relative overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#003366] via-[#004d99] to-[#006633] opacity-95"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#FFD700]/10 rounded-full translate-y-1/3 -translate-x-1/4"></div>
+          <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-white/5 rounded-full"></div>
+        </div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-white/15 text-[#FFD700] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-full backdrop-blur-sm">
+                ASTU Registrar
+              </span>
+              <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-full backdrop-blur-sm">
+                Digital Services
+              </span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
+              Document Services Portal
+            </h2>
+            <p className="text-sm text-white/80 leading-relaxed max-w-xl">
+              Request verified academic transcripts, degree verification files, or certificates online. Documents are verified by the registrar and dispatched securely.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
+              <p className="text-2xl font-extrabold text-white">{documentRequests.length}</p>
+              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Total Requests</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
+              <p className="text-2xl font-extrabold text-amber-300">{pendingCount}</p>
+              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Pending</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
+              <p className="text-2xl font-extrabold text-emerald-300">{approvedCount}</p>
+              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Completed</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Main Grid: Request Form (left) & Tracking Table (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Main Grid: Request Form & Tracking Table */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {/* Left: Request Form */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">Request New Document</h3>
-              <p className="text-xs text-gray-600">Ensure your graduation batch details are verified in your profile before requesting.</p>
+        <div className="lg:col-span-2">
+          <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden sticky top-20">
+            <div className="p-5 border-b border-[var(--border-color)]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#004d99] flex items-center justify-center shadow-md">
+                  <span className="text-lg">📝</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">New Document Request</h3>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-semibold">Select type and provide delivery details</p>
+                </div>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Document Type</label>
-                <select
-                  value={docType}
-                  onChange={(e) => setDocType(e.target.value as DocumentRequest['type'])}
-                  className="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all font-semibold text-gray-700"
-                >
-                  <option value="Official Transcript">Official Academic Transcript</option>
-                  <option value="Degree Verification">Official Degree Verification</option>
-                  <option value="Temporary Certificate">Temporary Graduation Certificate</option>
-                  <option value="English Medium Certificate">English Medium Instruction Certificate</option>
-                </select>
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+              {/* Document Type Selector */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Document Type</label>
+                <div className="space-y-2">
+                  {DOC_TYPES.map(doc => (
+                    <button
+                      key={doc.value}
+                      type="button"
+                      onClick={() => setDocType(doc.value)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 ${
+                        docType === doc.value
+                          ? 'border-[#003366] bg-[#003366]/5 shadow-sm ring-1 ring-[#003366]/20'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30 hover:bg-[#003366]/5'
+                      }`}
+                    >
+                      <span className="text-xl flex-shrink-0">{doc.icon}</span>
+                      <div className="min-w-0">
+                        <p className={`text-xs font-bold ${docType === doc.value ? 'text-[#003366]' : 'text-[var(--text-primary)]'}`}>
+                          {doc.value}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-secondary)] truncate">{doc.desc}</p>
+                      </div>
+                      {docType === doc.value && (
+                        <div className="ml-auto flex-shrink-0 w-5 h-5 rounded-full bg-[#003366] flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Reason / Delivery Address</label>
+              {/* Reason / Address */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">
+                  Purpose / Delivery Details
+                </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Provide recipient details, mailing address, or purpose (e.g. WES evaluation, employer HR email)..."
-                  className="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all h-28 resize-none"
+                  placeholder="e.g. WES evaluation, employer HR department, personal records..."
+                  className="w-full text-xs p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] focus:bg-[var(--bg-card)] transition-all duration-200 h-24 resize-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                   required
                 />
               </div>
 
+              {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 bg-astu-navy hover:bg-astu-navy/90 text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all shadow-md hover:scale-102"
+                disabled={isSubmitting}
+                className={`w-full py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 shadow-md ${
+                  isSubmitting
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#003366] to-[#004d99] hover:from-[#00264d] hover:to-[#003366] hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
+                } text-white`}
               >
-                Submit Request
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    Submit Request
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </span>
+                )}
               </button>
+
+              {/* Info Note */}
+              <div className="bg-[#003366]/5 border border-[#003366]/10 rounded-xl p-3 flex items-start gap-2.5">
+                <svg className="w-4 h-4 text-[#003366] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-[10px] text-[#003366]/80 leading-relaxed font-medium">
+                  Processing typically takes 3-5 business days. You will receive email notifications at each stage.
+                </p>
+              </div>
             </form>
           </div>
         </div>
 
-        {/* Right: Request History Table */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">Request History & Status Tracking</h3>
-              <p className="text-sm text-gray-600">Track registrar validation, signature approvals, and dispatch references.</p>
+        {/* Right: Request History */}
+        <div className="lg:col-span-3">
+          <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+                  <span className="text-lg">📊</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Request History & Tracking</h3>
+                  <p className="text-[10px] text-[var(--text-secondary)] font-semibold">Monitor registrar validation and dispatch</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg text-[10px] font-bold text-[var(--text-secondary)]">
+                {documentRequests.length} record{documentRequests.length !== 1 ? 's' : ''}
+              </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
+            {/* Timeline View for Mobile */}
+            <div className="lg:hidden p-4 space-y-3">
+              {documentRequests.map((req, idx) => {
+                const config = STATUS_CONFIG[req.status] || STATUS_CONFIG['Pending'];
+                return (
+                  <div key={req.id} className="relative bg-[var(--bg-page)] rounded-xl p-4 border border-[var(--border-color)] hover:shadow-sm transition-all duration-200">
+                    {idx < documentRequests.length - 1 && (
+                      <div className="absolute left-7 top-full w-0.5 h-3 bg-[var(--border-color)]"></div>
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-full ${config.bg} flex items-center justify-center flex-shrink-0 border ${config.border}`}>
+                        <div className={`w-2.5 h-2.5 rounded-full ${config.dot}`}></div>
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-xs font-bold text-[var(--text-primary)]">{req.type}</p>
+                          {getStatusBadge(req.status)}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)] font-mono font-bold">ASTU-DOC-{String(req.id + 1000).padStart(4, '0')}</p>
+                        <div className="flex items-center gap-2 text-[10px] text-[var(--text-secondary)]">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {req.requestDate}
+                        </div>
+                        {req.notes && (
+                          <p className="text-[10px] text-[var(--text-secondary)] bg-[var(--bg-card)] rounded-lg p-2 border border-[var(--border-color)]">
+                            {req.notes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {documentRequests.length === 0 && (
+                <div className="py-12 text-center space-y-3">
+                  <span className="text-4xl block">📭</span>
+                  <p className="text-xs font-bold text-[var(--text-secondary)]">No document requests yet</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">Submit your first request using the form</p>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    <th className="pb-3 pr-2">Document ID</th>
-                    <th className="pb-3 pr-2">Document Type</th>
-                    <th className="pb-3 pr-2">Requested Date</th>
-                    <th className="pb-3 pr-2">Approval Status</th>
-                    <th className="pb-3">Registrar Notes</th>
+                  <tr className="bg-[var(--bg-page)] border-b border-[var(--border-color)]">
+                    <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Reference</th>
+                    <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Document Type</th>
+                    <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Date</th>
+                    <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Status</th>
+                    <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Notes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[var(--border-color)]">
                   {documentRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 pr-2 font-bold text-astu-navy">ASTU-DOC-{req.id + 1000}</td>
-                      <td className="py-4 pr-2 font-bold text-gray-900">{req.type}</td>
-                      <td className="py-4 pr-2 text-gray-600">{req.requestDate}</td>
-                      <td className="py-4 pr-2">
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusBadge(req.status)}`}>
-                          {req.status}
+                    <tr key={req.id} className="hover:bg-[var(--bg-page)]/50 transition-colors duration-150 group">
+                      <td className="px-5 py-4">
+                        <span className="font-mono text-[11px] font-extrabold text-[#003366] bg-[#003366]/5 px-2 py-1 rounded-md">
+                          ASTU-DOC-{String(req.id + 1000).padStart(4, '0')}
                         </span>
                       </td>
-                      <td className="py-4 text-xs text-gray-600 leading-relaxed max-w-xs">{req.notes || 'Under registrar validation.'}</td>
+                      <td className="px-5 py-4">
+                        <span className="text-xs font-bold text-[var(--text-primary)]">{req.type}</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-[11px] text-[var(--text-secondary)] font-medium">{req.requestDate}</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {getStatusBadge(req.status)}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-[11px] text-[var(--text-secondary)] leading-relaxed max-w-xs block truncate">
+                          {req.notes || 'Under registrar validation.'}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                   {documentRequests.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-gray-400 italic">No document requests logged yet.</td>
+                      <td colSpan={5} className="px-5 py-16 text-center">
+                        <div className="space-y-2">
+                          <span className="text-4xl block">📭</span>
+                          <p className="text-xs font-bold text-[var(--text-secondary)]">No document requests logged</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Submit your first request using the form on the left</p>
+                        </div>
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -139,7 +319,6 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

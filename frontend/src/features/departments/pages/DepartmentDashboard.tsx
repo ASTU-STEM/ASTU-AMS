@@ -69,7 +69,7 @@ const DepartmentDashboard = () => {
     };
 
     return (
-        <div className={`min-h-screen font-body-md overflow-x-hidden transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
+        <div className={`min-h-screen font-body-md overflow-x-hidden transition-all duration-300 role-shell admin-shell ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
             }`}>
             <Toaster position="top-right" reverseOrder={false} />
 
@@ -250,7 +250,7 @@ const DepartmentDashboard = () => {
                 </header>
 
                 {/* Dynamic Inner Tab View */}
-                <div className="p-4 md:p-10 flex-grow">
+                <div className="flex-grow">
                     {renderSection()}
                 </div>
 

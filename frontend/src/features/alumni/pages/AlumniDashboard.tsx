@@ -322,64 +322,112 @@ const AlumniDashboard = () => {
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
+      <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a]'
         }`}>
-        <div className="p-6 mt-6">
+        {/* Sidebar Logo Section */}
+        <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <img
-              alt="ASTU Logo"
-              className="h-12 w-12 object-contain drop-shadow-lg rounded-lg"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-            />
+            <div className="relative">
+              <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-lg">
+                <img
+                  alt="ASTU Logo"
+                  className="h-8 w-8 object-contain rounded-md"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#003366]"></div>
+            </div>
             <div>
-              <h1 className="text-xl font-bold text-white">ASTU Alumni</h1>
-              <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management System</p>
+              <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Alumni</h1>
+              <p className="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Management System</p>
             </div>
           </div>
         </div>
 
-        <nav className="mt-8 flex-grow px-3">
-          <div className="space-y-1">
+        {/* Navigation Links */}
+        <nav className="flex-grow px-3 py-4 overflow-y-auto">
+          <p className="px-3 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Main Menu</p>
+          <div className="space-y-0.5">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'profile', label: 'Profile', icon: 'account_circle', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'career', label: 'Career Center', icon: 'school', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'surveys', label: 'Surveys', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'jobs', label: 'Jobs', icon: 'work', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'documents', label: 'Document Services', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'settings', label: 'Settings', icon: 'settings', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
+              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', emoji: '📊' },
+              { id: 'profile', label: 'My Profile', icon: 'account_circle', emoji: '👤' },
+              { id: 'career', label: 'Career Center', icon: 'school', emoji: '🎓' },
+              { id: 'surveys', label: 'Surveys', icon: 'assignment', emoji: '📋' },
+              { id: 'jobs', label: 'Jobs Board', icon: 'work', emoji: '💼' },
+              { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3', emoji: '🤝' },
             ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
-                    ? item.activeColor + ' font-bold shadow-md'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${
+                  activeTab === item.id
+                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
               >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
+                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
+                }`}>
+                  {item.emoji}
+                </span>
+                <span className="text-[13px] font-medium">{item.label}</span>
+                {activeTab === item.id && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <p className="px-3 mt-5 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Communication</p>
+          <div className="space-y-0.5">
+            {[
+              { id: 'documents', label: 'Documents', icon: 'description', emoji: '📑', badge: null },
+              { id: 'messages', label: 'Messages', icon: 'forum', emoji: '💬', badge: '3' },
+              { id: 'settings', label: 'Settings', icon: 'settings', emoji: '⚙️', badge: null },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${
+                  activeTab === item.id
+                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
+                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
+                }`}>
+                  {item.emoji}
+                </span>
+                <span className="text-[13px] font-medium">{item.label}</span>
+                {item.badge && (
+                  <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[9px] font-extrabold text-white shadow-md">
+                    {item.badge}
+                  </span>
+                )}
+                {activeTab === item.id && !item.badge && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                )}
               </button>
             ))}
           </div>
         </nav>
 
-        <div className="p-6 border-t border-white/10">
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-white/10 space-y-1">
           <button
             onClick={() => setActiveTab('career')}
-            className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group"
           >
-            <span className="material-symbols-outlined text-md">help</span>
-            <span className="text-sm font-medium">Help Center</span>
+            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70">❓</span>
+            <span className="text-[13px] font-medium">Help Center</span>
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group"
           >
-            <span className="material-symbols-outlined text-md">logout</span>
-            <span className="text-sm font-medium">Logout</span>
+            <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-sm group-hover:bg-red-500/20">🚪</span>
+            <span className="text-[13px] font-medium">Logout</span>
           </button>
         </div>
       </aside>
@@ -493,7 +541,7 @@ const AlumniDashboard = () => {
         </header>
 
         {/* Dynamic Inner Tab View */}
-        <div className="flex-grow p-4 md:p-6">
+        <div className="flex-grow">
           {activeTab === 'dashboard' && (
             <DashboardOverview
               profile={profile}

@@ -63,3 +63,51 @@ export interface Message {
   timestamp: string;
   unread: boolean;
 }
+
+export interface EmployerDashboardSummary {
+  activeJobs: number;
+  totalApplications: number;
+  pendingApplications: number;
+  shortlistedApplications: number;
+  feedbackReports: number;
+  totalViews: number;
+  shortlistRate: number;
+}
+
+export interface EmployerNotification {
+  id: number;
+  text: string;
+  time: string;
+  unread: boolean;
+  category: 'applications' | 'messages' | 'jobs' | 'feedback' | 'partnerships';
+}
+
+export interface TalentSearchFilters {
+  query: string;
+  department: string;
+  graduationYear: string;
+  skills: string[];
+  minimumCgpa?: number;
+  status?: CandidateApplication['status'] | 'All';
+}
+
+export interface InterviewSchedule {
+  id: number;
+  applicationId: number;
+  candidateName: string;
+  jobTitle: string;
+  date: string;
+  time: string;
+  mode: 'In Person' | 'Phone' | 'Video';
+  status: 'Scheduled' | 'Completed' | 'Cancelled';
+  notes?: string;
+}
+
+export interface PartnershipOpportunity {
+  id: number;
+  title: string;
+  type: 'Internship Pipeline' | 'Research Collaboration' | 'Career Event' | 'Sponsorship';
+  owner: string;
+  status: 'Draft' | 'Active' | 'Completed';
+  nextStep: string;
+}

@@ -134,8 +134,12 @@ export function DashboardLayout({
           </div>
         </header>
 
-        {/* View Frame Container */}
-        <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto">
+        {/*
+          View Frame Container
+          Spacing is controlled globally via CSS variables (--content-padding, --section-gap)
+          Do not add nested padding/margin here - it inherits from .space-y-6 normalization
+        */}
+        <main className="flex-1 overflow-y-auto">
           {/* Page Header with Breadcrumbs */}
           {(breadcrumbs || subtitle || headerActions) && (
             <PageHeader
@@ -145,7 +149,7 @@ export function DashboardLayout({
               actions={headerActions}
             />
           )}
-          
+
           {/* Loading State */}
           {loading ? (
             <div className="space-y-6">

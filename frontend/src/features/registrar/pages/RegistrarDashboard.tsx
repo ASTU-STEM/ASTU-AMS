@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useMemo, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+
 
 // Types
 import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
@@ -21,12 +23,17 @@ import { VerificationTab } from '../components/VerificationTab';
 import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
+import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 
 const RegistrarDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
+
 
   // Theme Dark / Light mode
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
@@ -49,6 +56,31 @@ const RegistrarDashboard = () => {
   const verifiedAlumniCount = graduates.filter(g => g.identityVerified).length + 18200;
   const pendingVerificationsCount = verifications.filter(v => v.status === 'Pending').length;
   const documentRequestsCount = documents.filter(d => d.status === 'Pending').length;
+
+  const filteredGraduates = useMemo(() => {
+    if (!normalizedSearch) return graduates;
+    return graduates.filter((g) => {
+      const haystack = `${g.studentId} ${g.fullName} ${g.email} ${g.department} ${g.graduationYear} ${g.cgpa}`.toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [graduates, normalizedSearch]);
+
+  const filteredVerifications = useMemo(() => {
+    if (!normalizedSearch) return verifications;
+    return verifications.filter((v) => {
+      const haystack = `${v.studentId} ${v.fullName} ${v.email} ${v.department} ${v.graduationYear} ${v.type} ${v.status} ${v.requestDate}`.toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [verifications, normalizedSearch]);
+
+  const filteredDocuments = useMemo(() => {
+    if (!normalizedSearch) return documents;
+    return documents.filter((d) => {
+      const haystack = `${d.studentId} ${d.fullName} ${d.documentType} ${d.destination} ${d.requestDate} ${d.status} ${d.id}`.toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [documents, normalizedSearch]);
+
 
   const stats = [
     {
@@ -108,6 +140,20 @@ const RegistrarDashboard = () => {
     { label: 'ETA Employment KPI', value: '84%', icon: 'query_stats', tone: 'text-astu-green' },
     { label: 'Pending Documents', value: documentRequestsCount.toString(), icon: 'pending_actions', tone: 'text-astu-red' },
     { label: 'SIS Heartbeat', value: 'Active', icon: 'database', tone: 'text-astu-navy' },
+  ];
+
+  const verificationRate = Math.round((verifiedAlumniCount / totalGraduatesCount) * 100);
+  const registrarCommandSignals = [
+    { label: 'Identity coverage', value: `${verificationRate}%`, icon: 'verified', tab: 'records', tone: 'text-astu-green' },
+    { label: 'Approval queue', value: pendingVerificationsCount.toString(), icon: 'rule', tab: 'verification', tone: 'text-astu-red' },
+    { label: 'Document SLA', value: documentRequestsCount > 0 ? 'Action' : 'Clear', icon: 'timer', tab: 'documents', tone: documentRequestsCount > 0 ? 'text-astu-red' : 'text-astu-green' },
+    { label: 'Export status', value: 'Ready', icon: 'download', tab: 'reporting', tone: 'text-astu-navy' },
+  ];
+
+  const dataQualityPanels = [
+    { label: 'Duplicate scan', value: '0 open', icon: 'difference', helper: 'Latest batch is conflict-free' },
+    { label: 'Record completeness', value: '96%', icon: 'data_check', helper: 'Student ID, CGPA, email, and department coverage' },
+    { label: 'Audit trail', value: 'Live', icon: 'admin_panel_settings', helper: 'Registrar actions are ready for review' },
   ];
 
   // Callbacks
@@ -228,6 +274,14 @@ const RegistrarDashboard = () => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
+  useEffect(() => {
+    if (activeTab === 'dashboard' && normalizedSearch) {
+      // keep user in dashboard unless they explicitly search
+      // (behavior: we still auto-switch in the search box onChange)
+    }
+  }, [activeTab, normalizedSearch]);
+
+
   return (
     <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
       <Toaster position="top-right" reverseOrder={false} />
@@ -237,6 +291,7 @@ const RegistrarDashboard = () => {
         <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
           }`}>
           <div className="p-6 mt-6">
+
             <div className="flex items-center gap-3">
               <img
                 alt="ASTU Official Logo"
@@ -258,6 +313,7 @@ const RegistrarDashboard = () => {
                 { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                 { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                 { id: 'documents', label: 'Document Queue', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                 { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                 { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
               ].map(item => (
@@ -265,8 +321,8 @@ const RegistrarDashboard = () => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
-                      ? item.activeColor + ' font-bold shadow-md'
-                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                    ? item.activeColor + ' font-bold shadow-md'
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
                     }`}
                 >
                   <span className="material-symbols-outlined">{item.icon}</span>
@@ -311,9 +367,11 @@ const RegistrarDashboard = () => {
                   <input
                     className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
                     style={{ borderColor: 'var(--border-color)' }}
-                    placeholder="Search verified records, transcripts, or graduates..."
+                    placeholder="Search SIS records, requests, documents..."
                     type="text"
+                    value={searchQuery}
                     onChange={(e) => {
+                      setSearchQuery(e.target.value);
                       if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
                         setActiveTab('records');
                       }
@@ -398,12 +456,13 @@ const RegistrarDashboard = () => {
             </header>
 
             {/* Dynamic tabs routing */}
-            <div className="flex-grow p-4 md:p-6">
+            <div className="flex-grow">
               {activeTab === 'dashboard' && (
                 <div className="space-y-6">
 
                   {/* Welcome banner */}
                   <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+                    {/* Admin shell spacing handled by global CSS */}
                     <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                       <div className="max-w-2xl space-y-2">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU SIS integration</span>
@@ -419,6 +478,55 @@ const RegistrarDashboard = () => {
                         <span className="material-symbols-outlined">cloud_upload</span>
                         Batch Upload CSV
                       </button>
+                    </div>
+                  </section>
+
+                  <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Registrar Command Center</h3>
+                        <p className="mt-1 text-xs text-gray-500">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('reporting')}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
+                      >
+                        <span className="material-symbols-outlined text-base">ios_share</span>
+                        Export reports
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
+                      <div className="grid grid-cols-2 gap-3">
+                        {registrarCommandSignals.map((signal) => (
+                          <button
+                            key={signal.label}
+                            onClick={() => setActiveTab(signal.tab)}
+                            className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                            </div>
+                            <p className="mt-2 text-2xl font-extrabold text-gray-900">{signal.value}</p>
+                          </button>
+                        ))}
+                      </div>
+                      <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                        <div className="mb-3 flex items-center justify-between">
+                          <h4 className="text-sm font-bold text-gray-900">SIS Data Quality</h4>
+                          <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Monitored</span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                          {dataQualityPanels.map((item) => (
+                            <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
+                              <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
+                              <p className="mt-2 text-xl font-extrabold text-gray-900">{item.value}</p>
+                              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+                              <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </section>
 
@@ -570,7 +678,7 @@ const RegistrarDashboard = () => {
 
               {activeTab === 'records' && (
                 <RecordsTab
-                  graduates={graduates}
+                  graduates={filteredGraduates}
                   onAddGraduate={handleAddGraduate}
                   onEditGraduate={handleEditGraduate}
                   onArchiveGraduate={handleArchiveGraduate}
@@ -586,17 +694,21 @@ const RegistrarDashboard = () => {
 
               {activeTab === 'verification' && (
                 <VerificationTab
-                  verifications={verifications}
+                  verifications={filteredVerifications}
                   onVerify={handleVerifyRequestAction}
                 />
               )}
 
               {activeTab === 'documents' && (
                 <DocumentProcessingTab
-                  documents={documents}
+                  documents={filteredDocuments}
                   onProcessDocument={handleProcessDocumentAction}
                 />
               )}
+
+{activeTab === 'surveys' && (
+                 <SurveyManagement />
+               )}
 
               {activeTab === 'reporting' && (
                 <ReportingTab />

@@ -1,32 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface AlumniMessage {
   id: number;
-  sender: 'Alumni' | 'Recruiter' | 'System';
+  sender: 'Alumni' | 'Recruiter' | 'System' | 'Registrar' | 'Mentor';
   senderName: string;
   text: string;
   timestamp: string;
+  status?: 'sent' | 'delivered' | 'read';
 }
 
 interface MessagingTabProps {
   darkMode: boolean;
 }
 
+interface Thread {
+  id: string;
+  label: string;
+  desc: string;
+  initials: string;
+  color: string;
+  gradient: string;
+  online: boolean;
+  unread: number;
+  lastMessage: string;
+  lastTime: string;
+}
+
+const THREADS: Thread[] = [
+  { id: 'recruiter', label: 'Recruiter', desc: 'Job interview and placement', initials: 'HS', color: 'from-blue-500 to-indigo-600', gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600', online: true, unread: 2, lastMessage: "Let's schedule it for 2:30 PM.", lastTime: '10:15 AM' },
+  { id: 'registrar', label: 'Registrar', desc: 'Transcript & verification', initials: 'RG', color: 'from-emerald-500 to-teal-600', gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600', online: true, unread: 0, lastMessage: 'Your transcript has been approved.', lastTime: 'Yesterday' },
+  { id: 'mentor', label: 'Mentor', desc: 'Career guidance & sessions', initials: 'MN', color: 'from-violet-500 to-purple-600', gradient: 'bg-gradient-to-br from-violet-500 to-purple-600', online: false, unread: 1, lastMessage: 'Great progress on the project!', lastTime: 'Mon' },
+  { id: 'system', label: 'System', desc: 'Notifications & alerts', initials: 'SY', color: 'from-amber-500 to-orange-600', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', online: true, unread: 0, lastMessage: 'Survey reminder sent.', lastTime: 'Mar 15' },
+];
+
+const INITIAL_MESSAGES: Record<string, AlumniMessage[]> = {
+  recruiter: [
+    { id: 1, sender: 'Recruiter', senderName: 'Hilina Sileshi', text: 'Hello! We reviewed your profile and matches for the Senior Developer opening. Are you available for a brief introductory call tomorrow?', timestamp: '09:30 AM', status: 'read' },
+    { id: 2, sender: 'Alumni', senderName: 'You', text: 'Hi Hilina! Yes, absolutely. I am available anytime after 2:00 PM.', timestamp: '10:05 AM', status: 'read' },
+    { id: 3, sender: 'Recruiter', senderName: 'Hilina Sileshi', text: "Excellent! Let's schedule it for 2:30 PM. I'll send over a calendar invite soon.", timestamp: '10:15 AM', status: 'delivered' },
+  ],
+  registrar: [
+    { id: 4, sender: 'Registrar', senderName: 'ASTU Registrar Office', text: 'Your Official Transcript request (ASTU-DOC-1001) has been approved and is being prepared for dispatch.', timestamp: '2:00 PM', status: 'read' },
+    { id: 5, sender: 'Alumni', senderName: 'You', text: 'Thank you! When can I expect it to be ready for pickup?', timestamp: '2:30 PM', status: 'read' },
+    { id: 6, sender: 'Registrar', senderName: 'ASTU Registrar Office', text: 'The document will be ready within 3 business days. You will receive an email notification once it is dispatched.', timestamp: '3:00 PM', status: 'delivered' },
+  ],
+  mentor: [
+    { id: 7, sender: 'Mentor', senderName: 'Dr. Abebe Kebede', text: 'Hi! I reviewed the project proposal you shared. Great progress! Let me know if you need help with the architecture phase.', timestamp: '11:00 AM', status: 'read' },
+    { id: 8, sender: 'Alumni', senderName: 'You', text: "Thanks Dr. Abebe! I'd love to schedule a session to discuss the database design patterns.", timestamp: '11:30 AM', status: 'delivered' },
+  ],
+  system: [
+    { id: 9, sender: 'System', senderName: 'ASTU AMS', text: '📋 Reminder: The 12-Month Tracer Survey is now available. Please complete it before April 30.', timestamp: 'Mar 15', status: 'read' },
+    { id: 10, sender: 'System', senderName: 'ASTU AMS', text: '🎉 Congratulations! Your degree verification has been completed and dispatched.', timestamp: 'Mar 10', status: 'read' },
+  ],
+};
+
+const THREAD_META: Record<string, { name: string; role: string; initials: string; gradient: string; online: boolean }> = {
+  recruiter: { name: 'Hilina Sileshi', role: 'HR Recruiter · Safir Technologies', initials: 'HS', gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600', online: true },
+  registrar: { name: 'ASTU Registrar Office', role: 'Document Verification', initials: 'RG', gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600', online: true },
+  mentor: { name: 'Dr. Abebe Kebede', role: 'Senior Mentor · CS Department', initials: 'MN', gradient: 'bg-gradient-to-br from-violet-500 to-purple-600', online: false },
+  system: { name: 'ASTU AMS System', role: 'Automated Notifications', initials: 'SY', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', online: true },
+};
+
 export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const [activeThread, setActiveThread] = useState('recruiter');
-  const [messages, setMessages] = useState<AlumniMessage[]>([
-    { id: 1, sender: 'Recruiter', senderName: 'Hilina Sileshi (HR Manager)', text: 'Hello! We reviewed your profile and matches for the Senior developer opening. Are you available for a brief introductory call tomorrow?', timestamp: '09:30 AM' },
-    { id: 2, sender: 'Alumni', senderName: 'You', text: 'Hi Hilina! Yes, absolutely. I am available anytime after 2:00 PM.', timestamp: '10:05 AM' },
-    { id: 3, sender: 'Recruiter', senderName: 'Hilina Sileshi (HR Manager)', text: 'Excellent! Let\'s schedule it for 2:30 PM. I\'ll send over a calendar invite soon.', timestamp: '10:15 AM' }
-  ]);
+  const [messages, setMessages] = useState<Record<string, AlumniMessage[]>>(INITIAL_MESSAGES);
   const [typedMessage, setTypedMessage] = useState('');
-  const threads = [
-    { id: 'recruiter', label: 'Recruiter', desc: 'Job interview and placement follow-up', initials: 'HS' },
-    { id: 'registrar', label: 'Registrar', desc: 'Transcript and verification updates', initials: 'RG' },
-    { id: 'mentor', label: 'Mentor', desc: 'Career guidance and booking notes', initials: 'MN' },
-  ];
+  const [isTyping, setIsTyping] = useState(false);
+  const [mobileShowThread, setMobileShowThread] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const quickReplies = ['I am available after 2:00 PM.', 'Please send the document checklist.', 'Can we schedule a mentorship session?'];
+  const currentMessages = messages[activeThread] || [];
+  const currentMeta = THREAD_META[activeThread] || THREAD_META.recruiter;
+
+  const quickReplies: Record<string, string[]> = {
+    recruiter: ['I am available after 2:00 PM.', 'Could we reschedule?', 'Please share the job description.'],
+    registrar: ['When will my document be ready?', 'Can I expedite the process?', 'Thank you for the update!'],
+    mentor: ['Can we schedule a session?', 'Thanks for the feedback!', 'I will share the updated draft.'],
+    system: ['How do I complete the survey?', 'Show my document status.'],
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [currentMessages, isTyping]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,136 +97,287 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
       sender: 'Alumni',
       senderName: 'You',
       text: typedMessage.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'sent',
     };
 
-    setMessages(prev => [...prev, newMsg]);
+    setMessages(prev => ({
+      ...prev,
+      [activeThread]: [...(prev[activeThread] || []), newMsg],
+    }));
     setTypedMessage('');
 
-    // Mock quick reply
+    // Simulate typing indicator and auto-reply
+    setTimeout(() => setIsTyping(true), 800);
     setTimeout(() => {
-      const automaticReply: AlumniMessage = {
-        id: Date.now() + 1,
-        sender: 'Recruiter',
-        senderName: 'Hilina Sileshi (HR Manager)',
-        text: 'Got it. Talk to you then!',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      setIsTyping(false);
+      const autoReplies: Record<string, string> = {
+        recruiter: 'Got it! Talk to you then. I will send the calendar invite shortly.',
+        registrar: 'Thank you for reaching out. We will update you on the status soon.',
+        mentor: "That's a great idea! Let me check my schedule and get back to you.",
+        system: 'Acknowledged. Your request has been logged in the system.',
       };
-      setMessages(prev => [...prev, automaticReply]);
-    }, 1500);
+      const reply: AlumniMessage = {
+        id: Date.now() + 1,
+        sender: activeThread === 'recruiter' ? 'Recruiter' : activeThread === 'registrar' ? 'Registrar' : activeThread === 'mentor' ? 'Mentor' : 'System',
+        senderName: currentMeta.name,
+        text: autoReplies[activeThread] || 'Received. We will respond shortly.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'delivered',
+      };
+      setMessages(prev => ({
+        ...prev,
+        [activeThread]: [...(prev[activeThread] || []), reply],
+      }));
+    }, 2200);
   };
 
-  return (
-    <div className={`grid min-h-[620px] grid-cols-1 overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 lg:grid-cols-[280px_1fr] ${
-      darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
-    }`}>
-      <aside className="border-b border-gray-150 bg-gray-50 p-4 lg:border-b-0 lg:border-r">
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold">Internal Messages</h3>
-          <p className="mt-1 text-xs text-gray-500">Recruiter, registrar, mentor, and system conversations.</p>
-        </div>
-        <div className="space-y-2">
-          {threads.map(thread => (
-            <button
-              key={thread.id}
-              onClick={() => {
-                setActiveThread(thread.id);
-                setMessages(prev => [
-                  ...prev,
-                  { id: Date.now(), sender: 'System', senderName: 'ASTU AMS', text: `Switched to ${thread.label} thread.`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
-                ]);
-              }}
-              className={`w-full rounded-[10px] border p-3 text-left transition-all ${activeThread === thread.id ? 'border-astu-navy bg-white shadow-sm' : 'border-gray-200 bg-transparent hover:bg-white'}`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-astu-navy/10 text-xs font-bold text-astu-navy">{thread.initials}</span>
-                <span>
-                  <span className="block text-xs font-bold">{thread.label}</span>
-                  <span className="block text-[10px] text-gray-500">{thread.desc}</span>
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </aside>
-      <div className="flex min-h-[620px] flex-col">
-      {/* Thread Header */}
-      <div className="flex items-center justify-between border-b border-gray-150 p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-astu-navy/15 flex items-center justify-center text-astu-navy font-bold shadow-sm">
-            HS
-          </div>
-          <div>
-            <h4 className="font-bold text-sm">Hilina Sileshi (HR Recruiter)</h4>
-            <p className={`text-[10px] ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Safir Technologies Recruiter</p>
-          </div>
-        </div>
-        <span className="flex items-center gap-1 text-[10px] text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-bold">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> Active
-        </span>
-      </div>
+  const handleThreadSwitch = (threadId: string) => {
+    setActiveThread(threadId);
+    setMobileShowThread(true);
+  };
 
-      {/* Message list */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-4">
-        {messages.map((msg) => {
-          const isMe = msg.sender === 'Alumni';
-          return (
-            <div 
-              key={msg.id}
-              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`max-w-md p-4 rounded-2xl text-xs space-y-1 shadow-sm leading-relaxed ${
-                isMe 
-                  ? 'bg-astu-navy text-white rounded-tr-none' 
-                  : (darkMode ? 'bg-slate-800 border-slate-700 rounded-tl-none' : 'bg-gray-100 border-gray-200 rounded-tl-none')
-              }`}>
-                <p className="font-bold">{isMe ? 'You' : msg.senderName}</p>
-                <p>{msg.text}</p>
-                <span className={`text-[9px] block text-right font-semibold ${isMe ? 'text-slate-200' : 'text-gray-400'}`}>
-                  {msg.timestamp}
-                </span>
+  const totalUnread = THREADS.reduce((sum, t) => sum + t.unread, 0);
+
+  return (
+    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+      <div className="grid min-h-[600px] grid-cols-1 lg:grid-cols-[300px_1fr]">
+
+        {/* Sidebar: Thread List */}
+        <aside className={`border-b lg:border-b-0 lg:border-r border-[var(--border-color)] flex flex-col ${mobileShowThread && activeThread ? 'hidden lg:flex' : 'flex'}`}>
+          {/* Thread Header */}
+          <div className="p-4 border-b border-[var(--border-color)]">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Messages</h3>
+                <p className="text-[10px] text-[var(--text-secondary)] font-semibold mt-0.5">
+                  {totalUnread} unread conversation{totalUnread !== 1 ? 's' : ''}
+                </p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-[#003366]/5 flex items-center justify-center">
+                <svg className="w-4 h-4 text-[#003366]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
-          );
-        })}
-      </div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                className="w-full text-xs p-2.5 pl-8 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+              />
+              <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
 
-      {/* Message Input Form */}
-      <form 
-        onSubmit={handleSend}
-        className="border-t border-gray-150 p-4"
-      >
-        <div className="mb-3 flex flex-wrap gap-2">
-          {quickReplies.map(reply => (
-            <button
-              key={reply}
-              type="button"
-              onClick={() => setTypedMessage(reply)}
-              className="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] font-semibold text-gray-600 hover:bg-white"
-            >
-              {reply}
-            </button>
-          ))}
+          {/* Thread Items */}
+          <div className="flex-1 overflow-y-auto">
+            {THREADS.map(thread => {
+              const isActive = activeThread === thread.id;
+              return (
+                <button
+                  key={thread.id}
+                  onClick={() => handleThreadSwitch(thread.id)}
+                  className={`w-full p-4 text-left transition-all duration-200 border-b border-[var(--border-color)] hover:bg-[var(--bg-page)] ${isActive ? 'bg-[var(--bg-page)] border-l-[3px] border-l-[#003366]' : 'border-l-[3px] border-l-transparent'
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-shrink-0">
+                      <div className={`w-11 h-11 rounded-full ${thread.gradient} flex items-center justify-center text-white text-xs font-extrabold shadow-md`}>
+                        {thread.initials}
+                      </div>
+                      {thread.online && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[var(--bg-card)]"></div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-[var(--text-primary)] truncate">{thread.label}</span>
+                        <span className="text-[10px] text-[var(--text-muted)] font-medium flex-shrink-0">{thread.lastTime}</span>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-secondary)] truncate mt-0.5">{thread.desc}</p>
+                      <p className="text-[10px] text-[var(--text-secondary)] truncate mt-0.5 opacity-70">{thread.lastMessage}</p>
+                    </div>
+                    {thread.unread > 0 && (
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center">
+                        <span className="text-[9px] font-extrabold text-white">{thread.unread}</span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* Main Chat Area */}
+        <div className={`flex flex-col min-h-[600px] ${!mobileShowThread && activeThread ? 'hidden lg:flex' : 'flex'}`}>
+
+          {/* Chat Header */}
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border-color)] bg-[var(--bg-card)]">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setMobileShowThread(false)}
+                className="lg:hidden p-1.5 -ml-1 rounded-lg hover:bg-[var(--bg-page)] transition-colors"
+              >
+                <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="relative">
+                <div className={`w-10 h-10 rounded-full ${currentMeta.gradient} flex items-center justify-center text-white text-xs font-extrabold shadow-md`}>
+                  {currentMeta.initials}
+                </div>
+                {currentMeta.online && (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--bg-card)]"></div>
+                )}
+              </div>
+              <div>
+                <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{currentMeta.name}</h4>
+                <div className="flex items-center gap-1.5">
+                  {currentMeta.online ? (
+                    <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Active now
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-[var(--text-muted)] font-medium">Offline</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </button>
+              <button className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+              <button className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 bg-[var(--bg-page)]/30">
+            {/* Date Separator */}
+            <div className="flex items-center gap-3 my-2">
+              <div className="flex-1 h-px bg-[var(--border-color)]"></div>
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Today</span>
+              <div className="flex-1 h-px bg-[var(--border-color)]"></div>
+            </div>
+
+            {currentMessages.map((msg) => {
+              const isMe = msg.sender === 'Alumni';
+              return (
+                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`flex items-end gap-2 max-w-[80%] ${isMe ? 'flex-row-reverse' : ''}`}>
+                    {!isMe && (
+                      <div className={`w-7 h-7 rounded-full ${currentMeta.gradient} flex items-center justify-center text-white text-[9px] font-extrabold flex-shrink-0 shadow-sm`}>
+                        {currentMeta.initials}
+                      </div>
+                    )}
+                    <div className={`space-y-1 ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
+                      <div className={`px-4 py-3 rounded-2xl text-xs leading-relaxed shadow-sm ${isMe
+                          ? 'bg-gradient-to-br from-[#003366] to-[#004d99] text-white rounded-br-md'
+                          : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-bl-md'
+                        }`}>
+                        <p className="font-medium">{msg.text}</p>
+                      </div>
+                      <div className={`flex items-center gap-1.5 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
+                        <span className="text-[9px] text-[var(--text-muted)] font-medium">{msg.timestamp}</span>
+                        {isMe && msg.status && (
+                          <span className="text-[9px] text-[#003366]">
+                            {msg.status === 'read' ? '✓✓' : msg.status === 'delivered' ? '✓✓' : '✓'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex items-end gap-2">
+                <div className={`w-7 h-7 rounded-full ${currentMeta.gradient} flex items-center justify-center text-white text-[9px] font-extrabold flex-shrink-0 shadow-sm`}>
+                  {currentMeta.initials}
+                </div>
+                <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Replies */}
+          <div className="px-5 pt-3 pb-1 flex flex-wrap gap-2 border-t border-[var(--border-color)] bg-[var(--bg-card)]">
+            {(quickReplies[activeThread] || quickReplies.recruiter).map(reply => (
+              <button
+                key={reply}
+                type="button"
+                onClick={() => setTypedMessage(reply)}
+                className="px-3 py-1.5 text-[10px] font-bold rounded-full border border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-[#003366]/5 hover:border-[#003366]/20 hover:text-[#003366] transition-all duration-200"
+              >
+                {reply}
+              </button>
+            ))}
+          </div>
+
+          {/* Message Input */}
+          <form onSubmit={handleSend} className="px-5 py-3 bg-[var(--bg-card)]">
+            <div className="flex items-center gap-3">
+              <button type="button" className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </button>
+              <div className="flex-1 relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={typedMessage}
+                  onChange={(e) => setTypedMessage(e.target.value)}
+                  placeholder={`Message ${currentMeta.name}...`}
+                  className="w-full text-xs p-3 pr-10 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] focus:bg-[var(--bg-card)] transition-all duration-200 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                  required
+                />
+                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </div>
+              <button
+                type="submit"
+                disabled={!typedMessage.trim()}
+                className={`p-3 rounded-xl transition-all duration-300 shadow-md ${typedMessage.trim()
+                    ? 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white hover:shadow-lg hover:scale-105 active:scale-95'
+                    : 'bg-[var(--bg-page)] text-[var(--text-muted)] cursor-not-allowed shadow-none'
+                  }`}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="flex gap-2">
-        <input
-          type="text"
-          value={typedMessage}
-          onChange={(e) => setTypedMessage(e.target.value)}
-          placeholder="Type message to HR manager..."
-          className={`flex-1 text-xs p-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${
-            darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-800'
-          }`}
-          required
-        />
-        <button
-          type="submit"
-          className="px-5 bg-astu-navy hover:bg-astu-navy/90 text-white rounded-xl font-bold flex items-center justify-center"
-        >
-          <span className="material-symbols-outlined text-md">send</span>
-        </button>
-        </div>
-      </form>
       </div>
     </div>
   );

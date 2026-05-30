@@ -124,6 +124,23 @@ const EmployerDashboard = () => {
     { label: 'Interview Queue', value: '7 candidates', tone: 'text-astu-red', icon: 'calendar_month' },
   ];
 
+  const shortlistRate = totalApplicationsCount > 0
+    ? Math.round((shortlistedApplicationsCount / totalApplicationsCount) * 100)
+    : 0;
+
+  const employerCommandSignals = [
+    { label: 'Open requisitions', value: activeJobsCount.toString(), icon: 'work_history', tab: 'post_job', tone: 'text-astu-green' },
+    { label: 'Pending reviews', value: pendingApplicationsCount.toString(), icon: 'rate_review', tab: 'candidates', tone: 'text-astu-red' },
+    { label: 'Shortlist rate', value: `${shortlistRate}%`, icon: 'social_leaderboard', tab: 'candidates', tone: 'text-[#8A5CF6]' },
+    { label: 'Feedback files', value: feedbacks.length.toString(), icon: 'fact_check', tab: 'feedback', tone: 'text-astu-navy' },
+  ];
+
+  const hiringPipeline = [
+    { label: 'Views captured', value: jobs.reduce((sum, job) => sum + job.viewsCount, 0).toLocaleString(), icon: 'visibility', helper: 'Across active and archived postings' },
+    { label: 'Applications received', value: totalApplicationsCount.toString(), icon: 'inbox', helper: `${pendingApplicationsCount} still need a decision` },
+    { label: 'Candidates shortlisted', value: shortlistedApplicationsCount.toString(), icon: 'how_to_reg', helper: 'Ready for interviews or offer review' },
+  ];
+
   // Callback triggers
   const handleSaveProfile = (updatedProfile: CompanyProfile) => {
     setProfile(updatedProfile);
@@ -156,15 +173,29 @@ const EmployerDashboard = () => {
     ]);
   };
 
-  const handleToggleJobStatus = (jobId: number) => {
-    const updatedJobs = jobs.map(j =>
-      j.id === jobId
-        ? { ...j, status: (j.status === 'Open' ? 'Closed' : 'Open') as EmployerJob['status'] }
-        : j
-    );
-    setJobs(updatedJobs);
-    saveEmployerJobs(updatedJobs);
-  };
+   const handleToggleJobStatus = (jobId: number) => {
+     const updatedJobs = jobs.map(j =>
+       j.id === jobId
+         ? { ...j, status: (j.status === 'Open' ? 'Closed' : 'Open') as EmployerJob['status'] }
+         : j
+     );
+     setJobs(updatedJobs);
+     saveEmployerJobs(updatedJobs);
+   };
+
+   const handleUpdateJob = (updatedJob: EmployerJob) => {
+     const updatedJobs = jobs.map(job => 
+       job.id === updatedJob.id ? updatedJob : job
+     );
+     setJobs(updatedJobs);
+     saveEmployerJobs(updatedJobs);
+   };
+
+   const handleDeleteJob = (jobId: number) => {
+     const updatedJobs = jobs.filter(job => job.id !== jobId);
+     setJobs(updatedJobs);
+     saveEmployerJobs(updatedJobs);
+   };
 
   const handleUpdateApplicationStatus = (appId: number, status: CandidateApplication['status']) => {
     const updatedApps = applications.map(app =>
@@ -439,12 +470,13 @@ const EmployerDashboard = () => {
         </header>
 
         {/* Dynamic routing wrapper */}
-        <div className="flex-grow p-4 md:p-6">
+        <div className="flex-grow">
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
 
               {/* Welcome banner */}
               <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+                {/* Admin shell spacing handled by global CSS */}
                 <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                   <div className="max-w-2xl space-y-2">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU corporate network</span>
@@ -461,6 +493,55 @@ const EmployerDashboard = () => {
                     <span className="material-symbols-outlined">add</span>
                     Post Career Placement
                   </button>
+                </div>
+              </section>
+
+              <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold">Employer Command Center</h3>
+                    <p className="mt-1 text-xs text-gray-500">One clear snapshot for hiring, review queues, curriculum feedback, and recruiter follow-up.</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('analytics')}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
+                  >
+                    <span className="material-symbols-outlined text-base">analytics</span>
+                    Open analytics
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
+                  <div className="grid grid-cols-2 gap-3">
+                    {employerCommandSignals.map((signal) => (
+                      <button
+                        key={signal.label}
+                        onClick={() => setActiveTab(signal.tab)}
+                        className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                        </div>
+                        <p className="mt-2 text-2xl font-extrabold">{signal.value}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                    <div className="mb-3 flex items-center justify-between">
+                      <h4 className="text-sm font-bold">Hiring Pipeline Health</h4>
+                      <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Live</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      {hiringPipeline.map((item) => (
+                        <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
+                          <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
+                          <p className="mt-2 text-xl font-extrabold">{item.value}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+                          <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </section>
 
@@ -680,14 +761,16 @@ const EmployerDashboard = () => {
             />
           )}
 
-          {activeTab === 'post_job' && (
-            <JobPostingTab
-              jobs={jobs}
-              onPostJob={handlePostJob}
-              onToggleJobStatus={handleToggleJobStatus}
-              darkMode={darkMode}
-            />
-          )}
+           {activeTab === 'post_job' && (
+             <JobPostingTab
+               jobs={jobs}
+               onPostJob={handlePostJob}
+               onToggleJobStatus={handleToggleJobStatus}
+               onUpdateJob={handleUpdateJob}
+               onDeleteJob={handleDeleteJob}
+               darkMode={darkMode}
+             />
+           )}
 
           {activeTab === 'candidates' && (
             <ApplicationsTab

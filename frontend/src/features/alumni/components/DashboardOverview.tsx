@@ -86,6 +86,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     { icon: 'workspace_premium', title: 'Verified Documents', desc: 'Transcript, certificate, identity badge, and digital download tracking.', tab: 'documents' },
   ];
 
+  const pendingSurveyCount = surveys.filter((survey) => survey.status === 'PENDING').length;
+  const appliedJobsCount = recentJobs.filter((job) => job.applied).length;
+  const savedJobsCount = recentJobs.filter((job) => job.saved).length;
+
+  const commandSignals = [
+    { label: 'Employer visibility', value: completion >= 90 ? 'High' : 'Improve', icon: 'visibility', tone: completion >= 90 ? 'text-astu-green' : 'text-astu-red' },
+    { label: 'Applications sent', value: appliedJobsCount.toString(), icon: 'send', tone: 'text-astu-navy' },
+    { label: 'Saved roles', value: savedJobsCount.toString(), icon: 'bookmark', tone: 'text-[#8A5CF6]' },
+    { label: 'Tracer actions', value: pendingSurveyCount.toString(), icon: 'assignment_late', tone: pendingSurveyCount > 0 ? 'text-astu-red' : 'text-astu-green' },
+  ];
+
+  const profileReadiness = [
+    { label: 'Public profile', value: `${completion}%`, width: completion, icon: 'badge' },
+    { label: 'Career evidence', value: `${Math.min(100, completion + 8)}%`, width: Math.min(100, completion + 8), icon: 'fact_check' },
+    { label: 'Recruiter match', value: `${Math.min(98, completion + 14)}%`, width: Math.min(98, completion + 14), icon: 'target' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
@@ -119,6 +136,74 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               Complete Profile
             </button>
           )}
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {commandSignals.map((signal) => (
+            <button
+              key={signal.label}
+              onClick={() => {
+                if (signal.label.includes('Employer')) onTabChange('profile');
+                if (signal.label.includes('Applications') || signal.label.includes('Saved')) onTabChange('jobs');
+                if (signal.label.includes('Tracer')) onTabChange('surveys');
+              }}
+              className="rounded-[10px] border border-white/15 bg-white/10 p-3 text-left backdrop-blur transition-all hover:bg-white/15"
+            >
+              <div className="flex items-center gap-2">
+                <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-white/65">{signal.label}</p>
+              </div>
+              <p className="mt-2 text-xl font-extrabold text-white">{signal.value}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Alumni Success Command Center</h3>
+                <p className="mt-1 text-xs text-gray-500">A single view for profile strength, hiring movement, tracer compliance, and document readiness.</p>
+              </div>
+              <button
+                onClick={() => onTabChange('profile')}
+                className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
+              >
+                <span className="material-symbols-outlined text-base">tune</span>
+                Improve profile
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              {profileReadiness.map((item) => (
+                <div key={item.label} className="rounded-[10px] border border-gray-200 bg-gray-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
+                    <span className="text-xs font-extrabold text-gray-900">{item.value}</span>
+                  </div>
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+                    <div className="h-full rounded-full bg-astu-green transition-all duration-500" style={{ width: `${item.width}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-[10px] border border-astu-green/20 bg-astu-green/10 p-4">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-astu-green">verified</span>
+              <h4 className="text-sm font-bold text-gray-900">Next best action</h4>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-gray-600">
+              {pendingSurveyCount > 0
+                ? `Complete ${pendingSurveyCount} pending tracer survey${pendingSurveyCount > 1 ? 's' : ''} so departments can count your employment outcomes in accreditation reports.`
+                : 'Tracer responses are clear. Keep your role, skills, and resume fresh so employers see the newest version of your profile.'}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button onClick={() => onTabChange('surveys')} className="rounded-md bg-astu-green px-3 py-2 text-xs font-bold text-white">Open surveys</button>
+              <button onClick={() => onTabChange('jobs')} className="rounded-md border border-astu-navy/20 bg-white px-3 py-2 text-xs font-bold text-astu-navy">View jobs</button>
+            </div>
+          </div>
         </div>
       </section>
 
