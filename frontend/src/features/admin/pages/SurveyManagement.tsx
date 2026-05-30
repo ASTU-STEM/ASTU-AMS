@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardList,
-  DragHandleDots2,
   Eye,
   FilePlus2,
   GripVertical,

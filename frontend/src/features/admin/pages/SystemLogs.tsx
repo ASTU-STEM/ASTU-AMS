@@ -217,7 +217,7 @@ export default function SystemLogs() {
           ['Timestamp', 'User Email', 'Role', 'Action', 'Details', 'IP Address', 'Severity'],
           ...filteredLogs.map((log) => [log.timestamp, log.userEmail, log.role, log.action, log.details, log.ipAddress, log.severity]),
         ]
-          .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
+          .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
           .join('\n')
       : JSON.stringify(filteredLogs, null, 2);
 

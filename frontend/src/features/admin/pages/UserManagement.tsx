@@ -409,7 +409,7 @@ export default function UserManagement() {
     ]);
 
     const csv = [header, ...body]
-      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(','))
+      .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

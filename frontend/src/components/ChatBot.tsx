@@ -1,16 +1,29 @@
 import { useState, useRef, useEffect } from "react";
 
+type MessageSender = "user" | "bot";
+
+type ChatMessage = {
+  id: number;
+  text: string;
+  sender: MessageSender;
+  timestamp: string;
+  isAI: boolean;
+};
+
+type ChatApiMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 // ─── ASTU Color Palette ───────────────────────────────────────────────────────
 // Navy:  #003087  Green: #006B3C  Gold: #C8962A  Red: #C0392B
 
 const COLORS = {
   navy: "#003087",
-  navyDark: "#002060",
   navyLight: "#0A3E9E",
   green: "#006B3C",
   greenLight: "#008B4C",
   gold: "#C8962A",
-  goldLight: "#E0A830",
   red: "#C0392B",
 };
 
@@ -27,7 +40,7 @@ const QUICK_REPLIES = [
 ];
 
 // ─── Fallback responses (used when API is unavailable) ────────────────────────
-const FALLBACK_RESPONSES = {
+const FALLBACK_RESPONSES: Record<string, string> = {
   "update my profile":
     "Go to your Dashboard → Profile tab to update your education, work experience, and skills. A complete profile increases your job match rate by up to 40%!",
   "find job":
@@ -46,7 +59,7 @@ const FALLBACK_RESPONSES = {
     "Reach alumni support via the Help Center in your dashboard, or email alumni@astu.edu.et. Our team responds within 1 business day.",
 };
 
-function getFallback(input) {
+function getFallback(input: string) {
   const key = input.toLowerCase();
   for (const [pattern, response] of Object.entries(FALLBACK_RESPONSES)) {
     if (key.includes(pattern)) return response;
@@ -54,38 +67,28 @@ function getFallback(input) {
   return "I can help with profile updates, job searches, tracer surveys, transcripts, mentorship, alumni networking, and career events. Try one of the quick action buttons below!";
 }
 
-// ─── Claude API call ──────────────────────────────────────────────────────────
-async function askClaude(userMessage, history) {
-  const systemPrompt = `You are the ASTU Career Copilot, an AI assistant for Adama Science and Technology University (ASTU) in Ethiopia. You help alumni and students with:
-- Career opportunities and job searching
-- Profile and dashboard navigation
-- Tracer surveys (6-month post-graduation study)
-- Document requests (transcripts, certificates)
-- Mentorship programs
-- Alumni network and events
-- General university services
-
-Keep responses concise (2-4 sentences), friendly, and action-oriented. Always guide users toward the specific dashboard tab or action they need. Use occasional relevant emojis. If asked something outside your scope, kindly redirect to alumni@astu.edu.et.`;
-
-  const messages = [
-    ...history.map((m) => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text })),
+// ─── Chat API call ────────────────────────────────────────────────────────────
+async function askAssistant(userMessage: string, history: ChatMessage[]) {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const messages: ChatApiMessage[] = [
+    ...history.map((m) => ({
+      role: m.sender === "user" ? "user" as const : "assistant" as const,
+      content: m.text,
+    })),
     { role: "user", content: userMessage },
   ];
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch(`${apiBaseUrl}/chatbot`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages,
-    }),
+    body: JSON.stringify({ message: userMessage, messages }),
   });
 
-  if (!response.ok) throw new Error("API error");
+  if (!response.ok) throw new Error("Chat API error");
   const data = await response.json();
-  return data.content?.[0]?.text || getFallback(userMessage);
+  return typeof data.reply === "string" && data.reply.trim()
+    ? data.reply
+    : getFallback(userMessage);
 }
 
 // ─── Timestamp helper ─────────────────────────────────────────────────────────
@@ -113,7 +116,7 @@ function TypingDots() {
 }
 
 // ─── Single message bubble ────────────────────────────────────────────────────
-function MessageBubble({ msg }) {
+function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.sender === "user";
   return (
     <div style={{
@@ -161,7 +164,7 @@ function MessageBubble({ msg }) {
 export default function ASTUCareerCopilot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       text: "Hello! I'm your ASTU Career Copilot 👋\n\nI'm powered by AI to help you with jobs, mentorship, documents, tracer surveys, and more. How can I assist you today?",
@@ -174,8 +177,13 @@ export default function ASTUCareerCopilot() {
   const [isTyping, setIsTyping] = useState(false);
   const [showQuickReplies, setShowQuickReplies] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const isOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -194,11 +202,21 @@ export default function ASTUCareerCopilot() {
     if (isOpen) setUnreadCount(0);
   }, [isOpen]);
 
-  const sendMessage = async (text) => {
+  const addUnreadIfClosed = () => {
+    if (!isOpenRef.current) setUnreadCount((count) => count + 1);
+  };
+
+  const sendMessage = async (text: string) => {
     const trimmed = text?.trim();
     if (!trimmed || isTyping) return;
 
-    const userMsg = { id: Date.now(), text: trimmed, sender: "user", timestamp: nowTime() };
+    const userMsg: ChatMessage = {
+      id: Date.now(),
+      text: trimmed,
+      sender: "user",
+      timestamp: nowTime(),
+      isAI: false,
+    };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
@@ -206,8 +224,8 @@ export default function ASTUCareerCopilot() {
 
     try {
       const history = messages.slice(-6); // Send last 6 messages for context
-      const responseText = await askClaude(trimmed, history);
-      const botMsg = {
+      const responseText = await askAssistant(trimmed, history);
+      const botMsg: ChatMessage = {
         id: Date.now() + 1,
         text: responseText,
         sender: "bot",
@@ -215,10 +233,10 @@ export default function ASTUCareerCopilot() {
         isAI: true,
       };
       setMessages((prev) => [...prev, botMsg]);
-      if (!isOpen) setUnreadCount((c) => c + 1);
+      addUnreadIfClosed();
     } catch {
       // Graceful fallback
-      const botMsg = {
+      const botMsg: ChatMessage = {
         id: Date.now() + 1,
         text: getFallback(trimmed),
         sender: "bot",
@@ -226,6 +244,7 @@ export default function ASTUCareerCopilot() {
         isAI: false,
       };
       setMessages((prev) => [...prev, botMsg]);
+      addUnreadIfClosed();
     } finally {
       setIsTyping(false);
     }
@@ -267,9 +286,9 @@ export default function ASTUCareerCopilot() {
         .action-btn:hover { opacity: 0.82; }
         .send-btn:not(:disabled):hover { background: ${COLORS.green} !important; }
         .chat-input:focus { outline: none; border-color: ${COLORS.navy} !important; box-shadow: 0 0 0 3px rgba(0,48,135,0.12); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,48,135,0.2); border-radius: 4px; }
+        .chatbot-messages::-webkit-scrollbar { width: 4px; }
+        .chatbot-messages::-webkit-scrollbar-track { background: transparent; }
+        .chatbot-messages::-webkit-scrollbar-thumb { background: rgba(0,48,135,0.2); border-radius: 4px; }
       `}</style>
 
       {/* ── Floating Action Button ── */}
@@ -388,7 +407,7 @@ export default function ASTUCareerCopilot() {
                 flex: 1, overflowY:"auto", padding:"14px",
                 display:"flex", flexDirection:"column", gap:10,
                 background:"#f4f7fc",
-              }}>
+              }} className="chatbot-messages">
                 {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
 
                 {/* Typing indicator */}
@@ -499,7 +518,7 @@ export default function ASTUCareerCopilot() {
                 fontSize:10, color:"#9aa3b8", background:"#fff",
                 borderTop:"1px solid #f0f3fa", flexShrink:0,
               }}>
-                Powered by Claude AI · ASTU Alumni Portal
+                ASTU Alumni Portal Assistant
               </div>
             </>
           )}
