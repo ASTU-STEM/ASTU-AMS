@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 
 // Types
 import {
@@ -46,11 +47,12 @@ import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
 
 const AlumniDashboard = () => {
-  const navigate = useNavigate();
+   const navigate = useNavigate();
 
-  // Active Tab State
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+// Active Tab State
+   const [activeTab, setActiveTab] = useState<string>('dashboard');
+   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('alumni_sidebar_collapsed') === 'true');
 
   // Theme Dark / Light mode
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
@@ -66,7 +68,8 @@ const AlumniDashboard = () => {
 
   // Interactivity States
   const [selectedJobForModal, setSelectedJobForModal] = useState<JobMatch | null>(null);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Tracer Survey 2026 launched! Complete before March 15.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New job matches released for Computer Science graduates.', unread: true, time: '1 day ago' },
@@ -317,16 +320,83 @@ const AlumniDashboard = () => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
+  useEffect(() => {
+    setMenuOpen(false);
+    setNotificationOpen(false);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('alumni_sidebar_collapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && !target.closest('[data-admin-menu]')) {
+        setMenuOpen(false);
+      }
+      if (target && !target.closest('[data-admin-notifications]')) {
+        setNotificationOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menu = (
+    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+      <div className="px-3 py-3">
+        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile.fullName}</div>
+        <div className="mt-1">
+          <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">Alumni</span>
+        </div>
+      </div>
+      <div className="my-1 h-px bg-[var(--border-color)]" />
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); setActiveTab('profile'); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <User className="h-4 w-4" />
+        My Profile
+      </button>
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); setActiveTab('settings'); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <Settings className="h-4 w-4" />
+        Settings
+      </button>
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); toast('Help center coming soon.'); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <HelpCircle className="h-4 w-4" />
+        Help
+      </button>
+      <div className="my-1 h-px bg-[var(--border-color)]" />
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); handleLogout(); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50"
+      >
+        <LogOut className="h-4 w-4" />
+        Logout
+      </button>
+    </div>
+  );
+
   return (
-    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
+    <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a]'
-        }`}>
+      <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col overflow-hidden shadow-2xl transition-all duration-300 md:flex bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
         {/* Sidebar Logo Section */}
         <div className="p-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="relative">
               <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-lg">
                 <img
@@ -337,75 +407,73 @@ const AlumniDashboard = () => {
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#003366]"></div>
             </div>
-            <div>
+            {!sidebarCollapsed && <div>
               <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Alumni</h1>
               <p className="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Management System</p>
-            </div>
+            </div>}
           </div>
         </div>
 
         {/* Navigation Links */}
         <nav className="flex-grow px-3 py-4 overflow-y-auto">
-          <p className="px-3 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Main Menu</p>
+          {!sidebarCollapsed && <p className="px-3 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Main Menu</p>}
           <div className="space-y-0.5">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', emoji: '📊' },
-              { id: 'profile', label: 'My Profile', icon: 'account_circle', emoji: '👤' },
-              { id: 'career', label: 'Career Center', icon: 'school', emoji: '🎓' },
-              { id: 'surveys', label: 'Surveys', icon: 'assignment', emoji: '📋' },
-              { id: 'jobs', label: 'Jobs Board', icon: 'work', emoji: '💼' },
-              { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3', emoji: '🤝' },
+              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+              { id: 'profile', label: 'My Profile', icon: 'account_circle' },
+              { id: 'career', label: 'Career Center', icon: 'school' },
+              { id: 'surveys', label: 'Surveys', icon: 'assignment' },
+              { id: 'jobs', label: 'Jobs Board', icon: 'work' },
+              { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3' },
             ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${
-                  activeTab === item.id
-                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
+                  ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
               >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
-                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
-                }`}>
-                  {item.emoji}
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
+                  }`}>
+                  <span className="material-symbols-outlined">{item.icon}</span>
                 </span>
-                <span className="text-[13px] font-medium">{item.label}</span>
-                {activeTab === item.id && (
+                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                {activeTab === item.id && !sidebarCollapsed && (
                   <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                 )}
               </button>
             ))}
           </div>
 
-          <p className="px-3 mt-5 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Communication</p>
+          {!sidebarCollapsed && <p className="px-3 mt-5 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Communication</p>}
           <div className="space-y-0.5">
             {[
-              { id: 'documents', label: 'Documents', icon: 'description', emoji: '📑', badge: null },
-              { id: 'messages', label: 'Messages', icon: 'forum', emoji: '💬', badge: '3' },
-              { id: 'settings', label: 'Settings', icon: 'settings', emoji: '⚙️', badge: null },
+              { id: 'documents', label: 'Documents', icon: 'description', badge: null },
+              { id: 'messages', label: 'Messages', icon: 'forum', badge: '3' },
+              { id: 'settings', label: 'Settings', icon: 'settings', badge: null },
             ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${
-                  activeTab === item.id
-                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
+                  ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
+                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
               >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${
-                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
-                }`}>
-                  {item.emoji}
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
+                  }`}>
+                  <span className="material-symbols-outlined">{item.icon}</span>
                 </span>
-                <span className="text-[13px] font-medium">{item.label}</span>
-                {item.badge && (
+                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                {item.badge && !sidebarCollapsed && (
                   <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[9px] font-extrabold text-white shadow-md">
                     {item.badge}
                   </span>
                 )}
-                {activeTab === item.id && !item.badge && (
+                {activeTab === item.id && !item.badge && !sidebarCollapsed && (
                   <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                 )}
               </button>
@@ -417,131 +485,179 @@ const AlumniDashboard = () => {
         <div className="p-4 border-t border-white/10 space-y-1">
           <button
             onClick={() => setActiveTab('career')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group"
+            title={sidebarCollapsed ? 'Help Center' : undefined}
+            className={`w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
           >
-            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70">❓</span>
-            <span className="text-[13px] font-medium">Help Center</span>
+            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
+            {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group"
+            title={sidebarCollapsed ? 'Logout' : undefined}
+            className={`w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
           >
-            <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-sm group-hover:bg-red-500/20">🚪</span>
-            <span className="text-[13px] font-medium">Logout</span>
+            <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 material-symbols-outlined">logout</span>
+            {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex min-h-screen flex-col md:ml-[240px]">
+      <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
 
-        {/* Header Section */}
-        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 md:px-6"
-          style={{ background: 'var(--bg-navbar)', borderColor: 'var(--border-color)' }}>
-          <div className="flex-1 max-w-xl">
-            <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+        {/* Header Section - Admin Layout Style */}
+        <header
+          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
+          style={{
+            background: 'var(--bg-navbar)',
+            borderColor: 'var(--border-color)',
+          }}
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed((value) => !value)}
+              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
+                <span>Alumni</span>
+                <span>/</span>
+                <span>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}</span>
+              </div>
+              <h1 className="truncate text-[16px] font-semibold tracking-tight text-[var(--text-primary)]">
+                {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Search Bar */}
+            <label
+              className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
+              style={{ borderColor: 'var(--border-color)' }}
+            >
+              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
+                <Search className="h-4.5 w-4.5 flex-none" />
+              </span>
               <input
-                className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
-                style={{ borderColor: 'var(--border-color)' }}
-                placeholder="Search alumni, companies, or mentors..."
                 type="text"
+                placeholder="Search alumni, companies, or mentors..."
+                className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
                 onChange={(e) => {
                   if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
                     setActiveTab('jobs');
                   }
                 }}
               />
-            </div>
-          </div>
+            </label>
 
-          <div className="flex items-center gap-4 ml-6 relative">
-            {/* Dark Mode Toggle Switch */}
+            {/* Dark Mode Toggle */}
             <button
+              type="button"
               onClick={() => {
                 setDarkMode(!darkMode);
-                toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
+                toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
               }}
-              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
-                }`}
-              title="Toggle Dark/Light Mode"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+              aria-label="Toggle dark mode"
             >
-              <span className="material-symbols-outlined text-xl">
-                {darkMode ? 'light_mode' : 'dark_mode'}
-              </span>
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             {/* Notification Bell */}
-            <button
-              onClick={() => {
-                setShowNotifications(!showNotifications);
-                if (!showNotifications) handleMarkNotificationsRead();
-              }}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative transition-all duration-300 hover:scale-105"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white animate-pulse"></span>
-              )}
-            </button>
-
-            {/* Notification Dropdown Portal */}
-            {showNotifications && (
-              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-                }`}>
-                <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
-                  <h4 className="font-bold text-sm">Notifications</h4>
-                  <button
-                    onClick={() => setNotifications([])}
-                    className="text-xs text-astu-red hover:underline"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className="space-y-2.5 max-h-60 overflow-y-auto">
-                  {notifications.map(notif => (
-                    <div key={notif.id} className="flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50/10 transition-colors">
-                      <div className="space-y-0.5">
-                        <p className="text-xs leading-normal">{notif.text}</p>
-                        <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
+            <div className="relative" data-admin-notifications>
+              <button
+                type="button"
+                onClick={() => setNotificationOpen((v) => !v)}
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+              >
+                <Bell className="h-4 w-4" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">
+                    {unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+              {notificationOpen && (
+                <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                  <div className="border-b border-[var(--border-color)] px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
+                        <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
                       </div>
                       <button
-                        onClick={() => handleClearNotification(notif.id)}
-                        className="text-gray-300 hover:text-gray-500"
+                        onClick={() => setNotifications([])}
+                        className="text-xs font-semibold text-[#E24B4A] hover:underline"
                       >
-                        <span className="material-symbols-outlined text-sm">close</span>
+                        Clear All
                       </button>
                     </div>
-                  ))}
-                  {notifications.length === 0 && (
-                    <p className="text-xs text-gray-500 italic text-center py-4">No notifications yet.</p>
-                  )}
+                  </div>
+                  <div className="max-h-60 space-y-1 overflow-y-auto p-2">
+                    {notifications.length > 0 ? (
+                      notifications.map((n) => (
+                        <div key={n.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
+                          <span className={`mt-1 h-2.5 w-2.5 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-[var(--text-primary)]">{n.text}</p>
+                            <p className="text-xs text-[var(--text-secondary)]">{n.time}</p>
+                          </div>
+                          <button
+                            onClick={() =>
+                              setNotifications((prev) => prev.filter((x) => x.id !== n.id))
+                            }
+                            className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                          >
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">
+                        No notifications
+                      </p>
+                    )}
+                  </div>
+                  <div className="border-t border-[var(--border-color)] px-4 py-3">
+                    <button type="button" className="text-sm font-semibold text-[#003580] hover:underline">
+                      View all →
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
-
-            {/* Header User Profile Display */}
-            <div
-              onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
-            >
-              <div className="text-right hidden sm:block">
-                <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{profile.fullName}</p>
-                <p className="text-xs text-gray-500 font-semibold">{profile.batch}</p>
-              </div>
-              <img
-                alt="Profile"
-                className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-sm object-cover"
-                src={profile.avatarUrl}
-              />
+            {/* Profile Dropdown */}
+            <div className="relative" data-admin-menu>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
+                  {profile.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AU'}
+                </div>
+                <div className="hidden text-left sm:block">
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{profile.fullName}</div>
+                  <div className="text-[11px] text-[var(--text-secondary)]">Alumni</div>
+                </div>
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              </button>
+              {menuOpen && menu}
             </div>
           </div>
         </header>
 
-        {/* Dynamic Inner Tab View */}
-        <div className="flex-grow">
+        {/* Main Content */}
+        <main className="h-[calc(100vh-4rem)] overflow-y-auto bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {activeTab === 'dashboard' && (
             <DashboardOverview
               profile={profile}
@@ -611,9 +727,8 @@ const AlumniDashboard = () => {
               onSavePreferences={handleSavePreferences}
             />
           )}
-        </div>
-
-      </main>
+        </main>
+      </div>
 
       {/* JOB DETAILS MODAL PORTAL */}
       <JobDetailsModal

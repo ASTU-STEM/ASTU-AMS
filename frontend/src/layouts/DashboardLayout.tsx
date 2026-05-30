@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   GraduationCap, Building2, Database, BarChart3, ShieldCheck,
-  Menu, X, ArrowRight, CheckCircle2, User, Briefcase,
+  Menu, ArrowRight, User, Briefcase,
   FileText, Users, Settings, Bell, LogOut, Upload,
-  Plus, AlertCircle, TrendingUp, Search
+  Plus, AlertCircle, TrendingUp
 } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
@@ -42,83 +42,98 @@ export function DashboardLayout({
   loading = false
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem(`dashboard_layout_${role}_collapsed`) === 'true');
   const location = useLocation();
 
+  React.useEffect(() => {
+    localStorage.setItem(`dashboard_layout_${role}_collapsed`, String(sidebarCollapsed));
+  }, [role, sidebarCollapsed]);
+
   return (
-    <div className="min-h-screen bg-slate-50 flex text-slate-800 antialiased font-sans">
+    <div className="flex w-screen h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
       )}
 
-      {/* Sidebar Navigation */}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-50 transform lg:transform-none lg:opacity-100 transition-all duration-300 flex flex-col justify-between ${sidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0'
-        }`}>
-        <div>
-          {/* Sidebar Header */}
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md">
-                <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
-              </div>
-              <div>
-                <span className="font-extrabold text-md tracking-tight text-[#003366] block">ASTU-AMS</span>
-                <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block">{role}</span>
-              </div>
-            </Link>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-slate-400 hover:text-slate-600">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+{/* Sidebar Container */}
+       <aside className={`flex flex-col h-screen flex-shrink-0 relative z-20 bg-white border-r border-slate-200 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+         
+         {/* Sidebar Header */}
+         <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+           <Link to="/" className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+             <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md flex-shrink-0">
+               <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
+             </div>
+             {!sidebarCollapsed && <div className="overflow-hidden">
+               <span className="font-extrabold text-md tracking-tight text-[#003366] block whitespace-nowrap">ASTU-AMS</span>
+               <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block whitespace-nowrap">{role}</span>
+             </div>}
+           </Link>
+         </div>
 
-          {/* Navigation Links */}
-          <nav className="p-4 space-y-1">
-            {navItems.map((item: { path: string; label: string; icon: React.ComponentType<any> }, idx: number) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={idx}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive
-                    ? 'bg-[#003366]/5 text-[#003366] shadow-sm border-l-4 border-[#003366]'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                >
-                  <item.icon className={`h-4 w-4 ${isActive ? 'text-[#003366]' : 'text-slate-400'}`} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+         {/* Navigation Links */}
+         <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+           {navItems.map((item: { path: string; label: string; icon: React.ComponentType<any> }, idx: number) => {
+             const isActive = location.pathname === item.path;
+             return (
+               <Link
+                 key={idx}
+                 to={item.path}
+                 onClick={() => setSidebarOpen(false)}
+                 title={sidebarCollapsed ? item.label : undefined}
+                 className={`w-full flex items-center rounded-xl transition-all duration-200 px-4 py-3 ${sidebarCollapsed ? 'justify-center' : 'gap-4'} ${isActive
+                   ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-sm'
+                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                   }`}
+               >
+                 <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-[#003366]' : 'text-slate-500'}`} />
+                 {!sidebarCollapsed && <span className="text-sm tracking-wide font-medium truncate">
+                   {item.label}
+                 </span>}
+               </Link>
+             );
+           })}
+         </nav>
 
-        {/* Sidebar Footer Account Section */}
-        <div className="p-4 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={() => {
-              logoutLocally();
-              window.location.href = '/login';
-            }}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all"
-          >
-            <LogOut className="h-4 w-4" />
-            Exit Workspace
-          </button>
-        </div>
-      </aside>
+         {/* Sidebar Footer */}
+         <div className="border-t border-slate-100 flex-shrink-0 p-4">
+           <button
+             type="button"
+             onClick={() => {
+               logoutLocally();
+               window.location.href = '/login';
+             }}
+             title={sidebarCollapsed ? 'Exit Workspace' : undefined}
+             className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
+           >
+             <LogOut className="h-4 w-4 flex-shrink-0" />
+             {!sidebarCollapsed && <span>Exit Workspace</span>}
+           </button>
+         </div>
+       </aside>
 
-      {/* Main Workspace Frame */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
-        {/* Top Management Navbar */}
-        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 shadow-sm">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
-              <Menu className="h-5 w-5" />
-            </button>
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
-          </div>
+       {/* Fluid Canvas - main content area */}
+       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+         
+         {/* Clean Top Header Bar */}
+         <header className="bg-white h-16 border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 z-10">
+           <div className="flex items-center gap-4">
+             {/* Mobile menu button */}
+             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
+               <Menu className="h-5 w-5" />
+             </button>
+             <button
+               type="button"
+               onClick={() => setSidebarCollapsed((value) => !value)}
+               className="hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:inline-flex"
+               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+             >
+               <Menu className="h-5 w-5" />
+             </button>
+             {/* Breadcrumbs / Title */}
+             <h1 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
+           </div>
 
           <div className="flex items-center gap-4">
             <button className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-xl relative shadow-sm">
@@ -134,12 +149,8 @@ export function DashboardLayout({
           </div>
         </header>
 
-        {/*
-          View Frame Container
-          Spacing is controlled globally via CSS variables (--content-padding, --section-gap)
-          Do not add nested padding/margin here - it inherits from .space-y-6 normalization
-        */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Scrolling Content Panel */}
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
           {/* Page Header with Breadcrumbs */}
           {(breadcrumbs || subtitle || headerActions) && (
             <PageHeader

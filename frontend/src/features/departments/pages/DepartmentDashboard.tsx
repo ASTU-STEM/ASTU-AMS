@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { HelpCircle, LogOut, Menu } from 'lucide-react';
 
 // Components
 import { DashboardOverview } from '../components/DashboardOverview';
@@ -17,9 +18,9 @@ import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerS
 
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('department_sidebar_collapsed') === 'true');
     const [activeTab, setActiveTab] = useState<string>('dashboard');
     const [darkMode, setDarkMode] = useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([
         { id: 1, text: 'New tracer survey responses received from 2024 graduates.', unread: true, time: '2 hours ago' },
@@ -44,6 +45,10 @@ const DepartmentDashboard = () => {
     };
 
     const unreadNotificationsCount = notifications.filter(n => n.unread).length;
+
+    React.useEffect(() => {
+        localStorage.setItem('department_sidebar_collapsed', String(sidebarCollapsed));
+    }, [sidebarCollapsed]);
 
     const renderSection = () => {
         switch (activeTab) {
@@ -73,26 +78,32 @@ const DepartmentDashboard = () => {
             }`}>
             <Toaster position="top-right" reverseOrder={false} />
 
-            {/* Sidebar Navigation */}
-            <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
-                } ${sidebarCollapsed ? 'w-[80px]' : 'w-[280px]'}`}>
+{/* Sidebar Navigation - Fixed width, collapsible */}
+            <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col shadow-2xl ${sidebarCollapsed ? 'w-20' : 'w-64'} md:flex bg-astu-navy transition-all duration-300`}>
                 <div className={`p-6 mt-6 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
-                    <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+                    {!sidebarCollapsed && (
+                        <div className="flex items-center gap-3">
+                            <img
+                                alt="ASTU Logo"
+                                className="h-10 w-10 object-contain drop-shadow-lg rounded-lg"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                            />
+                            <div>
+                                <h1 className="text-xl font-bold text-white">ASTU Department</h1>
+                                <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management Portal</p>
+                            </div>
+                        </div>
+                    )}
+                    {sidebarCollapsed && (
                         <img
                             alt="ASTU Logo"
                             className="h-10 w-10 object-contain drop-shadow-lg rounded-lg"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
                         />
-                        {!sidebarCollapsed && (
-                            <div>
-                                <h1 className="text-xl font-bold text-white">ASTU Department</h1>
-                                <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management Portal</p>
-                            </div>
-                        )}
-                    </div>
+                    )}
                 </div>
 
-                <nav className="mt-8 flex-grow px-3">
+                <nav className="mt-8 flex-grow overflow-y-auto">
                     <div className="space-y-1">
                         {[
                             { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
@@ -107,11 +118,11 @@ const DepartmentDashboard = () => {
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
+                                title={sidebarCollapsed ? item.label : undefined}
+                                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'gap-4 px-6'} py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
                                     ? item.activeColor + ' font-bold shadow-md'
                                     : 'text-slate-300 hover:text-white hover:bg-white/5'
-                                    } ${sidebarCollapsed ? 'justify-center px-4' : ''}`}
-                                title={sidebarCollapsed ? item.label : ''}
+                                    }`}
                             >
                                 <span className="material-symbols-outlined">{item.icon}</span>
                                 {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
@@ -120,41 +131,60 @@ const DepartmentDashboard = () => {
                     </div>
                 </nav>
 
-                <div className="p-6 border-t border-white/10">
-                    <button
-                        onClick={() => setActiveTab('dashboard')}
-                        className={`w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left ${sidebarCollapsed ? 'justify-center' : ''}`}
-                        title={sidebarCollapsed ? 'Help Center' : ''}
-                    >
-                        <span className="material-symbols-outlined text-md">help</span>
-                        {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className={`w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left ${sidebarCollapsed ? 'justify-center' : ''}`}
-                        title={sidebarCollapsed ? 'Logout' : ''}
-                    >
-                        <span className="material-symbols-outlined text-md">logout</span>
-                        {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
-                    </button>
+                <div className={`p-6 border-t border-white/10 mt-auto ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
+                    {!sidebarCollapsed && (
+                        <button
+                            onClick={() => setActiveTab('dashboard')}
+                            className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
+                        >
+                            <span className="material-symbols-outlined text-md">help</span>
+                            <span className="text-sm font-medium">Help Center</span>
+                        </button>
+                    )}
+                    {!sidebarCollapsed && (
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
+                        >
+                            <span className="material-symbols-outlined text-md">logout</span>
+                            <span className="text-sm font-medium">Logout</span>
+                        </button>
+                    )}
+                    {sidebarCollapsed && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('dashboard')}
+                                className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:text-white transition-colors mb-2"
+                                title="Help Center"
+                            >
+                                <span className="material-symbols-outlined text-md">help</span>
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 hover:text-red-400 transition-colors"
+                                title="Logout"
+                            >
+                                <span className="material-symbols-outlined text-md">logout</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </aside>
 
             {/* Main Content Area */}
-            <main className={`min-h-screen flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'md:ml-[80px]' : 'md:ml-[280px]'}`}>
+            <main className={`min-h-screen flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
 
                 {/* Header Section */}
                 <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
                     }`}>
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                            className={`p-2 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode ? 'bg-slate-800 text-slate-300 hover:text-white' : 'bg-gray-100 text-gray-600 hover:text-gray-900'}`}
-                            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+                            type="button"
+                            onClick={() => setSidebarCollapsed((value) => !value)}
+                            className={`hidden h-10 w-10 items-center justify-center rounded-[8px] md:inline-flex ${darkMode ? 'text-slate-300 hover:bg-white/5' : 'text-slate-600 hover:bg-black/5'}`}
+                            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                         >
-                            <span className="material-symbols-outlined">
-                                {sidebarCollapsed ? 'menu_open' : 'menu'}
-                            </span>
+                            <span className="material-symbols-outlined">menu</span>
                         </button>
                         <div className="flex-1 max-w-xl">
                             <div className="relative group">

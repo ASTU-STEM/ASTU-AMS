@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 
 // Types
 import {
@@ -38,13 +39,15 @@ import { AnalyticsTab } from '../components/AnalyticsTab';
 const EmployerDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Theme Dark / Light mode
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Abebe Bikila applied for Senior Fullstack Engineer.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New messaging update from ASTU Placement Officer.', unread: true, time: '1 day ago' },
@@ -282,6 +285,7 @@ const EmployerDashboard = () => {
   };
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
+  const initials = profile.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EP';
 
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');
@@ -289,90 +293,247 @@ const EmployerDashboard = () => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
-  return (
-    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
+  useEffect(() => {
+    setMenuOpen(false);
+    setNotificationOpen(false);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('employer_sidebar_collapsed', String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && !target.closest('[data-admin-menu]')) {
+        setMenuOpen(false);
+      }
+      if (target && !target.closest('[data-admin-notifications]')) {
+        setNotificationOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menu = (
+    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+      <div className="px-3 py-3">
+        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile.name}</div>
+        <div className="mt-1">
+          <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">Employer</span>
+        </div>
+      </div>
+      <div className="my-1 h-px bg-[var(--border-color)]" />
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); setActiveTab('profile'); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <User className="h-4 w-4" />
+        Company Profile
+      </button>
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); toast('Settings panel coming soon.'); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <Settings className="h-4 w-4" />
+        Settings
+      </button>
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); toast('Help center coming soon.'); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <HelpCircle className="h-4 w-4" />
+        Help
+      </button>
+      <div className="my-1 h-px bg-[var(--border-color)]" />
+      <button
+        type="button"
+        onClick={() => { setMenuOpen(false); handleLogout(); }}
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50"
+      >
+        <LogOut className="h-4 w-4" />
+        Logout
+      </button>
+    </div>
+  );
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
+
+return (
+    <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <Toaster position="top-right" reverseOrder={false} />
 
-      {/* Sidebar navigation */}
-      <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
-        }`}>
-        <div className="p-6 mt-6">
-          <div className="flex items-center gap-3">
-            <img
-              alt="ASTU Logo"
-              className="h-12 w-12 object-contain drop-shadow-lg rounded-lg"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-            />
-            <div>
-              <h1 className="text-lg font-bold text-white">ASTU Employer</h1>
-              <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Recruitment Hub</p>
+      {/* Sidebar Navigation */}
+      <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col overflow-hidden shadow-2xl transition-all duration-300 md:flex bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+        {/* Sidebar Logo Section */}
+        <div className="p-5 border-b border-white/10">
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+            <div className="relative">
+              <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-lg">
+                <img
+                  alt="ASTU Logo"
+                  className="h-8 w-8 object-contain rounded-md"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#003366]"></div>
             </div>
+            {!sidebarCollapsed && <div>
+              <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Employer</h1>
+              <p className="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Recruitment Hub</p>
+            </div>}
           </div>
         </div>
 
-        <nav className="mt-8 flex-grow px-3">
-          <div className="space-y-1">
+        {/* Navigation Links */}
+        <nav className="flex-grow px-3 py-4 overflow-y-auto">
+          {!sidebarCollapsed && <p className="px-3 mb-2 text-[10px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Recruiting</p>}
+          <div className="space-y-0.5">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'post_job', label: 'Job Scaffolder', icon: 'add_circle', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'candidates', label: 'Applications', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'search_talent', label: 'Talent Search', icon: 'person_search', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'feedback', label: 'Quality Feedbacks', icon: 'rate_review', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'chat', label: 'Messages', icon: 'chat', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'analytics', label: 'Hiring Analytics', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'profile', label: 'Company Profile', icon: 'business', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
-            ].map(item => (
+              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+              { id: 'post_job', label: 'Job Scaffolder', icon: 'work' },
+              { id: 'candidates', label: 'Applications', icon: 'description' },
+              { id: 'search_talent', label: 'Talent Search', icon: 'search' },
+            ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
-                    ? item.activeColor + ' font-bold shadow-md'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${
+                  activeTab === item.id
+                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
               >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
+                }`}>
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                </span>
+                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                {activeTab === item.id && !sidebarCollapsed && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {!sidebarCollapsed && <p className="px-3 mt-5 mb-2 text-[10px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Management</p>}
+          <div className="space-y-0.5">
+            {[
+              { id: 'feedback', label: 'Feedbacks', icon: 'rate_review' },
+              { id: 'chat', label: 'Messages', badge: '2', icon: 'forum' },
+              { id: 'analytics', label: 'Analytics', icon: 'analytics' },
+              { id: 'profile', label: 'Company Profile', icon: 'business' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${
+                  activeTab === item.id
+                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
+                }`}>
+                  <span className="material-symbols-outlined">{item.icon}</span>
+                </span>
+                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                {item.badge && !sidebarCollapsed && (
+                  <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[10px] font-extrabold text-white shadow-md">
+                    {item.badge}
+                  </span>
+                )}
+                {activeTab === item.id && !item.badge && !sidebarCollapsed && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                )}
               </button>
             ))}
           </div>
         </nav>
 
-        <div className="p-6 border-t border-white/10 mt-auto">
+        {/* Sidebar Footer */}
+<div className="p-4 border-t border-white/10 space-y-1">
           <button
-            onClick={() => setActiveTab('feedback')}
-            className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-all duration-300 text-left"
+            onClick={() => { toast('Help center coming soon.'); }}
+            title={sidebarCollapsed ? 'Help Center' : undefined}
+            className={`w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
           >
-            <span className="material-symbols-outlined text-md">help</span>
-            <span className="text-sm font-medium">Help Center</span>
+            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70">
+              <span className="material-symbols-outlined w-4 h-4">help</span>
+            </span>
+            {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
           </button>
           <button
-            onClick={() => {
-              localStorage.removeItem('authToken');
-              localStorage.removeItem('refreshToken');
-              localStorage.removeItem('user');
-              window.location.href = '/login';
-            }}
-            className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-all duration-300 text-left"
+            onClick={handleLogout}
+            title={sidebarCollapsed ? 'Logout' : undefined}
+            className={`w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
           >
-            <span className="material-symbols-outlined text-md">logout</span>
-            <span className="text-sm font-medium">Logout</span>
+            <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20">
+              <span className="material-symbols-outlined w-4 h-4">logout</span>
+            </span>
+            {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main content pane */}
-      <main className="flex min-h-screen flex-col md:ml-[240px]">
+      {/* Main Content Area */}
+      <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
 
-        {/* Header bar */}
-        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 md:px-6"
-          style={{ background: 'var(--bg-navbar)', borderColor: 'var(--border-color)' }}>
-          <div className="flex-1 max-w-xl">
-            <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+        {/* Header Section - Admin Layout Style */}
+        <header
+          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
+          style={{
+            background: 'var(--bg-navbar)',
+            borderColor: 'var(--border-color)',
+          }}
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed((value) => !value)}
+              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
+                <span>Employer</span>
+                <span>/</span>
+                <span>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}</span>
+              </div>
+              <h1 className="truncate text-[16px] font-semibold tracking-tight text-[var(--text-primary)]">
+                {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Search Bar */}
+            <label
+              className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
+              style={{ borderColor: 'var(--border-color)' }}
+            >
+              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
+                <Search className="h-4.5 w-4.5 flex-none" />
+              </span>
               <input
-                className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
-                style={{ borderColor: 'var(--border-color)' }}
-                placeholder="Global Search: search candidates, departments, or postings..."
+                type="text"
+                placeholder="Search candidates, departments, or postings..."
+                className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -381,102 +542,111 @@ const EmployerDashboard = () => {
                   }
                 }}
               />
-            </div>
-          </div>
+            </label>
 
-          <div className="flex items-center gap-4 ml-6 relative">
-            {/* Dark Mode Toggle Switch */}
+            {/* Dark Mode Toggle */}
             <button
+              type="button"
               onClick={() => {
                 setDarkMode(!darkMode);
                 toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
               }}
-              className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
-                }`}
-              title="Toggle Dark/Light Mode"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+              aria-label="Toggle dark mode"
             >
-              <span className="material-symbols-outlined text-xl">
-                {darkMode ? 'light_mode' : 'dark_mode'}
-              </span>
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            {/* Notification bell */}
-            <button
-              onClick={() => {
-                setShowNotifications(!showNotifications);
-                if (!showNotifications) handleMarkNotificationsRead();
-              }}
-              className="p-2 text-gray-400 hover:bg-gray-100/10 rounded-full relative transition-all duration-300 hover:scale-105"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white animate-pulse"></span>
-              )}
-            </button>
-
-            {/* Notifications Dropdown card */}
-            {showNotifications && (
-              <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-                }`}>
-                <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
-                  <h4 className="font-bold text-sm">Recruiter Notifications</h4>
-                  <button
-                    onClick={handleClearAllNotifications}
-                    className="text-xs text-astu-red hover:underline font-bold"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className="space-y-2.5 max-h-60 overflow-y-auto">
-                  {notifications.map(notif => (
-                    <div key={notif.id} className={`flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50/10 transition-colors`}>
-                      <div className="space-y-0.5">
-                        <p className="text-xs leading-normal">{notif.text}</p>
-                        <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
+            {/* Notification Bell */}
+            <div className="relative" data-admin-notifications>
+              <button
+                type="button"
+                onClick={() => setNotificationOpen((v) => !v)}
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+              >
+                <Bell className="h-4 w-4" />
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">
+                    {unreadNotificationsCount}
+                  </span>
+                )}
+              </button>
+              {notificationOpen && (
+                <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                  <div className="border-b border-[var(--border-color)] px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
+                        <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
                       </div>
                       <button
-                        onClick={() => handleRemoveNotification(notif.id)}
-                        className="text-gray-400 hover:text-gray-600"
+                        onClick={handleClearAllNotifications}
+                        className="text-xs font-semibold text-[#E24B4A] hover:underline"
                       >
-                        <span className="material-symbols-outlined text-sm">close</span>
+                        Clear All
                       </button>
                     </div>
-                  ))}
-                  {notifications.length === 0 && (
-                    <p className="text-xs text-gray-500 italic text-center py-4">No new recruit alerts.</p>
-                  )}
+                  </div>
+                  <div className="space-y-1 p-2">
+                    {notifications.map((notif) => (
+                      <div key={notif.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
+                        <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notif.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm text-[var(--text-primary)]">{notif.text}</p>
+                          <p className="text-xs text-[var(--text-secondary)]">{notif.time}</p>
+                        </div>
+                        <button
+                          onClick={() => handleRemoveNotification(notif.id)}
+                          className="flex-shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                    {notifications.length === 0 && (
+                      <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">No new recruit alerts.</p>
+                    )}
+                  </div>
+                  <div className="border-t border-[var(--border-color)] px-4 py-3">
+                    <button type="button" className="text-sm font-semibold text-[#003580] hover:underline">
+                      View all notifications →
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
-            <div className="h-8 w-[1px] bg-gray-250 mx-2"></div>
-
-            {/* Company profile head */}
-            <div
-              onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
-            >
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold">{profile.name}</p>
-                <p className="text-xs text-gray-500 font-semibold">HR Manager</p>
-              </div>
-              <img
-                alt="Profile"
-                className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-sm object-cover"
-                src={profile.logoUrl}
-              />
+            {/* Profile Dropdown */}
+            <div className="relative" data-admin-menu>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
+                  {initials}
+                </div>
+                <div className="hidden text-left sm:block">
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{profile.name}</div>
+                  <div className="text-[11px] text-[var(--text-secondary)]">HR Manager</div>
+                </div>
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              </button>
+              {menuOpen && menu}
             </div>
           </div>
         </header>
 
-        {/* Dynamic routing wrapper */}
-        <div className="flex-grow">
+{/* Main Content */}
+         <main className="h-[calc(100vh-4rem)] overflow-y-auto bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
 
               {/* Welcome banner */}
               <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
-                {/* Admin shell spacing handled by global CSS */}
                 <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                   <div className="max-w-2xl space-y-2">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU corporate network</span>
@@ -807,9 +977,8 @@ const EmployerDashboard = () => {
               darkMode={darkMode}
             />
           )}
-        </div>
-
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
