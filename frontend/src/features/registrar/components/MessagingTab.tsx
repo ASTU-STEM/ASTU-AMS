@@ -24,6 +24,11 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const [subject, setSubject] = useState('');
   const [text, setText] = useState('');
   const [isBroadcast, setIsBroadcast] = useState(false);
+  const templates = [
+    { label: 'Tracer Reminder', subject: 'Tracer Survey Action Required', text: 'Please submit your current employment, salary range, and location update for ASTU accreditation reporting.' },
+    { label: 'Document Ready', subject: 'Digital Document Ready', text: 'Your requested transcript/certificate has been verified, digitally signed, and is ready for download.' },
+    { label: 'Exit Survey', subject: 'Graduation Exit Survey', text: 'Complete the mandatory exit survey to activate alumni services, job board access, and document requests.' },
+  ];
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,14 +52,31 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className={`p-6 border rounded-3xl shadow-sm transition-all duration-300 ${
+    <div className="space-y-4">
+      <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${
         darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
       }`}>
-        <h3 className="text-base font-bold mb-4">Broadcast & Direct Messaging</h3>
+        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Broadcast & Direct Messaging</h3>
+            <p className="mt-1 text-xs text-slate-400">Send tracer reminders, document notices, and accreditation communications.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {[
+              { label: 'Queued', value: '18' },
+              { label: 'Delivered', value: '94%' },
+              { label: 'SMS Ready', value: 'On' },
+            ].map(item => (
+              <div key={item.label} className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                <p className="text-sm font-bold text-gray-900">{item.value}</p>
+                <p className="text-[10px] font-semibold text-gray-500">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
         
         <form onSubmit={handleSend} className="space-y-4">
-          <div className="flex gap-6 items-center border-b border-gray-150 pb-3">
+          <div className="flex flex-wrap items-center gap-4 border-b border-gray-150 pb-3">
             <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
               <input
                 type="radio"
@@ -81,7 +103,24 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
             </label>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-wrap gap-2">
+            {templates.map(template => (
+              <button
+                key={template.label}
+                type="button"
+                onClick={() => {
+                  setSubject(template.subject);
+                  setText(template.text);
+                  toast.success(`${template.label} template loaded.`);
+                }}
+                className="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] font-bold text-gray-600 hover:bg-white"
+              >
+                {template.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                 Recipient / Target Group
@@ -142,13 +181,13 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
         </form>
       </div>
 
-      <div className={`p-6 border rounded-3xl shadow-sm transition-all duration-300 ${
+      <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${
         darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
       }`}>
-        <h3 className="text-base font-bold mb-4">Outbox & Broadcast History</h3>
-        <div className="space-y-4">
+        <h3 className="mb-4 text-sm font-semibold">Outbox & Broadcast History</h3>
+        <div className="space-y-3">
           {messages.map((msg) => (
-            <div key={msg.id} className={`p-4 border rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
+            <div key={msg.id} className={`flex flex-col items-start justify-between gap-4 rounded-[10px] border p-4 md:flex-row md:items-center ${
               darkMode ? 'bg-slate-800/40 border-slate-800' : 'bg-gray-50/50 border-gray-150'
             }`}>
               <div className="space-y-1">

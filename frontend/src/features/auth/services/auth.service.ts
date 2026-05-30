@@ -33,6 +33,8 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('astu_ams_user_role');
+      window.dispatchEvent(new Event('astu-auth-changed'));
     }
     return Promise.reject(error);
   }
@@ -53,7 +55,9 @@ export const authService = {
         }
         if (data.data.user) {
           localStorage.setItem('user', JSON.stringify(data.data.user));
+          localStorage.setItem('astu_ams_user_role', data.data.user.role);
         }
+        window.dispatchEvent(new Event('astu-auth-changed'));
       }
 
       return data;
@@ -96,6 +100,8 @@ export const authService = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('astu_ams_user_role');
+      window.dispatchEvent(new Event('astu-auth-changed'));
     }
   },
 
@@ -123,6 +129,8 @@ export const authService = {
       localStorage.removeItem('authToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('astu_ams_user_role');
+      window.dispatchEvent(new Event('astu-auth-changed'));
       throw new Error('Session expired. Please login again.');
     }
   },

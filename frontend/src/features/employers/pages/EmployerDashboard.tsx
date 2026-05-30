@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Types
@@ -41,7 +41,7 @@ const EmployerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Theme Dark / Light mode
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
@@ -109,6 +109,19 @@ const EmployerDashboard = () => {
       trendIcon: 'assignment_turned_in',
       trendColor: 'astu-green'
     }
+  ];
+
+  const hiringControlCards = [
+    { icon: 'post_add', title: 'Recruitment System', desc: 'Create jobs or internships, set GPA, department, skill, and experience rules.', tab: 'post_job' },
+    { icon: 'person_search', title: 'Talent Search Engine', desc: 'Find alumni by skills, GPA, department, experience, location, and AI rank.', tab: 'search_talent' },
+    { icon: 'event_available', title: 'Interview Scheduling', desc: 'Move candidates from shortlist to interview with notes and next steps.', tab: 'candidates' },
+    { icon: 'handshake', title: 'Partnership Module', desc: 'Track internships, sponsorship interest, research collaboration, and event support.', tab: 'feedback' },
+  ];
+
+  const demandSignals = [
+    { label: 'Top Skill Demand', value: 'Cloud + DevOps', tone: 'text-astu-navy', icon: 'monitoring' },
+    { label: 'Time to Hire', value: '18 days', tone: 'text-astu-green', icon: 'timer' },
+    { label: 'Interview Queue', value: '7 candidates', tone: 'text-astu-red', icon: 'calendar_month' },
   ];
 
   // Callback triggers
@@ -239,13 +252,18 @@ const EmployerDashboard = () => {
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
   return (
-    <div className={`min-h-screen font-body-md overflow-x-hidden transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
-      }`}>
+    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar navigation */}
-      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+      <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
         }`}>
         <div className="p-6 mt-6">
           <div className="flex items-center gap-3">
@@ -312,17 +330,17 @@ const EmployerDashboard = () => {
       </aside>
 
       {/* Main content pane */}
-      <main className="md:ml-[280px] min-h-screen flex flex-col">
+      <main className="flex min-h-screen flex-col md:ml-[240px]">
 
         {/* Header bar */}
-        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
-          }`}>
+        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 md:px-6"
+          style={{ background: 'var(--bg-navbar)', borderColor: 'var(--border-color)' }}>
           <div className="flex-1 max-w-xl">
             <div className="relative group">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
               <input
-                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white'
-                  }`}
+                className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
+                style={{ borderColor: 'var(--border-color)' }}
                 placeholder="Global Search: search candidates, departments, or postings..."
                 value={searchQuery}
                 onChange={(e) => {
@@ -421,25 +439,24 @@ const EmployerDashboard = () => {
         </header>
 
         {/* Dynamic routing wrapper */}
-        <div className="p-4 md:p-10 flex-grow">
+        <div className="flex-grow p-4 md:p-6">
           {activeTab === 'dashboard' && (
-            <div className="space-y-8">
+            <div className="space-y-6">
 
               {/* Welcome banner */}
-              <section className="relative bg-gradient-to-r from-astu-navy via-indigo-900 to-indigo-950 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-xl">
-                <div className="absolute right-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-                  <div className="max-w-2xl space-y-3">
-                    <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU Corporate Network</span>
-                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Welcome back, {profile.name}! 👋</h2>
-                    <p className="text-sm opacity-90 leading-relaxed">
+              <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                  <div className="max-w-2xl space-y-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU corporate network</span>
+                    <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Welcome back, {profile.name}</h2>
+                    <p className="text-sm leading-relaxed text-white/85">
                       Your current vacancy listings have collected <span className="font-bold text-astu-green">{totalApplicationsCount} candidate files</span>.
                       Complete your graduate feedback forms to help align our technical curricula with industry standards.
                     </p>
                   </div>
                   <button
                     onClick={() => setActiveTab('post_job')}
-                    className="bg-gradient-to-r from-astu-red to-red-600 hover:scale-105 px-6 py-3 rounded-xl font-extrabold text-xs tracking-wide text-white shadow-md transition-all whitespace-nowrap flex items-center gap-1.5"
+                    className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
                   >
                     <span className="material-symbols-outlined">add</span>
                     Post Career Placement
@@ -448,7 +465,7 @@ const EmployerDashboard = () => {
               </section>
 
               {/* Stats Counters Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat) => (
                   <div
                     key={stat.id}
@@ -459,8 +476,8 @@ const EmployerDashboard = () => {
                       if (stat.id === 2) setActiveTab('candidates');
                       if (stat.id === 4) setActiveTab('feedback');
                     }}
-                    className={`relative rounded-3xl p-6 border shadow-sm transition-all duration-300 cursor-pointer overflow-hidden group ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
-                      } ${hoveredCard === stat.id ? '-translate-y-2 shadow-md' : ''}`}
+                    className={`group relative cursor-pointer overflow-hidden rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
+                      } ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
                   >
                     <div className="relative z-10 space-y-3">
                       <div className="flex items-start justify-between">
@@ -483,11 +500,11 @@ const EmployerDashboard = () => {
               </div>
 
               {/* Active Jobs list overview */}
-              <section className={`p-8 border rounded-3xl shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+              <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
                 }`}>
-                <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-150">
+                <div className="mb-4 flex items-center justify-between border-b border-gray-150 pb-2">
                   <div>
-                    <h3 className="text-lg font-bold">Your Posted Positions</h3>
+                    <h3 className="text-sm font-semibold">Your Posted Positions</h3>
                     <p className="text-xs text-gray-500 font-semibold">Quick updates on recent vacancies</p>
                   </div>
                   <button
@@ -502,7 +519,7 @@ const EmployerDashboard = () => {
                   {jobs.slice(0, 2).map((job) => (
                     <div
                       key={job.id}
-                      className={`p-5 border rounded-2xl transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50/50 border-gray-200'
+                    className={`rounded-[10px] border p-4 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50/50 border-gray-200'
                         }`}
                     >
                       <div className="flex justify-between items-start">
@@ -519,8 +536,45 @@ const EmployerDashboard = () => {
                 </div>
               </section>
 
+              <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                }`}>
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold">Employer Feature Control</h3>
+                    <p className="mt-1 text-xs text-gray-500">Recruitment, talent search, feedback, and partnership actions in one place.</p>
+                  </div>
+                  <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
+                    Hiring workflow active
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  {hiringControlCards.map((card) => (
+                    <button
+                      key={card.title}
+                      onClick={() => setActiveTab(card.tab)}
+                      className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-800/70 hover:bg-slate-800' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                    >
+                      <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
+                      <h4 className="mt-3 text-sm font-bold">{card.title}</h4>
+                      <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {demandSignals.map((signal) => (
+                    <div key={signal.label} className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                      </div>
+                      <p className="mt-2 text-lg font-extrabold">{signal.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
               {/* Employer Analytics Graphs Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <AnalyticsChart
                   type="area"
                   title="Application Submissions"
@@ -569,8 +623,8 @@ const EmployerDashboard = () => {
               </div>
 
               {/* Quick actions panel */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <section className={`p-6 border rounded-3xl shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
                   }`}>
                   <h3 className="font-bold text-md mb-4">Recruitment Quick Actions</h3>
                   <div className="grid grid-cols-2 gap-4 text-xs font-bold">
@@ -601,7 +655,7 @@ const EmployerDashboard = () => {
                   </div>
                 </section>
 
-                <section className={`p-6 border rounded-3xl shadow-sm ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
                   }`}>
                   <h3 className="font-bold text-md mb-4 font-body-md">Recruitment Partner Perks</h3>
                   <p className="text-xs text-gray-500 leading-relaxed mb-4">

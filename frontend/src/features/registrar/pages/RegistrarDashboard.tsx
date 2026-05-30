@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Types
@@ -29,7 +29,7 @@ const RegistrarDashboard = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   // Theme Dark / Light mode
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
@@ -95,6 +95,19 @@ const RegistrarDashboard = () => {
       trendIcon: 'schedule',
       trendColor: 'astu-red'
     }
+  ];
+
+  const registrarControlCards = [
+    { icon: 'verified_user', title: 'Verification Center', desc: 'Approve alumni activation, validate identity, and resolve duplicate requests.', tab: 'verification' },
+    { icon: 'draw', title: 'Document Workflow', desc: 'Transcript approval, certificate validation, digital signature, and request queues.', tab: 'documents' },
+    { icon: 'analytics', title: 'Tracer Control', desc: 'Track 6/12/24-month survey responses, exports, and accreditation-ready reports.', tab: 'reporting' },
+    { icon: 'admin_panel_settings', title: 'RBAC & Audit Readiness', desc: 'Registrar, employer, alumni, access control, audit logs, and monitoring cues.', tab: 'records' },
+  ];
+
+  const complianceSignals = [
+    { label: 'ETA Employment KPI', value: '84%', icon: 'query_stats', tone: 'text-astu-green' },
+    { label: 'Pending Documents', value: documentRequestsCount.toString(), icon: 'pending_actions', tone: 'text-astu-red' },
+    { label: 'SIS Heartbeat', value: 'Active', icon: 'database', tone: 'text-astu-navy' },
   ];
 
   // Callbacks
@@ -209,14 +222,19 @@ const RegistrarDashboard = () => {
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
   return (
-    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col justify-between transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
-      }`}>
+    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
       <Toaster position="top-right" reverseOrder={false} />
 
       <div className="flex-grow">
         {/* Sidebar navigation */}
-        <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+        <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
           }`}>
           <div className="p-6 mt-6">
             <div className="flex items-center gap-3">
@@ -282,17 +300,17 @@ const RegistrarDashboard = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="md:ml-[280px] min-h-screen flex flex-col justify-between">
+        <main className="flex min-h-screen flex-col justify-between md:ml-[240px]">
           <div>
             {/* Header bar */}
-            <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
-              }`}>
+            <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 md:px-6"
+              style={{ background: 'var(--bg-navbar)', borderColor: 'var(--border-color)' }}>
               <div className="flex-1 max-w-xl">
                 <div className="relative group">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                   <input
-                    className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
-                      }`}
+                    className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
+                    style={{ borderColor: 'var(--border-color)' }}
                     placeholder="Search verified records, transcripts, or graduates..."
                     type="text"
                     onChange={(e) => {
@@ -380,24 +398,23 @@ const RegistrarDashboard = () => {
             </header>
 
             {/* Dynamic tabs routing */}
-            <div className="p-4 md:p-10 flex-grow">
+            <div className="flex-grow p-4 md:p-6">
               {activeTab === 'dashboard' && (
-                <div className="space-y-8">
+                <div className="space-y-6">
 
                   {/* Welcome banner */}
-                  <section className="relative bg-gradient-to-r from-astu-navy via-emerald-900 to-emerald-950 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-xl">
-                    <div className="absolute right-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-                      <div className="max-w-2xl space-y-3">
-                        <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU SIS Integration</span>
-                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Institutional Registrar Panel 🏛️</h2>
-                        <p className="text-sm opacity-90 leading-relaxed">
+                  <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+                    <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                      <div className="max-w-2xl space-y-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU SIS integration</span>
+                        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Institutional Registrar Panel</h2>
+                        <p className="text-sm leading-relaxed text-white/85">
                           Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
                         </p>
                       </div>
                       <button
                         onClick={() => setActiveTab('data_integration')}
-                        className="bg-gradient-to-r from-astu-red to-red-600 hover:scale-105 px-6 py-3 rounded-xl font-extrabold text-xs tracking-wide text-white shadow-md transition-all whitespace-nowrap flex items-center gap-1.5"
+                        className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
                       >
                         <span className="material-symbols-outlined">cloud_upload</span>
                         Batch Upload CSV
@@ -406,7 +423,7 @@ const RegistrarDashboard = () => {
                   </section>
 
                   {/* Stats Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                     {stats.map((stat) => (
                       <div
                         key={stat.id}
@@ -417,7 +434,7 @@ const RegistrarDashboard = () => {
                           if (stat.id === 3) setActiveTab('verification');
                           if (stat.id === 4) setActiveTab('documents');
                         }}
-                        className={`relative bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm transition-all duration-300 cursor-pointer overflow-hidden group ${hoveredCard === stat.id ? '-translate-y-2 shadow-md' : ''}`}
+                        className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
                       >
                         <div className="relative z-10 space-y-3">
                           <div className="flex items-start justify-between">
@@ -440,7 +457,7 @@ const RegistrarDashboard = () => {
                   </div>
 
                   {/* Action Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {[
                       { icon: 'people', title: 'SIS Records Management', desc: 'Browse full lists, edit academic GPAs, or archive old folders.', tab: 'records' },
                       { icon: 'cloud_upload', title: 'Excel/CSV Scaffolding', desc: 'Process bulk file datasets and send automated sign-up emails.', tab: 'data_integration' },
@@ -449,7 +466,7 @@ const RegistrarDashboard = () => {
                       <div
                         key={idx}
                         onClick={() => setActiveTab(act.tab)}
-                        className="group p-6 bg-white border border-gray-200/60 rounded-3xl hover:shadow-md hover:border-astu-navy/30 transition-all cursor-pointer text-center space-y-4"
+                        className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-white p-5 text-center transition-all hover:border-astu-navy/30 hover:shadow-md space-y-4"
                       >
                         <div className="mx-auto w-12 h-12 rounded-2xl bg-astu-navy/10 flex items-center justify-center group-hover:bg-astu-navy/20 transition-colors text-astu-navy">
                           <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
@@ -462,8 +479,44 @@ const RegistrarDashboard = () => {
                     ))}
                   </div>
 
+                  <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-gray-900">Registrar Feature Control</h3>
+                        <p className="mt-1 text-xs text-gray-500">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
+                      </div>
+                      <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
+                        Accreditation ready
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      {registrarControlCards.map((card) => (
+                        <button
+                          key={card.title}
+                          onClick={() => setActiveTab(card.tab)}
+                          className="rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+                        >
+                          <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
+                          <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
+                          <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                      {complianceSignals.map((signal) => (
+                        <div key={signal.label} className="rounded-[10px] border border-gray-200 bg-white p-4">
+                          <div className="flex items-center gap-2">
+                            <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                          </div>
+                          <p className="mt-2 text-lg font-extrabold text-gray-900">{signal.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
                   {/* Charts & Graphs Section */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                  <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <AnalyticsChart
                       type="bar"
                       title="Graduate Import Trends"

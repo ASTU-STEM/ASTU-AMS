@@ -10,6 +10,9 @@ interface CompanyProfileTabProps {
 
 export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, onSave, darkMode }) => {
   const [formData, setFormData] = useState<CompanyProfile>({ ...profile });
+  const [premiumListing, setPremiumListing] = useState(false);
+  const [partnerships, setPartnerships] = useState<string[]>(['Internship agreements']);
+  const [verificationSubmitted, setVerificationSubmitted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -36,27 +39,48 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
     toast.success('Company logo updated!');
   };
 
+  const togglePartnership = (item: string) => {
+    setPartnerships(prev => prev.includes(item) ? prev.filter(value => value !== item) : [...prev, item]);
+  };
+
   return (
-    <div className={`max-w-4xl mx-auto rounded-3xl p-8 border shadow-sm transition-all duration-300 ${
+    <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${
       darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
     }`}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-150 mb-8 gap-4">
+      <div className="mb-4 flex flex-col justify-between gap-4 border-b border-gray-150 pb-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-2xl font-bold">Company Profile</h3>
+          <h3 className="text-lg font-semibold">Company Profile</h3>
           <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>Manage your corporate credentials and recruiting contacts</p>
         </div>
         <button
           onClick={handleSubmit}
-          className="px-6 py-2.5 bg-astu-navy hover:bg-astu-navy/90 text-white font-semibold rounded-xl transition-all hover:scale-105 shadow-md whitespace-nowrap"
+          className="whitespace-nowrap rounded-md bg-astu-navy px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-astu-navy/90"
         >
           Save Profile
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-4">
+        {[
+          { icon: 'verified', label: 'Employer Status', value: verificationSubmitted ? 'Under review' : 'Verified Partner', tone: 'text-astu-green' },
+          { icon: 'workspace_premium', label: 'Premium Profile', value: premiumListing ? 'Sponsored listing' : 'Standard listing', tone: 'text-[#B87900]' },
+          { icon: 'handshake', label: 'Partnerships', value: `${partnerships.length} active`, tone: 'text-astu-navy' },
+          { icon: 'policy', label: 'Data Agreement', value: 'NDA ready', tone: 'text-astu-red' },
+        ].map(item => (
+          <div key={item.label} className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50'}`}>
+            <div className="flex items-center gap-2">
+              <span className={`material-symbols-outlined ${item.tone}`}>{item.icon}</span>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+            </div>
+            <p className="mt-2 text-sm font-bold">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         
         {/* Logo and registration block */}
-        <div className={`flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl border transition-all ${
+        <div className={`flex flex-col items-center gap-4 rounded-[10px] border p-4 transition-all sm:flex-row ${
           darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-100'
         }`}>
           <div className="relative group cursor-pointer" onClick={triggerMockLogoChange}>
@@ -71,7 +95,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
           </div>
           <div className="flex-1 w-full space-y-2">
             <h4 className="text-lg font-bold">{formData.name}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className={`text-[10px] font-bold uppercase tracking-wider block ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Registration Number</label>
                 <input 
@@ -117,7 +141,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
         </div>
 
         {/* Physical Address and Site links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-1">
             <label className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Location / Address</label>
             <input
@@ -154,7 +178,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
             Primary HR Recruiter Contact
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-1">
               <label className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>HR Manager Name</label>
               <input
@@ -194,6 +218,67 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                 required
               />
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 border-t border-gray-150 pt-4 lg:grid-cols-2">
+          <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50'}`}>
+            <h4 className="flex items-center gap-2 text-sm font-bold">
+              <span className="material-symbols-outlined text-[#B87900]">campaign</span>
+              Sponsorship & Premium Employer Profile
+            </h4>
+            <p className="mt-2 text-xs text-gray-500">Promote priority vacancies, career fairs, scholarships, or department events.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setPremiumListing(value => !value);
+                toast.success(!premiumListing ? 'Premium employer listing activated.' : 'Premium employer listing paused.');
+              }}
+              className={`mt-4 rounded-md px-4 py-2 text-xs font-bold text-white ${premiumListing ? 'bg-astu-green' : 'bg-astu-navy'}`}
+            >
+              {premiumListing ? 'Premium Active' : 'Activate Premium Listing'}
+            </button>
+          </div>
+
+          <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50'}`}>
+            <h4 className="flex items-center gap-2 text-sm font-bold">
+              <span className="material-symbols-outlined text-astu-green">handshake</span>
+              Partnership Interests
+            </h4>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {['Internship agreements', 'Sponsorship of events', 'Research collaboration', 'Curriculum advisory'].map(item => (
+                <button
+                  type="button"
+                  key={item}
+                  onClick={() => togglePartnership(item)}
+                  className={`rounded-md border px-3 py-1.5 text-[11px] font-bold ${partnerships.includes(item) ? 'border-astu-green bg-astu-green/10 text-astu-green' : 'border-gray-200 bg-white text-gray-600'}`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50'}`}>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h4 className="flex items-center gap-2 text-sm font-bold">
+                <span className="material-symbols-outlined text-astu-red">fact_check</span>
+                Employer Verification Packet
+              </h4>
+              <p className="mt-1 text-xs text-gray-500">Submit business license, HR contact proof, and data-sharing agreement for verified access to alumni records.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setVerificationSubmitted(true);
+                toast.success('Verification packet submitted to ASTU admin.');
+              }}
+              className="rounded-md bg-astu-red px-4 py-2 text-xs font-bold text-white hover:bg-astu-red/90"
+            >
+              {verificationSubmitted ? 'Packet Submitted' : 'Submit Verification Packet'}
+            </button>
           </div>
         </div>
 

@@ -13,15 +13,14 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
-import DashboardLayout from "./layouts/DashboardLayout";
-import { LayoutDashboard, TrendingUp, FileText, BookOpen, Download } from "lucide-react";
+import ChatBot from "./components/ChatBot";
 
 function App() {
   return (
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<><HomePage /><ChatBot /></>} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />
@@ -33,7 +32,7 @@ function App() {
           element={
             <ProtectedRoute
               element={<AlumniDashboard />}
-              allowedRoles={["alumni"]}
+              allowedRoles={["ALUMNI"]}
             />
           }
         />
@@ -42,7 +41,7 @@ function App() {
           element={
             <ProtectedRoute
               element={<EmployerDashboard />}
-              allowedRoles={["employer"]}
+              allowedRoles={["EMPLOYER"]}
             />
           }
         />
@@ -51,7 +50,7 @@ function App() {
           element={
             <ProtectedRoute
               element={<RegistrarDashboard />}
-              allowedRoles={["registrar"]}
+              allowedRoles={["REGISTRAR"]}
             />
           }
         />
@@ -60,7 +59,7 @@ function App() {
           element={
             <ProtectedRoute
               element={<DepartmentDashboard />}
-              allowedRoles={["department", "admin"]}
+              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
             />
           }
         />
@@ -69,13 +68,18 @@ function App() {
           element={
             <ProtectedRoute
               element={<DepartmentDashboard />}
-              allowedRoles={["department", "admin"]}
+              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
             />
           }
         />
         <Route
           path="/admin/*"
-          element={<AdminRoutes />}
+          element={
+            <ProtectedRoute
+              element={<AdminRoutes />}
+              allowedRoles={["ADMIN"]}
+            />
+          }
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

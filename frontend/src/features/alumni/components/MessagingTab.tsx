@@ -13,12 +13,20 @@ interface MessagingTabProps {
 }
 
 export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
+  const [activeThread, setActiveThread] = useState('recruiter');
   const [messages, setMessages] = useState<AlumniMessage[]>([
     { id: 1, sender: 'Recruiter', senderName: 'Hilina Sileshi (HR Manager)', text: 'Hello! We reviewed your profile and matches for the Senior developer opening. Are you available for a brief introductory call tomorrow?', timestamp: '09:30 AM' },
     { id: 2, sender: 'Alumni', senderName: 'You', text: 'Hi Hilina! Yes, absolutely. I am available anytime after 2:00 PM.', timestamp: '10:05 AM' },
     { id: 3, sender: 'Recruiter', senderName: 'Hilina Sileshi (HR Manager)', text: 'Excellent! Let\'s schedule it for 2:30 PM. I\'ll send over a calendar invite soon.', timestamp: '10:15 AM' }
   ]);
   const [typedMessage, setTypedMessage] = useState('');
+  const threads = [
+    { id: 'recruiter', label: 'Recruiter', desc: 'Job interview and placement follow-up', initials: 'HS' },
+    { id: 'registrar', label: 'Registrar', desc: 'Transcript and verification updates', initials: 'RG' },
+    { id: 'mentor', label: 'Mentor', desc: 'Career guidance and booking notes', initials: 'MN' },
+  ];
+
+  const quickReplies = ['I am available after 2:00 PM.', 'Please send the document checklist.', 'Can we schedule a mentorship session?'];
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +57,41 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   };
 
   return (
-    <div className={`max-w-3xl mx-auto border rounded-3xl shadow-sm transition-all duration-300 flex flex-col h-[550px] overflow-hidden ${
+    <div className={`grid min-h-[620px] grid-cols-1 overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 lg:grid-cols-[280px_1fr] ${
       darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
     }`}>
+      <aside className="border-b border-gray-150 bg-gray-50 p-4 lg:border-b-0 lg:border-r">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold">Internal Messages</h3>
+          <p className="mt-1 text-xs text-gray-500">Recruiter, registrar, mentor, and system conversations.</p>
+        </div>
+        <div className="space-y-2">
+          {threads.map(thread => (
+            <button
+              key={thread.id}
+              onClick={() => {
+                setActiveThread(thread.id);
+                setMessages(prev => [
+                  ...prev,
+                  { id: Date.now(), sender: 'System', senderName: 'ASTU AMS', text: `Switched to ${thread.label} thread.`, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+                ]);
+              }}
+              className={`w-full rounded-[10px] border p-3 text-left transition-all ${activeThread === thread.id ? 'border-astu-navy bg-white shadow-sm' : 'border-gray-200 bg-transparent hover:bg-white'}`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-astu-navy/10 text-xs font-bold text-astu-navy">{thread.initials}</span>
+                <span>
+                  <span className="block text-xs font-bold">{thread.label}</span>
+                  <span className="block text-[10px] text-gray-500">{thread.desc}</span>
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </aside>
+      <div className="flex min-h-[620px] flex-col">
       {/* Thread Header */}
-      <div className="p-4 border-b border-gray-150 flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-gray-150 p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-astu-navy/15 flex items-center justify-center text-astu-navy font-bold shadow-sm">
             HS
@@ -96,8 +134,21 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
       {/* Message Input Form */}
       <form 
         onSubmit={handleSend}
-        className="p-4 border-t border-gray-150 flex gap-2"
+        className="border-t border-gray-150 p-4"
       >
+        <div className="mb-3 flex flex-wrap gap-2">
+          {quickReplies.map(reply => (
+            <button
+              key={reply}
+              type="button"
+              onClick={() => setTypedMessage(reply)}
+              className="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] font-semibold text-gray-600 hover:bg-white"
+            >
+              {reply}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
         <input
           type="text"
           value={typedMessage}
@@ -114,7 +165,9 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
         >
           <span className="material-symbols-outlined text-md">send</span>
         </button>
+        </div>
       </form>
+      </div>
     </div>
   );
 };

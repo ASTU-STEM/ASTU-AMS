@@ -11,6 +11,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const [formData, setFormData] = useState<AlumniProfile>({ ...profile });
   const [newSkill, setNewSkill] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const profileScore = Math.min(100, 45 + formData.skills.length * 5 + (formData.resume ? 15 : 0) + (formData.linkedInUrl ? 10 : 0) + (formData.gitHubUrl ? 10 : 0));
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -95,23 +96,40 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
+    <div className="bg-white rounded-[10px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-gray-200/60">
+      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Manage Profile</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Manage Profile</h3>
           <p className="text-sm text-gray-600">Keep your academic and professional accomplishments updated</p>
         </div>
         <button
           onClick={handleSubmit}
-          className="px-6 py-2.5 bg-astu-navy text-white font-semibold rounded-xl hover:bg-astu-navy/90 transition-all duration-300 shadow-md hover:scale-105"
+          className="rounded-md bg-astu-navy px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-astu-navy/90"
         >
           Save All Changes
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-4">
+        {[
+          { icon: 'verified_user', label: 'Identity Badge', value: 'Registrar verified', tone: 'text-astu-green' },
+          { icon: 'query_stats', label: 'Tracer Readiness', value: `${profileScore}% complete`, tone: 'text-astu-navy' },
+          { icon: 'work', label: 'Employer Visibility', value: formData.resume ? 'CV searchable' : 'Upload CV', tone: 'text-astu-red' },
+          { icon: 'school', label: 'SIS Sync', value: formData.studentId || 'Pending ID', tone: 'text-[#B87900]' },
+        ].map(item => (
+          <div key={item.label} className="rounded-[10px] border border-gray-200 bg-gray-50 p-4">
+            <div className="flex items-center gap-2">
+              <span className={`material-symbols-outlined ${item.tone}`}>{item.icon}</span>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+            </div>
+            <p className="mt-2 text-sm font-bold text-gray-900">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Photo and Bio header section */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 p-6 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100">
+        <div className="flex flex-col items-center gap-4 rounded-[10px] border border-gray-100 bg-gray-50 p-4 sm:flex-row">
           <div className="relative group cursor-pointer" onClick={handleAvatarChange}>
             <img
               src={formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80'}
@@ -141,7 +159,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
         </div>
 
         {/* Personal details grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Full Name</label>
             <input
@@ -191,13 +209,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
         </div>
 
         {/* Academic Details Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-100">
+        <div className="space-y-4 border-t border-gray-100 pt-4">
           <h4 className="text-md font-bold text-gray-900 flex items-center gap-2">
             <span className="material-symbols-outlined text-astu-navy">school</span>
             Academic Record (ASTU)
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-1 md:col-span-1">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Department</label>
               <select
@@ -246,7 +264,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             Current Employment Details
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Role / Title</label>
               <input
@@ -296,7 +314,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             Social Profiles (LinkedIn & GitHub)
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">LinkedIn URL</label>
               <div className="relative">
@@ -336,7 +354,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             Technical & Soft Skills
           </h4>
 
-          <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 space-y-4">
+          <div className="space-y-4 rounded-[10px] border border-gray-100 bg-gray-50 p-4">
             <div className="flex flex-wrap gap-2">
               {formData.skills.map((skill) => (
                 <span

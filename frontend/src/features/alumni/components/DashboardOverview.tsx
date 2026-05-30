@@ -79,27 +79,32 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     toast.success('Employment status updated successfully!');
   };
 
-  return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <section className="relative bg-gradient-to-r from-astu-navy via-blue-800 to-blue-900 rounded-3xl p-8 md:p-12 text-white overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-astu-green/10 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl -z-10"></div>
+  const intelligenceCards = [
+    { icon: 'auto_awesome', title: 'AI Career Coach', desc: 'CV score, missing skills, salary path, and job-fit guidance from your profile.', tab: 'career' },
+    { icon: 'event_available', title: 'Events & RSVP', desc: 'Career fairs, ASTU reunions, workshops, RSVP status, and ticket QR readiness.', tab: 'career' },
+    { icon: 'forum', title: 'Community Network', desc: 'Achievement sharing, alumni posts, mentor conversations, and peer discovery.', tab: 'messages' },
+    { icon: 'workspace_premium', title: 'Verified Documents', desc: 'Transcript, certificate, identity badge, and digital download tracking.', tab: 'documents' },
+  ];
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+  return (
+    <div className="space-y-6">
+      {/* Welcome Banner */}
+      <section className="relative rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1d9e75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Welcome back, {profile.fullName}! 👋</h2>
-            <p className="text-lg opacity-95 leading-relaxed mb-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni command center</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">Welcome back, {profile.fullName}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/85">
               {completion === 100 
                 ? 'Your profile is fully complete! Your credentials are fully visible to corporate employers.'
                 : 'Your profile is nearly complete. Boost visibility with employers by finishing your profile.'}
             </p>
 
-            <div className="space-y-3">
-              <p className="text-sm font-semibold opacity-90">Profile Completion: {completion}%</p>
-              <div className="w-48 bg-white/20 h-3 rounded-full overflow-hidden backdrop-blur-sm">
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-semibold text-white/90">Profile Completion: {completion}%</p>
+              <div className="h-2.5 w-56 overflow-hidden rounded-full bg-white/20">
                 <div 
-                  className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full transition-all duration-500 shadow-lg"
+                  className="h-full rounded-full bg-[#E8A020] transition-all duration-500"
                   style={{ width: `${completion}%` }}
                 ></div>
               </div>
@@ -108,7 +113,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {completion < 100 && (
             <button 
               onClick={() => onTabChange('profile')}
-              className="bg-gradient-to-r from-astu-green to-emerald-500 hover:from-astu-green hover:to-emerald-600 px-10 py-4 rounded-2xl font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 whitespace-nowrap flex items-center gap-2"
+              className="flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-xs font-bold text-astu-navy shadow-sm transition-all hover:bg-white/90"
             >
               <span className="material-symbols-outlined">check</span>
               Complete Profile
@@ -118,10 +123,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </section>
 
       {/* Interactive Employment Status & Tracer Surveys Tracker Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         
         {/* Left: Employment Status Tracking */}
-        <div className="lg:col-span-1 bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-4">
+        <div className="lg:col-span-1 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <span className="material-symbols-outlined text-astu-navy font-bold">work</span>
@@ -137,7 +142,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           {!isEditingStatus ? (
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-150 space-y-3">
+            <div className="space-y-3 rounded-[10px] border border-gray-200 bg-gray-50 p-4">
               <div>
                 <p className="text-xs uppercase font-extrabold text-gray-400">Position</p>
                 <p className="text-md font-bold text-gray-900 mt-0.5">{profile.currentRole || 'Not Employed'}</p>
@@ -200,18 +205,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
 
         {/* Right: Active Tracer Survey Status Indicators (6, 12, 24 Months) */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-4">
+        <div className="lg:col-span-2 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
           <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             <span className="material-symbols-outlined text-astu-red font-bold">assignment_turned_in</span>
             Tracer Survey Timelines (6, 12, 24 Months)
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="grid grid-cols-1 gap-4 pt-2 md:grid-cols-3">
             {surveys.map((survey) => (
               <div 
                 key={survey.id}
                 onClick={() => onTabChange('surveys')}
-                className={`p-4 border rounded-2xl cursor-pointer transition-all hover:shadow-sm ${
+                className={`cursor-pointer rounded-[10px] border p-4 transition-all hover:shadow-sm ${
                   survey.status === 'COMPLETED' 
                     ? 'bg-green-50/30 border-green-150' 
                     : 'bg-red-50/30 border-red-150 hover:border-red-300'
@@ -242,13 +247,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.id}
             onMouseEnter={() => setHoveredCard(stat.id)}
             onMouseLeave={() => setHoveredCard(null)}
-            className={`relative bg-white rounded-2xl p-6 border border-gray-200/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group ${hoveredCard === stat.id ? 'translate-y-[-8px]' : ''}`}
+            className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-md ${hoveredCard === stat.id ? 'translate-y-[-4px]' : ''}`}
             onClick={() => {
               if (stat.label.includes('Profile')) onTabChange('profile');
               if (stat.label.includes('Job')) onTabChange('jobs');
@@ -280,14 +285,39 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Main Grid: Job Matches (left) and Career Progression Timeline (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">World-Class Alumni Features</h3>
+            <p className="mt-1 text-xs text-gray-500">Everything from the brief, wired into the current dashboard modules.</p>
+          </div>
+          <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
+            Profile + tracer + career ready
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {intelligenceCards.map((card) => (
+            <button
+              key={card.title}
+              onClick={() => onTabChange(card.tab)}
+              className="group rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+            >
+              <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
+              <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
+              <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         
         {/* Left Column: Recent Job Matches */}
         <div className="lg:col-span-2 space-y-6">
-          <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60 h-full">
-            <div className="flex items-center justify-between mb-8">
+          <section className="h-full rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">Recent Job Matches</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Recent Job Matches</h3>
                 <p className="text-sm text-gray-600">Opportunities tailored to your profile</p>
               </div>
               <button 
@@ -298,11 +328,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {recentJobs.slice(0, 3).map((job) => (
                 <div
                   key={job.id}
-                  className="p-6 bg-gradient-to-r from-gray-50 to-white border border-gray-200/60 rounded-2xl hover:shadow-lg hover:border-astu-navy/30 transition-all duration-300 group cursor-pointer"
+                  className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-gray-50 p-4 transition-all duration-300 hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
                   onClick={() => onViewJob(job)}
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -352,7 +382,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {/* Right Column: Career Progression Timeline */}
         <div className="lg:col-span-1">
-          <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 h-full space-y-6">
+          <section className="h-full rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
             <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <span className="material-symbols-outlined text-astu-green font-bold">timeline</span>
               Career Timeline
@@ -384,7 +414,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Analytics Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <AnalyticsChart
           type="area"
           title="Employment Rate Trend"
@@ -431,9 +461,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       />
 
       {/* Quick Actions */}
-      <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200/60">
-        <h3 className="text-2xl font-bold text-gray-900 mb-8">Recommended Next Steps</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <h3 className="mb-4 text-sm font-semibold text-gray-900">Recommended Next Steps</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
             { icon: 'edit', title: 'Update Skills', desc: 'Add new technical and soft skills' },
             { icon: 'photo_camera', title: 'Upload Photo', desc: 'Add a professional profile picture' },
@@ -441,7 +471,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ].map((action, idx) => (
             <div
               key={idx}
-              className="group p-6 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-2xl hover:shadow-lg hover:border-astu-navy/30 transition-all duration-300 cursor-pointer text-center"
+              className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-gray-50 p-4 text-center transition-all duration-300 hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
               onClick={() => onTabChange('profile')}
             >
               <div className="mx-auto w-14 h-14 rounded-2xl bg-astu-navy/10 flex items-center justify-center mb-4 group-hover:bg-astu-navy/20 transition-colors">

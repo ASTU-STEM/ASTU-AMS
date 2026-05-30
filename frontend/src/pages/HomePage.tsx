@@ -16,6 +16,9 @@ import {
   Target,
   Users,
   BarChart3,
+  FileCheck2,
+  LockKeyhole,
+  MessageSquareText,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -64,6 +67,30 @@ const stakeholders = [
     route: "/department/dashboard",
     tint: "text-astu-green bg-astu-green/10",
   },
+  {
+    title: "For Registrar",
+    icon: FileCheck2,
+    points: [
+      "Verify alumni identities from SIS records.",
+      "Process transcript and certificate requests.",
+      "Broadcast tracer reminders and audit notices.",
+    ],
+    cta: "Open Registrar",
+    route: "/registrar/dashboard",
+    tint: "text-[#B87900] bg-[#E8A020]/15",
+  },
+  {
+    title: "For Admin",
+    icon: LockKeyhole,
+    points: [
+      "Govern users, roles, departments, and jobs.",
+      "Monitor system logs, backups, and security.",
+      "Coordinate institutional analytics and reports.",
+    ],
+    cta: "Admin Console",
+    route: "/admin/dashboard",
+    tint: "text-violet-700 bg-violet-100",
+  },
 ];
 
 const navSections = [
@@ -71,23 +98,8 @@ const navSections = [
   { label: "Stakeholders", id: "stakeholders" },
   { label: "Impact", id: "impact" },
   { label: "Gallery", id: "gallery" },
-  { label: "Proposal", id: "proposal" },
   { label: "Community", id: "community" },
   { label: "Events", id: "events" },
-];
-
-const searchItems = [
-  { label: "Go to Stakeholders section", type: "section", id: "stakeholders" },
-  { label: "Go to Impact section", type: "section", id: "impact" },
-  { label: "Go to Gallery section", type: "section", id: "gallery" },
-  { label: "Go to Proposal section", type: "section", id: "proposal" },
-  { label: "Go to Community section", type: "section", id: "community" },
-  { label: "Go to Events section", type: "section", id: "events" },
-  { label: "Open Alumni Portal", type: "route", route: "/alumni/dashboard" },
-  { label: "Open Employer Portal", type: "route", route: "/employer/dashboard" },
-  { label: "Open Registrar Portal", type: "route", route: "/registrar/dashboard" },
-  { label: "Open Department Portal", type: "route", route: "/department/dashboard" },
-  { label: "Open Admin Portal", type: "route", route: "/admin/dashboard" },
 ];
 
 const communityPosts = [
@@ -117,63 +129,6 @@ const events = [
     location: "Networking Hall",
     image:
       "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80",
-  },
-];
-
-const proposalBlocks = [
-  {
-    title: "Background & Rationale",
-    icon: ShieldCheck,
-    points: [
-      "Centralize fragmented alumni data across registrar and departments.",
-      "Provide verified tracer data for ETA and accreditation agencies.",
-      "Close curriculum-industry mismatch with real employer insights.",
-    ],
-  },
-  {
-    title: "Project Objectives",
-    icon: Target,
-    points: [
-      "Integrate registrar and ERP data into one digital ecosystem.",
-      "Automate 6, 12, and 24-month longitudinal tracer tracking.",
-      "Deliver mentorship, job board, and digital document services.",
-    ],
-  },
-  {
-    title: "Expected Outcomes",
-    icon: BarChart3,
-    points: [
-      "90%+ graduate tracking accuracy with audit-ready reports.",
-      "Department-level skill-gap analytics for curriculum upgrades.",
-      "Lower registrar bottlenecks through workflow automation.",
-    ],
-  },
-  {
-    title: "Methodology & Sprints",
-    icon: Layers,
-    points: [
-      "Agile SDLC with iterative two-week sprint cycles.",
-      "Pilot rollout with graduates and employer partners.",
-      "Capacity building for registrar and department staff.",
-    ],
-  },
-  {
-    title: "Technical Scope",
-    icon: Globe,
-    points: [
-      "Web platform with secure API layer and role-based access.",
-      "Tracer engine, employer portal, analytics, and SIS integration.",
-      "Extensible integration for Telebirr, email, and reporting tools.",
-    ],
-  },
-  {
-    title: "Sustainability Plan",
-    icon: Leaf,
-    points: [
-      "ICT handover, annual budgeting, and regular security audits.",
-      "Student-led DevOps internship for ongoing modernization.",
-      "Institutional policies to keep tracer data continuously updated.",
-    ],
   },
 ];
 
@@ -330,7 +285,7 @@ export default function HomePage() {
           </div>
 
           {/* Spacious clean text - exactly like the original large layout */}
-          <div className="relative z-20 mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28 lg:py-32 h-full flex items-center">
+          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-20 md:px-8 md:py-28 lg:py-32">
             <div className="max-w-3xl space-y-6">
               <span className="inline-block rounded-full bg-astu-red px-4 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-md">
                 {slides[currentSlide].tagline}
@@ -413,7 +368,7 @@ export default function HomePage() {
         </section>
 
         <section className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8">
-          <div className="grid overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl md:grid-cols-3">
+          <div className="grid overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl md:grid-cols-5">
             <article className="flex flex-col items-center gap-3 border-b border-outline-variant p-8 text-center md:border-b-0 md:border-r">
               <div className="rounded-full bg-astu-navy/10 p-3 text-astu-navy">
                 <Users className="h-5 w-5" />
@@ -435,6 +390,20 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-astu-navy">87%</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Employment Rate</p>
             </article>
+            <article className="flex flex-col items-center gap-3 border-t border-outline-variant p-8 text-center md:border-l md:border-t-0">
+              <div className="rounded-full bg-[#E8A020]/15 p-3 text-[#B87900]">
+                <FileCheck2 className="h-5 w-5" />
+              </div>
+              <h2 className="text-2xl font-bold text-astu-navy">6K+</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Digital Requests</p>
+            </article>
+            <article className="flex flex-col items-center gap-3 border-t border-outline-variant p-8 text-center md:border-l md:border-t-0">
+              <div className="rounded-full bg-violet-100 p-3 text-violet-700">
+                <MessageSquareText className="h-5 w-5" />
+              </div>
+              <h2 className="text-2xl font-bold text-astu-navy">24/7</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Engagement Hub</p>
+            </article>
           </div>
         </section>
 
@@ -446,7 +415,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {stakeholders.map((item) => {
               const Icon = item.icon;
               return (

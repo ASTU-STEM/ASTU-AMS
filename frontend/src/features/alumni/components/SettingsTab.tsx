@@ -9,6 +9,8 @@ interface SettingsTabProps {
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePreferences }) => {
   const [prefs, setPrefs] = useState<AlumniPreferences>({ ...preferences });
+  const [digest, setDigest] = useState('weekly');
+  const [donationEnabled, setDonationEnabled] = useState(false);
   const [passwords, setPasswords] = useState({
     currentPassword: '',
     newPassword: '',
@@ -49,24 +51,24 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Overview Intro Banner */}
-      <section className="bg-gradient-to-r from-slate-800 via-gray-900 to-slate-900 rounded-3xl p-8 text-white shadow-md relative overflow-hidden">
-        <div className="absolute right-0 bottom-0 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
-        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Account Preferences & Settings ⚙️</h2>
-        <p className="text-sm opacity-90 leading-relaxed mt-2">
+      <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni settings</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight">Account Preferences & Settings</h2>
+        <p className="mt-2 text-sm leading-relaxed text-white/85">
           Manage your secure password, configure automated notification digests, and control visibility standards of your verified academic information to prospective partner employers.
         </p>
       </section>
 
       {/* Form cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         
         {/* Left: Preferences Card */}
-        <div className="space-y-6">
+        <div className="space-y-4 xl:col-span-2">
           {/* Notification toggles */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="space-y-4 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <span className="material-symbols-outlined text-astu-navy">notifications</span>
               Notifications Preferences
             </h3>
@@ -78,7 +80,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                 { key: 'emailSurveys' as const, label: 'Tracer Survey Reminders', desc: 'Reminders when institutional tracer studies require submission.' },
                 { key: 'emailMentorship' as const, label: 'Mentorship Session Updates', desc: 'Alerts when peers or students accept scheduled requests.' }
               ].map(opt => (
-                <div key={opt.key} className="flex items-start justify-between gap-4 p-3 bg-gray-50 rounded-xl hover:bg-gray-100/50 transition-colors">
+                <div key={opt.key} className="flex items-start justify-between gap-4 rounded-[10px] bg-gray-50 p-3 transition-colors hover:bg-gray-100/50">
                   <div className="space-y-0.5">
                     <p className="text-xs font-bold text-gray-900">{opt.label}</p>
                     <p className="text-[10px] text-gray-500">{opt.desc}</p>
@@ -100,8 +102,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           </div>
 
           {/* Privacy controls */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="space-y-4 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
               <span className="material-symbols-outlined text-astu-red">shield</span>
               Privacy & Directory Visibility
             </h3>
@@ -112,7 +114,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                 { key: 'profileVisibleToEmployers' as const, label: 'Visible to Partner Employers', desc: 'Allow companies to search your qualifications and CV.' },
                 { key: 'profileVisibleToPeers' as const, label: 'Visible in Peer Network', desc: 'Appear in alumni directory for mentorship networking.' }
               ].map(opt => (
-                <div key={opt.key} className="flex items-start justify-between gap-4 p-3 bg-gray-50 rounded-xl hover:bg-gray-100/50 transition-colors">
+                <div key={opt.key} className="flex items-start justify-between gap-4 rounded-[10px] bg-gray-50 p-3 transition-colors hover:bg-gray-100/50">
                   <div className="space-y-0.5">
                     <p className="text-xs font-bold text-gray-900">{opt.label}</p>
                     <p className="text-[10px] text-gray-500">{opt.desc}</p>
@@ -132,13 +134,56 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               ))}
             </div>
           </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span className="material-symbols-outlined text-astu-green">schedule_send</span>
+                Tracer Reminder Engine
+              </h3>
+              <p className="mt-2 text-xs text-gray-600">Choose how often ASTU can remind you about 6, 12, and 24-month surveys.</p>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {['instant', 'weekly', 'monthly'].map(option => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      setDigest(option);
+                      toast.success(`Tracer digest set to ${option}.`);
+                    }}
+                    className={`rounded-md border px-3 py-2 text-xs font-bold capitalize ${digest === option ? 'border-astu-green bg-astu-green/10 text-astu-green' : 'border-gray-200 bg-gray-50 text-gray-600'}`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <span className="material-symbols-outlined text-[#B87900]">volunteer_activism</span>
+                Donation & Alumni Support
+              </h3>
+              <p className="mt-2 text-xs text-gray-600">Enable Telebirr-ready scholarship and department support prompts.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setDonationEnabled((value) => !value);
+                  toast.success(!donationEnabled ? 'Donation prompts enabled.' : 'Donation prompts paused.');
+                }}
+                className={`mt-4 rounded-md px-4 py-2 text-xs font-bold text-white ${donationEnabled ? 'bg-astu-green' : 'bg-astu-navy'}`}
+              >
+                {donationEnabled ? 'Support Prompts Enabled' : 'Enable Donation Prompts'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Right: Security & Password Management */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-3xl p-6 border border-gray-200/60 shadow-sm space-y-6">
+          <div className="space-y-5 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                 <span className="material-symbols-outlined text-astu-navy">lock</span>
                 Security Management
               </h3>

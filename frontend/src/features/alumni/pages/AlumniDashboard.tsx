@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -53,7 +53,7 @@ const AlumniDashboard = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   // Theme Dark / Light mode
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Core Data States
   const [profile, setProfile] = useState<AlumniProfile>(getAlumniProfile());
@@ -311,13 +311,18 @@ const AlumniDashboard = () => {
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
   return (
-    <div className={`min-h-screen font-body-md overflow-x-hidden flex flex-col transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
-      }`}>
+    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 h-full flex flex-col z-40 shadow-2xl w-[280px] hidden md:flex transition-all duration-300 ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-astu-navy'
+      <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
         }`}>
         <div className="p-6 mt-6">
           <div className="flex items-center gap-3">
@@ -380,17 +385,17 @@ const AlumniDashboard = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="md:ml-[280px] min-h-screen flex flex-col">
+      <main className="flex min-h-screen flex-col md:ml-[240px]">
 
         {/* Header Section */}
-        <header className={`sticky top-0 z-50 flex justify-between items-center w-full px-4 md:px-10 h-16 border-b transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200/50 shadow-sm'
-          }`}>
+        <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 md:px-6"
+          style={{ background: 'var(--bg-navbar)', borderColor: 'var(--border-color)' }}>
           <div className="flex-1 max-w-xl">
             <div className="relative group">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
               <input
-                className={`w-full pl-10 pr-4 py-2 text-sm rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-850 border-slate-700 text-white focus:bg-slate-800' : 'bg-gray-100/80 border-gray-200 focus:bg-white text-gray-900'
-                  }`}
+                className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
+                style={{ borderColor: 'var(--border-color)' }}
                 placeholder="Search alumni, companies, or mentors..."
                 type="text"
                 onChange={(e) => {
@@ -488,7 +493,7 @@ const AlumniDashboard = () => {
         </header>
 
         {/* Dynamic Inner Tab View */}
-        <div className="p-4 md:p-10 flex-grow">
+        <div className="flex-grow p-4 md:p-6">
           {activeTab === 'dashboard' && (
             <DashboardOverview
               profile={profile}
