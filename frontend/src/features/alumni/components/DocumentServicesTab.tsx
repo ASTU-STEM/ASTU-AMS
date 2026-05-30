@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { DocumentRequest } from '../types/alumni.types';
 import toast from 'react-hot-toast';
+import { FileDown, Shield, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface DocumentServicesTabProps {
   documentRequests: DocumentRequest[];
   onRequestDocument: (type: DocumentRequest['type'], notes?: string) => void;
 }
 
-const DOC_TYPES: { value: DocumentRequest['type']; icon: string; desc: string }[] = [
-  { value: 'Official Transcript', icon: 'description', desc: 'Official academic transcript with grades and coursework' },
-  { value: 'Degree Verification', icon: 'school', desc: 'Degree completion and verification letter' },
-  { value: 'Temporary Certificate', icon: 'assignment', desc: 'Provisional graduation certificate' },
-  { value: 'English Medium Certificate', icon: 'public', desc: 'Medium of instruction certificate' },
+const DOC_TYPES: { value: DocumentRequest['type']; icon: string; desc: string; turnaround: string }[] = [
+  { value: 'Official Transcript', icon: 'description', desc: 'Official academic transcript with grades and coursework', turnaround: '2-3 business days' },
+  { value: 'Degree Verification', icon: 'school', desc: 'Degree completion and verification letter', turnaround: '1-2 business days' },
+  { value: 'Temporary Certificate', icon: 'assignment', desc: 'Provisional graduation certificate', turnaround: 'Same day' },
+  { value: 'English Medium Certificate', icon: 'public', desc: 'Medium of instruction certificate', turnaround: '1 business day' },
 ];
 
 const STATUS_CONFIG: Record<DocumentRequest['status'], { bg: string; text: string; dot: string; border: string }> = {
@@ -118,37 +119,43 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {/* Document Type Selector */}
               <div className="space-y-2">
-                <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Document Type</label>
-                <div className="space-y-2">
-                  {DOC_TYPES.map(doc => (
-                    <button
-                      key={doc.value}
-                      type="button"
-                      onClick={() => setDocType(doc.value)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 ${
-                        docType === doc.value
-                          ? 'border-[#003366] bg-[#003366]/5 shadow-sm ring-1 ring-[#003366]/20'
-                          : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30 hover:bg-[#003366]/5'
-                      }`}
-                    >
-                      <span className="text-xl flex-shrink-0">{doc.icon}</span>
-                      <div className="min-w-0">
-                        <p className={`text-xs font-bold ${docType === doc.value ? 'text-[#003366]' : 'text-[var(--text-primary)]'}`}>
-                          {doc.value}
-                        </p>
-                        <p className="text-[10px] text-[var(--text-secondary)] truncate">{doc.desc}</p>
-                      </div>
-                      {docType === doc.value && (
-                        <div className="ml-auto flex-shrink-0 w-5 h-5 rounded-full bg-[#003366] flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
+  <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Document Type</label>
+  <div className="space-y-2">
+    {DOC_TYPES.map(doc => (
+      <button
+        key={doc.value}
+        type="button"
+        onClick={() => setDocType(doc.value)}
+        className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 ${
+          docType === doc.value
+            ? 'border-[#003366] bg-[#003366]/5 shadow-sm ring-1 ring-[#003366]/20'
+            : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30 hover:bg-[#003366]/5'
+        }`}
+      >
+        <span className={`material-symbols-outlined text-xl flex-shrink-0 ${docType === doc.value ? 'text-[#003366]' : 'text-[var(--text-secondary)]'}`}>
+          {doc.icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className={`text-xs font-bold ${docType === doc.value ? 'text-[#003366]' : 'text-[var(--text-primary)]'}`}>
+            {doc.value}
+          </p>
+          <p className="text-[10px] text-[var(--text-secondary)] truncate">{doc.desc}</p>
+        </div>
+        <div className="flex-shrink-0 text-right">
+          <span className="text-[9px] font-medium text-[var(--text-secondary)] bg-[var(--bg-card)] px-2 py-0.5 rounded">
+            <Clock className="inline h-2.5 w-2.5 mr-0.5" />
+            {doc.turnaround}
+          </span>
+        </div>
+        {docType === doc.value && (
+          <div className="ml-auto flex-shrink-0 w-5 h-5 rounded-full bg-[#003366] flex items-center justify-center">
+            <CheckCircle2 className="h-3 w-3 text-white" />
+          </div>
+        )}
+      </button>
+    ))}
+  </div>
+</div>
 
               {/* Reason / Address */}
               <div className="space-y-2">
@@ -168,37 +175,33 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 shadow-md ${
+                className={`w-full py-3 rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 shadow-md flex items-center justify-center gap-2 ${
                   isSubmitting
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-[#003366] to-[#004d99] hover:from-[#00264d] hover:to-[#003366] hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
                 } text-white`}
               >
                 {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Processing...
-                  </span>
+                  </>
                 ) : (
-                  <span className="flex items-center justify-center gap-2">
+                  <>
                     Submit Request
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </span>
+                    <FileDown className="h-3.5 w-3.5" />
+                  </>
                 )}
               </button>
 
               {/* Info Note */}
-              <div className="bg-[#003366]/5 border border-[#003366]/10 rounded-xl p-3 flex items-start gap-2.5">
-                <svg className="w-4 h-4 text-[#003366] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-[10px] text-[#003366]/80 leading-relaxed font-medium">
-                  Processing typically takes 3-5 business days. You will receive email notifications at each stage.
+              <div className="bg-astu-navy/5 border border-astu-navy/10 rounded-xl p-3 flex items-start gap-2.5">
+                <Shield className="h-4 w-4 text-astu-navy flex-shrink-0 mt-0.5" />
+                <p className="text-[10px] text-astu-navy/80 leading-relaxed font-medium">
+                  All documents are verified by the ASTU Registrar. Processing time varies by document type.
                 </p>
               </div>
             </form>
@@ -253,6 +256,12 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                             {req.notes}
                           </p>
                         )}
+                        {req.status === 'Approved' && (
+                          <button className="mt-2 inline-flex items-center gap-1 rounded-md bg-astu-green px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-astu-green/90 transition-all">
+                            <FileDown className="h-3 w-3" />
+                            Download Secure PDF
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -260,7 +269,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
               })}
               {documentRequests.length === 0 && (
                 <div className="py-12 text-center space-y-3">
-                  <span className="text-4xl block">📭</span>
+                  <AlertCircle className="mx-auto h-10 w-10 text-[var(--text-secondary)]" />
                   <p className="text-xs font-bold text-[var(--text-secondary)]">No document requests yet</p>
                   <p className="text-[10px] text-[var(--text-muted)]">Submit your first request using the form</p>
                 </div>
@@ -277,6 +286,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                     <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Date</th>
                     <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Status</th>
                     <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Notes</th>
+                    <th className="px-5 py-3 text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-color)]">
@@ -301,13 +311,23 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                           {req.notes || 'Under registrar validation.'}
                         </span>
                       </td>
+                      <td className="px-5 py-4">
+                        {req.status === 'Approved' ? (
+                          <button className="inline-flex items-center gap-1 rounded-md bg-astu-green px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-astu-green/90 transition-all">
+                            <FileDown className="h-3 w-3" />
+                            Download
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-[var(--text-muted)]">-</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                   {documentRequests.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-5 py-16 text-center">
+                      <td colSpan={6} className="px-5 py-16 text-center">
                         <div className="space-y-2">
-                          <span className="text-4xl block">📭</span>
+                          <AlertCircle className="mx-auto h-10 w-10 text-[var(--text-secondary)]" />
                           <p className="text-xs font-bold text-[var(--text-secondary)]">No document requests logged</p>
                           <p className="text-[10px] text-[var(--text-muted)]">Submit your first request using the form on the left</p>
                         </div>

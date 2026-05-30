@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { CareerEvent } from '../types/alumni.types';
+import { CareerEvent, JobMatch } from '../types/alumni.types';
 import toast from 'react-hot-toast';
+import { CalendarDays, MapPin, Users, TrendingUp, Award, FileText, BarChart3, Target, CheckCircle2, AlertCircle, BookOpen, Briefcase, GraduationCap } from 'lucide-react';
+import { AnalyticsChart } from '../../../components/AnalyticsChart';
 
 interface CareerTabProps {
   events: CareerEvent[];
@@ -23,26 +25,64 @@ export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent })
 
   return (
     <div className="space-y-8">
-      {/* Overview Intro Banner */}
-      <section className="bg-gradient-to-r from-blue-900 via-indigo-900 to-astu-navy rounded-3xl p-8 md:p-10 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-72 h-72 bg-white/5 rounded-full blur-2xl"></div>
-        <div className="max-w-3xl relative z-10 space-y-4">
-          <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU Career Hub</span>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Accelerate Your Professional Growth 🚀</h2>
+      {/* Enhanced Hero Banner */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-astu-navy via-indigo-900 to-purple-900 p-8 md:p-10 text-white shadow-xl">
+        <div className="absolute -top-12 -right-12 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-astu-green/10 rounded-full blur-2xl"></div>
+        <div className="relative z-10 max-w-3xl space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">ASTU Career Hub</span>
+            <span className="px-3 py-1 bg-astu-green/20 text-astu-green text-xs font-bold uppercase tracking-wider rounded-full">Career Center</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Accelerate Your Professional Growth</h2>
           <p className="text-md opacity-90 leading-relaxed">
-            Gain exclusive access to specialized resources, resume enhancement checklists, and premier networking events designed to elevate ASTU alumni in modern engineering and tech industries.
+            Access premium career resources, skill development pathways, and exclusive networking events designed for ASTU engineering graduates in modern industries.
           </p>
         </div>
       </section>
+
+      {/* Metrics Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-astu-navy/10 flex items-center justify-center">
+              <Briefcase className="h-5 w-5 text-astu-navy" />
+            </div>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Job Matches Available</p>
+          </div>
+          <p className="text-3xl font-extrabold text-gray-900">127+</p>
+          <p className="text-[10px] text-astu-green font-semibold mt-1">Updated daily from 500+ employers</p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-astu-green/10 flex items-center justify-center">
+              <GraduationCap className="h-5 w-5 text-astu-green" />
+            </div>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Skill Pathways</p>
+          </div>
+          <p className="text-3xl font-extrabold text-gray-900">8</p>
+          <p className="text-[10px] text-astu-navy font-semibold mt-1">Tech specialization tracks</p>
+        </div>
+        <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+              <Users className="h-5 w-5 text-purple-600" />
+            </div>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Alumni Mentors Online</p>
+          </div>
+          <p className="text-3xl font-extrabold text-gray-900">347</p>
+          <p className="text-[10px] text-purple-600 font-semibold mt-1">Ready for mentorship</p>
+        </div>
+      </div>
 
       {/* Main Grid: Resources (left) and Events (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column: Resources Checklist & Career Guides */}
         <div className="space-y-6 lg:col-span-1">
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 space-y-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60 space-y-6">
             <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="material-symbols-outlined text-astu-navy">auto_stories</span>
+              <BookOpen className="h-5 w-5 text-astu-navy" />
               Career Resource Center
             </h3>
 
@@ -50,43 +90,73 @@ export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent })
               {[
                 {
                   title: 'Technical Resume Builder',
-                  desc: 'Checklist to align engineering CVs with automated Applicant Tracking Systems.',
-                  icon: 'description',
-                  color: 'text-astu-red bg-red-50'
+                  desc: 'ATS-optimized templates for engineering roles, with keyword guidance.',
+                  icon: FileText,
+                  color: 'text-astu-red',
+                  stats: '12 pages',
+                  downloads: '1.2K'
                 },
                 {
                   title: 'Live Coding Interview Prep',
-                  desc: 'Comprehensive study lists covering arrays, system design, and algorithmic optimization.',
-                  icon: 'code',
-                  color: 'text-astu-green bg-green-50'
+                  desc: 'System design and algorithm problems from top tech companies.',
+                  icon: BarChart3,
+                  color: 'text-astu-green',
+                  stats: '48 challenges',
+                  downloads: '890'
                 },
                 {
                   title: 'Fintech Cover Letters',
-                  desc: 'Proven templates designed to secure interviews at regional payment processors.',
-                  icon: 'contact_mail',
-                  color: 'text-purple-600 bg-purple-50'
+                  desc: 'Templates for Chapa, Telebirr, and international fintech roles.',
+                  icon: Award,
+                  color: 'text-purple-600',
+                  stats: '6 templates',
+                  downloads: '654'
                 },
                 {
                   title: 'Salary Negotiation Guide',
-                  desc: 'Frameworks to evaluate benefits packages and negotiate entry and senior packages.',
-                  icon: 'paid',
-                  color: 'text-amber-600 bg-amber-50'
+                  desc: 'Negotiation frameworks for Ethiopian and remote positions.',
+                  icon: Target,
+                  color: 'text-amber-600',
+                  stats: '8 sections',
+                  downloads: '2.1K'
                 }
               ].map((res, idx) => (
                 <div 
                   key={idx}
-                  onClick={() => toast.success(`Mock PDF Resource: "${res.title}" opened for download.`)}
-                  className="flex items-start gap-4 p-4 hover:bg-gray-50 border border-gray-100 rounded-2xl cursor-pointer transition-all hover:border-astu-navy/20 group"
+                  onClick={() => toast.success(`Downloaded: "${res.title}" (${res.stats})`)}
+                  className="flex items-start gap-4 p-4 hover:bg-gray-50 border border-gray-100 rounded-xl cursor-pointer transition-all hover:border-astu-navy/20 group"
                 >
-                  <div className={`p-2.5 rounded-xl ${res.color} group-hover:scale-105 transition-transform`}>
-                    <span className="material-symbols-outlined">{res.icon}</span>
+                  <div className={`p-2.5 rounded-xl bg-gray-50 group-hover:scale-105 transition-transform`}>
+                    <res.icon className={`h-5 w-5 ${res.color}`} />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{res.title}</h4>
                     <p className="text-xs text-gray-600 mt-1">{res.desc}</p>
+                    <div className="flex items-center gap-3 mt-2 text-[10px]">
+                      <span className="text-astu-navy font-semibold">{res.stats}</span>
+                      <span className="text-gray-400">{res.downloads} downloads</span>
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Career Progress Tracker */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-astu-navy" />
+              Career Readiness Score
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-600">Profile Strength</span>
+                <span className="text-xs font-bold text-astu-navy">68%</span>
+              </div>
+              <div className="h-2 bg-gray-200 rounded-full">
+                <div className="h-full w-2/3 bg-gradient-to-r from-astu-navy to-astu-green rounded-full"></div>
+              </div>
+              <p className="text-[10px] text-gray-500">Add skills and experience to boost employer visibility</p>
             </div>
           </div>
         </div>

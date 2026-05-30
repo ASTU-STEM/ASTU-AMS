@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
+import ChatBot from "../components/ChatBot";
 
 import astuLogo from "../assets/logos/astu-icon.jpeg";
 import gallery1 from "../assets/imgs/astu-building.jpg";
@@ -816,6 +817,7 @@ export default function HomePage() {
 
         </div>
       </footer>
+      <ChatBot />
     </div>
   );
 }

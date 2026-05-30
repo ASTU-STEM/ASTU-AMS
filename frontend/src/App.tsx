@@ -13,14 +13,13 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
-import ChatBot from "./components/ChatBot";
 
 function App() {
   return (
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<><HomePage /><ChatBot /></>} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />
