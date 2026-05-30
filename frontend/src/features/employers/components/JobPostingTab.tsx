@@ -15,6 +15,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
   const [isPosting, setIsPosting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingJobId, setEditingJobId] = useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'Open' | 'Closed'>('all');
   const [formData, setFormData] = useState({
     title: '',
     type: 'Full-Time' as EmployerJob['type'],
@@ -27,16 +28,10 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const skills = formData.skillsInput
-      .split(',')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
+    const skills = formData.skillsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
     if (isEditing && editingJobId !== null) {
-      // Find the original job to preserve certain fields
       const originalJob = jobs.find(job => job.id === editingJobId);
-      
-      // Update existing job
       const updatedJob: EmployerJob = {
         id: editingJobId,
         title: formData.title,
@@ -46,19 +41,17 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
         experienceRequired: formData.experienceRequired,
         description: formData.description,
         skillsRequired: skills,
-        status: originalJob?.status || 'Open', // Preserve existing status
-        applicationsCount: originalJob?.applicationsCount || 0, // Preserve existing count
-        shortlistedCount: originalJob?.shortlistedCount || 0, // Preserve existing count
-        viewsCount: originalJob?.viewsCount || 0, // Preserve existing count
-        postedDate: originalJob?.postedDate || '' // Preserve existing date
+        status: originalJob?.status || 'Open',
+        applicationsCount: originalJob?.applicationsCount || 0,
+        shortlistedCount: originalJob?.shortlistedCount || 0,
+        viewsCount: originalJob?.viewsCount || 0,
+        postedDate: originalJob?.postedDate || ''
       };
-      
       onUpdateJob(updatedJob);
       toast.success('Job listing updated successfully!');
       setIsEditing(false);
       setEditingJobId(null);
     } else {
-      // Create new job
       onPostJob({
         title: formData.title,
         type: formData.type,
@@ -73,15 +66,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
     }
 
     setIsPosting(false);
-    setFormData({
-      title: '',
-      type: 'Full-Time',
-      location: '',
-      salaryRange: '30,001 - 60,000 ETB/mo',
-      experienceRequired: '1-3 years',
-      description: '',
-      skillsInput: ''
-    });
+    setFormData({ title: '', type: 'Full-Time', location: '', salaryRange: '30,001 - 60,000 ETB/mo', experienceRequired: '1-3 years', description: '', skillsInput: '' });
   };
 
   const populateFormForEdit = (job: EmployerJob) => {
@@ -99,257 +84,302 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
     });
   };
 
+  const filteredJobs = activeFilter === 'all' ? jobs : jobs.filter(j => j.status === activeFilter);
+  const openCount = jobs.filter(j => j.status === 'Open').length;
+  const closedCount = jobs.filter(j => j.status === 'Closed').length;
+
+  const inputClass = "w-full text-xs p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] focus:bg-[var(--bg-card)] transition-all duration-200 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]";
+  const labelClass = "text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]";
+
+  const TYPE_COLORS: Record<string, string> = {
+    'Full-Time': 'bg-blue-50 text-blue-700 border-blue-200',
+    'Internship': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    'Contract': 'bg-amber-50 text-amber-700 border-amber-200',
+  };
+
   return (
     <div className="space-y-6">
-      
-      {/* Header Panel */}
-      <div className="flex justify-between items-center pb-4 border-b border-gray-200/50">
-        <div>
-          <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-            {isEditing ? 'Edit Job Listing' : 'Job Posting Scaffolder'}
-          </h3>
-          <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>
-            {isEditing ? 'Modify existing job posting details' : 'Create, close, and manage active career postings'}
-          </p>
+      {/* Header Banner */}
+      <section className="relative overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#003366] via-[#004080] to-[#006633] opacity-95"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#FFD700]/8 rounded-full translate-y-1/3 -translate-x-1/4"></div>
         </div>
-        <button
-          onClick={() => setIsPosting(!isPosting)}
-          className="px-6 py-2.5 bg-gradient-to-r from-astu-red to-red-600 text-white font-bold rounded-xl hover:scale-105 shadow-md transition-all flex items-center gap-1.5"
-        >
-          <span className="material-symbols-outlined">{isPosting ? 'close' : 'add'}</span>
-          {isPosting ? 'Close Form' : 'Post New Job'}
-        </button>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <span className="px-2.5 py-1 bg-white/15 text-[#FFD700] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-full backdrop-blur-sm">
+              Recruitment
+            </span>
+            <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              {isEditing ? 'Edit Job Listing' : 'Job Scaffolder'}
+            </h2>
+            <p className="text-sm text-white/80 max-w-lg">
+              {isEditing ? 'Modify existing job posting details and requirements.' : 'Create, manage, and track your career postings for ASTU graduates.'}
+            </p>
+          </div>
+          <button
+            onClick={() => { setIsPosting(!isPosting); if (isEditing) { setIsEditing(false); setEditingJobId(null); } }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 border border-white/15 shadow-lg hover:shadow-xl whitespace-nowrap"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              {isPosting ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />}
+            </svg>
+            {isPosting ? 'Close Form' : 'New Job'}
+          </button>
+        </div>
+      </section>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Total Jobs', value: jobs.length, icon: 'work', color: 'blue' },
+          { label: 'Open Positions', value: openCount, icon: 'check_circle', color: 'emerald' },
+          { label: 'Closed', value: closedCount, icon: 'lock', color: 'gray' },
+        ].map((stat, idx) => (
+          <div key={idx} className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-3.5 shadow-sm">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="material-symbols-outlined text-base">{stat.icon}</span>
+              <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-700' :
+                stat.color === 'blue' ? 'bg-blue-50 text-blue-700' :
+                'bg-gray-100 text-gray-600'
+              }`}>{stat.label}</span>
+            </div>
+            <p className="text-xl font-extrabold text-[var(--text-primary)]">{stat.value}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Dynamic Job Posting Form */}
+      {/* Job Posting Form */}
       {isPosting && (
-        <form 
-          onSubmit={handleSubmit}
-          className={`p-6 border rounded-3xl shadow-sm transition-all duration-300 space-y-6 max-w-3xl mx-auto ${
-            darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
-          }`}
-        >
-          <h4 className="text-lg font-bold border-b pb-2">Enter Job Details</h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider">Job Title</label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className={`w-full text-sm p-3 rounded-xl border focus:outline-none ${
-                  darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-                }`}
-                placeholder="e.g. Senior Frontend React Developer"
-                required
-              />
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-[var(--border-color)] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003366] to-[#004d99] flex items-center justify-center shadow-md">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider">Job Format / Type</label>
-              <select
-                value={formData.type}
-                onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as EmployerJob['type'] }))}
-                className={`w-full text-sm p-3 rounded-xl border focus:outline-none font-semibold ${
-                  darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-                }`}
+            <div>
+              <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">
+                {isEditing ? 'Edit Job Details' : 'Create New Job Listing'}
+              </h3>
+              <p className="text-[10px] text-[var(--text-secondary)] font-semibold">Fill in the details to attract top ASTU talent</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-5 space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Job Title</label>
+                <input type="text" value={formData.title} onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))} className={inputClass} placeholder="e.g. Senior Frontend Developer" required />
+              </div>
+              <div className="space-y-1.5">
+                <label className={labelClass}>Job Type</label>
+                <select value={formData.type} onChange={e => setFormData(prev => ({ ...prev, type: e.target.value as EmployerJob['type'] }))} className={inputClass}>
+                  <option value="Full-Time">Full-Time</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Contract">Contract</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Location</label>
+                <input type="text" value={formData.location} onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))} className={inputClass} placeholder="e.g. Addis Ababa (Hybrid)" required />
+              </div>
+              <div className="space-y-1.5">
+                <label className={labelClass}>Salary Range</label>
+                <select value={formData.salaryRange} onChange={e => setFormData(prev => ({ ...prev, salaryRange: e.target.value }))} className={inputClass}>
+                  <option value="Under 15,000 ETB/mo">Under 15,000 ETB/mo</option>
+                  <option value="15,000 - 30,000 ETB/mo">15,000 - 30,000 ETB/mo</option>
+                  <option value="30,001 - 60,000 ETB/mo">30,001 - 60,000 ETB/mo</option>
+                  <option value="60,001 - 100,000 ETB/mo">60,001 - 100,000 ETB/mo</option>
+                  <option value="Over 100,000 ETB/mo">Over 100,000 ETB/mo</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className={labelClass}>Experience Level</label>
+                <select value={formData.experienceRequired} onChange={e => setFormData(prev => ({ ...prev, experienceRequired: e.target.value }))} className={inputClass}>
+                  <option value="Entry Level (0-1 years)">Entry Level (0-1 yrs)</option>
+                  <option value="Junior (1-3 years)">Junior (1-3 yrs)</option>
+                  <option value="Mid-Level (3-5 years)">Mid-Level (3-5 yrs)</option>
+                  <option value="Senior (5+ years)">Senior (5+ yrs)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className={labelClass}>Required Skills (comma separated)</label>
+              <input type="text" value={formData.skillsInput} onChange={e => setFormData(prev => ({ ...prev, skillsInput: e.target.value }))} className={inputClass} placeholder="e.g. React, TypeScript, Node.js, SQL" required />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className={labelClass}>Job Description & Responsibilities</label>
+              <textarea value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} className={`${inputClass} h-28 resize-none`} placeholder="Describe candidate expectations, duties, and project frameworks..." required />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => { setIsPosting(false); setIsEditing(false); setEditingJobId(null); setFormData({ title: '', type: 'Full-Time', location: '', salaryRange: '30,001 - 60,000 ETB/mo', experienceRequired: '1-3 years', description: '', skillsInput: '' }); }}
+                className="flex-1 py-3 border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all"
               >
-                <option value="Full-Time">Full-Time Placement</option>
-                <option value="Internship">Internship Placement</option>
-                <option value="Contract">Contract Placement</option>
-              </select>
+                Cancel
+              </button>
+              <button type="submit" className="flex-1 py-3 bg-gradient-to-r from-[#003366] to-[#004d99] hover:from-[#00264d] hover:to-[#003366] text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 shadow-md hover:shadow-lg">
+                {isEditing ? 'Update Listing' : 'Publish Job'}
+              </button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider">Location</label>
-              <input
-                type="text"
-                value={formData.location}
-                onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                className={`w-full text-sm p-3 rounded-xl border focus:outline-none ${
-                  darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-                }`}
-                placeholder="e.g. Addis Ababa (Hybrid) or Remote"
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider">Salary Range Bracket</label>
-              <select
-                value={formData.salaryRange}
-                onChange={e => setFormData(prev => ({ ...prev, salaryRange: e.target.value }))}
-                className={`w-full text-sm p-3 rounded-xl border focus:outline-none font-semibold ${
-                  darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-                }`}
-              >
-                <option value="Under 15,000 ETB/mo">Under 15,000 ETB/mo</option>
-                <option value="15,000 - 30,000 ETB/mo">15,000 - 30,000 ETB/mo</option>
-                <option value="30,001 - 60,000 ETB/mo">30,001 - 60,000 ETB/mo</option>
-                <option value="60,001 - 100,000 ETB/mo">60,001 - 100,000 ETB/mo</option>
-                <option value="Over 100,000 ETB/mo">Over 100,000 ETB/mo</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider">Experience Level</label>
-              <select
-                value={formData.experienceRequired}
-                onChange={e => setFormData(prev => ({ ...prev, experienceRequired: e.target.value }))}
-                className={`w-full text-sm p-3 rounded-xl border focus:outline-none font-semibold ${
-                  darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-                }`}
-              >
-                <option value="Entry Level (0-1 years)">Entry Level (0-1 years)</option>
-                <option value="Junior (1-3 years)">Junior (1-3 years)</option>
-                <option value="Mid-Level (3-5 years)">Mid-Level (3-5 years)</option>
-                <option value="Senior (5+ years)">Senior (5+ years)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold uppercase tracking-wider">Required Skills (Comma separated)</label>
-            <input
-              type="text"
-              value={formData.skillsInput}
-              onChange={e => setFormData(prev => ({ ...prev, skillsInput: e.target.value }))}
-              className={`w-full text-sm p-3 rounded-xl border focus:outline-none ${
-                darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-              }`}
-              placeholder="e.g. React, TypeScript, Node.js, SQL"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold uppercase tracking-wider">Job Description & Responsibilities</label>
-            <textarea
-              value={formData.description}
-              onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              className={`w-full text-sm p-3 rounded-xl border focus:outline-none h-32 resize-none ${
-                darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'
-              }`}
-              placeholder="Describe candidate expectations, duties, and project frameworks..."
-              required
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => {
-                setIsPosting(false);
-                setIsEditing(false);
-                setEditingJobId(null);
-                setFormData({
-                  title: '',
-                  type: 'Full-Time',
-                  location: '',
-                  salaryRange: '30,001 - 60,000 ETB/mo',
-                  experienceRequired: '1-3 years',
-                  description: '',
-                  skillsInput: ''
-                });
-              }}
-              className="flex-1 py-3 border border-gray-300 rounded-xl font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-3 bg-astu-navy text-white rounded-xl font-bold transition-all shadow-md"
-            >
-              {isEditing ? 'Update Job' : 'Post Career Opening'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       )}
 
-      {/* Jobs list grid */}
-      <div className="grid grid-cols-1 gap-4">
-        {jobs.map(job => (
-          <div
-            key={job.id}
-            className={`p-6 border rounded-3xl shadow-sm transition-all group flex flex-col md:flex-row md:items-center justify-between gap-6 ${
-              darkMode ? 'bg-slate-900 border-slate-800 text-white hover:border-slate-700' : 'bg-white border-gray-200/60 text-gray-900 hover:border-gray-300'
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2">
+        {[
+          { id: 'all' as const, label: 'All Jobs', count: jobs.length },
+          { id: 'Open' as const, label: 'Open', count: openCount },
+          { id: 'Closed' as const, label: 'Closed', count: closedCount },
+        ].map(f => (
+          <button
+            key={f.id}
+            onClick={() => setActiveFilter(f.id)}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 ${
+              activeFilter === f.id
+                ? 'bg-[#003366] text-white shadow-md'
+                : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[#003366]/30'
             }`}
           >
-            <div className="flex-1 space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="text-lg font-bold group-hover:text-astu-red transition-colors">{job.title}</h4>
-                  <span className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded inline-block mt-1 ${
-                    job.status === 'Open' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {job.status}
-                  </span>
-                </div>
-                <div className="text-right text-xs text-gray-500 font-semibold">
-                  Posted {job.postedDate}
-                </div>
-              </div>
+            {f.label}
+            <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${
+              activeFilter === f.id ? 'bg-white/20' : 'bg-[var(--bg-page)]'
+            }`}>{f.count}</span>
+          </button>
+        ))}
+      </div>
 
-              <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-600'} line-clamp-2`}>
-                {job.description}
-              </p>
+      {/* Jobs List */}
+      <div className="space-y-3">
+        {filteredJobs.map(job => (
+          <div key={job.id} className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+            {/* Job Header */}
+            <div className="p-5">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-lg font-extrabold text-[var(--text-primary)] tracking-tight">{job.title}</h4>
+                        <span className={`px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider rounded-full border ${
+                          job.status === 'Open' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
+                        }`}>{job.status}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)] font-medium">
+                        <span className="flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                          {job.location}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          {job.experienceRequired}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold border ${TYPE_COLORS[job.type] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                          {job.type}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] font-medium whitespace-nowrap">{job.postedDate}</span>
+                  </div>
 
-              {/* Stats and skills */}
-              <div className="flex flex-wrap items-center gap-4 text-xs">
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">visibility</span>
-                  {job.viewsCount} views
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">description</span>
-                  {job.applicationsCount} applications
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">check_circle</span>
-                  {job.shortlistedCount} shortlisted
-                </span>
+                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-2">{job.description}</p>
+
+                  {/* Skills */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {job.skillsRequired.map((skill, idx) => (
+                      <span key={idx} className="px-2 py-0.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-md text-[10px] font-bold text-[var(--text-secondary)]">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 pt-2 border-t border-[var(--border-color)]">
+                    <span className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] font-medium">
+                      <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      {job.viewsCount} views
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] font-medium">
+                      <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      {job.applicationsCount} applications
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] font-medium">
+                      <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      {job.shortlistedCount} shortlisted
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[10px] text-[var(--text-secondary)] font-medium">
+                      <svg className="w-3.5 h-3.5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      {job.salaryRange}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Job Actions */}
-            <div className="flex md:flex-col gap-2">
+            {/* Job Action Bar */}
+            <div className="px-5 py-3 border-t border-[var(--border-color)] bg-[var(--bg-page)]/50 flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => populateFormForEdit(job)}
-                className="px-3 py-2 bg-blue-50 border border-blue-200 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[10px] font-bold text-[var(--text-primary)] hover:border-blue-300 hover:text-blue-600 transition-all"
               >
-                <span className="material-symbols-outlined">edit</span>
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                 Edit
               </button>
               <button
                 onClick={() => {
                   if (window.confirm('Are you sure you want to delete this job listing?')) {
                     onDeleteJob(job.id);
-                    toast.success('Job listing deleted successfully!');
+                    toast.success('Job listing deleted.');
                   }
                 }}
-                className="px-3 py-2 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[10px] font-bold text-[var(--text-primary)] hover:border-red-300 hover:text-red-600 transition-all"
               >
-                <span className="material-symbols-outlined">delete</span>
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 Delete
               </button>
               <button
-                onClick={() => {
-                  onToggleJobStatus(job.id);
-                  toast.success(`Job status changed to: ${job.status === 'Open' ? 'Closed' : 'Open'}`);
-                }}
-                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                  job.status === 'Open' 
-                    ? 'bg-red-50 border border-red-200 text-astu-red hover:bg-red-100' 
-                    : 'bg-green-50 border border-green-200 text-green-700 hover:bg-green-100'
+                onClick={() => { onToggleJobStatus(job.id); toast.success(`Job ${job.status === 'Open' ? 'closed' : 'reopened'}.`); }}
+                className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                  job.status === 'Open'
+                    ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100'
+                    : 'bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100'
                 }`}
               >
-                {job.status === 'Open' ? 'Close Job' : 'Re-open'}
+                {job.status === 'Open' ? (
+                  <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                    Close
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Reopen
+                  </>
+                )}
               </button>
             </div>
           </div>
         ))}
-      </div>
 
+        {filteredJobs.length === 0 && (
+          <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-16 text-center">
+            <span className="material-symbols-outlined text-4xl block mb-3">work</span>
+            <p className="text-xs font-bold text-[var(--text-secondary)]">No {activeFilter !== 'all' ? activeFilter.toLowerCase() : ''} job listings found</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-1">Create your first job posting to start receiving applications</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

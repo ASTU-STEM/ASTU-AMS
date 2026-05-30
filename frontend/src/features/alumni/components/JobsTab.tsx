@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { JobMatch } from '../types/alumni.types';
 import toast from 'react-hot-toast';
+import { JobMatch } from '../types/alumni.types';
 
 interface JobsTabProps {
   jobs: JobMatch[];
@@ -8,7 +8,11 @@ interface JobsTabProps {
   onToggleSaveJob: (jobId: number) => void;
 }
 
-export const JobsTab: React.FC<JobsTabProps> = ({ jobs, onViewJob, onToggleSaveJob }) => {
+export const JobsTab: React.FC<JobsTabProps> = ({
+  jobs,
+  onViewJob,
+  onToggleSaveJob
+}) => {
   const [innerTab, setInnerTab] = useState<'all' | 'saved' | 'applied'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All');
@@ -20,43 +24,27 @@ export const JobsTab: React.FC<JobsTabProps> = ({ jobs, onViewJob, onToggleSaveJ
   const handleToggleSave = (e: React.MouseEvent, id: number, saved: boolean) => {
     e.stopPropagation();
     onToggleSaveJob(id);
-    toast.success(saved ? 'Removed from saved listings.' : 'Listing saved for later review!');
-  };
-
-  const getApplicationStatusBadge = (status?: string) => {
-    switch (status) {
-      case 'Offered':
-        return 'bg-[#1D9E75]/10 text-[#1D9E75] border border-[#1D9E75]/20';
-      case 'Interview Scheduled':
-        return 'bg-[#003366]/10 text-[#003366] border border-[#003366]/20';
-      case 'Under Review':
-        return 'bg-[#FFCC00]/10 text-[#92400E] border border-[#FFCC00]/30';
-      case 'Applied':
-      default:
-        return 'bg-gray-100 text-gray-600 border border-gray-200';
-    }
+    toast.success(
+      saved ? 'Removed from saved listings.' : 'Listing saved for later review!'
+    );
   };
 
   let tabJobs = jobs;
-  if (innerTab === 'saved') {
-    tabJobs = jobs.filter(j => j.saved);
-  } else if (innerTab === 'applied') {
-    tabJobs = jobs.filter(j => j.applied);
-  }
+  if (innerTab === 'saved') tabJobs = jobs.filter(j => j.saved);
+  else if (innerTab === 'applied') tabJobs = jobs.filter(j => j.applied);
 
-  const filteredJobs = tabJobs.filter((job) => {
+  const filteredJobs = tabJobs.filter(job => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchQuery.toLowerCase());
+      job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesLocation =
       selectedLocation === 'All' ||
       job.location.toLowerCase().includes(selectedLocation.toLowerCase());
 
-    const matchesFormat =
-      selectedFormat === 'All' ||
-      job.type === selectedFormat;
+    const matchesFormat = selectedFormat === 'All' || job.type === selectedFormat;
 
     return matchesSearch && matchesLocation && matchesFormat;
   });
@@ -64,215 +52,255 @@ export const JobsTab: React.FC<JobsTabProps> = ({ jobs, onViewJob, onToggleSaveJ
   const tabConfig = [
     { key: 'all' as const, label: 'Available Placements', icon: 'work' },
     { key: 'saved' as const, label: 'Saved Opportunities', icon: 'star' },
-    { key: 'applied' as const, label: 'My Applications', icon: 'task_alt' },
+    { key: 'applied' as const, label: 'My Applications', icon: 'task_alt' }
   ];
 
-  return (
-    <div className="space-y-6">
-      {/* ── Hero Banner with ASTU Branding ── */}
+return (
+       <div className="space-y-8 bg-gray-50/50 min-h-screen">
+      
+      {/* HERO SECTION */}
       <section
-        className="rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #003366 0%, #001a33 50%, #0d2b4d 100%)' }}
+        className="rounded-2xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #003366 0%, #001a33 50%, #0d2b4d 100%)'
+        }}
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFCC00]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="flex items-start gap-4">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:justify-between md:items-center gap-8">
+          <div className="flex flex-col sm:flex-row items-start gap-5">
             <img
               alt="ASTU Logo"
-              className="h-14 w-14 object-contain rounded-xl bg-white/10 p-1.5 border border-white/20 shadow-md flex-shrink-0"
+              className="h-16 w-16 object-contain rounded-xl bg-white p-1 border border-white/20 shadow-md"
               src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+              onError={(e) => {
+                // Fallback icon placeholder if your local image isn't loaded
+                (e.target as HTMLElement).style.display = 'none';
+              }}
             />
             <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFCC00]"></span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFCC00]/20 text-[#FFD700] text-xs font-bold uppercase tracking-widest rounded-full border border-[#FFCC00]/30">
+                <span className="w-2 h-2 rounded-full bg-[#FFCC00] animate-pulse"></span>
                 ASTU Corporate Careers
               </span>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-black tracking-tight">
                 Career Placement Board
               </h2>
-              <p className="text-sm text-white/70 leading-relaxed max-w-xl">
+              <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-2xl">
                 Discover career openings and internships mapped to your graduating major.
                 Apply with your ASTU verified credentials.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center">
-              <div className="text-2xl font-extrabold text-[#FFCC00]">{filteredJobs.length}</div>
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Positions</div>
+          <div className="flex gap-4 self-start md:self-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 text-center border border-white/10 min-w-[100px]">
+              <div className="text-3xl font-extrabold text-[#FFCC00]">
+                {filteredJobs.length}
+              </div>
+              <div className="text-xs font-bold uppercase tracking-wider text-white/60">
+                Positions
+              </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center">
-              <div className="text-2xl font-extrabold text-white">{jobs.filter(j => j.applied).length}</div>
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Applied</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 text-center border border-white/10 min-w-[100px]">
+              <div className="text-3xl font-extrabold text-white">
+                {jobs.filter(j => j.applied).length}
+              </div>
+              <div className="text-xs font-bold uppercase tracking-wider text-white/60">
+                Applied
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Sub-navigation Tabs ── */}
-      <div className="flex gap-1 border-b border-gray-200 bg-gray-50/50 rounded-xl p-1">
-        {tabConfig.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setInnerTab(tab.key)}
-            className={`flex-1 py-2.5 px-3 rounded-lg font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5 ${
-              innerTab === tab.key
-                ? 'bg-white text-[#003366] shadow-sm'
-                : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
-            }`}
-          >
-            <span className="material-symbols-outlined text-base">{tab.icon}</span>
-            {tab.label}
-          </button>
-        ))}
+      {/* FILTER TABS */}
+      <div className="flex p-1.5 bg-white rounded-xl border border-gray-200 shadow-sm gap-1">
+        {tabConfig.map(tab => {
+          const isActive = innerTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setInnerTab(tab.key)}
+              className={`flex-1 py-3 px-4 rounded-lg font-bold text-base md:text-lg flex items-center justify-center gap-2 transition-all duration-200 ${
+                isActive
+                  ? 'bg-[#003366] text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <span className={`material-symbols-outlined text-xl ${isActive ? 'text-[#FFCC00]' : ''}`}>
+                {tab.icon}
+              </span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* ── Search and Filters ── */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200/60">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="flex-1 relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+      {/* SEARCH & SELECT FILTERS */}
+      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="relative flex-1">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              search
+            </span>
             <input
-              type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by job title, skills, or company..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] focus:bg-white transition-all"
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search jobs, companies, or skills..."
+              className="w-full pl-11 pr-4 py-3 text-base border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] transition-all outline-none"
             />
           </div>
 
-          <select
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="w-full md:w-44 p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] focus:bg-white transition-all"
-          >
-            <option value="All">All Locations</option>
-            {locations.filter(l => l !== 'All').map(loc => (
-              <option key={loc} value={loc}>{loc}</option>
-            ))}
-          </select>
+          <div className="grid grid-cols-2 lg:flex gap-3">
+            <select
+              value={selectedLocation}
+              onChange={e => setSelectedLocation(e.target.value)}
+              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
+            >
+              <option value="All">📍 All Locations</option>
+              {locations.filter(l => l !== 'All').map(loc => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
 
-          <select
-            value={selectedFormat}
-            onChange={(e) => setSelectedFormat(e.target.value)}
-            className="w-full md:w-44 p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] focus:bg-white transition-all"
-          >
-            <option value="All">All Formats</option>
-            {formats.filter(f => f !== 'All').map(fmt => (
-              <option key={fmt} value={fmt}>{fmt}</option>
-            ))}
-          </select>
+            <select
+              value={selectedFormat}
+              onChange={e => setSelectedFormat(e.target.value)}
+              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
+            >
+              <option value="All">All Formats</option>
+              {formats.filter(f => f !== 'All').map(fmt => (
+                <option key={fmt} value={fmt}>{fmt}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* ── Job Cards ── */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{filteredJobs.length} Positions Found</p>
+      {/* JOB LISTINGS */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center px-1">
+          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+            {filteredJobs.length} Positions Found
+          </p>
         </div>
 
-        <div className="space-y-3">
-          {filteredJobs.map((job) => (
+        {filteredJobs.length === 0 ? (
+          <div className="text-center py-16 bg-white border rounded-2xl shadow-sm">
+            <span className="material-symbols-outlined text-5xl text-gray-300 mb-2">
+              find_in_page
+            </span>
+            <p className="text-gray-500 font-medium text-lg">No matching career listings found.</p>
+            <p className="text-gray-400 text-sm">Try tweaking your search keywords or filters.</p>
+          </div>
+        ) : (
+          filteredJobs.map(job => (
             <div
               key={job.id}
               onClick={() => onViewJob(job)}
-              className="bg-white border border-gray-200/60 rounded-2xl p-5 hover:shadow-md hover:border-[#003366]/15 transition-all duration-200 group cursor-pointer"
+              className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer relative group"
             >
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div className="flex-1 space-y-2.5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="text-base font-bold text-gray-900 group-hover:text-[#003366] transition-colors">{job.title}</h4>
-                      <p className="text-xs font-bold text-[#003366]">{job.company}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-md ${
-                        job.type === 'Internship'
-                          ? 'bg-[#FFCC00]/15 text-[#92400E]'
-                          : 'bg-[#003366]/10 text-[#003366]'
-                      }`}>
-                        {job.type}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                
+                <div className="space-y-3 flex-1 w-full">
+                  
+                  {/* Top line metadata */}
+                  <div className="flex items-center justify-between md:justify-start gap-3">
+                    <span className="px-2.5 py-1 bg-blue-50 text-[#003366] text-xs font-bold uppercase rounded-md tracking-wide">
+                      {job.type}
+                    </span>
+                    <span className="text-xs text-gray-400 font-medium">
+                      ⏱️ {job.postedDate}
+                    </span>
+                    
+                    {/* Floating Save Button on Mobile */}
+                    <button
+                      onClick={(e) => handleToggleSave(e, job.id, job.saved)}
+                      className="md:hidden p-2 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-yellow-500"
+                    >
+                      <span className={`material-symbols-outlined ${job.saved ? 'fill-yellow-400 text-yellow-500' : ''}`}>
+                        star
                       </span>
-                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] text-[10px] font-extrabold rounded-md">
-                        <span className="material-symbols-outlined text-[11px] font-bold">bolt</span>
-                        {job.match} Match
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => handleToggleSave(e, job.id, job.saved)}
-                        className={`p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0 ${
-                          job.saved ? 'text-[#FFCC00]' : 'text-gray-300'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-lg">{job.saved ? 'star' : 'star_border'}</span>
-                      </button>
-                    </div>
+                    </button>
                   </div>
 
-                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{job.description}</p>
+                  {/* Title & Company */}
+                  <div>
+                    <h4 className="text-2xl md:text-3xl font-bold text-gray-900 group-hover:text-[#003366] transition-colors">
+                      {job.title}
+                    </h4>
+                    <p className="text-lg font-semibold text-gray-600 mt-0.5">
+                      {job.company} — <span className="text-base font-normal text-gray-500">{job.location}</span>
+                    </p>
+                  </div>
 
-                  <div className="flex flex-wrap gap-3 pt-1 text-[11px] text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">location_on</span>
-                      {job.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">paid</span>
-                      {job.salary}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">schedule</span>
-                      {job.postedDate}
-                    </span>
+                  {/* Job description */}
+                  <p className="text-base md:text-lg text-gray-600 line-clamp-2 leading-relaxed">
+                    {job.description}
+                  </p>
+
+                  {/* Tech Stack Tags */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {job.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Metrics & Hiring Analytics Panel */}
+                  <div className="grid grid-cols-3 gap-2 max-w-sm pt-2 border-t border-gray-100 text-sm font-medium text-gray-500">
+                    <div>👀 <span className="text-gray-800 font-bold">{job.views}</span> Views</div>
+                    <div>📝 <span className="text-gray-800 font-bold">{job.applications}</span> Applied</div>
+                    <div>🎯 <span className="text-green-600 font-bold">{job.shortlisted}</span> Shortlisted</div>
                   </div>
                 </div>
 
-                <div className="flex md:flex-col items-stretch justify-center gap-2 w-full md:w-auto">
-                  {innerTab === 'applied' ? (
-                    <div className="text-right flex flex-col items-end gap-1">
-                      <span className="text-[10px] text-gray-400 font-extrabold uppercase">Status</span>
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold ${getApplicationStatusBadge(job.applicationStatus || 'Applied')}`}>
-                        {job.applicationStatus || 'Applied'}
-                      </span>
-                    </div>
-                  ) : (
+                {/* Desktop Action Column */}
+                <div className="flex md:flex-col items-center md:items-end justify-between w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 gap-4">
+                  <div className="text-left md:text-right">
+                    <div className="text-base text-gray-400 font-medium">Est. Monthly Salary</div>
+                    <div className="text-xl font-black text-gray-900">{job.salary}</div>
+                    <div className="text-sm text-gray-500 font-semibold">{job.experience}</div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Desktop Save Star Button */}
                     <button
-                      onClick={(e) => {
+                      onClick={(e) => handleToggleSave(e, job.id, job.saved)}
+                      className="hidden md:flex p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-400 hover:text-yellow-500"
+                      title={job.saved ? "Remove from saved" : "Save Opportunity"}
+                    >
+                      <span className={`material-symbols-outlined text-xl ${job.saved ? 'fill-yellow-400 text-yellow-400' : ''}`}>
+                        star
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={e => {
                         e.stopPropagation();
                         onViewJob(job);
                       }}
-                      className={`px-5 py-2.5 rounded-xl text-xs font-extrabold tracking-wide transition-all text-center ${
+                      className={`px-6 py-3 text-base font-bold rounded-xl shadow-sm whitespace-nowrap transition-all ${
                         job.applied
-                          ? 'bg-[#003366]/5 border border-[#003366]/20 text-[#003366]'
-                          : 'text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-[#003366] text-white hover:bg-[#002244]'
                       }`}
-                      style={!job.applied ? { background: 'linear-gradient(135deg, #003366, #001a33)' } : undefined}
                     >
                       {job.applied ? 'Applied ✓' : 'View & Apply'}
                     </button>
-                  )}
+                  </div>
                 </div>
+
               </div>
             </div>
-          ))}
-
-          {filteredJobs.length === 0 && (
-            <div className="text-center py-12 px-6 rounded-2xl bg-gray-50 border border-gray-200/60">
-              <div className="text-4xl mb-3 opacity-30">💼</div>
-              <p className="text-sm font-semibold text-gray-600">
-                {innerTab === 'saved'
-                  ? 'No saved listings yet. Star jobs to review them here.'
-                  : innerTab === 'applied'
-                    ? 'No applications tracked yet. Start applying to roles!'
-                    : 'No jobs match your selected filters.'}
-              </p>
-            </div>
-          )}
-        </div>
+          ))
+        )}
       </div>
     </div>
   );

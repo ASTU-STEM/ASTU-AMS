@@ -56,10 +56,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   };
 
   const sections = [
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
-    { id: 'privacy', label: 'Privacy', icon: '🛡️' },
-    { id: 'preferences', label: 'Preferences', icon: '⚙️' },
-    { id: 'security', label: 'Security', icon: '🔒' },
+    { id: 'notifications', label: 'Notifications', icon: 'notifications' },
+    { id: 'privacy', label: 'Privacy', icon: 'privacy_tip' },
+    { id: 'preferences', label: 'Preferences', icon: 'settings' },
+    { id: 'security', label: 'Security', icon: 'lock' },
   ];
 
   const ToggleSwitch: React.FC<{ enabled: boolean; onToggle: () => void; color?: string }> = ({ enabled, onToggle, color = '#003366' }) => (
@@ -70,9 +70,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       style={{ backgroundColor: enabled ? color : 'var(--border-color)' }}
     >
       <span
-        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out ${
-          enabled ? 'translate-x-5' : 'translate-x-0'
-        }`}
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'
+          }`}
       />
     </button>
   );
@@ -100,13 +99,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           </div>
           <div className="flex items-center gap-3">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-              <span className="text-xl block">📧</span>
+              <span className="material-symbols-outlined text-xl block">mail</span>
               <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">
                 {Object.values(prefs).filter(Boolean).length} Active
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-              <span className="text-xl block">🔐</span>
+              <span className="material-symbols-outlined text-xl block">lock</span>
               <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Secured</p>
             </div>
           </div>
@@ -120,11 +119,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
-              className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold whitespace-nowrap transition-all duration-200 border-b-2 ${
-                activeSection === section.id
-                  ? 'border-[#003366] text-[#003366] bg-[#003366]/5'
-                  : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)]'
-              }`}
+              className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold whitespace-nowrap transition-all duration-200 border-b-2 ${activeSection === section.id
+                ? 'border-[#003366] text-[#003366] bg-[#003366]/5'
+                : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)]'
+                }`}
             >
               <span className="text-base">{section.icon}</span>
               {section.label}
@@ -143,14 +141,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
 
               <div className="space-y-3">
                 {[
-                  { key: 'emailJobs' as const, label: 'Job & Placement Recommendations', desc: 'Get alerted when emerging opportunities match your skill sets.', icon: '💼', color: '#003366' },
-                  { key: 'emailSurveys' as const, label: 'Tracer Survey Reminders', desc: 'Receive reminders when institutional tracer studies require submission.', icon: '📋', color: '#003366' },
-                  { key: 'emailMentorship' as const, label: 'Mentorship Session Updates', desc: 'Get alerts when peers or mentors accept or reschedule requests.', icon: '🤝', color: '#003366' },
+                  { key: 'emailJobs' as const, label: 'Job & Placement Recommendations', desc: 'Get alerted when emerging opportunities match your skill sets.', icon: 'work', color: '#003366' },
+                  { key: 'emailSurveys' as const, label: 'Tracer Survey Reminders', desc: 'Receive reminders when institutional tracer studies require submission.', icon: 'assignment', color: '#003366' },
+                  { key: 'emailMentorship' as const, label: 'Mentorship Session Updates', desc: 'Get alerts when peers or mentors accept or reschedule requests.', icon: 'diversity_3', color: '#003366' },
                 ].map(opt => (
                   <div key={opt.key} className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all duration-200 group">
                     <div className="flex items-center gap-3.5">
                       <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-lg shadow-sm group-hover:shadow-md transition-shadow">
-                        {opt.icon}
+                        <span className="material-symbols-outlined">{opt.icon}</span>
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[var(--text-primary)]">{opt.label}</p>
@@ -186,13 +184,20 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                         setDigest(option);
                         toast.success(`Digest frequency set to ${option}.`);
                       }}
-                      className={`rounded-xl border px-4 py-2.5 text-xs font-bold capitalize transition-all duration-200 ${
-                        digest === option
-                          ? 'border-[#003366] bg-[#003366] text-white shadow-md'
-                          : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003366]/30'
-                      }`}
+                      className={`rounded-xl border px-4 py-2.5 text-xs font-bold capitalize transition-all duration-200 ${digest === option
+                        ? 'border-[#003366] bg-[#003366] text-white shadow-md'
+                        : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003366]/30'
+                        }`}
                     >
-                      {option === 'instant' && '⚡ '}{option === 'weekly' && '📅 '}{option === 'monthly' && '📆 '}
+                      {option === 'instant' && (
+                        <span className="material-symbols-outlined align-middle text-sm">bolt</span>
+                      )}
+                      {option === 'weekly' && (
+                        <span className="material-symbols-outlined align-middle text-sm">calendar_month</span>
+                      )}
+                      {option === 'monthly' && (
+                        <span className="material-symbols-outlined align-middle text-sm">event</span>
+                      )}
                       {option}
                     </button>
                   ))}
@@ -211,13 +216,28 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
 
               <div className="space-y-3">
                 {[
-                  { key: 'profileVisibleToEmployers' as const, label: 'Visible to Partner Employers', desc: 'Allow companies to search your qualifications and CV for recruitment.', icon: '🏢', badge: 'Recommended' },
-                  { key: 'profileVisibleToPeers' as const, label: 'Visible in Peer Network', desc: 'Appear in alumni directory for mentorship networking and connections.', icon: '👥', badge: null },
+                  {
+                    key: 'profileVisibleToEmployers' as const,
+                    label: 'Visible to Partner Employers',
+                    desc: 'Allow companies to search your qualifications and CV for recruitment.',
+                    icon: 'business',
+                    badge: 'Recommended',
+                  },
+                  {
+                    key: 'profileVisibleToPeers' as const,
+                    label: 'Visible in Peer Network',
+                    desc: 'Appear in alumni directory for mentorship networking and connections.',
+                    icon: 'group',
+                    badge: null,
+                  },
                 ].map(opt => (
-                  <div key={opt.key} className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all duration-200 group">
+                  <div
+                    key={opt.key}
+                    className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all duration-200 group"
+                  >
                     <div className="flex items-center gap-3.5">
                       <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-lg shadow-sm group-hover:shadow-md transition-shadow">
-                        {opt.icon}
+                        <span className="material-symbols-outlined">{opt.icon}</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
@@ -231,6 +251,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                         <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">{opt.desc}</p>
                       </div>
                     </div>
+
                     <ToggleSwitch
                       enabled={prefs[opt.key]}
                       onToggle={() => handleToggleChange(opt.key)}
@@ -267,7 +288,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                 <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:shadow-md transition-all duration-200">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md">
-                      <span className="text-lg">📊</span>
+                      <span className="material-symbols-outlined text-lg">analytics</span>
                     </div>
                     <div>
                       <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Tracer Reminder Engine</h4>
@@ -283,11 +304,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                           setDigest(option);
                           toast.success(`Tracer digest set to ${option}.`);
                         }}
-                        className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left transition-all duration-200 ${
-                          digest === option
-                            ? 'border-[#003366] bg-[#003366]/5'
-                            : 'border-[var(--border-color)] hover:border-[#003366]/20'
-                        }`}
+                        className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left transition-all duration-200 ${digest === option
+                          ? 'border-[#003366] bg-[#003366]/5'
+                          : 'border-[var(--border-color)] hover:border-[#003366]/20'
+                          }`}
                       >
                         <span className="text-xs font-bold capitalize text-[var(--text-primary)]">{option}</span>
                         {digest === option && (
@@ -320,13 +340,16 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       setDonationEnabled((value) => !value);
                       toast.success(!donationEnabled ? 'Donation prompts enabled.' : 'Donation prompts paused.');
                     }}
-                    className={`mt-4 w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-300 ${
-                      donationEnabled
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                        : 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white shadow-md hover:shadow-lg'
-                    }`}
+                    className={`mt-4 w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-300 ${donationEnabled
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                      : 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white shadow-md hover:shadow-lg'
+                      }`}
                   >
-                    {donationEnabled ? '✅ Giving Prompts Active' : '💝 Enable Giving Prompts'}
+                    {donationEnabled ? (
+                      <span className="material-symbols-outlined">volunteer_activism</span>
+                    ) : (
+                      <span className="material-symbols-outlined">favorite</span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -335,7 +358,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-md">
-                    <span className="text-lg">🎨</span>
+                    <span className="material-symbols-outlined text-lg">palette</span>
                   </div>
                   <div>
                     <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Display Preferences</h4>
@@ -345,14 +368,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-4 rounded-xl border-2 border-[#003366] bg-[#003366]/5 text-center cursor-pointer">
                     <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 mx-auto mb-2 flex items-center justify-center shadow-sm">
-                      <span className="text-sm">☀️</span>
+                      <span className="material-symbols-outlined text-sm">light_mode</span>
                     </div>
                     <p className="text-xs font-bold text-[#003366]">Light Mode</p>
                     <p className="text-[9px] text-[var(--text-secondary)] mt-0.5">Active</p>
                   </div>
                   <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] text-center cursor-pointer hover:border-[#003366]/30 transition-all">
                     <div className="w-8 h-8 rounded-lg bg-gray-800 mx-auto mb-2 flex items-center justify-center shadow-sm">
-                      <span className="text-sm">🌙</span>
+                      <span className="material-symbols-outlined text-sm text-white">dark_mode</span>
                     </div>
                     <p className="text-xs font-bold text-[var(--text-primary)]">Dark Mode</p>
                     <p className="text-[9px] text-[var(--text-secondary)] mt-0.5">Available</p>
@@ -434,7 +457,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                   <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md">
-                        <span className="text-lg">🛡️</span>
+                        <span className="material-symbols-outlined text-lg">shield_lock</span>
                       </div>
                       <div>
                         <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Security Status</h4>
@@ -443,21 +466,20 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     </div>
                     <div className="space-y-3">
                       {[
-                        { label: 'Password', status: 'Strong', color: 'emerald', icon: '✅' },
-                        { label: 'Two-Factor Auth', status: 'Not enabled', color: 'amber', icon: '⚠️' },
-                        { label: 'Last Login', status: 'Today, 09:15 AM', color: 'blue', icon: '🕐' },
-                        { label: 'Session', status: 'Active (1 device)', color: 'emerald', icon: '💻' },
+                        { label: 'Password', status: 'Strong', color: 'emerald', icon: 'check_circle' },
+                        { label: 'Two-Factor Auth', status: 'Not enabled', color: 'amber', icon: 'warning' },
+                        { label: 'Last Login', status: 'Today, 09:15 AM', color: 'blue', icon: 'schedule' },
+                        { label: 'Session', status: 'Active (1 device)', color: 'emerald', icon: 'monitor' },
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-page)]">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm">{item.icon}</span>
+                            <span className="material-symbols-outlined text-sm">{item.icon}</span>
                             <span className="text-xs font-bold text-[var(--text-primary)]">{item.label}</span>
                           </div>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            item.color === 'emerald' ? 'bg-emerald-50 text-emerald-700' :
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.color === 'emerald' ? 'bg-emerald-50 text-emerald-700' :
                             item.color === 'amber' ? 'bg-amber-50 text-amber-700' :
-                            'bg-blue-50 text-blue-700'
-                          }`}>
+                              'bg-blue-50 text-blue-700'
+                            }`}>
                             {item.status}
                           </span>
                         </div>
@@ -470,16 +492,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <h4 className="text-xs font-extrabold text-[var(--text-primary)] mb-3">Quick Actions</h4>
                     <div className="space-y-2">
                       {[
-                        { label: 'Enable Two-Factor Authentication', icon: '🔐', color: 'from-blue-500 to-indigo-600' },
-                        { label: 'Download Account Data', icon: '📥', color: 'from-emerald-500 to-teal-600' },
-                        { label: 'View Login History', icon: '📋', color: 'from-violet-500 to-purple-600' },
+                        { label: 'Enable Two-Factor Authentication', icon: 'lock', color: 'from-blue-500 to-indigo-600' },
+                        { label: 'Download Account Data', icon: 'download', color: 'from-emerald-500 to-teal-600' },
+                        { label: 'View Login History', icon: 'assignment', color: 'from-violet-500 to-purple-600' },
                       ].map((action, idx) => (
                         <button
                           key={idx}
                           className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 hover:shadow-sm transition-all duration-200 text-left group"
                         >
-                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center text-white text-sm shadow-sm group-hover:shadow-md transition-shadow`}>
-                            {action.icon}
+                          <div
+                            className={`w-8 h-8 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center text-white text-sm shadow-sm group-hover:shadow-md transition-shadow`}
+                          >
+                            <span className="material-symbols-outlined">{action.icon}</span>
                           </div>
                           <span className="text-xs font-bold text-[var(--text-primary)]">{action.label}</span>
                           <svg className="w-3.5 h-3.5 text-[var(--text-muted)] ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -503,7 +527,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };

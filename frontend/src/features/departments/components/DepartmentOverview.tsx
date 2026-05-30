@@ -18,7 +18,7 @@ export const DepartmentOverview: React.FC<DepartmentOverviewProps> = ({ stats, o
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Department Analytics 📈</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Department Analytics</h2>
             <p className="text-lg opacity-95 leading-relaxed">Track graduate outcomes, monitor program effectiveness, and improve curriculum based on alumni feedback and industry trends.</p>
           </div>
           <button className="bg-gradient-to-r from-astu-red to-red-600 hover:from-astu-red hover:to-red-700 px-10 py-4 rounded-2xl font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 whitespace-nowrap flex items-center gap-2">

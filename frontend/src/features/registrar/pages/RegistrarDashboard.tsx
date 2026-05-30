@@ -1,6 +1,6 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 
 
 // Types
@@ -28,15 +28,16 @@ import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 
 const RegistrarDashboard = () => {
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+   const [activeTab, setActiveTab] = useState<string>('dashboard');
+   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('registrar_sidebar_collapsed') === 'true');
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
+   const [searchQuery, setSearchQuery] = useState('');
+   const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
 
 
-  // Theme Dark / Light mode
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+   // Theme Dark / Light mode
+   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
@@ -277,502 +278,567 @@ const RegistrarDashboard = () => {
   useEffect(() => {
     if (activeTab === 'dashboard' && normalizedSearch) {
       // keep user in dashboard unless they explicitly search
-      // (behavior: we still auto-switch in the search box onChange)
     }
   }, [activeTab, normalizedSearch]);
 
+useEffect(() => {
+     localStorage.setItem('registrar_sidebar_collapsed', String(sidebarCollapsed));
+   }, [sidebarCollapsed]);
 
-  return (
-    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased transition-all duration-300">
+   const handleLogout = () => {
+     localStorage.removeItem('authToken');
+     localStorage.removeItem('refreshToken');
+     localStorage.removeItem('user');
+     window.location.href = '/login';
+   };
+
+
+   return (
+    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <Toaster position="top-right" reverseOrder={false} />
 
-      <div className="flex-grow">
-        {/* Sidebar navigation */}
-        <aside className={`fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col shadow-2xl transition-all duration-300 md:flex ${darkMode ? 'bg-[#080d18] border-r border-[var(--border-color)]' : 'bg-[#003366]'
-          }`}>
-          <div className="p-6 mt-6">
-
-            <div className="flex items-center gap-3">
-              <img
-                alt="ASTU Official Logo"
-                className="h-12 w-12 object-contain drop-shadow-lg rounded-lg"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-              />
+      {/* Sidebar Navigation - Fixed width, collapsible */}
+      <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col shadow-2xl ${sidebarCollapsed ? 'w-20' : 'w-64'} md:flex bg-[#003366] transition-all duration-300`}>
+        <div className={`p-6 mt-6 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
+          <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-3'}`}>
+            <img
+              alt="ASTU Official Logo"
+              className="h-10 w-10 object-contain drop-shadow-lg rounded-lg"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+            />
+            {!sidebarCollapsed && (
               <div>
                 <h1 className="text-lg font-bold text-white">ASTU Registrar</h1>
                 <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management Hub</p>
               </div>
-            </div>
+            )}
           </div>
+        </div>
 
-          <nav className="mt-8 flex-grow px-3">
-            <div className="space-y-1">
-              {[
-                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'records', label: 'Alumni Records', icon: 'people', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'documents', label: 'Document Queue', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
-              ].map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-4 px-6 py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
-                    ? item.activeColor + ' font-bold shadow-md'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
-                    }`}
-                >
-                  <span className="material-symbols-outlined">{item.icon}</span>
-                  <span className="text-sm font-medium">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </nav>
+        <nav className="mt-8 flex-grow overflow-y-auto">
+          <div className="space-y-1">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'records', label: 'Alumni Records', icon: 'people', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'documents', label: 'Document Queue', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'gap-4 px-6'} py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
+                  ? item.activeColor + ' font-bold shadow-md'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                <span className="material-symbols-outlined">{item.icon}</span>
+                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+              </button>
+            ))}
+          </div>
+        </nav>
 
-          <div className="p-6 border-t border-white/10 mt-auto">
+        <div className={`p-6 border-t border-white/10 mt-auto ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
+          {!sidebarCollapsed && (
             <button
               onClick={() => setActiveTab('reporting')}
-              className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-all duration-300 text-left"
+              className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
             >
               <span className="material-symbols-outlined text-md">help</span>
               <span className="text-sm font-medium">Help Center</span>
             </button>
+          )}
+          {!sidebarCollapsed && (
             <button
-              onClick={() => {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
-              }}
-              className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-all duration-300 text-left"
+              onClick={handleLogout}
+              className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
             >
               <span className="material-symbols-outlined text-md">logout</span>
               <span className="text-sm font-medium">Logout</span>
             </button>
-          </div>
-        </aside>
+          )}
+          {sidebarCollapsed && (
+            <>
+              <button
+                onClick={() => setActiveTab('reporting')}
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:text-white transition-colors mb-2"
+                title="Help Center"
+              >
+                <span className="material-symbols-outlined text-md">help</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 hover:text-red-400 transition-colors"
+                title="Logout"
+              >
+                <span className="material-symbols-outlined text-md">logout</span>
+              </button>
+            </>
+          )}
+        </div>
+      </aside>
 
-        {/* Main Content Area */}
-        <main className="flex min-h-screen flex-col justify-between md:ml-[240px]">
-          <div>
-            {/* Header bar */}
-            <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 md:px-6"
-              style={{ background: 'var(--bg-navbar)', borderColor: 'var(--border-color)' }}>
-              <div className="flex-1 max-w-xl">
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                  <input
-                    className="w-full rounded-full border bg-[#F3F5FA] py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] transition-all duration-300 focus:bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:bg-[#1E2130]"
-                    style={{ borderColor: 'var(--border-color)' }}
-                    placeholder="Search SIS records, requests, documents..."
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
-                        setActiveTab('records');
-                      }
-                    }}
-                  />
-                </div>
-              </div>
+{/* Main Content Area */}
+       <main className={`flex min-h-screen flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+         <div>
+           {/* Header bar */}
+           <header
+             className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
+             style={{
+               background: 'var(--bg-navbar)',
+               borderColor: 'var(--border-color)',
+             }}
+           >
+             <div className="flex min-w-0 items-center gap-3">
+               <button
+                 type="button"
+                 onClick={() => setSidebarCollapsed((value) => !value)}
+                 className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
+                 title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+               >
+                 <Menu className="h-5 w-5" />
+               </button>
+               <div className="min-w-0 space-y-0.5">
+                 <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
+                   <span>Registrar</span>
+                   <span>/</span>
+                   <span>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}</span>
+                 </div>
+                 <h1 className="truncate text-[16px] font-semibold tracking-tight text-[var(--text-primary)]">
+                   {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
+                 </h1>
+               </div>
+             </div>
 
-              <div className="flex items-center gap-4 ml-6 relative">
-                {/* Dark Mode Toggle Switch */}
-                <button
-                  onClick={() => {
-                    setDarkMode(!darkMode);
-                    toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
+            <div className="flex items-center gap-3">
+              {/* Search Bar */}
+              <label
+                className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
+                  <Search className="h-4.5 w-4.5 flex-none" />
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search SIS records, requests, documents..."
+                  className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
+                      setActiveTab('records');
+                    }
                   }}
-                  className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
-                    }`}
-                  title="Toggle Dark/Light Mode"
-                >
-                  <span className="material-symbols-outlined text-xl">
-                    {darkMode ? 'light_mode' : 'dark_mode'}
-                  </span>
-                </button>
+                />
+              </label>
 
-                {/* Notification bell */}
+              {/* Dark Mode Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setDarkMode(!darkMode);
+                  toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
+                }}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+
+              {/* Notification Bell */}
+              <div className="relative" data-admin-notifications>
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="p-2 text-gray-400 hover:bg-gray-100/10 rounded-full relative transition-all duration-300 hover:scale-105"
+                  type="button"
+                  onClick={() => setShowNotifications((v) => !v)}
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
                 >
-                  <span className="material-symbols-outlined">notifications</span>
+                  <Bell className="h-4 w-4" />
                   {unreadNotificationsCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-astu-red rounded-full border-2 border-white animate-pulse"></span>
+                    <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">
+                      {unreadNotificationsCount}
+                    </span>
                   )}
                 </button>
-
-                {/* Notifications Dropdown card */}
                 {showNotifications && (
-                  <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-                    }`}>
-                    <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
-                      <h4 className="font-bold text-sm">Registrar Notifications</h4>
-                      <button
-                        onClick={handleClearNotifications}
-                        className="text-xs text-astu-red hover:underline font-bold"
-                      >
-                        Clear All
-                      </button>
+                  <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                    <div className="border-b border-[var(--border-color)] px-4 py-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
+                          <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
+                        </div>
+                        <button
+                          onClick={handleClearNotifications}
+                          className="text-xs font-semibold text-[#E24B4A] hover:underline"
+                        >
+                          Clear All
+                        </button>
+                      </div>
                     </div>
-                    <div className="space-y-2.5 max-h-60 overflow-y-auto">
-                      {notifications.map(notif => (
-                        <div key={notif.id} className="flex justify-between items-start gap-2 p-2 rounded-lg hover:bg-gray-50/10 transition-colors">
-                          <div className="space-y-0.5">
-                            <p className="text-xs leading-normal">{notif.text}</p>
-                            <span className="text-[10px] text-gray-400 font-semibold">{notif.time}</span>
+                    <div className="space-y-1 p-2">
+                      {notifications.map((notif) => (
+                        <div key={notif.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
+                          <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notif.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-[var(--text-primary)]">{notif.text}</p>
+                            <p className="text-xs text-[var(--text-secondary)]">{notif.time}</p>
                           </div>
                         </div>
                       ))}
                       {notifications.length === 0 && (
-                        <p className="text-xs text-gray-500 italic text-center py-4">No new recruit alerts.</p>
+                        <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">No new alerts.</p>
                       )}
+                    </div>
+                    <div className="border-t border-[var(--border-color)] px-4 py-3">
+                      <button type="button" className="text-sm font-semibold text-[#003580] hover:underline">
+                        View all notifications →
+                      </button>
                     </div>
                   </div>
                 )}
-
-                <div className="h-8 w-[1px] bg-gray-250 mx-2"></div>
-
-                {/* Registrar Head */}
-                <div
-                  className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity"
-                >
-                  <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold">Dr. Abebe Assefa</p>
-                    <p className={`text-xs font-semibold ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Dean of Registrar</p>
-                  </div>
-                  <img
-                    alt="Profile"
-                    className="h-10 w-10 rounded-full border-2 border-astu-navy/20 shadow-sm object-cover"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80"
-                  />
-                </div>
               </div>
-            </header>
 
-            {/* Dynamic tabs routing */}
-            <div className="flex-grow">
-              {activeTab === 'dashboard' && (
-                <div className="space-y-6">
-
-                  {/* Welcome banner */}
-                  <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
-                    {/* Admin shell spacing handled by global CSS */}
-                    <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                      <div className="max-w-2xl space-y-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU SIS integration</span>
-                        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Institutional Registrar Panel</h2>
-                        <p className="text-sm leading-relaxed text-white/85">
-                          Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setActiveTab('data_integration')}
-                        className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
-                      >
-                        <span className="material-symbols-outlined">cloud_upload</span>
-                        Batch Upload CSV
-                      </button>
-                    </div>
-                  </section>
-
-                  <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
-                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-gray-900">Registrar Command Center</h3>
-                        <p className="mt-1 text-xs text-gray-500">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
-                      </div>
-                      <button
-                        onClick={() => setActiveTab('reporting')}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
-                      >
-                        <span className="material-symbols-outlined text-base">ios_share</span>
-                        Export reports
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
-                      <div className="grid grid-cols-2 gap-3">
-                        {registrarCommandSignals.map((signal) => (
-                          <button
-                            key={signal.label}
-                            onClick={() => setActiveTab(signal.tab)}
-                            className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
-                            </div>
-                            <p className="mt-2 text-2xl font-extrabold text-gray-900">{signal.value}</p>
-                          </button>
-                        ))}
-                      </div>
-                      <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
-                        <div className="mb-3 flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-gray-900">SIS Data Quality</h4>
-                          <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Monitored</span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                          {dataQualityPanels.map((item) => (
-                            <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
-                              <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
-                              <p className="mt-2 text-xl font-extrabold text-gray-900">{item.value}</p>
-                              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-                              <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Stats Cards Grid */}
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    {stats.map((stat) => (
-                      <div
-                        key={stat.id}
-                        onMouseEnter={() => setHoveredCard(stat.id)}
-                        onMouseLeave={() => setHoveredCard(null)}
-                        onClick={() => {
-                          if (stat.id === 1) setActiveTab('records');
-                          if (stat.id === 3) setActiveTab('verification');
-                          if (stat.id === 4) setActiveTab('documents');
-                        }}
-                        className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
-                      >
-                        <div className="relative z-10 space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div className="p-2.5 rounded-xl bg-astu-navy/10 text-astu-navy">
-                              <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
-                            </div>
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">SIS Verified</span>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
-                            <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t">
-                            <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
-                            {stat.trend}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+              {/* Profile Button with Initials (Admin Style) */}
+              <div className="relative" data-admin-menu>
+                <button
+                  type="button"
+                  className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                  style={{ borderColor: 'var(--border-color)' }}
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
+                    AA
                   </div>
-
-                  {/* Action Cards */}
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {[
-                      { icon: 'people', title: 'SIS Records Management', desc: 'Browse full lists, edit academic GPAs, or archive old folders.', tab: 'records' },
-                      { icon: 'cloud_upload', title: 'Excel/CSV Scaffolding', desc: 'Process bulk file datasets and send automated sign-up emails.', tab: 'data_integration' },
-                      { icon: 'description', title: 'Document Processing Queue', desc: 'Authorize official transcripts and degree verifications.', tab: 'documents' }
-                    ].map((act, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => setActiveTab(act.tab)}
-                        className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-white p-5 text-center transition-all hover:border-astu-navy/30 hover:shadow-md space-y-4"
-                      >
-                        <div className="mx-auto w-12 h-12 rounded-2xl bg-astu-navy/10 flex items-center justify-center group-hover:bg-astu-navy/20 transition-colors text-astu-navy">
-                          <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-gray-900 text-sm">{act.title}</h3>
-                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{act.desc}</p>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="hidden text-left sm:block">
+                    <div className="text-sm font-medium text-[var(--text-primary)]">Dr. Abebe Assefa</div>
+                    <div className="text-[11px] text-[var(--text-secondary)]">Dean of Registrar</div>
                   </div>
+                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                </button>
+              </div>
+            </div>
+          </header>
 
-                  <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-gray-900">Registrar Feature Control</h3>
-                        <p className="mt-1 text-xs text-gray-500">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
-                      </div>
-                      <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
-                        Accreditation ready
-                      </span>
+          {/* Dynamic tabs routing */}
+          <div className="flex-grow">
+            {activeTab === 'dashboard' && (
+              <div className="space-y-6">
+
+                {/* Welcome banner */}
+                <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+                  <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                    <div className="max-w-2xl space-y-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU SIS integration</span>
+                      <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Institutional Registrar Panel</h2>
+                      <p className="text-sm leading-relaxed text-white/85">
+                        Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
+                      </p>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                      {registrarControlCards.map((card) => (
+                    <button
+                      onClick={() => setActiveTab('data_integration')}
+                      className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
+                    >
+                      <span className="material-symbols-outlined">cloud_upload</span>
+                      Batch Upload CSV
+                    </button>
+                  </div>
+                </section>
+
+                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Registrar Command Center</h3>
+                      <p className="mt-1 text-xs text-gray-500">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('reporting')}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
+                    >
+                      <span className="material-symbols-outlined text-base">ios_share</span>
+                      Export reports
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
+                    <div className="grid grid-cols-2 gap-3">
+                      {registrarCommandSignals.map((signal) => (
                         <button
-                          key={card.title}
-                          onClick={() => setActiveTab(card.tab)}
-                          className="rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+                          key={signal.label}
+                          onClick={() => setActiveTab(signal.tab)}
+                          className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
                         >
-                          <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
-                          <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
-                          <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                          <div className="flex items-center gap-2">
+                            <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                          </div>
+                          <p className="mt-2 text-2xl font-extrabold text-gray-900">{signal.value}</p>
                         </button>
                       ))}
                     </div>
-                    <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-                      {complianceSignals.map((signal) => (
-                        <div key={signal.label} className="rounded-[10px] border border-gray-200 bg-white p-4">
-                          <div className="flex items-center gap-2">
-                            <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                    <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                      <div className="mb-3 flex items-center justify-between">
+                        <h4 className="text-sm font-bold text-gray-900">SIS Data Quality</h4>
+                        <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Monitored</span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        {dataQualityPanels.map((item) => (
+                          <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
+                            <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
+                            <p className="mt-2 text-xl font-extrabold text-gray-900">{item.value}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+                            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
                           </div>
-                          <p className="mt-2 text-lg font-extrabold text-gray-900">{signal.value}</p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </section>
-
-                  {/* Charts & Graphs Section */}
-                  <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    <AnalyticsChart
-                      type="bar"
-                      title="Graduate Import Trends"
-                      subtitle="Volume of graduates synchronized from SIS per batch"
-                      data={[
-                        { batch: '2021', graduates: 3200 },
-                        { batch: '2022', graduates: 3450 },
-                        { batch: '2023', graduates: 3800 },
-                        { batch: '2024', graduates: 4100 },
-                        { batch: '2025', graduates: 4324 },
-                      ]}
-                      xKey="batch"
-                      series={[{ key: 'graduates', label: 'Synced Graduates' }]}
-                      height={200}
-                      darkMode={darkMode}
-                    />
-                    <AnalyticsChart
-                      type="line"
-                      title="Tracer Survey Submissions Rate"
-                      subtitle="Interactive timeline tracking response rate percentage"
-                      data={[
-                        { month: 'Jan', rate: 45 },
-                        { month: 'Feb', rate: 58 },
-                        { month: 'Mar', rate: 68 },
-                        { month: 'Apr', rate: 76 },
-                        { month: 'May', rate: 84 },
-                      ]}
-                      xKey="month"
-                      series={[{ key: 'rate', label: 'Response Rate %' }]}
-                      height={200}
-                      darkMode={darkMode}
-                    />
                   </div>
+                </section>
 
-                  {/* Registrar Activity Timeline */}
-                  <div className="mt-6">
-                    <ActivityTimeline
-                      activities={[
-                        { id: 1, type: 'verification', title: 'Alumni registration approved', description: 'Abebe Bikila successfully cleared identity checks.', timestamp: '1 hour ago', unread: true },
-                        { id: 2, type: 'document', title: 'Transcript verification complete', description: 'Dean approved digital credential hash for student ID UG/12839/14.', timestamp: '3 hours ago', unread: true },
-                        { id: 3, type: 'broadcast', title: 'Global tracer study published', description: 'Launched 24-month feedback inquiry to Class of 2024.', timestamp: '1 day ago' },
-                        { id: 4, type: 'alert', title: 'SIS Database backup', description: 'Cloud replication completed successfully.', timestamp: '2 days ago' }
-                      ] as ActivityEntry[]}
-                      darkMode={darkMode}
-                      onViewAll={() => setActiveTab('messages')}
-                    />
-                  </div>
-
+                {/* Stats Cards Grid */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {stats.map((stat) => (
+                    <div
+                      key={stat.id}
+                      onMouseEnter={() => setHoveredCard(stat.id)}
+                      onMouseLeave={() => setHoveredCard(null)}
+                      onClick={() => {
+                        if (stat.id === 1) setActiveTab('records');
+                        if (stat.id === 3) setActiveTab('verification');
+                        if (stat.id === 4) setActiveTab('documents');
+                      }}
+                      className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
+                    >
+                      <div className="relative z-10 space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="p-2.5 rounded-xl bg-astu-navy/10 text-astu-navy">
+                            <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
+                          </div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">SIS Verified</span>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                          <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t">
+                          <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
+                          {stat.trend}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
 
-              {activeTab === 'records' && (
-                <RecordsTab
-                  graduates={filteredGraduates}
-                  onAddGraduate={handleAddGraduate}
-                  onEditGraduate={handleEditGraduate}
-                  onArchiveGraduate={handleArchiveGraduate}
-                  onVerifyIdentity={handleVerifyIdentity}
+                {/* Action Cards */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {[
+                    { icon: 'people', title: 'SIS Records Management', desc: 'Browse full lists, edit academic GPAs, or archive old folders.', tab: 'records' },
+                    { icon: 'cloud_upload', title: 'Excel/CSV Scaffolding', desc: 'Process bulk file datasets and send automated sign-up emails.', tab: 'data_integration' },
+                    { icon: 'description', title: 'Document Processing Queue', desc: 'Authorize official transcripts and degree verifications.', tab: 'documents' }
+                  ].map((act, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => setActiveTab(act.tab)}
+                      className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-white p-5 text-center transition-all hover:border-astu-navy/30 hover:shadow-md space-y-4"
+                    >
+                      <div className="mx-auto w-12 h-12 rounded-2xl bg-astu-navy/10 flex items-center justify-center group-hover:bg-astu-navy/20 transition-colors text-astu-navy">
+                        <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-sm">{act.title}</h3>
+                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{act.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Registrar Feature Control</h3>
+                      <p className="mt-1 text-xs text-gray-500">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
+                    </div>
+                    <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
+                      Accreditation ready
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    {registrarControlCards.map((card) => (
+                      <button
+                        key={card.title}
+                        onClick={() => setActiveTab(card.tab)}
+                        className="rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+                      >
+                        <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
+                        <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                    {complianceSignals.map((signal) => (
+                      <div key={signal.label} className="rounded-[10px] border border-gray-200 bg-white p-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                        </div>
+                        <p className="mt-2 text-lg font-extrabold text-gray-900">{signal.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Charts & Graphs Section */}
+                <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <AnalyticsChart
+                    type="bar"
+                    title="Graduate Import Trends"
+                    subtitle="Volume of graduates synchronized from SIS per batch"
+                    data={[
+                      { batch: '2021', graduates: 3200 },
+                      { batch: '2022', graduates: 3450 },
+                      { batch: '2023', graduates: 3800 },
+                      { batch: '2024', graduates: 4100 },
+                      { batch: '2025', graduates: 4324 },
+                    ]}
+                    xKey="batch"
+                    series={[{ key: 'graduates', label: 'Synced Graduates' }]}
+                    height={200}
+                    darkMode={darkMode}
+                  />
+                  <AnalyticsChart
+                    type="line"
+                    title="Tracer Survey Submissions Rate"
+                    subtitle="Interactive timeline tracking response rate percentage"
+                    data={[
+                      { month: 'Jan', rate: 45 },
+                      { month: 'Feb', rate: 58 },
+                      { month: 'Mar', rate: 68 },
+                      { month: 'Apr', rate: 76 },
+                      { month: 'May', rate: 84 },
+                    ]}
+                    xKey="month"
+                    series={[{ key: 'rate', label: 'Response Rate %' }]}
+                    height={200}
+                    darkMode={darkMode}
+                  />
+                </div>
+
+                {/* Registrar Activity Timeline */}
+                <div className="mt-6">
+                  <ActivityTimeline
+                    activities={[
+                      { id: 1, type: 'verification', title: 'Alumni registration approved', description: 'Abebe Bikila successfully cleared identity checks.', timestamp: '1 hour ago', unread: true },
+                      { id: 2, type: 'document', title: 'Transcript verification complete', description: 'Dean approved digital credential hash for student ID UG/12839/14.', timestamp: '3 hours ago', unread: true },
+                      { id: 3, type: 'broadcast', title: 'Global tracer study published', description: 'Launched 24-month feedback inquiry to Class of 2024.', timestamp: '1 day ago' },
+                      { id: 4, type: 'alert', title: 'SIS Database backup', description: 'Cloud replication completed successfully.', timestamp: '2 days ago' }
+                    ] as ActivityEntry[]}
+                    darkMode={darkMode}
+                    onViewAll={() => setActiveTab('messages')}
+                  />
+                </div>
+
+              </div>
+            )}
+
+            {activeTab === 'records' && (
+              <RecordsTab
+                graduates={filteredGraduates}
+                onAddGraduate={handleAddGraduate}
+                onEditGraduate={handleEditGraduate}
+                onArchiveGraduate={handleArchiveGraduate}
+                onVerifyIdentity={handleVerifyIdentity}
+              />
+            )}
+
+            {activeTab === 'data_integration' && (
+              <DataIntegrationTab
+                onBatchInsert={handleBatchInsert}
+              />
+            )}
+
+            {activeTab === 'verification' && (
+              <VerificationTab
+                verifications={filteredVerifications}
+                onVerify={handleVerifyRequestAction}
+              />
+            )}
+
+            {activeTab === 'documents' && (
+              <DocumentProcessingTab
+                documents={filteredDocuments}
+                onProcessDocument={handleProcessDocumentAction}
+              />
+            )}
+
+            {activeTab === 'surveys' && (
+              <SurveyManagement />
+            )}
+
+            {activeTab === 'reporting' && (
+              <ReportingTab />
+            )}
+
+            {activeTab === 'messages' && (
+              <MessagingTab darkMode={darkMode} />
+            )}
+          </div>
+        </div>
+
+        {/* Premium Footer Enhancement */}
+        <footer className="mt-12 bg-astu-navy text-slate-300 py-10 px-6 border-t border-white/10 relative overflow-hidden">
+          <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <img
+                  alt="ASTU Official Emblem"
+                  className="h-10 w-10 object-contain rounded-lg bg-white/10 p-1"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
                 />
-              )}
+                <div>
+                  <h4 className="font-bold text-white text-sm">Adama Science and Technology University</h4>
+                  <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Office of the Registrar</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-400 max-w-md leading-relaxed">
+                The ASTU Alumni Management System bridges engineering graduates with industry recruiters, securing transcripts verification, and providing continuous tracer study reports to the dean boards.
+              </p>
+            </div>
 
-              {activeTab === 'data_integration' && (
-                <DataIntegrationTab
-                  onBatchInsert={handleBatchInsert}
-                />
-              )}
-
-              {activeTab === 'verification' && (
-                <VerificationTab
-                  verifications={filteredVerifications}
-                  onVerify={handleVerifyRequestAction}
-                />
-              )}
-
-              {activeTab === 'documents' && (
-                <DocumentProcessingTab
-                  documents={filteredDocuments}
-                  onProcessDocument={handleProcessDocumentAction}
-                />
-              )}
-
-{activeTab === 'surveys' && (
-                 <SurveyManagement />
-               )}
-
-              {activeTab === 'reporting' && (
-                <ReportingTab />
-              )}
-
-              {activeTab === 'messages' && (
-                <MessagingTab darkMode={darkMode} />
-              )}
+            <div className="flex flex-col sm:flex-row gap-8 text-xs">
+              <div className="space-y-2">
+                <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">Helpful Channels</h5>
+                <ul className="space-y-1 text-slate-400 font-medium">
+                  <li><a href="#" className="hover:text-white transition-colors">Curriculum Review Committee</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">SIS Technical Assistance</a></li>
+                  <li><a href="#" className="hover:text-white transition-colors">API Sync Integration Docs</a></li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">System Info</h5>
+                <p className="text-[10px] text-slate-400">Version: <strong>v1.4.0 (Enterprise)</strong></p>
+                <p className="text-[10px] text-slate-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+                  SIS Sync Heartbeat: <strong>Active</strong>
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Premium Footer Enhancement */}
-          <footer className="mt-12 bg-astu-navy text-slate-300 py-10 px-6 border-t border-white/10 relative overflow-hidden">
-            <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    alt="ASTU Official Emblem"
-                    className="h-10 w-10 object-contain rounded-lg bg-white/10 p-1"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-                  />
-                  <div>
-                    <h4 className="font-bold text-white text-sm">Adama Science and Technology University</h4>
-                    <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Office of the Registrar</p>
-                  </div>
-                </div>
-                <p className="text-[11px] text-slate-400 max-w-md leading-relaxed">
-                  The ASTU Alumni Management System bridges engineering graduates with industry recruiters, securing transcripts verification, and providing continuous tracer study reports to the dean boards.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-8 text-xs">
-                <div className="space-y-2">
-                  <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">Helpful Channels</h5>
-                  <ul className="space-y-1 text-slate-400 font-medium">
-                    <li><a href="#" className="hover:text-white transition-colors">Curriculum Review Committee</a></li>
-                    <li><a href="#" className="hover:text-white transition-colors">SIS Technical Assistance</a></li>
-                    <li><a href="#" className="hover:text-white transition-colors">API Sync Integration Docs</a></li>
-                  </ul>
-                </div>
-                <div className="space-y-2">
-                  <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">System Info</h5>
-                  <p className="text-[10px] text-slate-400">Version: <strong>v1.4.0 (Enterprise)</strong></p>
-                  <p className="text-[10px] text-slate-400 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
-                    SIS Sync Heartbeat: <strong>Active</strong>
-                  </p>
-                </div>
-              </div>
+          <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-500 font-semibold gap-4">
+            <p>&copy; {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
+            <div className="flex gap-4">
+              <a href="#" className="hover:text-slate-300">Privacy Policy</a>
+              <span>&bull;</span>
+              <a href="#" className="hover:text-slate-300">Terms of Use</a>
             </div>
-
-            <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-500 font-semibold gap-4">
-              <p>&copy; {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
-              <div className="flex gap-4">
-                <a href="#" className="hover:text-slate-300">Privacy Policy</a>
-                <span>&bull;</span>
-                <a href="#" className="hover:text-slate-300">Terms of Use</a>
-              </div>
-            </div>
-          </footer>
-        </main>
-      </div>
-
+          </div>
+        </footer>
+      </main>
     </div>
   );
 };

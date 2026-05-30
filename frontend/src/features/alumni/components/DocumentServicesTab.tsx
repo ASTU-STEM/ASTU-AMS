@@ -8,10 +8,10 @@ interface DocumentServicesTabProps {
 }
 
 const DOC_TYPES: { value: DocumentRequest['type']; icon: string; desc: string }[] = [
-  { value: 'Official Transcript', icon: '📜', desc: 'Official academic transcript with grades and coursework' },
-  { value: 'Degree Verification', icon: '🎓', desc: 'Degree completion and verification letter' },
-  { value: 'Temporary Certificate', icon: '📋', desc: 'Provisional graduation certificate' },
-  { value: 'English Medium Certificate', icon: '🌐', desc: 'Medium of instruction certificate' },
+  { value: 'Official Transcript', icon: 'description', desc: 'Official academic transcript with grades and coursework' },
+  { value: 'Degree Verification', icon: 'school', desc: 'Degree completion and verification letter' },
+  { value: 'Temporary Certificate', icon: 'assignment', desc: 'Provisional graduation certificate' },
+  { value: 'English Medium Certificate', icon: 'public', desc: 'Medium of instruction certificate' },
 ];
 
 const STATUS_CONFIG: Record<DocumentRequest['status'], { bg: string; text: string; dot: string; border: string }> = {
@@ -211,7 +211,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-                  <span className="text-lg">📊</span>
+                  <span className="material-symbols-outlined text-lg">analytics</span>
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Request History & Tracking</h3>

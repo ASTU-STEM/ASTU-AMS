@@ -11,34 +11,26 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const [formData, setFormData] = useState<AlumniProfile>({ ...profile });
   const [newSkill, setNewSkill] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [activeSection, setActiveSection] = useState('personal');
   const profileScore = Math.min(100, 45 + formData.skills.length * 5 + (formData.resume ? 15 : 0) + (formData.linkedInUrl ? 10 : 0) + (formData.gitHubUrl ? 10 : 0));
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddSkill = (e: React.FormEvent) => {
     e.preventDefault();
     const skillTrimmed = newSkill.trim();
     if (skillTrimmed && !formData.skills.includes(skillTrimmed)) {
-      setFormData((prev) => ({
-        ...prev,
-        skills: [...prev.skills, skillTrimmed],
-      }));
+      setFormData((prev) => ({ ...prev, skills: [...prev.skills, skillTrimmed] }));
       setNewSkill('');
       toast.success(`Added skill: ${skillTrimmed}`);
     }
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((skill) => skill !== skillToRemove),
-    }));
+    setFormData((prev) => ({ ...prev, skills: prev.skills.filter((skill) => skill !== skillToRemove) }));
     toast.success(`Removed skill: ${skillToRemove}`);
   };
 
@@ -52,11 +44,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           resume: {
             fileName: file.name,
             fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-            uploadedAt: new Date().toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            }),
+            uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           },
         }));
         setIsUploading(false);
@@ -66,10 +54,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   };
 
   const handleRemoveResume = () => {
-    setFormData((prev) => ({
-      ...prev,
-      resume: null,
-    }));
+    setFormData((prev) => ({ ...prev, resume: null }));
     toast.success('Resume removed.');
   };
 
@@ -79,7 +64,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     toast.success('Profile updated successfully!');
   };
 
-  // Mock avatar upload
   const handleAvatarChange = () => {
     const mockAvatars = [
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
@@ -87,373 +71,416 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
     ];
-    const randomAvatar = mockAvatars[Math.floor(Math.random() * mockAvatars.length)];
-    setFormData((prev) => ({
-      ...prev,
-      avatarUrl: randomAvatar,
-    }));
+    setFormData((prev) => ({ ...prev, avatarUrl: mockAvatars[Math.floor(Math.random() * mockAvatars.length)] }));
     toast.success('Profile photo updated!');
   };
 
+  const getScoreColor = () => {
+    if (profileScore >= 80) return 'from-emerald-500 to-teal-600';
+    if (profileScore >= 60) return 'from-blue-500 to-indigo-600';
+    if (profileScore >= 40) return 'from-amber-500 to-orange-600';
+    return 'from-red-500 to-pink-600';
+  };
+
+  const sections = [
+    { id: 'personal', label: 'Personal', icon: 'person' },
+    { id: 'academic', label: 'Academic', icon: 'school' },
+    { id: 'employment', label: 'Employment', icon: 'work' },
+    { id: 'social', label: 'Social Links', icon: 'link' },
+    { id: 'skills', label: 'Skills', icon: 'bolt' },
+    { id: 'resume', label: 'Resume', icon: 'description' },
+  ];
+
+  const inputClass = "w-full text-xs p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] focus:bg-[var(--bg-card)] transition-all duration-200 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]";
+  const labelClass = "text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]";
+
   return (
-    <div className="bg-white rounded-[10px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] border border-gray-200/60">
-      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Manage Profile</h3>
-          <p className="text-sm text-gray-600">Keep your academic and professional accomplishments updated</p>
+    <div className="space-y-6">
+      {/* Profile Hero Banner */}
+      <section className="relative overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#003366] via-[#004080] to-[#1a5c3a] opacity-95"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
+          <div className="absolute bottom-0 left-0 w-56 h-56 bg-[#FFD700]/8 rounded-full translate-y-1/3 -translate-x-1/4"></div>
         </div>
-        <button
-          onClick={handleSubmit}
-          className="rounded-md bg-astu-navy px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-astu-navy/90"
-        >
-          Save All Changes
-        </button>
-      </div>
-
-      <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-4">
-        {[
-          { icon: 'verified_user', label: 'Identity Badge', value: 'Registrar verified', tone: 'text-astu-green' },
-          { icon: 'query_stats', label: 'Tracer Readiness', value: `${profileScore}% complete`, tone: 'text-astu-navy' },
-          { icon: 'work', label: 'Employer Visibility', value: formData.resume ? 'CV searchable' : 'Upload CV', tone: 'text-astu-red' },
-          { icon: 'school', label: 'SIS Sync', value: formData.studentId || 'Pending ID', tone: 'text-[#B87900]' },
-        ].map(item => (
-          <div key={item.label} className="rounded-[10px] border border-gray-200 bg-gray-50 p-4">
-            <div className="flex items-center gap-2">
-              <span className={`material-symbols-outlined ${item.tone}`}>{item.icon}</span>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-            </div>
-            <p className="mt-2 text-sm font-bold text-gray-900">{item.value}</p>
-          </div>
-        ))}
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Photo and Bio header section */}
-        <div className="flex flex-col items-center gap-4 rounded-[10px] border border-gray-100 bg-gray-50 p-4 sm:flex-row">
-          <div className="relative group cursor-pointer" onClick={handleAvatarChange}>
-            <img
-              src={formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80'}
-              alt={formData.fullName}
-              className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover transition-transform group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="material-symbols-outlined text-white text-xl">photo_camera</span>
-            </div>
-          </div>
-          <div className="flex-1 w-full space-y-4">
-            <div>
-              <h4 className="text-lg font-bold text-gray-900">{formData.fullName || 'New Alumnus'}</h4>
-              <p className="text-sm text-astu-navy font-semibold">{formData.currentRole} at {formData.company || 'ASTU'}</p>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Professional Bio</label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy transition-all h-20 resize-none"
-                placeholder="Share a short summary about your background, career interests, or tech stack..."
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Personal details grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Full Name</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student ID / Batch No.</label>
-            <input
-              type="text"
-              name="studentId"
-              value={formData.studentId}
-              onChange={handleInputChange}
-              className="w-full text-sm p-3 bg-gray-100 border border-gray-200 rounded-xl cursor-not-allowed opacity-75"
-              readOnly
-            />
-          </div>
-        </div>
-
-        {/* Academic Details Section */}
-        <div className="space-y-4 border-t border-gray-100 pt-4">
-          <h4 className="text-md font-bold text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-astu-navy">school</span>
-            Academic Record (ASTU)
-          </h4>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="space-y-1 md:col-span-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Department</label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-              >
-                <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
-                <option value="Civil Engineering">Civil Engineering</option>
-                <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
-                <option value="Chemical Engineering">Chemical Engineering</option>
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Graduation Batch</label>
-              <input
-                type="text"
-                name="batch"
-                value={formData.batch}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Final CGPA</label>
-              <input
-                type="text"
-                name="cgpa"
-                value={formData.cgpa}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-                placeholder="e.g. 3.75"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Professional Placement & Salary Details Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-100">
-          <h4 className="text-md font-bold text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-astu-green">work</span>
-            Current Employment Details
-          </h4>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Role / Title</label>
-              <input
-                type="text"
-                name="currentRole"
-                value={formData.currentRole}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-                placeholder="e.g. Junior Frontend Dev"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company Name</label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all"
-                placeholder="e.g. Chapa Financials"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Salary Range</label>
-              <select
-                name="salaryRange"
-                value={formData.salaryRange}
-                onChange={handleInputChange}
-                className="w-full text-sm p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy focus:bg-white transition-all font-semibold text-gray-700"
-              >
-                <option value="Under 15,000 ETB">Under 15,000 ETB</option>
-                <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
-                <option value="30,001 - 60,000 ETB">30,001 - 60,000 ETB</option>
-                <option value="60,001 - 100,000 ETB">60,001 - 100,000 ETB</option>
-                <option value="Over 100,000 ETB">Over 100,000 ETB</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Social Links Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-100">
-          <h4 className="text-md font-bold text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-500">link</span>
-            Social Profiles (LinkedIn & GitHub)
-          </h4>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">LinkedIn URL</label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">contact_page</span>
-                <input
-                  type="url"
-                  name="linkedInUrl"
-                  value={formData.linkedInUrl || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://linkedin.com/in/your-handle"
-                  className="w-full pl-10 pr-3 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+        <div className="relative z-10 p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="relative group cursor-pointer" onClick={handleAvatarChange}>
+                <img
+                  src={formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80'}
+                  alt={formData.fullName}
+                  className="w-20 h-20 rounded-2xl border-3 border-white/20 shadow-xl object-cover transition-transform group-hover:scale-105"
                 />
+                <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white text-lg">📷</span>
+                </div>
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-white tracking-tight">{formData.fullName || 'New Alumnus'}</h2>
+                <p className="text-sm text-white/70 font-medium mt-0.5">{formData.currentRole} {formData.company ? `at ${formData.company}` : ''}</p>
+                <p className="text-[10px] text-white/50 font-semibold mt-1">{formData.department} • {formData.batch}</p>
               </div>
             </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">GitHub URL</label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-800">terminal</span>
-                <input
-                  type="url"
-                  name="gitHubUrl"
-                  value={formData.gitHubUrl || ''}
-                  onChange={handleInputChange}
-                  placeholder="https://github.com/your-handle"
-                  className="w-full pl-10 pr-3 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-slate-800/20 focus:outline-none focus:border-slate-800 focus:bg-white transition-all"
-                />
+            <div className="flex items-center gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
+                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getScoreColor()} flex items-center justify-center mx-auto`}>
+                  <span className="text-sm font-extrabold text-white">{profileScore}%</span>
+                </div>
+                <p className="text-[9px] text-white/60 font-bold uppercase tracking-wider mt-1.5">Profile Score</p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Interactive Skills Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-100">
-          <h4 className="text-md font-bold text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-astu-green">grade</span>
-            Technical & Soft Skills
-          </h4>
-
-          <div className="space-y-4 rounded-[10px] border border-gray-100 bg-gray-50 p-4">
-            <div className="flex flex-wrap gap-2">
-              {formData.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm"
-                >
-                  {skill}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSkill(skill)}
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-xs text-gray-400 hover:bg-gray-100 hover:text-astu-red"
-                  >
-                    <span className="material-symbols-outlined text-xs">close</span>
-                  </button>
-                </span>
-              ))}
-              {formData.skills.length === 0 && (
-                <p className="text-sm text-gray-500 italic">No skills added yet. Add skills to boost job recommendations.</p>
-              )}
-            </div>
-
-            <div className="flex gap-2 max-w-md">
-              <input
-                type="text"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                placeholder="e.g. React, Docker, Python, System Design"
-                className="flex-1 text-sm p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none focus:border-astu-navy transition-all"
-              />
               <button
-                type="button"
-                onClick={handleAddSkill}
-                className="px-5 bg-astu-navy hover:bg-astu-navy/90 text-white rounded-xl font-semibold flex items-center gap-1.5 transition-colors"
+                onClick={handleSubmit}
+                className="px-5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 border border-white/15 shadow-lg hover:shadow-xl"
               >
-                <span className="material-symbols-outlined text-lg">add</span> Add
+                💾 Save Changes
               </button>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Resume Section */}
-        <div className="space-y-4 pt-4 border-t border-gray-100">
-          <h4 className="text-md font-bold text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-astu-red">description</span>
-            Professional Resume / CV
-          </h4>
+      {/* Profile Completion Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { icon: 'verified', label: 'Identity', value: 'Verified', color: 'emerald' },
+          { icon: 'analytics', label: 'Completeness', value: `${profileScore}%`, color: 'blue' },
+          { icon: 'work', label: 'Resume', value: formData.resume ? 'Uploaded' : 'Missing', color: formData.resume ? 'emerald' : 'amber' },
+          { icon: 'link', label: 'LinkedIn', value: formData.linkedInUrl ? 'Connected' : 'Not set', color: formData.linkedInUrl ? 'emerald' : 'amber' },
+        ].map((stat, idx) => (
+          <div key={idx} className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-3.5 shadow-sm hover:shadow-md transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-outlined text-base">{stat.icon}</span>
+              <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-700' :
+                stat.color === 'blue' ? 'bg-blue-50 text-blue-700' :
+                'bg-amber-50 text-amber-700'
+              }`}>{stat.label}</span>
+            </div>
+            <p className="text-xs font-extrabold text-[var(--text-primary)]">{stat.value}</p>
+          </div>
+        ))}
+      </div>
 
-          {formData.resume ? (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-gradient-to-r from-red-50/40 via-white to-white border border-red-100 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-100 text-astu-red rounded-xl">
-                  <span className="material-symbols-outlined text-3xl">picture_as_pdf</span>
+      {/* Section Tabs */}
+      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+        <div className="flex overflow-x-auto border-b border-[var(--border-color)]">
+          {sections.map(section => (
+            <button
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              className={`flex items-center gap-1.5 px-4 py-3 text-[11px] font-bold whitespace-nowrap transition-all duration-200 border-b-2 ${
+                activeSection === section.id
+                  ? 'border-[#003366] text-[#003366] bg-[#003366]/5'
+                  : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)]'
+              }`}
+            >
+              <span className="text-sm">{section.icon}</span>
+              {section.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-5">
+          {/* Personal Info Section */}
+          {activeSection === 'personal' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Personal Information</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Manage your contact details and personal information.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Full Name</label>
+                  <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className={inputClass} required />
                 </div>
-                <div>
-                  <h5 className="font-bold text-gray-900">{formData.resume.fileName}</h5>
-                  <p className="text-xs text-gray-500">Size: {formData.resume.fileSize} • Uploaded on {formData.resume.uploadedAt}</p>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Email Address</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} className={inputClass} required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Phone Number</label>
+                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className={inputClass} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Student ID / Batch No.</label>
+                  <input type="text" name="studentId" value={formData.studentId} onChange={handleInputChange} className={`${inputClass} opacity-60 cursor-not-allowed`} readOnly />
                 </div>
               </div>
-              <div className="flex gap-3 mt-4 sm:mt-0 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => toast.success('Mock download started!')}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-semibold text-gray-700 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-lg">download</span> Download
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRemoveResume}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2 border border-red-200 hover:bg-red-50 rounded-xl text-sm font-semibold text-astu-red transition-colors"
-                >
-                  <span className="material-symbols-outlined text-lg">delete</span> Delete
-                </button>
+              <div className="space-y-1.5">
+                <label className={labelClass}>Professional Bio</label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  className={`${inputClass} h-24 resize-none`}
+                  placeholder="Share a short summary about your background, career interests, or tech stack..."
+                />
               </div>
             </div>
-          ) : (
-            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-astu-navy/50 transition-colors relative cursor-pointer group">
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={handleMockResumeUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                disabled={isUploading}
-              />
-              <div className="space-y-3">
-                <div className="mx-auto w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-astu-navy/10 group-hover:text-astu-navy transition-colors">
-                  <span className="material-symbols-outlined text-3xl">upload_file</span>
+          )}
+
+          {/* Academic Section */}
+          {activeSection === 'academic' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Academic Record</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Your ASTU academic information synced from the student information system.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Department</label>
+                  <select name="department" value={formData.department} onChange={handleInputChange} className={inputClass}>
+                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                    <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
+                    <option value="Civil Engineering">Civil Engineering</option>
+                    <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
+                    <option value="Chemical Engineering">Chemical Engineering</option>
+                  </select>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900">
-                    {isUploading ? 'Uploading resume...' : 'Click or Drag file to upload resume'}
-                  </p>
-                  <p className="text-xs text-gray-500">PDF, DOC, or DOCX formats up to 5MB</p>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Graduation Batch</label>
+                  <input type="text" name="batch" value={formData.batch} onChange={handleInputChange} className={inputClass} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Final CGPA</label>
+                  <input type="text" name="cgpa" value={formData.cgpa} onChange={handleInputChange} className={inputClass} placeholder="e.g. 3.75" />
                 </div>
               </div>
             </div>
           )}
+
+          {/* Employment Section */}
+          {activeSection === 'employment' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Employment Details</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your current professional role and compensation details.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Role / Title</label>
+                  <input type="text" name="currentRole" value={formData.currentRole} onChange={handleInputChange} className={inputClass} placeholder="e.g. Junior Frontend Dev" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Company Name</label>
+                  <input type="text" name="company" value={formData.company} onChange={handleInputChange} className={inputClass} placeholder="e.g. Chapa Financials" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Salary Range</label>
+                  <select name="salaryRange" value={formData.salaryRange} onChange={handleInputChange} className={inputClass}>
+                    <option value="Under 15,000 ETB">Under 15,000 ETB</option>
+                    <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
+                    <option value="30,001 - 60,000 ETB">30,001 - 60,000 ETB</option>
+                    <option value="60,001 - 100,000 ETB">60,001 - 100,000 ETB</option>
+                    <option value="Over 100,000 ETB">Over 100,000 ETB</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Social Links Section - ENHANCED */}
+          {activeSection === 'social' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Social & Professional Profiles</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Connect your professional profiles to boost visibility to recruiters and mentors.</p>
+              </div>
+
+              {/* LinkedIn Profile Card */}
+              <div className={`rounded-xl border-2 overflow-hidden transition-all duration-300 ${
+                formData.linkedInUrl ? 'border-blue-200 bg-blue-50/30' : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-blue-200'
+              }`}>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0A66C2] to-[#004182] flex items-center justify-center shadow-lg">
+                        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-extrabold text-[var(--text-primary)]">LinkedIn Profile</h4>
+                          {formData.linkedInUrl && (
+                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-extrabold rounded-full uppercase tracking-wider">Connected</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)]">Showcase your professional experience, endorsements, and recommendations.</p>
+                      </div>
+                    </div>
+                    {formData.linkedInUrl && (
+                      <a
+                        href={formData.linkedInUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0A66C2] text-white rounded-lg text-[10px] font-bold hover:bg-[#004182] transition-colors shadow-md"
+                      >
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        Visit
+                      </a>
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    <label className={labelClass}>LinkedIn Profile URL</label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0A66C2]">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                      </span>
+                      <input
+                        type="url"
+                        name="linkedInUrl"
+                        value={formData.linkedInUrl || ''}
+                        onChange={handleInputChange}
+                        placeholder="https://linkedin.com/in/your-handle"
+                        className={`${inputClass} pl-10`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* GitHub Profile Card */}
+              <div className={`rounded-xl border-2 overflow-hidden transition-all duration-300 ${
+                formData.gitHubUrl ? 'border-gray-300 bg-gray-50/30' : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-gray-300'
+              }`}>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-800 to-black flex items-center justify-center shadow-lg">
+                        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-extrabold text-[var(--text-primary)]">GitHub Profile</h4>
+                          {formData.gitHubUrl && (
+                            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-extrabold rounded-full uppercase tracking-wider">Connected</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)]">Display your open-source contributions, repositories, and code portfolio.</p>
+                      </div>
+                    </div>
+                    {formData.gitHubUrl && (
+                      <a
+                        href={formData.gitHubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-[10px] font-bold hover:bg-black transition-colors shadow-md"
+                      >
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        Visit
+                      </a>
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    <label className={labelClass}>GitHub Profile URL</label>
+                    <div className="relative mt-1.5">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                      </span>
+                      <input
+                        type="url"
+                        name="gitHubUrl"
+                        value={formData.gitHubUrl || ''}
+                        onChange={handleInputChange}
+                        placeholder="https://github.com/your-handle"
+                        className={`${inputClass} pl-10`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Profiles Tip */}
+              <div className="bg-[#003366]/5 border border-[#003366]/10 rounded-xl p-4 flex items-start gap-3">
+                <span className="text-lg">💡</span>
+                <div>
+                  <p className="text-xs font-bold text-[#003366]">Pro Tip: Connect Your Profiles</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-relaxed">
+                    Alumni with connected LinkedIn and GitHub profiles receive 3x more recruiter views and 2x more mentorship opportunities. Keep your profiles updated for maximum visibility.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Skills Section */}
+          {activeSection === 'skills' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Technical & Soft Skills</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Add skills to improve job matching and recommendations.</p>
+              </div>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {formData.skills.map((skill) => (
+                    <span key={skill} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-full text-[11px] font-bold text-[var(--text-primary)] shadow-sm hover:shadow-md transition-all group">
+                      {skill}
+                      <button type="button" onClick={() => handleRemoveSkill(skill)} className="w-4 h-4 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-100 hover:text-red-500 transition-colors">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </span>
+                  ))}
+                  {formData.skills.length === 0 && <p className="text-xs text-[var(--text-muted)] italic">No skills added yet.</p>}
+                </div>
+                <div className="flex gap-2 max-w-md">
+                  <input type="text" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} placeholder="e.g. React, Docker, Python, System Design" className={`${inputClass} flex-1`} />
+                  <button type="button" onClick={handleAddSkill} className="px-4 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
+                    <span>➕</span> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Resume Section */}
+          {activeSection === 'resume' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Professional Resume / CV</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Upload your resume to make it visible to partner employers.</p>
+              </div>
+              {formData.resume ? (
+                <div className="p-5 rounded-xl border border-emerald-200 bg-emerald-50/30">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white shadow-lg">
+                        <span className="text-2xl">📄</span>
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-extrabold text-[var(--text-primary)]">{formData.resume.fileName}</h5>
+                        <p className="text-[10px] text-[var(--text-secondary)]">Size: {formData.resume.fileSize} • Uploaded {formData.resume.uploadedAt}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => toast.success('Mock download started!')} className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
+                        ⬇️ Download
+                      </button>
+                      <button onClick={handleRemoveResume} className="flex items-center gap-1.5 px-4 py-2 border border-red-200 rounded-xl text-[11px] font-bold text-red-600 hover:bg-red-50 transition-all">
+                        🗑️ Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <label className="block border-2 border-dashed border-[var(--border-color)] rounded-xl p-10 text-center hover:border-[#003366]/30 hover:bg-[#003366]/5 transition-all cursor-pointer group">
+                  <input type="file" accept=".pdf,.doc,.docx" onChange={handleMockResumeUpload} className="hidden" disabled={isUploading} />
+                  <div className="space-y-3">
+                    <span className="text-4xl block group-hover:scale-110 transition-transform">{isUploading ? '⏳' : '📁'}</span>
+                    <div>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{isUploading ? 'Uploading...' : 'Click or drag to upload resume'}</p>
+                      <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">PDF, DOC, or DOCX formats up to 5MB</p>
+                    </div>
+                  </div>
+                </label>
+              )}
+            </div>
+          )}
         </div>
-      </form>
+      </div>
     </div>
   );
 };

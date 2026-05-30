@@ -113,12 +113,7 @@ export const SurveysTab: React.FC<SurveysTabProps> = ({ surveys, onCompleteSurve
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold"
-                  style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
-                >
-                  📋
-                </span>
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold material-symbols-outlined" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>assignment</span>
                 Your Tracer Questionnaires
               </h3>
               <p className="text-xs text-gray-500 mt-0.5 ml-10">Complete all pending studies to assist quality reviews</p>
@@ -239,7 +234,7 @@ export const SurveysTab: React.FC<SurveysTabProps> = ({ surveys, onCompleteSurve
 
             {surveys.length === 0 && (
               <div className="text-center py-12 px-6 rounded-2xl bg-gray-50 border border-gray-200/60">
-                <div className="text-4xl mb-3 opacity-30">📊</div>
+                <div className="text-4xl mb-3 opacity-30 material-symbols-outlined">analytics</div>
                 <p className="text-sm font-semibold text-gray-600">No tracer study questionnaires found.</p>
                 <p className="text-xs text-gray-400 mt-1">New surveys will appear here when assigned.</p>
               </div>

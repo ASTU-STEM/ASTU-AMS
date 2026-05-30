@@ -55,7 +55,6 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
 };
 
 export default function AdminLayout() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true');
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -84,10 +83,6 @@ export default function AdminLayout() {
     document.documentElement.classList.add(theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
-
-  useEffect(() => {
-    localStorage.setItem('sidebar_collapsed', String(sidebarCollapsed));
-  }, [sidebarCollapsed]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -192,16 +187,13 @@ export default function AdminLayout() {
       `}</style>
       <Toaster position="top-right" />
 
-      <AdminSidebar
-        compact={sidebarCollapsed}
-        onToggleCompact={() => setSidebarCollapsed((current) => !current)}
-        onClose={() => undefined}
+<AdminSidebar
         onLogout={handleLogout}
       />
 
-      <div
+       <div
         className="min-h-screen transition-[margin-left] duration-[250ms] ease-in-out"
-        style={{ marginLeft: sidebarCollapsed ? 64 : 240 }}
+        style={{ marginLeft: 256 }}
       >
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
@@ -211,14 +203,6 @@ export default function AdminLayout() {
           }}
         >
           <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSidebarCollapsed((current) => !current)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
-              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
                 <span>Admin</span>

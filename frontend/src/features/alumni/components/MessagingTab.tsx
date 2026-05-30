@@ -49,8 +49,8 @@ const INITIAL_MESSAGES: Record<string, AlumniMessage[]> = {
     { id: 8, sender: 'Alumni', senderName: 'You', text: "Thanks Dr. Abebe! I'd love to schedule a session to discuss the database design patterns.", timestamp: '11:30 AM', status: 'delivered' },
   ],
   system: [
-    { id: 9, sender: 'System', senderName: 'ASTU AMS', text: '📋 Reminder: The 12-Month Tracer Survey is now available. Please complete it before April 30.', timestamp: 'Mar 15', status: 'read' },
-    { id: 10, sender: 'System', senderName: 'ASTU AMS', text: '🎉 Congratulations! Your degree verification has been completed and dispatched.', timestamp: 'Mar 10', status: 'read' },
+    { id: 9, sender: 'System', senderName: 'ASTU AMS', text: `<span class="material-symbols-outlined">assignment</span> Reminder: The 12-Month Tracer Survey is now available. Please complete it before April 30.`, timestamp: 'Mar 15', status: 'read' },
+    { id: 10, sender: 'System', senderName: 'ASTU AMS', text: `<span class="material-symbols-outlined">celebration</span> Congratulations! Your degree verification has been completed and dispatched.`, timestamp: 'Mar 10', status: 'read' },
   ],
 };
 

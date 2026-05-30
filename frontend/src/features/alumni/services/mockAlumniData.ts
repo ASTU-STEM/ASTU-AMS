@@ -86,7 +86,12 @@ const defaultJobs: JobMatch[] = [
     ],
     applied: false,
     saved: false,
-    type: 'Full-Time'
+    type: 'Full-Time',
+    experience: 'Mid-Level (3-5 years)',
+    views: 128,
+    applications: 24,
+    shortlisted: 7,
+    skills: ['Node.js', 'Spring Boot', 'Kubernetes', 'Microservices']
   },
   {
     id: 2,
@@ -109,7 +114,12 @@ const defaultJobs: JobMatch[] = [
     ],
     applied: false,
     saved: true,
-    type: 'Internship'
+    type: 'Internship',
+    experience: 'Entry-Level',
+    views: 89,
+    applications: 12,
+    shortlisted: 3,
+    skills: ['Product Management', 'Figma', 'Analytics', 'E-commerce']
   },
   {
     id: 3,
@@ -134,7 +144,12 @@ const defaultJobs: JobMatch[] = [
     ],
     applied: false,
     saved: false,
-    type: 'Full-Time'
+    type: 'Full-Time',
+    experience: 'Mid-Level (2-4 years)',
+    views: 203,
+    applications: 31,
+    shortlisted: 12,
+    skills: ['Python', 'Machine Learning', 'PyTorch', 'AWS']
   },
   {
     id: 4,
@@ -157,7 +172,12 @@ const defaultJobs: JobMatch[] = [
     ],
     applied: false,
     saved: false,
-    type: 'Internship'
+    type: 'Internship',
+    experience: 'Entry-Level',
+    views: 156,
+    applications: 28,
+    shortlisted: 9,
+    skills: ['React', 'TypeScript', 'Tailwind CSS', 'Figma']
   }
 ];
 

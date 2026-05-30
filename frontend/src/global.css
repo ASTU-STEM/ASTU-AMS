@@ -115,14 +115,16 @@ input {
 .role-shell > div > main,
 .role-shell main,
 .admin-shell .flex-grow,
-.role-shell .flex-grow {
+.role-shell .flex-grow,
+.admin-shell main,
+.role-shell main {
   padding: var(--content-padding) !important;
 }
 
-/* ── Normalize content inner wrapper gap ── */
+/* ── Ensure flex-grow children in nested structures have proper padding ── */
 .admin-shell .flex-grow > div,
 .role-shell .flex-grow > div {
-  padding: 0 !important;
+  padding: var(--content-padding) !important;
   margin: 0 !important;
 }
 
@@ -235,7 +237,9 @@ input {
 .admin-shell .max-w-7xl,
 .role-shell .max-w-3xl,
 .role-shell .max-w-4xl,
-.role-shell .max-w-7xl {
+.role-shell .max-w-7xl,
+.admin-shell .max-w-6xl,
+.role-shell .max-w-6xl {
   max-width: none !important;
 }
 

@@ -274,10 +274,10 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
               <div>
                 <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <span
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold"
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold material-symbols-outlined"
                     style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
                   >
-                    📅
+                    event
                   </span>
                   Scheduled Sessions
                 </h3>
@@ -322,12 +322,12 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                   ))
                 )}
 
-                {connectedMentors.every(m => !m.sessions || m.sessions.length === 0) && (
-                  <div className="text-center py-6">
-                    <div className="text-2xl mb-2 opacity-30">📅</div>
-                    <p className="text-[11px] text-gray-400">No sessions scheduled yet.</p>
-                  </div>
-                )}
+{connectedMentors.every(m => !m.sessions || m.sessions.length === 0) && (
+                    <div className="text-center py-6">
+                      <div className="text-2xl mb-2 opacity-30 material-symbols-outlined">event</div>
+                      <p className="text-[11px] text-gray-400">No sessions scheduled yet.</p>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -338,12 +338,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-4">
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <span
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold"
-                  style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
-                >
-                  🎓
-                </span>
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold material-symbols-outlined" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>school</span>
                 Mentorship Status
               </h3>
               <p className="text-[11px] text-gray-500 leading-relaxed">

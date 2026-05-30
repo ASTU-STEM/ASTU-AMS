@@ -45,6 +45,11 @@ export interface JobMatch {
   saved: boolean;
   applicationStatus?: 'Applied' | 'Under Review' | 'Interview Scheduled' | 'Offered';
   type: 'Full-Time' | 'Internship' | 'Contract';
+  experience?: string;
+  views?: number;
+  applications?: number;
+  shortlisted?: number;
+  skills?: string[];
 }
 
 export interface TracerSurvey {

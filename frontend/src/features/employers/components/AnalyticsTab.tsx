@@ -11,7 +11,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
       {/* Analytics Hero Banner */}
       <section className="bg-gradient-to-r from-indigo-950 via-slate-900 to-astu-navy rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
         <div className="absolute right-0 bottom-0 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
-        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Hiring Analytics & Benchmarking Engine 📊</h2>
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Hiring Analytics & Benchmarking Engine<span className="material-symbols-outlined align-middle ml-2">analytics</span></h2>
         <p className="text-sm opacity-90 leading-relaxed mt-2">
           Review employment benchmarks, salary packages comparisons across regions, skill gap indicators, and average time-to-hire metrics.
         </p>
