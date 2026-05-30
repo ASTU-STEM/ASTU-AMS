@@ -13,6 +13,8 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
+import DashboardLayout from "./layouts/DashboardLayout";
+import { LayoutDashboard, TrendingUp, FileText, BookOpen, Download } from "lucide-react";
 
 function App() {
   return (

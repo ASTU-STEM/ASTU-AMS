@@ -6,6 +6,8 @@ import {
   FileText, Users, Settings, Bell, LogOut, Upload,
   Plus, AlertCircle, TrendingUp, Search
 } from 'lucide-react';
+import { PageHeader } from '../components/PageHeader';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
 
 // No backend call here (logout is purely local for now)
 const logoutLocally = () => {
@@ -18,17 +20,27 @@ const logoutLocally = () => {
 // ==========================================
 // 1. DYNAMIC SHARED LAYOUT SYSTEM
 // ==========================================
-function DashboardLayout({
-  children,
-  title,
-  role,
-  navItems,
-}: {
+interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   role: string;
   navItems: Array<{ path: string; label: string; icon: React.ComponentType<any> }>;
-}) {
+  breadcrumbs?: Array<{ label: string; path?: string; onClick?: () => void }>;
+  subtitle?: string;
+  headerActions?: React.ReactNode;
+  loading?: boolean;
+}
+
+export function DashboardLayout({
+  children,
+  title,
+  role,
+  navItems,
+  breadcrumbs,
+  subtitle,
+  headerActions,
+  loading = false
+}: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -124,7 +136,24 @@ function DashboardLayout({
 
         {/* View Frame Container */}
         <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto">
-          {children}
+          {/* Page Header with Breadcrumbs */}
+          {(breadcrumbs || subtitle || headerActions) && (
+            <PageHeader
+              title={title}
+              subtitle={subtitle}
+              breadcrumbs={breadcrumbs}
+              actions={headerActions}
+            />
+          )}
+          
+          {/* Loading State */}
+          {loading ? (
+            <div className="space-y-6">
+              <LoadingSkeleton variant="card" count={3} />
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>
@@ -428,63 +457,7 @@ function EmployerPortal() {
 }
 
 // ==========================================
-// 6. PORTAL 4: DEPARTMENT HEAD DASHBOARD
-// ==========================================
-function DepartmentPortal() {
-  const navItems = [
-    { label: "Curriculum Analytics", path: "/department", icon: BarChart3 }
-  ];
-
-  return (
-    <DashboardLayout title="Department Program Assessment Dashboard" role="Dept Head" navItems={navItems}>
-      <div className="space-y-6">
-        {/* Core Analysis Summary Rows */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md space-y-2">
-            <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block">Software Engineering Placement Speed</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">3.4 Months</span>
-              <span className="text-xs font-bold text-emerald-600">Avg to secure hire</span>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md space-y-2">
-            <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider block">Tracer Survey Completion</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">79.2%</span>
-              <span className="text-xs font-bold text-slate-500">Roster feedback loop</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Missing Practical Skill Set Alerts Array */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-4">
-          <div>
-            <h3 className="text-md font-bold text-slate-900">Industry-Flagged Technical Skill Deficiencies</h3>
-            <p className="text-xs text-slate-500">Skill gaps generated automatically from corporate partner feedback metrics.</p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            {[
-              { skill: "Cloud Architecture Models (AWS / Azure Deployments)", gap: "88% of tracking employers flag as mandatory requirement" },
-              { skill: "Automated Production Testing & CI/CD Pipelines", gap: "72% of tracking employers notice curriculum discrepancy" }
-            ].map((g, i) => (
-              <div key={i} className="bg-rose-50/50 border border-rose-100 rounded-xl p-4 flex items-start gap-3 shadow-sm">
-                <AlertCircle className="text-[#CC0033] h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-sm text-rose-950 block">{g.skill}</span>
-                  <span className="text-xs text-[#CC0033] block font-medium">{g.gap}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </DashboardLayout>
-  );
-}
-
-// ==========================================
-// 7. PORTAL 5: ROOT SYSTEM GOVERNANCE
+// 6. PORTAL 5: ROOT SYSTEM GOVERNANCE
 // ==========================================
 function AdminPortal() {
   const navItems = [
@@ -519,6 +492,34 @@ function AdminPortal() {
           </div>
         </div>
       </div>
+    </DashboardLayout>
+  );
+}
+
+// ==========================================
+// 7. PORTAL 4: DEPARTMENT ANALYTICS
+// ==========================================
+function DepartmentPortal() {
+  const navItems = [
+    { label: "Dashboard", path: "/department", icon: BarChart3 },
+    { label: "Employment Analytics", path: "/department/employment", icon: TrendingUp },
+    { label: "Skill Gap Reports", path: "/department/skill-gap", icon: GraduationCap },
+    { label: "Employer Feedback", path: "/department/employer-feedback", icon: FileText },
+    { label: "Tracer Reports", path: "/department/tracer", icon: FileText },
+    { label: "Curriculum Insights", path: "/department/curriculum", icon: FileText },
+    { label: "Accreditation Reports", path: "/department/accreditation", icon: FileText }
+  ];
+
+  return (
+    <DashboardLayout title="Department Head Portal" role="Department Head" navItems={navItems}>
+      <Routes>
+        <Route path="/" element={
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
+            <h2 className="text-lg font-black text-[#003366] mb-4">Department Dashboard</h2>
+            <p className="text-sm text-slate-500">Select a module from the sidebar to view analytics.</p>
+          </div>
+        } />
+      </Routes>
     </DashboardLayout>
   );
 }
