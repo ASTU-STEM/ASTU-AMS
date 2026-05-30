@@ -3,8 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
-import apiRouter from './routes/api.routes';
-import { globalErrorHandler } from './middlewares/error.middleware';
+import apiRouter from './presentation/routes/api.routes';
+import { globalErrorHandler } from './presentation/middlewares/error.middleware';
 
 const app = express();
 

@@ -20,6 +20,12 @@ enum SyncStatus {
   FAILED
 }
 
+enum AlumniStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
 enum ApplicationStatus {
   PENDING
   SHORTLISTED
@@ -68,6 +74,9 @@ model AlumniProfile {
   dateOfBirth    DateTime?
   departmentId   String
   department     Department        @relation(fields: [departmentId], references: [id])
+  registrarRecordId String?       @unique
+  registrarRecord   RegistrarStudent? @relation(fields: [registrarRecordId], references: [id])
+  status         AlumniStatus      @default(INACTIVE)
   profilePicture String?
   skills         String[]          // Array of skills
   resumeUrl      String?
@@ -223,6 +232,24 @@ model RegistrarSyncLog {
   recordsCount Int
   status       SyncStatus
   errors       String?
+}
+
+model RegistrarStudent {
+  id             String   @id @default(uuid())
+  studentId      String   @unique
+  fullName       String
+  department     String
+  departmentCode String
+  cgpa           Float
+  graduationDate DateTime?
+  graduationYear Int
+  email          String?
+  phone          String?
+  source         String
+  importedAt     DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  alumniProfile  AlumniProfile?
 }
 
 model Notification {

@@ -1,8 +1,8 @@
 import app from './app';
-import { env } from './config/env';
-import prisma, { initPrisma } from './config/db';
-import { CronService } from './services/cron.service';
-import { Logger } from './utils/logger.utils';
+import { env } from './infrastructure/config/env';
+import prisma, { initPrisma } from './infrastructure/config/db';
+import { CronService } from './infrastructure/services/cron.service';
+import { Logger } from './shared/utils/logger.utils';
 
 const PORT = env.PORT || 5000;
 
