@@ -1089,14 +1089,14 @@ export default function HomePage() {
             <p className="mt-4 text-slate-200 max-w-2xl mx-auto">
               Connect with fellow alumni, discover career opportunities, and contribute to university excellence.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md" onClick={() => navigate("/alumni")}>
-                Alumni Portal
-              </button>
-              <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all" onClick={() => navigate("/employer")}>
-                Employer Portal
-              </button>
-            </div>
+<div className="mt-8 flex flex-wrap justify-center gap-4">
+               <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md" onClick={() => navigate("/alumni")}>
+                 Alumni Portal
+               </button>
+               <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all" onClick={() => navigate("/employer")}>
+                 Employer Portal
+               </button>
+             </div>
           </div>
         </section>
 

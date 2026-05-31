@@ -467,57 +467,50 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
               {item.label}
               </button>
             ))}
-            {megaMenuCategories.map((group) => (
-              <div key={group.title} className="relative h-full">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMegaMenuOpen(false);
-                    setOpenNavGroup((current) => current === group.title ? null : group.title);
-                  }}
-                  className={`flex h-full items-center gap-1 border-b-2 px-3 text-sm font-bold tracking-wide transition-all ${
-                    openNavGroup === group.title
-                      ? "border-astu-red text-astu-navy"
-                      : "border-transparent text-on-surface-variant hover:border-astu-navy/50 hover:text-astu-navy"
-                  }`}
-                >
-                  {group.title}
-                  <ChevronDown className={`h-4 w-4 transition-transform ${openNavGroup === group.title ? "rotate-180" : ""}`} />
-                </button>
-                {openNavGroup === group.title && (
-                  <div className="absolute left-0 top-12 z-50 w-72 rounded-b-xl border border-t-0 border-outline-variant bg-white p-3 shadow-xl animate-[mega-menu-fade-in_200ms_ease-out_both]">
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <button
-                          key={item.label}
-                          type="button"
-                          onClick={() => handleGroupedNavSelect(item)}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-astu-navy transition-colors hover:bg-surface-container-low"
-                        >
-                          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-astu-navy/10 text-astu-navy">
-                            <Icon className="h-4 w-4" />
-                          </span>
-                          <span>{item.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            ))}
+{megaMenuCategories.map((group) => (
+               <div key={group.title} className="relative h-full">
+                 <button
+                   type="button"
+                   onClick={() => {
+                     setIsMegaMenuOpen(false);
+                     setOpenNavGroup((current) => current === group.title ? null : group.title);
+                   }}
+                   className={`flex h-full items-center gap-1 border-b-2 px-3 text-sm font-bold tracking-wide transition-all ${
+                     openNavGroup === group.title
+                       ? "border-astu-red text-astu-navy"
+                       : "border-transparent text-on-surface-variant hover:border-astu-navy/50 hover:text-astu-navy"
+                   }`}
+                 >
+                   {group.title}
+                   <ChevronDown className={`h-4 w-4 transition-transform ${openNavGroup === group.title ? "rotate-180" : ""}`} />
+                 </button>
+                 {openNavGroup === group.title && (
+                   <div className="absolute left-0 top-12 z-50 w-72 rounded-b-xl border border-t-0 border-outline-variant bg-white p-3 shadow-xl animate-[mega-menu-fade-in_200ms_ease-out_both]">
+                     {group.items.map((item) => {
+                       const Icon = item.icon;
+                       return (
+                         <button
+                           key={item.label}
+                           type="button"
+                           onClick={() => handleGroupedNavSelect(item)}
+                           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-astu-navy transition-colors hover:bg-surface-container-low"
+                         >
+                           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-astu-navy/10 text-astu-navy">
+                             <Icon className="h-4 w-4" />
+                           </span>
+                           <span>{item.label}</span>
+                         </button>
+                       );
+                     })}
+                   </div>
+                 )}
+               </div>
+             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
-            className="rounded-md bg-astu-red px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition-all hover:brightness-110"
-          >
-            Portal Access
-          </button>
         </nav>
       </div>
 
-      {/* Mobile drawer panel */}
+        {/* Mobile drawer panel */}
       {isMobileNavOpen ? (
         <div className="border-t border-outline-variant bg-white px-4 py-4 xl:hidden">
           <div className="space-y-2">
