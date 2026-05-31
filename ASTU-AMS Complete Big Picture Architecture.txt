@@ -1,0 +1,1628 @@
+﻿ASTU-AMS Complete Big Picture Architecture
+The system your university wants is not just a “website”.
+It is actually a:
+University-Wide Digital Alumni Ecosystem
+that connects:
+* Registrar Office
+* Alumni
+* Employers
+* Departments
+* University Management
+* Accreditation Agencies
+into ONE centralized platform.
+________________
+
+
+1. THE BIG PICTURE
+Main Goal
+ASTU wants to answer these questions automatically:
+* Where are our graduates working?
+* How long did they take to get jobs?
+* Which department performs best?
+* Which skills are missing?
+* Which companies hire ASTU students?
+* Are our curricula aligned with industry?
+* Can we prove graduate employability for accreditation?
+That is the REAL purpose.
+________________
+
+
+2. OVERALL SYSTEM ARCHITECTURE
+High-Level Architecture
+                   ┌─────────────────────┐
+                   │  Registrar Office   │
+                   │ Student Database    │
+                   └──────────┬──────────┘
+                              │
+                        Data Sync/API
+                              │
+                              ▼
+┌───────────────────────────────────────────────────────┐
+│                 ASTU-AMS Backend                     │
+│------------------------------------------------------│
+│ Authentication Service                               │
+│ Alumni Management Service                            │
+│ Tracer Study Engine                                  │
+│ Job Board Service                                    │
+│ Employer Feedback System                             │
+│ Analytics Engine                                     │
+│ Notification Service                                 │
+│ Admin Management                                     │
+└───────────────┬───────────────────────────────────────┘
+               │
+       REST APIs / JWT
+               │
+               ▼
+┌───────────────────────────────────────────────────────┐
+│                 React Frontend                       │
+│------------------------------------------------------│
+│ Alumni Portal                                        │
+│ Admin Portal                                         │
+│ Employer Portal                                      │
+│ Analytics Dashboard                                  │
+└───────────────────────────────────────────────────────┘
+               │
+               ▼
+┌───────────────────────────────────────────────────────┐
+│                 PostgreSQL Database                  │
+└───────────────────────────────────────────────────────┘
+________________
+
+
+3. CORE ACTORS OF THE SYSTEM
+A. Alumni
+Can:
+* Login
+* Update profile
+* Fill tracer surveys
+* Apply for jobs
+* Join mentorship
+* Receive announcements
+________________
+
+
+B. Registrar Office
+Can:
+* Export graduate data
+* Sync student records
+* Verify graduates
+* Approve alumni accounts
+________________
+
+
+C. Employers
+Can:
+* Post jobs
+* Rate graduates
+* Give skill feedback
+* Search alumni talent
+________________
+
+
+D. Department Heads
+Can:
+* View analytics
+* View employment reports
+* Review curriculum gaps
+________________
+
+
+E. System Admin
+Can:
+* Manage everything
+* Generate reports
+* Control users
+* Monitor surveys
+________________
+
+
+4. MAIN MODULES OF THE SYSTEM
+________________
+
+
+MODULE 1 — AUTHENTICATION SYSTEM
+Purpose
+Secure access.
+Features
+* Login
+* Registration
+* JWT authentication
+* Role-based access
+* Password reset
+Roles
+ADMIN
+ALUMNI
+EMPLOYER
+DEPARTMENT_HEAD
+REGISTRAR
+________________
+
+
+MODULE 2 — REGISTRAR INTEGRATION SYSTEM
+This is VERY IMPORTANT.
+What Happens?
+Registrar office already has:
+* Student IDs
+* Names
+* Departments
+* CGPA
+* Graduation year
+* Email
+* Phone
+ASTU-AMS should IMPORT this data.
+________________
+
+
+HOW DATA FLOWS
+Option A — CSV/Excel Upload (BEST FOR STUDENTS)
+Registrar exports:
+graduates_2025.xlsx
+Admin uploads it into AMS.
+System automatically:
+* Creates alumni records
+* Sends activation emails
+* Verifies graduates
+This is easiest and realistic.
+________________
+
+
+Option B — Direct Database Integration (Advanced)
+AMS directly connects to:
+* ERP
+* SIS
+* Registrar database
+using APIs.
+But this is HARD for student project.
+So for now:
+USE Direct Database Integration.
+________________
+
+
+Also use CSV/Excel Upload  and Option
+________________
+
+
+MODULE 3 — ALUMNI PROFILE SYSTEM
+Data Stored
+Full Name
+Student ID
+Department
+Batch
+Graduation Year
+CGPA
+Phone
+Email
+Current Job
+Company
+Salary Range
+Country
+LinkedIn
+Skills
+Resume/CV
+________________
+
+
+MODULE 4 — TRACER STUDY ENGINE
+THIS IS THE HEART OF THE SYSTEM.
+________________
+
+
+What is Tracer Study?
+Universities track graduates after:
+* 6 months
+* 12 months
+* 24 months
+to measure employability.
+________________
+
+
+HOW IT WORKS
+Step 1
+System sends survey automatically.
+Example:
+"Are you currently employed?"
+________________
+
+
+Step 2
+Alumni fill survey.
+________________
+
+
+Step 3
+Analytics generated automatically.
+________________
+
+
+SURVEY QUESTIONS
+Employment
+* Employed?
+* Self-employed?
+* Unemployed?
+Job Details
+* Company
+* Salary range
+* Industry
+* Country
+Skill Alignment
+* Was curriculum useful?
+* Missing skills?
+* Technologies used?
+________________
+
+
+AUTOMATION LOGIC
+If graduation_date == 6 months:
+   Send Survey 1
+
+
+If graduation_date == 12 months:
+   Send Survey 2
+________________
+
+
+MODULE 5 — EMPLOYER PORTAL
+Employers can:
+* Post jobs
+* Search alumni
+* Give competency ratings
+________________
+
+
+EMPLOYER FEEDBACK SYSTEM
+Example:
+Communication Skill: 8/10
+Technical Skill: 7/10
+Problem Solving: 9/10
+This becomes analytics for departments.
+________________
+
+
+MODULE 6 — JOB BOARD
+Features
+* Post jobs
+* Internship posts
+* Apply system
+* Deadline tracking
+________________
+
+
+MODULE 7 — ANALYTICS DASHBOARD
+This is what university management LOVES.
+________________
+
+
+ANALYTICS EXAMPLES
+Employment Rate
+Software Engineering → 82%
+Mechanical Engineering → 70%
+________________
+
+
+Time to Hire
+Average: 4.2 months
+________________
+
+
+Top Hiring Companies
+Ethio Telecom
+Safaricom
+INSA
+Commercial Bank
+________________
+
+
+Skill Gap Analysis
+Missing Skills:
+- Cloud Computing
+- DevOps
+- AI/ML
+________________
+
+
+DASHBOARD CHARTS
+Use:
+* Pie charts
+* Bar charts
+* Line charts
+* Heat maps
+Libraries:
+* Recharts
+* Chart.js
+________________
+
+
+MODULE 8 — NOTIFICATION SYSTEM
+Send:
+* Survey reminders
+* Job alerts
+* Event notifications
+Using:
+* Email API
+* SMS API (future)
+________________
+
+
+MODULE 9 — DOCUMENT REQUEST SYSTEM
+Alumni can request:
+* Transcript
+* Degree verification
+* Recommendation letters
+This reduces registrar workload.
+
+
+ASTU-AMS PORTALS — COMPLETE DETAILED SYSTEM DESIGN
+Your system is basically:
+ONE SYSTEM
+   ↓
+5 Different Portals
+   ↓
+Each portal sees different features
+based on their role.
+________________
+
+
+FULL SYSTEM ROLE STRUCTURE
+Role
+	Purpose
+	Alumni
+	Update career information
+	Registrar Office
+	Provide official graduate data
+	Employers
+	Recruit and evaluate graduates
+	Department Heads
+	Analyze department performance
+	System Admin
+	Control the whole system
+	________________
+
+
+1. ALUMNI PORTAL
+This is the MAIN user portal.
+After login, alumni should see:
+________________
+
+
+ALUMNI DASHBOARD
+Dashboard Overview Cards
+Profile Completion %
+Survey Status
+Job Matches
+Mentorship Requests
+Notifications
+________________
+
+
+SIDEBAR MENU
+Dashboard
+My Profile
+Career Information
+Tracer Surveys
+Jobs & Internships
+Mentorship
+Events
+Documents
+Messages
+Settings
+Logout
+________________
+
+
+A. MY PROFILE MODULE
+Personal Information
+Full Name
+Student ID
+Department
+Batch
+CGPA
+Graduation Year
+Gender
+Date of Birth
+Phone
+Email
+Address
+Country
+Profile Picture
+________________
+
+
+Academic Information
+College
+Department
+Degree Type
+Research Area
+Skills
+Certifications
+________________
+
+
+Career Information
+Employment Status
+Company Name
+Position
+Industry
+Salary Range
+Work Location
+Remote/Onsite
+Years of Experience
+________________
+
+
+Social Links
+LinkedIn
+GitHub
+Portfolio Website
+Telegram
+________________
+
+
+B. TRACER SURVEY MODULE
+This is VERY IMPORTANT.
+________________
+
+
+Survey Dashboard
+Shows:
+* Pending surveys
+* Completed surveys
+* Upcoming surveys
+________________
+
+
+Example Survey Types
+6-Month Survey
+Are you employed?
+How long did it take?
+Salary range?
+________________
+
+
+12-Month Survey
+Career growth?
+Industry satisfaction?
+Skills needed?
+________________
+
+
+Survey Logic
+Graduated 6 months ago?
+   → Show Survey 1
+
+
+Graduated 12 months ago?
+   → Show Survey 2
+________________
+
+
+C. JOB BOARD MODULE
+Alumni can:
+Features
+Search jobs
+Apply jobs
+Upload CV
+Save jobs
+Track applications
+________________
+
+
+Job Details Page
+Company
+Salary
+Deadline
+Requirements
+Location
+Apply Button
+________________
+
+
+D. MENTORSHIP MODULE
+Alumni can:
+* Become mentor
+* Request mentor
+* Schedule sessions
+________________
+
+
+E. EVENT SYSTEM
+Shows:
+* Alumni events
+* Webinars
+* Workshops
+* Reunion programs
+________________
+
+
+F. DOCUMENT REQUEST MODULE
+Alumni request:
+* Transcript
+* Degree verification
+* Recommendation letter
+________________
+
+
+G. SETTINGS MODULE
+Change password
+Notification preferences
+Privacy settings
+2FA (future)
+________________
+
+
+2. REGISTRAR OFFICE PORTAL
+This is one of the MOST IMPORTANT portals.
+Registrar is the SOURCE OF TRUTH.
+________________
+
+
+REGISTRAR DASHBOARD
+Dashboard Cards
+Total Graduates
+Pending Verifications
+Imported Records
+Document Requests
+Survey Participation
+________________
+
+
+SIDEBAR
+Dashboard
+Graduate Records
+Import Data
+Verification
+Document Requests
+Reports
+Settings
+Logout
+________________
+
+
+A. GRADUATE RECORD MANAGEMENT
+Registrar can:
+* Add graduate
+* Edit graduate
+* Verify graduate
+* Archive records
+________________
+
+
+B. DATA IMPORT SYSTEM
+VERY IMPORTANT FEATURE.
+________________
+
+
+Import Flow
+Registrar uploads:
+CSV
+Excel
+________________
+
+
+Example Excel Columns
+Student ID
+Full Name
+Department
+Graduation Year
+Email
+Phone
+CGPA
+________________
+
+
+Import Processing
+System should:
+* Validate data
+* Remove duplicates
+* Detect errors
+* Auto-create alumni accounts
+________________
+
+
+C. VERIFICATION MODULE
+Registrar verifies:
+* Real graduates
+* Transcript requests
+* Alumni identities
+________________
+
+
+D. DOCUMENT REQUEST MANAGEMENT
+Approve:
+* Transcript requests
+* Degree verification
+* Official documents
+________________
+
+
+E. REPORT GENERATION
+Generate:
+* Graduate reports
+* Batch reports
+* Department statistics
+________________
+
+
+3. EMPLOYER PORTAL
+This connects industry with ASTU.
+________________
+
+
+EMPLOYER DASHBOARD
+Cards
+Active Jobs
+Applications Received
+Shortlisted Candidates
+Employer Feedback
+________________
+
+
+SIDEBAR
+Dashboard
+Post Jobs
+Applications
+Talent Search
+Feedback
+Company Profile
+Messages
+Logout
+________________
+
+
+A. COMPANY PROFILE
+Company Name
+Industry
+Website
+Location
+HR Contact
+Logo
+________________
+
+
+B. JOB POSTING SYSTEM
+Employers can:
+* Create jobs
+* Edit jobs
+* Delete jobs
+* Close jobs
+________________
+
+
+Job Fields
+Title
+Description
+Salary
+Deadline
+Experience
+Required Skills
+Location
+Employment Type
+________________
+
+
+C. APPLICATION MANAGEMENT
+Employers can:
+* View applicants
+* Download CVs
+* Shortlist candidates
+* Reject/approve
+________________
+
+
+D. TALENT SEARCH
+Search alumni by:
+* Skill
+* Department
+* Graduation year
+* Country
+________________
+
+
+E. FEEDBACK MODULE
+VERY IMPORTANT FOR UNIVERSITY.
+Employers rate graduates.
+________________
+
+
+Example Ratings
+Technical Skill
+Communication
+Leadership
+Teamwork
+Problem Solving
+Innovation
+________________
+
+
+Feedback Analytics Used By:
+* Department heads
+* Curriculum reviewers
+________________
+
+
+4. DEPARTMENT HEAD PORTAL
+This is PURELY ANALYTICS & MONITORING.
+________________
+
+
+DASHBOARD
+Cards
+Employment Rate
+Top Employers
+Skill Gaps
+Graduate Count
+Average Salary
+Tracer Completion
+________________
+
+
+SIDEBAR
+Dashboard
+Employment Analytics
+Skill Gap Reports
+Employer Feedback
+Tracer Reports
+Curriculum Insights
+Export Reports
+Logout
+________________
+
+
+A. EMPLOYMENT ANALYTICS
+Shows:
+* Employment percentage
+* Time-to-hire
+* Industry distribution
+________________
+
+
+Example
+Software Engineering:
+Employment Rate → 84%
+Average Hire Time → 3.2 Months
+________________
+
+
+B. SKILL GAP ANALYSIS
+VERY IMPORTANT FEATURE.
+Shows:
+* Missing skills
+* Market demand
+* Weak curriculum areas
+________________
+
+
+Example
+Top Missing Skills:
+- DevOps
+- Cloud Computing
+- AI Engineering
+________________
+
+
+C. EMPLOYER FEEDBACK REPORTS
+Department sees:
+* Employer complaints
+* Graduate strengths
+* Recommendations
+________________
+
+
+D. CURRICULUM INSIGHTS
+System recommends:
+* Add new courses
+* Update technologies
+* Remove outdated topics
+________________
+
+
+E. EXPORT REPORTS
+Export:
+* PDF
+* Excel
+* Accreditation reports
+________________
+
+
+5. SYSTEM ADMIN PORTAL
+THIS CONTROLS EVERYTHING.
+________________
+
+
+ADMIN DASHBOARD
+Main Cards
+Total Alumni
+Total Employers
+Survey Completion Rate
+System Usage
+Active Jobs
+Departments
+________________
+
+
+SIDEBAR
+Dashboard
+User Management
+Role Management
+System Analytics
+Survey Management
+Jobs Management
+Departments
+Notifications
+Logs
+Settings
+Backup
+Logout
+________________
+
+
+A. USER MANAGEMENT
+Admin can:
+* Create users
+* Ban users
+* Reset passwords
+* Assign roles
+________________
+
+
+B. ROLE MANAGEMENT
+Control permissions.
+Example:
+Alumni:
+ Can view own data only
+
+
+Department Head:
+ Can view department analytics only
+
+
+Registrar:
+ Can import graduate data
+________________
+
+
+C. SURVEY MANAGEMENT
+Admin creates:
+* Survey templates
+* Scheduled surveys
+* Questions
+________________
+
+
+D. NOTIFICATION SYSTEM
+Send:
+* Emails
+* Announcements
+* Survey reminders
+________________
+
+
+E. SYSTEM LOGS
+Track:
+* Login history
+* Data imports
+* User actions
+* Errors
+________________
+
+
+F. BACKUP & SECURITY
+Admin controls:
+* Database backups
+* Security settings
+* API keys
+________________
+
+
+6. SHARED FEATURES ACROSS ALL PORTALS
+________________
+
+
+NOTIFICATION CENTER
+Unread notifications
+Survey reminders
+System alerts
+________________
+
+
+SEARCH SYSTEM
+Global search:
+* Alumni
+* Jobs
+* Surveys
+* Employers
+________________
+
+
+MESSAGING SYSTEM
+Internal communication:
+* Employer ↔ Alumni
+* Admin ↔ Users
+________________
+
+
+DARK/LIGHT MODE
+Optional but impressive.
+________________
+
+
+RESPONSIVE DESIGN
+Must work on:
+* Laptop
+* Phone
+* Tablet
+________________
+
+
+7. BEST UI STRUCTURE
+Use:
+Layout
+Top Navbar
+Left Sidebar
+Main Content Area
+Right Notification Panel
+________________
+
+
+8. DATABASE RELATIONSHIPS
+VERY IMPORTANT.
+________________
+
+
+Core Relationships
+User
+├── Alumni Profile
+├── Survey Responses
+├── Job Applications
+└── Notifications
+
+
+Employer
+├── Jobs
+└── Feedback
+
+
+Department
+├── Alumni
+└── Analytics
+ASTU-AMS — ENTERPRISE SYSTEM ARCHITECTURE
+React + Node.js + TypeScript + PostgreSQL
+I’ll design this like a real production-level system architecture.
+Your system should follow:
+Frontend (React)
+       ↓
+API Gateway
+       ↓
+Backend Services (Node.js)
+       ↓
+PostgreSQL Database
+       ↓
+Storage / Email / Analytics
+________________
+
+
+1. COMPLETE SYSTEM ARCHITECTURE
+┌─────────────────────────────┐
+│        React Frontend       │
+│-----------------------------│
+│ Alumni Portal               │
+│ Employer Portal             │
+│ Registrar Portal            │
+│ Department Portal           │
+│ Admin Portal                │
+└──────────────┬──────────────┘
+              │ REST API
+              ▼
+┌─────────────────────────────┐
+│       Express API Server    │
+│-----------------------------│
+│ Auth Module                 │
+│ Alumni Module               │
+│ Survey Module               │
+│ Job Module                  │
+│ Employer Module             │
+│ Analytics Module            │
+│ Notification Module         │
+│ Upload Module               │
+└──────────────┬──────────────┘
+              │
+              ▼
+┌─────────────────────────────┐
+│      PostgreSQL Database    │
+└─────────────────────────────┘
+________________
+
+
+2. FRONTEND ARCHITECTURE (REACT + TS)
+________________
+
+
+MAIN FRONTEND STRUCTURE
+frontend/
+│
+├── public/
+│
+├── src/
+│   ├── app/
+│   ├── assets/
+│   ├── components/
+│   ├── features/
+│   ├── layouts/
+│   ├── pages/
+│   ├── routes/
+│   ├── services/
+│   ├── store/
+│   ├── hooks/
+│   ├── contexts/
+│   ├── types/
+│   ├── utils/
+│   ├── constants/
+│   ├── styles/
+│   ├── config/
+│   ├── middleware/
+│   └── main.tsx
+│
+├── .env
+├── tsconfig.json
+├── vite.config.ts
+├── package.json
+└── README.md
+________________
+
+
+3. FRONTEND FOLDER EXPLANATION
+________________
+
+
+/app
+Application bootstrap.
+app/
+├── App.tsx
+├── providers.tsx
+└── store.ts
+________________
+
+
+/assets
+assets/
+├── images/
+├── icons/
+├── logos/
+└── fonts/
+________________
+
+
+/components
+Reusable UI components.
+components/
+├── ui/
+├── forms/
+├── charts/
+├── tables/
+├── modals/
+├── cards/
+├── loaders/
+├── sidebar/
+├── navbar/
+└── notifications/
+________________
+
+
+/features
+MOST IMPORTANT folder.
+Feature-based architecture.
+features/
+├── auth/
+├── alumni/
+├── employers/
+├── registrar/
+├── surveys/
+├── analytics/
+├── jobs/
+├── departments/
+├── admin/
+└── notifications/
+________________
+
+
+Example Feature Structure
+features/alumni/
+│
+├── api/
+├── components/
+├── hooks/
+├── pages/
+├── types/
+├── services/
+├── validation/
+└── state/
+________________
+
+
+/layouts
+layouts/
+├── DashboardLayout.tsx
+├── AuthLayout.tsx
+└── PublicLayout.tsx
+________________
+
+
+/pages
+Global pages.
+pages/
+├── LoginPage.tsx
+├── RegisterPage.tsx
+├── Unauthorized.tsx
+└── NotFound.tsx
+________________
+
+
+/routes
+routes/
+├── index.tsx
+├── ProtectedRoute.tsx
+└── RoleRoute.tsx
+________________
+
+
+/services
+API communication layer.
+services/
+├── api.ts
+├── auth.service.ts
+├── survey.service.ts
+└── job.service.ts
+________________
+
+
+/store
+Redux Toolkit.
+store/
+├── index.ts
+├── authSlice.ts
+├── surveySlice.ts
+└── jobSlice.ts
+________________
+
+
+/hooks
+hooks/
+├── useAuth.ts
+├── useDebounce.ts
+└── usePermissions.ts
+________________
+
+
+/types
+Global TypeScript types.
+types/
+├── user.types.ts
+├── survey.types.ts
+└── api.types.ts
+________________
+
+
+/utils
+utils/
+├── formatDate.ts
+├── exportExcel.ts
+├── validators.ts
+└── permissions.ts
+________________
+
+
+4. FRONTEND ROLE-BASED PAGES
+________________
+
+
+ALUMNI PAGES
+alumni/
+├── Dashboard
+├── Profile
+├── Surveys
+├── Jobs
+├── Applications
+├── Mentorship
+└── Settings
+________________
+
+
+REGISTRAR PAGES
+registrar/
+├── ImportGraduates
+├── GraduateRecords
+├── Verification
+├── Reports
+└── Requests
+________________
+
+
+EMPLOYER PAGES
+employer/
+├── Dashboard
+├── Jobs
+├── Applicants
+├── Feedback
+└── TalentSearch
+________________
+
+
+ADMIN PAGES
+admin/
+├── Dashboard
+├── Users
+├── Roles
+├── Surveys
+├── Analytics
+├── Logs
+└── Settings
+________________
+
+
+5. BACKEND ARCHITECTURE (NODE.JS + TS)
+Use:
+* Express.js
+* TypeScript
+* Prisma ORM
+* PostgreSQL
+________________
+
+
+MAIN BACKEND STRUCTURE
+backend/
+│
+├── src/
+│   ├── config/
+│   ├── modules/
+│   ├── common/
+│   ├── middlewares/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── jobs/
+│   ├── events/
+│   ├── database/
+│   ├── interfaces/
+│   ├── types/
+│   ├── validators/
+│   ├── docs/
+│   ├── app.ts
+│   └── server.ts
+│
+├── prisma/
+├── uploads/
+├── logs/
+├── tests/
+├── .env
+├── tsconfig.json
+├── package.json
+└── README.md
+________________
+
+
+6. BACKEND MODULE-BASED DESIGN
+VERY IMPORTANT.
+Each feature becomes independent.
+________________
+
+
+MODULE STRUCTURE
+modules/
+├── auth/
+├── users/
+├── alumni/
+├── registrar/
+├── employers/
+├── jobs/
+├── surveys/
+├── analytics/
+├── notifications/
+└── departments/
+________________
+
+
+SINGLE MODULE STRUCTURE
+Example:
+modules/alumni/
+│
+├── alumni.controller.ts
+├── alumni.service.ts
+├── alumni.repository.ts
+├── alumni.routes.ts
+├── alumni.validation.ts
+├── alumni.types.ts
+└── alumni.constants.ts
+________________
+
+
+7. BACKEND LAYERED ARCHITECTURE
+________________
+
+
+CONTROLLER LAYER
+Handles:
+* HTTP requests
+* Validation
+* Response formatting
+Example:
+GET /api/alumni/profile
+________________
+
+
+SERVICE LAYER
+Business logic.
+Example:
+calculateEmploymentRate()
+________________
+
+
+REPOSITORY LAYER
+Database communication.
+Example:
+findAlumniByDepartment()
+
+
+8. DATABASE ARCHITECTURE
+________________
+
+
+MAIN TABLES
+users
+roles
+permissions
+alumni_profiles
+departments
+employers
+jobs
+applications
+surveys
+survey_questions
+survey_responses
+notifications
+events
+audit_logs
+document_requests
+________________
+
+
+RELATIONSHIP DESIGN
+User
+├── AlumniProfile
+├── Applications
+├── SurveyResponses
+
+
+Employer
+├── Jobs
+└── Feedback
+
+
+Department
+└── AlumniProfiles
+________________
+
+
+9. AUTHENTICATION ARCHITECTURE
+Use:
+* JWT Access Token
+* Refresh Token
+________________
+
+
+LOGIN FLOW
+User Login
+  ↓
+Validate Credentials
+  ↓
+Generate JWT
+  ↓
+Return Access Token
+________________
+
+
+SECURITY FEATURES
+bcrypt password hashing
+helmet
+rate limiting
+CORS
+input sanitization
+RBAC permissions
+________________
+
+
+10. ROLE-BASED ACCESS CONTROL (RBAC)
+VERY IMPORTANT.
+________________
+
+
+Example Permissions
+ADMIN:
+ full access
+
+
+ALUMNI:
+ own profile only
+
+
+REGISTRAR:
+ import/manage graduates
+
+
+EMPLOYER:
+ manage jobs/applications
+
+
+DEPARTMENT_HEAD:
+ analytics only
+________________
+
+
+11. API ARCHITECTURE
+________________
+
+
+AUTH APIs
+POST /api/auth/login
+POST /api/auth/register
+POST /api/auth/refresh
+POST /api/auth/logout
+________________
+
+
+ALUMNI APIs
+GET /api/alumni/me
+PUT /api/alumni/me
+GET /api/alumni/jobs
+________________
+
+
+REGISTRAR APIs
+POST /api/registrar/import
+GET /api/registrar/graduates
+________________
+
+
+SURVEY APIs
+GET /api/surveys
+POST /api/surveys/submit
+________________
+
+
+ANALYTICS APIs
+GET /api/analytics/employment
+GET /api/analytics/skills
+________________
+
+
+12. FILE UPLOAD SYSTEM
+Needed for:
+* CV uploads
+* Excel imports
+* Profile images
+________________
+
+
+Upload Architecture
+uploads/
+├── cvs/
+├── profiles/
+├── excel/
+└── documents/
+Use:
+* Multer middleware
+________________
+
+
+13. BACKGROUND JOBS
+VERY IMPORTANT for automation.
+________________
+
+
+Scheduled Jobs
+Send tracer surveys
+Send reminders
+Generate reports
+Cleanup expired jobs
+Use:
+* node-cron
+________________
+
+
+14. ANALYTICS ENGINE
+This is your system’s intelligence layer.
+________________
+
+
+Analytics Calculations
+Employment Rate
+Average Salary
+Time-to-Hire
+Industry Distribution
+Skill Gap Analysis
+________________
+
+
+15. NOTIFICATION SYSTEM
+Use:
+* Email
+* In-app notifications
+________________
+
+
+Notification Events
+Job Posted
+Survey Due
+Document Approved
+Application Accepted
+________________
+
+
+16. DEVOPS & DEPLOYMENT ARCHITECTURE
+________________
+
+
+FRONTEND DEPLOYMENT
+Vercel
+________________
+
+
+BACKEND DEPLOYMENT
+Render / Railway / VPS
+________________
+
+
+DATABASE
+PostgreSQL
+________________
+
+
+17. PROFESSIONAL ENGINEERING PRACTICES
+________________
+
+
+Git Strategy
+main
+develop
+feature/*
+bugfix/*
+________________
+
+
+Commit Format
+feat:
+fix:
+refactor:
+docs:
+________________
+
+
+API Documentation
+Use:
+* Swagger/OpenAPI
+________________
+
+
+Testing
+Use:
+* Jest
+* Supertest
+________________
+
+
+18. ENTERPRISE-LEVEL FUTURE EXPANSIONS
+________________
+
+
+Future Microservices
+Notification Service
+Analytics Service
+Recommendation Engine
+AI Prediction Service
+________________
+
+
+Future Integrations
+LinkedIn API
+Telebirr
+ERP System
+SMS Gateway
+Google OAuth
