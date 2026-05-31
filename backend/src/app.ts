@@ -37,8 +37,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // 6. Mount Module Routes
-// Routes will be registered here as modules are implemented in future milestones.
-// Example: app.use('/api/auth', authRouter);
+import authRouter from './modules/auth/presentation/auth.routes';
+import alumniRouter from './modules/alumni/presentation/alumni.routes';
+
+app.use('/api/auth', authRouter);
+app.use('/api/alumni', alumniRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {

@@ -1,19 +1,16 @@
-import { IAlumniRepository } from '../ports/IAlumniRepository';
-import { Alumni } from '../../domain/entities/Alumni';
+import { IAlumniProfileRepository } from '../ports/IAlumniProfileRepository';
+import { AlumniNotFoundError } from '../../domain/errors/AlumniErrors';
 
 export class UpdateAlumniProfile {
-  constructor(private alumniRepository: IAlumniRepository) {}
+  constructor(private readonly alumniRepository: IAlumniProfileRepository) {}
 
-  async execute(id: string, newName: string): Promise<Alumni> {
-    const alumni = await this.alumniRepository.findById(id);
-    
-    if (!alumni) {
-      throw new Error('Alumni not found');
+  async execute(userId: string, data: any) {
+    const profile = await this.alumniRepository.findByUserId(userId);
+    if (!profile) {
+      throw new AlumniNotFoundError();
     }
 
-    alumni.updateName(newName);
-    await this.alumniRepository.save(alumni);
-
-    return alumni;
+    const updatedProfile = await this.alumniRepository.update(userId, data);
+    return updatedProfile;
   }
 }
