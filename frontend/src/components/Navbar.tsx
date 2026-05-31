@@ -12,11 +12,9 @@ import {
   GalleryHorizontal,
   GraduationCap,
   Lightbulb,
-  Megaphone,
   Menu,
   PlayCircle,
   Search,
-  ShieldCheck,
   Star,
   Trophy,
   UsersRound,
@@ -26,115 +24,73 @@ import toast from "react-hot-toast";
 import authService from "../features/auth/services/auth.service";
 
 const searchItems = [
-  { label: "Home Section", type: "section", id: "home" },
-  { label: "Stakeholder Portals", type: "section", id: "stakeholders" },
-  { label: "Impact & Accreditation", type: "section", id: "impact" },
-  { label: "Campus Gallery", type: "section", id: "gallery" },
-  { label: "Community Feed", type: "section", id: "community" },
-  { label: "Quick Links", type: "section", id: "quick-links" },
-  { label: "Announcements", type: "section", id: "announcements" },
-  { label: "Explore Campus Life", type: "section", id: "campus-life" },
-  { label: "Campuses", type: "section", id: "campuses" },
-  { label: "Upcoming Events", type: "section", id: "events" },
-  { label: "Upcoming Workshops", type: "section", id: "workshops" },
-  { label: "Video Gallery", type: "section", id: "video-gallery" },
-  { label: "Featured Alumni", type: "section", id: "featured-network" },
-  { label: "Featured Employers", type: "section", id: "featured-network" },
-  { label: "Research & Innovation", type: "section", id: "research" },
-  { label: "University Achievements", type: "section", id: "research" },
-  { label: "Partner Companies", type: "section", id: "partners" },
-  { label: "Testimonials", type: "section", id: "testimonials" },
-  { label: "Career Opportunities", type: "section", id: "career-opportunities" },
-  { label: "FAQ", type: "section", id: "faq" },
-  { label: "Open Alumni Portal", type: "route", route: "/alumni/dashboard" },
-  { label: "Open Employer Portal", type: "route", route: "/employer/dashboard" },
-  { label: "Open Registrar Portal", type: "route", route: "/registrar/dashboard" },
-  { label: "Open Department Portal", type: "route", route: "/department/dashboard" },
-  { label: "Open Admin Portal", type: "route", route: "/admin/dashboard" },
+  { label: "Home", type: "route", route: "/" },
+  { label: "Announcements", type: "route", route: "/info/announcements" },
+  { label: "Quick Links", type: "route", route: "/info/quick-links" },
+  { label: "About & Impact", type: "route", route: "/info/about" },
+  { label: "Platform Services", type: "route", route: "/info/services" },
+  { label: "Community & Events", type: "route", route: "/info/events" },
+  { label: "Media & Research", type: "route", route: "/info/media" },
+  { label: "FAQ", type: "route", route: "/info/faq" },
+  { label: "Alumni Portal", type: "route", route: "/alumni/dashboard" },
+  { label: "Employer Portal", type: "route", route: "/employer/dashboard" },
+  { label: "Registrar Portal", type: "route", route: "/registrar/dashboard" },
+  { label: "Department Portal", type: "route", route: "/department/dashboard" },
+  { label: "Admin Portal", type: "route", route: "/admin/dashboard" },
 ];
 
 const navSections = [
-  { label: "Home", id: "home" },
-  { label: "Stakeholders", id: "stakeholders" },
-  { label: "Impact", id: "impact" },
-  { label: "Gallery", id: "gallery" },
-  { label: "Community", id: "community" },
-  { label: "Events", id: "events" },
+  { label: "Home", route: "/" },
+  { label: "Announcements", route: "/info/announcements" },
 ];
 
-const megaMenuGroups = [
+const megaMenuCategories = [
   {
-    title: "Homepage Sections",
+    title: "About & Impact",
     items: [
-      { label: "Upcoming Workshops", id: "workshops", icon: CalendarDays },
-      { label: "Video Gallery", id: "video-gallery", icon: PlayCircle },
-      { label: "Featured Alumni", id: "featured-network", icon: GraduationCap },
-      { label: "Featured Employers", id: "featured-network", icon: Building2 },
-      { label: "Research & Innovation", id: "research", icon: Lightbulb },
-      { label: "University Achievements", id: "research", icon: Trophy },
+      { label: "ASTU-AMS Overview", route: "/info/about", icon: BookOpen },
+      { label: "Impact Numbers", route: "/info/about", icon: UsersRound },
+      { label: "Impact & Accreditation", route: "/info/about", icon: Building2 },
+      { label: "University Achievements", route: "/info/about", icon: Trophy },
     ],
   },
   {
-    title: "Engagement",
+    title: "Portal Services",
     items: [
-      { label: "Partner Companies", id: "partners", icon: UsersRound },
-      { label: "Testimonials", id: "testimonials", icon: Star },
-      { label: "Career Opportunities", id: "career-opportunities", icon: Briefcase },
-      { label: "FAQ", id: "faq", icon: CircleHelp },
-      { label: "Photo Gallery", id: "gallery", icon: GalleryHorizontal },
-      { label: "Latest News", id: "news", icon: Bell },
-    ],
-  },
-];
-
-const institutionalNavGroups = [
-  {
-    label: "About",
-    items: [
-      { label: "ASTU-AMS Overview", id: "home", icon: BookOpen },
-      { label: "Stakeholder Portals", id: "stakeholders", icon: UsersRound },
-      { label: "Impact & Accreditation", id: "impact", icon: ShieldCheck },
-      { label: "Quick Links", id: "quick-links", icon: FileText },
-      { label: "Community Feed", id: "community", icon: Megaphone },
+      { label: "Alumni", route: "/alumni/dashboard", icon: GraduationCap },
+      { label: "Employer", route: "/employer/dashboard", icon: Building2 },
+      { label: "Registrar", route: "/registrar/dashboard", icon: FileText },
+      { label: "Department", route: "/department/dashboard", icon: Trophy },
     ],
   },
   {
-    label: "Services",
+    title: "Community & Events",
     items: [
-      { label: "Alumni Portal", route: "/alumni/dashboard", icon: GraduationCap },
-      { label: "Employer Portal", route: "/employer/dashboard", icon: Building2 },
-      { label: "Registrar Services", route: "/registrar/dashboard", icon: FileText },
-      { label: "Department Analytics", route: "/department/dashboard", icon: Trophy },
+      { label: "Community Feed", route: "/info/events", icon: Star },
+      { label: "Announcements", route: "/info/announcements", icon: Bell },
+      { label: "Upcoming Events", route: "/info/events", icon: CalendarDays },
+      { label: "Upcoming Workshops", route: "/info/events", icon: CalendarDays },
+      { label: "Partner Companies", route: "/info/events", icon: UsersRound },
     ],
   },
   {
-    label: "Engagement",
+    title: "Media & Research",
     items: [
-      { label: "Upcoming Events", id: "events", icon: CalendarDays },
-      { label: "Upcoming Workshops", id: "workshops", icon: CalendarDays },
-      { label: "Announcements", id: "announcements", icon: Megaphone },
-      { label: "Career Opportunities", id: "career-opportunities", icon: Briefcase },
-      { label: "Testimonials", id: "testimonials", icon: Star },
-    ],
-  },
-  {
-    label: "Media & Research",
-    items: [
-      { label: "Photo Gallery", id: "gallery", icon: GalleryHorizontal },
-      { label: "Video Gallery", id: "video-gallery", icon: PlayCircle },
-      { label: "Explore Campus Life", id: "campus-life", icon: BookOpen },
-      { label: "Campuses", id: "campuses", icon: Building2 },
-      { label: "Research & Innovation", id: "research", icon: Lightbulb },
-      { label: "Partner Companies", id: "partners", icon: Building2 },
+      { label: "Photo Gallery", route: "/info/media", icon: GalleryHorizontal },
+      { label: "Video Gallery", route: "/info/media", icon: PlayCircle },
+      { label: "Campus Life", route: "/info/media", icon: BookOpen },
+      { label: "Campuses", route: "/info/media", icon: Building2 },
+      { label: "Research & Innovation", route: "/info/media", icon: Lightbulb },
+      { label: "Testimonials", route: "/info/media", icon: Star },
+      { label: "Career Opportunities", route: "/info/events", icon: Briefcase },
+      { label: "FAQ", route: "/info/faq", icon: CircleHelp },
     ],
   },
 ];
 
 const utilityLinks = [
-  { label: "Portal", route: "/login" },
-  { label: "Employers", route: "/employers" },
-  { label: "FAQ", id: "faq" },
-  { label: "Contact", id: "contact" },
+  { label: "FAQ", route: "/info/faq" },
+  { label: "Contact", route: "/info/contact" },
 ];
 
 interface NavbarProps {
@@ -269,6 +225,10 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
     }
 
     if (item.type === "route") {
+      if (item.route === "/" || item.route?.startsWith("/info") || item.route === "/employers") {
+        navigate(item.route);
+        return;
+      }
       if (localStorage.getItem("user")) {
         navigate(item.route);
       } else {
@@ -280,13 +240,14 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
 
   const handleGroupedNavSelect = (item: { id?: string; route?: string }) => {
     setOpenNavGroup(null);
+    setIsMobileNavOpen(false);
     if (item.id) {
       goToSection(item.id);
       return;
     }
 
     if (item.route) {
-      if (item.route === "/employers") {
+      if (item.route.startsWith("/info") || item.route === "/" || item.route === "/employers") {
         navigate(item.route);
         return;
       }
@@ -317,18 +278,17 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => goToSection("announcements")}
-              className="inline-flex items-center gap-1.5 text-white/90 transition-colors hover:text-white"
+              onClick={() => navigate("/info/announcements")}
+              className="inline-flex items-center gap-1.5 text-white transition-colors hover:text-white/85"
             >
               <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-5 w-5" />
-              Announcements
+              Notice
             </button>
             {utilityLinks.map((link) => (
               <button
                 key={link.label}
                 type="button"
                 onClick={() => {
-                  if (link.id) goToSection(link.id);
                   if (link.route) navigate(link.route);
                 }}
                 className="text-white/80 transition-colors hover:text-white"
@@ -495,37 +455,37 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
       <div className="hidden border-t border-outline-variant bg-white xl:block">
         <nav className="mx-auto flex h-12 max-w-[1440px] items-center justify-between px-8">
           <div className="flex h-full items-center gap-1">
-            {navSections.slice(0, 2).map((item) => (
-            <button
-              key={item.id}
-              className={`flex h-full items-center px-3 text-sm font-bold tracking-wide transition-all duration-200 border-b-2 ${activeSection === item.id
-                  ? "text-astu-navy border-astu-red scale-105"
-                  : "text-on-surface-variant border-transparent hover:text-astu-navy hover:border-astu-navy/50"
-                }`}
-              onClick={() => goToSection(item.id)}
-            >
+{navSections.map((item) => (
+               <button
+                 key={item.route}
+                 className={`flex h-full items-center px-3 text-sm font-bold tracking-wide transition-all duration-200 border-b-2 ${activeSection === item.route
+                     ? "text-astu-navy border-astu-red scale-105"
+                     : "text-on-surface-variant border-transparent hover:text-astu-navy hover:border-astu-navy/50"
+                   }`}
+                 onClick={() => navigate(item.route)}
+               >
               {item.label}
-            </button>
-          ))}
-            {institutionalNavGroups.map((group) => (
-              <div key={group.label} className="relative h-full">
+              </button>
+            ))}
+            {megaMenuCategories.map((group) => (
+              <div key={group.title} className="relative h-full">
                 <button
                   type="button"
                   onClick={() => {
                     setIsMegaMenuOpen(false);
-                    setOpenNavGroup((current) => current === group.label ? null : group.label);
+                    setOpenNavGroup((current) => current === group.title ? null : group.title);
                   }}
                   className={`flex h-full items-center gap-1 border-b-2 px-3 text-sm font-bold tracking-wide transition-all ${
-                    openNavGroup === group.label
+                    openNavGroup === group.title
                       ? "border-astu-red text-astu-navy"
                       : "border-transparent text-on-surface-variant hover:border-astu-navy/50 hover:text-astu-navy"
                   }`}
                 >
-                  {group.label}
-                  <ChevronDown className={`h-4 w-4 transition-transform ${openNavGroup === group.label ? "rotate-180" : ""}`} />
+                  {group.title}
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openNavGroup === group.title ? "rotate-180" : ""}`} />
                 </button>
-                {openNavGroup === group.label && (
-                  <div className="absolute left-0 top-12 z-50 w-80 rounded-b-xl border border-t-0 border-outline-variant bg-white p-3 shadow-xl animate-[mega-menu-fade-in_200ms_ease-out_both]">
+                {openNavGroup === group.title && (
+                  <div className="absolute left-0 top-12 z-50 w-72 rounded-b-xl border border-t-0 border-outline-variant bg-white p-3 shadow-xl animate-[mega-menu-fade-in_200ms_ease-out_both]">
                     {group.items.map((item) => {
                       const Icon = item.icon;
                       return (
@@ -546,74 +506,13 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
                 )}
               </div>
             ))}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                setOpenNavGroup(null);
-                setIsMegaMenuOpen((value) => !value);
-              }}
-              className={`flex h-12 items-center gap-1 border-b-2 px-3 text-sm font-bold tracking-wide transition-all duration-200 ${isMegaMenuOpen
-                  ? "text-astu-navy border-astu-red scale-105"
-                  : "text-on-surface-variant border-transparent hover:text-astu-navy hover:border-astu-navy/50"
-                }`}
-            >
-              Mega Menu
-              <ChevronDown className={`h-4 w-4 transition-transform ${isMegaMenuOpen ? "rotate-180" : ""}`} />
-            </button>
-            {isMegaMenuOpen && (
-              <div className="absolute right-0 top-12 z-50 w-[760px] rounded-b-xl border border-t-0 border-outline-variant bg-white p-5 shadow-xl animate-[mega-menu-fade-in_200ms_ease-out_both]">
-                <div className="grid gap-5 md:grid-cols-2">
-                  {megaMenuGroups.map((group) => (
-                    <div key={group.title}>
-                      <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">{group.title}</p>
-                      <div className="grid gap-2">
-                        {group.items.map((item) => {
-                          const Icon = item.icon;
-                          return (
-                            <button
-                              key={`${group.title}-${item.label}`}
-                              type="button"
-                              onClick={() => goToSection(item.id)}
-                              className="flex items-center gap-3 rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-astu-navy transition-colors hover:border-outline-variant hover:bg-surface-container-low"
-                            >
-                              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-navy/10 text-astu-navy">
-                                <Icon className="h-4 w-4" />
-                              </span>
-                              {item.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center justify-between rounded-lg bg-astu-navy px-4 py-3 text-white">
-                  <div>
-                    <p className="text-sm font-bold">Admin-managed homepage modules</p>
-                    <p className="text-xs text-white/75">Create, publish, pin, feature, and audit public content.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMegaMenuOpen(false);
-                      navigate(user?.role === "ADMIN" ? "/admin/homepage" : "/login");
-                    }}
-                    className="rounded-md bg-white px-3 py-2 text-xs font-bold text-astu-navy"
-                  >
-                    Manage
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
           </div>
           <button
             type="button"
             onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
             className="rounded-md bg-astu-red px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white transition-all hover:brightness-110"
           >
-            Portal
+            Portal Access
           </button>
         </nav>
       </div>
@@ -622,23 +521,30 @@ export default function Navbar({ activeSection = "home" }: NavbarProps) {
       {isMobileNavOpen ? (
         <div className="border-t border-outline-variant bg-white px-4 py-4 xl:hidden">
           <div className="space-y-2">
-            {navSections.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => goToSection(item.id)}
-                className="block w-full rounded-md border border-outline-variant px-3 py-2 text-left text-sm font-semibold text-astu-navy"
-              >
+{navSections.map((item) => (
+               <button
+                 key={item.route}
+                 onClick={() => navigate(item.route)}
+                 className="block w-full rounded-md border border-outline-variant px-3 py-2 text-left text-sm font-semibold text-astu-navy"
+               >
                 {item.label}
               </button>
             ))}
-            {megaMenuGroups.flatMap((group) => group.items).map((item) => (
-              <button
-                key={`mobile-${item.label}`}
-                onClick={() => goToSection(item.id)}
-                className="block w-full rounded-md border border-outline-variant px-3 py-2 text-left text-sm font-semibold text-astu-navy"
-              >
-                {item.label}
-              </button>
+            {megaMenuCategories.map((group) => (
+              <div key={`mobile-group-${group.title}`} className="rounded-md border border-outline-variant p-2">
+                <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">{group.title}</p>
+                <div className="grid gap-1">
+                  {group.items.map((item) => (
+                    <button
+                      key={`mobile-${group.title}-${item.label}`}
+                      onClick={() => handleGroupedNavSelect(item)}
+                      className="block w-full rounded-md px-2 py-2 text-left text-sm font-semibold text-astu-navy hover:bg-surface-container-low"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
           <div className="mt-4 pt-3 border-t border-outline-variant/60">

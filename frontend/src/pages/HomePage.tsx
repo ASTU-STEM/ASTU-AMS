@@ -9,10 +9,8 @@ import {
   CalendarDays,
   Globe,
   Handshake,
-  Leaf,
   LineChart,
   ShieldCheck,
-  Target,
   Users,
   BarChart3,
   Bell,
@@ -20,7 +18,6 @@ import {
   FileText,
   HelpCircle,
   Image,
-  Library,
   LockKeyhole,
   MessageSquareText,
   MapPin,
@@ -29,7 +26,6 @@ import {
   Star,
   Trophy,
   UserRoundCheck,
-  Wifi
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -112,10 +108,9 @@ const stakeholders = [
 
 const navSections = [
   { label: "Home", id: "home" },
-  { label: "Stakeholders", id: "stakeholders" },
+  { label: "Impact Numbers", id: "impact-numbers" },
   { label: "Impact", id: "impact" },
   { label: "Gallery", id: "gallery" },
-  { label: "Quick Links", id: "quick-links" },
   { label: "Campuses", id: "campuses" },
   { label: "Announcements", id: "announcements" },
   { label: "Community", id: "community" },
@@ -186,13 +181,10 @@ const featuredEmployers = [
 
 const partners = ["Ethio Telecom", "INSA", "Ethiopian Airlines", "Safaricom", "Huawei", "Commercial Bank of Ethiopia"];
 
-const quickLinks = [
-  { label: "Portal", detail: "Access dashboards and services", icon: LockKeyhole, route: "/login" },
-  { label: "Library", detail: "Digital resources and research support", icon: Library, section: "research" },
-  { label: "e-Learning", detail: "Training, workshops, and learning links", icon: Wifi, section: "workshops" },
-  { label: "Campus Life", detail: "Events, facilities, and galleries", icon: Image, section: "campus-life" },
-  { label: "Alumni", detail: "Directory, jobs, mentorship, and ID", icon: Users, route: "/alumni/dashboard" },
-  { label: "Meet Employers", detail: "Partners, jobs, internships, and fairs", icon: Building2, route: "/employers" },
+const campusLifeCards = [
+  { title: "Events and Activities", campus: "Main Campus", description: "Career expos, alumni reunions, workshops, chapter meetings, and community programs.", image: gallery2, action: "View Events" },
+  { title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, student services, and employer interview rooms.", image: electricLabs, action: "Explore Facilities" },
+  { title: "ASTU Museums & Gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, campus photography, and public video archives.", image: arcImage, action: "View Gallery" },
 ];
 
 const announcements = [
@@ -201,12 +193,6 @@ const announcements = [
   { title: "Graduate verification batch import schedule", date: "May 25, 2026", type: "Registrar Notice" },
   { title: "Workshop registration: AI for Engineering Research", date: "May 21, 2026", type: "Public Announcement" },
   { title: "Emergency contact and campus service directory updated", date: "May 18, 2026", type: "Internal Notice" },
-];
-
-const campusLifeCards = [
-  { title: "Events and Activities", campus: "Main Campus", description: "Career expos, alumni reunions, workshops, chapter meetings, and community programs.", image: gallery2, action: "View Events" },
-  { title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, student services, and employer interview rooms.", image: electricLabs, action: "Explore Facilities" },
-  { title: "ASTU Museums & Gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, campus photography, and public video archives.", image: arcImage, action: "View Gallery" },
 ];
 
 const campuses = [
@@ -226,6 +212,33 @@ const galleryImages = [
   { src: gallery1, title: "ASTU Main Campus" },
   { src: gallery2, title: "Innovation and Collaboration" },
   { src: gallery3, title: "ASTU Alumni Identity" },
+];
+
+const impactStats = [
+  {
+    title: "Employment Rate",
+    value: "87%",
+    detail: "Tracked through tracer studies",
+    icon: LineChart,
+    action: "View Analytics",
+    target: "/department/dashboard",
+  },
+  {
+    title: "Partner Employers",
+    value: "500+",
+    detail: "Hiring, internships, and feedback",
+    icon: Building2,
+    action: "Meet Partners",
+    target: "/employers",
+  },
+  {
+    title: "Digital Requests",
+    value: "6K+",
+    detail: "Transcript, certificate, and ID services",
+    icon: FileCheck2,
+    action: "Open Registrar",
+    target: "/registrar/dashboard",
+  },
 ];
 
 export default function HomePage() {
@@ -492,90 +505,6 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-astu-navy">24/7</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Engagement Hub</p>
             </article>
-          </div>
-        </section>
-
-        <section id="quick-links" className="mx-auto max-w-[1440px] px-4 py-10 md:px-8">
-          <div className="reveal mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Quick Links</p>
-              <h3 className="mt-1 text-2xl font-bold text-astu-navy md:text-3xl">Essential ASTU-AMS Services</h3>
-            </div>
-            <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low">
-              View all
-            </button>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {quickLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <button
-                  key={link.label}
-                  type="button"
-                  onClick={() => {
-                    if (link.section) {
-                      document.getElementById(link.section)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                    if (link.route) {
-                      navigate(link.route);
-                    }
-                  }}
-                  className="reveal rounded-xl border border-outline-variant bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-astu-navy/30 hover:shadow-md"
-                >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-astu-navy/10 text-astu-navy">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <h4 className="mt-4 text-sm font-bold text-astu-navy">{link.label}</h4>
-                  <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{link.detail}</p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section id="stakeholders" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Stakeholder Portals</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Dedicated interfaces for alumni, employers, departments, registrar, and administrators.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {stakeholders.map((item) => {
-              const Icon = item.icon;
-              return (
-                <article
-                  key={item.title}
-                  className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
-                >
-                  <div className={`mb-4 inline-flex rounded-lg p-3 ${item.tint}`}>
-                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </div>
-                  <h4 className="mb-3 text-base font-semibold text-astu-navy sm:text-lg">{item.title}</h4>
-                  <ul className="space-y-2.5 text-sm text-on-surface-variant">
-                    {item.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2">
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy hover:text-astu-red"
-                    onClick={() => {
-                      if (user) {
-                        navigate(item.route);
-                      } else {
-                        toast("Please log in to access this portal.", { icon: "🔒" });
-                        navigate("/login");
-                      }
-                    }}
-                  >
-                    {item.cta}
-                  </button>
-                </article>
-              );
-            })}
           </div>
         </section>
 
@@ -1280,6 +1209,16 @@ export default function HomePage() {
                   >
                     Mentorship Scheduling
                   </button>
+                </li>
+                <li>
+                  <a
+                    href="https://estudent.astu.edu.et/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
+                  >
+                    Student Portal
+                  </a>
                 </li>
               </ul>
             </div>

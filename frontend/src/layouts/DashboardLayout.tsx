@@ -1,11 +1,70 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { GraduationCap, ShieldCheck } from 'lucide-react';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import {
+  GraduationCap,
+  ShieldCheck,
+  LogOut,
+  Menu,
+  Bell,
+  Database,
+  Building2,
+  BarChart3,
+  ArrowRight,
+  User,
+  FileText,
+  Briefcase,
+  Users,
+  MapPin,
+  ShoppingBag,
+  Zap,
+  Award,
+  FileCheck,
+  Ticket,
+  Heart,
+  Globe,
+  TrendingUp,
+  Settings,
+  FileBarChart2,
+  Edit,
+  Layers,
+  Palette,
+  MenuSquare,
+  Image,
+  Newspaper,
+  SearchCode,
+  MessageCircle,
+  Mail,
+  Handshake,
+  Share2,
+  CheckCircle,
+  HardDrive,
+  Activity,
+  Archive,
+  FileCode,
+  Key,
+  Monitor,
+  Shield,
+  LogIn,
+  Download,
+  Mic,
+  GalleryHorizontal,
+  Video,
+  Calendar,
+  UserCog,
+  BarChart,
+  AlertCircle,
+  Upload,
+  RefreshCw,
+  ThumbsUp,
+  BarChart2,
+  BookOpen,
+  Plus,
+} from 'lucide-react';
 import AlumniDashboard from '../features/alumni/pages/AlumniDashboard';
 import EmployerDashboard from '../features/employers/pages/EmployerDashboard';
 import RegistrarDashboard from '../features/registrar/pages/RegistrarDashboard';
 import DepartmentDashboard from '../features/departments/pages/DepartmentDashboard';
-import AdminPortal from '../features/admin/pages/AdminPortal';
+import AdminDashboard from '../features/admin/pages/AdminDashboard';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 
@@ -471,7 +530,7 @@ function EmployerPortal() {
     { label: "Internship Programs", path: "/employer/internships", icon: Calendar },
     { label: "Company Verification", path: "/employer/verification", icon: FileCheck },
     { label: "Campus Events", path: "/employer/events", icon: Calendar },
-    { label: "Shortlist Candidates", path: "/employer/shortlist", icon: Thumbsup },
+    { label: "Shortlist Candidates", path: "/employer/shortlist", icon: ThumbsUp },
     { label: "Job Fair Participation", path: "/employer/jobfair", icon: Award },
     { label: "Publish Opportunities", path: "/employer/post", icon: Plus },
     { label: "Settings", path: "/employer/settings", icon: Settings }
@@ -585,21 +644,7 @@ function AdminPortal() {
     <DashboardLayout title="Overarching Ecosystem Management Control Panel" role="Root Admin" navItems={navItems}>
       <Routes>
         <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
-        <Route index element={
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
-              <div>
-                <h2 className="text-md font-bold text-slate-900">Admin Dashboard Overview</h2>
-                <p className="text-xs text-slate-500">System administration and accreditation controls.</p>
-              </div>
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className="bg-slate-50 p-4 rounded-xl"><span className="text-xs text-slate-500">Total Users</span><p className="text-xl font-bold">24,000+</p></div>
-                <div className="bg-slate-50 p-4 rounded-xl"><span className="text-xs text-slate-500">System Status</span><p className="text-xl font-bold text-emerald-700">ONLINE</p></div>
-                <div className="bg-slate-50 p-4 rounded-xl"><span className="text-xs text-slate-500">Pending Approvals</span><p className="text-xl font-bold">12</p></div>
-              </div>
-            </div>
-          </div>
-        } />
+        <Route index element={<AdminDashboard />} />
         <Route path="/cms" element={<div className="p-6"><h2 className="text-lg font-bold">CMS/Page Builder</h2><p className="text-sm text-slate-500">Drag-and-drop page builder for content management.</p></div>} />
         <Route path="/homepage/sections" element={<div className="p-6"><h2 className="text-lg font-bold">Dynamic Homepage Sections</h2><p className="text-sm text-slate-500">Add, remove, reorder homepage sections.</p></div>} />
         <Route path="/homepage/theme" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Theme Customization</h2><p className="text-sm text-slate-500">Customize colors, fonts, and styling.</p></div>} />

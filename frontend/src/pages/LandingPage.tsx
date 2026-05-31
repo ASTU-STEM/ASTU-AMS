@@ -114,11 +114,11 @@ const searchItems = [
   { label: "Go to Events section", type: "section", id: "events" },
   { label: "Go to News section", type: "section", id: "news" },
   { label: "Go to Success Stories section", type: "section", id: "success-stories" },
-  { label: "Open Alumni Portal", type: "route", route: "/alumni" },
-  { label: "Open Employer Portal", type: "route", route: "/employer" },
-  { label: "Open Registrar Portal", type: "route", route: "/registrar" },
-  { label: "Open Department Portal", type: "route", route: "/department" },
-  { label: "Open Admin Portal", type: "route", route: "/admin" },
+  { label: "Alumni Portal", type: "route", route: "/alumni" },
+  { label: "Employer Portal", type: "route", route: "/employer" },
+  { label: "Registrar Portal", type: "route", route: "/registrar" },
+  { label: "Department Portal", type: "route", route: "/department" },
+  { label: "Admin Portal", type: "route", route: "/admin" },
 ];
 
 const communityPosts = [

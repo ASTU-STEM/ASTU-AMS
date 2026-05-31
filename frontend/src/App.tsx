@@ -2,10 +2,11 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
+import EmployersPage from "./pages/EmployersPage";
+import PublicInfoPage from "./pages/PublicInfoPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
-import EmployersPage from "./features/auth/pages/EmployersPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -20,6 +21,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/info/:slug" element={<PublicInfoPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />

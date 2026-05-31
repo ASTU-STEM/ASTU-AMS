@@ -1,34 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Activity,
-  AppWindow,
-  BellRing,
-  Blocks,
-  Brush,
-  ClipboardCheck,
-  CloudCog,
-  Code2,
-  DatabaseBackup,
-  FileQuestion,
-  FolderArchive,
-  Globe2,
-  History,
-  KeyRound,
-  Layers3,
-  LockKeyhole,
-  MailCheck,
-  MessageCircle,
-  MonitorDot,
-  PanelTop,
-  Search,
-  ShieldAlert,
-  SlidersHorizontal,
-  UsersRound,
-} from 'lucide-react';
+import { Activity, AlertCircle, Archive, AppWindow, BarChart, BarChart2, BellRing, Blocks, Brush, Calendar, CheckCircle, ClipboardCheck, CloudCog, Code2, DatabaseBackup, Edit, FileCheck, FileCode, FileQuestion, GalleryHorizontal, Globe2, HardDrive, Handshake, History, KeyRound, Layers3, LockKeyhole, MailCheck, MenuSquare, MessageCircle, Mic, MonitorDot, Newspaper, Palette, PanelTop, Plus, RefreshCw, Search, SearchCode, Shield, ShieldAlert, Share2, SlidersHorizontal, Ticket, ThumbsUp, Upload, UserCog, UsersRound, Video } from 'lucide-react';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
 
 type ModuleStatus = 'Live' | 'Configured' | 'Needs Review' | 'Planned';
+type ModuleGroupName = typeof moduleGroups[number]['name'];
 
 const moduleGroups = [
   {
@@ -51,7 +27,7 @@ const moduleGroups = [
       { title: 'Partner & Sponsor Management', icon: UsersRound, status: 'Live' },
       { title: 'Advertisement Banner Management', icon: PanelTop, status: 'Needs Review' },
       { title: 'Alumni Success Story Approval', icon: ClipboardCheck, status: 'Live' },
-      { title: 'Digital Asset Library', icon: FolderArchive, status: 'Configured' },
+      { title: 'Digital Asset Library', icon: HardDrive, status: 'Configured' },
     ],
   },
   {
@@ -64,7 +40,7 @@ const moduleGroups = [
       { title: 'Role & Permission Management', icon: KeyRound, status: 'Configured' },
       { title: 'API Management', icon: Code2, status: 'Planned' },
       { title: 'System Monitoring Dashboard', icon: MonitorDot, status: 'Live' },
-      { title: 'Security Center', icon: ShieldAlert, status: 'Needs Review' },
+      { title: 'Security Center', icon: Shield, status: 'Needs Review' },
       { title: 'Login History', icon: LockKeyhole, status: 'Live' },
       { title: 'Data Export Center', icon: CloudCog, status: 'Configured' },
     ],
@@ -79,7 +55,7 @@ const statusClass: Record<ModuleStatus, string> = {
 };
 
 export default function SuperAdminModules() {
-  const [activeGroup, setActiveGroup] = useState(moduleGroups[0].name);
+  const [activeGroup, setActiveGroup] = useState<ModuleGroupName>(moduleGroups[0].name);
   const selectedGroup = moduleGroups.find((group) => group.name === activeGroup) ?? moduleGroups[0];
 
   return (
