@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import {
-  GraduationCap, Building2, Database, BarChart3, ShieldCheck,
-  Menu, ArrowRight, User, Briefcase,
-  FileText, Users, Settings, Bell, LogOut, Upload,
-  Plus, AlertCircle, TrendingUp
-} from 'lucide-react';
+import { GraduationCap, ShieldCheck } from 'lucide-react';
+import AlumniDashboard from '../features/alumni/pages/AlumniDashboard';
+import EmployerDashboard from '../features/employers/pages/EmployerDashboard';
+import RegistrarDashboard from '../features/registrar/pages/RegistrarDashboard';
+import DepartmentDashboard from '../features/departments/pages/DepartmentDashboard';
+import AdminPortal from '../features/admin/pages/AdminPortal';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 
@@ -49,23 +49,25 @@ export function DashboardLayout({
     localStorage.setItem(`dashboard_layout_${role}_collapsed`, String(sidebarCollapsed));
   }, [role, sidebarCollapsed]);
 
+  const sidebarDisplayCollapsed = sidebarCollapsed && !sidebarOpen;
+
   return (
-    <div className="flex w-screen h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
+    <div className="flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
       )}
 
 {/* Sidebar Container */}
-       <aside className={`flex flex-col h-screen flex-shrink-0 relative z-20 bg-white border-r border-slate-200 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+       <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-shrink-0 flex-col bg-white border-r border-slate-200 transition-all duration-300 lg:relative lg:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
          
          {/* Sidebar Header */}
          <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-           <Link to="/" className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+           <Link to="/" className={`flex items-center ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}>
              <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md flex-shrink-0">
                <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
              </div>
-             {!sidebarCollapsed && <div className="overflow-hidden">
+             {!sidebarDisplayCollapsed && <div className="overflow-hidden">
                <span className="font-extrabold text-md tracking-tight text-[#003366] block whitespace-nowrap">ASTU-AMS</span>
                <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block whitespace-nowrap">{role}</span>
              </div>}
@@ -81,14 +83,14 @@ export function DashboardLayout({
                  key={idx}
                  to={item.path}
                  onClick={() => setSidebarOpen(false)}
-                 title={sidebarCollapsed ? item.label : undefined}
-                 className={`w-full flex items-center rounded-xl transition-all duration-200 px-4 py-3 ${sidebarCollapsed ? 'justify-center' : 'gap-4'} ${isActive
+                 title={sidebarDisplayCollapsed ? item.label : undefined}
+                 className={`w-full flex items-center rounded-xl transition-all duration-200 px-4 py-3 ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-4'} ${isActive
                    ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-sm'
                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                    }`}
                >
                  <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-[#003366]' : 'text-slate-500'}`} />
-                 {!sidebarCollapsed && <span className="text-sm tracking-wide font-medium truncate">
+                 {!sidebarDisplayCollapsed && <span className="text-sm tracking-wide font-medium truncate">
                    {item.label}
                  </span>}
                </Link>
@@ -104,11 +106,11 @@ export function DashboardLayout({
                logoutLocally();
                window.location.href = '/login';
              }}
-             title={sidebarCollapsed ? 'Exit Workspace' : undefined}
-             className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
+             title={sidebarDisplayCollapsed ? 'Exit Workspace' : undefined}
+             className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}
            >
              <LogOut className="h-4 w-4 flex-shrink-0" />
-             {!sidebarCollapsed && <span>Exit Workspace</span>}
+             {!sidebarDisplayCollapsed && <span>Exit Workspace</span>}
            </button>
          </div>
        </aside>
@@ -117,7 +119,7 @@ export function DashboardLayout({
        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
          
          {/* Clean Top Header Bar */}
-         <header className="bg-white h-16 border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 z-10">
+         <header className="bg-white h-16 border-b border-gray-200 flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
            <div className="flex items-center gap-4">
              {/* Mobile menu button */}
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
@@ -132,7 +134,7 @@ export function DashboardLayout({
                <Menu className="h-5 w-5" />
              </button>
              {/* Breadcrumbs / Title */}
-             <h1 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
+             <h1 className="truncate text-base font-bold text-slate-900 tracking-tight sm:text-lg">{title}</h1>
            </div>
 
           <div className="flex items-center gap-4">
@@ -150,7 +152,7 @@ export function DashboardLayout({
         </header>
 
         {/* Scrolling Content Panel */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+        <main className="flex-1 overflow-y-auto bg-gray-50/50 p-4 sm:p-6">
           {/* Page Header with Breadcrumbs */}
           {(breadcrumbs || subtitle || headerActions) && (
             <PageHeader
@@ -244,12 +246,27 @@ function AlumniPortal() {
   const navItems = [
     { label: "Overview", path: "/alumni", icon: User },
     { label: "Tracer Surveys", path: "/alumni/surveys", icon: FileText },
-    { label: "Jobs Board", path: "/alumni/jobs", icon: Briefcase }
+    { label: "Jobs Board", path: "/alumni/jobs", icon: Briefcase },
+    { label: "Alumni Directory", path: "/alumni/directory", icon: Users },
+    { label: "Alumni Map", path: "/alumni/map", icon: MapPin },
+    { label: "Business Directory", path: "/alumni/business", icon: ShoppingBag },
+    { label: "Startup Showcase", path: "/alumni/startups", icon: Zap },
+    { label: "Research Publications", path: "/alumni/research", icon: BookOpen },
+    { label: "Skills Portfolio", path: "/alumni/skills", icon: Award },
+    { label: "CV Builder", path: "/alumni/cv", icon: FileCheck },
+    { label: "Digital ID Card", path: "/alumni/id-card", icon: Ticket },
+    { label: "Volunteer Program", path: "/alumni/volunteer", icon: Heart },
+    { label: "Alumni Awards", path: "/alumni/awards", icon: Award },
+    { label: "Chapters", path: "/alumni/chapters", icon: Globe },
+    { label: "Donation History", path: "/alumni/donations", icon: Heart },
+    { label: "Career Progress", path: "/alumni/career", icon: TrendingUp },
+    { label: "Settings", path: "/alumni/settings", icon: Settings }
   ];
 
   return (
     <DashboardLayout title="Alumni Hub Dashboard" role="Alumni Account" navItems={navItems}>
       <Routes>
+        <Route path="/dashboard" element={<Navigate to="/alumni" replace />} />
         <Route path="/" element={
           <div className="space-y-6">
             {/* Profile Highlight Card */}
@@ -338,6 +355,20 @@ function AlumniPortal() {
             </div>
           </div>
         } />
+        <Route path="/directory" element={<div className="p-6"><h2 className="text-lg font-bold">Alumni Directory</h2><p className="text-sm text-slate-500">Browse and search alumni profiles.</p></div>} />
+        <Route path="/map" element={<div className="p-6"><h2 className="text-lg font-bold">Alumni Map</h2><p className="text-sm text-slate-500">Visualize alumni distribution worldwide.</p></div>} />
+        <Route path="/business" element={<div className="p-6"><h2 className="text-lg font-bold">Business Directory</h2><p className="text-sm text-slate-500">Explore alumni-owned businesses.</p></div>} />
+        <Route path="/startups" element={<div className="p-6"><h2 className="text-lg font-bold">Startup Showcase</h2><p className="text-sm text-slate-500">View innovative alumni startups.</p></div>} />
+        <Route path="/research" element={<div className="p-6"><h2 className="text-lg font-bold">Research Publications</h2><p className="text-sm text-slate-500">View alumni research contributions.</p></div>} />
+        <Route path="/skills" element={<div className="p-6"><h2 className="text-lg font-bold">Skills Portfolio</h2><p className="text-sm text-slate-500">Showcase your professional skills.</p></div>} />
+        <Route path="/cv" element={<div className="p-6"><h2 className="text-lg font-bold">CV Builder</h2><p className="text-sm text-slate-500">Create and download professional resume.</p></div>} />
+        <Route path="/id-card" element={<div className="p-6"><h2 className="text-lg font-bold">Digital ID Card</h2><p className="text-sm text-slate-500">View and download your ASTU ID card.</p></div>} />
+        <Route path="/volunteer" element={<div className="p-6"><h2 className="text-lg font-bold">Volunteer Program</h2><p className="text-sm text-slate-500">Apply for alumni volunteer opportunities.</p></div>} />
+        <Route path="/awards" element={<div className="p-6"><h2 className="text-lg font-bold">Alumni Awards</h2><p className="text-sm text-slate-500">View and apply for alumni awards.</p></div>} />
+        <Route path="/chapters" element={<div className="p-6"><h2 className="text-lg font-bold">Chapters</h2><p className="text-sm text-slate-500">Join or create alumni chapters.</p></div>} />
+        <Route path="/donations" element={<div className="p-6"><h2 className="text-lg font-bold">Donation History</h2><p className="text-sm text-slate-500">View your contribution history.</p></div>} />
+        <Route path="/career" element={<div className="p-6"><h2 className="text-lg font-bold">Career Progress</h2><p className="text-sm text-slate-500">Track your career milestones.</p></div>} />
+        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">Settings</h2><p className="text-sm text-slate-500">Manage your account preferences.</p></div>} />
       </Routes>
     </DashboardLayout>
   );
@@ -348,13 +379,21 @@ function AlumniPortal() {
 // ==========================================
 function RegistrarPortal() {
   const navItems = [
-    { label: "Records Batching", path: "/registrar", icon: Database },
-    { label: "Data Import Pipeline", path: "/registrar/import", icon: Upload }
+    { label: "Dashboard", path: "/registrar", icon: Database },
+    { label: "Digital Transcript", path: "/registrar/transcript", icon: FileCheck },
+    { label: "Graduate Clearance", path: "/registrar/clearance", icon: CheckCircle },
+    { label: "Certificate Verification", path: "/registrar/certificates", icon: Ticket },
+    { label: "Student Migration", path: "/registrar/migration", icon: RefreshCw },
+    { label: "Batch Management", path: "/registrar/batches", icon: Calendar },
+    { label: "Academic Verification", path: "/registrar/verification", icon: Shield },
+    { label: "Data Import Pipeline", path: "/registrar/import", icon: Upload },
+    { label: "Settings", path: "/registrar/settings", icon: Settings }
   ];
 
   return (
     <DashboardLayout title="Registrar Verification Hub" role="Registrar Admin" navItems={navItems}>
       <Routes>
+        <Route path="/dashboard" element={<Navigate to="/registrar" replace />} />
         <Route path="/" element={
           <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -400,13 +439,20 @@ function RegistrarPortal() {
               <h2 className="text-lg font-black text-[#003366]">Excel Data Import Pipeline</h2>
               <p className="text-xs text-slate-500">Upload official graduate roster files from the student information system to create accounts.</p>
             </div>
-            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center bg-slate-50 hover:bg-slate-100/50 transition-all cursor-pointer group shadow-inner">
-              <Upload className="mx-auto h-10 w-10 text-slate-400 group-hover:text-[#003366] transition-colors mb-4" />
-              <span className="font-bold text-sm text-slate-700 block mb-1">Drag and drop graduates_ratios.xlsx</span>
-              <span className="text-xs text-slate-400 block">Supports standard column templates (Student ID, Name, Department, Year, CGPA)</span>
-            </div>
-          </div>
-        } />
+<div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center bg-slate-50 hover:bg-slate-100/50 transition-all cursor-pointer group shadow-inner">
+               <Upload className="mx-auto h-10 w-10 text-slate-400 group-hover:text-[#003366] transition-colors mb-4" />
+               <span className="font-bold text-sm text-slate-700 block mb-1">Drag and drop graduates_ratios.xlsx</span>
+               <span className="text-xs text-slate-400 block">Supports standard column templates (Student ID, Name, Department, Year, CGPA)</span>
+             </div>
+           </div>
+         } />
+        <Route path="/transcript" element={<div className="p-6"><h2 className="text-lg font-bold">Digital Transcript Verification</h2><p className="text-sm text-slate-500">Verify and issue digital transcripts.</p></div>} />
+        <Route path="/clearance" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Clearance Tracking</h2><p className="text-sm text-slate-500">Track clearance status for graduates.</p></div>} />
+        <Route path="/certificates" element={<div className="p-6"><h2 className="text-lg font-bold">Certificate Verification Portal</h2><p className="text-sm text-slate-500">Validate and verify certificates.</p></div>} />
+        <Route path="/migration" element={<div className="p-6"><h2 className="text-lg font-bold">Student-to-Alumni Migration</h2><p className="text-sm text-slate-500">Automate student to alumni transitions.</p></div>} />
+        <Route path="/batches" element={<div className="p-6"><h2 className="text-lg font-bold">Graduation Batch Management</h2><p className="text-sm text-slate-500">Manage graduation batch records.</p></div>} />
+        <Route path="/verification" element={<div className="p-6"><h2 className="text-lg font-bold">Academic History Verification</h2><p className="text-sm text-slate-500">Verify academic credentials.</p></div>} />
+        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">Settings</h2><p className="text-sm text-slate-500">Registrar preferences and settings.</p></div>} />
       </Routes>
     </DashboardLayout>
   );
@@ -418,12 +464,23 @@ function RegistrarPortal() {
 function EmployerPortal() {
   const navItems = [
     { label: "Dashboard", path: "/employer", icon: Building2 },
-    { label: "Publish Opportunities", path: "/employer/post", icon: Plus }
+    { label: "Talent Pool", path: "/employer/talent", icon: Users },
+    { label: "AI Candidate Matching", path: "/employer/matching", icon: Zap },
+    { label: "Recruitment Analytics", path: "/employer/analytics", icon: BarChart2 },
+    { label: "Bulk Job Posting", path: "/employer/bulk-post", icon: Upload },
+    { label: "Internship Programs", path: "/employer/internships", icon: Calendar },
+    { label: "Company Verification", path: "/employer/verification", icon: FileCheck },
+    { label: "Campus Events", path: "/employer/events", icon: Calendar },
+    { label: "Shortlist Candidates", path: "/employer/shortlist", icon: Thumbsup },
+    { label: "Job Fair Participation", path: "/employer/jobfair", icon: Award },
+    { label: "Publish Opportunities", path: "/employer/post", icon: Plus },
+    { label: "Settings", path: "/employer/settings", icon: Settings }
   ];
 
   return (
     <DashboardLayout title="Industry Talent Sourcing Pipeline" role="Partner Employer" navItems={navItems}>
       <Routes>
+        <Route path="/dashboard" element={<Navigate to="/employer" replace />} />
         <Route path="/" element={
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-md flex items-center justify-between">
@@ -466,6 +523,16 @@ function EmployerPortal() {
             </form>
           </div>
         } />
+        <Route path="/talent" element={<div className="p-6"><h2 className="text-lg font-bold">Talent Pool Management</h2><p className="text-sm text-slate-500">View and manage candidate pool.</p></div>} />
+        <Route path="/matching" element={<div className="p-6"><h2 className="text-lg font-bold">AI Candidate Matching</h2><p className="text-sm text-slate-500">AI-powered candidate recommendations.</p></div>} />
+        <Route path="/analytics" element={<div className="p-6"><h2 className="text-lg font-bold">Recruitment Analytics</h2><p className="text-sm text-slate-500">Track hiring metrics and trends.</p></div>} />
+        <Route path="/bulk-post" element={<div className="p-6"><h2 className="text-lg font-bold">Bulk Job Posting</h2><p className="text-sm text-slate-500">Upload multiple job openings at once.</p></div>} />
+        <Route path="/internships" element={<div className="p-6"><h2 className="text-lg font-bold">Internship Programs</h2><p className="text-sm text-slate-500">Manage internship program listings.</p></div>} />
+        <Route path="/verification" element={<div className="p-6"><h2 className="text-lg font-bold">Company Profile Verification</h2><p className="text-sm text-slate-500">Verify company and update profile.</p></div>} />
+        <Route path="/events" element={<div className="p-6"><h2 className="text-lg font-bold">Campus Recruitment Events</h2><p className="text-sm text-slate-500">Schedule and manage campus events.</p></div>} />
+        <Route path="/shortlist" element={<div className="p-6"><h2 className="text-lg font-bold">Candidate Shortlisting</h2><p className="text-sm text-slate-500">Review and shortlist applicants.</p></div>} />
+        <Route path="/jobfair" element={<div className="p-6"><h2 className="text-lg font-bold">Job Fair Participation</h2><p className="text-sm text-slate-500">Register and manage job fair booths.</p></div>} />
+        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">Settings</h2><p className="text-sm text-slate-500">Manage company profile and preferences.</p></div>} />
       </Routes>
     </DashboardLayout>
   );
@@ -476,37 +543,100 @@ function EmployerPortal() {
 // ==========================================
 function AdminPortal() {
   const navItems = [
-    { label: "Universal Configurations", path: "/admin", icon: Settings }
+    { label: "Dashboard", path: "/admin", icon: BarChart3 },
+    { label: "CMS/Page Builder", path: "/admin/cms", icon: Edit },
+    { label: "Dynamic Homepage Sections", path: "/admin/homepage/sections", icon: Layers },
+    { label: "Homepage Theme", path: "/admin/homepage/theme", icon: Palette },
+    { label: "Homepage Menu", path: "/admin/homepage/menu", icon: MenuSquare },
+    { label: "Hero Slider", path: "/admin/homepage/hero", icon: Image },
+    { label: "Banners", path: "/admin/homepage/banners", icon: Newspaper },
+    { label: "Homepage Search", path: "/admin/homepage/search", icon: SearchCode },
+    { label: "SEO Settings", path: "/admin/seo", icon: Globe },
+    { label: "Popup & Notices", path: "/admin/popup", icon: MessageCircle },
+    { label: "Contact Messages", path: "/admin/contact", icon: Mail },
+    { label: "FAQ Management", path: "/admin/faq", icon: FileText },
+    { label: "Partners & Sponsors", path: "/admin/partners", icon: Handshake },
+    { label: "Advertisement Banners", path: "/admin/advertisement", icon: Share2 },
+    { label: "Success Story Approval", path: "/admin/success-stories/approval", icon: CheckCircle },
+    { label: "Digital Asset Library", path: "/admin/assets", icon: HardDrive },
+    { label: "Activity Logs", path: "/admin/logs", icon: Activity },
+    { label: "Backup & Restore", path: "/admin/backup", icon: Archive },
+    { label: "Email/SMS Templates", path: "/admin/templates", icon: FileCode },
+    { label: "Notification Center", path: "/admin/notifications", icon: Bell },
+    { label: "Role & Permissions", path: "/admin/roles", icon: Key },
+    { label: "API Management", path: "/admin/api", icon: Zap },
+    { label: "System Monitoring", path: "/admin/monitoring", icon: Monitor },
+    { label: "Security Center", path: "/admin/security", icon: Shield },
+    { label: "Login History", path: "/admin/login-history", icon: LogIn },
+    { label: "Data Export", path: "/admin/export", icon: Download },
+    { label: "News & Announcements", path: "/admin/announcements", icon: Newspaper },
+    { label: "Statistics", path: "/admin/statistics", icon: BarChart },
+    { label: "Testimonials", path: "/admin/testimonials", icon: Mic },
+    { label: "Gallery", path: "/admin/gallery", icon: GalleryHorizontal },
+    { label: "Events", path: "/admin/events", icon: Calendar },
+    { label: "Workshops", path: "/admin/workshops", icon: Video },
+    { label: "Community", path: "/admin/community", icon: Users },
+    { label: "User Management", path: "/admin/users", icon: UserCog },
+    { label: "System Settings", path: "/admin/settings", icon: Settings },
+    { label: "All Reports", path: "/admin/reports", icon: FileBarChart2 }
   ];
 
   return (
     <DashboardLayout title="Overarching Ecosystem Management Control Panel" role="Root Admin" navItems={navItems}>
-      <div className="space-y-6">
-        {/* Core Settings Grid */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
-          <div>
-            <h2 className="text-md font-bold text-slate-900">Automated Tracer Outreach Scheduler (Cron Jobs)</h2>
-            <p className="text-xs text-slate-500">Configure time triggers for automated student messaging.</p>
-          </div>
-
-          <div className="divide-y divide-slate-100 border-t border-slate-100">
-            <div className="py-4 flex justify-between items-center">
+      <Routes>
+        <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+        <Route index element={
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md space-y-6">
               <div>
-                <span className="font-bold text-sm text-slate-800 block">6-Month Tracer Email Script</span>
-                <span className="text-xs text-slate-400 block">Triggers exactly 180 calendar days post graduation date array records.</span>
+                <h2 className="text-md font-bold text-slate-900">Admin Dashboard Overview</h2>
+                <p className="text-xs text-slate-500">System administration and accreditation controls.</p>
               </div>
-              <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">ACTIVE</span>
-            </div>
-            <div className="py-4 flex justify-between items-center">
-              <div>
-                <span className="font-bold text-sm text-slate-800 block">12-Month Alignment Review Script</span>
-                <span className="text-xs text-slate-400 block">Triggers exactly 365 calendar days post graduation date array records.</span>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-4 rounded-xl"><span className="text-xs text-slate-500">Total Users</span><p className="text-xl font-bold">24,000+</p></div>
+                <div className="bg-slate-50 p-4 rounded-xl"><span className="text-xs text-slate-500">System Status</span><p className="text-xl font-bold text-emerald-700">ONLINE</p></div>
+                <div className="bg-slate-50 p-4 rounded-xl"><span className="text-xs text-slate-500">Pending Approvals</span><p className="text-xl font-bold">12</p></div>
               </div>
-              <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">ACTIVE</span>
             </div>
           </div>
-        </div>
-      </div>
+        } />
+        <Route path="/cms" element={<div className="p-6"><h2 className="text-lg font-bold">CMS/Page Builder</h2><p className="text-sm text-slate-500">Drag-and-drop page builder for content management.</p></div>} />
+        <Route path="/homepage/sections" element={<div className="p-6"><h2 className="text-lg font-bold">Dynamic Homepage Sections</h2><p className="text-sm text-slate-500">Add, remove, reorder homepage sections.</p></div>} />
+        <Route path="/homepage/theme" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Theme Customization</h2><p className="text-sm text-slate-500">Customize colors, fonts, and styling.</p></div>} />
+        <Route path="/homepage/menu" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Menu Management</h2><p className="text-sm text-slate-500">Configure navigation menu items and order.</p></div>} />
+        <Route path="/homepage/hero" element={<div className="p-6"><h2 className="text-lg font-bold">Hero Slider</h2><p className="text-sm text-slate-500">Configure hero slider images and text.</p></div>} />
+        <Route path="/homepage/banners" element={<div className="p-6"><h2 className="text-lg font-bold">Banners</h2><p className="text-sm text-slate-500">Manage homepage banners and promotions.</p></div>} />
+        <Route path="/homepage/search" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Search Management</h2><p className="text-sm text-slate-500">Configure search parameters and filters.</p></div>} />
+        <Route path="/seo" element={<div className="p-6"><h2 className="text-lg font-bold">SEO Settings</h2><p className="text-sm text-slate-500">Manage meta tags, sitemap, and SEO.</p></div>} />
+        <Route path="/popup" element={<div className="p-6"><h2 className="text-lg font-bold">Popup & Notice Management</h2><p className="text-sm text-slate-500">Create and schedule popup notifications.</p></div>} />
+        <Route path="/contact" element={<div className="p-6"><h2 className="text-lg font-bold">Contact Message Management</h2><p className="text-sm text-slate-500">View and respond to contact inquiries.</p></div>} />
+        <Route path="/faq" element={<div className="p-6"><h2 className="text-lg font-bold">FAQ Management</h2><p className="text-sm text-slate-500">Add, edit, organize FAQ entries.</p></div>} />
+        <Route path="/partners" element={<div className="p-6"><h2 className="text-lg font-bold">Partners & Sponsors</h2><p className="text-sm text-slate-500">Manage partner and sponsor profiles.</p></div>} />
+        <Route path="/advertisement" element={<div className="p-6"><h2 className="text-lg font-bold">Advertisement Banner Management</h2><p className="text-sm text-slate-500">Upload and schedule ad banners.</p></div>} />
+        <Route path="/success-stories/approval" element={<div className="p-6"><h2 className="text-lg font-bold">Success Story Approval</h2><p className="text-sm text-slate-500">Review and approve alumni stories.</p></div>} />
+        <Route path="/assets" element={<div className="p-6"><h2 className="text-lg font-bold">Digital Asset Library</h2><p className="text-sm text-slate-500">Store and organize images, documents.</p></div>} />
+        <Route path="/logs" element={<div className="p-6"><h2 className="text-lg font-bold">Activity Logs & Audit Trail</h2><p className="text-sm text-slate-500">View system activity and user actions.</p></div>} />
+        <Route path="/backup" element={<div className="p-6"><h2 className="text-lg font-bold">Backup & Restore System</h2><p className="text-sm text-slate-500">Schedule backups and restore data.</p></div>} />
+        <Route path="/templates" element={<div className="p-6"><h2 className="text-lg font-bold">Email/SMS Templates</h2><p className="text-sm text-slate-500">Create and manage communication templates.</p></div>} />
+        <Route path="/notifications" element={<div className="p-6"><h2 className="text-lg font-bold">Notification Center</h2><p className="text-sm text-slate-500">Send and track system notifications.</p></div>} />
+        <Route path="/roles" element={<div className="p-6"><h2 className="text-lg font-bold">Role & Permission Management</h2><p className="text-sm text-slate-500">Configure user roles and access levels.</p></div>} />
+        <Route path="/api" element={<div className="p-6"><h2 className="text-lg font-bold">API Management</h2><p className="text-sm text-slate-500">API keys, endpoints, and documentation.</p></div>} />
+        <Route path="/monitoring" element={<div className="p-6"><h2 className="text-lg font-bold">System Monitoring Dashboard</h2><p className="text-sm text-slate-500">Real-time system performance metrics.</p></div>} />
+        <Route path="/security" element={<div className="p-6"><h2 className="text-lg font-bold">Security Center</h2><p className="text-sm text-slate-500">Security policies and threat monitoring.</p></div>} />
+        <Route path="/login-history" element={<div className="p-6"><h2 className="text-lg font-bold">Login History</h2><p className="text-sm text-slate-500">View all user login attempts.</p></div>} />
+        <Route path="/export" element={<div className="p-6"><h2 className="text-lg font-bold">Data Export Center</h2><p className="text-sm text-slate-500">Export accreditation and analytics data.</p></div>} />
+        <Route path="/homepage" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Management</h2><p className="text-sm text-slate-500">Manage homepage content and settings.</p></div>} />
+        <Route path="/announcements" element={<div className="p-6"><h2 className="text-lg font-bold">News & Announcements</h2><p className="text-sm text-slate-500">Create and manage news posts.</p></div>} />
+        <Route path="/statistics" element={<div className="p-6"><h2 className="text-lg font-bold">Statistics</h2><p className="text-sm text-slate-500">View platform analytics and metrics.</p></div>} />
+        <Route path="/testimonials" element={<div className="p-6"><h2 className="text-lg font-bold">Testimonials</h2><p className="text-sm text-slate-500">Manage testimonials from alumni and employers.</p></div>} />
+        <Route path="/gallery" element={<div className="p-6"><h2 className="text-lg font-bold">Gallery</h2><p className="text-sm text-slate-500">Manage photo gallery and assets.</p></div>} />
+        <Route path="/events" element={<div className="p-6"><h2 className="text-lg font-bold">Events</h2><p className="text-sm text-slate-500">Manage alumni and university events.</p></div>} />
+        <Route path="/workshops" element={<div className="p-6"><h2 className="text-lg font-bold">Workshops</h2><p className="text-sm text-slate-500">Manage workshop listings and recordings.</p></div>} />
+        <Route path="/community" element={<div className="p-6"><h2 className="text-lg font-bold">Community</h2><p className="text-sm text-slate-500">Monitor and moderate community feed.</p></div>} />
+        <Route path="/users" element={<div className="p-6"><h2 className="text-lg font-bold">User Management</h2><p className="text-sm text-slate-500">Manage users, roles, and permissions.</p></div>} />
+        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">System Settings</h2><p className="text-sm text-slate-500">Configure system-wide settings.</p></div>} />
+        <Route path="/reports" element={<div className="p-6"><h2 className="text-lg font-bold">All Reports</h2><p className="text-sm text-slate-500">View and export all accreditation reports.</p></div>} />
+      </Routes>
     </DashboardLayout>
   );
 }
@@ -517,23 +647,48 @@ function AdminPortal() {
 function DepartmentPortal() {
   const navItems = [
     { label: "Dashboard", path: "/department", icon: BarChart3 },
+    { label: "Graduate Outcome Analytics", path: "/department/outcome-analytics", icon: BarChart2 },
+    { label: "Curriculum Review", path: "/department/curriculum-review", icon: BookOpen },
+    { label: "Department Ranking", path: "/department/ranking", icon: Award },
+    { label: "Research Collaboration", path: "/department/research", icon: Zap },
+    { label: "Employability Reports", path: "/department/employability", icon: TrendingUp },
+    { label: "KPI Dashboard", path: "/department/kpi", icon: Activity },
+    { label: "Industry Partnership", path: "/department/partnership", icon: Handshake },
     { label: "Employment Analytics", path: "/department/employment", icon: TrendingUp },
     { label: "Skill Gap Reports", path: "/department/skill-gap", icon: GraduationCap },
     { label: "Employer Feedback", path: "/department/employer-feedback", icon: FileText },
     { label: "Tracer Reports", path: "/department/tracer", icon: FileText },
     { label: "Curriculum Insights", path: "/department/curriculum", icon: FileText },
-    { label: "Accreditation Reports", path: "/department/accreditation", icon: FileText }
+    { label: "Accreditation Reports", path: "/department/accreditation", icon: FileText },
+    { label: "Settings", path: "/department/settings", icon: Settings }
   ];
 
   return (
     <DashboardLayout title="Department Head Portal" role="Department Head" navItems={navItems}>
       <Routes>
-        <Route path="/" element={
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
-            <h2 className="text-lg font-black text-[#003366] mb-4">Department Dashboard</h2>
-            <p className="text-sm text-slate-500">Select a module from the sidebar to view analytics.</p>
+        <Route path="/dashboard" element={<Navigate to="/department" replace />} />
+        <Route index element={
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
+              <h2 className="text-lg font-black text-[#003366] mb-4">Department Dashboard</h2>
+              <p className="text-sm text-slate-500">Select a module from the sidebar to view analytics.</p>
+            </div>
           </div>
         } />
+        <Route path="/outcome-analytics" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Outcome Analytics</h2><p className="text-sm text-slate-500">Track graduate employment outcomes.</p></div>} />
+        <Route path="/curriculum-review" element={<div className="p-6"><h2 className="text-lg font-bold">Curriculum Review Dashboard</h2><p className="text-sm text-slate-500">Review and suggest curriculum updates.</p></div>} />
+        <Route path="/ranking" element={<div className="p-6"><h2 className="text-lg font-bold">Department Ranking Dashboard</h2><p className="text-sm text-slate-500">View department performance rankings.</p></div>} />
+        <Route path="/research" element={<div className="p-6"><h2 className="text-lg font-bold">Research Collaboration Tracking</h2><p className="text-sm text-slate-500">Track research partnerships and outcomes.</p></div>} />
+        <Route path="/employability" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Employability Reports</h2><p className="text-sm text-slate-500">Generate employability analytics.</p></div>} />
+        <Route path="/kpi" element={<div className="p-6"><h2 className="text-lg font-bold">Department KPI Dashboard</h2><p className="text-sm text-slate-500">Key performance indicators for the department.</p></div>} />
+        <Route path="/partnership" element={<div className="p-6"><h2 className="text-lg font-bold">Industry Partnership Reports</h2><p className="text-sm text-slate-500">Manage and track industry partnerships.</p></div>} />
+        <Route path="/employment" element={<div className="p-6"><h2 className="text-lg font-bold">Employment Analytics</h2><p className="text-sm text-slate-500">Detailed employment statistics.</p></div>} />
+        <Route path="/skill-gap" element={<div className="p-6"><h2 className="text-lg font-bold">Skill Gap Reports</h2><p className="text-sm text-slate-500">Analyze skill gaps from employer feedback.</p></div>} />
+        <Route path="/employer-feedback" element={<div className="p-6"><h2 className="text-lg font-bold">Employer Feedback</h2><p className="text-sm text-slate-500">Review feedback from employers.</p></div>} />
+        <Route path="/tracer" element={<div className="p-6"><h2 className="text-lg font-bold">Tracer Reports</h2><p className="text-sm text-slate-500">Generate tracer study reports.</p></div>} />
+        <Route path="/curriculum" element={<div className="p-6"><h2 className="text-lg font-bold">Curriculum Insights</h2><p className="text-sm text-slate-500">View curriculum analytics.</p></div>} />
+        <Route path="/accreditation" element={<div className="p-6"><h2 className="text-lg font-bold">Accreditation Reports</h2><p className="text-sm text-slate-500">Accreditation-ready reports.</p></div>} />
+        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">Settings</h2><p className="text-sm text-slate-500">Manage department preferences.</p></div>} />
       </Routes>
     </DashboardLayout>
   );

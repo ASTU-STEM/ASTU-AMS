@@ -53,6 +53,7 @@ const AlumniDashboard = () => {
    const [activeTab, setActiveTab] = useState<string>('dashboard');
    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('alumni_sidebar_collapsed') === 'true');
+   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Theme Dark / Light mode
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
@@ -127,6 +128,15 @@ const AlumniDashboard = () => {
       trendIcon: 'trending_up',
       trendColor: 'astu-green'
     }
+  ];
+
+  const managementActions = [
+    { title: 'Alumni Directory', desc: 'Browse peers by batch, city, country, department, skills, and chapter.', tab: 'profile', icon: 'travel_explore' },
+    { title: 'Skills Portfolio', desc: 'Create skill evidence, publications, projects, awards, and career progress records.', tab: 'profile', icon: 'workspace_premium' },
+    { title: 'CV Builder', desc: 'Generate accreditation-friendly CV snapshots from your verified profile.', tab: 'profile', icon: 'description' },
+    { title: 'Digital ID Card', desc: 'Manage verified alumni identity and registrar-approved profile data.', tab: 'documents', icon: 'badge' },
+    { title: 'Volunteer Program', desc: 'Join mentorship, alumni chapters, campus events, and community initiatives.', tab: 'mentorship', icon: 'volunteer_activism' },
+    { title: 'Career Progress', desc: 'Update employment, salary range, startup, research, and tracer outcomes.', tab: 'surveys', icon: 'timeline' },
   ];
 
   // Sync state mutations with LocalStorage
@@ -323,6 +333,7 @@ const AlumniDashboard = () => {
   useEffect(() => {
     setMenuOpen(false);
     setNotificationOpen(false);
+    setMobileSidebarOpen(false);
   }, [activeTab]);
 
   useEffect(() => {
@@ -392,8 +403,17 @@ const AlumniDashboard = () => {
     <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <Toaster position="top-right" reverseOrder={false} />
 
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col overflow-hidden shadow-2xl transition-all duration-300 md:flex bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         {/* Sidebar Logo Section */}
         <div className="p-5 border-b border-white/10">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
@@ -420,6 +440,7 @@ const AlumniDashboard = () => {
           <div className="space-y-0.5">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+              { id: 'management', label: 'Management Hub', icon: 'dashboard_customize' },
               { id: 'profile', label: 'My Profile', icon: 'account_circle' },
               { id: 'career', label: 'Career Center', icon: 'school' },
               { id: 'surveys', label: 'Surveys', icon: 'assignment' },
@@ -522,6 +543,17 @@ const AlumniDashboard = () => {
             >
               <Menu className="h-5 w-5" />
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSidebarCollapsed(false);
+                setMobileSidebarOpen(true);
+              }}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
                 <span>Alumni</span>
@@ -583,7 +615,7 @@ const AlumniDashboard = () => {
                 )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
                   <div className="border-b border-[var(--border-color)] px-4 py-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -657,7 +689,7 @@ const AlumniDashboard = () => {
         </header>
 
         {/* Main Content */}
-        <main className="h-[calc(100vh-4rem)] overflow-y-auto bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {activeTab === 'dashboard' && (
             <DashboardOverview
               profile={profile}
@@ -671,6 +703,28 @@ const AlumniDashboard = () => {
               hoveredCard={hoveredCard}
               onUpdateEmploymentStatus={handleUpdateEmploymentStatus}
             />
+          )}
+
+          {activeTab === 'management' && (
+            <section className="space-y-6 p-4 md:p-6">
+              <div className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1D9E75)] p-5 text-white md:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni management</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">Create and manage your alumni services</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+                  Directory, map, business profile, startup showcase, research publications, CV builder, digital ID, volunteer programs, awards, chapters, donations, and career progress tracking.
+                </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {managementActions.map((action) => (
+                  <button key={action.title} onClick={() => setActiveTab(action.tab)} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/30">
+                    <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 p-2 text-[#003580]">{action.icon}</span>
+                    <h3 className="mt-4 text-sm font-semibold text-[var(--text-primary)]">{action.title}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">{action.desc}</p>
+                    <span className="mt-4 inline-flex rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
+                  </button>
+                ))}
+              </div>
+            </section>
           )}
 
           {activeTab === 'profile' && (

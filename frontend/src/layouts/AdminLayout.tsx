@@ -42,6 +42,12 @@ class AdminRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/admin/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Admin' }, { label: 'Dashboard' }] },
+  '/admin/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'Admin' }, { label: 'Homepage' }] },
+  '/admin/content': { title: 'News & Community', breadcrumb: [{ label: 'Admin' }, { label: 'Content' }] },
+  '/admin/gallery': { title: 'Gallery', breadcrumb: [{ label: 'Admin' }, { label: 'Gallery' }] },
+  '/admin/events': { title: 'Events & Workshops', breadcrumb: [{ label: 'Admin' }, { label: 'Events' }] },
+  '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
+  '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },
   '/admin/roles': { title: 'Role Management', breadcrumb: [{ label: 'Admin' }, { label: 'Roles' }] },
   '/admin/analytics': { title: 'Analytics', breadcrumb: [{ label: 'Admin' }, { label: 'Analytics' }] },
@@ -58,6 +64,7 @@ export default function AdminLayout() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -65,6 +72,7 @@ export default function AdminLayout() {
   useEffect(() => {
     setMenuOpen(false);
     setNotificationOpen(false);
+    setMobileSidebarOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -187,13 +195,23 @@ export default function AdminLayout() {
       `}</style>
       <Toaster position="top-right" />
 
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm lg:hidden"
+        />
+      )}
+
 <AdminSidebar
         onLogout={handleLogout}
+        isOpen={mobileSidebarOpen}
+        onNavigate={() => setMobileSidebarOpen(false)}
       />
 
        <div
-        className="min-h-screen transition-[margin-left] duration-[250ms] ease-in-out"
-        style={{ marginLeft: 256 }}
+        className="min-h-screen transition-[margin-left] duration-[250ms] ease-in-out lg:ml-64"
       >
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
@@ -203,6 +221,14 @@ export default function AdminLayout() {
           }}
         >
           <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 lg:hidden"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
                 <span>Admin</span>
@@ -249,7 +275,7 @@ export default function AdminLayout() {
                 </span>
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
                   <div className="border-b border-[var(--border-color)] px-4 py-3">
                     <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
                     <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
@@ -295,7 +321,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="h-[calc(100vh-4rem)] overflow-y-auto bg-[var(--bg-page)] p-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main className="h-[calc(100dvh-4rem)] overflow-y-auto bg-[var(--bg-page)] p-4 sm:p-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

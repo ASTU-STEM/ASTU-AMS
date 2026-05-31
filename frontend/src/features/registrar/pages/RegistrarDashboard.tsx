@@ -31,6 +31,7 @@ const RegistrarDashboard = () => {
    const [activeTab, setActiveTab] = useState<string>('dashboard');
    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('registrar_sidebar_collapsed') === 'true');
+   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
    const [searchQuery, setSearchQuery] = useState('');
    const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
@@ -155,6 +156,15 @@ const RegistrarDashboard = () => {
     { label: 'Duplicate scan', value: '0 open', icon: 'difference', helper: 'Latest batch is conflict-free' },
     { label: 'Record completeness', value: '96%', icon: 'data_check', helper: 'Student ID, CGPA, email, and department coverage' },
     { label: 'Audit trail', value: 'Live', icon: 'admin_panel_settings', helper: 'Registrar actions are ready for review' },
+  ];
+
+  const registrarManagementActions = [
+    { title: 'Digital Transcript Verification', desc: 'Create verification cases, approve transcript checks, and attach audit notes.', tab: 'documents', icon: 'verified' },
+    { title: 'Graduate Clearance Tracking', desc: 'Track clearance status, missing approvals, and graduation readiness by batch.', tab: 'records', icon: 'rule' },
+    { title: 'Certificate Verification Portal', desc: 'Validate certificate requests and publish official verification outcomes.', tab: 'verification', icon: 'workspace_premium' },
+    { title: 'Student-to-Alumni Migration', desc: 'Automate graduate import, SIS sync, activation records, and duplicate checks.', tab: 'data_integration', icon: 'sync_alt' },
+    { title: 'Graduation Batch Management', desc: 'Create batches, map departments, reconcile records, and export cohort data.', tab: 'records', icon: 'groups' },
+    { title: 'Academic History Verification', desc: 'Review CGPA, program, completion, and document history before approval.', tab: 'reporting', icon: 'history_edu' },
   ];
 
   // Callbacks
@@ -285,6 +295,11 @@ useEffect(() => {
      localStorage.setItem('registrar_sidebar_collapsed', String(sidebarCollapsed));
    }, [sidebarCollapsed]);
 
+   useEffect(() => {
+     setMobileSidebarOpen(false);
+     setShowNotifications(false);
+   }, [activeTab]);
+
    const handleLogout = () => {
      localStorage.removeItem('authToken');
      localStorage.removeItem('refreshToken');
@@ -297,8 +312,17 @@ useEffect(() => {
     <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <Toaster position="top-right" reverseOrder={false} />
 
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+        />
+      )}
+
       {/* Sidebar Navigation - Fixed width, collapsible */}
-      <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col shadow-2xl ${sidebarCollapsed ? 'w-20' : 'w-64'} md:flex bg-[#003366] transition-all duration-300`}>
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col shadow-2xl md:translate-x-0 bg-[#003366] transition-all duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         <div className={`p-6 mt-6 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
           <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-3'}`}>
             <img
@@ -319,6 +343,7 @@ useEffect(() => {
           <div className="space-y-1">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+              { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
               { id: 'records', label: 'Alumni Records', icon: 'people', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
               { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
               { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
@@ -403,6 +428,17 @@ useEffect(() => {
                >
                  <Menu className="h-5 w-5" />
                </button>
+               <button
+                 type="button"
+                 onClick={() => {
+                   setSidebarCollapsed(false);
+                   setMobileSidebarOpen(true);
+                 }}
+                 className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden"
+                 aria-label="Open navigation"
+               >
+                 <Menu className="h-5 w-5" />
+               </button>
                <div className="min-w-0 space-y-0.5">
                  <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
                    <span>Registrar</span>
@@ -466,7 +502,7 @@ useEffect(() => {
                   )}
                 </button>
                 {showNotifications && (
-                  <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                  <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
                     <div className="border-b border-[var(--border-color)] px-4 py-3">
                       <div className="flex items-center justify-between">
                         <div>
@@ -526,6 +562,28 @@ useEffect(() => {
 
           {/* Dynamic tabs routing */}
           <div className="flex-grow">
+            {activeTab === 'management' && (
+              <section className="space-y-6 p-4 md:p-6">
+                <div className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white md:p-6">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Registrar management</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">Manage verification, clearance, certificates, and migration</h2>
+                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+                    Digital transcript verification, graduate clearance, certificate verification, student-to-alumni automation, graduation batches, and academic history checks.
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {registrarManagementActions.map((action) => (
+                    <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
+                      <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 p-2 text-[#003580]">{action.icon}</span>
+                      <h3 className="mt-4 text-sm font-semibold text-gray-900">{action.title}</h3>
+                      <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
+                      <span className="mt-4 inline-flex rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
 

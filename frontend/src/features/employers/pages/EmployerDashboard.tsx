@@ -40,6 +40,7 @@ const EmployerDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Theme Dark / Light mode
@@ -119,6 +120,15 @@ const EmployerDashboard = () => {
     { icon: 'person_search', title: 'Talent Search Engine', desc: 'Find alumni by skills, GPA, department, experience, location, and AI rank.', tab: 'search_talent' },
     { icon: 'event_available', title: 'Interview Scheduling', desc: 'Move candidates from shortlist to interview with notes and next steps.', tab: 'candidates' },
     { icon: 'handshake', title: 'Partnership Module', desc: 'Track internships, sponsorship interest, research collaboration, and event support.', tab: 'feedback' },
+  ];
+
+  const employerManagementActions = [
+    { title: 'Talent Pool Management', desc: 'Segment saved candidates by department, skill, GPA, experience, and availability.', tab: 'search_talent', icon: 'groups' },
+    { title: 'AI Candidate Matching', desc: 'Rank alumni for jobs and internships using skills, location, and employer criteria.', tab: 'search_talent', icon: 'psychology' },
+    { title: 'Bulk Job Posting', desc: 'Create multiple jobs or internships with shared eligibility and approval rules.', tab: 'post_job', icon: 'post_add' },
+    { title: 'Internship Program', desc: 'Manage intern cohorts, supervisors, feedback, and conversion to employment.', tab: 'post_job', icon: 'school' },
+    { title: 'Campus Recruitment Events', desc: 'Schedule job fairs, interviews, RSVPs, and department collaboration.', tab: 'analytics', icon: 'event_available' },
+    { title: 'Candidate Shortlisting', desc: 'Review applications, move candidates to interview, and track decisions.', tab: 'candidates', icon: 'fact_check' },
   ];
 
   const demandSignals = [
@@ -296,6 +306,7 @@ const EmployerDashboard = () => {
   useEffect(() => {
     setMenuOpen(false);
     setNotificationOpen(false);
+    setMobileSidebarOpen(false);
   }, [activeTab]);
 
   useEffect(() => {
@@ -372,8 +383,17 @@ return (
     <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <Toaster position="top-right" reverseOrder={false} />
 
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col overflow-hidden shadow-2xl transition-all duration-300 md:flex bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         {/* Sidebar Logo Section */}
         <div className="p-5 border-b border-white/10">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
@@ -400,6 +420,7 @@ return (
           <div className="space-y-0.5">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+              { id: 'management', label: 'Management Hub', icon: 'dashboard_customize' },
               { id: 'post_job', label: 'Job Scaffolder', icon: 'work' },
               { id: 'candidates', label: 'Applications', icon: 'description' },
               { id: 'search_talent', label: 'Talent Search', icon: 'search' },
@@ -509,6 +530,17 @@ return (
             >
               <Menu className="h-5 w-5" />
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSidebarCollapsed(false);
+                setMobileSidebarOpen(true);
+              }}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
                 <span>Employer</span>
@@ -572,7 +604,7 @@ return (
                 )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
                   <div className="border-b border-[var(--border-color)] px-4 py-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -641,7 +673,7 @@ return (
         </header>
 
 {/* Main Content */}
-         <main className="h-[calc(100vh-4rem)] overflow-y-auto bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+         <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
 
@@ -921,6 +953,28 @@ return (
               </div>
 
             </div>
+          )}
+
+          {activeTab === 'management' && (
+            <section className="space-y-6 p-4 md:p-6">
+              <div className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white md:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Employer management</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight">Create jobs, internships, events, and candidate pipelines</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+                  Talent pools, AI matching, recruitment analytics, bulk posting, internship programs, verification, campus events, shortlisting, and job fair participation.
+                </p>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {employerManagementActions.map((action) => (
+                  <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
+                    <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 p-2 text-[#003580]">{action.icon}</span>
+                    <h3 className="mt-4 text-sm font-semibold">{action.title}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
+                    <span className="mt-4 inline-flex rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
+                  </button>
+                ))}
+              </div>
+            </section>
           )}
 
           {activeTab === 'profile' && (

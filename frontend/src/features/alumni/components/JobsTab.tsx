@@ -38,7 +38,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
+      job.skills?.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())) || false;
 
     const matchesLocation =
       selectedLocation === 'All' ||
@@ -220,7 +220,7 @@ return (
                       onClick={(e) => handleToggleSave(e, job.id, job.saved)}
                       className="md:hidden p-2 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-yellow-500"
                     >
-                      <span className={`material-symbols-outlined ${job.saved ? 'fill-yellow-400 text-yellow-500' : ''}`}>
+                      <span className={`material-symbols-outlined ${job.saved ? 'text-yellow-500' : ''}`}>
                         star
                       </span>
                     </button>
@@ -243,7 +243,7 @@ return (
 
                   {/* Tech Stack Tags */}
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {job.skills.map((skill, index) => (
+                    {job.skills?.map((skill, index) => (
                       <span
                         key={index}
                         className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium"
@@ -276,7 +276,7 @@ return (
                       className="hidden md:flex p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-400 hover:text-yellow-500"
                       title={job.saved ? "Remove from saved" : "Save Opportunity"}
                     >
-                      <span className={`material-symbols-outlined text-xl ${job.saved ? 'fill-yellow-400 text-yellow-400' : ''}`}>
+                      <span className={`material-symbols-outlined text-xl ${job.saved ? 'text-yellow-400' : ''}`}>
                         star
                       </span>
                     </button>

@@ -31,7 +31,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   return (
     <aside
-      className={`h-screen flex-shrink-0 flex-col bg-[#002244] shadow-2xl overflow-hidden transition-all duration-300 ${collapsed ? 'w-20' : 'w-full'}`}
+      className={`flex h-dvh flex-shrink-0 flex-col overflow-hidden bg-[#002244] shadow-2xl transition-all duration-300 ${collapsed ? 'w-20' : 'w-full'}`}
       style={{
         background: 'linear-gradient(180deg, #003366 0%, #002a55 50%, #001a3a 100%)',
       }}

@@ -50,6 +50,7 @@ export function DashboardShell({
    );
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     () => localStorage.getItem(`dashboard_shell_${brand}_collapsed`) === 'true'
   );
@@ -78,6 +79,7 @@ export function DashboardShell({
   useEffect(() => {
     setNotificationOpen(false);
     setMenuOpen(false);
+    setMobileSidebarOpen(false);
   }, [activeTab]);
 
   useEffect(() => {
@@ -98,19 +100,28 @@ export function DashboardShell({
   };
 
   const unreadNotifCount = notifications.filter((n) => n.unread).length;
+  const sidebarDisplayCollapsed = sidebarCollapsed && !mobileSidebarOpen;
 
   return (
-    <div className="flex w-screen h-screen overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+        />
+      )}
       {/* Sidebar */}
-      <div className={`relative z-20 h-screen flex-shrink-0 overflow-hidden transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+      <div className={`fixed inset-y-0 left-0 z-40 h-dvh w-64 flex-shrink-0 overflow-hidden transition-all duration-300 md:relative md:z-20 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         <AppSidebar
           items={sidebarItems}
           activeTab={activeTab}
           onTabChange={onTabChange}
-          collapsed={sidebarCollapsed}
+          collapsed={sidebarDisplayCollapsed}
           title={title}
           subtitle={subtitle}
-          logo={sidebarCollapsed ? undefined : sidebarLogo}
+          logo={sidebarDisplayCollapsed ? undefined : sidebarLogo}
           onLogout={handleLocalLogout}
         />
       </div>
@@ -132,6 +143,14 @@ export function DashboardShell({
               onClick={() => setSidebarCollapsed((value) => !value)}
               className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden"
+              aria-label="Open navigation"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -203,7 +222,7 @@ export function DashboardShell({
               {notificationOpen && (
                 <div
                   data-notif-panel
-                  className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
                 >
                   <div className="border-b border-[var(--border-color)] px-4 py-3">
                     <div className="flex items-center justify-between">

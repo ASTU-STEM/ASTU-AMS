@@ -19,6 +19,7 @@ import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerS
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('department_sidebar_collapsed') === 'true');
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('dashboard');
     const [darkMode, setDarkMode] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -50,8 +51,44 @@ const DepartmentDashboard = () => {
         localStorage.setItem('department_sidebar_collapsed', String(sidebarCollapsed));
     }, [sidebarCollapsed]);
 
+    React.useEffect(() => {
+        setMobileSidebarOpen(false);
+        setShowNotifications(false);
+    }, [activeTab]);
+
+    const departmentManagementActions = [
+        { title: 'Graduate Outcome Analytics', desc: 'Create outcome cohorts and compare employment, salary, location, and study continuation.', tab: 'employment-analytics', icon: 'query_stats' },
+        { title: 'Curriculum Review Dashboard', desc: 'Manage feedback evidence, course updates, competency gaps, and review cycles.', tab: 'curriculum', icon: 'menu_book' },
+        { title: 'Department KPI Dashboard', desc: 'Track accreditation KPIs, tracer response, research collaboration, and engagement.', tab: 'accreditation', icon: 'monitoring' },
+        { title: 'Skill Gap Reports', desc: 'Create department skill-gap reports from employer demand and alumni career data.', tab: 'skill-gap', icon: 'school' },
+        { title: 'Industry Partnership Reports', desc: 'Manage employer feedback, partnership evidence, and collaboration requests.', tab: 'employer-feedback', icon: 'handshake' },
+        { title: 'Graduate Employability Reports', desc: 'Export accreditation-ready reports by batch, program, geography, and sector.', tab: 'export', icon: 'ios_share' },
+    ];
+
     const renderSection = () => {
         switch (activeTab) {
+            case 'management':
+                return (
+                    <section className="space-y-6 p-4 md:p-6">
+                        <div className="rounded-[20px] border border-white/10 bg-gradient-to-r from-astu-navy via-[#0f4f86] to-astu-green p-5 text-white shadow-md md:p-6">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Department management</p>
+                            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Manage analytics, curriculum, KPIs, partnerships, and reports</h2>
+                            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+                                Graduate outcomes, curriculum review, ranking/KPI evidence, research collaboration, employability reporting, and industry partnership analytics.
+                            </p>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                            {departmentManagementActions.map((action) => (
+                                <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-astu-navy/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
+                                    <span className="material-symbols-outlined rounded-[8px] bg-astu-navy/10 p-2 text-astu-navy">{action.icon}</span>
+                                    <h3 className="mt-4 text-sm font-semibold">{action.title}</h3>
+                                    <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
+                                    <span className="mt-4 inline-flex rounded-[8px] bg-astu-navy px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+                );
             case 'dashboard':
                 return <DashboardOverview darkMode={darkMode} />;
             case 'employment-analytics':
@@ -78,8 +115,17 @@ const DepartmentDashboard = () => {
             }`}>
             <Toaster position="top-right" reverseOrder={false} />
 
+            {mobileSidebarOpen && (
+                <button
+                    type="button"
+                    aria-label="Close navigation"
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+                />
+            )}
+
 {/* Sidebar Navigation - Fixed width, collapsible */}
-            <aside className={`fixed left-0 top-0 z-40 hidden h-full flex-col shadow-2xl ${sidebarCollapsed ? 'w-20' : 'w-64'} md:flex bg-astu-navy transition-all duration-300`}>
+            <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col shadow-2xl md:translate-x-0 bg-astu-navy transition-all duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
                 <div className={`p-6 mt-6 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
                     {!sidebarCollapsed && (
                         <div className="flex items-center gap-3">
@@ -105,9 +151,10 @@ const DepartmentDashboard = () => {
 
                 <nav className="mt-8 flex-grow overflow-y-auto">
                     <div className="space-y-1">
-                        {[
-                            { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'employment-analytics', label: 'Employment Analytics', icon: 'trending_up', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                            {[
+                                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                                { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
+                                { id: 'employment-analytics', label: 'Employment Analytics', icon: 'trending_up', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                             { id: 'skill-gap', label: 'Skill Gap Reports', icon: 'school', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                             { id: 'employer-feedback', label: 'Employer Feedback', icon: 'rate_review', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
                             { id: 'tracer-reports', label: 'Tracer Reports', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
@@ -186,6 +233,17 @@ const DepartmentDashboard = () => {
                         >
                             <span className="material-symbols-outlined">menu</span>
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSidebarCollapsed(false);
+                                setMobileSidebarOpen(true);
+                            }}
+                            className={`inline-flex h-10 w-10 items-center justify-center rounded-[8px] md:hidden ${darkMode ? 'text-slate-300 hover:bg-white/5' : 'text-slate-600 hover:bg-black/5'}`}
+                            aria-label="Open navigation"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
                         <div className="flex-1 max-w-xl">
                             <div className="relative group">
                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
@@ -231,7 +289,7 @@ const DepartmentDashboard = () => {
 
                         {/* Notification Dropdown Portal */}
                         {showNotifications && (
-                            <div className={`absolute right-12 top-12 w-80 border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
+                            <div className={`absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
                                 }`}>
                                 <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
                                     <h4 className="font-bold text-sm">Notifications</h4>

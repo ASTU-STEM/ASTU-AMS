@@ -4,10 +4,15 @@ import {
   BarChart3,
   Bell,
   Briefcase,
+  CalendarDays,
   ClipboardList,
+  FileBarChart,
+  GalleryHorizontal,
   GraduationCap,
+  Layers3,
   LayoutDashboard,
   LogOut,
+  Newspaper,
   ScrollText,
   Settings,
   Shield,
@@ -19,10 +24,18 @@ import AdminBadge from '../features/admin/components/AdminBadge';
 
 interface AdminSidebarProps {
   onLogout: () => void;
+  isOpen?: boolean;
+  onNavigate?: () => void;
 }
 
 const navItems: AdminNavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard, exact: true },
+  { label: 'Homepage CMS', path: '/admin/homepage', icon: Layers3 },
+  { label: 'News & Community', path: '/admin/content', icon: Newspaper },
+  { label: 'Gallery', path: '/admin/gallery', icon: GalleryHorizontal },
+  { label: 'Events & Workshops', path: '/admin/events', icon: CalendarDays },
+  { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield },
+  { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart },
   { label: 'User Management', path: '/admin/users', icon: Users },
   { label: 'Role Management', path: '/admin/roles', icon: ShieldCheck },
   { label: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
@@ -35,11 +48,11 @@ const navItems: AdminNavItem[] = [
   { label: 'Settings', path: '/admin/settings', icon: Settings },
 ];
 
-export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
+export default function AdminSidebar({ onLogout, isOpen = false, onNavigate }: AdminSidebarProps) {
   return (
     <>
       <aside
-        className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#003366] text-slate-200"
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#003366] text-slate-200 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="relative px-4 pt-5">
           <div className="flex items-center gap-3">
@@ -67,6 +80,7 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
                   key={item.path}
                   to={item.path}
                   end={item.exact}
+                  onClick={onNavigate}
                   className={({ isActive }) =>
                     [
                       'group relative flex items-center gap-3 rounded-[10px] py-3 px-4 text-[14px] font-medium transition-all duration-200',
@@ -101,7 +115,10 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
 
           <button
             type="button"
-            onClick={onLogout}
+            onClick={() => {
+              onNavigate?.();
+              onLogout();
+            }}
             className="mt-3 flex w-full items-center gap-2 rounded-[8px] border border-white/10 px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
           >
             <LogOut className="h-4 w-4" />

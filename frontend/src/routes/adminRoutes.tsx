@@ -12,6 +12,12 @@ import NotificationCenter from '../features/admin/pages/NotificationCenter';
 import SystemLogs from '../features/admin/pages/SystemLogs';
 import BackupSecurity from '../features/admin/pages/BackupSecurity';
 import SystemSettings from '../features/admin/pages/SystemSettings';
+import HomepageManagement from '../features/admin/pages/HomepageManagement';
+import GalleryManagement from '../features/admin/pages/GalleryManagement';
+import EventWorkshopManagement from '../features/admin/pages/EventWorkshopManagement';
+import ContentGovernance from '../features/admin/pages/ContentGovernance';
+import SuperAdminModules from '../features/admin/pages/SuperAdminModules';
+import ReportsCenter from '../features/admin/pages/ReportsCenter';
 
 export default function AdminRoutes() {
   return (
@@ -19,6 +25,12 @@ export default function AdminRoutes() {
       <Route element={<AdminLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="homepage" element={<HomepageManagement />} />
+        <Route path="content" element={<ContentGovernance />} />
+        <Route path="gallery" element={<GalleryManagement />} />
+        <Route path="events" element={<EventWorkshopManagement />} />
+        <Route path="modules" element={<SuperAdminModules />} />
+        <Route path="reports" element={<ReportsCenter />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="roles" element={<RoleManagement />} />
         <Route path="analytics" element={<AnalyticsOverview />} />
