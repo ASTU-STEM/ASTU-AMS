@@ -91,7 +91,6 @@ model AlumniProfile {
   gitHub         String?
   portfolio      String?
   telegram       String?
-  isVerified     Boolean           @default(false)
   experiences    WorkExperience[]
   applications   JobApplication[]
   surveyResponses SurveyResponse[]

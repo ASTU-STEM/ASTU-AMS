@@ -3,9 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
-import apiRouter from './presentation/routes/api.routes';
-import { HealthController } from './presentation/controllers/HealthController';
-import { globalErrorHandler } from './presentation/middlewares/error.middleware';
+import { globalErrorHandler } from './core/middleware/error.middleware';
+import { sendSuccess } from './core/utils/response.utils';
 
 const app = express();
 
@@ -37,11 +36,14 @@ app.use(express.urlencoded({ extended: true }));
 // 5. Static Files Route for Uploads (CVs, profile images)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// 6. Mount Main API Router
-app.use('/api', apiRouter);
+// 6. Mount Module Routes
+// Routes will be registered here as modules are implemented in future milestones.
+// Example: app.use('/api/auth', authRouter);
 
 // 7. Base API Health Check
-app.get('/health', HealthController.getHealth);
+app.get('/health', (req, res) => {
+  return sendSuccess(res, 'API is healthy', { timestamp: new Date().toISOString() });
+});
 
 // 8. 404 Fallback Route
 app.use((req, res) => {
