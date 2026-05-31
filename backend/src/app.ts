@@ -40,10 +40,12 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 import authRouter from './modules/auth/presentation/auth.routes';
 import alumniRouter from './modules/alumni/presentation/alumni.routes';
 import registrarRouter from './modules/registrar/presentation/registrar.routes';
+import employerRouter from './modules/employer/presentation/employer.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
 app.use('/api/registrar', registrarRouter);
+app.use('/api/employer', employerRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {
