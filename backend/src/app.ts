@@ -41,11 +41,13 @@ import authRouter from './modules/auth/presentation/auth.routes';
 import alumniRouter from './modules/alumni/presentation/alumni.routes';
 import registrarRouter from './modules/registrar/presentation/registrar.routes';
 import employerRouter from './modules/employer/presentation/employer.routes';
+import departmentRouter from './modules/department/presentation/department.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
 app.use('/api/registrar', registrarRouter);
 app.use('/api/employer', employerRouter);
+app.use('/api/departments', departmentRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {
