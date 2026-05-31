@@ -42,12 +42,16 @@ import alumniRouter from './modules/alumni/presentation/alumni.routes';
 import registrarRouter from './modules/registrar/presentation/registrar.routes';
 import employerRouter from './modules/employer/presentation/employer.routes';
 import departmentRouter from './modules/department/presentation/department.routes';
+import surveyRouter from './modules/surveys/presentation/surveys.routes';
+import analyticsRouter from './modules/analytics/presentation/analytics.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
 app.use('/api/registrar', registrarRouter);
 app.use('/api/employer', employerRouter);
 app.use('/api/departments', departmentRouter);
+app.use('/api/surveys', surveyRouter);
+app.use('/api/analytics', analyticsRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {
