@@ -8,6 +8,7 @@ import { PrismaRegistrarAlumniRepository } from '../infrastructure/repositories/
 import { ImportGraduateData } from '../application/use-cases/ImportGraduateData';
 import { GetGraduateRecord, VerifyStudentId } from '../application/use-cases/GraduateLookups';
 import { ManageAlumniStatus } from '../application/use-cases/ManageAlumniStatus';
+import { FetchGraduatesByAPI } from '../application/use-cases/FetchGraduatesByAPI';
 
 import { updateAlumniStatusSchema } from './registrar.validation';
 // We will mock CSV parsing here since it's just a controller representation
@@ -126,6 +127,29 @@ export class RegistrarController {
       const useCase = new ManageAlumniStatus(alumniRepo, loggerMock);
       const result = await useCase.execute(req.params.alumniId, 'SUSPENDED', reason || 'Suspended by registrar', adminId, req.ip || 'unknown');
       return sendSuccess(res, 'Alumni account suspended.', result);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async fetchGraduatesByYear(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { year } = req.params;
+      const yearNum = parseInt(year, 10);
+      
+      if (!yearNum || yearNum < 1900 || yearNum > new Date().getFullYear()) {
+        return sendError(res, 'Invalid graduation year', null, 400);
+      }
+
+      const fetchService = new FetchGraduatesByAPI();
+      const graduates = await fetchService.fetchByYear(yearNum);
+      const syncResult = await fetchService.syncGraduatesToAlumniProfiles(graduates);
+
+      return sendSuccess(res, `Fetched and synced graduates for year ${yearNum}.`, {
+        year: yearNum,
+        totalFetched: graduates.length,
+        syncResults: syncResult,
+      });
     } catch (err: any) {
       next(err);
     }

@@ -18,6 +18,7 @@ router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 
 router.post('/import', upload.single('file'), asyncHandler(RegistrarController.importFile));
 router.get('/logs', asyncHandler(RegistrarController.getLogs));
+router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));
 
 router.get('/students/:studentId', asyncHandler(RegistrarController.getStudentRecord));
 
