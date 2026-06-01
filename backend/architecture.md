@@ -91,6 +91,7 @@ Currently mounted routes:
   /api/analytics       → Analytics Module
   /api/documents       → Documents Module
   /api/notifications   → Notifications Module
+  /api/audit           → Audit Module
 ```
 
 ---
@@ -155,6 +156,7 @@ The `modules/` directory is the heart of the application. Each subdirectory repr
 src/modules/
 ├── alumni/           # Alumni profile management, work experience, file uploads
 ├── analytics/        # Data aggregation: employment rates, skill gaps, department metrics
+├── audit/            # Security audit logs (Admin only view/purge)
 ├── auth/             # Authentication: login, register, activation, logout
 ├── department/       # Department head dashboard: stats and alumni lists per department
 ├── documents/        # Document requests: transcripts, degree verifications
@@ -1176,6 +1178,7 @@ npx prisma migrate dev # Create and apply a migration (production workflow)
 | `/api/analytics` | Analytics | `ADMIN`, `REGISTRAR`, `DEPARTMENT_HEAD` | Employment Rates, Skill Gaps, Department Metrics |
 | `/api/documents` | Documents | `ALUMNI`, `ADMIN`, `REGISTRAR` | Request Documents, Process Requests |
 | `/api/notifications` | Notifications | Any Authenticated | Get, Read, Mark All Read, Send (Admin) |
+| `/api/audit` | Audit | `ADMIN` | View Audit Logs, Filter by User/Action, Purge Old Logs |
 
 ---
 
@@ -1184,7 +1187,7 @@ npx prisma migrate dev # Create and apply a migration (production workflow)
 - **Methodology**: Test-Driven Development (TDD) — Red → Green → Refactor
 - **Tool**: Jest with `ts-jest`
 - **Scope**: Unit tests on Use Cases with mocked repository ports
-- **Coverage**: 34 test suites, 99 unit tests — all passing
+- **Coverage**: 35 test suites, 109 unit tests — all passing
 - **Isolation**: Tests never hit the database. Repositories are fully mocked via `jest.Mocked<IRepository>`.
 
 ```bash

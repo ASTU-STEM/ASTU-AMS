@@ -1,6 +1,6 @@
 # File Tree: src
 
-**Generated:** 6/1/2026, 12:49:02 AM
+**Generated:** 6/1/2026, 10:10:41 AM
 **Root Path:** `c:\Users\sebon\OneDrive\Desktop\ASTU-AMS\backend\src`
 
 ```
@@ -94,6 +94,28 @@
 │   │       └── 📁 application
 │   │           └── 📁 use-cases
 │   │               └── 📄 GetAnalyticsReport.test.ts
+│   ├── 📁 audit
+│   │   ├── 📁 application
+│   │   │   ├── 📁 ports
+│   │   │   │   └── 📄 IAuditLogRepository.ts
+│   │   │   └── 📁 use-cases
+│   │   │       └── 📄 ManageAuditLogs.ts
+│   │   ├── 📁 domain
+│   │   │   ├── 📁 entities
+│   │   │   │   └── 📄 AuditLog.ts
+│   │   │   └── 📁 errors
+│   │   │       └── 📄 AuditErrors.ts
+│   │   ├── 📁 infrastructure
+│   │   │   └── 📁 repositories
+│   │   │       └── 📄 PrismaAuditLogRepository.ts
+│   │   ├── 📁 presentation
+│   │   │   ├── 📄 audit.controller.ts
+│   │   │   ├── 📄 audit.routes.ts
+│   │   │   └── 📄 audit.validation.ts
+│   │   └── 📁 tests
+│   │       └── 📁 application
+│   │           └── 📁 use-cases
+│   │               └── 📄 ManageAuditLogs.test.ts
 │   ├── 📁 auth
 │   │   ├── 📁 application
 │   │   │   ├── 📁 dto

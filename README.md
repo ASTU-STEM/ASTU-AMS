@@ -96,6 +96,7 @@ ASTU-AMS/
 │   │   ├── modules/             # Feature modules (Clean Architecture)
 │   │   │   ├── alumni/
 │   │   │   ├── analytics/
+│   │   │   ├── audit/
 │   │   │   ├── auth/
 │   │   │   ├── department/
 │   │   │   ├── documents/
@@ -355,6 +356,7 @@ Features completed:
 7. Advanced Analytics and statistics aggregation
 8. Document Request workflow
 9. In-app Notifications
+10. Security Audit Trail (Admin only view & purge)
 
 For a complete breakdown of the backend architecture, see `backend/architecture.md`.
 
