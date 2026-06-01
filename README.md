@@ -88,71 +88,29 @@ Each actor has role-based access and sees only their permitted modules.
 
 ```text
 ASTU-AMS/
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── app/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── features/
-│   │   ├── layouts/
-│   │   ├── pages/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── store/
-│   │   ├── hooks/
-│   │   ├── contexts/
-│   │   ├── types/
-│   │   ├── utils/
-│   │   ├── constants/
-│   │   ├── styles/
-│   │   ├── config/
-│   │   ├── middleware/
-│   │   └── main.tsx
-│   ├── .env
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── package.json
-│
 ├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── modules/
-│   │   │   ├── auth/
-│   │   │   ├── users/
-│   │   │   ├── alumni/
-│   │   │   ├── registrar/
-│   │   │   ├── employers/
-│   │   │   ├── jobs/
-│   │   │   ├── surveys/
-│   │   │   ├── analytics/
-│   │   │   ├── notifications/
-│   │   │   └── departments/
-│   │   ├── common/
-│   │   ├── middlewares/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── jobs/
-│   │   ├── events/
-│   │   ├── database/
-│   │   ├── interfaces/
-│   │   ├── types/
-│   │   ├── validators/
-│   │   ├── docs/
-│   │   ├── app.ts
-│   │   └── server.ts
 │   ├── prisma/
-│   ├── uploads/
-│   │   ├── cvs/
-│   │   ├── profiles/
-│   │   ├── excel/
-│   │   └── documents/
-│   ├── tests/
-│   ├── .env
+│   │   └── schema.prisma        # Database schema
+│   ├── src/
+│   │   ├── core/                # Shared infrastructure (middleware, utils, config)
+│   │   ├── modules/             # Feature modules (Clean Architecture)
+│   │   │   ├── alumni/
+│   │   │   ├── analytics/
+│   │   │   ├── auth/
+│   │   │   ├── department/
+│   │   │   ├── documents/
+│   │   │   ├── employer/
+│   │   │   ├── notifications/
+│   │   │   ├── registrar/
+│   │   │   └── surveys/
+│   │   ├── app.ts               # Express app setup
+│   │   └── server.ts            # Entry point
+│   ├── architecture.md          # Detailed backend architecture docs
+│   ├── package.json
 │   ├── tsconfig.json
-│   └── package.json
+│   └── jest.config.js
 │
+├── frontend/                    # (Planned React/Vite App)
 └── README.md
 ```
 
@@ -242,23 +200,33 @@ Registrar Excel File
 - Phone
 - CGPA
 
-## 9. Backend Layered Architecture
+## 9. Backend Clean Architecture
 
-- Controller Layer: request handling, validation, response formatting
-- Service Layer: business logic and workflow orchestration
-- Repository Layer: database access via Prisma
+The backend strictly follows a Vertical Slice / Feature-based Clean Architecture, where each module is fully self-contained across 4 layers:
+
+- **Domain Layer (`domain/`)**: Pure TypeScript entities and custom error classes. No framework dependencies.
+- **Application Layer (`application/`)**: Repository interfaces (ports) and pure business logic (use cases).
+- **Infrastructure Layer (`infrastructure/`)**: Prisma implementations of the repository interfaces.
+- **Presentation Layer (`presentation/`)**: Express controllers, Zod validation, and routes.
 
 Example module layout:
 
 ```text
-modules/alumni/
-├── alumni.controller.ts
-├── alumni.service.ts
-├── alumni.repository.ts
-├── alumni.routes.ts
-├── alumni.validation.ts
-├── alumni.types.ts
-└── alumni.constants.ts
+src/modules/employer/
+├── domain/
+│   ├── entities/Employer.ts
+│   └── errors/EmployerErrors.ts
+├── application/
+│   ├── ports/IJobRepository.ts
+│   └── use-cases/ManageJobs.ts
+├── infrastructure/
+│   └── repositories/PrismaJobRepository.ts
+├── presentation/
+│   ├── employer.controller.ts
+│   ├── employer.routes.ts
+│   └── employer.validation.ts
+└── tests/
+    └── application/use-cases/ManageJobs.test.ts
 ```
 
 ## 10. Database Design (Core Tables)
@@ -375,13 +343,20 @@ Future integrations:
 
 ## 17. Project Status
 
-This repository currently contains the foundational architecture documentation. Implementation can proceed module-by-module, starting with:
+The backend is **fully implemented, tested, and complete**. All 11 initial milestones and core feature modules have been delivered using strictly typed Test-Driven Development (TDD) and Clean Architecture.
 
-1. Auth + RBAC
-2. Registrar Excel import
-3. Alumni profile and tracer surveys
-4. Job board and employer feedback
-5. Analytics dashboard
+Features completed:
+1. Auth + RBAC (JWT)
+2. Registrar module (data import and verification)
+3. Alumni profile management
+4. Job board, applications, and Employer profiles
+5. Department Head insights
+6. Tracer studies and Survey engine
+7. Advanced Analytics and statistics aggregation
+8. Document Request workflow
+9. In-app Notifications
+
+For a complete breakdown of the backend architecture, see `backend/architecture.md`.
 
 ---
 
