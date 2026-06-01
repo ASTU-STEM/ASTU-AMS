@@ -1,5 +1,6 @@
 import { IUserRepository } from '../ports/IUserRepository';
 import { PrismaClient, Role } from '@prisma/client';
+import { EmailService } from '../../../../core/services/EmailService';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ export interface CreateAdminUserRequest {
 }
 
 export class CreateAdminUser {
-  constructor(private userRepo: IUserRepository) {}
+  constructor(private userRepo: IUserRepository, private emailService: EmailService) {}
 
   async execute(req: CreateAdminUserRequest, adminId: string) {
     const existingUser = await this.userRepo.findByEmail(req.email);
@@ -20,11 +21,8 @@ export class CreateAdminUser {
 
     // Generate random 12-character temporary password
     const tempPassword = this.generateTempPassword();
-    const crypto = require('crypto');
-    const hashedPassword = crypto
-      .createHash('sha256')
-      .update(tempPassword)
-      .digest('hex');
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
     const user = await this.userRepo.create({
       email: req.email.toLowerCase(),
@@ -41,6 +39,8 @@ export class CreateAdminUser {
         ipAddress: 'admin-panel',
       },
     });
+
+    await this.emailService.sendTemporaryPassword(req.email, tempPassword, req.role);
 
     return {
       userId: user.id,

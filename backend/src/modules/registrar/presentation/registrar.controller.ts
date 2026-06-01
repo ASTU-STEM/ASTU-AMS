@@ -154,4 +154,29 @@ export class RegistrarController {
       next(err);
     }
   }
+
+  static async fetchCurrentAndPreviousGraduates(req: Request, res: Response, next: NextFunction) {
+    try {
+      const currentYear = new Date().getFullYear();
+      const previousYear = currentYear - 1;
+      const fetchService = new FetchGraduatesByAPI();
+
+      const currentGraduates = await fetchService.fetchByYear(currentYear);
+      const previousGraduates = await fetchService.fetchByYear(previousYear);
+
+      const currentSync = await fetchService.syncGraduatesToAlumniProfiles(currentGraduates);
+      const previousSync = await fetchService.syncGraduatesToAlumniProfiles(previousGraduates);
+
+      return sendSuccess(res, `Fetched and synced graduates for ${currentYear} and ${previousYear}.`, {
+        years: [previousYear, currentYear],
+        totalFetched: currentGraduates.length + previousGraduates.length,
+        syncResults: {
+          [previousYear]: previousSync,
+          [currentYear]: currentSync,
+        },
+      });
+    } catch (err: any) {
+      next(err);
+    }
+  }
 }

@@ -20,6 +20,7 @@ export const registerEmployerSchema = z.object({
   website: z.string().url('Invalid website URL').optional().or(z.literal('')),
   location: z.string().min(2, 'Location is required'),
   hrContact: z.string().min(5, 'HR contact details are required'),
+  tin: z.string().min(5, 'TIN is required for employer verification'),
 });
 
 // Alumni Registration Schemas

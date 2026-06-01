@@ -136,6 +136,7 @@ model EmployerProfile {
   website     String?
   location    String
   hrContact   String
+  tin         String?            @unique
   logoUrl     String?
   isVerified  Boolean            @default(false)
   jobs        Job[]

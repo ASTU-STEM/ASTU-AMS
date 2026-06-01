@@ -1,5 +1,6 @@
 import { IUserRepository } from '../ports/IUserRepository';
 import { PrismaClient } from '@prisma/client';
+import { EmailService } from '../../../../core/services/EmailService';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export interface RegisterAlumniRequest {
 }
 
 export class RegisterAlumni {
-  constructor(private userRepo: IUserRepository) {}
+  constructor(private userRepo: IUserRepository, private emailService: EmailService) {}
 
   async execute(req: RegisterAlumniRequest) {
     const profile = await prisma.alumniProfile.findUnique({
@@ -41,11 +42,8 @@ export class RegisterAlumni {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    const crypto = require('crypto');
-    const pendingPasswordHash = crypto
-      .createHash('sha256')
-      .update(req.password)
-      .digest('hex');
+    const bcrypt = require('bcryptjs');
+    const pendingPasswordHash = await bcrypt.hash(req.password, 10);
 
     await prisma.alumniProfile.update({
       where: { id: profile.id },
@@ -58,6 +56,8 @@ export class RegisterAlumni {
         status: 'INACTIVE',
       },
     });
+
+    await this.emailService.sendVerificationCode(profile.email, verificationCode, req.studentId);
 
     return {
       studentId: req.studentId,

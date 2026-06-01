@@ -50,6 +50,31 @@ export class DiditService {
     }
     return { valid: true, name: fullName };
   }
+
+  async verifyCompanyTin(tin: string, companyName: string): Promise<{ valid: boolean; companyName?: string; details?: any }> {
+    try {
+      const response = await this.client.post('/company/tin/verify', {
+        tin,
+        companyName,
+      });
+
+      if (response.status !== 200 || !response.data) {
+        return { valid: false, details: response.data };
+      }
+
+      return {
+        valid: Boolean(response.data?.valid),
+        companyName: response.data?.companyName || response.data?.name || companyName,
+        details: response.data,
+      };
+    } catch (err: any) {
+      console.error('Didit company TIN verification error:', err.message);
+      return {
+        valid: false,
+        details: err.response?.data || err.message,
+      };
+    }
+  }
 }
 
 export const diditService = new DiditService();

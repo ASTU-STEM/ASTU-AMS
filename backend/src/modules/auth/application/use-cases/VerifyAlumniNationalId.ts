@@ -44,11 +44,8 @@ export class VerifyAlumniNationalId {
 
     let passwordHash: string | undefined;
     if (req.password) {
-      const crypto = require('crypto');
-      passwordHash = crypto
-        .createHash('sha256')
-        .update(req.password)
-        .digest('hex');
+      const bcrypt = require('bcryptjs');
+      passwordHash = await bcrypt.hash(req.password, 10);
     } else {
       passwordHash = profile.pendingPasswordHash || undefined;
     }
