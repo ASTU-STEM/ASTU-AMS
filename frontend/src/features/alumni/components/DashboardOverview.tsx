@@ -105,8 +105,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner */}
-      <section className="relative rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1d9e75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+      {/* Welcome Banner with animated gradient */}
+      <style>{`
+        @keyframes dash-gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .dash-glow {
+          animation: dash-gradient 8s ease infinite;
+          background-size: 200% 200%;
+        }
+      `}</style>
+      <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1d9e75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6 dash-glow">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-5 left-[10%] w-2 h-2 rounded-full bg-white/20 animate-float" />
+          <div className="absolute top-20 right-[30%] w-1.5 h-1.5 rounded-full bg-[#FFD700]/30 animate-float" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-10 left-[40%] w-2.5 h-2.5 rounded-full bg-emerald-300/20 animate-float" style={{ animationDelay: '4s' }} />
+        </div>
         <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="max-w-2xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni command center</p>

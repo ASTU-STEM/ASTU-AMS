@@ -310,6 +310,38 @@ useEffect(() => {
 
    return (
     <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      <style>{`
+        @keyframes float-particle {
+          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+          25% { transform: translateY(-15px) translateX(8px); opacity: 0.6; }
+          50% { transform: translateY(-8px) translateX(-4px); opacity: 0.3; }
+          75% { transform: translateY(-22px) translateX(12px); opacity: 0.5; }
+        }
+        @keyframes gradient-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes glow-soft {
+          0%, 100% { box-shadow: 0 0 8px rgba(0,51,102,0.08); }
+          50% { box-shadow: 0 0 20px rgba(0,51,102,0.15); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .sidebar-particle {
+          animation: float-particle 6s ease-in-out infinite;
+        }
+        .sidebar-particle:nth-child(2) { animation-delay: 2s; animation-duration: 8s; }
+        .sidebar-particle:nth-child(3) { animation-delay: 4s; animation-duration: 7s; }
+        .nav-btn {
+          transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-btn:hover {
+          transform: translateX(3px);
+        }
+      `}</style>
       <Toaster position="top-right" reverseOrder={false} />
 
       {mobileSidebarOpen && (
@@ -321,92 +353,213 @@ useEffect(() => {
         />
       )}
 
-      {/* Sidebar Navigation - Fixed width, collapsible */}
-      <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col shadow-2xl md:translate-x-0 bg-[#003366] transition-all duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-        <div className={`p-6 mt-6 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
-          <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-3'}`}>
-            <img
-              alt="ASTU Official Logo"
-              className="h-10 w-10 object-contain drop-shadow-lg rounded-lg"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-            />
+        {/* Enhanced Sidebar with Animated Gradient and Feature Badges */}
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-gradient-to-b from-[#001a33] via-[#002a55] to-[#003366] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+          {/* Animated overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite]" />
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-emerald-400/30 sidebar-particle" />
+            <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#FFD700]/25 sidebar-particle" />
+            <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-blue-400/20 sidebar-particle" />
+          </div>
+
+          {/* Sidebar Logo with Enhanced Status */}
+          <div className="relative z-10 p-5 border-b border-white/10">
+            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+              <div className="relative group/logo">
+                <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15 shadow-lg transition-all duration-300 group-hover/logo:border-emerald-400/50 group-hover/logo:shadow-emerald-400/20">
+                  <img
+                    alt="ASTU Official Logo"
+                    className="h-8 w-8 object-contain rounded-md"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                  />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#001a33] shadow-lg animate-pulse" />
+                {!sidebarCollapsed && (
+                  <div className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[7px] font-extrabold rounded border border-emerald-500/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">
+                    Live
+                  </div>
+                )}
+              </div>
+              {!sidebarCollapsed && (
+                <div>
+                  <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Registrar</h1>
+                  <p className="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Management Hub</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation Links with Enhanced Features */}
+          <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin">
             {!sidebarCollapsed && (
-              <div>
-                <h1 className="text-lg font-bold text-white">ASTU Registrar</h1>
-                <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management Hub</p>
+              <div className="flex items-center justify-between px-3 mb-2">
+                <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Main Menu</p>
+                <span className="text-[8px] text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-400/5 rounded border border-emerald-400/10">
+                  {8} items
+                </span>
               </div>
             )}
-          </div>
-        </div>
-
-        <nav className="mt-8 flex-grow overflow-y-auto">
-          <div className="space-y-1">
-            {[
-              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'records', label: 'Alumni Records', icon: 'people', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'verification', label: 'Registration Verifications', icon: 'verified_user', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'documents', label: 'Document Queue', icon: 'description', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'reporting', label: 'Reports & Export', icon: 'analytics', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-              { id: 'messages', label: 'Internal Messaging', icon: 'forum', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                title={sidebarCollapsed ? item.label : undefined}
-                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'gap-4 px-6'} py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
-                  ? item.activeColor + ' font-bold shadow-md'
-                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+            <div className="space-y-0.5">
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & key metrics' },
+                { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Verification, clearance, certificates & migration' },
+                { id: 'records', label: 'Alumni Records', icon: 'people', badge: totalGraduatesCount > 0 ? totalGraduatesCount.toLocaleString() : null, tooltip: `${graduates.length} active records` },
+                { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', badge: null, tooltip: 'Excel/CSV import & batch processing' },
+                { id: 'verification', label: 'Verifications', icon: 'verified_user', badge: pendingVerificationsCount > 0 ? pendingVerificationsCount : null, tooltip: `${pendingVerificationsCount} pending approvals` },
+                { id: 'documents', label: 'Document Queue', icon: 'description', badge: documentRequestsCount > 0 ? documentRequestsCount : null, tooltip: `${documentRequestsCount} documents awaiting action` },
+                { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', badge: null, tooltip: 'Survey response tracking & analytics' },
+                { id: 'reporting', label: 'Reports & Export', icon: 'analytics', badge: null, tooltip: 'Accreditation reports & data export' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  title={sidebarCollapsed ? item.label : item.tooltip}
+                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
+                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm ring-1 ring-white/10'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                   }`}
-              >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-              </button>
-            ))}
-          </div>
-        </nav>
+                >
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
+                    <span className="material-symbols-outlined">{item.icon}</span>
+                    {item.badge && sidebarCollapsed && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
+                        {item.badge > 99 ? '99+' : item.badge}
+                      </span>
+                    )}
+                  </span>
+                  {!sidebarCollapsed && (
+                    <>
+                      <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
+                      {item.badge && (
+                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg ${String(item.id) === 'verification' || String(item.id) === 'documents' ? 'bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/30' : 'bg-white/10 text-white/70'}`}>
+                          {item.badge > 99 ? '99+' : item.badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+                  {/* Hover tooltip for collapsed state */}
+                  {sidebarCollapsed && (
+                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                      {item.label}
+                      {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
 
-        <div className={`p-6 border-t border-white/10 mt-auto ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
-          {!sidebarCollapsed && (
-            <button
-              onClick={() => setActiveTab('reporting')}
-              className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
-            >
-              <span className="material-symbols-outlined text-md">help</span>
-              <span className="text-sm font-medium">Help Center</span>
-            </button>
-          )}
-          {!sidebarCollapsed && (
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
-            >
-              <span className="material-symbols-outlined text-md">logout</span>
-              <span className="text-sm font-medium">Logout</span>
-            </button>
-          )}
-          {sidebarCollapsed && (
-            <>
-              <button
-                onClick={() => setActiveTab('reporting')}
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:text-white transition-colors mb-2"
-                title="Help Center"
-              >
-                <span className="material-symbols-outlined text-md">help</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 hover:text-red-400 transition-colors"
-                title="Logout"
-              >
-                <span className="material-symbols-outlined text-md">logout</span>
-              </button>
-            </>
-          )}
-        </div>
-      </aside>
+            {!sidebarCollapsed && (
+              <div className="flex items-center justify-between px-3 mt-5 mb-2">
+                <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Communication</p>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+            )}
+            <div className="space-y-0.5">
+              {[
+                { id: 'messages', label: 'Internal Messaging', icon: 'forum', badge: notifications.filter(n => n.unread).length || null, tooltip: `${notifications.filter(n => n.unread).length} unread messages` }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  title={sidebarCollapsed ? item.label : item.tooltip}
+                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
+                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm ring-1 ring-white/10'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
+                    <span className="material-symbols-outlined">{item.icon}</span>
+                    {item.badge && sidebarCollapsed && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                  </span>
+                  {!sidebarCollapsed && (
+                    <>
+                      <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
+                      {item.badge && (
+                        <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500/20 text-rose-300 text-[9px] font-extrabold ring-1 ring-rose-500/30 shadow-lg">
+                          {item.badge > 9 ? '9+' : item.badge}
+                        </span>
+                      )}
+                      {!item.badge && activeTab === item.id && (
+                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      )}
+                    </>
+                  )}
+                  {sidebarCollapsed && (
+                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                      {item.label}
+                      {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge} unread)</span>}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Quick system status indicator for collapsed mode */}
+            {sidebarCollapsed && (
+              <div className="mt-4 px-3">
+                <div className="flex justify-center">
+                  <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" title="System Online" />
+                </div>
+              </div>
+            )}
+          </nav>
+
+          {/* Sidebar Footer with Enhanced Actions */}
+          <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
+            {!sidebarCollapsed && (
+              <>
+                <button
+                  onClick={() => setActiveTab('reporting')}
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3"
+                >
+                  <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
+                  <span className="text-sm font-medium">Help Center</span>
+                  <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-left group gap-3"
+                >
+                  <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
+                  <span className="text-sm font-medium">Logout</span>
+                  <span className="ml-auto text-[8px] text-white/10 font-medium">Alt+L</span>
+                </button>
+              </>
+            )}
+            {sidebarCollapsed && (
+              <>
+                <button
+                  onClick={() => setActiveTab('reporting')}
+                  className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative"
+                  title="Help Center"
+                >
+                  <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                    Help Center
+                  </div>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group relative"
+                  title="Logout"
+                >
+                  <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                    Logout
+                  </div>
+                </button>
+              </>
+            )}
+          </div>
+        </aside>
 
 {/* Main Content Area */}
        <main className={`flex min-h-screen flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
@@ -547,7 +700,7 @@ useEffect(() => {
                   className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
                   style={{ borderColor: 'var(--border-color)' }}
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#003580] to-[#004d99] text-xs font-semibold text-white shadow-sm">
                     AA
                   </div>
                   <div className="hidden text-left sm:block">
@@ -561,25 +714,112 @@ useEffect(() => {
           </header>
 
           {/* Dynamic tabs routing */}
-          <div className="flex-grow">
+          <div className="flex-grow bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
               <section className="space-y-6 p-4 md:p-6">
-                <div className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white md:p-6">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Registrar management</p>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">Manage verification, clearance, certificates, and migration</h2>
-                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
-                    Digital transcript verification, graduate clearance, certificate verification, student-to-alumni automation, graduation batches, and academic history checks.
-                  </p>
+                {/* Management Hub Hero */}
+                <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-astu-navy via-[#002a55] to-emerald-800 p-6 md:p-8 text-white shadow-lg">
+                  <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/10 rounded-full translate-y-1/3 -translate-x-1/4" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300 mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Registrar Management Hub
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Manage verification, clearance, certificates, and migration</h2>
+                    <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">
+                      Digital transcript verification, graduate clearance, certificate verification, student-to-alumni automation, graduation batches, and academic history checks.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <button onClick={() => setActiveTab('verification')} className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl text-xs font-bold hover:bg-white/25 transition-all">
+                        <span className="material-symbols-outlined text-sm">verified_user</span>
+                        Verification Center
+                      </button>
+                      <button onClick={() => setActiveTab('documents')} className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl text-xs font-bold hover:bg-white/25 transition-all">
+                        <span className="material-symbols-outlined text-sm">description</span>
+                        Document Queue
+                      </button>
+                      <button onClick={() => setActiveTab('records')} className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl text-xs font-bold hover:bg-white/25 transition-all">
+                        <span className="material-symbols-outlined text-sm">people</span>
+                        Alumni Records
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-astu-navy">verified_user</span>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Pending Verification</p>
+                    </div>
+                    <p className="text-2xl font-extrabold text-amber-600 mt-2">{pendingVerificationsCount}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-astu-navy">description</span>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Document Queue</p>
+                    </div>
+                    <p className="text-2xl font-extrabold text-astu-navy mt-2">{documentRequestsCount}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-astu-navy">people</span>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Graduate Records</p>
+                    </div>
+                    <p className="text-2xl font-extrabold text-emerald-600 mt-2">{totalGraduatesCount.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-astu-navy">analytics</span>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Verification Rate</p>
+                    </div>
+                    <p className="text-2xl font-extrabold text-astu-navy mt-2">{verificationRate}%</p>
+                  </div>
+                </div>
+
+                {/* Management Action Cards */}
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {registrarManagementActions.map((action) => (
-                    <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
-                      <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 p-2 text-[#003580]">{action.icon}</span>
-                      <h3 className="mt-4 text-sm font-semibold text-gray-900">{action.title}</h3>
+                    <button key={action.title} onClick={() => setActiveTab(action.tab)}
+                      className="group rounded-2xl border border-gray-200/60 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:border-astu-navy/30 hover:shadow-md hover:-translate-y-0.5">
+                      <span className="material-symbols-outlined rounded-xl bg-astu-navy/10 p-2.5 text-astu-navy group-hover:scale-110 transition-transform duration-300 text-xl">{action.icon}</span>
+                      <h3 className="mt-4 text-sm font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{action.title}</h3>
                       <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
-                      <span className="mt-4 inline-flex rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
+                      <span className="mt-4 inline-flex rounded-xl bg-gradient-to-r from-astu-navy to-[#004d99] px-3 py-2 text-xs font-bold text-white shadow-sm group-hover:shadow-md transition-all">
+                        Manage / Create
+                      </span>
                     </button>
                   ))}
+                </div>
+
+                {/* Quick Process Cards */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div onClick={() => setActiveTab('verification')} className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-amber-600">gavel</span>
+                      <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Verification</p>
+                    </div>
+                    <p className="text-lg font-extrabold text-amber-900 mt-2">{pendingVerificationsCount} pending</p>
+                    <p className="text-xs text-amber-700 mt-1">Awaiting graduation confirmation</p>
+                  </div>
+                  <div onClick={() => setActiveTab('documents')} className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-blue-600">description</span>
+                      <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Documents</p>
+                    </div>
+                    <p className="text-lg font-extrabold text-blue-900 mt-2">{documentRequestsCount} in queue</p>
+                    <p className="text-xs text-blue-700 mt-1">Transcript & certificate requests</p>
+                  </div>
+                  <div onClick={() => setActiveTab('data_integration')} className="bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-emerald-600">cloud_upload</span>
+                      <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Batch Import</p>
+                    </div>
+                    <p className="text-lg font-extrabold text-emerald-900 mt-2">Ready for upload</p>
+                    <p className="text-xs text-emerald-700 mt-1">Import graduate rosters from SIS</p>
+                  </div>
                 </div>
               </section>
             )}
@@ -833,7 +1073,18 @@ useEffect(() => {
             )}
 
             {activeTab === 'surveys' && (
-              <SurveyManagement />
+              <div className="p-4 md:p-6">
+                <div className="rounded-3xl bg-gradient-to-br from-astu-navy via-[#002a55] to-emerald-800 p-6 md:p-8 text-white shadow-lg mb-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/10 rounded-full translate-y-1/3 -translate-x-1/4" />
+                  <div className="relative z-10">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300">Tracer Studies</span>
+                    <h2 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight">Tracer Surveys</h2>
+                    <p className="mt-2 max-w-2xl text-sm text-white/80">Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month response rates and export accreditation-ready data.</p>
+                  </div>
+                </div>
+                <SurveyManagement />
+              </div>
             )}
 
             {activeTab === 'reporting' && (

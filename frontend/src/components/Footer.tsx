@@ -1,14 +1,14 @@
 import React from "react";
-import { Facebook, Twitter, Youtube, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Linkedin, Send, Mail, Phone, MapPin, Globe } from "lucide-react";
 
 const footerSections = [
   {
     title: "Portal Services",
     links: [
-      { label: "Alumni", href: "/alumni/dashboard" },
-      { label: "Employer", href: "/employer/dashboard" },
-      { label: "Registrar", href: "/registrar/dashboard" },
-      { label: "Department", href: "/department/dashboard" },
+      { label: "Alumni", href: "/info/alumni-portal" },
+      { label: "Employer", href: "/info/employer-portal" },
+      { label: "Registrar", href: "/info/registrar-portal" },
+      { label: "Department", href: "/info/department-portal" },
     ],
   },
   {
@@ -35,6 +35,7 @@ const footerSections = [
       { label: "Contact Us", id: "contact", scroll: true },
       { label: "Photo Gallery", id: "gallery", scroll: true },
       { label: "Community Feed", id: "community", scroll: true },
+      { label: "Join Alumni", href: "/register" },
     ],
   },
 ];
@@ -64,16 +65,20 @@ export default function Footer() {
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-astu-red" />
-                <span>Adama, Oromia, Ethiopia</span>
+                <MapPin className="h-4 w-4 text-astu-green" />
+                <span>Adama Science and Technology University, Adama, Ethiopia</span>
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-astu-red" />
+                <Globe className="h-4 w-4 text-astu-green" />
+                <span>P.O. Box: 1888 Adama, Ethiopia</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-astu-green" />
                 <span>+251-221-110000</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-astu-red" />
-                <span>alumni.office@astu.edu.et</span>
+                <Mail className="h-4 w-4 text-astu-green" />
+                <span>irccd@astu.edu.et</span>
               </div>
             </div>
           </div>
@@ -97,25 +102,22 @@ export default function Footer() {
         </div>
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700 py-6 md:flex-row">
           <p className="text-sm text-slate-400">
-            © 2026 Adama Science and Technology University. All rights reserved.
+            &copy; 2026 Adama Science and Technology University. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white">
+            <a href="https://web.facebook.com/adamaastu/" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Facebook">
               <Facebook className="h-5 w-5" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white">
-              <Twitter className="h-5 w-5" />
+            <a href="https://t.me/Adama_STU_Almuni" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Telegram">
+              <Send className="h-5 w-5" />
             </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white">
-              <Youtube className="h-5 w-5" />
-            </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white">
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="LinkedIn">
               <Linkedin className="h-5 w-5" />
             </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white">
-              <Instagram className="h-5 w-5" />
-            </a>
           </div>
+        </div>
+        <div className="border-t border-slate-800 py-3 text-center text-[11px] text-slate-500">
+          Designed by <a href="https://www.astu.edu.et" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">ASTU-BADA</a>
         </div>
       </div>
     </footer>

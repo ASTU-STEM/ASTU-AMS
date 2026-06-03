@@ -15,19 +15,18 @@ type ChatApiMessage = {
   content: string;
 };
 
-// ─── ASTU Color Palette ───────────────────────────────────────────────────────
-// Navy:  #003087  Green: #006B3C  Gold: #C8962A  Red: #C0392B
-
 const COLORS = {
   navy: "#003087",
   navyLight: "#0A3E9E",
+  navyDark: "#002060",
   green: "#006B3C",
   greenLight: "#008B4C",
   gold: "#C8962A",
+  goldLight: "#E8B84A",
   red: "#C0392B",
+  redLight: "#E74C3C",
 };
 
-// ─── Quick Reply Buttons ──────────────────────────────────────────────────────
 const QUICK_REPLIES = [
   { label: "Update Profile",      icon: "👤", q: "How do I update my profile?" },
   { label: "Find Jobs",           icon: "💼", q: "How do I find job opportunities?" },
@@ -39,7 +38,6 @@ const QUICK_REPLIES = [
   { label: "Contact Support",     icon: "🎧", q: "How do I contact alumni support?" },
 ];
 
-// ─── Fallback responses (used when API is unavailable) ────────────────────────
 const FALLBACK_RESPONSES: Record<string, string> = {
   "update my profile":
     "Go to your Dashboard → Profile tab to update your education, work experience, and skills. A complete profile increases your job match rate by up to 40%!",
@@ -67,7 +65,6 @@ function getFallback(input: string) {
   return "I can help with profile updates, job searches, tracer surveys, transcripts, mentorship, alumni networking, and career events. Try one of the quick action buttons below!";
 }
 
-// ─── Chat API call ────────────────────────────────────────────────────────────
 async function askAssistant(userMessage: string, history: ChatMessage[]) {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
   const messages: ChatApiMessage[] = [
@@ -91,12 +88,10 @@ async function askAssistant(userMessage: string, history: ChatMessage[]) {
     : getFallback(userMessage);
 }
 
-// ─── Timestamp helper ─────────────────────────────────────────────────────────
 function nowTime() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-// ─── Typing indicator ─────────────────────────────────────────────────────────
 function TypingDots() {
   return (
     <div style={{ display: "flex", gap: 4, alignItems: "center", padding: "4px 2px" }}>
@@ -104,10 +99,11 @@ function TypingDots() {
         <span
           key={i}
           style={{
-            width: 7, height: 7, borderRadius: "50%",
+            width: 8, height: 8, borderRadius: "50%",
             background: [COLORS.navy, COLORS.green, COLORS.gold][i],
             display: "inline-block",
             animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+            boxShadow: `0 0 6px ${[COLORS.navy, COLORS.green, COLORS.gold][i]}60`,
           }}
         />
       ))}
@@ -115,52 +111,62 @@ function TypingDots() {
   );
 }
 
-// ─── Single message bubble ────────────────────────────────────────────────────
 function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.sender === "user";
   return (
     <div style={{
-      display: "flex", gap: 8, alignItems: "flex-end",
+      display: "flex", gap: 10, alignItems: "flex-end",
       flexDirection: isUser ? "row-reverse" : "row",
-      animation: "fadeSlideIn 0.25s ease",
+      animation: "fadeSlideIn 0.3s ease",
     }}>
-      {/* Avatar */}
       <div style={{
-        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-        background: isUser ? COLORS.green : COLORS.navy,
+        width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
+        background: isUser
+          ? `linear-gradient(135deg, ${COLORS.green}, ${COLORS.greenLight})`
+          : `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 14, color: "#fff", fontWeight: 600,
-        border: `2px solid ${isUser ? COLORS.greenLight : COLORS.navyLight}`,
+        fontSize: 15, color: "#fff", fontWeight: 700,
+        boxShadow: `0 2px 8px ${isUser ? COLORS.green : COLORS.navy}40`,
       }}>
         {isUser ? "You" : "🤖"}
       </div>
 
-      {/* Bubble */}
       <div style={{
-        maxWidth: "72%",
-        background: isUser ? COLORS.navy : "#fff",
+        maxWidth: "75%",
+        background: isUser
+          ? `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`
+          : "#fff",
         color: isUser ? "#fff" : "#1a1a2e",
-        borderRadius: 14,
-        borderBottomLeftRadius: isUser ? 14 : 3,
-        borderBottomRightRadius: isUser ? 3 : 14,
-        padding: "10px 14px",
+        borderRadius: 16,
+        borderBottomLeftRadius: isUser ? 16 : 4,
+        borderBottomRightRadius: isUser ? 4 : 16,
+        padding: "12px 16px",
         border: isUser ? "none" : "1px solid #e2e8f4",
-        boxShadow: isUser ? "0 2px 8px rgba(0,48,135,0.18)" : "0 1px 4px rgba(0,0,0,0.06)",
+        boxShadow: isUser
+          ? `0 4px 12px ${COLORS.navy}30`
+          : "0 2px 8px rgba(0,0,0,0.06)",
       }}>
-        <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>{msg.text}</p>
+        <p style={{ fontSize: 14, lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap" }}>{msg.text}</p>
         <p style={{
-          fontSize: 10, marginTop: 5, marginBottom: 0,
-          color: isUser ? "rgba(255,255,255,0.55)" : "#9aa3b8", textAlign: isUser ? "right" : "left",
+          fontSize: 11, marginTop: 6, marginBottom: 0,
+          color: isUser ? "rgba(255,255,255,0.55)" : "#9aa3b8",
+          textAlign: isUser ? "right" : "left",
         }}>
           {msg.timestamp}
-          {msg.isAI && <span style={{ marginLeft: 4, opacity: 0.7 }}>· AI</span>}
+          {msg.isAI && (
+            <span style={{
+              marginLeft: 6, opacity: 0.7,
+              background: isUser ? "rgba(255,255,255,0.15)" : COLORS.gold + "20",
+              color: isUser ? "#fff" : COLORS.gold,
+              padding: "1px 6px", borderRadius: 8, fontSize: 9, fontWeight: 600,
+            }}>AI</span>
+          )}
         </p>
       </div>
     </div>
   );
 }
 
-// ─── Main ChatBot Component ───────────────────────────────────────────────────
 export default function ASTUCareerCopilot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -185,19 +191,25 @@ export default function ASTUCareerCopilot() {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  // Auto-scroll to bottom
+  useEffect(() => {
+    const handleOpenChatbot = () => {
+      setIsOpen(true);
+      setIsMinimized(false);
+    };
+    window.addEventListener("openChatbot", handleOpenChatbot);
+    return () => window.removeEventListener("openChatbot", handleOpenChatbot);
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Focus input when opened
   useEffect(() => {
     if (isOpen && !isMinimized) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen, isMinimized]);
 
-  // Reset unread when opened
   useEffect(() => {
     if (isOpen) setUnreadCount(0);
   }, [isOpen]);
@@ -223,7 +235,7 @@ export default function ASTUCareerCopilot() {
     setShowQuickReplies(false);
 
     try {
-      const history = messages.slice(-6); // Send last 6 messages for context
+      const history = messages.slice(-6);
       const responseText = await askAssistant(trimmed, history);
       const botMsg: ChatMessage = {
         id: Date.now() + 1,
@@ -235,7 +247,6 @@ export default function ASTUCareerCopilot() {
       setMessages((prev) => [...prev, botMsg]);
       addUnreadIfClosed();
     } catch {
-      // Graceful fallback
       const botMsg: ChatMessage = {
         id: Date.now() + 1,
         text: getFallback(trimmed),
@@ -264,163 +275,218 @@ export default function ASTUCareerCopilot() {
 
   return (
     <>
-      {/* ── CSS keyframes injected globally ── */}
       <style>{`
         @keyframes bounce {
           0%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-6px); }
+          40% { transform: translateY(-8px); }
         }
         @keyframes fadeSlideIn {
-          from { opacity: 0; transform: translateY(8px); }
+          from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes popIn {
-          from { transform: scale(0.85); opacity: 0; }
-          to   { transform: scale(1); opacity: 1; }
+          from { transform: scale(0.8) translateY(20px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(200,150,42,0.5); }
-          50%       { box-shadow: 0 0 0 8px rgba(200,150,42,0); }
+          50%       { box-shadow: 0 0 0 14px rgba(200,150,42,0); }
         }
-        .qr-btn:hover { background: ${COLORS.navy} !important; color: #fff !important; }
-        .action-btn:hover { opacity: 0.82; }
-        .send-btn:not(:disabled):hover { background: ${COLORS.green} !important; }
-        .chat-input:focus { outline: none; border-color: ${COLORS.navy} !important; box-shadow: 0 0 0 3px rgba(0,48,135,0.12); }
-        .chatbot-messages::-webkit-scrollbar { width: 4px; }
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes floatSlow {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        .qr-btn {
+          transition: all 0.2s ease;
+          border: 1.5px solid ${COLORS.navy};
+          background: linear-gradient(135deg, #eef3fa, #e8edf8);
+        }
+        .qr-btn:hover {
+          background: linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight}) !important;
+          color: #fff !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px ${COLORS.navy}40;
+        }
+        .action-btn:hover { opacity: 0.85; transform: scale(1.05); }
+        .send-btn:not(:disabled):hover {
+          background: linear-gradient(135deg, ${COLORS.green}, ${COLORS.gold}) !important;
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px ${COLORS.green}50;
+        }
+        .chat-input:focus {
+          outline: none;
+          border-color: ${COLORS.gold} !important;
+          box-shadow: 0 0 0 4px rgba(200,150,42,0.15) !important;
+        }
+        .chatbot-messages::-webkit-scrollbar { width: 5px; }
         .chatbot-messages::-webkit-scrollbar-track { background: transparent; }
-        .chatbot-messages::-webkit-scrollbar-thumb { background: rgba(0,48,135,0.2); border-radius: 4px; }
+        .chatbot-messages::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, ${COLORS.navy}40, ${COLORS.gold}40);
+          border-radius: 6px;
+        }
       `}</style>
 
-      {/* ── Floating Action Button ── */}
+      {/* Floating Action Button */}
       <button
         onClick={() => { setIsOpen(!isOpen); setIsMinimized(false); }}
         aria-label={isOpen ? "Close chat" : "Open ASTU Career Copilot"}
         style={{
           position: "fixed", bottom: 24, right: 24, zIndex: 9999,
-          width: 60, height: 60, borderRadius: "50%",
-          background: isOpen ? COLORS.red : COLORS.navy,
+          width: 64, height: 64, borderRadius: "50%",
+          background: isOpen
+            ? `linear-gradient(135deg, ${COLORS.red}, ${COLORS.redLight})`
+            : `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyDark})`,
           border: "none", cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 20px rgba(0,48,135,0.35)",
+          boxShadow: `0 6px 24px ${isOpen ? COLORS.red : COLORS.navy}50`,
           transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)",
           transform: "scale(1)",
           animation: !isOpen ? "pulse 2.5s infinite" : "none",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.12)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
       >
-        <span style={{ fontSize: 24, lineHeight: 1 }}>{isOpen ? "✕" : "💬"}</span>
+        <div style={{
+          position: "absolute", inset: -3, borderRadius: "50%",
+          background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight}, ${COLORS.green})`,
+          opacity: 0.3, animation: "floatSlow 3s ease-in-out infinite",
+        }} />
+        <span style={{ fontSize: 26, lineHeight: 1, position: "relative", zIndex: 1 }}>
+          {isOpen ? "✕" : "💬"}
+        </span>
         {!isOpen && unreadCount > 0 && (
           <span style={{
-            position: "absolute", top: 2, right: 2,
-            width: 18, height: 18, borderRadius: "50%",
-            background: COLORS.red, color: "#fff",
-            fontSize: 10, fontWeight: 700,
+            position: "absolute", top: 0, right: 0,
+            width: 22, height: 22, borderRadius: "50%",
+            background: COLORS.red,
+            color: "#fff",
+            fontSize: 11, fontWeight: 800,
             display: "flex", alignItems: "center", justifyContent: "center",
             border: "2px solid #fff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
           }}>
             {unreadCount}
           </span>
         )}
       </button>
 
-      {/* ── Chat Window ── */}
+      {/* Chat Window */}
       {isOpen && (
         <div
           style={{
             position: "fixed",
-            bottom: 96, right: 24, zIndex: 9998,
-            width: 390, maxWidth: "calc(100vw - 48px)",
-            height: isMinimized ? 64 : 560,
-            maxHeight: "calc(100vh - 120px)",
-            borderRadius: 20,
+            bottom: 100, right: 24, zIndex: 9998,
+            width: 400, maxWidth: "calc(100vw - 48px)",
+            height: isMinimized ? 68 : 580,
+            maxHeight: "calc(100vh - 130px)",
+            borderRadius: 24,
             background: "#fff",
-            border: "1px solid #dde3f0",
-            boxShadow: "0 8px 40px rgba(0,48,135,0.18), 0 2px 8px rgba(0,0,0,0.08)",
+            border: "1px solid rgba(200,150,42,0.15)",
+            boxShadow: `0 12px 60px ${COLORS.navy}25, 0 4px 16px rgba(0,0,0,0.08)`,
             display: "flex", flexDirection: "column",
             overflow: "hidden",
-            animation: "popIn 0.3s cubic-bezier(0.34,1.56,0.64,1)",
+            animation: "popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)",
             transition: "height 0.3s ease",
           }}
         >
-          {/* ── Header ── */}
+          {/* Header with animated gradient */}
           <div style={{
-            background: COLORS.navy,
-            padding: "12px 14px",
-            display: "flex", alignItems: "center", gap: 10,
+            background: `linear-gradient(-45deg, ${COLORS.navyDark}, ${COLORS.navy}, ${COLORS.navyLight}, ${COLORS.navyDark})`,
+            backgroundSize: "300% 300%",
+            animation: "gradientShift 6s ease infinite",
+            padding: "14px 16px",
+            display: "flex", alignItems: "center", gap: 12,
             flexShrink: 0, position: "relative", overflow: "hidden",
           }}>
-            {/* Decorative circles */}
-            <div style={{ position:"absolute", top:-20, right:-20, width:90, height:90, borderRadius:"50%", background:"rgba(255,255,255,0.05)" }} />
-            <div style={{ position:"absolute", bottom:-28, right:30, width:70, height:70, borderRadius:"50%", background:"rgba(200,150,42,0.10)" }} />
+            <div style={{ position:"absolute", top:-24, right:-24, width:110, height:110, borderRadius:"50%", background:"rgba(255,255,255,0.04)" }} />
+            <div style={{ position:"absolute", bottom:-32, right:40, width:80, height:80, borderRadius:"50%", background:"rgba(200,150,42,0.08)" }} />
+            <div style={{ position:"absolute", top:10, left:"40%", width:40, height:40, borderRadius:"50%", background:"rgba(0,107,60,0.06)" }} />
 
             {/* Bot avatar */}
             <div style={{
-              width: 42, height: 42, borderRadius: "50%",
-              background: "rgba(255,255,255,0.12)",
-              border: "1.5px solid rgba(255,255,255,0.28)",
+              width: 44, height: 44, borderRadius: "50%",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
+              border: "2px solid rgba(255,255,255,0.25)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 20, flexShrink: 0,
+              fontSize: 22, flexShrink: 0,
+              boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
             }}>🤖</div>
 
-            {/* Title */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-                <span style={{ color:"#fff", fontSize:14, fontWeight:600 }}>ASTU Career Copilot</span>
-                <span style={{ width:8, height:8, borderRadius:"50%", background:"#4ade80", display:"inline-block" }} />
+            <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ color:"#fff", fontSize:15, fontWeight:700, letterSpacing:"0.3px" }}>
+                  ASTU Career Copilot
+                </span>
+                <span style={{
+                  width: 8, height: 8, borderRadius: "50%",
+                  background: "#4ade80",
+                  display: "inline-block",
+                  animation: "pulse 2s infinite",
+                }} />
               </div>
-              <div style={{ color:"rgba(255,255,255,0.6)", fontSize:11, marginTop:2 }}>
+              <div style={{ color:"rgba(255,255,255,0.6)", fontSize:12, marginTop:3 }}>
                 Adama Science &amp; Technology University
               </div>
             </div>
 
-            {/* Header action buttons */}
-            <div style={{ display:"flex", gap:5, zIndex:1 }}>
+            <div style={{ display:"flex", gap:6, zIndex:1 }}>
               {[
                 { icon:"🗑️", title:"Clear chat", action: clearChat },
                 { icon: isMinimized ? "⬆️" : "⬇️", title: isMinimized ? "Expand" : "Minimize", action: () => setIsMinimized(!isMinimized) },
               ].map(({ icon, title, action }) => (
                 <button key={title} onClick={action} title={title} className="action-btn"
                   style={{
-                    width:30, height:30, borderRadius:8,
+                    width: 32, height: 32, borderRadius: 10,
                     background:"rgba(255,255,255,0.10)",
-                    border:"0.5px solid rgba(255,255,255,0.20)",
+                    border:"0.5px solid rgba(255,255,255,0.18)",
                     color:"#fff", cursor:"pointer",
                     display:"flex", alignItems:"center", justifyContent:"center",
-                    fontSize:13, transition:"opacity 0.15s",
+                    fontSize:14, transition:"all 0.15s",
+                    backdropFilter: "blur(4px)",
                   }}
                 >{icon}</button>
               ))}
             </div>
           </div>
 
-          {/* ── ASTU tricolor stripe ── */}
+          {/* ASTU tricolor stripe with glow */}
           <div style={{
-            height: 3, flexShrink: 0,
-            background: `linear-gradient(90deg, ${COLORS.navy} 0%, ${COLORS.green} 50%, ${COLORS.gold} 100%)`,
+            height: 4, flexShrink: 0,
+            background: `linear-gradient(90deg, ${COLORS.navy} 0%, ${COLORS.green} 33%, ${COLORS.gold} 66%, ${COLORS.red} 100%)`,
+            boxShadow: `0 2px 8px ${COLORS.gold}30`,
           }} />
 
           {!isMinimized && (
             <>
-              {/* ── Messages area ── */}
+              {/* Messages area */}
               <div style={{
-                flex: 1, overflowY:"auto", padding:"14px",
-                display:"flex", flexDirection:"column", gap:10,
-                background:"#f4f7fc",
+                flex: 1, overflowY:"auto", padding:"16px",
+                display:"flex", flexDirection:"column", gap:12,
+                background: "linear-gradient(180deg, #f0f4fe 0%, #f4f7fc 50%, #f8faff 100%)",
               }} className="chatbot-messages">
                 {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
 
-                {/* Typing indicator */}
                 {isTyping && (
-                  <div style={{ display:"flex", gap:8, alignItems:"flex-end", animation:"fadeSlideIn 0.25s ease" }}>
+                  <div style={{
+                    display:"flex", gap:10, alignItems:"flex-end",
+                    animation:"fadeSlideIn 0.3s ease",
+                  }}>
                     <div style={{
-                      width:32, height:32, borderRadius:"50%", flexShrink:0,
-                      background: COLORS.navy, fontSize:14, color:"#fff",
+                      width:34, height:34, borderRadius:"50%", flexShrink:0,
+                      background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
+                      fontSize:15, color:"#fff",
                       display:"flex", alignItems:"center", justifyContent:"center",
+                      boxShadow: `0 2px 8px ${COLORS.navy}40`,
                     }}>🤖</div>
                     <div style={{
-                      background:"#fff", borderRadius:14, borderBottomLeftRadius:3,
-                      padding:"8px 14px", border:"1px solid #e2e8f4",
+                      background:"#fff", borderRadius:16, borderBottomLeftRadius:4,
+                      padding:"10px 16px", border:"1px solid #e2e8f4",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                     }}>
                       <TypingDots />
                     </div>
@@ -429,14 +495,18 @@ export default function ASTUCareerCopilot() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* ── Quick Replies ── */}
+              {/* Quick Replies */}
               {showQuickReplies && (
                 <div style={{
-                  padding:"8px 12px", background:"#fff",
+                  padding:"10px 14px", background:"#fff",
                   borderTop:"1px solid #edf0f8",
-                  display:"flex", flexWrap:"wrap", gap:5,
+                  display:"flex", flexWrap:"wrap", gap:6,
                 }}>
-                  <div style={{ width:"100%", fontSize:11, color:"#8a94b0", marginBottom:3, fontWeight:500 }}>
+                  <div style={{
+                    width:"100%", fontSize:11, color:"#8a94b0",
+                    marginBottom:4, fontWeight:600, letterSpacing:"0.5px",
+                    textTransform: "uppercase",
+                  }}>
                     Quick actions:
                   </div>
                   {QUICK_REPLIES.map((r) => (
@@ -446,12 +516,11 @@ export default function ASTUCareerCopilot() {
                       className="qr-btn"
                       disabled={isTyping}
                       style={{
-                        fontSize:11, padding:"5px 10px", borderRadius:20,
-                        border:`1px solid ${COLORS.navy}`,
-                        color: COLORS.navy, background:"#eef3fa",
-                        cursor:"pointer", transition:"all 0.15s",
-                        display:"flex", alignItems:"center", gap:4,
-                        whiteSpace:"nowrap", fontWeight:500,
+                        fontSize:12, padding:"6px 12px", borderRadius:22,
+                        color: COLORS.navy,
+                        cursor:"pointer",
+                        display:"flex", alignItems:"center", gap:5,
+                        whiteSpace:"nowrap", fontWeight:600,
                         opacity: isTyping ? 0.5 : 1,
                       }}
                     >
@@ -461,23 +530,27 @@ export default function ASTUCareerCopilot() {
                 </div>
               )}
 
-              {/* ── Input bar ── */}
+              {/* Input bar */}
               <div style={{
-                padding:"10px 12px", background:"#fff",
+                padding:"12px 14px", background:"#fff",
                 borderTop:"1px solid #edf0f8",
                 display:"flex", gap:8, alignItems:"center", flexShrink:0,
               }}>
-                {/* Show quick replies toggle */}
                 {!showQuickReplies && (
                   <button
                     onClick={() => setShowQuickReplies(true)}
                     title="Show quick actions"
                     style={{
-                      width:34, height:34, borderRadius:10, border:`1px solid ${COLORS.navy}`,
-                      background:"#eef3fa", color:COLORS.navy, cursor:"pointer",
+                      width:36, height:36, borderRadius:12,
+                      background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`,
+                      border:"none",
+                      color:"#fff", cursor:"pointer",
                       fontSize:16, display:"flex", alignItems:"center", justifyContent:"center",
                       flexShrink:0, transition:"all 0.15s",
+                      boxShadow: `0 2px 8px ${COLORS.gold}40`,
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                   >⚡</button>
                 )}
 
@@ -490,8 +563,8 @@ export default function ASTUCareerCopilot() {
                   disabled={isTyping}
                   className="chat-input"
                   style={{
-                    flex:1, fontSize:13, padding:"9px 12px",
-                    borderRadius:10, border:"1px solid #dde3f0",
+                    flex:1, fontSize:14, padding:"10px 14px",
+                    borderRadius:12, border:"1.5px solid #dde3f0",
                     background:"#f4f7fc", color:"#1a1a2e",
                     transition:"border-color 0.2s, box-shadow 0.2s",
                   }}
@@ -502,23 +575,32 @@ export default function ASTUCareerCopilot() {
                   disabled={!input.trim() || isTyping}
                   className="send-btn"
                   style={{
-                    width:36, height:36, borderRadius:10,
-                    background: COLORS.navy, border:"none",
+                    width:38, height:38, borderRadius:12,
+                    background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
+                    border:"none",
                     color:"#fff", cursor:"pointer",
                     display:"flex", alignItems:"center", justifyContent:"center",
-                    fontSize:16, flexShrink:0, transition:"background 0.2s",
+                    fontSize:18, flexShrink:0, transition:"all 0.2s",
                     opacity: (!input.trim() || isTyping) ? 0.4 : 1,
+                    boxShadow: `0 2px 8px ${COLORS.navy}30`,
                   }}
                 >➤</button>
               </div>
 
-              {/* ── Powered by footer ── */}
+              {/* Powered by footer */}
               <div style={{
-                textAlign:"center", padding:"5px 12px 8px",
-                fontSize:10, color:"#9aa3b8", background:"#fff",
+                textAlign:"center", padding:"6px 14px 10px",
+                background: `linear-gradient(180deg, #fff, #f8faff)`,
                 borderTop:"1px solid #f0f3fa", flexShrink:0,
               }}>
-                ASTU Alumni Portal Assistant
+                <span style={{
+                  fontSize:11, color:"#9aa3b8", fontWeight:500,
+                  background: `linear-gradient(90deg, ${COLORS.navy}, ${COLORS.green})`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}>
+                  ASTU Alumni Portal Assistant
+                </span>
               </div>
             </>
           )}

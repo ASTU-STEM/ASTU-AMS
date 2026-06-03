@@ -26,6 +26,8 @@ import {
   Star,
   Trophy,
   UserRoundCheck,
+  Phone,
+  Mail,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -53,7 +55,7 @@ const stakeholders = [
       "Mentor current students and connect with peers.",
     ],
     cta: "Access Alumni Portal",
-    route: "/alumni",
+    route: "/info/alumni-portal",
     tint: "text-astu-navy bg-astu-navy/10",
   },
   {
@@ -65,7 +67,7 @@ const stakeholders = [
       "Provide feedback to enhance curriculum relevance.",
     ],
     cta: "Partner With ASTU",
-    route: "/employer",
+    route: "/info/employer-portal",
     tint: "text-astu-red bg-astu-red/10",
   },
   {
@@ -77,7 +79,7 @@ const stakeholders = [
       "Generate accreditation-ready reports.",
     ],
     cta: "View Department Analytics",
-    route: "/department",
+    route: "/info/department-portal",
     tint: "text-astu-green bg-astu-green/10",
   },
   {
@@ -89,7 +91,7 @@ const stakeholders = [
       "Send tracer study reminders and audit notifications.",
     ],
     cta: "Open Registrar Portal",
-    route: "/registrar",
+    route: "/info/registrar-portal",
     tint: "text-[#B87900] bg-[#E8A020]/15",
   },
   {
@@ -145,16 +147,16 @@ const communityPosts = [
 
 const events = [
   {
-    title: "ASTU Annual Tech Career Expo",
-    date: "June 30, 2026",
+    title: "ASTU Alumni Carnival 2026",
+    date: "April 25-26, 2026",
     location: "Main Campus",
     image:
       "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
   },
   {
-    title: "Class of 2014 Decade Reunion",
-    date: "July 28, 2026",
-    location: "Networking Hall",
+    title: "DAAD Alumni Workshop",
+    date: "March 2026",
+    location: "ASTU Research Center",
     image:
       "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80",
   },
@@ -179,7 +181,14 @@ const featuredEmployers = [
   { name: "Huawei Ethiopia", area: "Network Engineering", openings: "11 certification paths" },
 ];
 
-const partners = ["Ethio Telecom", "INSA", "Ethiopian Airlines", "Safaricom", "Huawei", "Commercial Bank of Ethiopia"];
+const partners = [
+  { name: "Ethio Telecom", color: "#1A5276", initials: "ET" },
+  { name: "INSA", color: "#1B5E20", initials: "IN" },
+  { name: "Ethiopian Airlines", color: "#E31E24", initials: "EA" },
+  { name: "Safaricom", color: "#1B8304", initials: "SF" },
+  { name: "Huawei", color: "#CF0A2C", initials: "HW" },
+  { name: "Commercial Bank of Ethiopia", color: "#003366", initials: "CB" },
+];
 
 const campusLifeCards = [
   { title: "Events and Activities", campus: "Main Campus", description: "Career expos, alumni reunions, workshops, chapter meetings, and community programs.", image: gallery2, action: "View Events" },
@@ -188,11 +197,11 @@ const campusLifeCards = [
 ];
 
 const announcements = [
+  { title: "ASTU Alumni Association Inspires Graduating Class with Career Tips!", date: "March 7, 2025", type: "Alumni Announcement" },
+  { title: "ASTU hosts a five-day DAAD Alumni workshop", date: "March 7, 2025", type: "Employer Announcement" },
+  { title: "ASTU alumni serve as model United Nations secretariats!", date: "January 7, 2025", type: "Alumni Achievement" },
   { title: "Tracer Study 2026 response window is open", date: "May 31, 2026", type: "Alumni Announcement" },
   { title: "Call for employer partners: campus recruitment week", date: "May 28, 2026", type: "Employer Announcement" },
-  { title: "Graduate verification batch import schedule", date: "May 25, 2026", type: "Registrar Notice" },
-  { title: "Workshop registration: AI for Engineering Research", date: "May 21, 2026", type: "Public Announcement" },
-  { title: "Emergency contact and campus service directory updated", date: "May 18, 2026", type: "Internal Notice" },
 ];
 
 const campuses = [
@@ -216,12 +225,20 @@ const galleryImages = [
 
 const impactStats = [
   {
-    title: "Employment Rate",
-    value: "87%",
-    detail: "Tracked through tracer studies",
-    icon: LineChart,
-    action: "View Analytics",
-    target: "/department/dashboard",
+    title: "Alumni Members",
+    value: "1,238+",
+    detail: "Registered in the alumni network",
+    icon: Users,
+    action: "View Network",
+    target: "/register",
+  },
+  {
+    title: "Fields of Study",
+    value: "5",
+    detail: "Engineering, Science, Tech & more",
+    icon: BookOpen,
+    action: "Explore Programs",
+    target: "/info/overview",
   },
   {
     title: "Partner Employers",
@@ -229,15 +246,7 @@ const impactStats = [
     detail: "Hiring, internships, and feedback",
     icon: Building2,
     action: "Meet Partners",
-    target: "/employers",
-  },
-  {
-    title: "Digital Requests",
-    value: "6K+",
-    detail: "Transcript, certificate, and ID services",
-    icon: FileCheck2,
-    action: "Open Registrar",
-    target: "/registrar/dashboard",
+    target: "/info/featured-employers",
   },
 ];
 
@@ -247,19 +256,20 @@ export default function HomePage() {
   const [activeSection, setActiveSection] = useState("home");
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const slides = useMemo(() => [
     {
       image: gallery1, // real astu-building.jpg
       tagline: "Quality Assurance & Accreditation",
       title: "Connecting ASTU's Excellence to the Global Industry",
-      description: "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University.",
+      description: "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.",
     },
     {
       image: gallery2, // real campus-2.jpeg
       tagline: "Enterprise Networking & Placement",
       title: "Empowering ASTU Graduates in Modern Workspaces",
-      description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement.",
+      description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
     },
     {
       image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80", // third beautiful campus photo
@@ -284,16 +294,7 @@ export default function HomePage() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const getDashboardRoute = (role: string) => {
-    switch (role) {
-      case 'ALUMNI': return '/alumni/dashboard';
-      case 'EMPLOYER': return '/employer/dashboard';
-      case 'REGISTRAR': return '/registrar/dashboard';
-      case 'DEPARTMENT_HEAD': return '/department/dashboard';
-      case 'ADMIN': return '/admin/dashboard';
-      default: return '/';
-    }
-  };
+
 
   useEffect(() => {
     const checkUserSession = () => {
@@ -312,6 +313,16 @@ export default function HomePage() {
     checkUserSession();
     window.addEventListener("storage", checkUserSession);
     return () => window.removeEventListener("storage", checkUserSession);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
@@ -362,10 +373,25 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <Navbar activeSection={activeSection} />
+      <Navbar />
+
+      <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20">
+        <div
+          className="h-full bg-gradient-to-r from-astu-green via-astu-navy to-astu-red transition-all duration-150 ease-out"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
 
       <main id="home">
-        <section className="relative overflow-hidden h-[580px] md:h-[620px] lg:h-[680px] bg-slate-950">
+        <section className="relative overflow-hidden h-[500px] md:h-[580px] lg:h-[650px] bg-slate-950">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+            <div className="absolute top-20 left-[10%] w-2 h-2 rounded-full bg-astu-green/30 animate-float" style={{ animationDelay: "0s", animationDuration: "5s" }} />
+            <div className="absolute top-40 left-[30%] w-1.5 h-1.5 rounded-full bg-astu-red/30 animate-float" style={{ animationDelay: "1s", animationDuration: "7s" }} />
+            <div className="absolute top-60 left-[60%] w-2.5 h-2.5 rounded-full bg-astu-green/20 animate-float" style={{ animationDelay: "2s", animationDuration: "6s" }} />
+            <div className="absolute top-32 right-[20%] w-1.5 h-1.5 rounded-full bg-white/20 animate-float" style={{ animationDelay: "0.5s", animationDuration: "8s" }} />
+            <div className="absolute bottom-20 right-[40%] w-2 h-2 rounded-full bg-astu-red/20 animate-float" style={{ animationDelay: "1.5s", animationDuration: "5.5s" }} />
+            <div className="absolute bottom-40 left-[50%] w-1 h-1 rounded-full bg-white/15 animate-float" style={{ animationDelay: "3s", animationDuration: "9s" }} />
+          </div>
           {/* Background Slides */}
           <div className="absolute inset-0 w-full h-full">
             {slides.map((slide, idx) => (
@@ -387,13 +413,13 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Spacious clean text - exactly like the original large layout */}
-          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-20 md:px-8 md:py-28 lg:py-32">
-            <div className="max-w-3xl space-y-6">
-              <span className="inline-block rounded-full bg-astu-red px-4 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-md">
+          {/* Compact text - hero is immediately visible below navbar */}
+          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-16 md:px-6 lg:py-20">
+            <div className="max-w-2xl space-y-4">
+              <span className="inline-block rounded-full bg-astu-red px-3 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-lg animate-glow">
                 {slides[currentSlide].tagline}
               </span>
-              <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
+              <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
                 {slides[currentSlide].title.split(" to the ")[0]}
                 <br />
                 {slides[currentSlide].title.includes(" to the ") ? (
@@ -404,34 +430,22 @@ export default function HomePage() {
                   slides[currentSlide].title
                 )}
               </h1>
-              <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-100 md:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 md:text-base">
                 {slides[currentSlide].description}
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-2">
                 <button
-                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-6 py-3 text-sm font-semibold text-white hover:brightness-110 transition-all shadow"
-                  onClick={() => {
-                    if (user) {
-                      navigate(getDashboardRoute(user.role));
-                    } else {
-                      navigate("/login");
-                    }
-                  }}
+                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-lg hover:shadow-xl hover:shadow-astu-red/20 hover:scale-105 btn-magnetic"
+                  onClick={() => navigate("/info/alumni-portal")}
                 >
-                  {user ? "Go to My Dashboard" : "Alumni Portal Login"}
+                  Alumni Portal
                 </button>
                 <button
-                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20 transition-all"
-                  onClick={() => {
-                    if (user) {
-                      navigate(getDashboardRoute(user.role));
-                    } else {
-                      navigate("/login");
-                    }
-                  }}
+                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 btn-magnetic backdrop-blur-sm"
+                  onClick={() => navigate("/info/employer-portal")}
                 >
-                  {user ? "Employer Services" : "Employer Partnership"}
+                  Employer Partnership
                   <Handshake className="h-4 w-4" />
                 </button>
               </div>
@@ -441,14 +455,14 @@ export default function HomePage() {
           {/* Left/Right navigation arrow buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-105 transition-all duration-200 backdrop-blur-sm hidden sm:block shadow"
+            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
             aria-label="Previous slide"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-105 transition-all duration-200 backdrop-blur-sm hidden sm:block shadow"
+            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
             aria-label="Next slide"
           >
             <ArrowRight className="h-5 w-5" />
@@ -469,36 +483,36 @@ export default function HomePage() {
         </section>
 
         <section className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8">
-          <div className="grid overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl md:grid-cols-5">
-            <article className="flex flex-col items-center gap-3 border-b border-outline-variant p-8 text-center md:border-b-0 md:border-r">
+          <div className="grid overflow-hidden rounded-xl shadow-[0_8px_32px_rgba(0,51,102,0.12)] md:grid-cols-5 glass">
+            <article className="flex flex-col items-center gap-3 border-b border-white/20 p-8 text-center md:border-b-0 md:border-r card-hover">
               <div className="rounded-full bg-astu-navy/10 p-3 text-astu-navy">
                 <Users className="h-5 w-5" />
               </div>
-              <h2 className="text-2xl font-bold text-astu-navy">24,000+</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Global ASTU Alumni</p>
+              <h2 className="text-2xl font-bold text-astu-navy">1,238+</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Registered Alumni Members</p>
             </article>
-            <article className="flex flex-col items-center gap-3 border-b border-outline-variant p-8 text-center md:border-b-0 md:border-r">
+            <article className="flex flex-col items-center gap-3 border-b border-white/20 p-8 text-center md:border-b-0 md:border-r card-hover">
               <div className="rounded-full bg-astu-red/10 p-3 text-astu-red">
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">500+</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Partner Organizations</p>
             </article>
-            <article className="flex flex-col items-center gap-3 p-8 text-center">
+            <article className="flex flex-col items-center gap-3 p-8 text-center card-hover">
               <div className="rounded-full bg-astu-green/10 p-3 text-astu-green">
                 <LineChart className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">87%</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Employment Rate</p>
             </article>
-            <article className="flex flex-col items-center gap-3 border-t border-outline-variant p-8 text-center md:border-l md:border-t-0">
+            <article className="flex flex-col items-center gap-3 border-t border-white/20 p-8 text-center md:border-l md:border-t-0 card-hover">
               <div className="rounded-full bg-[#E8A020]/15 p-3 text-[#B87900]">
                 <FileCheck2 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">6K+</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Digital Requests</p>
             </article>
-            <article className="flex flex-col items-center gap-3 border-t border-outline-variant p-8 text-center md:border-l md:border-t-0">
+            <article className="flex flex-col items-center gap-3 border-t border-white/20 p-8 text-center md:border-l md:border-t-0 card-hover">
               <div className="rounded-full bg-violet-100 p-3 text-violet-700">
                 <MessageSquareText className="h-5 w-5" />
               </div>
@@ -511,7 +525,7 @@ export default function HomePage() {
         <section id="impact" className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
           <article className="reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Industry-Campus Bridge</p>
-            <h3 className="mt-2 text-3xl font-bold text-astu-navy">Nurturing Innovation in Modern Laboratories</h3>
+            <h3 className="mt-2 text-3xl font-bold animate-gradient-text">Nurturing Innovation in Modern Laboratories</h3>
             <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">
               ASTU combines rigorous engineering education with practical lab training. Through ASTU-AMS,
               graduate outcomes and employer feedback feed directly into curriculum updates.
@@ -527,8 +541,8 @@ export default function HomePage() {
               </div>
             </div>
             <button
-              className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
-              onClick={() => navigate("/department/dashboard")}
+              className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 hover:scale-105 transition-all btn-magnetic shadow-lg hover:shadow-xl"
+              onClick={() => navigate("/info/campus-life")}
             >
               Explore Campus Life
             </button>
@@ -544,6 +558,69 @@ export default function HomePage() {
           </article>
         </section>
 
+        <section id="stakeholders" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+          <div className="mb-8 text-center reveal">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Portal Access</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Choose Your Portal</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+              Role-based access for alumni, employers, departments, registrar, and administrators.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {stakeholders.slice(0, 3).map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <article key={item.title} className={`reveal reveal-delay-${idx + 1} rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                  <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${item.tint}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h4 className="text-lg font-bold text-astu-navy">{item.title}</h4>
+                  <ul className="mt-3 space-y-2">
+                    {item.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2 text-sm text-on-surface-variant">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-astu-green" />
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => navigate(item.route)}
+                    className="mt-5 w-full rounded-lg bg-astu-navy px-4 py-2.5 text-sm font-bold text-white hover:bg-astu-navy/90 transition-all hover:scale-105"
+                  >
+                    {item.cta}
+                  </button>
+                </article>
+              );
+            })}
+            {stakeholders.slice(3).map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <article key={item.title} className={`reveal reveal-delay-${idx + 4} rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                  <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${item.tint}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h4 className="text-lg font-bold text-astu-navy">{item.title}</h4>
+                  <ul className="mt-3 space-y-2">
+                    {item.points.map((point) => (
+                      <li key={point} className="flex items-start gap-2 text-sm text-on-surface-variant">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-astu-green" />
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => navigate(item.route)}
+                    className="mt-5 w-full rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-all hover:scale-105"
+                    style={{ backgroundColor: item.tint.includes('violet') ? '#7c3aed' : item.tint.includes('[#B87900]') ? '#B87900' : '#1e3a5f' }}
+                  >
+                    {item.cta}
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
         <section id="campus-life" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Explore Life At ASTU</p>
@@ -553,14 +630,14 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {campusLifeCards.map((card) => (
-              <article key={card.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
-                <img src={card.image} alt={card.title} className="h-52 w-full object-cover" onError={handleImageError} />
+            {campusLifeCards.map((card, idx) => (
+              <article key={card.title} className={`reveal reveal-delay-${idx + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                <img src={card.image} alt={card.title} className="h-52 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-astu-red">{card.campus}</p>
                   <h4 className="mt-2 text-lg font-semibold text-astu-navy">{card.title}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{card.description}</p>
-                  <button className="mt-4 rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low">
+                  <button className="mt-4 rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low btn-magnetic">
                     {card.action}
                   </button>
                 </div>
@@ -580,13 +657,13 @@ export default function HomePage() {
             </button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {campuses.map((campus) => (
-              <article key={campus.name} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
-                <img src={campus.image} alt={campus.name} className="h-44 w-full object-cover" onError={handleImageError} />
+            {campuses.map((campus, idx) => (
+              <article key={campus.name} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                <img src={campus.image} alt={campus.name} className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-4">
                   <h4 className="text-sm font-semibold text-astu-navy">{campus.name}</h4>
                   <p className="mt-2 text-xs leading-relaxed text-on-surface-variant">{campus.description}</p>
-                  <button className="mt-3 text-xs font-semibold text-astu-red hover:underline">Explore</button>
+                  <button className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic">Explore</button>
                 </div>
               </article>
             ))}
@@ -601,9 +678,9 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {galleryImages.map((item) => (
-              <article key={item.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
-                <img src={item.src} alt={item.title} className="h-48 w-full object-cover transition-all duration-500 hover:scale-105 sm:h-56 md:h-64" onError={handleImageError} />
+            {galleryImages.map((item, idx) => (
+              <article key={item.title} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                <img src={item.src} alt={item.title} className="h-48 w-full object-cover transition-all duration-700 hover:scale-110 sm:h-56 md:h-64" onError={handleImageError} />
                 <div className="p-3 md:p-4">
                   <h4 className="text-sm font-semibold text-astu-navy">{item.title}</h4>
                 </div>
@@ -627,12 +704,12 @@ export default function HomePage() {
               { title: "Career Expo Highlights", image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80" },
               { title: "Research & Innovation Forum", image: arcImage },
               { title: "Graduation Ceremony Replay", image: gc7 },
-            ].map((video) => (
-              <article key={video.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
+            ].map((video, idx) => (
+              <article key={video.title} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <div className="relative">
                   <img src={video.image} alt={video.title} className="h-52 w-full object-cover" onError={handleImageError} />
                   <button className="absolute inset-0 flex items-center justify-center bg-slate-950/20 text-white" aria-label={`Play ${video.title}`}>
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all hover:scale-110">
                       <PlayCircle className="h-8 w-8" />
                     </span>
                   </button>
@@ -645,91 +722,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="community" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Community Feed</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay connected with alumni stories, employer announcements, and career opportunities.
-            </p>
+
+
+        <section className="relative bg-gradient-to-r from-astu-navy to-primary-container py-14 md:py-20 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-astu-green/5 animate-float-slow" />
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-astu-red/5 animate-float" style={{ animationDelay: "2s" }} />
           </div>
-
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="space-y-4 sm:col-span-2 lg:col-span-2">
-              <div className="reveal rounded-xl border border-outline-variant bg-white p-4">
-                <div className="mb-3 flex items-center gap-2 rounded-md bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant">
-                  <BookOpen className="h-4 w-4" />
-                  Share an update with the ASTU community...
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">Media</button>
-                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">Event</button>
-                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">Article</button>
-                </div>
-              </div>
-
-              {communityPosts.map((post) => (
-                <article key={post.name} className="reveal rounded-xl border border-outline-variant bg-white p-5">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {post.image && (
-                        <img src={post.image} alt={post.name} className="h-10 w-10 rounded-full object-cover" />
-                      )}
-                      <div>
-                        <h4 className="font-semibold text-astu-navy">{post.name}</h4>
-                        <p className="text-xs text-on-surface-variant">{post.role}</p>
-                      </div>
-                    </div>
-                    <button className="rounded-md px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low">...</button>
-                  </div>
-                  <p className="text-sm text-on-surface-variant">{post.text}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">Like</button>
-                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">Comment</button>
-                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">Share</button>
-                    <button
-                      className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low"
-                      onClick={() => navigate("/alumni")}
-                    >
-                      View Profile
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <aside className="space-y-4 lg:col-span-1">
-              <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
-                <h4 className="text-sm font-semibold text-astu-navy">Recommended Connections</h4>
-                <div className="mt-3 space-y-3 text-sm">
-                  <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
-                    <span>Meta Finetec PLC</span>
-                  </button>
-                  <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
-                    <span>Summit Devs</span>
-                  </button>
-                </div>
-              </article>
-
-              <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
-                <h4 className="text-sm font-semibold text-astu-navy">ASTU Trending Topics</h4>
-                <ul className="mt-3 space-y-2 text-sm text-on-surface-variant">
-                  <li>#EngineeringCareers</li>
-                  <li>#TracerStudy2026</li>
-                  <li>#ASTUInnovation</li>
-                </ul>
-                <button
-                  className="mt-4 rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low"
-                  onClick={() => navigate("/department/dashboard")}
-                >
-                  View Insights
-                </button>
-              </article>
-            </aside>
-          </div>
-        </section>
-
-        <section className="bg-gradient-to-r from-astu-navy to-primary-container py-14 md:py-20">
-          <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-2 md:px-8">
+          <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-2 md:px-8 relative z-10">
             <article className="reveal text-white">
               <p className="inline-flex rounded-full bg-astu-red px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]">
                 Quality Assurance
@@ -753,9 +753,9 @@ export default function HomePage() {
               </div>
               <button
                 className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
-                onClick={() => navigate("/department/dashboard")}
+                onClick={() => navigate("/info/impact-numbers")}
               >
-                Participate in Impact Study
+                View Impact Numbers
               </button>
             </article>
 
@@ -791,8 +791,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            {events.map((event) => (
-              <article key={event.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
+            {events.map((event, idx) => (
+              <article key={event.title} className={`reveal reveal-delay-${(idx % 2) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <img
                   alt={event.title}
                   className="h-48 w-full object-cover sm:h-52"
@@ -834,8 +834,8 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {workshops.map((workshop) => (
-              <article key={workshop.title} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+            {workshops.map((workshop, idx) => (
+              <article key={workshop.title} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-astu-red">{workshop.focus}</p>
                 <h4 className="mt-2 text-lg font-semibold text-astu-navy">{workshop.title}</h4>
                 <div className="mt-4 space-y-2 text-sm text-on-surface-variant">
@@ -863,7 +863,7 @@ export default function HomePage() {
               { title: "ASTU Research Grant Winners", date: "May 25, 2026" },
               { title: "Annual Career Expo Announced", date: "May 20, 2026" }
             ].map((news, idx) => (
-              <article key={idx} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+              <article key={idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <p className="text-xs text-astu-red font-semibold uppercase tracking-wider">Announcement</p>
                 <h4 className="mt-1 text-base font-semibold text-astu-navy">{news.title}</h4>
                 <p className="mt-2 text-xs text-on-surface-variant">{news.date}</p>
@@ -877,7 +877,7 @@ export default function HomePage() {
 
         <section id="announcements" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-            <article className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+            <article className="reveal rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10">
@@ -937,7 +937,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {communityPosts.slice(0, 3).map((story, idx) => (
-              <article key={idx} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+              <article key={idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 {story.image && (
                   <img src={story.image} alt={story.name} className="h-40 w-full rounded-xl object-cover mb-3" onError={handleImageError} />
                 )}
@@ -952,45 +952,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="featured-network" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="grid gap-8 xl:grid-cols-2">
-            <div>
-              <div className="mb-6 reveal">
-                <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Featured Alumni</h3>
-                <p className="mt-2 text-sm text-on-surface-variant">Approved profiles highlighting leadership, research, startups, and career progress.</p>
-              </div>
-              <div className="space-y-4">
-                {featuredAlumni.map((alumnus) => (
-                  <article key={alumnus.name} className="reveal flex gap-4 rounded-xl border border-outline-variant bg-white p-4 shadow-sm">
-                    <img src={alumnus.image} alt={alumnus.name} className="h-20 w-20 rounded-xl object-cover" onError={handleImageError} />
-                    <div>
-                      <h4 className="font-semibold text-astu-navy">{alumnus.name}</h4>
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-red">{alumnus.role}</p>
-                      <p className="mt-2 text-sm text-on-surface-variant">{alumnus.impact}</p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
 
-            <div>
-              <div className="mb-6 reveal">
-                <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Featured Employers</h3>
-                <p className="mt-2 text-sm text-on-surface-variant">Verified partner companies supporting jobs, internships, job fairs, and campus recruitment.</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {featuredEmployers.map((employer) => (
-                  <article key={employer.name} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
-                    <Building2 className="h-7 w-7 text-astu-navy" />
-                    <h4 className="mt-4 font-semibold text-astu-navy">{employer.name}</h4>
-                    <p className="mt-1 text-xs text-on-surface-variant">{employer.area}</p>
-                    <p className="mt-3 rounded-md bg-astu-green/10 px-3 py-2 text-xs font-semibold text-astu-green">{employer.openings}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
 
         <section id="research" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
@@ -1006,10 +968,10 @@ export default function HomePage() {
                 { label: "Research Publications", value: "1,240", icon: BookOpen },
                 { label: "Startup Showcases", value: "38", icon: Star },
                 { label: "Industry Projects", value: "72", icon: Handshake },
-              ].map((item) => {
+              ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
-                  <article key={item.label} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+                  <article key={item.label} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                     <Icon className="h-6 w-6 text-astu-navy" />
                     <p className="mt-4 text-2xl font-bold text-astu-navy">{item.value}</p>
                     <p className="mt-1 text-xs uppercase tracking-[0.14em] text-on-surface-variant">{item.label}</p>
@@ -1020,17 +982,28 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
+        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden">
+          <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Partner Companies</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            {partners.map((partner) => (
-              <div key={partner} className="reveal flex min-h-24 items-center justify-center rounded-xl border border-outline-variant bg-white p-4 text-center text-sm font-semibold text-astu-navy shadow-sm">
-                {partner}
-              </div>
-            ))}
+          <div className="relative">
+            <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
+              {[...partners, ...partners].map((partner, idx) => (
+                <div
+                  key={`${partner.name}-${idx}`}
+                  className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
+                >
+                  <div
+                    className="flex h-14 w-14 items-center justify-center rounded-xl text-white text-sm font-bold shadow-md"
+                    style={{ background: `linear-gradient(135deg, ${partner.color}, ${partner.color}cc)` }}
+                  >
+                    {partner.initials}
+                  </div>
+                  <span className="text-xs font-semibold text-astu-navy text-center leading-tight">{partner.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -1040,8 +1013,8 @@ export default function HomePage() {
               { quote: "ASTU-AMS gave our department the evidence we needed for skill-gap review.", by: "Department Head" },
               { quote: "The candidate search and feedback tools improved our campus recruitment cycle.", by: "Employer Partner" },
               { quote: "I found mentorship, events, and job matches without leaving the alumni portal.", by: "ASTU Alumna" },
-            ].map((item) => (
-              <article key={item.by} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+            ].map((item, idx) => (
+              <article key={item.by} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <Quote className="h-6 w-6 text-astu-red" />
                 <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{item.quote}</p>
                 <p className="mt-4 text-sm font-semibold text-astu-navy">{item.by}</p>
@@ -1051,7 +1024,7 @@ export default function HomePage() {
         </section>
 
         <section id="career-opportunities" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="reveal rounded-xl border border-outline-variant bg-white p-6 shadow-sm">
+          <div className="reveal rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)]">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">Career Opportunities</p>
@@ -1066,65 +1039,31 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="faq" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">FAQ</h3>
-          </div>
-          <div className="mx-auto grid max-w-4xl gap-3">
-            {faqItems.map((item) => (
-              <details key={item.question} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
-                <summary className="flex cursor-pointer list-none items-center gap-3 text-sm font-semibold text-astu-navy">
-                  <HelpCircle className="h-5 w-5 text-astu-red" />
-                  {item.question}
-                </summary>
-                <p className="mt-3 pl-8 text-sm leading-relaxed text-on-surface-variant">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </section>
 
-        <section id="cta" className="bg-gradient-to-r from-astu-navy to-slate-900 py-16 text-center">
-          <div className="max-w-[1440px] mx-auto px-4 reveal">
+
+        <section id="cta" className="relative bg-gradient-to-r from-astu-navy via-primary-container to-slate-900 py-16 text-center overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-10 left-[20%] w-3 h-3 rounded-full bg-astu-green/20 animate-float" style={{ animationDelay: "0s" }} />
+            <div className="absolute bottom-10 right-[30%] w-2 h-2 rounded-full bg-astu-red/20 animate-float" style={{ animationDelay: "1.5s" }} />
+            <div className="absolute top-20 right-[15%] w-1.5 h-1.5 rounded-full bg-white/15 animate-float" style={{ animationDelay: "3s" }} />
+          </div>
+          <div className="max-w-[1440px] mx-auto px-4 reveal relative z-10">
             <h3 className="text-3xl font-bold text-white md:text-4xl">Ready to Join ASTU-AMS?</h3>
             <p className="mt-4 text-slate-200 max-w-2xl mx-auto">
               Connect with fellow alumni, discover career opportunities, and contribute to university excellence.
             </p>
 <div className="mt-8 flex flex-wrap justify-center gap-4">
-               <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md" onClick={() => navigate("/alumni")}>
+               <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md hover:scale-105 btn-magnetic" onClick={() => navigate("/alumni")}>
                  Alumni Portal
                </button>
-               <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all" onClick={() => navigate("/employer")}>
+               <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all hover:scale-105 btn-magnetic" onClick={() => navigate("/employer")}>
                  Employer Portal
                </button>
              </div>
           </div>
         </section>
 
-        <section id="contact" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Contact Us</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Have questions? Reach out to the ASTU Alumni Relations Office.
-            </p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
-            <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <MapPin className="h-8 w-8 mx-auto text-astu-navy mb-3" />
-              <h4 className="font-semibold text-astu-navy">Address</h4>
-              <p className="text-xs text-on-surface-variant mt-1">Adama, Oromia, Ethiopia</p>
-            </div>
-            <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">phone</span>
-              <h4 className="font-semibold text-astu-navy">Phone</h4>
-              <p className="text-xs text-on-surface-variant mt-1">+251-221-110000</p>
-            </div>
-            <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">mail</span>
-              <h4 className="font-semibold text-astu-navy">Email</h4>
-              <p className="text-xs text-on-surface-variant mt-1">alumni.office@astu.edu.et</p>
-            </div>
-          </div>
-        </section>
+
       </main>
 
       <footer className="border-t-2 border-astu-green/30 bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 py-16 text-slate-300">
@@ -1189,7 +1128,7 @@ export default function HomePage() {
                 <li>
                   <button
                     className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                    onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                    onClick={() => navigate("/info/overview")}
                   >
                     Career Placement Portal
                   </button>
@@ -1197,7 +1136,7 @@ export default function HomePage() {
                 <li>
                   <button
                     className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                    onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                    onClick={() => navigate("/info/overview")}
                   >
                     Tracer Survey Hub
                   </button>
@@ -1205,7 +1144,7 @@ export default function HomePage() {
                 <li>
                   <button
                     className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                    onClick={() => navigate(user ? getDashboardRoute(user.role) : "/login")}
+                    onClick={() => navigate("/info/mentorship")}
                   >
                     Mentorship Scheduling
                   </button>
@@ -1227,15 +1166,15 @@ export default function HomePage() {
               <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Official Contact Details</h6>
               <ul className="space-y-3 text-xs text-slate-400">
                 <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-sm mt-0.5 text-astu-green">location_on</span>
+                  <MapPin className="h-4 w-4 text-astu-green mt-0.5" />
                   <span>Adama, Oromia, Ethiopia</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm text-astu-green">phone</span>
+                  <Phone className="h-4 w-4 text-astu-green" />
                   <span>+251-221-110000</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm text-astu-green">mail</span>
+                  <Mail className="h-4 w-4 text-astu-green" />
                   <a href="mailto:alumni.office@astu.edu.et" className="hover:text-white transition-colors">alumni.office@astu.edu.et</a>
                 </li>
               </ul>
@@ -1263,7 +1202,7 @@ export default function HomePage() {
               className="flex items-center gap-1 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-slate-300 hover:text-white transition-all hover:scale-105"
             >
               Back to Top
-              <span className="material-symbols-outlined text-sm">arrow_upward</span>
+              <ArrowLeft className="h-4 w-4 rotate-180" />
             </button>
           </div>
 
