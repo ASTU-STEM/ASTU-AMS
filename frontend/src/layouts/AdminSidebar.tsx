@@ -13,6 +13,8 @@ import {
   LayoutDashboard,
   LogOut,
   Newspaper,
+  PanelLeftClose,
+  PanelLeftOpen,
   ScrollText,
   Settings,
   Shield,
@@ -26,6 +28,8 @@ interface AdminSidebarProps {
   onLogout: () => void;
   isOpen?: boolean;
   onNavigate?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 interface EnhancedNavItem extends AdminNavItem {
@@ -61,9 +65,8 @@ const sections = [
   { key: 'settings', label: 'Configuration' },
 ];
 
-export default function AdminSidebar({ onLogout, isOpen = false, onNavigate }: AdminSidebarProps) {
+export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse }: AdminSidebarProps) {
   const location = useLocation();
-  const isCollapsed = false;
 
   const getSectionItems = (sectionKey: string) =>
     navItems.filter(item => item.section === sectionKey);
@@ -71,39 +74,51 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate }: A
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-[#003366] text-slate-200 transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] text-slate-200 transition-all duration-300 lg:translate-x-0 ${collapsed ? 'w-20' : 'w-64'} ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        {/* Logo Header */}
+        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(232,160,32,0.03)_60%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-[#E8A020]/20 sidebar-particle" />
+          <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#E8A020]/15 sidebar-particle" />
+          <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-[#E8A020]/10 sidebar-particle" />
+        </div>
+
         <div className="relative px-4 pt-5">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3">
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+            <div className="group/logo relative shrink-0">
               <img
                 src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
                 alt="ASTU Logo"
-                className="h-10 w-10 shrink-0 rounded-xl bg-white/5 object-contain p-0.5 ring-1 ring-white/10"
+                className="h-10 w-10 rounded-xl bg-white/5 object-contain p-0.5 ring-1 ring-white/10 transition-all duration-300 group-hover/logo:ring-[#E8A020]/40"
               />
+              {!collapsed && (
+                <div className="absolute -top-1 -right-1 px-1 py-0.5 bg-[#E8A020]/20 text-[#E8A020] text-[7px] font-extrabold rounded border border-[#E8A020]/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Beta</div>
+              )}
+            </div>
+            {!collapsed && (
               <div>
                 <div className="font-semibold tracking-[0.08em] text-[#E8A020] text-[20px] leading-none">ASTU</div>
                 <p className="mt-1 text-[11px] text-slate-300">Management System</p>
               </div>
-            </div>
+            )}
           </div>
-          <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-[#E8A020]/70 to-transparent" />
+          <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-[#E8A020]/50 to-transparent" />
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-5 scrollbar-thin">
+        <nav className="relative flex-1 overflow-y-auto px-2 py-5 scrollbar-thin">
           {sections.map(section => {
             const items = getSectionItems(section.key);
             if (items.length === 0) return null;
             return (
               <div key={section.key} className="mb-4">
-                <div className="flex items-center justify-between px-3 mb-1.5">
-                  <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">{section.label}</p>
-                  <span className="text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
-                    {items.length}
-                  </span>
-                </div>
+                {!collapsed && (
+                  <div className="flex items-center justify-between px-3 mb-1.5">
+                    <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">{section.label}</p>
+                    <span className="text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
+                      {items.length}
+                    </span>
+                  </div>
+                )}
                 <div className="space-y-0.5">
                   {items.map((item) => {
                     const Icon = item.icon;
@@ -116,16 +131,20 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate }: A
                         to={item.path}
                         end={item.exact}
                         onClick={onNavigate}
-                        title={item.tooltip || item.label}
-                        className={`group relative flex items-center gap-3 rounded-[10px] py-2.5 px-4 text-[13px] font-medium transition-all duration-200 ${
+                        title={collapsed ? item.tooltip || item.label : undefined}
+                        className={`group relative flex items-center rounded-[10px] text-[13px] font-medium transition-all duration-200 ${
+                          collapsed ? 'justify-center py-3 px-0 mx-1' : 'gap-3 py-2.5 px-4'
+                        } ${
                           isActive
                             ? 'bg-[rgba(232,160,32,0.12)] text-[#E8A020] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ring-1 ring-[#E8A020]/20'
                             : 'text-[#8FA3BF] hover:bg-white/5 hover:text-white'
                         }`}
                       >
-                        <Icon className="h-4.5 w-4.5 shrink-0" />
-                        <span className="flex-1 truncate">{item.label}</span>
-                        {item.badge && (
+                        <span className="shrink-0">
+                          <Icon className="h-4.5 w-4.5" />
+                        </span>
+                        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                        {item.badge && !collapsed && (
                           <span className={`flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg ${
                             isActive
                               ? 'bg-[#E8A020]/20 text-[#E8A020] ring-1 ring-[#E8A020]/30'
@@ -134,8 +153,19 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate }: A
                             {item.badge}
                           </span>
                         )}
-                        {isActive && !item.badge && (
+                        {item.badge && collapsed && (
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg ring-1 ring-white/20">
+                            {item.badge}
+                          </span>
+                        )}
+                        {isActive && !item.badge && !collapsed && (
                           <span className="w-1 h-1 rounded-full bg-[#E8A020] animate-pulse" />
+                        )}
+                        {collapsed && (
+                          <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                            {item.label}
+                            {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
+                          </div>
                         )}
                       </NavLink>
                     );
@@ -146,34 +176,52 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate }: A
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="border-t border-white/10 px-4 py-4">
-          <div className="flex items-center gap-3 rounded-[10px] bg-white/5 px-3 py-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30">
-              SA
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-white">System Administrator</p>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <AdminBadge variant="neutral" className="border-white/10 bg-white/10 text-slate-200 text-[10px]">
-                  Root Admin
-                </AdminBadge>
+        <div className="relative border-t border-white/10 px-4 py-4">
+          {!collapsed ? (
+            <>
+              <div className="flex items-center gap-3 rounded-[10px] bg-white/5 px-3 py-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30 shrink-0">
+                  SA
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-white">System Administrator</p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <AdminBadge variant="neutral" className="border-white/10 bg-white/10 text-slate-200 text-[10px]">
+                      Root Admin
+                    </AdminBadge>
+                  </div>
+                </div>
               </div>
+
+              <button type="button" onClick={onLogout}
+                className="mt-3 flex w-full items-center gap-2 rounded-[8px] border border-white/10 px-4 py-3 text-sm font-medium text-slate-200 transition-all hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20">
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+                <span className="ml-auto text-[8px] text-white/10 font-medium">Alt+L</span>
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30" title="System Administrator">
+                SA
+              </div>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Online" />
+              <button type="button" onClick={onLogout}
+                className="flex items-center justify-center w-9 h-9 rounded-[8px] border border-white/10 text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all"
+                title="Logout">
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
-          </div>
+          )}
 
           <button
             type="button"
-            onClick={() => {
-              onNavigate?.();
-              onLogout();
-            }}
-            className="mt-3 flex w-full items-center gap-2 rounded-[8px] border border-white/10 px-4 py-3 text-sm font-medium text-slate-200 transition-all hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20"
+            onClick={onToggleCollapse}
+            className={`mt-2 flex items-center justify-center rounded-[8px] text-white/40 hover:text-white hover:bg-white/5 transition-all ${collapsed ? 'w-full py-1.5' : 'w-full py-2 gap-2'}`}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
-            <span className="ml-auto text-[8px] text-white/10 font-medium">Alt+L</span>
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[10px] font-medium">Collapse</span></>}
           </button>
         </div>
       </aside>

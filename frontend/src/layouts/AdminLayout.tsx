@@ -65,7 +65,16 @@ export default function AdminLayout() {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('adminSidebarCollapsed') === 'true');
   const location = useLocation();
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('adminSidebarCollapsed', String(next));
+      return next;
+    });
+  };
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -208,11 +217,13 @@ export default function AdminLayout() {
         onLogout={handleLogout}
         isOpen={mobileSidebarOpen}
         onNavigate={() => setMobileSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
       />
 
        <div
-        className="min-h-screen transition-[margin-left] duration-[250ms] ease-in-out lg:ml-64"
-      >
+         className={`min-h-screen transition-[margin-left] duration-[250ms] ease-in-out ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}
+       >
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
           style={{
