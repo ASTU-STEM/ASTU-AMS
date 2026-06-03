@@ -21,6 +21,7 @@ import {
   X,
   Check,
   UserRound,
+  XCircle,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
@@ -520,6 +521,8 @@ export default function UserManagement() {
     { label: 'Delete', icon: Trash2, onClick: () => {} },
   ];
 
+  const hasActiveFilters = query || selectedRole !== 'All Roles' || selectedStatus !== 'All' || selectedDepartment !== 'All Departments' || dateFrom || dateTo;
+  const activeFilterCount = [query, selectedRole !== 'All Roles' ? 1 : 0, selectedStatus !== 'All' ? 1 : 0, selectedDepartment !== 'All Departments' ? 1 : 0, dateFrom ? 1 : 0, dateTo ? 1 : 0].reduce((a, b) => a + (typeof b === 'string' ? (b ? 1 : 0) : b), 0);
   const statsLine = `${totalUsersLabel} — ${activeCount.toLocaleString()} Active · ${pendingCount} Pending · ${suspendedCount} Suspended · ${inactiveCount} Inactive`;
   const summaryCards = [
     {
@@ -562,6 +565,13 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-6">
+      <style>{`
+        @keyframes slide-in-right {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .slide-in-right { animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+      `}</style>
       <AdminPageHeader
         title="User Management"
         subtitle="Manage all system accounts, roles, and access permissions"
@@ -698,9 +708,18 @@ export default function UserManagement() {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <button type="button" onClick={resetFilters} className="text-sm font-medium text-[#003580] hover:underline">
-            Reset Filters
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {hasActiveFilters && (
+              <button type="button" onClick={resetFilters} className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                <XCircle className="h-3 w-3" />
+                Clear All {activeFilterCount > 1 ? `(${activeFilterCount})` : ''}
+              </button>
+            )}
+            {query && <span className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 px-2.5 py-1.5 text-xs font-semibold text-[#003580]">Search: "{query}" <button onClick={() => setQuery('')}><X className="h-3 w-3" /></button></span>}
+            {selectedRole !== 'All Roles' && <span className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 px-2.5 py-1.5 text-xs font-semibold text-[#003580]">{selectedRole} <button onClick={() => setSelectedRole('All Roles')}><X className="h-3 w-3" /></button></span>}
+            {selectedStatus !== 'All' && <span className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 px-2.5 py-1.5 text-xs font-semibold text-[#003580]">{selectedStatus} <button onClick={() => setSelectedStatus('All')}><X className="h-3 w-3" /></button></span>}
+            {selectedDepartment !== 'All Departments' && <span className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 px-2.5 py-1.5 text-xs font-semibold text-[#003580]">{selectedDepartment} <button onClick={() => setSelectedDepartment('All Departments')}><X className="h-3 w-3" /></button></span>}
+          </div>
           <div className="flex items-center gap-2 text-[11px] text-slate-500">
             <span>Registered between</span>
             <AdminBadge variant="neutral">Date Range</AdminBadge>
@@ -708,7 +727,10 @@ export default function UserManagement() {
         </div>
       </section>
 
-      <div className="text-sm font-medium text-slate-600">{statsLine}</div>
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium text-slate-600">{statsLine}</div>
+        <div className="text-xs text-slate-400">{filteredUsers.length} filtered of {users.length}</div>
+      </div>
 
       {selectedIds.length > 0 && (
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[#003580]/15 bg-[#003580]/5 p-4">
@@ -773,11 +795,29 @@ export default function UserManagement() {
             </thead>
 
             <tbody>
-              {paginatedUsers.map((user) => (
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-4 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+                        <Search className="h-6 w-6 text-slate-400" />
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold text-slate-700">No users found</p>
+                        <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">Try adjusting your search or filter criteria to find what you are looking for.</p>
+                      </div>
+                      <button type="button" onClick={resetFilters} className="mt-2 rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-110 transition-all">
+                        Clear All Filters
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedUsers.map((user) => (
                 <tr
                   key={user.id}
-                  className={`cursor-pointer border-b border-slate-100 transition-colors hover:bg-slate-50/80 ${
-                    activeUser?.id === user.id ? 'bg-[#003580]/5' : ''
+                  className={`cursor-pointer border-b border-slate-100 transition-all hover:bg-slate-50/80 ${
+                    activeUser?.id === user.id ? 'bg-[#003580]/5 shadow-inner' : ''
                   }`}
                   onClick={() => setActiveUser(user)}
                 >
@@ -866,7 +906,8 @@ export default function UserManagement() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -993,25 +1034,33 @@ export default function UserManagement() {
       </AdminModal>
 
       {activeUser && (
-        <aside className="admin-card fixed right-0 top-16 z-10 h-[calc(100vh-4rem)] w-[360px] overflow-y-auto border-l border-slate-200 p-5 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+        <aside className="admin-card fixed right-0 top-16 z-10 h-[calc(100vh-4rem)] w-[380px] overflow-y-auto border-l border-slate-200 p-5 shadow-[-8px_0_32px_rgba(0,0,0,0.06)] slide-in-right">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#003580]/10 text-sm font-semibold text-[#003580]">
-                {initials(activeUser.name)}
+              <div className="relative">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#003580] to-[#1D9E75] text-sm font-semibold text-white shadow-md">
+                  {initials(activeUser.name)}
+                </div>
+                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${activeUser.status === 'Active' ? 'bg-emerald-400' : activeUser.status === 'Suspended' ? 'bg-rose-400' : 'bg-slate-400'}`} />
               </div>
               <div>
                 <h3 className="text-base font-semibold text-slate-900">{activeUser.name}</h3>
                 <p className="text-xs text-slate-500">{activeUser.email}</p>
               </div>
             </div>
-            <button type="button" onClick={() => setActiveUser(null)} className="rounded-md p-2 text-slate-500 hover:bg-slate-100">
+            <button type="button" onClick={() => setActiveUser(null)} className="rounded-md p-2 text-slate-500 hover:bg-slate-100 transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="mt-5 space-y-4">
+          <div className="mt-2">
+            <AdminBadge variant={roleTone[activeUser.role]} className={roleColorClass[activeUser.role]}>
+              {activeUser.role}
+            </AdminBadge>
+          </div>
+
+          <div className="mt-6 space-y-4">
             <KeyValue label="Student ID" value={activeUser.studentId || 'N/A'} />
-            <KeyValue label="Role" value={activeUser.role} />
             <KeyValue label="Department" value={activeUser.department} />
             <KeyValue label="Batch / Year" value={activeUser.batch} />
             <KeyValue label="Status" value={activeUser.status} />
@@ -1021,21 +1070,28 @@ export default function UserManagement() {
           </div>
 
           <div className="mt-6 rounded-[10px] border border-slate-200 bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Notes</p>
-            <p className="mt-2 text-sm text-slate-600">{activeUser.adminNotes || 'No notes available.'}</p>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#003580]" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Admin Notes</p>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">{activeUser.adminNotes || 'No notes available for this user.'}</p>
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => openEditModal(activeUser)} className="rounded-[8px] bg-[#003580] px-3 py-2.5 text-sm font-semibold text-white">
+            <button type="button" onClick={() => { setActiveUser(null); openEditModal(activeUser); }} className="rounded-[8px] bg-[#003580] px-3 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-sm">
+              <PencilLine className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Edit User
             </button>
-            <button type="button" className="rounded-[8px] border border-[#E24B4A]/20 px-3 py-2.5 text-sm font-semibold text-[#E24B4A]">
+            <button type="button" className="rounded-[8px] border border-rose-200 bg-rose-50/50 px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all">
+              <UserRound className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Suspend
             </button>
-            <button type="button" className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600">
+            <button type="button" className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+              <KeyRound className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Reset Password
             </button>
-            <button type="button" className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600">
+            <button type="button" className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+              <Shield className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Change Role
             </button>
           </div>
