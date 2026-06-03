@@ -381,6 +381,33 @@ const EmployerDashboard = () => {
 
 return (
     <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      <style>{`
+        @keyframes gradient-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes float-particle {
+          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+          25% { transform: translateY(-15px) translateX(8px); opacity: 0.5; }
+          50% { transform: translateY(-8px) translateX(-4px); opacity: 0.2; }
+          75% { transform: translateY(-22px) translateX(12px); opacity: 0.4; }
+        }
+        .sidebar-particle {
+          animation: float-particle 6s ease-in-out infinite;
+        }
+        .sidebar-particle:nth-child(2) { animation-delay: 2s; animation-duration: 8s; }
+        .sidebar-particle:nth-child(3) { animation-delay: 4s; animation-duration: 7s; }
+        .nav-btn {
+          transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-btn:hover {
+          transform: translateX(3px);
+        }
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
+      `}</style>
       <Toaster position="top-right" reverseOrder={false} />
 
       {mobileSidebarOpen && (
@@ -392,20 +419,28 @@ return (
         />
       )}
 
-      {/* Sidebar Navigation */}
+      {/* Enhanced Sidebar Navigation */}
       <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-        {/* Sidebar Logo Section */}
-        <div className="p-5 border-b border-white/10">
+        {/* Animated overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite] pointer-events-none" />
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-emerald-400/30 sidebar-particle" />
+          <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#FFD700]/25 sidebar-particle" />
+          <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-blue-400/20 sidebar-particle" />
+        </div>
+
+        {/* Sidebar Logo with Enhanced Status */}
+        <div className="relative z-10 p-5 border-b border-white/10">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="relative">
-              <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-lg">
-                <img
-                  alt="ASTU Logo"
-                  className="h-8 w-8 object-contain rounded-md"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-                />
+            <div className="relative group/logo">
+              <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 shadow-lg transition-all duration-300 group-hover/logo:border-emerald-400/50 group-hover/logo:shadow-emerald-400/20">
+                <img alt="ASTU Logo" className="h-8 w-8 object-contain rounded-md"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#003366]"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#003366] shadow-lg animate-pulse" />
+              {!sidebarCollapsed && (
+                <div className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[7px] font-extrabold rounded border border-emerald-500/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Live</div>
+              )}
             </div>
             {!sidebarCollapsed && <div>
               <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Employer</h1>
@@ -414,99 +449,140 @@ return (
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-grow px-3 py-4 overflow-y-auto">
-          {!sidebarCollapsed && <p className="px-3 mb-2 text-[10px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Recruiting</p>}
+        {/* Navigation Links with Enhanced Features */}
+        <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin">
+          {!sidebarCollapsed && (
+            <div className="flex items-center justify-between px-3 mb-2">
+              <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Recruiting</p>
+              <span className="text-[8px] text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-400/5 rounded border border-emerald-400/10">5 items</span>
+            </div>
+          )}
           <div className="space-y-0.5">
             {[
-              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-              { id: 'management', label: 'Management Hub', icon: 'dashboard_customize' },
-              { id: 'post_job', label: 'Job Scaffolder', icon: 'work' },
-              { id: 'candidates', label: 'Applications', icon: 'description' },
-              { id: 'search_talent', label: 'Talent Search', icon: 'search' },
+              { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & recruitment metrics' },
+              { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Jobs, candidates, events & analytics' },
+              { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: activeJobsCount > 0 ? activeJobsCount : null, tooltip: `${activeJobsCount} active job postings` },
+              { id: 'candidates', label: 'Applications', icon: 'description', badge: pendingApplicationsCount > 0 ? pendingApplicationsCount : null, tooltip: `${pendingApplicationsCount} pending reviews` },
+              { id: 'search_talent', label: 'Talent Search', icon: 'search', badge: null, tooltip: 'Search alumni by skills & criteria' },
             ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                title={sidebarCollapsed ? item.label : undefined}
-                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${
-                  activeTab === item.id
-                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
-                }`}>
+              <button key={item.id} onClick={() => setActiveTab(item.id)}
+                title={sidebarCollapsed ? item.label : item.tooltip}
+                className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm ring-1 ring-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
                   <span className="material-symbols-outlined">{item.icon}</span>
+                  {item.badge && sidebarCollapsed && (
+                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
+                      {item.badge > 9 ? '9+' : item.badge}
+                    </span>
+                  )}
                 </span>
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                {activeTab === item.id && !sidebarCollapsed && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                {!sidebarCollapsed && (
+                  <>
+                    <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
+                    {item.badge && (
+                      <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg ${String(item.id) === 'candidates' ? 'bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/30' : 'bg-white/10 text-white/70'}`}>
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                    {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                  </>
+                )}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                    {item.label}
+                    {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
+                  </div>
                 )}
               </button>
             ))}
           </div>
 
-          {!sidebarCollapsed && <p className="px-3 mt-5 mb-2 text-[10px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Management</p>}
+          {!sidebarCollapsed && (
+            <div className="flex items-center justify-between px-3 mt-5 mb-2">
+              <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Management</p>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+          )}
           <div className="space-y-0.5">
             {[
-              { id: 'feedback', label: 'Feedbacks', icon: 'rate_review' },
-              { id: 'chat', label: 'Messages', badge: '2', icon: 'forum' },
-              { id: 'analytics', label: 'Analytics', icon: 'analytics' },
-              { id: 'profile', label: 'Company Profile', icon: 'business' },
+              { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbacks.length > 0 ? feedbacks.length : null, tooltip: `${feedbacks.length} feedback submissions` },
+              { id: 'chat', label: 'Messages', icon: 'forum', badge: messages.filter(m => m.unread).length > 0 ? messages.filter(m => m.unread).length : null, tooltip: `${messages.filter(m => m.unread).length} unread messages` },
+              { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
+              { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
             ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                title={sidebarCollapsed ? item.label : undefined}
-                className={`w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${
-                  activeTab === item.id
-                    ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                  activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'
-                }`}>
+              <button key={item.id} onClick={() => setActiveTab(item.id)}
+                title={sidebarCollapsed ? item.label : item.tooltip}
+                className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm ring-1 ring-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
                   <span className="material-symbols-outlined">{item.icon}</span>
+                  {item.badge && sidebarCollapsed && (
+                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
+                      {item.badge > 9 ? '9+' : item.badge}
+                    </span>
+                  )}
                 </span>
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                {item.badge && !sidebarCollapsed && (
-                  <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[10px] font-extrabold text-white shadow-md">
-                    {item.badge}
-                  </span>
+                {!sidebarCollapsed && (
+                  <>
+                    <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
+                    {item.badge && (
+                      <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500/20 text-rose-300 text-[9px] font-extrabold ring-1 ring-rose-500/30 shadow-lg">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                    {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                  </>
                 )}
-                {activeTab === item.id && !item.badge && !sidebarCollapsed && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                    {item.label}
+                    {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
+                  </div>
                 )}
               </button>
             ))}
           </div>
+
+          {sidebarCollapsed && (
+            <div className="mt-4 px-3">
+              <div className="flex justify-center">
+                <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" title="System Online" />
+              </div>
+            </div>
+          )}
         </nav>
 
-        {/* Sidebar Footer */}
-<div className="p-4 border-t border-white/10 space-y-1">
-          <button
-            onClick={() => { toast('Help center coming soon.'); }}
-            title={sidebarCollapsed ? 'Help Center' : undefined}
-            className={`w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
-          >
-            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70">
-              <span className="material-symbols-outlined w-4 h-4">help</span>
-            </span>
-            {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
-          </button>
-          <button
-            onClick={handleLogout}
-            title={sidebarCollapsed ? 'Logout' : undefined}
-            className={`w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}
-          >
-            <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20">
-              <span className="material-symbols-outlined w-4 h-4">logout</span>
-            </span>
-            {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
-          </button>
+        {/* Sidebar Footer with Enhanced Actions */}
+        <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
+          {!sidebarCollapsed && (
+            <>
+              <button onClick={() => { toast('Help center coming soon.'); }}
+                className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
+                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined w-4 h-4">help</span>
+                <span className="text-sm font-medium">Help Center</span>
+                <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
+              </button>
+              <button onClick={handleLogout}
+                className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-left group gap-3">
+                <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
+                <span className="text-sm font-medium">Logout</span>
+                <span className="ml-auto text-[8px] text-white/10 font-medium">Alt+L</span>
+              </button>
+            </>
+          )}
+          {sidebarCollapsed && (
+            <>
+              <button onClick={() => { toast('Help center coming soon.'); }}
+                className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
+                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
+                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
+              </button>
+              <button onClick={handleLogout}
+                className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group relative" title="Logout">
+                <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
+                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
+              </button>
+            </>
+          )}
         </div>
       </aside>
 

@@ -124,94 +124,139 @@ const DepartmentDashboard = () => {
                 />
             )}
 
-{/* Sidebar Navigation - Fixed width, collapsible */}
-            <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col shadow-2xl md:translate-x-0 bg-astu-navy transition-all duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-                <div className={`p-6 mt-6 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
-                    {!sidebarCollapsed && (
-                        <div className="flex items-center gap-3">
-                            <img
-                                alt="ASTU Logo"
-                                className="h-10 w-10 object-contain drop-shadow-lg rounded-lg"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-                            />
-                            <div>
-                                <h1 className="text-xl font-bold text-white">ASTU Department</h1>
-                                <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Management Portal</p>
-                            </div>
-                        </div>
-                    )}
-                    {sidebarCollapsed && (
-                        <img
-                            alt="ASTU Logo"
-                            className="h-10 w-10 object-contain drop-shadow-lg rounded-lg"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-                        />
-                    )}
+        {/* Enhanced Sidebar Navigation */}
+            <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col shadow-2xl md:translate-x-0 bg-gradient-to-b from-[#001a33] via-[#002a55] to-[#003366] transition-all duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+                {/* Animated Background Overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite] pointer-events-none" />
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-emerald-400/30 sidebar-particle" />
+                    <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#FFD700]/25 sidebar-particle" />
+                    <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-blue-400/20 sidebar-particle" />
                 </div>
 
-                <nav className="mt-8 flex-grow overflow-y-auto">
-                    <div className="space-y-1">
-                            {[
-                                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                                { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                                { id: 'employment-analytics', label: 'Employment Analytics', icon: 'trending_up', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'skill-gap', label: 'Skill Gap Reports', icon: 'school', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'employer-feedback', label: 'Employer Feedback', icon: 'rate_review', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'tracer-reports', label: 'Tracer Reports', icon: 'assignment', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'curriculum', label: 'Curriculum Insights', icon: 'menu_book', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'accreditation', label: 'Accreditation Reports', icon: 'verified', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' },
-                            { id: 'export', label: 'Export Reports', icon: 'download', activeColor: 'text-astu-green bg-white/10 border-l-4 border-astu-green' }
+                {/* Logo */}
+                <div className="relative z-10 p-5 border-b border-white/10">
+                    <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+                        <div className="relative group/logo">
+                            <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15 shadow-lg transition-all duration-300 group-hover/logo:border-emerald-400/50">
+                                <img alt="ASTU Logo" className="h-8 w-8 object-contain rounded-md"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" />
+                            </div>
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#001a33] shadow-lg animate-pulse" />
+                            {!sidebarCollapsed && (
+                                <div className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[7px] font-extrabold rounded border border-emerald-500/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Live</div>
+                            )}
+                        </div>
+                        {!sidebarCollapsed && (
+                            <div>
+                                <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Department</h1>
+                                <p className="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Management Portal</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Navigation Links */}
+                <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin">
+                    {!sidebarCollapsed && (
+                        <div className="flex items-center justify-between px-3 mb-2">
+                            <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Analytics</p>
+                            <span className="text-[8px] text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-400/5 rounded border border-emerald-400/10">5 items</span>
+                        </div>
+                    )}
+                    <div className="space-y-0.5">
+                        {[
+                            { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & key metrics' },
+                            { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Analytics, curriculum, KPIs & partnerships' },
+                            { id: 'employment-analytics', label: 'Employment Analytics', icon: 'trending_up', badge: null, tooltip: 'Graduate employment outcomes & trends' },
+                            { id: 'skill-gap', label: 'Skill Gap Reports', icon: 'school', badge: null, tooltip: 'Skill gap analysis from employer data' },
+                            { id: 'employer-feedback', label: 'Employer Feedback', icon: 'rate_review', badge: null, tooltip: 'Employer reviews & curriculum feedback' },
                         ].map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                title={sidebarCollapsed ? item.label : undefined}
-                                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'gap-4 px-6'} py-2.5 rounded-r-xl transition-all duration-300 text-left ${activeTab === item.id
-                                    ? item.activeColor + ' font-bold shadow-md'
-                                    : 'text-slate-300 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                <span className="material-symbols-outlined">{item.icon}</span>
-                                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                            <button key={item.id} onClick={() => setActiveTab(item.id)}
+                                title={sidebarCollapsed ? item.label : item.tooltip}
+                                className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm ring-1 ring-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
+                                    <span className="material-symbols-outlined">{item.icon}</span>
+                                </span>
+                                {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate">{item.label}</span>}
+                                {activeTab === item.id && !sidebarCollapsed && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                                {sidebarCollapsed && (
+                                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                        {item.label}
+                                    </div>
+                                )}
                             </button>
                         ))}
                     </div>
+
+                    {!sidebarCollapsed && (
+                        <div className="flex items-center justify-between px-3 mt-5 mb-2">
+                            <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Reports</p>
+                            <span className="text-[8px] text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-400/5 rounded border border-emerald-400/10">4 items</span>
+                        </div>
+                    )}
+                    <div className="space-y-0.5">
+                        {[
+                            { id: 'tracer-reports', label: 'Tracer Reports', icon: 'assignment', badge: null, tooltip: 'Tracer study reports & surveys' },
+                            { id: 'curriculum', label: 'Curriculum Insights', icon: 'menu_book', badge: null, tooltip: 'Curriculum review & analytics' },
+                            { id: 'accreditation', label: 'Accreditation Reports', icon: 'verified', badge: null, tooltip: 'Accreditation-ready reports' },
+                            { id: 'export', label: 'Export Reports', icon: 'download', badge: null, tooltip: 'Export data & reports' },
+                        ].map((item) => (
+                            <button key={item.id} onClick={() => setActiveTab(item.id)}
+                                title={sidebarCollapsed ? item.label : item.tooltip}
+                                className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm ring-1 ring-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
+                                    <span className="material-symbols-outlined">{item.icon}</span>
+                                </span>
+                                {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate">{item.label}</span>}
+                                {activeTab === item.id && !sidebarCollapsed && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                                {sidebarCollapsed && (
+                                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                        {item.label}
+                                    </div>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+
+                    {sidebarCollapsed && (
+                        <div className="mt-4 px-3">
+                            <div className="flex justify-center">
+                                <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" title="System Online" />
+                            </div>
+                        </div>
+                    )}
                 </nav>
 
-                <div className={`p-6 border-t border-white/10 mt-auto ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
+                {/* Footer */}
+                <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
                     {!sidebarCollapsed && (
-                        <button
-                            onClick={() => setActiveTab('dashboard')}
-                            className="w-full flex items-center gap-4 text-slate-300 hover:text-white mb-4 transition-colors text-left"
-                        >
-                            <span className="material-symbols-outlined text-md">help</span>
-                            <span className="text-sm font-medium">Help Center</span>
-                        </button>
-                    )}
-                    {!sidebarCollapsed && (
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-4 text-slate-300 hover:text-white transition-colors text-left"
-                        >
-                            <span className="material-symbols-outlined text-md">logout</span>
-                            <span className="text-sm font-medium">Logout</span>
-                        </button>
+                        <>
+                            <button onClick={() => setActiveTab('dashboard')}
+                                className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
+                                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
+                                <span className="text-sm font-medium">Help Center</span>
+                                <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
+                            </button>
+                            <button onClick={handleLogout}
+                                className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-left group gap-3">
+                                <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
+                                <span className="text-sm font-medium">Logout</span>
+                                <span className="ml-auto text-[8px] text-white/10 font-medium">Alt+L</span>
+                            </button>
+                        </>
                     )}
                     {sidebarCollapsed && (
                         <>
-                            <button
-                                onClick={() => setActiveTab('dashboard')}
-                                className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:text-white transition-colors mb-2"
-                                title="Help Center"
-                            >
-                                <span className="material-symbols-outlined text-md">help</span>
+                            <button onClick={() => setActiveTab('dashboard')}
+                                className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
+                                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
+                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">Help Center</div>
                             </button>
-                            <button
-                                onClick={handleLogout}
-                                className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 hover:text-red-400 transition-colors"
-                                title="Logout"
-                            >
-                                <span className="material-symbols-outlined text-md">logout</span>
+                            <button onClick={handleLogout}
+                                className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group relative" title="Logout">
+                                <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
+                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">Logout</div>
                             </button>
                         </>
                     )}
