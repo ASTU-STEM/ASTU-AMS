@@ -6,6 +6,7 @@ import AuthLayout from '../../../layouts/AuthLayout';
 import AuthInput from '../components/AuthInput';
 import AuthButton from '../components/AuthButton';
 import AuthFooterLink from '../components/AuthFooterLink';
+import authService from '../services/auth.service';
 import * as yup from 'yup';
 
 const alumniRegistrationSchema = yup.object().shape({
@@ -54,14 +55,21 @@ export default function AlumniRegistrationPage() {
   const handleSubmit = async (values: AlumniRegistrationFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Call alumni registration API
-      // const response = await authService.registerAlumni(values);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setIsSuccess(true);
-      toast.success('Registration submitted successfully!');
+      const response = await authService.signup({
+        fullName: values.fullName,
+        studentId: '',
+        email: values.email,
+        password: values.password,
+        confirmPassword: values.password,
+        phone: values.phone,
+      });
+
+      if (response.success) {
+        setIsSuccess(true);
+        toast.success('Registration submitted successfully!');
+      } else {
+        toast.error(response.message || 'Registration failed. Please try again.');
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.');
     } finally {

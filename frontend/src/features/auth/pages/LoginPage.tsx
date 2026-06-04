@@ -9,9 +9,27 @@ import AuthCheckbox from '../components/AuthCheckbox';
 import AuthFooterLink from '../components/AuthFooterLink';
 import { loginSchema, type LoginFormData } from '../schemas/auth.schema';
 import authService from '../services/auth.service';
+import { useAuth } from '../../../contexts/AuthContext';
+
+const QUICK_LOGIN_ROLES = [
+  { role: 'ALUMNI', label: 'Alumni', color: 'bg-astu-navy' },
+  { role: 'EMPLOYER', label: 'Employer', color: 'bg-astu-green' },
+  { role: 'REGISTRAR', label: 'Registrar', color: 'bg-amber-600' },
+  { role: 'DEPARTMENT_HEAD', label: 'Dept Head', color: 'bg-purple-600' },
+  { role: 'ADMIN', label: 'Admin', color: 'bg-red-600' },
+] as const;
+
+const roleRoutes: Record<string, string> = {
+  ALUMNI: '/alumni/dashboard',
+  EMPLOYER: '/employer/dashboard',
+  REGISTRAR: '/registrar/dashboard',
+  DEPARTMENT_HEAD: '/department/dashboard',
+  ADMIN: '/admin/dashboard',
+};
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -22,26 +40,14 @@ export default function LoginPage() {
   };
 
   const handleLoginSuccess = (role: string) => {
-    // Redirect based on role
-    switch (role) {
-      case 'ALUMNI':
-        navigate('/alumni/dashboard');
-        break;
-      case 'EMPLOYER':
-        navigate('/employer/dashboard');
-        break;
-      case 'REGISTRAR':
-        navigate('/registrar/dashboard');
-        break;
-      case 'DEPARTMENT_HEAD':
-        navigate('/department/dashboard');
-        break;
-      case 'ADMIN':
-        navigate('/admin/dashboard');
-        break;
-      default:
-        navigate('/');
-    }
+    const route = roleRoutes[role] || '/';
+    navigate(route);
+  };
+
+  const handleQuickLogin = (role: string) => {
+    login(role as any);
+    toast.success(`Logged in as ${role}`);
+    handleLoginSuccess(role);
   };
 
   const handleSubmit = async (values: LoginFormData) => {
@@ -56,6 +62,8 @@ export default function LoginPage() {
       if (response.success && response.data) {
         toast.success('Login successful!');
         handleLoginSuccess(response.data.user.role);
+      } else {
+        toast.error(response.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed. Please try again.');
@@ -77,6 +85,33 @@ export default function LoginPage() {
             Employers Portal
           </Link>.
         </p>
+      </div>
+
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-3">
+          Demo Quick Login
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {QUICK_LOGIN_ROLES.map(({ role, label, color }) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => handleQuickLogin(role)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold text-white hover:brightness-110 transition-all ${color}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-outline-variant" />
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-white px-2 text-on-surface-variant">or sign in with credentials</span>
+        </div>
       </div>
 
       <Formik

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { CareerEvent, JobMatch } from '../types/alumni.types';
+import { CareerEvent, JobMatch, SkillPathway } from '../types/alumni.types';
 import toast from 'react-hot-toast';
-import { CalendarDays, MapPin, Users, TrendingUp, Award, FileText, BarChart3, Target, CheckCircle2, AlertCircle, BookOpen, Briefcase, GraduationCap } from 'lucide-react';
+import { CalendarDays, MapPin, Users, TrendingUp, Award, FileText, BarChart3, Target, CheckCircle2, AlertCircle, BookOpen, Briefcase, GraduationCap, Rocket, Lightbulb, Code2, Cloud, Shield, Smartphone } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { getSkillPathways } from '../services/mockAlumniData';
 
 interface CareerTabProps {
   events: CareerEvent[];
@@ -11,6 +12,17 @@ interface CareerTabProps {
 
 export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+  const [selectedPathway, setSelectedPathway] = useState<number | null>(null);
+  const skillPathways = getSkillPathways();
+
+  const pathwayIcons: Record<string, React.ElementType> = {
+    'Full-Stack Web Development': Code2,
+    'AI & Machine Learning Engineering': Lightbulb,
+    'Cloud & DevOps Engineering': Cloud,
+    'Mobile App Development': Smartphone,
+    'Cybersecurity Fundamentals': Shield,
+  };
 
   const categories = ['All', 'Career Fair', 'Reunion', 'Workshop'];
 
@@ -254,6 +266,97 @@ export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent })
         </div>
 
       </div>
+
+      {/* Skill Pathways Section */}
+      <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 space-y-6">
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <Rocket className="h-5 w-5 text-astu-navy" />
+            Skill Development Pathways
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">Recommended learning tracks based on your profile and market demand</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {skillPathways.map((pathway) => {
+            const IconComponent = pathwayIcons[pathway.title] || Code2;
+            return (
+              <div
+                key={pathway.id}
+                onClick={() => setSelectedPathway(selectedPathway === pathway.id ? null : pathway.id)}
+                className={`rounded-2xl border-2 p-5 cursor-pointer transition-all duration-200 ${
+                  selectedPathway === pathway.id
+                    ? 'border-astu-navy bg-astu-navy/5 shadow-md'
+                    : 'border-gray-200 hover:border-astu-navy/30 bg-white hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="p-2.5 rounded-xl bg-astu-navy/10">
+                    <IconComponent className="h-6 w-6 text-astu-navy" />
+                  </div>
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                    pathway.level === 'beginner' ? 'bg-green-100 text-green-700' :
+                    pathway.level === 'intermediate' ? 'bg-blue-100 text-blue-700' :
+                    'bg-purple-100 text-purple-700'
+                  }`}>
+                    {pathway.level}
+                  </span>
+                </div>
+                <h4 className="font-bold text-gray-900 mb-1">{pathway.title}</h4>
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">{pathway.description}</p>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {pathway.skills.slice(0, 4).map((skill, i) => (
+                    <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-md">{skill}</span>
+                  ))}
+                  {pathway.skills.length > 4 && (
+                    <span className="px-2 py-0.5 bg-gray-100 text-gray-400 text-[10px] font-bold rounded-md">+{pathway.skills.length - 4}</span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <GraduationCap className="h-3 w-3" />
+                    {pathway.duration}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {pathway.popularity}% match
+                  </span>
+                </div>
+
+                {selectedPathway === pathway.id && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-gray-500 mb-2">All Skills</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {pathway.skills.map((skill, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-bold rounded-md">{skill}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-gray-500 mb-2">Target Roles</p>
+                      <div className="space-y-1">
+                        {pathway.jobs.map((job, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                            <span className="w-1.5 h-1.5 rounded-full bg-astu-green"></span>
+                            {job}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toast.success(`Enrolled in ${pathway.title} pathway!`); }}
+                      className="w-full py-2.5 bg-gradient-to-r from-astu-navy to-[#004d99] text-white rounded-xl text-xs font-bold hover:shadow-lg transition-all"
+                    >
+                      Enroll in Pathway
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 };

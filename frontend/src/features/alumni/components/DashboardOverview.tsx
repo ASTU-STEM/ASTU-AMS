@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone } from '../types/alumni.types';
+import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, DonationCampaign } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
+import { getForumPosts, getDonationCampaigns } from '../services/mockAlumniData';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -582,6 +583,92 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <p className="text-sm text-gray-600">{action.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Community Feed Section */}
+      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Alumni Community Feed</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Latest updates from your network</p>
+          </div>
+          <button onClick={() => onTabChange('messages')} className="text-xs font-bold text-astu-navy hover:underline">View All</button>
+        </div>
+        <div className="space-y-3">
+          {getForumPosts().slice(0, 3).map((post) => (
+            <div key={post.id} className="flex gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-astu-navy/20 transition-all">
+              <img src={post.authorAvatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-900">{post.author}</span>
+                  <span className="text-[9px] text-gray-400">{post.timestamp}</span>
+                </div>
+                <p className="text-[11px] text-gray-600 mt-1 leading-relaxed line-clamp-2">{post.content}</p>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <svg className="w-3 h-3" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                    {post.likes}
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    {post.comments}
+                  </span>
+                  <div className="flex gap-1">
+                    {post.tags.slice(0, 2).map((tag, i) => (
+                      <span key={i} className="px-1.5 py-0.5 bg-astu-navy/5 text-[8px] font-bold text-astu-navy rounded">#{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Donation Campaigns */}
+      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">Alumni Giving Campaigns</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Support ASTU development initiatives</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {getDonationCampaigns().slice(0, 3).map((campaign) => {
+            const progress = Math.round((campaign.raised / campaign.goal) * 100);
+            return (
+              <div key={campaign.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[9px] font-bold rounded-full uppercase">
+                    {campaign.category}
+                  </span>
+                  <span className="text-[10px] text-gray-400">{campaign.donorCount} donors</span>
+                </div>
+                <h4 className="text-sm font-bold text-gray-900 mb-1">{campaign.title}</h4>
+                <p className="text-[11px] text-gray-500 leading-relaxed mb-3 line-clamp-2">{campaign.description}</p>
+                <div className="mb-2">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="font-bold text-astu-navy">{campaign.raised.toLocaleString()} ETB</span>
+                    <span className="text-gray-400">of {campaign.goal.toLocaleString()} ETB</span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-astu-navy to-astu-green transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toast.success(`Thank you for donating to "${campaign.title}"!`)}
+                  className="w-full py-2 bg-gradient-to-r from-astu-navy to-[#004d99] text-white rounded-xl text-[11px] font-bold hover:shadow-lg transition-all"
+                >
+                  Donate Now
+                </button>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

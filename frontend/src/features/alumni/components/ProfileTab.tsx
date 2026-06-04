@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlumniProfile } from '../types/alumni.types';
+import { AlumniProfile, Certification, Project, Achievement } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 
 interface ProfileTabProps {
@@ -12,7 +12,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const [newSkill, setNewSkill] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [activeSection, setActiveSection] = useState('personal');
-  const profileScore = Math.min(100, 45 + formData.skills.length * 5 + (formData.resume ? 15 : 0) + (formData.linkedInUrl ? 10 : 0) + (formData.gitHubUrl ? 10 : 0));
+  const [newCertification, setNewCertification] = useState<Partial<Certification>>({});
+  const [newProject, setNewProject] = useState<Partial<Project>>({});
+  const [newTechnology, setNewTechnology] = useState('');
+  const [showCertForm, setShowCertForm] = useState(false);
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const profileScore = Math.min(100, 
+    30 + 
+    formData.skills.length * 3 + 
+    (formData.resume ? 10 : 0) + 
+    (formData.linkedInUrl ? 5 : 0) + 
+    (formData.gitHubUrl ? 5 : 0) + 
+    (formData.portfolioUrl ? 5 : 0) +
+    (formData.certifications?.length ? Math.min(formData.certifications.length * 5, 15) : 0) +
+    (formData.projects?.length ? Math.min(formData.projects.length * 5, 15) : 0) +
+    (formData.achievements?.length ? Math.min(formData.achievements.length * 3, 10) : 0) +
+    (formData.languages?.length ? 5 : 0)
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -88,6 +104,9 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     { id: 'employment', label: 'Employment', icon: 'work' },
     { id: 'social', label: 'Social Links', icon: 'link' },
     { id: 'skills', label: 'Skills', icon: 'bolt' },
+    { id: 'certifications', label: 'Certifications', icon: 'verified' },
+    { id: 'projects', label: 'Projects', icon: 'code' },
+    { id: 'achievements', label: 'Achievements', icon: 'emoji_events' },
     { id: 'resume', label: 'Resume', icon: 'description' },
   ];
 
@@ -207,18 +226,63 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   <input type="text" name="studentId" value={formData.studentId} onChange={handleInputChange} className={`${inputClass} opacity-60 cursor-not-allowed`} readOnly />
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <label className={labelClass}>Professional Bio</label>
-                <textarea
-                  name="bio"
-                  value={formData.bio}
-                  onChange={handleInputChange}
-                  className={`${inputClass} h-24 resize-none`}
-                  placeholder="Share a short summary about your background, career interests, or tech stack..."
-                />
-              </div>
-            </div>
-          )}
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Professional Bio</label>
+                    <textarea
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      className={`${inputClass} h-24 resize-none`}
+                      placeholder="Share a short summary about your background, career interests, or tech stack..."
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Nationality</label>
+                      <input type="text" name="nationality" value={formData.nationality || ''} onChange={handleInputChange} className={inputClass} placeholder="e.g. Ethiopian" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Date of Birth</label>
+                      <input type="date" name="dateOfBirth" value={formData.dateOfBirth?.split('T')[0] || ''} onChange={(e) => setFormData(p => ({ ...p, dateOfBirth: e.target.value }))} className={inputClass} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Gender</label>
+                      <select name="gender" value={formData.gender || ''} onChange={handleInputChange} className={inputClass}>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Languages Spoken</label>
+                      <input type="text" name="languages" value={Array.isArray(formData.languages) ? formData.languages.join(', ') : ''} onChange={(e) => setFormData(p => ({ ...p, languages: e.target.value.split(',').map(l => l.trim()).filter(Boolean) }))} className={inputClass} placeholder="e.g. English, Amharic, Afan Oromo" />
+                      <p className="text-[8px] text-[var(--text-muted)]">Separate multiple languages with commas</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Marital Status</label>
+                      <select name="maritalStatus" value={formData.maritalStatus || ''} onChange={handleInputChange} className={inputClass}>
+                        <option value="">Select</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Volunteer / Community Work</label>
+                    <textarea name="volunteerWork" value={formData.volunteerWork || ''} onChange={handleInputChange} className={`${inputClass} h-20 resize-none`} placeholder="Describe any volunteer or community service work..." />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Current Address</label>
+                    <input type="text" name="address" value={formData.address || ''} onChange={handleInputChange} className={inputClass} placeholder="City, Region, Country" />
+                  </div>
+                </div>
+              )}
+
 
           {/* Academic Section */}
           {activeSection === 'academic' && (
@@ -394,6 +458,34 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 </div>
               </div>
 
+              {/* Portfolio URL */}
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-md">
+                    <span className="material-symbols-outlined text-white text-lg">language</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Portfolio / Personal Website</h4>
+                    <p className="text-[10px] text-[var(--text-secondary)]">Link your personal website or portfolio.</p>
+                  </div>
+                </div>
+                <input type="url" name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://your-portfolio.com" className={inputClass} />
+              </div>
+
+              {/* Twitter/X URL */}
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-md">
+                    <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">X (Twitter) Profile</h4>
+                    <p className="text-[10px] text-[var(--text-secondary)]">Connect your X/Twitter for professional networking.</p>
+                  </div>
+                </div>
+                <input type="url" name="twitterUrl" value={formData.twitterUrl || ''} onChange={handleInputChange} placeholder="https://x.com/your-handle" className={inputClass} />
+              </div>
+
               {/* Social Profiles Tip */}
               <div className="bg-[#003366]/5 border border-[#003366]/10 rounded-xl p-4 flex items-start gap-3">
                 <span className="text-lg">💡</span>
@@ -433,6 +525,274 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Certifications Section */}
+          {activeSection === 'certifications' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Professional Certifications</h3>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your verified credentials and certificates.</p>
+                </div>
+                <button onClick={() => setShowCertForm(!showCertForm)} className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
+                  <span>{showCertForm ? '✕' : '+'}</span> {showCertForm ? 'Cancel' : 'Add Certification'}
+                </button>
+              </div>
+
+              {showCertForm && (
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Certification Name</label>
+                      <input type="text" value={newCertification.name || ''} onChange={(e) => setNewCertification(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="e.g. AWS Certified Cloud Practitioner" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Issuing Organization</label>
+                      <input type="text" value={newCertification.issuer || ''} onChange={(e) => setNewCertification(p => ({ ...p, issuer: e.target.value }))} className={inputClass} placeholder="e.g. Amazon Web Services" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Issue Date</label>
+                      <input type="text" value={newCertification.issueDate || ''} onChange={(e) => setNewCertification(p => ({ ...p, issueDate: e.target.value }))} className={inputClass} placeholder="e.g. Jan 2025" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Credential URL</label>
+                      <input type="url" value={newCertification.credentialUrl || ''} onChange={(e) => setNewCertification(p => ({ ...p, credentialUrl: e.target.value }))} className={inputClass} placeholder="https://example.com/verify" />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!newCertification.name || !newCertification.issuer) { toast.error('Name and issuer required.'); return; }
+                      const cert: Certification = { id: Date.now(), name: newCertification.name!, issuer: newCertification.issuer!, issueDate: newCertification.issueDate || 'Present', credentialUrl: newCertification.credentialUrl };
+                      setFormData(p => ({ ...p, certifications: [...(p.certifications || []), cert] }));
+                      setNewCertification({});
+                      setShowCertForm(false);
+                      toast.success('Certification added!');
+                    }}
+                    className="px-4 py-2 bg-[#003366] text-white rounded-xl text-xs font-bold hover:bg-[#002244] transition-all"
+                  >
+                    Save Certification
+                  </button>
+                </div>
+              )}
+
+              {formData.certifications && formData.certifications.length > 0 ? (
+                <div className="space-y-3">
+                  {formData.certifications.map((cert) => (
+                    <div key={cert.id} className="flex items-start justify-between p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                          <span className="material-symbols-outlined text-lg">verified</span>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{cert.name}</h4>
+                          <p className="text-[10px] text-[var(--text-secondary)] font-bold mt-0.5">{cert.issuer}</p>
+                          <p className="text-[9px] text-[var(--text-muted)] mt-0.5">Issued: {cert.issueDate}{cert.expiryDate ? ` · Expires: ${cert.expiryDate}` : ''}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        {cert.credentialUrl && (
+                          <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[#003366] transition-all">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          </a>
+                        )}
+                        <button
+                          onClick={() => {
+                            setFormData(p => ({ ...p, certifications: p.certifications?.filter(c => c.id !== cert.id) }));
+                            toast.success('Certification removed.');
+                          }}
+                          className="p-2 rounded-lg hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 transition-all"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--text-muted)]">
+                  <span className="text-3xl block mb-2">🏅</span>
+                  <p className="text-xs font-bold">No certifications added yet.</p>
+                  <p className="text-[10px] mt-1">Add professional certifications to boost your profile credibility.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Projects Section */}
+          {activeSection === 'projects' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Projects & Portfolio</h3>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your technical projects and open source contributions.</p>
+                </div>
+                <button onClick={() => setShowProjectForm(!showProjectForm)} className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
+                  <span>{showProjectForm ? '✕' : '+'}</span> {showProjectForm ? 'Cancel' : 'Add Project'}
+                </button>
+              </div>
+
+              {showProjectForm && (
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Project Title</label>
+                      <input type="text" value={newProject.title || ''} onChange={(e) => setNewProject(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="e.g. E-commerce Platform" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Role</label>
+                      <input type="text" value={newProject.role || ''} onChange={(e) => setNewProject(p => ({ ...p, role: e.target.value }))} className={inputClass} placeholder="e.g. Lead Developer" />
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className={labelClass}>Description</label>
+                      <textarea value={newProject.description || ''} onChange={(e) => setNewProject(p => ({ ...p, description: e.target.value }))} className={`${inputClass} h-20 resize-none`} placeholder="Brief description of the project..." />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Project URL</label>
+                      <input type="url" value={newProject.url || ''} onChange={(e) => setNewProject(p => ({ ...p, url: e.target.value }))} className={inputClass} placeholder="https://github.com/..." />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Technologies Used</label>
+                      <div className="flex gap-2">
+                        <input type="text" value={newTechnology} onChange={(e) => setNewTechnology(e.target.value)} className={inputClass} placeholder="e.g. React" />
+                        <button
+                          onClick={() => {
+                            if (newTechnology.trim() && !(newProject.technologies || []).includes(newTechnology.trim())) {
+                              setNewProject(p => ({ ...p, technologies: [...(p.technologies || []), newTechnology.trim()] }));
+                              setNewTechnology('');
+                            }
+                          }}
+                          className="px-3 py-2 bg-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-300"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {newProject.technologies?.map((tech, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-[#003366]/5 text-[#003366] text-[9px] font-bold rounded-full flex items-center gap-1">
+                            {tech}
+                            <button onClick={() => setNewProject(p => ({ ...p, technologies: p.technologies?.filter((_, j) => j !== i) }))} className="hover:text-red-500">x</button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!newProject.title) { toast.error('Project title is required.'); return; }
+                      const project: Project = { id: Date.now(), title: newProject.title!, description: newProject.description || '', technologies: newProject.technologies || [], role: newProject.role || '', startDate: '', url: newProject.url };
+                      setFormData(p => ({ ...p, projects: [...(p.projects || []), project] }));
+                      setNewProject({});
+                      setNewTechnology('');
+                      setShowProjectForm(false);
+                      toast.success('Project added!');
+                    }}
+                    className="px-4 py-2 bg-[#003366] text-white rounded-xl text-xs font-bold hover:bg-[#002244] transition-all"
+                  >
+                    Save Project
+                  </button>
+                </div>
+              )}
+
+              {formData.projects && formData.projects.length > 0 ? (
+                <div className="space-y-3">
+                  {formData.projects.map((proj) => (
+                    <div key={proj.id} className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                            <span className="material-symbols-outlined text-lg">code</span>
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{proj.title}</h4>
+                            <p className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5">Role: {proj.role}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setFormData(p => ({ ...p, projects: p.projects?.filter(pr => pr.id !== proj.id) }));
+                            toast.success('Project removed.');
+                          }}
+                          className="p-2 rounded-lg hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 transition-all"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-[var(--text-secondary)] mt-2 leading-relaxed">{proj.description}</p>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {proj.technologies.map((tech, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-[#003366]/5 text-[#003366] text-[9px] font-bold rounded-md">{tech}</span>
+                        ))}
+                      </div>
+                      {proj.url && (
+                        <a href={proj.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-[#003366] hover:underline">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          View Project
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--text-muted)]">
+                  <span className="text-3xl block mb-2">💻</span>
+                  <p className="text-xs font-bold">No projects added yet.</p>
+                  <p className="text-[10px] mt-1">Showcase your work to attract recruiters.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Achievements Section */}
+          {activeSection === 'achievements' && (
+            <div className="space-y-5">
+              <div>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Achievements & Recognition</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Awards, publications, and professional recognitions.</p>
+              </div>
+              {formData.achievements && formData.achievements.length > 0 ? (
+                <div className="space-y-3">
+                  {formData.achievements.map((ach) => (
+                    <div key={ach.id} className="flex items-start gap-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm flex-shrink-0 ${
+                        ach.type === 'award' ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
+                        ach.type === 'publication' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
+                        ach.type === 'patent' ? 'bg-gradient-to-br from-rose-500 to-pink-600' :
+                        'bg-gradient-to-br from-emerald-500 to-teal-600'
+                      }`}>
+                        <span className="material-symbols-outlined text-lg">
+                          {ach.type === 'award' ? 'emoji_events' : ach.type === 'publication' ? 'menu_book' : ach.type === 'patent' ? 'toll' : 'stars'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{ach.title}</h4>
+                            <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase mt-0.5">{ach.type} · {ach.date}</p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setFormData(p => ({ ...p, achievements: p.achievements?.filter(a => a.id !== ach.id) }));
+                              toast.success('Achievement removed.');
+                            }}
+                            className="p-1 rounded hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500"
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-[var(--text-secondary)] mt-1 leading-relaxed">{ach.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--text-muted)]">
+                  <span className="text-3xl block mb-2">🏆</span>
+                  <p className="text-xs font-bold">No achievements added yet.</p>
+                  <p className="text-[10px] mt-1">Share your awards and recognitions.</p>
+                </div>
+              )}
             </div>
           )}
 

@@ -32,6 +32,7 @@ import {
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
+import { partnerLogos } from "../components/PartnerLogos";
 
 import astuLogo from "../assets/logos/astu-icon.jpeg";
 import gallery1 from "../assets/imgs/astu-building.jpg";
@@ -182,12 +183,12 @@ const featuredEmployers = [
 ];
 
 const partners = [
-  { name: "Ethio Telecom", color: "#1A5276", initials: "ET" },
-  { name: "INSA", color: "#1B5E20", initials: "IN" },
-  { name: "Ethiopian Airlines", color: "#E31E24", initials: "EA" },
-  { name: "Safaricom", color: "#1B8304", initials: "SF" },
-  { name: "Huawei", color: "#CF0A2C", initials: "HW" },
-  { name: "Commercial Bank of Ethiopia", color: "#003366", initials: "CB" },
+  { name: "Ethio Telecom" },
+  { name: "INSA" },
+  { name: "Ethiopian Airlines" },
+  { name: "Safaricom" },
+  { name: "Huawei" },
+  { name: "Commercial Bank of Ethiopia" },
 ];
 
 const campusLifeCards = [
@@ -982,27 +983,31 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden">
+        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-8">
           <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Partner Companies</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
           <div className="relative">
             <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
-              {[...partners, ...partners].map((partner, idx) => (
-                <div
-                  key={`${partner.name}-${idx}`}
-                  className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
-                >
+              {[...partners, ...partners].map((partner, idx) => {
+                const LogoComponent = partnerLogos[partner.name];
+                return (
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-xl text-white text-sm font-bold shadow-md"
-                    style={{ background: `linear-gradient(135deg, ${partner.color}, ${partner.color}cc)` }}
+                    key={`${partner.name}-${idx}`}
+                    className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
                   >
-                    {partner.initials}
+                    {LogoComponent ? (
+                      <LogoComponent />
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-astu-navy text-white text-sm font-bold shadow-md">
+                        {partner.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-xs font-semibold text-astu-navy text-center leading-tight">{partner.name}</span>
                   </div>
-                  <span className="text-xs font-semibold text-astu-navy text-center leading-tight">{partner.name}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

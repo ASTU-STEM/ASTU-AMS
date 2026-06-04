@@ -1,5 +1,6 @@
 import React from 'react';
 import { JobMatch } from '../types/alumni.types';
+import toast from 'react-hot-toast';
 
 interface JobDetailsModalProps {
   job: JobMatch | null;
@@ -10,6 +11,13 @@ interface JobDetailsModalProps {
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, onApply }) => {
   if (!job) return null;
 
+  // Similar jobs calculation
+  const similarJobs: { title: string; company: string; match: string }[] = [
+    { title: 'Senior React Developer', company: 'Chapa Financial', match: '92%' },
+    { title: 'Full Stack Engineer', company: 'Ethio Telecom', match: '88%' },
+    { title: 'Node.js Backend Developer', company: 'Safaricom', match: '85%' },
+  ];
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div 
@@ -17,20 +25,23 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        {/* Enhanced Modal Header with Gradient */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-start sticky top-0 z-10"
           style={{ background: 'linear-gradient(135deg, #f8faff, #fff)' }}>
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">
-                {job.location.includes('Remote') ? 'Remote' : 'On-Site'}
+                {job.remoteOption === 'remote' ? 'Remote' : job.remoteOption === 'hybrid' ? 'Hybrid' : 'On-Site'}
               </span>
               <span className="px-2.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">
                 {job.match} Skills Match
               </span>
+              <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider rounded-full">
+                {job.type}
+              </span>
             </div>
             <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
             <p className="text-sm font-bold text-[#003366] mt-0.5">{job.company}</p>
+            {job.industry && <p className="text-[10px] text-gray-500 mt-0.5">{job.industry} · {job.companySize || 'Medium'}</p>}
           </div>
           <button 
             onClick={onClose}
@@ -43,18 +54,22 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
         {/* Modal Body */}
         <div className="p-6 space-y-6 flex-1 overflow-y-auto">
           {/* Quick info cards */}
-          <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl border border-gray-100 text-center"
+          <div className="grid grid-cols-4 gap-4 p-4 rounded-2xl border border-gray-100 text-center"
             style={{ background: 'linear-gradient(135deg, #f8faff, #f0f4fe)' }}>
             <div className="p-2 rounded-xl bg-white/60 backdrop-blur-sm">
               <p className="text-[10px] uppercase font-bold text-gray-400">Compensation</p>
-              <p className="text-sm font-bold text-gray-900 mt-1">{job.salary.split(' ')[0]} ETB</p>
+              <p className="text-sm font-bold text-gray-900 mt-1">{job.salary}</p>
             </div>
             <div className="p-2 rounded-xl bg-white/60 backdrop-blur-sm">
               <p className="text-[10px] uppercase font-bold text-gray-400">Location</p>
-              <p className="text-sm font-bold text-gray-900 mt-1">{job.location.split(' ')[0]}</p>
+              <p className="text-sm font-bold text-gray-900 mt-1">{job.location.split(',')[0]}</p>
             </div>
             <div className="p-2 rounded-xl bg-white/60 backdrop-blur-sm">
-              <p className="text-[10px] uppercase font-bold text-gray-400">Posted Date</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400">Experience</p>
+              <p className="text-sm font-bold text-gray-900 mt-1">{job.experience || 'N/A'}</p>
+            </div>
+            <div className="p-2 rounded-xl bg-white/60 backdrop-blur-sm">
+              <p className="text-[10px] uppercase font-bold text-gray-400">Posted</p>
               <p className="text-sm font-bold text-gray-900 mt-1">{job.postedDate}</p>
             </div>
           </div>
@@ -89,6 +104,77 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Application Progress */}
+          {job.applied && (
+            <div className="p-4 rounded-2xl border border-astu-green/20 bg-astu-green/5 space-y-3">
+              <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-astu-green">description</span>
+                Application Status
+              </h4>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${
+                    job.applicationStatus === 'Offered' ? 'bg-astu-green' :
+                    job.applicationStatus === 'Interview Scheduled' ? 'bg-blue-500' :
+                    'bg-amber-500'
+                  }`}>
+                    {job.applicationStatus === 'Offered' ? '✓' : job.applicationStatus === 'Interview Scheduled' ? '📅' : '⏳'}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">{job.applicationStatus}</p>
+                    {job.appliedDate && <p className="text-[10px] text-gray-500">Applied: {job.appliedDate}</p>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Skills Tags */}
+          {job.skills && job.skills.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-bold text-gray-900">Required Skills</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {job.skills.map((skill, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Hiring Metrics */}
+          <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl border border-gray-100 bg-gray-50/50">
+            <div className="text-center">
+              <p className="text-lg font-extrabold text-gray-900">{job.views}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase">Views</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-extrabold text-gray-900">{job.applications}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase">Applicants</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-extrabold text-astu-green">{job.shortlisted}</p>
+              <p className="text-[10px] font-bold text-gray-500 uppercase">Shortlisted</p>
+            </div>
+          </div>
+
+          {/* Similar Jobs */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-gray-900">Similar Positions</h4>
+            <div className="space-y-2">
+              {similarJobs.map((sj, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-all cursor-pointer">
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">{sj.title}</p>
+                    <p className="text-[10px] text-gray-500">{sj.company}</p>
+                  </div>
+                  <span className="px-2 py-0.5 bg-astu-green/10 text-astu-green text-[10px] font-bold rounded-full">{sj.match} Match</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

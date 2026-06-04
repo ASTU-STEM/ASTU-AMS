@@ -17,9 +17,12 @@ export const JobsTab: React.FC<JobsTabProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All');
   const [selectedFormat, setSelectedFormat] = useState('All');
+  const [sortBy, setSortBy] = useState<'match' | 'recent' | 'salary' | 'views'>('match');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   const locations = ['All', 'Addis Ababa', 'Remote'];
-  const formats = ['All', 'Full-Time', 'Internship', 'Contract'];
+  const formats = ['All', 'Full-Time', 'Internship', 'Contract', 'Part-Time'];
 
   const handleToggleSave = (e: React.MouseEvent, id: number, saved: boolean) => {
     e.stopPropagation();
@@ -48,6 +51,20 @@ export const JobsTab: React.FC<JobsTabProps> = ({
 
     return matchesSearch && matchesLocation && matchesFormat;
   });
+
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
+    const parseSalary = (s: string) => parseInt(s.replace(/[^0-9]/g, '')) || 0;
+    switch (sortBy) {
+      case 'match': return parseInt(b.match) - parseInt(a.match);
+      case 'recent': return (b.views || 0) - (a.views || 0);
+      case 'salary': return parseSalary(b.salary) - parseSalary(a.salary);
+      case 'views': return (b.applications || 0) - (a.applications || 0);
+      default: return 0;
+    }
+  });
+
+  const totalPages = Math.ceil(sortedJobs.length / pageSize);
+  const paginatedJobs = sortedJobs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const tabConfig = [
     { key: 'all' as const, label: 'Available Placements', icon: 'work' },
@@ -147,7 +164,7 @@ return (
             </span>
             <input
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               placeholder="Search jobs, companies, or skills..."
               className="w-full pl-11 pr-4 py-3 text-base border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] transition-all outline-none"
             />
@@ -156,7 +173,7 @@ return (
           <div className="grid grid-cols-2 lg:flex gap-3">
             <select
               value={selectedLocation}
-              onChange={e => setSelectedLocation(e.target.value)}
+              onChange={e => { setSelectedLocation(e.target.value); setCurrentPage(1); }}
               className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
             >
               <option value="All">📍 All Locations</option>
@@ -167,13 +184,24 @@ return (
 
             <select
               value={selectedFormat}
-              onChange={e => setSelectedFormat(e.target.value)}
+              onChange={e => { setSelectedFormat(e.target.value); setCurrentPage(1); }}
               className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
             >
               <option value="All">All Formats</option>
               {formats.filter(f => f !== 'All').map(fmt => (
                 <option key={fmt} value={fmt}>{fmt}</option>
               ))}
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as typeof sortBy)}
+              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
+            >
+              <option value="match">🎯 Best Match</option>
+              <option value="recent">🕐 Most Recent</option>
+              <option value="salary">💰 Highest Salary</option>
+              <option value="views">👁️ Most Viewed</option>
             </select>
           </div>
         </div>
@@ -183,11 +211,41 @@ return (
       <div className="space-y-4">
         <div className="flex justify-between items-center px-1">
           <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
-            {filteredJobs.length} Positions Found
+            {sortedJobs.length} Positions Found
+            {currentPage > 1 && <span className="text-gray-400 font-normal lowercase ml-1">(page {currentPage}/{totalPages})</span>}
           </p>
+          <div className="flex items-center gap-2">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg border ${currentPage === 1 ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === page ? 'bg-[#003366] text-white' : 'text-gray-500 hover:bg-gray-100'}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg border ${currentPage === totalPages ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {filteredJobs.length === 0 ? (
+        {sortedJobs.length === 0 ? (
           <div className="text-center py-16 bg-white border rounded-2xl shadow-sm">
             <span className="material-symbols-outlined text-5xl text-gray-300 mb-2">
               find_in_page
@@ -196,7 +254,7 @@ return (
             <p className="text-gray-400 text-sm">Try tweaking your search keywords or filters.</p>
           </div>
         ) : (
-          filteredJobs.map(job => (
+          paginatedJobs.map(job => (
             <div
               key={job.id}
               onClick={() => onViewJob(job)}

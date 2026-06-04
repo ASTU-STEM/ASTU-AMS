@@ -14,6 +14,7 @@ export interface SignupData {
   confirmPassword: string;
   department?: string;
   batch?: string;
+  phone?: string;
   activationCode?: string;
 }
 

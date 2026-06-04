@@ -140,11 +140,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               </div>
 
               <div className="space-y-3">
-                {[
-                  { key: 'emailJobs' as const, label: 'Job & Placement Recommendations', desc: 'Get alerted when emerging opportunities match your skill sets.', icon: 'work', color: '#003366' },
-                  { key: 'emailSurveys' as const, label: 'Tracer Survey Reminders', desc: 'Receive reminders when institutional tracer studies require submission.', icon: 'assignment', color: '#003366' },
-                  { key: 'emailMentorship' as const, label: 'Mentorship Session Updates', desc: 'Get alerts when peers or mentors accept or reschedule requests.', icon: 'diversity_3', color: '#003366' },
-                ].map(opt => (
+                  {[
+                    { key: 'emailJobs' as const, label: 'Job & Placement Recommendations', desc: 'Get alerted when emerging opportunities match your skill sets.', icon: 'work', color: '#003366' },
+                    { key: 'emailSurveys' as const, label: 'Tracer Survey Reminders', desc: 'Receive reminders when institutional tracer studies require submission.', icon: 'assignment', color: '#003366' },
+                    { key: 'emailMentorship' as const, label: 'Mentorship Session Updates', desc: 'Get alerts when peers or mentors accept or reschedule requests.', icon: 'diversity_3', color: '#003366' },
+                    { key: 'emailEvents' as const, label: 'Events & Workshop Notifications', desc: 'Get notified about career fairs, workshops, and networking events.', icon: 'event', color: '#003366' },
+                    { key: 'emailNewsletter' as const, label: 'ASTU Alumni Newsletter', desc: 'Receive monthly newsletters with alumni stories and university updates.', icon: 'newspaper', color: '#003366' },
+                    { key: 'smsNotifications' as const, label: 'SMS Notifications', desc: 'Receive critical alerts via SMS (e.g., document ready, interview invites).', icon: 'sms', color: '#003366' },
+                  ].map(opt => (
                   <div key={opt.key} className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all duration-200 group">
                     <div className="flex items-center gap-3.5">
                       <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-lg shadow-sm group-hover:shadow-md transition-shadow">
@@ -215,22 +218,43 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               </div>
 
               <div className="space-y-3">
-                {[
-                  {
-                    key: 'profileVisibleToEmployers' as const,
-                    label: 'Visible to Partner Employers',
-                    desc: 'Allow companies to search your qualifications and CV for recruitment.',
-                    icon: 'business',
-                    badge: 'Recommended',
-                  },
-                  {
-                    key: 'profileVisibleToPeers' as const,
-                    label: 'Visible in Peer Network',
-                    desc: 'Appear in alumni directory for mentorship networking and connections.',
-                    icon: 'group',
-                    badge: null,
-                  },
-                ].map(opt => (
+                  {[
+                    {
+                      key: 'profileVisibleToEmployers' as const,
+                      label: 'Visible to Partner Employers',
+                      desc: 'Allow companies to search your qualifications and CV for recruitment.',
+                      icon: 'business',
+                      badge: 'Recommended',
+                    },
+                    {
+                      key: 'profileVisibleToPeers' as const,
+                      label: 'Visible in Peer Network',
+                      desc: 'Appear in alumni directory for mentorship networking and connections.',
+                      icon: 'group',
+                      badge: null,
+                    },
+                    {
+                      key: 'profileVisibleToAlumni' as const,
+                      label: 'Visible to Alumni Directory',
+                      desc: 'Allow fellow alumni to find and connect with you in the alumni directory.',
+                      icon: 'diversity_3',
+                      badge: null,
+                    },
+                    {
+                      key: 'anonymousTracerResponses' as const,
+                      label: 'Anonymous Tracer Responses',
+                      desc: 'Submit tracer survey responses anonymously to protect your identity.',
+                      icon: 'incognito',
+                      badge: 'Privacy',
+                    },
+                    {
+                      key: 'shareAchievementsPublic' as const,
+                      label: 'Share Achievements Publicly',
+                      desc: 'Allow your achievements and milestones to appear on the alumni community feed.',
+                      icon: 'celebration',
+                      badge: null,
+                    },
+                  ].map(opt => (
                   <div
                     key={opt.key}
                     className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all duration-200 group"

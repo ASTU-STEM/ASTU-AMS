@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import toast from 'react-hot-toast';
 import AuthLayout from '../../../layouts/AuthLayout';
 import AuthInput from '../components/AuthInput';
 import AuthButton from '../components/AuthButton';
+import authService from '../services/auth.service';
 import * as yup from 'yup';
 
 const alumniActivationSchema = yup.object().shape({
@@ -29,6 +30,7 @@ interface AlumniActivationFormData {
 
 export default function AlumniActivationPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,14 +44,15 @@ export default function AlumniActivationPage() {
   const handleSubmit = async (values: AlumniActivationFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Call alumni activation API with token from URL
-      // const response = await authService.activateAlumniAccount(values);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setIsSuccess(true);
-      toast.success('Account activated successfully!');
+      const token = searchParams.get('token') || '';
+      const response = await authService.resetPassword(token, values.password);
+
+      if (response.success) {
+        setIsSuccess(true);
+        toast.success('Account activated successfully!');
+      } else {
+        toast.error(response.message || 'Activation failed. Please try again.');
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Activation failed. Please try again.');
     } finally {

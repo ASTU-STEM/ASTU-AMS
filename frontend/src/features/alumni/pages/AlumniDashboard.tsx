@@ -228,6 +228,8 @@ const AlumniDashboard = () => {
     { id: 'surveys', label: 'Surveys', icon: 'assignment' },
     { id: 'jobs', label: 'Jobs Board', icon: 'work' },
     { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3' },
+    { id: 'forum', label: 'Community', icon: 'group' },
+    { id: 'donations', label: 'Giving', icon: 'volunteer_activism' },
   ];
 
   const commItems = [
@@ -523,6 +525,99 @@ const AlumniDashboard = () => {
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
           {activeTab === 'messages' && <MessagingTab darkMode={darkMode} />}
           {activeTab === 'settings' && <SettingsTab preferences={preferences} onSavePreferences={handleSavePreferences} />}
+          {activeTab === 'forum' && (
+            <div className="space-y-6 p-4 md:p-6">
+              <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1d9e75)] p-5 text-white md:p-6">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#FFD700]/10 rounded-full translate-y-1/3 -translate-x-1/4" />
+                <div className="relative z-10">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni community</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">Alumni Community Forum</h2>
+                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+                    Connect with fellow alumni, share opportunities, and celebrate achievements together.
+                  </p>
+                </div>
+              </section>
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
+                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Recent Posts</h3>
+                <div className="space-y-3">
+                  {[
+                    { author: 'Abebe Bikila', role: 'CS 2018', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=40&h=40&q=80', content: 'I just launched my open-source Telebirr SDK! Check it out on GitHub. #opensource #fintech', likes: 24, comments: 8, time: '2h ago' },
+                    { author: 'Helina Sileshi', role: 'CSE 2014', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=40&h=40&q=80', content: 'Summit Tech is hiring 3 senior React Native developers! Remote-friendly for ASTU alumni.', likes: 56, comments: 15, time: '5h ago' },
+                    { author: 'Dr. Yosef Kebede', role: 'ECE 2010', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=40&h=40&q=80', content: 'Excited to speak at the ASTU Career Expo 2026 about system design at Google scale!', likes: 89, comments: 22, time: '1d ago' },
+                  ].map((post, idx) => (
+                    <div key={idx} className="flex gap-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
+                      <img src={post.avatar} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[var(--text-primary)]">{post.author}</span>
+                          <span className="text-[9px] text-[var(--text-secondary)]">{post.role}</span>
+                          <span className="text-[9px] text-[var(--text-muted)] ml-auto">{post.time}</span>
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{post.content}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <button className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                            {post.likes}
+                          </button>
+                          <button className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                            {post.comments}
+                          </button>
+                          <button className="text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">Share</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab === 'donations' && (
+            <div className="space-y-6 p-4 md:p-6">
+              <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#1d9e75,#003580)] p-5 text-white md:p-6">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+                <div className="relative z-10">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni giving</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">Support ASTU's Future</h2>
+                  <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
+                    Your contributions drive scholarships, research, and infrastructure development at ASTU.
+                  </p>
+                </div>
+              </section>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {[
+                  { title: 'ASTU Scholarship Fund 2026', desc: 'Support underprivileged engineering students with full tuition scholarships.', goal: '5,000,000 ETB', raised: '1,850,000 ETB', progress: 37, category: 'Scholarship', donors: 347 },
+                  { title: 'AI Research Lab Equipment', desc: 'Fund cutting-edge GPU servers for the new AI research laboratory.', goal: '8,000,000 ETB', raised: '3,200,000 ETB', progress: 40, category: 'Research', donors: 156 },
+                  { title: 'Campus Innovation Hub', desc: 'Build a modern co-working makerspace and innovation center for students.', goal: '12,000,000 ETB', raised: '5,400,000 ETB', progress: 45, category: 'Infrastructure', donors: 289 },
+                ].map((campaign, idx) => (
+                  <div key={idx} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="px-2 py-0.5 bg-[#003366]/10 text-[#003366] text-[9px] font-bold rounded-full uppercase">{campaign.category}</span>
+                      <span className="text-[10px] text-[var(--text-secondary)]">{campaign.donors} donors</span>
+                    </div>
+                    <h3 className="text-sm font-bold text-[var(--text-primary)]">{campaign.title}</h3>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{campaign.desc}</p>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="font-bold text-[#003366]">{campaign.raised}</span>
+                        <span className="text-[var(--text-muted)]">of {campaign.goal}</span>
+                      </div>
+                      <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${campaign.progress}%` }}></div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toast.success(`Thank you for your generous donation to "${campaign.title}"!`)}
+                      className="mt-4 w-full py-2.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-bold hover:shadow-lg transition-all"
+                    >
+                      Donate Now
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </main>
       </div>
 

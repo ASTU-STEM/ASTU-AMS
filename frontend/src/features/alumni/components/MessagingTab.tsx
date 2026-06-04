@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 interface AlumniMessage {
   id: number;
@@ -67,8 +68,30 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const [typedMessage, setTypedMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [mobileShowThread, setMobileShowThread] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<{ name: string; size: string }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      Array.from(files).forEach(file => {
+        setAttachedFiles(prev => [...prev, {
+          name: file.name,
+          size: `${(file.size / 1024).toFixed(1)} KB`
+        }]);
+      });
+      toast.success(`${files.length} file(s) attached`);
+    }
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setAttachedFiles(prev => prev.filter(f => f.name !== fileName));
+  };
+
+  const emojis = ['😊', '👍', '🎉', '🚀', '👋', '🔥', '💡', '📌', '✅', '🌟', '❤️', '💪', '🙏', '🎯', '✨', '🎓'];
 
   const currentMessages = messages[activeThread] || [];
   const currentMeta = THREAD_META[activeThread] || THREAD_META.recruiter;
@@ -339,12 +362,59 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
             ))}
           </div>
 
+          {/* Attached Files Preview */}
+          {attachedFiles.length > 0 && (
+            <div className="px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border-color)]">
+              <div className="flex flex-wrap gap-2">
+                {attachedFiles.map((file, i) => (
+                  <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-page)] rounded-lg border border-[var(--border-color)] text-[10px] font-medium">
+                    <svg className="w-3.5 h-3.5 text-[#003366]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-[var(--text-primary)]">{file.name}</span>
+                    <span className="text-[var(--text-muted)]">({file.size})</span>
+                    <button onClick={() => handleRemoveFile(file.name)} className="text-[var(--text-muted)] hover:text-red-500 ml-1">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Emoji Picker */}
+          {showEmojiPicker && (
+            <div className="px-5 py-2 bg-[var(--bg-card)] border-t border-[var(--border-color)]">
+              <div className="flex flex-wrap gap-1">
+                {emojis.map(emoji => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => {
+                      setTypedMessage(prev => prev + emoji);
+                      setShowEmojiPicker(false);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center hover:bg-[var(--bg-page)] rounded-lg transition-colors text-lg"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Message Input */}
           <form onSubmit={handleSend} className="px-5 py-3 bg-[var(--bg-card)]">
             <div className="flex items-center gap-3">
-              <button type="button" className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+              </button>
+              <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileAttach} />
+              <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="p-2 rounded-lg hover:bg-[var(--bg-page)] transition-colors text-[var(--text-secondary)]">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
               <div className="flex-1 relative">
@@ -365,8 +435,8 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
               </div>
               <button
                 type="submit"
-                disabled={!typedMessage.trim()}
-                className={`p-3 rounded-xl transition-all duration-300 shadow-md ${typedMessage.trim()
+                disabled={!typedMessage.trim() && attachedFiles.length === 0}
+                className={`p-3 rounded-xl transition-all duration-300 shadow-md ${typedMessage.trim() || attachedFiles.length > 0
                     ? 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white hover:shadow-lg hover:scale-105 active:scale-95'
                     : 'bg-[var(--bg-page)] text-[var(--text-muted)] cursor-not-allowed shadow-none'
                   }`}
