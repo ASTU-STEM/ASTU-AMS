@@ -2,6 +2,7 @@ import app from './app';
 import { env } from './core/config/env';
 import { initPrisma } from './core/config/db';
 import { Logger } from './core/utils/logger.utils';
+import { startTracerStudyCronJobs } from './services/tracer.service';
 
 const PORT = env.PORT || 5000;
 
@@ -15,7 +16,8 @@ async function bootstrap() {
     Logger.info('✅ Database client initialized.');
 
     // 2. Initialize Background Cron Services
-    // CronService will be added in the Tracer Study milestone
+    startTracerStudyCronJobs();
+    Logger.info('✅ Tracer study cron jobs started.');
 
     // 3. Start Server listener
     app.listen(PORT, () => {

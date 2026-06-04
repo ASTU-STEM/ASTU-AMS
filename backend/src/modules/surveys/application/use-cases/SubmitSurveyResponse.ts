@@ -19,6 +19,7 @@ export class SubmitSurveyResponse {
     const response = await this.responseRepo.create({
       surveyId,
       alumniId,
+      assignmentId: null,
       answers,
     });
 

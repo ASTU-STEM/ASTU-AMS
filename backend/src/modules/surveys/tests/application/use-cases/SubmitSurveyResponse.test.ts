@@ -8,12 +8,27 @@ describe('SubmitSurveyResponse Use Case', () => {
   let mockSurveyRepo: jest.Mocked<ISurveyRepository>;
   let mockRespRepo: jest.Mocked<ISurveyResponseRepository>;
 
-  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', true, []);
-  const mockResponse = new SurveyResponse('r1', 's1', 'a1', new Date(), []);
+  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', 6, true, false, []);
+  const mockResponse = new SurveyResponse('r1', 's1', 'a1', null, []);
 
   beforeEach(() => {
-    mockSurveyRepo = { findById: jest.fn(), findAll: jest.fn(), create: jest.fn() };
-    mockRespRepo = { findByAlumniAndSurvey: jest.fn(), create: jest.fn(), findBySurveyId: jest.fn() };
+    mockSurveyRepo = {
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      archive: jest.fn(),
+      clone: jest.fn(),
+      findByMilestone: jest.fn(),
+    } as unknown as jest.Mocked<ISurveyRepository>;
+    mockRespRepo = {
+      findByAlumniAndSurvey: jest.fn(),
+      create: jest.fn(),
+      findDraftByAssignment: jest.fn(),
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      update: jest.fn(),
+    } as unknown as jest.Mocked<ISurveyResponseRepository>;
   });
 
   it('should submit response successfully', async () => {
