@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import TelebirrDonationModal from '../../../components/TelebirrDonationModal';
 
 import {
   JobMatch,
@@ -65,6 +66,7 @@ const AlumniDashboard = () => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [donationCampaign, setDonationCampaign] = useState<{ title: string; category: string } | null>(null);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Tracer Survey 2026 launched! Complete before March 15.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New job matches released for Computer Science graduates.', unread: true, time: '1 day ago' },
@@ -610,7 +612,7 @@ const AlumniDashboard = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => toast.success(`Thank you for your generous donation to "${campaign.title}"!`)}
+                      onClick={() => setDonationCampaign({ title: campaign.title, category: campaign.category })}
                       className="mt-4 w-full py-2.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-bold hover:shadow-lg transition-all"
                     >
                       Donate Now
@@ -626,6 +628,11 @@ const AlumniDashboard = () => {
       <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+      <TelebirrDonationModal
+        isOpen={!!donationCampaign}
+        onClose={() => setDonationCampaign(null)}
+        campaign={donationCampaign}
+      />
     </div>
   );
 };
