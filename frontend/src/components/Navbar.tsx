@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   HiHome,
   HiMagnifyingGlass,
@@ -91,6 +91,7 @@ function scrollToSection(sectionId: string) {
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const searchWrapRef = useRef<HTMLDivElement>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,7 +128,7 @@ export default function Navbar() {
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
     setIsSearchOpen(false);
-    scrollToSection(item.sectionId);
+    navigateToSection(item.sectionId);
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -136,6 +137,18 @@ export default function Navbar() {
     }
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const sectionId = params.get("scrollTo");
+    if (sectionId && location.pathname === "/") {
+      const timer = setTimeout(() => {
+        scrollToSection(sectionId);
+        window.history.replaceState({}, "", "/");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
+
   const handleLogout = async () => {
     await authService.logout();
     setUser(null);
@@ -143,11 +156,17 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const handleNavClick = (sectionId: string) => {
+  const navigateToSection = (sectionId: string) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    scrollToSection(sectionId);
+    if (location.pathname === "/") {
+      scrollToSection(sectionId);
+    } else {
+      navigate(`/?scrollTo=${sectionId}`);
+    }
   };
+
+  const handleNavClick = navigateToSection;
 
   const handleMegaEnter = (label: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);

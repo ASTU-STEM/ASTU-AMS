@@ -80,7 +80,7 @@ export default function LoginPage() {
     >
       <div className="rounded-lg bg-astu-navy/5 p-4 mb-6">
         <p className="text-xs text-on-surface-variant">
-          <strong>Note:</strong> For employer login, please use the{' '}
+          <strong>Note:</strong> after backend integrated this demo is revomed For employer login, please use the{' '}
           <Link to="/employers" className="font-semibold text-astu-navy hover:underline">
             Employers Portal
           </Link>.

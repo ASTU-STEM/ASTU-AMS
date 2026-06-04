@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import HelpCenter from '../../../components/HelpCenter';
 
 import {
   JobMatch,
@@ -63,6 +64,7 @@ const AlumniDashboard = () => {
   const [selectedJobForModal, setSelectedJobForModal] = useState<JobMatch | null>(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Tracer Survey 2026 launched! Complete before March 15.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New job matches released for Computer Science graduates.', unread: true, time: '1 day ago' },
@@ -210,7 +212,7 @@ const AlumniDashboard = () => {
       <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('settings'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
         <Settings className="h-4 w-4" /> Settings
       </button>
-      <button type="button" onClick={() => { setMenuOpen(false); toast('Help center coming soon.'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
+      <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
         <HelpCircle className="h-4 w-4" /> Help
       </button>
       <div className="my-1 h-px bg-[var(--border-color)]" />
@@ -356,7 +358,7 @@ const AlumniDashboard = () => {
 
         {/* Sidebar Footer */}
         <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
-          <button onClick={() => setActiveTab('career')} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <button onClick={() => setHelpOpen(true)} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
             <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
             {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
           </button>
@@ -622,6 +624,8 @@ const AlumniDashboard = () => {
       </div>
 
       <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />
+
+      <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 };

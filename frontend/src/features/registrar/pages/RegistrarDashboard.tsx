@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import HelpCenter from '../../../components/HelpCenter';
 
 
 // Types
@@ -42,6 +43,7 @@ const RegistrarDashboard = () => {
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
@@ -309,6 +311,7 @@ useEffect(() => {
 
 
    return (
+    <>
     <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes float-particle {
@@ -517,7 +520,7 @@ useEffect(() => {
             {!sidebarCollapsed && (
               <>
                 <button
-                  onClick={() => setActiveTab('reporting')}
+                  onClick={() => setHelpOpen(true)}
                   className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3"
                 >
                   <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
@@ -537,7 +540,7 @@ useEffect(() => {
             {sidebarCollapsed && (
               <>
                 <button
-                  onClick={() => setActiveTab('reporting')}
+                  onClick={() => setHelpOpen(true)}
                   className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative"
                   title="Help Center"
                 >
@@ -1149,6 +1152,9 @@ useEffect(() => {
         </footer>
       </main>
     </div>
+
+    <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 };
 

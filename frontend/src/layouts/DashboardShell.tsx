@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import { AppSidebar, SidebarNavItem } from './AppSidebar';
+import HelpCenter from './HelpCenter';
 import toast from 'react-hot-toast';
 
 export interface DashboardShellProps {
@@ -54,6 +55,7 @@ export function DashboardShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     () => localStorage.getItem(`dashboard_shell_${brand}_collapsed`) === 'true'
   );
+  const [helpOpen, setHelpOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
     { id: 1, text: 'New system update available', unread: true, time: '2 hours ago' },
     { id: 2, text: '3 pending approval requests', unread: true, time: '1 day ago' },
@@ -103,6 +105,7 @@ export function DashboardShell({
   const sidebarDisplayCollapsed = sidebarCollapsed && !mobileSidebarOpen;
 
   return (
+    <>
     <div className="flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       {mobileSidebarOpen && (
         <button
@@ -337,10 +340,10 @@ export function DashboardShell({
                     Settings
                   </button>
                   <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      toast('Help center coming soon');
-                    }}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setHelpOpen(true);
+                      }}
                     className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
                   >
                     <HelpCircle className="h-4 w-4" />
@@ -369,5 +372,8 @@ export function DashboardShell({
         </main>
       </div>
     </div>
+
+    <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import HelpCenter from '../../../components/HelpCenter';
 
 // Types
 import {
@@ -49,6 +50,7 @@ const EmployerDashboard = () => {
   // Notifications Bell dropdown
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Abebe Bikila applied for Senior Fullstack Engineer.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New messaging update from ASTU Placement Officer.', unread: true, time: '1 day ago' },
@@ -354,7 +356,7 @@ const EmployerDashboard = () => {
       </button>
       <button
         type="button"
-        onClick={() => { setMenuOpen(false); toast('Help center coming soon.'); }}
+        onClick={() => { setMenuOpen(false); setHelpOpen(true); }}
         className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
       >
         <HelpCircle className="h-4 w-4" />
@@ -380,6 +382,7 @@ const EmployerDashboard = () => {
   };
 
 return (
+    <>
     <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes gradient-shift {
@@ -555,7 +558,7 @@ return (
         <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
           {!sidebarCollapsed && (
             <>
-              <button onClick={() => { toast('Help center coming soon.'); }}
+              <button onClick={() => { setHelpOpen(true); }}
                 className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
                 <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined w-4 h-4">help</span>
                 <span className="text-sm font-medium">Help Center</span>
@@ -571,7 +574,7 @@ return (
           )}
           {sidebarCollapsed && (
             <>
-              <button onClick={() => { toast('Help center coming soon.'); }}
+              <button onClick={() => { setHelpOpen(true); }}
                 className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
                 <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
                 <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
@@ -1110,6 +1113,9 @@ return (
         </main>
       </div>
     </div>
+
+    <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 };
 

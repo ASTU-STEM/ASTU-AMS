@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { HelpCircle, LogOut, Menu } from 'lucide-react';
+import HelpCenter from '../../../components/HelpCenter';
 
 // Components
 import { DashboardOverview } from '../components/DashboardOverview';
@@ -23,6 +24,7 @@ const DepartmentDashboard = () => {
     const [activeTab, setActiveTab] = useState<string>('dashboard');
     const [darkMode, setDarkMode] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [helpOpen, setHelpOpen] = useState(false);
     const [notifications, setNotifications] = useState([
         { id: 1, text: 'New tracer survey responses received from 2024 graduates.', unread: true, time: '2 hours ago' },
         { id: 2, text: 'Employer feedback report generated for Computer Science.', unread: true, time: '1 day ago' },
@@ -111,6 +113,7 @@ const DepartmentDashboard = () => {
     };
 
     return (
+        <>
         <div className={`min-h-screen font-body-md overflow-x-hidden transition-all duration-300 role-shell admin-shell ${darkMode ? 'bg-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-on-surface'
             }`}>
             <Toaster position="top-right" reverseOrder={false} />
@@ -232,7 +235,7 @@ const DepartmentDashboard = () => {
                 <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
                     {!sidebarCollapsed && (
                         <>
-                            <button onClick={() => setActiveTab('dashboard')}
+                            <button onClick={() => setHelpOpen(true)}
                                 className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
                                 <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
                                 <span className="text-sm font-medium">Help Center</span>
@@ -248,7 +251,7 @@ const DepartmentDashboard = () => {
                     )}
                     {sidebarCollapsed && (
                         <>
-                            <button onClick={() => setActiveTab('dashboard')}
+                            <button onClick={() => setHelpOpen(true)}
                                 className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
                                 <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
                                 <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">Help Center</div>
@@ -389,6 +392,9 @@ const DepartmentDashboard = () => {
 
             </main>
         </div>
+
+        <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+        </>
     );
 };
 

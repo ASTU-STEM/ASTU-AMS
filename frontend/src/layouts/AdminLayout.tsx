@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
+import HelpCenter from '../components/HelpCenter';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -66,6 +67,7 @@ export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('adminSidebarCollapsed') === 'true');
+  const [helpOpen, setHelpOpen] = useState(false);
   const location = useLocation();
 
   const toggleSidebarCollapse = () => {
@@ -172,7 +174,7 @@ export default function AdminLayout() {
         type="button"
         onClick={() => {
           setMenuOpen(false);
-          toast('Help center will be expanded in the next module.');
+          setHelpOpen(true);
         }}
         className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
       >
@@ -195,6 +197,7 @@ export default function AdminLayout() {
   );
 
   return (
+    <>
     <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes astu-admin-fade-in {
@@ -339,5 +342,8 @@ export default function AdminLayout() {
         </main>
       </div>
     </div>
+
+    <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 }
