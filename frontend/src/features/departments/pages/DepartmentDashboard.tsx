@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
-import { HelpCircle, LogOut, Menu } from 'lucide-react';
+import { HelpCircle, LogOut, Menu, ChevronDown, FileText, BarChart3, Settings } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
 
 // Components
@@ -25,6 +25,7 @@ const DepartmentDashboard = () => {
     const [darkMode, setDarkMode] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     const [notifications, setNotifications] = useState([
         { id: 1, text: 'New tracer survey responses received from 2024 graduates.', unread: true, time: '2 hours ago' },
         { id: 2, text: 'Employer feedback report generated for Computer Science.', unread: true, time: '1 day ago' },
@@ -56,7 +57,20 @@ const DepartmentDashboard = () => {
     React.useEffect(() => {
         setMobileSidebarOpen(false);
         setShowNotifications(false);
+        setMenuOpen(false);
     }, [activeTab]);
+
+    // Close dropdowns on click outside
+    React.useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('[data-dept-menu]')) {
+                setMenuOpen(false);
+            }
+        };
+        window.addEventListener('mousedown', handleClick);
+        return () => window.removeEventListener('mousedown', handleClick);
+    }, []);
 
     const departmentManagementActions = [
         { title: 'Graduate Outcome Analytics', desc: 'Create outcome cohorts and compare employment, salary, location, and study continuation.', tab: 'employment-analytics', icon: 'query_stats' },
@@ -254,12 +268,12 @@ const DepartmentDashboard = () => {
                             <button onClick={() => setHelpOpen(true)}
                                 className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
                                 <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
-                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">Help Center</div>
+                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
                             </button>
                             <button onClick={handleLogout}
                                 className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group relative" title="Logout">
                                 <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
-                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">Logout</div>
+                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
                             </button>
                         </>
                     )}
@@ -373,14 +387,41 @@ const DepartmentDashboard = () => {
                         <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
 
                         {/* Header User Profile Display */}
-                        <div className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity">
-                            <div className="text-right hidden sm:block">
-                                <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Department Head</p>
-                                <p className="text-xs text-gray-500 font-semibold">Computer Science</p>
+                        <div className="relative" data-dept-menu>
+                            <div onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity">
+                                <div className="text-right hidden sm:block">
+                                    <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Department Head</p>
+                                    <p className="text-xs text-gray-500 font-semibold">Computer Science</p>
+                                </div>
+                                <div className="w-10 h-10 rounded-full border-2 border-astu-navy/20 shadow-sm bg-astu-navy flex items-center justify-center text-white font-bold">
+                                    DH
+                                </div>
+                                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
                             </div>
-                            <div className="w-10 h-10 rounded-full border-2 border-astu-navy/20 shadow-sm bg-astu-navy flex items-center justify-center text-white font-bold">
-                                DH
-                            </div>
+                            {menuOpen && (
+                                <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-gray-200 bg-white p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-gray-900 dark:border-gray-700">
+                                    <div className="px-3 py-3">
+                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">Department Head</div>
+                                        <div className="mt-1">
+                                            <span className="inline-flex items-center rounded-md bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 border border-purple-200">Computer Science</span>
+                                        </div>
+                                    </div>
+                                    <div className="my-1 h-px bg-gray-100" />
+                                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('accreditation'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+                                        <BarChart3 className="h-4 w-4" /> Accreditation Reports
+                                    </button>
+                                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('export'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+                                        <FileText className="h-4 w-4" /> Export Center
+                                    </button>
+                                    <div className="my-1 h-px bg-gray-100" />
+                                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-gray-600 hover:bg-black/5 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+                                        <HelpCircle className="h-4 w-4" /> Help
+                                    </button>
+                                    <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-red-500 hover:bg-rose-50 dark:hover:bg-red-500/10 transition-colors">
+                                        <LogOut className="h-4 w-4" /> Logout
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>

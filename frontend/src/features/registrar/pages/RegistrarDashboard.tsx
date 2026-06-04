@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
 
 
@@ -44,6 +44,7 @@ const RegistrarDashboard = () => {
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
     { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
@@ -300,7 +301,21 @@ useEffect(() => {
    useEffect(() => {
      setMobileSidebarOpen(false);
      setShowNotifications(false);
+     setMenuOpen(false);
    }, [activeTab]);
+
+   // Close dropdowns on click outside
+   useEffect(() => {
+     const handleClick = (e: MouseEvent) => {
+       const target = e.target as HTMLElement;
+       if (!target.closest('[data-admin-menu]') && !target.closest('[data-admin-notifications]')) {
+         setMenuOpen(false);
+         setShowNotifications(false);
+       }
+     };
+     window.addEventListener('mousedown', handleClick);
+     return () => window.removeEventListener('mousedown', handleClick);
+   }, []);
 
    const handleLogout = () => {
      localStorage.removeItem('authToken');
@@ -700,6 +715,7 @@ useEffect(() => {
               <div className="relative" data-admin-menu>
                 <button
                   type="button"
+                  onClick={() => setMenuOpen((v) => !v)}
                   className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
                   style={{ borderColor: 'var(--border-color)' }}
                 >
@@ -712,6 +728,30 @@ useEffect(() => {
                   </div>
                   <ChevronDown className="h-4 w-4 text-slate-400" />
                 </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                    <div className="px-3 py-3">
+                      <div className="text-sm font-semibold text-[var(--text-primary)]">Dr. Abebe Assefa</div>
+                      <div className="mt-1">
+                        <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">Dean of Registrar</span>
+                      </div>
+                    </div>
+                    <div className="my-1 h-px bg-[var(--border-color)]" />
+                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('surveys'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
+                      <FileText className="h-4 w-4" /> Tracer Reports
+                    </button>
+                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('reporting'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
+                      <BarChart3 className="h-4 w-4" /> Reports
+                    </button>
+                    <div className="my-1 h-px bg-[var(--border-color)]" />
+                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
+                      <HelpCircle className="h-4 w-4" /> Help
+                    </button>
+                    <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50">
+                      <LogOut className="h-4 w-4" /> Logout
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </header>

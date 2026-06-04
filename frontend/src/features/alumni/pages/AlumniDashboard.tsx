@@ -360,13 +360,24 @@ const AlumniDashboard = () => {
 
         {/* Sidebar Footer */}
         <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
-          <button onClick={() => setHelpOpen(true)} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <button onClick={() => setHelpOpen(true)} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'Help Center' : undefined}>
             <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
-            {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
+            {!sidebarCollapsed && (
+              <>
+                <span className="text-sm font-medium">Help Center</span>
+                <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
+              </>
+            )}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
+            )}
           </button>
-          <button onClick={handleLogout} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
+          <button onClick={handleLogout} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'Logout' : undefined}>
             <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 material-symbols-outlined">logout</span>
             {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
+            )}
           </button>
         </div>
       </aside>
