@@ -1,0 +1,737 @@
+/* ── Import additional animation styles (must be first) ── */
+@import "./styles/animations.css";
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL SPACING SCALE & THEME TOKENS (4px base unit)
+   4px/8px/12px/16px/20px/24px/32px/40px
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  /* Spacing scale - 4px base unit */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Theme colors */
+  --bg-page: #f4f6fa;
+  --bg-card: #ffffff;
+  --bg-sidebar: #0a1628;
+  --bg-navbar: #ffffff;
+  --border-color: #e8edf5;
+  --text-primary: #0a0e1a;
+  --text-secondary: #5a6278;
+  --text-muted: #9ba3b8;
+
+  /* Dashboard layout tokens - standardized spacing */
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --content-padding: 16px;
+  --section-gap: 16px;
+  --grid-gap: 16px;
+  --card-padding: 16px;
+}
+
+/* Dark theme overrides */
+.dark {
+  --bg-page: #0f1117;
+  --bg-card: #1a1d27;
+  --bg-sidebar: #080d18;
+  --bg-navbar: #13161f;
+  --border-color: #2a2d3a;
+  --text-primary: #f1f3f9;
+  --text-secondary: #8b91a8;
+  --text-muted: #555b72;
+}
+
+.light {
+  --bg-page: #f4f6fa;
+  --bg-card: #ffffff;
+  --bg-sidebar: #0a1628;
+  --bg-navbar: #ffffff;
+  --border-color: #e8edf5;
+  --text-primary: #0a0e1a;
+  --text-secondary: #5a6278;
+  --text-muted: #9ba3b8;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE RESET
+   ═══════════════════════════════════════════════════════════ */
+* {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Hanken Grotesk", sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4c6d1;
+  border-radius: 10px;
+}
+
+a,
+button,
+input {
+  font: inherit;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL DASHBOARD SPACING NORMALIZATION
+   Ensures all dashboard shells use consistent spacing.
+   Applies to admin-shell, role-shell, and any dashboard layout.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Normalize main content padding across all shells ── */
+.admin-shell > div > main,
+.role-shell > div > main,
+.role-shell main,
+.admin-shell .flex-grow,
+.role-shell .flex-grow,
+.admin-shell main,
+.role-shell main {
+  padding: var(--content-padding) !important;
+}
+
+/* ── Ensure flex-grow children in nested structures have proper padding ── */
+.admin-shell .flex-grow > div,
+.role-shell .flex-grow > div {
+  padding: var(--content-padding) !important;
+  margin: 0 !important;
+}
+
+/* ── Standardize vertical section spacing ── */
+.admin-shell .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.role-shell .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.admin-shell .flex-grow .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.role-shell .flex-grow .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.admin-shell .p-4.md\:p-6 .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.role-shell .p-4.md\:p-6 .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: var(--section-gap) !important;
+}
+
+.admin-shell .space-y-4 > :not([hidden]) ~ :not([hidden]),
+.role-shell .space-y-4 > :not([hidden]) ~ :not([hidden]),
+.admin-shell .flex-grow .space-y-4 > :not([hidden]) ~ :not([hidden]),
+.role-shell .flex-grow .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 16px !important;
+}
+
+.admin-shell .space-y-8 > :not([hidden]) ~ :not([hidden]),
+.role-shell .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: var(--section-gap) !important;
+}
+
+/* ── Standardize grid/flex gaps ── */
+.admin-shell .gap-6,
+.role-shell .gap-6,
+.admin-shell .flex-grow .gap-6,
+.role-shell .flex-grow .gap-6 {
+  gap: var(--grid-gap) !important;
+}
+
+.admin-shell .gap-8,
+.role-shell .gap-8,
+.admin-shell .flex-grow .gap-8,
+.role-shell .flex-grow .gap-8 {
+  gap: var(--grid-gap) !important;
+}
+
+.admin-shell .gap-4,
+.role-shell .gap-4,
+.admin-shell .flex-grow .gap-4,
+.role-shell .flex-grow .gap-4 {
+  gap: var(--grid-gap) !important;
+}
+
+/* ── Standardize card/section padding ── */
+.admin-shell .p-6,
+.role-shell .p-6,
+.admin-shell .flex-grow .p-6,
+.role-shell .flex-grow .p-6 {
+  padding: var(--card-padding) !important;
+}
+
+.admin-shell .p-8,
+.role-shell .p-8,
+.admin-shell .flex-grow .p-8,
+.role-shell .flex-grow .p-8 {
+  padding: var(--card-padding) !important;
+}
+
+.admin-shell .p-5,
+.role-shell .p-5,
+.admin-shell .flex-grow .p-5,
+.role-shell .flex-grow .p-5 {
+  padding: var(--card-padding) !important;
+}
+
+.admin-shell .p-4,
+.role-shell .p-4,
+.admin-shell .flex-grow .p-4,
+.role-shell .flex-grow .p-4 {
+  padding: 16px !important;
+}
+
+/* ── Standardize responsive padding ── */
+@media (min-width: 768px) {
+  .admin-shell .md\:p-8,
+  .role-shell .md\:p-8,
+  .admin-shell .md\:p-10,
+  .role-shell .md\:p-10,
+  .admin-shell .md\:p-12,
+  .role-shell .md\:p-12 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-shell .lg\:p-10,
+  .role-shell .lg\:p-10 {
+    padding: var(--content-padding) !important;
+  }
+}
+
+/* ── Standardize border radius ── */
+.admin-shell .rounded-3xl,
+.role-shell .rounded-3xl {
+  border-radius: 10px !important;
+}
+
+.admin-shell .rounded-2xl,
+.role-shell .rounded-2xl {
+  border-radius: 8px !important;
+}
+
+/* ── Remove max-width constraints that cause content gaps ── */
+.admin-shell .max-w-3xl,
+.admin-shell .max-w-4xl,
+.admin-shell .max-w-7xl,
+.role-shell .max-w-3xl,
+.role-shell .max-w-4xl,
+.role-shell .max-w-7xl,
+.admin-shell .max-w-6xl,
+.role-shell .max-w-6xl {
+  max-width: none !important;
+}
+
+/* ── Remove centering that creates side gaps ── */
+.admin-shell .mx-auto,
+.role-shell .mx-auto {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* ── Ensure tight sidebar-content alignment ── */
+.admin-shell .flex-col.justify-between,
+.role-shell .flex-col.justify-between {
+  gap: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN CARD SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+.admin-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.admin-shell main > * {
+  animation: admin-shell-fade 180ms ease-out both;
+}
+
+.admin-shell main,
+.role-shell main,
+.admin-shell main > div,
+.role-shell main > div {
+  min-width: 0;
+}
+
+.admin-shell table,
+.role-shell table {
+  min-width: max-content;
+}
+
+.admin-shell .overflow-x-auto,
+.role-shell .overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+.admin-shell .recharts-responsive-container,
+.role-shell .recharts-responsive-container {
+  min-width: 0;
+}
+
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea,
+.role-shell input,
+.role-shell select,
+.role-shell textarea {
+  min-width: 0;
+}
+
+.admin-shell .fixed.right-0,
+.role-shell .fixed.right-0 {
+  max-width: 100vw;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --content-padding: 12px;
+    --section-gap: 12px;
+    --grid-gap: 12px;
+    --card-padding: 14px;
+  }
+
+  .admin-shell header,
+  .role-shell header {
+    gap: 10px;
+  }
+
+  .admin-shell header > div,
+  .role-shell header > div {
+    min-width: 0;
+  }
+
+  .admin-shell main,
+  .role-shell main {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .admin-shell section,
+  .admin-shell article,
+  .role-shell section,
+  .role-shell article {
+    max-width: 100%;
+  }
+
+  .admin-shell .grid,
+  .role-shell .grid {
+    min-width: 0;
+  }
+
+  .admin-shell .fixed.right-0,
+  .role-shell .fixed.right-0 {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+  }
+}
+
+.admin-shell main section,
+.admin-shell main article,
+.admin-shell main .admin-card,
+.admin-shell main .shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.06\)\],
+.admin-shell main .shadow-\[0_4px_16px_rgba\(0\,0\,0\,0\.08\)\] {
+  animation: admin-float-in 260ms ease-out both;
+}
+
+.admin-shell main section:hover,
+.admin-shell main article:hover,
+.admin-shell main .admin-card:hover {
+  transform: translateY(-1px);
+}
+
+/* ═══ SMOOTH SIDEBAR-CONTENT TRANSITION ══ */
+.admin-shell > div,
+.role-shell > div {
+  transition: margin-left 250ms ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Admin shell dark mode */
+.dark .admin-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+.dark .admin-shell .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .admin-shell .bg-slate-50 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dark .admin-shell .bg-slate-100 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .admin-shell .border-slate-200,
+.dark .admin-shell .border-slate-100 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .admin-shell .text-slate-900,
+.dark .admin-shell .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+.dark .admin-shell .text-slate-700,
+.dark .admin-shell .text-slate-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .admin-shell .text-slate-500,
+.dark .admin-shell .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+
+.dark .admin-shell .shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.06\)\],
+.dark .admin-shell .shadow-\[0_4px_16px_rgba\(0\,0\,0\,0\.08\)\] {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
+}
+
+.dark table tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark table thead {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background: #1e2130;
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark .admin-shell input::placeholder,
+.dark .admin-shell textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Role shell dark mode - main content background */
+.role-shell main > div {
+  background: var(--bg-page);
+}
+
+.dark .role-shell .bg-white,
+.dark .role-shell .bg-gray-50,
+.dark .role-shell .bg-gray-50\/50,
+.dark .role-shell .from-gray-50,
+.dark .role-shell .to-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .role-shell .border-gray-200,
+.dark .role-shell .border-gray-200\/60,
+.dark .role-shell .border-gray-150,
+.dark .role-shell .border-gray-100,
+.dark .role-shell .border-gray-100\/5,
+.dark .role-shell .border-slate-800 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .role-shell .text-gray-900,
+.dark .role-shell .text-gray-800,
+.dark .role-shell .text-slate-900,
+.dark .role-shell .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+.dark .role-shell .text-gray-600,
+.dark .role-shell .text-gray-500,
+.dark .role-shell .text-gray-400,
+.dark .role-shell .text-slate-400,
+.dark .role-shell .text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+
+.dark .role-shell input,
+.dark .role-shell select,
+.dark .role-shell textarea {
+  background: #1e2130 !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .role-shell input::placeholder,
+.dark .role-shell textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.dark .role-shell .shadow-sm,
+.dark .role-shell .shadow-md,
+.dark .role-shell .shadow-xl,
+.dark .role-shell .shadow-2xl {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ticker {
+  display: inline-block;
+  padding-left: 100%;
+  animation: ticker-scroll 20s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes admin-shell-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mega menu fade-in animation */
+@keyframes mega-menu-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADVANCED ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Staggered reveal delays */
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 51, 102, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(0, 51, 102, 0.2); }
+}
+
+.animate-glow {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Gradient text animation */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-text {
+  background: linear-gradient(135deg, #003366, #008C44, #E31E24, #003366);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* Scale on hover */
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 51, 102, 0.12), 0 8px 16px rgba(0, 51, 102, 0.08);
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Particle dot animation */
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+  25% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
+  50% { transform: translateY(-10px) translateX(-5px); opacity: 0.4; }
+  75% { transform: translateY(-30px) translateX(15px); opacity: 0.7; }
+}
+
+/* Magnetic button effect */
+.btn-magnetic {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Section reveal with slide up */
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up-fade 0.6s ease forwards;
+}
+
+/* Pulsing dot for active status */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
+
+/* Smooth counter animation placeholder */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-count {
+  animation: count-up 0.5s ease forwards;
+}
+
+/* Glassmorphism base */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(0, 51, 102, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Scrolling partners carousel */
+@keyframes scroll-loop {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll {
+  animation: scroll-loop 30s linear infinite;
+  width: fit-content;
+}

@@ -1,0 +1,164 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { GraduationCap, Users, Briefcase, BarChart3, ShieldCheck } from 'lucide-react';
+
+interface AuthLayoutProps {
+  children: React.ReactNode;
+  title: string;
+  subtitle: string;
+  showLogo?: boolean;
+}
+
+export default function AuthLayout({ children, title, subtitle, showLogo = true }: AuthLayoutProps) {
+  const features = [
+    {
+      icon: Users,
+      title: 'Alumni Network',
+      description: 'Connect with graduates and build professional relationships',
+    },
+    {
+      icon: Briefcase,
+      title: 'Job Opportunities',
+      description: 'Access exclusive job postings and career resources',
+    },
+    {
+      icon: BarChart3,
+      title: 'Career Analytics',
+      description: 'Track your career growth and industry insights',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'Verified Profiles',
+      description: 'Secure, university-verified alumni credentials',
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-surface">
+      {/* Top Navigation */}
+      <header className="border-b border-outline-variant bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="rounded-full bg-astu-navy p-2 text-white">
+              <GraduationCap className="h-4 w-4" />
+            </div>
+            <span className="text-sm font-bold text-astu-navy">ASTU AMS</span>
+          </Link>
+          <Link to="/" className="text-sm font-semibold text-on-surface-variant hover:text-astu-navy">
+            Back to Home
+          </Link>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex min-h-[calc(100vh-4rem)]">
+        {/* Left Side - Branding & Features (Desktop) */}
+        <div 
+          className="hidden lg:flex lg:w-1/2 flex-col justify-center p-12 text-white relative overflow-hidden"
+          style={{
+            backgroundImage: 'url(/images/astuget.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-astu-navy/70 backdrop-blur-[2px]"></div>
+          <div className="mx-auto max-w-lg relative z-10">
+            <div className="mb-8">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
+                <GraduationCap className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="mb-3 text-4xl font-bold tracking-tight">
+                Welcome to ASTU-AMS
+              </h1>
+              <p className="text-lg text-white/80">
+                The official alumni management system connecting graduates, employers, and the university community.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/10 backdrop-blur">
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold">{feature.title}</h3>
+                    <p className="text-sm text-white/70">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 rounded-xl bg-white/10 p-6 backdrop-blur">
+              <p className="text-sm font-medium text-white/90">
+                "ASTU-AMS has transformed how we connect with our alumni and track graduate success."
+              </p>
+              <p className="mt-2 text-xs text-white/60">
+                — University Administration
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Auth Form */}
+        <div className="flex w-full items-center justify-center bg-surface p-4 lg:w-1/2 lg:p-12">
+          <div className="w-full max-w-md">
+            {/* Logo */}
+            {showLogo && (
+              <div className="flex justify-center mb-4">
+                <img 
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
+                  alt="ASTU Logo" 
+                  className="h-32 w-32 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.src = "/images/astu-logo.jpeg";
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Title and Subtitle */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-astu-navy mb-2">{title}</h1>
+              <p className="text-sm text-on-surface-variant">{subtitle}</p>
+            </div>
+
+            {/* Mobile Header */}
+            <div className="mb-8 text-center lg:hidden">
+              <div className="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-astu-navy/10">
+                <GraduationCap className="h-8 w-8 text-astu-navy" />
+              </div>
+              <h1 className="mb-2 text-2xl font-bold text-astu-navy">
+                Welcome to ASTU-AMS
+              </h1>
+              <p className="text-sm text-on-surface-variant">
+                The official alumni management system
+              </p>
+            </div>
+
+            {/* Auth Card */}
+            <div className="rounded-xl border border-outline-variant bg-white p-8 shadow-md">
+              {children}
+            </div>
+
+            {/* Mobile Features */}
+            <div className="mt-8 space-y-4 lg:hidden">
+              {features.slice(0, 2).map((feature, index) => (
+                <div key={index} className="flex items-center gap-3 rounded-lg border border-outline-variant bg-white p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/10">
+                    <feature.icon className="h-5 w-5 text-astu-navy" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-astu-navy">{feature.title}</h3>
+                    <p className="text-xs text-on-surface-variant">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
