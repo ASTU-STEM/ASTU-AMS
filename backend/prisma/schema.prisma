@@ -13,6 +13,7 @@ enum Role {
   EMPLOYER
   DEPARTMENT_HEAD
   REGISTRAR
+  ALUMNI_OFFICE
 }
 
 enum SyncStatus {
@@ -24,6 +25,12 @@ enum AlumniStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+enum EmploymentStatus {
+  EMPLOYED
+  UNEMPLOYED
+  SELF_EMPLOYED
 }
 
 enum ApplicationStatus {
@@ -52,6 +59,7 @@ model User {
   departmentHeadProfile DepartmentHeadProfile?
   notifications         Notification[]
   auditLogs        AuditLog[]
+  tracerNotifications TracerNotification[]
 }
 
 model Department {
@@ -90,6 +98,8 @@ model AlumniProfile {
   registrarRecordId String?       @unique
   registrarRecord   RegistrarStudent? @relation(fields: [registrarRecordId], references: [id])
   status         AlumniStatus      @default(INACTIVE)
+  employmentStatus EmploymentStatus @default(UNEMPLOYED)
+  salary         Float?
   isVerified     Boolean           @default(false)
   pendingVerificationCode String?
   verificationCodeExpiresAt DateTime?
@@ -106,8 +116,12 @@ model AlumniProfile {
   experiences    WorkExperience[]
   applications   JobApplication[]
   surveyResponses SurveyResponse[]
+  surveyAssignments SurveyAssignment[]
   documentRequests DocumentRequest[]
   employerFeedback EmployerFeedback[]
+  eventRsvps     EventRSVP[]
+  mentorRequests MentorshipRequest[] @relation("MentorRequests")
+  menteeRequests MentorshipRequest[] @relation("MenteeRequests")
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 }
@@ -136,6 +150,7 @@ model EmployerProfile {
   website     String?
   location    String
   hrContact   String
+  tin         String?            @unique
   logoUrl     String?
   isVerified  Boolean            @default(false)
   jobs        Job[]
@@ -175,37 +190,119 @@ model JobApplication {
   updatedAt   DateTime          @updatedAt
 }
 
+enum SurveyType {
+  SIX_MONTH
+  TWELVE_MONTH
+  EIGHTEEN_MONTH
+  TWENTY_FOUR_MONTH
+  CUSTOM
+}
+
+enum SurveyQuestionType {
+  TEXT
+  TEXTAREA
+  SELECT
+  RADIO
+  CHECKBOX
+  RATING
+  NUMBER
+  DATE
+}
+
+enum AssignmentStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  EXPIRED
+}
+
+enum TracerNotificationType {
+  NEW_SURVEY
+  REMINDER
+  OVERDUE
+}
+
 model Survey {
-  id          String           @id @default(uuid())
+  id              String               @id @default(uuid())
+  title           String
+  description     String
+  type            SurveyType           @default(CUSTOM)
+  milestoneMonths Int?
+  isActive        Boolean              @default(true)
+  isArchived      Boolean              @default(false)
+  sections        SurveySection[]
+  questions       SurveyQuestion[]
+  assignments     SurveyAssignment[]
+  responses       SurveyResponse[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model SurveySection {
+  id          String          @id @default(uuid())
+  surveyId    String
+  survey      Survey          @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   title       String
-  description String
-  type        String           // "SIX_MONTH" | "TWELVE_MONTH" | "TWENTY_FOUR_MONTH"
-  isActive    Boolean          @default(true)
+  description String?
+  order       Int
   questions   SurveyQuestion[]
-  responses   SurveyResponse[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model SurveyQuestion {
-  id           String         @id @default(uuid())
-  surveyId     String
-  survey       Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  questionText String
-  questionType String         // "TEXT" | "SINGLE_CHOICE" | "MULTI_CHOICE" | "RATING"
-  options      String[]       // List of choices (if choice type)
-  order        Int
-  answers      SurveyAnswer[]
+  id              String            @id @default(uuid())
+  surveyId        String
+  survey          Survey            @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  sectionId       String?
+  section         SurveySection?    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  questionText    String
+  questionType    SurveyQuestionType @default(TEXT)
+  required        Boolean           @default(false)
+  placeholder     String?
+  helpText        String?
+  validationRules Json?
+  options         String[]          @default([])
+  order           Int
+  answers         SurveyAnswer[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model SurveyAssignment {
+  id                   String            @id @default(uuid())
+  surveyId             String
+  survey               Survey            @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  alumniId             String
+  alumni               AlumniProfile     @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  status               AssignmentStatus  @default(PENDING)
+  assignedAt           DateTime          @default(now())
+  dueDate              DateTime
+  completedAt          DateTime?
+  sevenDayReminderSent Boolean           @default(false)
+  threeDayReminderSent Boolean           @default(false)
+  overdueReminderSent  Boolean           @default(false)
+  response             SurveyResponse?
+  responseId           String?           @unique
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  tracerNotifications  TracerNotification[]
 }
 
 model SurveyResponse {
-  id          String         @id @default(uuid())
-  surveyId    String
-  survey      Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  alumniId    String
-  alumni      AlumniProfile  @relation(fields: [alumniId], references: [id], onDelete: Cascade)
-  answers     SurveyAnswer[]
-  submittedAt DateTime       @default(now())
+  id           String             @id @default(uuid())
+  surveyId     String
+  survey       Survey             @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  alumniId     String
+  alumni       AlumniProfile      @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  assignment   SurveyAssignment?  @relation(fields: [assignmentId], references: [id])
+  assignmentId String?            @unique
+  answers      SurveyAnswer[]
+  isDraft      Boolean            @default(false)
+  submittedAt  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 }
 
 model SurveyAnswer {
@@ -215,6 +312,21 @@ model SurveyAnswer {
   questionId String
   question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   answerText String         // User input or selected option
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+model TracerNotification {
+  id           String                  @id @default(uuid())
+  userId       String
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignmentId String?
+  assignment   SurveyAssignment?       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  type         TracerNotificationType
+  title        String
+  content      String
+  isRead       Boolean                 @default(false)
+  createdAt    DateTime                @default(now())
 }
 
 model EmployerFeedback {
@@ -288,4 +400,50 @@ model AuditLog {
   details   String
   ipAddress String?
   createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  location    String
+  type        String      // "ONLINE" | "IN_PERSON"
+  createdBy   String      // userId of the ALUMNI_OFFICE/ADMIN who created it
+  rsvps       EventRSVP[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model EventRSVP {
+  id        String        @id @default(uuid())
+  eventId   String
+  event     Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  alumniId  String
+  alumni    AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  status    String        // "GOING" | "NOT_GOING"
+  createdAt DateTime      @default(now())
+
+  @@unique([eventId, alumniId])
+}
+
+model MentorshipRequest {
+  id          String        @id @default(uuid())
+  mentorId    String
+  mentor      AlumniProfile @relation("MentorRequests", fields: [mentorId], references: [id], onDelete: Cascade)
+  menteeId    String
+  mentee      AlumniProfile @relation("MenteeRequests", fields: [menteeId], references: [id], onDelete: Cascade)
+  status      String        // "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED"
+  message     String?       // Introduction message
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([mentorId, menteeId])
+}
+
+model AnalyticsCache {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @default(now()) @updatedAt
+  expiresAt DateTime
 }
