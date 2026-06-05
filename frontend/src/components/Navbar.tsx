@@ -64,13 +64,14 @@ const megaMenus: MegaMenu[] = [
 
 interface SimpleNavItem {
   label: string;
-  sectionId: string;
+  sectionId?: string;
+  route?: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
 const simpleItems: SimpleNavItem[] = [
   { label: "Home", sectionId: "home", icon: HiHome },
-  { label: "Partners", sectionId: "partners", icon: FaUsers },
+  { label: "Partners", route: "/partners", icon: FaUsers },
 ];
 
 const searchItems = [
@@ -166,7 +167,21 @@ export default function Navbar() {
     }
   };
 
-  const handleNavClick = navigateToSection;
+  const handleNavClick = (item: SimpleNavItem) => {
+    setIsMobileNavOpen(false);
+    setOpenMega(null);
+    if (item.route) {
+      navigate(item.route);
+    } else if (item.sectionId) {
+      navigateToSection(item.sectionId);
+    }
+  };
+
+  const handleMegaItemClick = (sectionId: string) => {
+    setIsMobileNavOpen(false);
+    setOpenMega(null);
+    navigateToSection(sectionId);
+  };
 
   const handleMegaEnter = (label: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -235,8 +250,8 @@ export default function Navbar() {
             const Icon = item.icon;
             return (
               <button
-                key={item.sectionId}
-                onClick={() => handleNavClick(item.sectionId)}
+                key={item.sectionId || item.route}
+                onClick={() => handleNavClick(item)}
                 className="relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide text-on-surface-variant hover:text-astu-navy transition-colors duration-200"
               >
                 <Icon className="h-4 w-4" />
@@ -278,7 +293,7 @@ export default function Navbar() {
                         {menu.items.map((item) => (
                           <button
                             key={item.sectionId}
-                            onClick={() => handleNavClick(item.sectionId)}
+                            onClick={() => handleMegaItemClick(item.sectionId)}
                             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-astu-navy/5"
                           >
                             <div>
@@ -386,8 +401,8 @@ export default function Navbar() {
               const Icon = item.icon;
               return (
                 <button
-                  key={item.sectionId}
-                  onClick={() => handleNavClick(item.sectionId)}
+                  key={item.sectionId || item.route}
+                  onClick={() => handleNavClick(item)}
                   className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-base font-bold text-on-surface hover:bg-astu-navy/5 transition-all text-left"
                 >
                   <Icon className="h-5 w-5 text-astu-navy/60" />
@@ -422,7 +437,7 @@ export default function Navbar() {
                       {menu.items.map((item) => (
                         <button
                           key={item.sectionId}
-                          onClick={() => handleNavClick(item.sectionId)}
+                          onClick={() => handleMegaItemClick(item.sectionId)}
                           className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-astu-navy/5 transition-all text-left"
                         >
                           {item.label}

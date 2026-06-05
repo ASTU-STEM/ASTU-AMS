@@ -4,11 +4,14 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 
 import HomePage from "./pages/HomePage";
+import PartnersPage from "./pages/PartnersPage";
 import EmployersPage from "./pages/EmployersPage";
 import PublicInfoPage from "./pages/PublicInfoPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
+import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
+import EmployerRegistrationPage from "./features/auth/pages/EmployerRegistrationPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -23,11 +26,14 @@ function AppContent() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/partners" element={<PartnersPage />} />
         <Route path="/info/:slug" element={<PublicInfoPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />
         <Route path="/employers" element={<EmployersPage />} />
+        <Route path="/employers/register" element={<EmployerRegistrationPage />} />
+        <Route path="/verify-national-id" element={<NationalIdVerificationPage />} />
 
         {/* Role-protected routes */}
         <Route
