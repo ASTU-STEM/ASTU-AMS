@@ -135,21 +135,21 @@ async function main() {
       {
         surveyId: survey6m.id,
         questionText: 'What is your current employment status?',
-        questionType: 'SINGLE_CHOICE',
+        questionType: 'SELECT',
         options: ['Employed', 'Self-employed', 'Continuing education', 'Unemployed'],
         order: 1,
       },
       {
         surveyId: survey6m.id,
         questionText: 'How long did it take you to find a job after graduation?',
-        questionType: 'SINGLE_CHOICE',
+        questionType: 'SELECT',
         options: ['0-3 Months', '4-6 Months', '7-12 Months', 'More than 1 year', 'Not applicable'],
         order: 2,
       },
       {
         surveyId: survey6m.id,
         questionText: 'What is your current monthly gross salary in ETB?',
-        questionType: 'SINGLE_CHOICE',
+        questionType: 'SELECT',
         options: ['Under 10,000', '10,000 - 20,000', '20,001 - 35,000', '35,001 - 50,000', 'Above 50,000'],
         order: 3,
       },
@@ -171,7 +171,7 @@ async function main() {
       {
         surveyId: survey12m.id,
         questionText: 'How relevant was your field of study to your current job?',
-        questionType: 'SINGLE_CHOICE',
+        questionType: 'SELECT',
         options: ['Highly Relevant', 'Somewhat Relevant', 'Unrelated'],
         order: 1,
       },
@@ -191,6 +191,284 @@ async function main() {
       },
     ],
   });
+  // 5. Create Mock Alumni Users and Profiles
+  console.log('Creating mock alumni profiles...');
+  const alumniPassword = await bcrypt.hash('alumni123', 10);
+
+  const alumniData = [
+    {
+      email: 'alice@alumni.com',
+      fullName: 'Alice Johnson',
+      studentId: 'ASTU/SWE/001/20',
+      cgpa: 3.82,
+      graduationYear: 2024,
+      gender: 'female',
+      deptId: swe.id,
+      employmentStatus: 'EMPLOYED' as const,
+      salary: 28000,
+      skills: ['React', 'Node.js', 'PostgreSQL', 'TypeScript', 'Docker'],
+    },
+    {
+      email: 'bob@alumni.com',
+      fullName: 'Bob Smith',
+      studentId: 'ASTU/SWE/002/20',
+      cgpa: 3.51,
+      graduationYear: 2024,
+      gender: 'male',
+      deptId: swe.id,
+      employmentStatus: 'SELF_EMPLOYED' as const,
+      salary: 18000,
+      skills: ['Flutter', 'Firebase', 'Dart', 'TailwindCSS'],
+    },
+    {
+      email: 'charlie@alumni.com',
+      fullName: 'Charlie Davis',
+      studentId: 'ASTU/ECE/003/19',
+      cgpa: 3.15,
+      graduationYear: 2023,
+      gender: 'male',
+      deptId: ece.id,
+      employmentStatus: 'EMPLOYED' as const,
+      salary: 22000,
+      skills: ['Python', 'C++', 'Embedded Systems', 'IoT'],
+    },
+    {
+      email: 'diana@alumni.com',
+      fullName: 'Diana Prince',
+      studentId: 'ASTU/ECE/004/20',
+      cgpa: 3.65,
+      graduationYear: 2024,
+      gender: 'female',
+      deptId: ece.id,
+      employmentStatus: 'UNEMPLOYED' as const,
+      salary: null,
+      skills: ['MATLAB', 'Circuit Design', 'Verilog'],
+    },
+    {
+      email: 'evan@alumni.com',
+      fullName: 'Evan Wright',
+      studentId: 'ASTU/CVE/005/19',
+      cgpa: 3.42,
+      graduationYear: 2023,
+      gender: 'male',
+      deptId: cve.id,
+      employmentStatus: 'EMPLOYED' as const,
+      salary: 16000,
+      skills: ['AutoCAD', 'Civil 3D', 'Project Management'],
+    },
+  ];
+
+  const createdAlumni: any[] = [];
+
+  for (const item of alumniData) {
+    const user = await prisma.user.upsert({
+      where: { email: item.email },
+      update: {},
+      create: {
+        email: item.email,
+        password: alumniPassword,
+        role: Role.ALUMNI,
+        isActive: true,
+      },
+    });
+
+    const profile = await prisma.alumniProfile.upsert({
+      where: { studentId: item.studentId },
+      update: {},
+      create: {
+        userId: user.id,
+        studentId: item.studentId,
+        fullName: item.fullName,
+        email: item.email,
+        cgpa: item.cgpa,
+        graduationYear: item.graduationYear,
+        gender: item.gender,
+        departmentId: item.deptId,
+        status: 'ACTIVE',
+        isVerified: true,
+        employmentStatus: item.employmentStatus,
+        salary: item.salary,
+        skills: item.skills,
+      },
+    });
+
+    createdAlumni.push({ ...profile, email: item.email });
+  }
+
+  // 6. Create Work Experiences
+  console.log('Creating work experiences...');
+  const alice = createdAlumni.find(a => a.email === 'alice@alumni.com');
+  const charlie = createdAlumni.find(a => a.email === 'charlie@alumni.com');
+  const evan = createdAlumni.find(a => a.email === 'evan@alumni.com');
+
+  await prisma.workExperience.create({
+    data: {
+      alumniId: alice.id,
+      companyName: 'Safaricom Ethiopia',
+      position: 'Junior Fullstack Engineer',
+      industry: 'Telecommunications',
+      salaryRange: '25,000 - 35,000 ETB',
+      location: 'Addis Ababa',
+      isCurrent: true,
+      startDate: new Date('2024-09-01'),
+    },
+  });
+
+  await prisma.workExperience.create({
+    data: {
+      alumniId: charlie.id,
+      companyName: 'Ethio Telecom',
+      position: 'Network Engineer',
+      industry: 'Telecommunications',
+      salaryRange: '20,001 - 35,000 ETB',
+      location: 'Addis Ababa',
+      isCurrent: true,
+      startDate: new Date('2023-10-01'),
+    },
+  });
+
+  await prisma.workExperience.create({
+    data: {
+      alumniId: evan.id,
+      companyName: 'Sunshine Construction',
+      position: 'Site Engineer',
+      industry: 'Construction',
+      salaryRange: '10,000 - 20,000 ETB',
+      location: 'Adama',
+      isCurrent: true,
+      startDate: new Date('2023-11-15'),
+    },
+  });
+
+  // 7. Create Employer Feedback
+  console.log('Creating employer feedbacks...');
+  await prisma.employerFeedback.create({
+    data: {
+      employerId: safaricomProfile.id,
+      alumniId: alice.id,
+      technicalSkill: 9,
+      communicationSkill: 8,
+      leadershipSkill: 7,
+      teamworkSkill: 9,
+      problemSolvingSkill: 8,
+      innovationSkill: 8,
+      feedbackText: 'Alice integrates well into our engineering team and delivers high-quality React features.',
+    },
+  });
+
+  // 8. Create Survey Responses
+  console.log('Creating survey assignments and responses...');
+  const questions6m = await prisma.surveyQuestion.findMany({
+    where: { surveyId: survey6m.id },
+    orderBy: { order: 'asc' },
+  });
+
+  const questions12m = await prisma.surveyQuestion.findMany({
+    where: { surveyId: survey12m.id },
+    orderBy: { order: 'asc' },
+  });
+
+  // 6-Month Responses
+  const responseAlumni6m = [
+    {
+      alumni: createdAlumni.find(a => a.email === 'alice@alumni.com'),
+      answers: ['Employed', '0-3 Months', '20,001 - 35,000'],
+    },
+    {
+      alumni: createdAlumni.find(a => a.email === 'bob@alumni.com'),
+      answers: ['Self-employed', '0-3 Months', '10,000 - 20,000'],
+    },
+    {
+      alumni: createdAlumni.find(a => a.email === 'diana@alumni.com'),
+      answers: ['Unemployed', 'Not applicable', 'Under 10,000'],
+    },
+  ];
+
+  for (const record of responseAlumni6m) {
+    const assignment = await prisma.surveyAssignment.create({
+      data: {
+        surveyId: survey6m.id,
+        alumniId: record.alumni.id,
+        status: 'COMPLETED',
+        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+        completedAt: new Date(),
+      },
+    });
+
+    const response = await prisma.surveyResponse.create({
+      data: {
+        surveyId: survey6m.id,
+        alumniId: record.alumni.id,
+        assignmentId: assignment.id,
+        isDraft: false,
+        submittedAt: new Date(),
+      },
+    });
+
+    await prisma.surveyAssignment.update({
+      where: { id: assignment.id },
+      data: { responseId: response.id },
+    });
+
+    for (let i = 0; i < questions6m.length; i++) {
+      await prisma.surveyAnswer.create({
+        data: {
+          responseId: response.id,
+          questionId: questions6m[i].id,
+          answerText: record.answers[i],
+        },
+      });
+    }
+  }
+
+  // 12-Month Responses
+  const responseAlumni12m = [
+    {
+      alumni: createdAlumni.find(a => a.email === 'charlie@alumni.com'),
+      answers: ['Highly Relevant', '8', 'Cloud Computing, DevOps'],
+    },
+    {
+      alumni: createdAlumni.find(a => a.email === 'evan@alumni.com'),
+      answers: ['Highly Relevant', '7', 'BIM Software, Project Management'],
+    },
+  ];
+
+  for (const record of responseAlumni12m) {
+    const assignment = await prisma.surveyAssignment.create({
+      data: {
+        surveyId: survey12m.id,
+        alumniId: record.alumni.id,
+        status: 'COMPLETED',
+        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+        completedAt: new Date(),
+      },
+    });
+
+    const response = await prisma.surveyResponse.create({
+      data: {
+        surveyId: survey12m.id,
+        alumniId: record.alumni.id,
+        assignmentId: assignment.id,
+        isDraft: false,
+        submittedAt: new Date(),
+      },
+    });
+
+    await prisma.surveyAssignment.update({
+      where: { id: assignment.id },
+      data: { responseId: response.id },
+    });
+
+    for (let i = 0; i < questions12m.length; i++) {
+      await prisma.surveyAnswer.create({
+        data: {
+          responseId: response.id,
+          questionId: questions12m[i].id,
+          answerText: record.answers[i],
+        },
+      });
+    }
+  }
 
   console.log('🌱 Seeding completed successfully!');
 }

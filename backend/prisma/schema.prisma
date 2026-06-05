@@ -26,6 +26,12 @@ enum AlumniStatus {
   SUSPENDED
 }
 
+enum EmploymentStatus {
+  EMPLOYED
+  UNEMPLOYED
+  SELF_EMPLOYED
+}
+
 enum ApplicationStatus {
   PENDING
   SHORTLISTED
@@ -52,6 +58,7 @@ model User {
   departmentHeadProfile DepartmentHeadProfile?
   notifications         Notification[]
   auditLogs        AuditLog[]
+  tracerNotifications TracerNotification[]
 }
 
 model Department {
@@ -90,6 +97,8 @@ model AlumniProfile {
   registrarRecordId String?       @unique
   registrarRecord   RegistrarStudent? @relation(fields: [registrarRecordId], references: [id])
   status         AlumniStatus      @default(INACTIVE)
+  employmentStatus EmploymentStatus @default(UNEMPLOYED)
+  salary         Float?
   isVerified     Boolean           @default(false)
   pendingVerificationCode String?
   verificationCodeExpiresAt DateTime?
@@ -106,6 +115,7 @@ model AlumniProfile {
   experiences    WorkExperience[]
   applications   JobApplication[]
   surveyResponses SurveyResponse[]
+  surveyAssignments SurveyAssignment[]
   documentRequests DocumentRequest[]
   employerFeedback EmployerFeedback[]
   createdAt      DateTime          @default(now())
@@ -273,6 +283,7 @@ model SurveyAssignment {
   responseId           String?           @unique
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+  tracerNotifications  TracerNotification[]
 }
 
 model SurveyResponse {
@@ -385,4 +396,11 @@ model AuditLog {
   details   String
   ipAddress String?
   createdAt DateTime @default(now())
+}
+
+model AnalyticsCache {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @default(now()) @updatedAt
+  expiresAt DateTime
 }

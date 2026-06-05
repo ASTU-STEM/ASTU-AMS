@@ -4,7 +4,16 @@ import { ISurveyResponseRepository } from '../../../application/ports/ISurveyRes
 import { Survey, SurveyResponse } from '../../../domain/entities/Survey';
 import { DuplicateSurveyResponseError, InactiveSurveyError, SurveyNotFoundError } from '../../../domain/errors/SurveyErrors';
 
+import prisma, { initPrisma } from '../../../../../core/config/db';
+
 describe('SubmitSurveyResponse Use Case', () => {
+  beforeAll(async () => {
+    await initPrisma();
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
   let mockSurveyRepo: jest.Mocked<ISurveyRepository>;
   let mockRespRepo: jest.Mocked<ISurveyResponseRepository>;
 
