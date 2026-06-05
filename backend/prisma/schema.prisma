@@ -13,6 +13,7 @@ enum Role {
   EMPLOYER
   DEPARTMENT_HEAD
   REGISTRAR
+  ALUMNI_OFFICE
 }
 
 enum SyncStatus {
@@ -118,6 +119,9 @@ model AlumniProfile {
   surveyAssignments SurveyAssignment[]
   documentRequests DocumentRequest[]
   employerFeedback EmployerFeedback[]
+  eventRsvps     EventRSVP[]
+  mentorRequests MentorshipRequest[] @relation("MentorRequests")
+  menteeRequests MentorshipRequest[] @relation("MenteeRequests")
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 }
@@ -396,6 +400,45 @@ model AuditLog {
   details   String
   ipAddress String?
   createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  location    String
+  type        String      // "ONLINE" | "IN_PERSON"
+  createdBy   String      // userId of the ALUMNI_OFFICE/ADMIN who created it
+  rsvps       EventRSVP[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model EventRSVP {
+  id        String        @id @default(uuid())
+  eventId   String
+  event     Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  alumniId  String
+  alumni    AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  status    String        // "GOING" | "NOT_GOING"
+  createdAt DateTime      @default(now())
+
+  @@unique([eventId, alumniId])
+}
+
+model MentorshipRequest {
+  id          String        @id @default(uuid())
+  mentorId    String
+  mentor      AlumniProfile @relation("MentorRequests", fields: [mentorId], references: [id], onDelete: Cascade)
+  menteeId    String
+  mentee      AlumniProfile @relation("MenteeRequests", fields: [menteeId], references: [id], onDelete: Cascade)
+  status      String        // "PENDING" | "ACCEPTED" | "REJECTED" | "COMPLETED"
+  message     String?       // Introduction message
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([mentorId, menteeId])
 }
 
 model AnalyticsCache {
