@@ -7,9 +7,11 @@ interface AuthLayoutProps {
   title: string;
   subtitle: string;
   showLogo?: boolean;
+  maxWidth?: string;
+  rightWidth?: string;
 }
 
-export default function AuthLayout({ children, title, subtitle, showLogo = true }: AuthLayoutProps) {
+export default function AuthLayout({ children, title, subtitle, showLogo = true, maxWidth = 'max-w-md', rightWidth = 'lg:w-1/2' }: AuthLayoutProps) {
   const features = [
     {
       icon: Users,
@@ -102,8 +104,8 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true 
         </div>
 
         {/* Right Side - Auth Form */}
-        <div className="flex w-full items-center justify-center bg-surface p-4 lg:w-1/2 lg:p-12">
-          <div className="w-full max-w-md">
+        <div className={`flex w-full items-center justify-center bg-surface p-4 ${rightWidth} lg:p-12`}>
+          <div className={`w-full ${maxWidth}`}>
             {/* Logo */}
             {showLogo && (
               <div className="flex justify-center mb-4">
