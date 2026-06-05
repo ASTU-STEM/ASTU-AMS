@@ -582,3 +582,57 @@ The specialized agents are strictly instructed via system instructions:
 🛡️ Why this approach is used:
 Accuracy (Rule #1 compliance): LLMs are prone to math errors and hallucinations. By querying the database first and passing the exact numbers to the context, the AI only performs reasoning, summarizing, and recommending rather than calculations.
 Security: The AI is never given direct access to execute raw SQL or Prisma queries against the database, protecting it from SQL injection or unauthorized access.
+
+
+
+so how to run this?
+3:10 PM
+Here is how you can run the system and its tests locally:
+
+⚙️ 1. Prerequisites & Environment Setup
+The project already contains a .env file with a configured PostgreSQL database connection.
+
+To run with the Mock LLM (default): You do not need to configure anything. The system will automatically intercept AI calls and return realistic mock responses (ideal for testing and offline development).
+To run with Live AI: Add your OpenRouter API key to the bottom of the c:\Users\wu\OneDrive\Desktop\ASTU-AMS\backend\.env file:
+env
+OPENROUTER_API_KEY="your_openrouter_api_key_here"
+OPENROUTER_MODEL="google/gemini-2.5-flash"  # Optional, default model
+🚀 2. Run Command Steps
+Open your terminal in c:\Users\wu\OneDrive\Desktop\ASTU-AMS\backend and run the following:
+
+Step A: Install dependencies
+bash
+npm install
+Step B: Generate the Prisma client & sync schemas
+bash
+npx prisma generate
+npx prisma db push
+Step C: Seed initial mock data (departments, courses, survey questions, and mock records)
+bash
+npm run prisma:seed
+Step D: Start the development server
+bash
+npm run dev
+The server will boot up on http://localhost:5000.
+
+🧪 3. Run the Tests
+To run the full test suite (unit, integration, and E2E chatbot workflows):
+
+bash
+npx jest
+This runs the Jest suite and verifies all 74 tests across 20 suites.
+
+📡 4. How to Test the API Endpoints (Postman or curl)
+Once the server is running on http://localhost:5000, you can authenticate as an Admin to ask chatbot questions or request reports:
+
+Example: Chatbot Query (POST /api/ai/chat)
+First login or generate a valid Admin JWT token.
+Send a POST request to http://localhost:5000/api/ai/chat:
+Headers: Authorization: Bearer <your_admin_jwt_token>
+Body (JSON):
+json
+{
+  "message": "Compare CS and Software Engineering"
+}
+Example: Download accreditation report PDF (POST /api/ai/reports/accreditation)
+Send a POST request to http://localhost:5000/api/ai/reports/accreditation with the same Authorization header to receive a structured PDF download.
