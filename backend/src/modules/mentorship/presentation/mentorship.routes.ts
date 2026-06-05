@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { requireAuth } from '../../../../core/middlewares/auth.middleware';
-import { requireAlumni } from '../../../../core/middlewares/role.middleware';
+import { authenticateJWT } from '../../../core/middleware/auth.middleware';
+import { requireRoles } from '../../../core/middleware/role.middleware';
+import { Role } from '@prisma/client';
 import {
   requestMentorshipController,
   respondMentorshipController,
@@ -11,7 +12,7 @@ import {
 const router = Router();
 
 // All mentorship routes require ALUMNI role
-router.use(requireAuth, requireAlumni);
+router.use(authenticateJWT, requireRoles([Role.ALUMNI]));
 
 // Mentee endpoints
 router.post('/request', requestMentorshipController);

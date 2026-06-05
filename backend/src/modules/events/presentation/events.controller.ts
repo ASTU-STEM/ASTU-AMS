@@ -10,7 +10,6 @@ import {
 } from '../application/use-cases/ManageEvents';
 import { createEventSchema, updateEventSchema, rsvpSchema } from './events.validation';
 import { EventError } from '../domain/errors/EventErrors';
-import { AppError } from '../../../../core/errors/AppError';
 
 const repo = new PrismaEventRepository();
 
@@ -21,7 +20,7 @@ export const createEventController = async (req: Request, res: Response, next: N
     const event = await useCase.execute({
       ...validatedData,
       date: new Date(validatedData.date),
-      createdBy: req.user!.id
+      createdBy: (req as any).user.userId
     });
     res.status(201).json({ success: true, data: event });
   } catch (error) {
@@ -37,10 +36,9 @@ export const updateEventController = async (req: Request, res: Response, next: N
       dataToUpdate.date = new Date(validatedData.date) as any;
     }
     const useCase = new UpdateEvent(repo);
-    const event = await useCase.execute(req.params.eventId, req.user!.id, dataToUpdate as any);
+    const event = await useCase.execute(req.params.eventId, (req as any).user.userId, dataToUpdate as any);
     res.json({ success: true, data: event });
   } catch (error) {
-    if (error instanceof EventError) return next(new AppError(error.message, error.statusCode));
     next(error);
   }
 };
@@ -48,10 +46,9 @@ export const updateEventController = async (req: Request, res: Response, next: N
 export const deleteEventController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const useCase = new DeleteEvent(repo);
-    await useCase.execute(req.params.eventId, req.user!.id);
+    await useCase.execute(req.params.eventId, (req as any).user.userId);
     res.json({ success: true, message: 'Event deleted successfully' });
   } catch (error) {
-    if (error instanceof EventError) return next(new AppError(error.message, error.statusCode));
     next(error);
   }
 };
@@ -70,10 +67,9 @@ export const rsvpController = async (req: Request, res: Response, next: NextFunc
   try {
     const { status } = rsvpSchema.parse(req.body);
     const useCase = new RSVPToEvent(repo);
-    const rsvp = await useCase.execute(req.params.eventId, req.alumni!.id, status);
+    const rsvp = await useCase.execute(req.params.eventId, (req as any).user.alumniProfileId, status);
     res.json({ success: true, data: rsvp });
   } catch (error) {
-    if (error instanceof EventError) return next(new AppError(error.message, error.statusCode));
     next(error);
   }
 };
@@ -84,7 +80,6 @@ export const getAttendeesController = async (req: Request, res: Response, next: 
     const attendees = await useCase.execute(req.params.eventId);
     res.json({ success: true, data: attendees });
   } catch (error) {
-    if (error instanceof EventError) return next(new AppError(error.message, error.statusCode));
     next(error);
   }
 };
