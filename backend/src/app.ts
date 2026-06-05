@@ -46,7 +46,7 @@ import surveyRouter from './modules/surveys/presentation/surveys.routes';
 import analyticsRouter from './modules/analytics/presentation/analytics.routes';
 import documentsRouter from './modules/documents/presentation/documents.routes';
 import notificationsRouter from './modules/notifications/presentation/notifications.routes';
-import auditRouter from './modules/audit/presentation/audit.routes';
+import aiRouter from './modules/ai/presentation/ai.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
@@ -57,7 +57,7 @@ app.use('/api/surveys', surveyRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/notifications', notificationsRouter);
-app.use('/api/audit', auditRouter);
+app.use('/api/ai', aiRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {

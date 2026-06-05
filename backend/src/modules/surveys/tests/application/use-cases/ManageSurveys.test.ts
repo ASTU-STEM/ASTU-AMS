@@ -4,10 +4,18 @@ import { Survey } from '../../../domain/entities/Survey';
 
 describe('ManageSurveys Use Cases', () => {
   let mockRepo: jest.Mocked<ISurveyRepository>;
-  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', true, []);
+  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', 6, true, false, []);
 
   beforeEach(() => {
-    mockRepo = { findById: jest.fn(), findAll: jest.fn(), create: jest.fn() };
+    mockRepo = {
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      archive: jest.fn(),
+      clone: jest.fn(),
+      findByMilestone: jest.fn(),
+    } as unknown as jest.Mocked<ISurveyRepository>;
   });
 
   describe('CreateSurvey', () => {

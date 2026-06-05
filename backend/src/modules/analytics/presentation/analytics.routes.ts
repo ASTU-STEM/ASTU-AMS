@@ -7,9 +7,21 @@ import { asyncHandler } from '../../../core/utils/asyncHandler';
 
 const router = Router();
 
+// Secure all endpoints to ADMIN, REGISTRAR, and DEPARTMENT_HEAD
 router.use(authenticateJWT);
 router.use(requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]));
 
-router.get('/report', asyncHandler(AnalyticsController.getReport));
+// Legacy mapping to prevent breaks
+router.get('/report', asyncHandler(AnalyticsController.getDashboard));
+
+// New analytics endpoints
+router.get('/dashboard', asyncHandler(AnalyticsController.getDashboard));
+router.get('/employment', asyncHandler(AnalyticsController.getEmployment));
+router.get('/employers', asyncHandler(AnalyticsController.getEmployers));
+router.get('/departments', asyncHandler(AnalyticsController.getDepartments));
+router.get('/skills', asyncHandler(AnalyticsController.getSkills));
+router.get('/tracer', asyncHandler(AnalyticsController.getTracer));
+router.get('/insights', asyncHandler(AnalyticsController.getInsights));
+router.get('/recommendations', asyncHandler(AnalyticsController.getRecommendations));
 
 export default router;
