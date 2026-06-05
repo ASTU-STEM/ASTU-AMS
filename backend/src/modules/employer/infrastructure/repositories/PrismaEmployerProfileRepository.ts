@@ -18,4 +18,24 @@ export class PrismaEmployerProfileRepository implements IEmployerProfileReposito
     });
     return updated as any as EmployerProfile;
   }
+
+  async create(data: Omit<EmployerProfile, 'id' | 'isVerified'>): Promise<EmployerProfile> {
+    const created = await prisma.employerProfile.create({
+      data: data as any,
+    });
+    return created as any as EmployerProfile;
+  }
+
+  async delete(userId: string): Promise<void> {
+    const profile = await this.findByUserId(userId);
+    if (profile) {
+      await prisma.employerProfile.delete({
+        where: { id: profile.id },
+      });
+      await prisma.user.update({
+        where: { id: userId },
+        data: { isActive: false },
+      });
+    }
+  }
 }

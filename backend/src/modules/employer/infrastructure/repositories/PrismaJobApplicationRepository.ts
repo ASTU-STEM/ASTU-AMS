@@ -5,7 +5,10 @@ import { ApplicationStatus } from '@prisma/client';
 
 export class PrismaJobApplicationRepository implements IJobApplicationRepository {
   async findById(applicationId: string): Promise<JobApplication | null> {
-    const app = await prisma.jobApplication.findUnique({ where: { id: applicationId } });
+    const app = await prisma.jobApplication.findUnique({
+      where: { id: applicationId },
+      include: { job: { include: { employer: true } }, alumni: { include: { department: true } } },
+    });
     if (!app) return null;
     return app as any as JobApplication;
   }
@@ -26,6 +29,15 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
     return apps as any as JobApplication[];
   }
 
+  async findByEmployerId(employerId: string): Promise<JobApplication[]> {
+    const apps = await prisma.jobApplication.findMany({
+      where: { job: { employerId } },
+      include: { job: true, alumni: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return apps as any as JobApplication[];
+  }
+
   async create(data: Omit<JobApplication, 'id'>): Promise<JobApplication> {
     const created = await prisma.jobApplication.create({
       data: {
@@ -40,6 +52,14 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
     const updated = await prisma.jobApplication.update({
       where: { id: applicationId },
       data: { status: status as ApplicationStatus },
+    });
+    return updated as any as JobApplication;
+  }
+
+  async update(applicationId: string, data: Partial<JobApplication>): Promise<JobApplication> {
+    const updated = await prisma.jobApplication.update({
+      where: { id: applicationId },
+      data: data as any,
     });
     return updated as any as JobApplication;
   }

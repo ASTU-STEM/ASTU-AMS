@@ -11,24 +11,46 @@ const router = Router();
 
 router.use(authenticateJWT);
 
-// Alumni Routes
-router.get('/jobs', requireRoles([Role.ALUMNI]), asyncHandler(EmployerController.searchJobs));
-router.post('/jobs/:jobId/apply', requireRoles([Role.ALUMNI]), upload.single('resume'), asyncHandler(EmployerController.applyForJob));
+// Alumni/Public job views & application
+router.get('/jobs', requireRoles([Role.ALUMNI, Role.ADMIN]), asyncHandler(EmployerController.searchJobs));
+router.post('/jobs/:jobId/apply', requireRoles([Role.ALUMNI, Role.ADMIN]), upload.single('resume'), asyncHandler(EmployerController.applyForJob));
 
-// Employer Routes
-router.use(requireRoles([Role.EMPLOYER]));
+// Dashboard (Employer, Admin, Registrar, Department Head for analytics)
+router.get('/dashboard', requireRoles([Role.EMPLOYER, Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(EmployerController.getDashboardStats));
+
+// Talent Search Engine (Employer and Admin)
+router.get('/talent', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.searchTalent));
+router.get('/talent/:alumniId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getAlumnusProfile));
 
 // Profile
-router.get('/profile', asyncHandler(EmployerController.getProfile));
-router.put('/profile', asyncHandler(EmployerController.updateProfile));
+router.post('/profile', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.createProfile));
+router.get('/profile', requireRoles([Role.EMPLOYER, Role.ADMIN, Role.REGISTRAR]), asyncHandler(EmployerController.getProfile));
+router.put('/profile', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.updateProfile));
+router.delete('/profile', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.deleteProfile));
 
-// Jobs
-router.post('/jobs', asyncHandler(EmployerController.createJob));
-router.get('/my-jobs', asyncHandler(EmployerController.getMyJobs));
-router.put('/jobs/:jobId', asyncHandler(EmployerController.updateJob));
-router.delete('/jobs/:jobId', asyncHandler(EmployerController.deleteJob));
+// Jobs Management
+router.post('/jobs', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.createJob));
+router.get('/my-jobs', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getMyJobs));
+router.put('/jobs/:jobId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.updateJob));
+router.delete('/jobs/:jobId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.deleteJob));
+router.post('/jobs/:jobId/publish', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.publishJob));
+router.post('/jobs/:jobId/close', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.closeJob));
+router.post('/jobs/:jobId/reopen', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.reopenJob));
 
-// Applications
-router.put('/applications/:applicationId/status', asyncHandler(EmployerController.updateApplicationStatus));
+// Applications Management
+router.get('/applications', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getApplications));
+router.get('/applications/:applicationId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getApplicationDetail));
+router.patch('/applications/:applicationId/status', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.updateApplicationStatus));
+router.put('/applications/:applicationId/status', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.updateApplicationStatus));
+
+// Interviews Management
+router.post('/interviews', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.scheduleInterview));
+router.get('/interviews', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getEmployerInterviews));
+router.put('/interviews/:interviewId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.updateInterview));
+router.delete('/interviews/:interviewId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.cancelInterview));
+
+// Feedback System
+router.post('/feedback', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.submitFeedback));
+router.get('/feedback', requireRoles([Role.EMPLOYER, Role.ADMIN, Role.REGISTRAR]), asyncHandler(EmployerController.getMyFeedbacks));
 
 export default router;

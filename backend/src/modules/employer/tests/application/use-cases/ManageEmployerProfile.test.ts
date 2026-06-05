@@ -8,7 +8,7 @@ describe('ManageEmployerProfile Use Cases', () => {
   const mockProfile = new EmployerProfile('emp1', 'usr1', 'Tech Corp', 'IT', 'City', 'HR', null, null, true);
 
   beforeEach(() => {
-    mockRepo = { findByUserId: jest.fn(), update: jest.fn() };
+    mockRepo = { findByUserId: jest.fn(), update: jest.fn() } as any;
   });
 
   describe('GetEmployerProfile', () => {

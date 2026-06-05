@@ -15,9 +15,9 @@ describe('ManageJobApplications Use Cases', () => {
   const mockApp = new JobApplication('app1', 'job1', 'alumni1', 'PENDING', null, null);
 
   beforeEach(() => {
-    mockAppRepo = { findById: jest.fn(), findByJobId: jest.fn(), findByAlumniId: jest.fn(), create: jest.fn(), updateStatus: jest.fn() };
+    mockAppRepo = { findById: jest.fn(), findByJobId: jest.fn(), findByAlumniId: jest.fn(), create: jest.fn(), updateStatus: jest.fn() } as any;
     mockJobRepo = { findById: jest.fn(), findByEmployerId: jest.fn(), search: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() };
-    mockEmpRepo = { findByUserId: jest.fn(), update: jest.fn() };
+    mockEmpRepo = { findByUserId: jest.fn(), update: jest.fn() } as any;
   });
 
   describe('ApplyForJob', () => {
