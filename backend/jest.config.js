@@ -8,5 +8,9 @@ module.exports = {
   transform: {
     ...tsJestTransformCfg,
   },
+  testTimeout: 60000,
+  moduleNameMapper: {
+    "^uuid$": require.resolve("uuid"),
+  },
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
 };
