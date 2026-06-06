@@ -85,4 +85,9 @@ export class EmailService {
     const html = `<p>Hello,</p><p>This is a reminder to complete the pending survey: <strong>${surveyTitle}</strong>.</p><p>It is due by <strong>${dueDate.toLocaleDateString()}</strong>.</p><p>Your feedback is vital to ASTU. Please login to ASTU AMS to complete it.</p>`;
     return this.sendMail({ to: email, subject, text, html });
   }
+
+  async sendGenericNotification(email: string, subject: string, message: string) {
+    const html = `<p>Hello,</p><p>${message}</p><p>Login to ASTU AMS for more details.</p>`;
+    return this.sendMail({ to: email, subject, text: message, html });
+  }
 }
