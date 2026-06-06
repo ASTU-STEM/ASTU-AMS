@@ -1,6 +1,9 @@
 import { IJobRepository } from '../ports/IJobRepository';
 import { IEmployerProfileRepository } from '../ports/IEmployerProfileRepository';
 import { EmployerNotFoundError, JobNotFoundError, UnauthorizedEmployerActionError } from '../../domain/errors/EmployerErrors';
+import { NotificationDispatcher } from '../../../notifications/application/services/NotificationDispatcher';
+
+const dispatcher = new NotificationDispatcher();
 
 export class CreateJob {
   constructor(
@@ -19,6 +22,11 @@ export class CreateJob {
       isActive: true,
       deadline: data.deadline ? new Date(data.deadline) : new Date(),
     });
+
+    if (job.status === 'PUBLISHED') {
+      await dispatcher.broadcastJobAlert(job.title, employer.companyName, job.id);
+    }
+
     return job;
   }
 }
@@ -83,7 +91,11 @@ export class PublishJob {
       throw new UnauthorizedEmployerActionError('You can only publish your own jobs.');
     }
 
-    return await this.jobRepo.update(jobId, { status: 'PUBLISHED' });
+    const updated = await this.jobRepo.update(jobId, { status: 'PUBLISHED' });
+    
+    await dispatcher.broadcastJobAlert(updated.title, employer.companyName, updated.id);
+    
+    return updated;
   }
 }
 

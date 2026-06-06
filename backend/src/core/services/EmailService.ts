@@ -7,6 +7,7 @@ export interface MailOptions {
   text: string;
   html?: string;
   from?: string;
+  bcc?: string[];
 }
 
 export class EmailService {
@@ -31,6 +32,7 @@ export class EmailService {
       subject: options.subject,
       text: options.text,
       html: options.html,
+      bcc: options.bcc,
     };
 
     const info = await this.transporter.sendMail(message);
@@ -55,6 +57,32 @@ export class EmailService {
     const subject = 'ASTU Employer Registration Submitted';
     const text = `Your employer registration for ${companyName} has been submitted and is pending admin approval.`;
     const html = `<p>Hello,</p><p>Your employer registration for <strong>${companyName}</strong> has been submitted successfully.</p><p>It is currently pending admin approval.</p>`;
+    return this.sendMail({ to: email, subject, text, html });
+  }
+
+  async sendJobAlert(emails: string[], jobTitle: string, companyName: string, jobId: string) {
+    if (emails.length === 0) return;
+    const subject = `New Job Alert: ${jobTitle} at ${companyName}`;
+    const text = `A new job matching your profile has been posted: ${jobTitle} at ${companyName}. Login to ASTU AMS to view and apply.`;
+    const html = `<p>Hello,</p><p>A new job has been posted that might interest you:</p><h3>${jobTitle} at ${companyName}</h3><p>Login to ASTU AMS to view the details and apply.</p>`;
+    // Send bulk by passing an array to "bcc". Bcc is better for privacy.
+    return this.sendMail({ to: env.SMTP_FROM, bcc: emails, subject, text, html, from: env.SMTP_FROM });
+  }
+
+  async sendEventNotification(emails: string[], eventTitle: string, eventDate: Date, location: string) {
+    if (emails.length === 0) return;
+    const subject = `Upcoming ASTU Event: ${eventTitle}`;
+    const dateStr = eventDate.toLocaleDateString();
+    const text = `You are invited to ${eventTitle} on ${dateStr} at ${location}. Login to ASTU AMS to RSVP.`;
+    const html = `<p>Hello,</p><p>You are invited to an upcoming ASTU Alumni event:</p><h3>${eventTitle}</h3><p><strong>Date:</strong> ${dateStr}<br/><strong>Location:</strong> ${location}</p><p>Login to ASTU AMS to RSVP.</p>`;
+    // Use bcc for bulk send
+    return this.sendMail({ to: env.SMTP_FROM, bcc: emails, subject, text, html, from: env.SMTP_FROM });
+  }
+
+  async sendSurveyReminder(email: string, surveyTitle: string, dueDate: Date) {
+    const subject = `Reminder: Pending ASTU Survey - ${surveyTitle}`;
+    const text = `Please complete the survey "${surveyTitle}" by ${dueDate.toLocaleDateString()}. Your feedback is important to us.`;
+    const html = `<p>Hello,</p><p>This is a reminder to complete the pending survey: <strong>${surveyTitle}</strong>.</p><p>It is due by <strong>${dueDate.toLocaleDateString()}</strong>.</p><p>Your feedback is vital to ASTU. Please login to ASTU AMS to complete it.</p>`;
     return this.sendMail({ to: email, subject, text, html });
   }
 }
