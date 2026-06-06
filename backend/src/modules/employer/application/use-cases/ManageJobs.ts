@@ -65,3 +65,66 @@ export class DeleteJob {
     await this.jobRepo.delete(jobId);
   }
 }
+
+export class PublishJob {
+  constructor(
+    private readonly jobRepo: IJobRepository,
+    private readonly empRepo: IEmployerProfileRepository
+  ) {}
+
+  async execute(userId: string, jobId: string) {
+    const employer = await this.empRepo.findByUserId(userId);
+    if (!employer) throw new EmployerNotFoundError();
+
+    const job = await this.jobRepo.findById(jobId);
+    if (!job) throw new JobNotFoundError();
+
+    if (job.employerId !== employer.id) {
+      throw new UnauthorizedEmployerActionError('You can only publish your own jobs.');
+    }
+
+    return await this.jobRepo.update(jobId, { status: 'PUBLISHED' });
+  }
+}
+
+export class CloseJob {
+  constructor(
+    private readonly jobRepo: IJobRepository,
+    private readonly empRepo: IEmployerProfileRepository
+  ) {}
+
+  async execute(userId: string, jobId: string) {
+    const employer = await this.empRepo.findByUserId(userId);
+    if (!employer) throw new EmployerNotFoundError();
+
+    const job = await this.jobRepo.findById(jobId);
+    if (!job) throw new JobNotFoundError();
+
+    if (job.employerId !== employer.id) {
+      throw new UnauthorizedEmployerActionError('You can only close your own jobs.');
+    }
+
+    return await this.jobRepo.update(jobId, { status: 'CLOSED' });
+  }
+}
+
+export class ReopenJob {
+  constructor(
+    private readonly jobRepo: IJobRepository,
+    private readonly empRepo: IEmployerProfileRepository
+  ) {}
+
+  async execute(userId: string, jobId: string, deadline: Date) {
+    const employer = await this.empRepo.findByUserId(userId);
+    if (!employer) throw new EmployerNotFoundError();
+
+    const job = await this.jobRepo.findById(jobId);
+    if (!job) throw new JobNotFoundError();
+
+    if (job.employerId !== employer.id) {
+      throw new UnauthorizedEmployerActionError('You can only reopen your own jobs.');
+    }
+
+    return await this.jobRepo.update(jobId, { status: 'PUBLISHED', deadline });
+  }
+}

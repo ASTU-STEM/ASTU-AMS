@@ -18,9 +18,19 @@ export class PrismaJobRepository implements IJobRepository {
   }
 
   async search(criteria: any): Promise<Job[]> {
-    // For simplicity, returning active jobs. In reality, apply filters from criteria.
+    const { department, employmentType, location, experienceLevel, skills } = criteria;
+    const whereClause: any = { status: 'PUBLISHED' };
+
+    if (department) whereClause.department = department;
+    if (employmentType) whereClause.employmentType = employmentType;
+    if (location) whereClause.location = { contains: location, mode: 'insensitive' };
+    if (experienceLevel) whereClause.experienceLevel = experienceLevel;
+    if (skills && Array.isArray(skills) && skills.length > 0) {
+      whereClause.skillsRequired = { hasSome: skills };
+    }
+
     const jobs = await prisma.job.findMany({
-      where: { isActive: true },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
