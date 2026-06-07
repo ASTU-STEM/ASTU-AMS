@@ -42,6 +42,7 @@ enum ApplicationStatus {
   HIRED
   REJECTED
   ACCEPTED
+  WITHDRAWN
 }
 
 enum JobStatus {
@@ -140,6 +141,9 @@ model AlumniProfile {
   eventRsvps     EventRSVP[]
   mentorRequests MentorshipRequest[] @relation("MentorRequests")
   menteeRequests MentorshipRequest[] @relation("MenteeRequests")
+  savedJobs      SavedJob[]
+  jobViews       JobView[]
+  jobRecommendations JobRecommendation[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 }
@@ -189,6 +193,8 @@ model Job {
   title              String
   description        String
   salary             String?
+  salaryMin          Float?           // Numeric min for range filtering
+  salaryMax          Float?           // Numeric max for range filtering
   deadline           DateTime
   experienceRequired Int              @default(0) // in years
   skillsRequired     String[]
@@ -196,6 +202,9 @@ model Job {
   employmentType     String           // e.g. "FULL_TIME", "PART_TIME", "INTERNSHIP"
   isActive           Boolean          @default(true)
   applications       JobApplication[]
+  savedBy            SavedJob[]
+  views              JobView[]
+  recommendations    JobRecommendation[]
   responsibilities   String?
   requirements       String?
   experienceLevel    String?
@@ -203,6 +212,12 @@ model Job {
   status             JobStatus        @default(PUBLISHED)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+
+  @@index([status, isActive])
+  @@index([employmentType])
+  @@index([department])
+  @@index([deadline])
+  @@index([createdAt])
 }
 
 model JobApplication {
@@ -515,4 +530,48 @@ model HiringEvent {
   @@index([employerId])
   @@index([alumniId])
   @@index([departmentId])
+}
+
+// ─── Job Board Models ────────────────────────────────────────────────
+
+model SavedJob {
+  id        String        @id @default(uuid())
+  alumniId  String
+  alumni    AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([alumniId, jobId])
+  @@index([alumniId])
+  @@index([jobId])
+}
+
+model JobView {
+  id        String         @id @default(uuid())
+  jobId     String
+  job       Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  viewerIp  String?
+  alumniId  String?
+  alumni    AlumniProfile? @relation(fields: [alumniId], references: [id], onDelete: SetNull)
+  createdAt DateTime       @default(now())
+
+  @@index([jobId])
+  @@index([alumniId])
+}
+
+model JobRecommendation {
+  id        String        @id @default(uuid())
+  alumniId  String
+  alumni    AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  score     Float
+  reasons   String[]
+  createdAt DateTime      @default(now())
+  expiresAt DateTime
+
+  @@unique([alumniId, jobId])
+  @@index([alumniId])
+  @@index([score])
 }

@@ -89,4 +89,85 @@ export class NotificationDispatcher {
       console.error('Failed to send survey reminder:', error);
     }
   }
+
+  // ─── Job Board Notifications ──────────────────────────────────────────────
+
+  /**
+   * Notify employer when an alumni applies to their job.
+   */
+  async notifyNewApplication(employerId: string, alumniName: string, jobTitle: string) {
+    try {
+      // Find the employer's user account via their profile
+      const employer = await prisma.employerProfile.findUnique({
+        where: { id: employerId },
+        include: { user: true },
+      });
+
+      if (employer?.userId) {
+        await prisma.notification.create({
+          data: {
+            userId: employer.userId,
+            title: `New Application: ${jobTitle}`,
+            content: `${alumniName} has applied for the position "${jobTitle}".`,
+          },
+        });
+
+        if (employer.user?.email) {
+          await this.emailService.sendGenericNotification(
+            employer.user.email,
+            `New Application for ${jobTitle}`,
+            `${alumniName} has submitted an application for "${jobTitle}". Log in to review their profile.`
+          ).catch(() => {}); // Email failures are non-critical
+        }
+      }
+    } catch (error) {
+      console.error('Failed to notify new application:', error);
+    }
+  }
+
+  /**
+   * Notify alumni when their application status changes.
+   */
+  async notifyApplicationStatusChanged(alumniUserId: string, jobTitle: string, companyName: string, newStatus: string) {
+    try {
+      const statusMessages: Record<string, string> = {
+        'REVIEWED': `Your application for "${jobTitle}" at ${companyName} has been reviewed.`,
+        'SHORTLISTED': `Great news! You have been shortlisted for "${jobTitle}" at ${companyName}.`,
+        'INTERVIEW_SCHEDULED': `An interview has been scheduled for "${jobTitle}" at ${companyName}. Check your email for details.`,
+        'OFFERED': `Congratulations! You have received an offer for "${jobTitle}" at ${companyName}!`,
+        'HIRED': `Congratulations! You have been hired for "${jobTitle}" at ${companyName}!`,
+        'REJECTED': `Unfortunately, your application for "${jobTitle}" at ${companyName} was not successful.`,
+      };
+
+      const content = statusMessages[newStatus] || `Your application status for "${jobTitle}" has been updated to ${newStatus}.`;
+
+      await prisma.notification.create({
+        data: {
+          userId: alumniUserId,
+          title: `Application Update: ${jobTitle}`,
+          content,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to notify application status change:', error);
+    }
+  }
+
+  /**
+   * Notify alumni when a new job matches their skills.
+   */
+  async notifySkillMatchedJob(userId: string, jobTitle: string, companyName: string, matchReasons: string[]) {
+    try {
+      const reasonsText = matchReasons.join(', ');
+      await prisma.notification.create({
+        data: {
+          userId,
+          title: `Job Match: ${jobTitle}`,
+          content: `A new job "${jobTitle}" at ${companyName} matches your profile (${reasonsText}). Check it out!`,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to notify skill matched job:', error);
+    }
+  }
 }
