@@ -7,6 +7,7 @@ import AdminSidebar from './AdminSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
+import AdminAiAssistant from '../components/AdminAiAssistant';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -68,6 +69,7 @@ export default function AdminLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('adminSidebarCollapsed') === 'true');
   const [helpOpen, setHelpOpen] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const location = useLocation();
 
   const toggleSidebarCollapse = () => {
@@ -222,6 +224,7 @@ export default function AdminLayout() {
         onNavigate={() => setMobileSidebarOpen(false)}
         collapsed={sidebarCollapsed}
         onToggleCollapse={toggleSidebarCollapse}
+        onOpenAiAssistant={() => setAiAssistantOpen(true)}
       />
 
        <div
@@ -344,6 +347,7 @@ export default function AdminLayout() {
     </div>
 
     <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+    <AdminAiAssistant isOpen={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
     </>
   );
 }

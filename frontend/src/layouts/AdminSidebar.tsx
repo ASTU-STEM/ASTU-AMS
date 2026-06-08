@@ -19,6 +19,7 @@ import {
   Settings,
   Shield,
   ShieldCheck,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
@@ -30,6 +31,7 @@ interface AdminSidebarProps {
   onNavigate?: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  onOpenAiAssistant?: () => void;
 }
 
 interface EnhancedNavItem extends AdminNavItem {
@@ -65,7 +67,7 @@ const sections = [
   { key: 'settings', label: 'Configuration' },
 ];
 
-export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse }: AdminSidebarProps) {
+export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse, onOpenAiAssistant }: AdminSidebarProps) {
   const location = useLocation();
 
   const getSectionItems = (sectionKey: string) =>
@@ -179,6 +181,19 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
         <div className="relative border-t border-white/10 px-4 py-4">
           {!collapsed ? (
             <>
+              {/* AI Copilot Launch Button */}
+              <button
+                type="button"
+                onClick={onOpenAiAssistant}
+                className="mb-4 flex w-full items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/10 border border-[#E8A020]/30 hover:border-[#E8A020]/50 px-4 py-3 text-sm font-medium text-slate-200 transition-all hover:from-amber-500/20 hover:to-orange-500/20 shadow-[0_0_12px_rgba(232,160,32,0.08)] group"
+              >
+                <Sparkles className="h-4.5 w-4.5 text-[#E8A020] animate-pulse shrink-0" />
+                <div className="text-left flex-1 min-w-0">
+                  <div className="text-xs font-extrabold uppercase tracking-wider text-[#E8A020]">ASTU AI Copilot</div>
+                  <div className="text-[9px] text-slate-400 truncate">Tracer &amp; Analytics Assistant</div>
+                </div>
+              </button>
+
               <div className="flex items-center gap-3 rounded-[10px] bg-white/5 px-3 py-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30 shrink-0">
                   SA
@@ -203,6 +218,19 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
+              {/* AI Copilot Launch Button Collapsed */}
+              <button
+                type="button"
+                onClick={onOpenAiAssistant}
+                className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-[#E8A020]/30 hover:border-[#E8A020]/50 text-slate-200 transition-all group relative shrink-0 shadow-[0_0_10px_rgba(232,160,32,0.1)]"
+                title="ASTU AI Copilot"
+              >
+                <Sparkles className="h-4.5 w-4.5 text-[#E8A020] animate-pulse" />
+                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                  ASTU AI Copilot
+                </div>
+              </button>
+
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30" title="System Administrator">
                 SA
               </div>
