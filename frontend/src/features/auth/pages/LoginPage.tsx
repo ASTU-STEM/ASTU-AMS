@@ -59,7 +59,7 @@ export default function LoginPage() {
         rememberMe: values.rememberMe,
       });
 
-      if (response.success && response.data) {
+      if (response.ok && response.data) {
         toast.success('Login successful!');
         handleLoginSuccess(response.data.user.role);
       } else {
@@ -163,15 +163,12 @@ export default function LoginPage() {
                 onChange={handleChange}
               />
               
-              <button
-                type="button"
-                onClick={() => {
-                  toast('Password reset feature coming soon', { icon: 'ℹ️' });
-                }}
+              <Link
+                to="/forgot-password"
                 className="text-sm font-semibold text-astu-navy hover:underline"
               >
                 Forgot password?
-              </button>
+              </Link>
             </div>
 
             <AuthButton

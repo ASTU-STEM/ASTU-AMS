@@ -16,6 +16,7 @@ export interface SignupData {
   batch?: string;
   phone?: string;
   activationCode?: string;
+  hasNoAstuEmail?: boolean;
 }
 
 export interface AuthResponse {

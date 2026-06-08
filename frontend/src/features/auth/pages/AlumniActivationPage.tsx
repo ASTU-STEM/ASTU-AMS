@@ -47,7 +47,7 @@ export default function AlumniActivationPage() {
       const token = searchParams.get('token') || '';
       const response = await authService.resetPassword(token, values.password);
 
-      if (response.success) {
+      if (response.ok) {
         setIsSuccess(true);
         toast.success('Account activated successfully!');
       } else {

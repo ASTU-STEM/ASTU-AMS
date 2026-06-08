@@ -40,9 +40,11 @@ export default function SignupPage() {
         activationCode: values.activationCode,
       });
 
-      if (response.success) {
+      if (response.ok) {
         toast.success('Registration successful! Please check your email for verification.');
         navigate('/login');
+      } else {
+        toast.error(response.message || 'Registration failed.');
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.');

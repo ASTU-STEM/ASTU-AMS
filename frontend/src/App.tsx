@@ -11,7 +11,13 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
+import VerifyNationalIdCallbackPage from "./features/auth/pages/VerifyNationalIdCallbackPage";
 import EmployerRegistrationPage from "./features/auth/pages/EmployerRegistrationPage";
+import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
+import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
+import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -19,6 +25,8 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
+import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
+import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
 
 function AppContent() {
   return (
@@ -33,7 +41,17 @@ function AppContent() {
         <Route path="/activate-account" element={<AlumniActivationPage />} />
         <Route path="/employers" element={<EmployersPage />} />
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
-        <Route path="/verify-national-id" element={<NationalIdVerificationPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/support" element={<SupportPage />} />
+
+        {/* Verification routes protected by VerificationRouteGuard */}
+        <Route element={<VerificationRouteGuard />}>
+          <Route path="/verify-otp" element={<VerifyOtpPage />} />
+          <Route path="/verify-national-id" element={<NationalIdVerificationPage />} />
+          <Route path="/verify-manual" element={<VerifyManualPage />} />
+          <Route path="/verify-national-id/callback" element={<VerifyNationalIdCallbackPage />} />
+        </Route>
 
         {/* Role-protected routes */}
         <Route
@@ -99,7 +117,9 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <RegistrationProvider>
+        <AppContent />
+      </RegistrationProvider>
     </Provider>
   );
 }
