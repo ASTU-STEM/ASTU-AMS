@@ -1,41 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
 import toast from 'react-hot-toast';
-import { Shield } from 'lucide-react';
+import { Shield, ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import AuthLayout from '../../../layouts/AuthLayout';
-import AuthInput from '../components/AuthInput';
-import AuthButton from '../components/AuthButton';
-import * as yup from 'yup';
-
-const nationalIdSchema = yup.object().shape({
-  nationalId: yup
-    .string()
-    .required('National ID is required')
-    .min(10, 'National ID must be at least 10 characters'),
-});
-
-interface NationalIdFormData {
-  nationalId: string;
-}
+import PrimaryButton from '../components/PrimaryButton';
+import InlineAlert from '../components/InlineAlert';
+import SupportLink from '../components/SupportLink';
+import authService from '../services/auth.service';
+import { useRegistration } from '../contexts/RegistrationContext';
 
 export default function NationalIdVerificationPage() {
   const navigate = useNavigate();
+  const { registrationDetails } = useRegistration();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const initialValues: NationalIdFormData = {
-    nationalId: '',
-  };
-
-  const handleSubmit = async (values: NationalIdFormData) => {
+  const handleDiditVerification = async () => {
     setIsLoading(true);
+    setErrorMsg(null);
     try {
-      // TODO: Call National ID verification API using didit.me
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('National ID verified successfully!');
-      navigate('/register');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'National ID verification failed. Please try again.');
+      const studentId = registrationDetails?.studentId || 'DEFAULT';
+      const result = await authService.startDiditVerification(studentId);
+      
+      if (result.ok && result.data.verificationUrl) {
+        toast.loading('Redirecting to didit.me verification session...', { duration: 2500 });
+        
+        // Redirect the user to the session-specific verification URL
+        setTimeout(() => {
+          window.location.href = result.data.verificationUrl;
+        }, 1500);
+      } else {
+        setErrorMsg(result.message || 'Could not initialize Didit verification session.');
+      }
+    } catch (err) {
+      setErrorMsg('Didit.me verification service is temporarily unavailable.');
     } finally {
       setIsLoading(false);
     }
@@ -44,66 +42,88 @@ export default function NationalIdVerificationPage() {
   return (
     <AuthLayout
       title="Verify with National ID"
-      subtitle="Alternative verification using your National ID"
+      subtitle="Fast, secure identity check using your national ID"
       showLogo={true}
     >
-      <Formik
-        initialValues={initialValues}
-        validationSchema={nationalIdSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ values, errors, touched, handleChange, handleBlur }) => (
-          <Form className="space-y-5">
-            <div className="flex items-center gap-3 rounded-lg bg-astu-navy/5 p-4 border border-astu-navy/10">
-              <Shield className="h-5 w-5 text-astu-navy" />
-              <p className="text-xs text-on-surface">
-                We'll verify your identity using didit.me National ID verification
-              </p>
-            </div>
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 rounded-lg bg-astu-navy/5 p-4 border border-astu-navy/10">
+          <Shield className="h-5 w-5 text-astu-navy flex-shrink-0" />
+          <p className="text-xs text-on-surface leading-relaxed">
+            We verify your identity in seconds using your official Ethiopian National ID card through **didit.me**.
+          </p>
+        </div>
 
-            <Field
-              name="nationalId"
-              as={AuthInput}
-              label="National ID"
-              type="text"
-              placeholder="Enter your National ID number"
-              value={values.nationalId}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={errors.nationalId}
-              touched={touched.nationalId}
-              disabled={isLoading}
-              required
-              autoComplete="off"
-            />
+        {/* Step Indicator */}
+        <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-slate-50 p-3 rounded-lg border border-outline-variant">
+          <span>Step 2 of 3: Verify identity</span>
+          <span className="bg-astu-navy/10 text-astu-navy px-2 py-0.5 rounded-full text-[10px]">National ID</span>
+        </div>
 
-            <div className="rounded-lg bg-astu-navy/5 p-4">
-              <p className="text-xs text-on-surface-variant">
-                <strong>Note:</strong> Your National ID will be verified securely through didit.me. 
-                This information is used only for identity verification purposes.
-              </p>
-            </div>
-
-            <AuthButton
-              type="submit"
-              loading={isLoading}
-              disabled={isLoading}
-            >
-              Verify National ID
-            </AuthButton>
-
-            <div className="text-center">
+        {/* Failure / Unavailable state */}
+        {errorMsg && (
+          <InlineAlert 
+            type="error"
+            title="Verification Failed"
+            message={errorMsg}
+            action={
               <button
                 type="button"
-                onClick={() => navigate('/register')}
-                className="text-sm text-on-surface-variant hover:text-astu-navy"
+                onClick={() => navigate('/verify-manual')}
+                className="inline-flex items-center gap-1 text-xs font-bold text-red-800 hover:underline"
               >
-                ← Back to OTP verification
+                Try Manual Verification Instead
+                <ArrowRight className="h-3 w-3" />
               </button>
-            </div>
-          </Form>
+            }
+          />
         )}
-      </Formik>
+
+        <div className="space-y-4">
+          <PrimaryButton
+            onClick={handleDiditVerification}
+            loading={isLoading}
+            disabled={isLoading}
+            type="button"
+            className="flex items-center justify-center gap-2"
+          >
+            <span>Continue with Didit</span>
+            <ExternalLink className="h-4 w-4" />
+          </PrimaryButton>
+
+          <div className="rounded-lg bg-astu-navy/5 p-4 border border-outline-variant text-[11px] text-on-surface-variant leading-relaxed space-y-1.5">
+            <p className="font-semibold text-astu-navy">🔒 Privacy Note</p>
+            <p>
+              Your National ID data is processed securely by didit.me. We do not store your physical ID card image or biometric information. Only identity verification confirmation is sent to the university.
+            </p>
+          </div>
+        </div>
+
+        {/* Navigation & Fallbacks */}
+        <div className="pt-2 border-t border-outline-variant flex flex-col items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/verify-manual')}
+            className="text-xs text-astu-navy hover:underline font-semibold"
+          >
+            I want to verify using documents manually →
+          </button>
+
+          <SupportLink 
+            lastErrorCode="DIDIT_PAGE"
+            label="Need assistance? Contact support"
+            className="mt-1"
+          />
+
+          <button
+            type="button"
+            onClick={() => navigate('/verify-otp')}
+            className="text-xs text-on-surface-variant hover:text-astu-navy font-semibold inline-flex items-center gap-1.5 mt-2"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to OTP verification
+          </button>
+        </div>
+      </div>
     </AuthLayout>
   );
 }
