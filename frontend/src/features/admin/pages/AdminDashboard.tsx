@@ -42,6 +42,7 @@ import {
   YAxis,
   Area,
   Legend,
+  LabelList,
 } from 'recharts';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
