@@ -4,15 +4,11 @@ import {
   BarChart3,
   Bell,
   Briefcase,
-  CalendarDays,
   ClipboardList,
   FileBarChart,
-  GalleryHorizontal,
   GraduationCap,
-  Layers3,
   LayoutDashboard,
   LogOut,
-  Newspaper,
   PanelLeftClose,
   PanelLeftOpen,
   ScrollText,
@@ -42,10 +38,6 @@ interface EnhancedNavItem extends AdminNavItem {
 
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard, exact: true, section: 'main', tooltip: 'Operational command center' },
-  { label: 'Homepage CMS', path: '/admin/homepage', icon: Layers3, section: 'content', tooltip: 'Manage homepage content' },
-  { label: 'News & Community', path: '/admin/content', icon: Newspaper, section: 'content', tooltip: 'News, announcements & community' },
-  { label: 'Gallery', path: '/admin/gallery', icon: GalleryHorizontal, section: 'content', tooltip: 'Photo & media gallery' },
-  { label: 'Events & Workshops', path: '/admin/events', icon: CalendarDays, section: 'content', tooltip: 'Manage events & workshops' },
   { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield, section: 'system', tooltip: 'Advanced system modules' },
   { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart, section: 'system', tooltip: 'Generate & export reports' },
   { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', badge: '142', tooltip: '142 pending verifications' },
@@ -62,7 +54,6 @@ const navItems: EnhancedNavItem[] = [
 
 const sections = [
   { key: 'main', label: 'Main Navigation' },
-  { key: 'content', label: 'Content Management' },
   { key: 'system', label: 'System Administration' },
   { key: 'settings', label: 'Configuration' },
 ];

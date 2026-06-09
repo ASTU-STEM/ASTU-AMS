@@ -2,13 +2,23 @@ import React from 'react';
 import type { AdminBadgeProps } from '../types/admin.types';
 
 const variantClasses: Record<NonNullable<AdminBadgeProps['variant']>, string> = {
-  default: 'bg-[#003580]/10 text-[#003580] border-[#003580]/15',
-  info: 'bg-[#003580]/10 text-[#003580] border-[#003580]/15',
-  success: 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15',
-  warning: 'bg-[#EF9F27]/10 text-[#8A5B08] border-[#EF9F27]/20',
-  danger: 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15',
-  neutral: 'bg-slate-100 text-slate-600 border-slate-200',
-  purple: 'bg-violet-100 text-violet-700 border-violet-200',
+  default: 'bg-blue-50/70 text-blue-700',
+  info: 'bg-blue-50/70 text-blue-700',
+  success: 'bg-emerald-50/70 text-emerald-700',
+  warning: 'bg-amber-50/70 text-amber-700',
+  danger: 'bg-rose-50/70 text-rose-700',
+  neutral: 'bg-slate-100 text-slate-600',
+  purple: 'bg-violet-50/70 text-violet-700',
+  published: 'bg-emerald-50/70 text-emerald-700',
+  draft: 'bg-slate-100 text-slate-500',
+  scheduled: 'bg-blue-50/70 text-blue-700',
+  featured: 'bg-violet-50/70 text-violet-700',
+  pinned: 'bg-amber-50/70 text-amber-700',
+  'needs-review': 'bg-orange-50/70 text-orange-700',
+  archived: 'bg-slate-100 text-slate-400',
+  amber: 'bg-amber-50/70 text-amber-700',
+  'purple-soft': 'bg-violet-50/70 text-violet-600',
+  emerald: 'bg-emerald-50/70 text-emerald-700',
 };
 
 export default function AdminBadge({
@@ -22,7 +32,7 @@ export default function AdminBadge({
   return (
     <span
       className={[
-        'inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold leading-none',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition-all',
         variantClasses[variant],
         className,
       ].join(' ')}

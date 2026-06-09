@@ -17,6 +17,7 @@ const QUICK_LOGIN_ROLES = [
   { role: 'REGISTRAR', label: 'Registrar', color: 'bg-amber-600' },
   { role: 'DEPARTMENT_HEAD', label: 'Dept Head', color: 'bg-purple-600' },
   { role: 'ADMIN', label: 'Admin', color: 'bg-red-600' },
+  { role: 'CMS_MANAGER', label: 'CMS Mgr', color: 'bg-emerald-600' },
 ] as const;
 
 const roleRoutes: Record<string, string> = {
@@ -25,6 +26,7 @@ const roleRoutes: Record<string, string> = {
   REGISTRAR: '/registrar/dashboard',
   DEPARTMENT_HEAD: '/department/dashboard',
   ADMIN: '/admin/dashboard',
+  CMS_MANAGER: '/cms/dashboard',
 };
 
 export default function LoginPage() {

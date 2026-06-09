@@ -44,10 +44,6 @@ class AdminRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/admin/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Admin' }, { label: 'Dashboard' }] },
-  '/admin/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'Admin' }, { label: 'Homepage' }] },
-  '/admin/content': { title: 'News & Community', breadcrumb: [{ label: 'Admin' }, { label: 'Content' }] },
-  '/admin/gallery': { title: 'Gallery', breadcrumb: [{ label: 'Admin' }, { label: 'Gallery' }] },
-  '/admin/events': { title: 'Events & Workshops', breadcrumb: [{ label: 'Admin' }, { label: 'Events' }] },
   '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
   '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },
@@ -328,7 +324,7 @@ export default function AdminLayout() {
                   SA
                 </div>
                 <div className="hidden text-left sm:block">
-                  <div className="text-sm font-medium text-[var(--text-primary)]">{user?.name ?? 'System Administrator'}</div>
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">Super Admin</div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-slate-400" />

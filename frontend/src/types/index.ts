@@ -9,7 +9,7 @@ export interface User {
   updatedAt: string;
 }
 
-export type UserRole = 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPARTMENT_HEAD' | 'ADMIN' | 'SUPER_ADMIN';
+export type UserRole = 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPARTMENT_HEAD' | 'ADMIN' | 'SUPER_ADMIN' | 'CMS_MANAGER';
 
 export interface AuthState {
   user: User | null;

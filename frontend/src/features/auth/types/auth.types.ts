@@ -1,4 +1,4 @@
-export type UserRole = 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPARTMENT_HEAD' | 'ADMIN';
+export type UserRole = 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPARTMENT_HEAD' | 'ADMIN' | 'CMS_MANAGER';
 
 export interface LoginCredentials {
   emailOrStudentId: string;

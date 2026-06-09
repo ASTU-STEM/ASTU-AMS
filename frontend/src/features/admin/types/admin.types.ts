@@ -47,7 +47,7 @@ export interface AdminModalProps {
 export interface AdminBadgeProps {
   children?: ReactNode;
   label?: ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'purple';
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'purple' | 'published' | 'draft' | 'scheduled' | 'featured' | 'pinned' | 'needs-review' | 'archived' | 'amber' | 'purple-soft' | 'emerald';
   className?: string;
 }
 
@@ -57,6 +57,7 @@ export interface AdminPageHeaderProps {
   breadcrumb?: AdminBreadcrumbItem[];
   breadcrumbs?: AdminBreadcrumbItem[];
   actions?: ReactNode;
+  className?: string;
 }
 
 export interface AdminDataTableProps<T extends Record<string, unknown>> {

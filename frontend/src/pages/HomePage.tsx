@@ -1028,6 +1028,29 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section id="faq" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+          <div className="mb-10 text-center reveal">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">FAQ</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Frequently Asked Questions</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+              Common questions about ASTU-AMS, tracer studies, and alumni services.
+            </p>
+          </div>
+          <div className="mx-auto max-w-3xl space-y-3">
+            {faqItems.map((item, idx) => (
+              <details key={idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant bg-white overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-astu-navy hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
+                  <span>{item.question}</span>
+                  <HelpCircle className="h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 group-open:rotate-180" />
+                </summary>
+                <div className="border-t border-outline-variant px-5 py-4 text-sm leading-relaxed text-on-surface-variant">
+                  {item.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
         <section id="career-opportunities" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="reveal rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)]">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">

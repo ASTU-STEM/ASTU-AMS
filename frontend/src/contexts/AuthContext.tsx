@@ -18,6 +18,7 @@ const MOCK_USERS: Record<string, User> = {
   REGISTRAR: { id: 'reg-001', email: 'registrar@astu.edu.et', firstName: 'Abebe', lastName: 'Assefa', role: 'REGISTRAR', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
   DEPARTMENT_HEAD: { id: 'dept-001', email: 'cs.head@astu.edu.et', firstName: 'Meseret', lastName: 'Alemu', role: 'DEPARTMENT_HEAD', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
   ADMIN: { id: 'adm-001', email: 'admin@astu.edu.et', firstName: 'System', lastName: 'Administrator', role: 'ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  CMS_MANAGER: { id: 'cms-mgr-001', email: 'cms@astu.edu.et', firstName: 'Content', lastName: 'Manager', role: 'CMS_MANAGER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
 };
 
 const normalizeRole = (role?: string | null): UserRole | null => {
@@ -29,6 +30,7 @@ const normalizeRole = (role?: string | null): UserRole | null => {
     case 'DEPARTMENT_HEAD': return 'DEPARTMENT_HEAD';
     case 'ADMIN': return 'ADMIN';
     case 'SUPER_ADMIN': return 'SUPER_ADMIN';
+    case 'CMS_MANAGER': return 'CMS_MANAGER';
     default: return null;
   }
 };
