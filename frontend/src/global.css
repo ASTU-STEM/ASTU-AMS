@@ -735,3 +735,49 @@ a {
   animation: scroll-loop 30s linear infinite;
   width: fit-content;
 }
+
+/* ───────────────────────────────────────────────────────────
+   Phone Input Styles Override (react-phone-number-input)
+   ─────────────────────────────────────────────────────────── */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e8edf5;
+  background-color: #ffffff;
+  padding: 8px 14px;
+  transition: all 0.2s ease-in-out;
+}
+
+.PhoneInput:focus-within {
+  border-color: #003580;
+  box-shadow: 0 0 0 2px rgba(0, 53, 128, 0.2);
+}
+
+.PhoneInputInput {
+  flex: 1;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 0.875rem !important;
+  color: var(--text-primary) !important;
+  padding: 4px 0;
+  width: 100%;
+}
+
+.PhoneInputCountrySelect {
+  cursor: pointer;
+}
+
+.dark .PhoneInput {
+  border-color: #2a2d3a;
+  background-color: #1a1d27;
+}
+
+.dark .PhoneInput:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+

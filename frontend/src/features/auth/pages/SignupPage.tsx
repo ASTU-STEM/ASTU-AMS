@@ -58,13 +58,6 @@ export default function SignupPage() {
       title="Create Your Account"
       subtitle="Register as a verified ASTU alumni"
     >
-      <div className="flex justify-center mb-6">
-        <img 
-          src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg" 
-          alt="ASTU Logo" 
-          className="h-20 w-20 object-contain"
-        />
-      </div>
       <Formik
         initialValues={initialValues}
         validationSchema={signupSchema}

@@ -104,7 +104,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
         </div>
 
         {/* Right Side - Auth Form */}
-        <div className={`flex w-full items-center justify-center bg-surface p-4 ${rightWidth} lg:p-12`}>
+        <div className={`flex w-full items-center justify-center bg-surface p-4 ${rightWidth} sm:p-8 lg:p-12`}>
           <div className={`w-full ${maxWidth}`}>
             {/* Logo */}
             {showLogo && (
@@ -112,7 +112,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
                 <img 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
                   alt="ASTU Logo" 
-                  className="h-32 w-32 object-contain"
+                  className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 object-contain"
                   onError={(e) => {
                     e.currentTarget.src = "/images/astu-logo.jpeg";
                   }}
@@ -121,42 +121,14 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
             )}
 
             {/* Title and Subtitle */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-astu-navy mb-2">{title}</h1>
-              <p className="text-sm text-on-surface-variant">{subtitle}</p>
-            </div>
-
-            {/* Mobile Header */}
-            <div className="mb-8 text-center lg:hidden">
-              <div className="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-astu-navy/10">
-                <GraduationCap className="h-8 w-8 text-astu-navy" />
-              </div>
-              <h1 className="mb-2 text-2xl font-bold text-astu-navy">
-                Welcome to ASTU-AMS
-              </h1>
-              <p className="text-sm text-on-surface-variant">
-                The official alumni management system
-              </p>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-astu-navy mb-1.5">{title}</h1>
+              <p className="text-xs sm:text-sm text-on-surface-variant px-2">{subtitle}</p>
             </div>
 
             {/* Auth Card */}
-            <div className="rounded-xl border border-outline-variant bg-white p-8 shadow-md">
+            <div className="rounded-xl border border-outline-variant bg-white p-5 sm:p-8 shadow-sm">
               {children}
-            </div>
-
-            {/* Mobile Features */}
-            <div className="mt-8 space-y-4 lg:hidden">
-              {features.slice(0, 2).map((feature, index) => (
-                <div key={index} className="flex items-center gap-3 rounded-lg border border-outline-variant bg-white p-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/10">
-                    <feature.icon className="h-5 w-5 text-astu-navy" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-astu-navy">{feature.title}</h3>
-                    <p className="text-xs text-on-surface-variant">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>

@@ -382,7 +382,7 @@ export default function Navbar() {
 
       {isMobileNavOpen && (
         <div className="border-t border-outline-variant bg-white px-4 py-4 lg:hidden shadow-lg">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex flex-col gap-2 mb-4">
             <div className="relative flex-1">
               <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant" />
               <input
@@ -394,6 +394,21 @@ export default function Navbar() {
                 type="text"
               />
             </div>
+            {filteredSearch.length > 0 && (
+              <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-md max-h-60 overflow-y-auto">
+                {filteredSearch.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => handleSearchSelect(item)}
+                    className="flex w-full items-center border-b border-outline-variant/50 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-astu-navy/5 transition-colors"
+                  >
+                    <span className="font-semibold text-on-surface">
+                      {item.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">

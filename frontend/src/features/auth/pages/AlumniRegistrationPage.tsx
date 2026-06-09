@@ -168,7 +168,7 @@ export default function AlumniRegistrationPage() {
         }
         navigate('/verify-otp');
       } else {
-        toast.error(response.error?.message || 'Registration failed.');
+        toast.error(response.message || 'Registration failed.');
       }
     } catch (error) {
       toast.error('Registration failed. Please try again.');
@@ -196,7 +196,7 @@ export default function AlumniRegistrationPage() {
       title="Register Here"
       subtitle="Create your alumni account"
       showLogo={true}
-      maxWidth="max-w-7xl"
+      maxWidth="max-w-5xl"
       rightWidth="lg:w-1/2"
     >
       <div className="mb-6 text-center">
@@ -462,7 +462,6 @@ export default function AlumniRegistrationPage() {
                       onChange={(value) => setFieldValue('phone', value)}
                       placeholder="+251 911 123 456"
                       disabled={isLoading}
-                      className="w-full border rounded px-3 py-2 text-sm"
                     />
                     {touched.phone && errors.phone && (
                       <p className="text-xs text-astu-red">{errors.phone as string}</p>
@@ -507,7 +506,7 @@ export default function AlumniRegistrationPage() {
                           style={{ width: `${(strength.score / 5) * 100}%` }}
                         />
                       </div>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-[10px] text-on-surface-variant Pl-0 list-none">
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-[10px] text-on-surface-variant pl-0 list-none">
                         {passwordRules.map((rule, idx) => (
                           <li key={idx} className="flex items-center gap-1">
                             {rule.met ? (
