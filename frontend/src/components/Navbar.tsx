@@ -382,6 +382,41 @@ export default function Navbar() {
 
       {isMobileNavOpen && (
         <div className="border-t border-outline-variant bg-white px-4 py-4 lg:hidden shadow-lg">
+          {/* Mobile Quick Action Headers */}
+          <div className="mb-4 pb-4 border-b border-outline-variant/60">
+            {!user ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="rounded-lg border border-outline-variant px-3 py-2.5 text-sm font-bold text-astu-navy text-center hover:bg-astu-navy/5"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setIsMobileNavOpen(false)}
+                  className="rounded-lg bg-astu-navy px-3 py-2.5 text-sm font-bold text-white text-center hover:brightness-95"
+                >
+                  Join Network
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-on-surface-variant font-medium">Logged in</span>
+                <button
+                  onClick={() => {
+                    setIsMobileNavOpen(false);
+                    handleLogout();
+                  }}
+                  className="rounded-lg border border-astu-red px-3 py-1.5 text-xs font-bold text-astu-red hover:bg-astu-red/5"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col gap-2 mb-4">
             <div className="relative flex-1">
               <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant" />
@@ -463,37 +498,6 @@ export default function Navbar() {
                 </div>
               );
             })}
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-outline-variant/60">
-            {!user ? (
-              <div className="grid gap-2">
-                <Link
-                  to="/login"
-                  onClick={() => setIsMobileNavOpen(false)}
-                  className="rounded-lg border border-outline-variant px-3 py-3 text-base font-bold text-astu-navy text-center hover:bg-astu-navy/5"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setIsMobileNavOpen(false)}
-                  className="rounded-lg bg-astu-navy px-3 py-3 text-base font-bold text-white text-center"
-                >
-                  Join Alumni Network
-                </Link>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  setIsMobileNavOpen(false);
-                  handleLogout();
-                }}
-                className="w-full rounded-lg border border-astu-red px-3 py-3 text-base font-bold text-astu-red hover:bg-astu-red/5"
-              >
-                Sign Out
-              </button>
-            )}
           </div>
         </div>
       )}

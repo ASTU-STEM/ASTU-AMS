@@ -68,12 +68,12 @@ export default function PartnersPage() {
         <div className="relative mx-auto max-w-[1440px] px-4 py-24 md:px-8 md:py-32">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
-              <Building2 className="h-5 w-5 text-astu-teal" />
+              <Building2 className="h-5 w-5 text-astu-red" />
               <span className="text-sm font-semibold text-white">Employer Partnership Program</span>
             </div>
             <h1 className="mb-6 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
               Partner with ASTU to Access{' '}
-              <span className="text-astu-teal">Top Graduates</span>
+              <span className="text-[#FFD700]">Top Graduates</span>
             </h1>
             <p className="mb-8 text-lg leading-relaxed text-slate-200 md:text-xl">
               Connect with verified alumni talent, post job opportunities, and shape the future of 
@@ -82,13 +82,13 @@ export default function PartnersPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <button
                 onClick={() => navigate('/employers/register')}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-astu-teal px-8 py-4 text-base font-semibold text-white hover:bg-astu-teal/90 transition-all hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-astu-teal/20"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-astu-red px-8 py-4 text-base font-semibold text-white hover:bg-astu-red/90 transition-all hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-astu-red/20"
               >
                 Register as Employer
                 <ArrowRight className="h-5 w-5" />
               </button>
               <button
-                onClick={() => navigate('/employers')}
+                onClick={() => navigate('/login')}
                 className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white/30 bg-white/10 px-8 py-4 text-base font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 backdrop-blur-sm"
               >
                 Employer Login
@@ -174,8 +174,8 @@ export default function PartnersPage() {
               <ul className="space-y-4">
                 {features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-astu-teal/10">
-                      <CheckCircle className="h-4 w-4 text-astu-teal" />
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-astu-green/10">
+                      <CheckCircle className="h-4 w-4 text-astu-green" />
                     </div>
                     <span className="text-base font-medium text-on-surface">{feature}</span>
                   </li>
@@ -190,7 +190,7 @@ export default function PartnersPage() {
                 </p>
                 <button
                   onClick={() => navigate('/employers/register')}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-astu-teal px-6 py-3 text-base font-semibold text-white hover:bg-astu-teal/90 transition-all hover:scale-105"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-astu-red px-6 py-3 text-base font-semibold text-white hover:bg-astu-red/90 transition-all hover:scale-105"
                 >
                   Register Now
                   <ArrowRight className="h-5 w-5" />
@@ -242,7 +242,7 @@ export default function PartnersPage() {
           </p>
           <button
             onClick={() => navigate('/employers/register')}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-astu-teal px-8 py-4 text-base font-semibold text-white hover:bg-astu-teal/90 transition-all hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-astu-teal/20"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-astu-red px-8 py-4 text-base font-semibold text-white hover:bg-astu-red/90 transition-all hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-astu-red/20"
           >
             Register Your Organization
             <ArrowRight className="h-5 w-5" />
