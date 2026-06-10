@@ -104,6 +104,30 @@ export const authService = {
     }
   },
 
+  // ==================== EMPLOYER REGISTRATION ====================
+  async registerEmployer(data: any): Promise<ApiResult<{ success: boolean; message: string }>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/employer/register', data);
+      return { 
+        ok: true, 
+        data: { 
+          success: response.data.success,
+          message: response.data.message
+        } 
+      };
+    } catch (error) {
+      let message = 'Employer registration failed. Please try again.';
+      let errorCode = 'EMPLOYER_REG_ERROR';
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const resData = error.response.data as any;
+        message = resData.message || message;
+        errorCode = resData.errorCode || errorCode;
+      }
+      return { ok: false, errorCode, message };
+    }
+  },
+
+
   // ==================== LOGOUT ====================
   async logout(): Promise<void> {
     try {

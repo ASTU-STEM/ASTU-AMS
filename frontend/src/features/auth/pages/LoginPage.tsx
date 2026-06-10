@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   const handleQuickLogin = (role: string) => {
     login(role as any);
-    toast.success(`Logged in as ${role}`);
+    toast.success(`Logged in as ${role}`, { id: 'login-success' });
     handleLoginSuccess(role);
   };
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
       });
 
       if (response.ok && response.data) {
-        toast.success('Login successful!');
+        toast.success('Login successful!', { id: 'login-success' });
         handleLoginSuccess(response.data.user.role);
       } else {
         toast.error(response.message || 'Login failed. Please check your credentials.');

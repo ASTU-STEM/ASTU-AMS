@@ -46,10 +46,7 @@ export class LoginUser {
       throw new AccountPendingApprovalError();
     }
 
-    if (user.role === Role.EMPLOYER && !data.isEmployerLoginFlow) {
-      throw new Error('Employers use the separate employer login page');
-    }
-
+    // Employers now use the same login page as others, so no strict isEmployerLoginFlow check is needed.
     const isPasswordValid = await bcrypt.compare(data.password, user.password as string);
     if (!isPasswordValid) {
       throw new InvalidCredentialsError();

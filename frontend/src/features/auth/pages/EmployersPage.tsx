@@ -44,7 +44,7 @@ export default function EmployersPage() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast.success('Login successful!');
+      toast.success('Login successful!', { id: 'login-success' });
       navigate('/employer/dashboard');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed. Please try again.');

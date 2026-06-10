@@ -50,8 +50,7 @@ export class AuthController {
   static async registerEmployer(req: Request, res: Response, next: NextFunction) {
     try {
       const parsedData = registerEmployerSchema.parse(req.body);
-      const diditSvc = new DiditService();
-      const useCase = new RegisterEmployer(userRepository, auditLogRepository, diditSvc, emailService);
+      const useCase = new RegisterEmployer(userRepository, auditLogRepository, emailService);
       const result = await useCase.execute(parsedData, req.ip || 'unknown');
       return sendSuccess(res, 'Employer registration submitted successfully! Please wait for admin approval.', result, 201);
     } catch (err) {

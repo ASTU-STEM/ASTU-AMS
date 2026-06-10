@@ -3,14 +3,12 @@ import { IAuditLogRepository } from '../ports/IAuditLogRepository';
 import bcrypt from 'bcryptjs';
 import prisma from '../../../../core/config/db';
 import { Role } from '@prisma/client';
-import { DiditService } from '../../infrastructure/services/DiditService';
 import { EmailService } from '../../../../core/services/EmailService';
 
 export class RegisterEmployer {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly auditLogRepository: IAuditLogRepository,
-    private readonly diditService: DiditService,
     private readonly emailService: EmailService
   ) {}
 
@@ -25,9 +23,12 @@ export class RegisterEmployer {
       throw new Error('A valid TIN is required for employer registration.');
     }
 
-    const verification = await this.diditService.verifyCompanyTin(data.tin, data.companyName);
-    if (!verification.valid) {
-      throw new Error('Employer TIN verification failed. Please check the TIN and company name.');
+    // Check for duplicate TIN
+    const existingTin = await prisma.employerProfile.findUnique({
+      where: { tin: data.tin },
+    });
+    if (existingTin) {
+      throw new Error('An employer with this TIN is already registered.');
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -52,7 +53,7 @@ export class RegisterEmployer {
           location: data.location,
           hrContact: data.hrContact,
           tin: data.tin,
-          isVerified: verification.valid,
+          isVerified: false, // Manual verification — admin will approve
         },
       });
 
@@ -66,14 +67,18 @@ export class RegisterEmployer {
       ipAddress,
     });
 
-    await this.emailService.sendEmployerRegistrationPending(result.user.email, result.profile.companyName);
+    // Send confirmation email (non-blocking — don't crash registration if email fails)
+    try {
+      await this.emailService.sendEmployerRegistrationPending(result.user.email, result.profile.companyName);
+    } catch (emailError) {
+      console.warn('Failed to send employer registration email:', emailError);
+    }
 
     return {
       userId: result.user.id,
       email: result.user.email,
       companyName: result.profile.companyName,
-      tinVerified: verification.valid,
-      message: 'Employer registration is pending approval. A confirmation email has been sent.',
+      message: 'Employer registration is pending approval. You will receive an email once your account is approved.',
     };
   }
 }

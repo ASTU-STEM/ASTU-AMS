@@ -7,6 +7,7 @@ import AuthLayout from '../../../layouts/AuthLayout';
 import AuthInput from '../components/AuthInput';
 import AuthButton from '../components/AuthButton';
 import AuthFooterLink from '../components/AuthFooterLink';
+import { authService } from '../services/auth.service';
 import * as yup from 'yup';
 
 const employerRequestSchema = yup.object().shape({
@@ -31,8 +32,8 @@ const employerRequestSchema = yup.object().shape({
     .min(2, 'Location must be at least 2 characters'),
   hrContact: yup
     .string()
-    .required('HR contact name is required')
-    .min(2, 'HR contact name must be at least 2 characters'),
+    .required('HR contact details are required')
+    .min(5, 'HR contact details must be at least 5 characters'),
   email: yup
     .string()
     .required('Email is required')
@@ -78,14 +79,14 @@ export default function EmployerRegistrationPage() {
   const handleRequestSubmit = async (values: EmployerRequestFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Call employer registration API
-      // const response = await authService.registerEmployer(values);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const result = await authService.registerEmployer(values);
+
+      if (!result.ok) {
+        throw new Error('message' in result ? result.message : 'Registration failed.');
+      }
+
       setIsRegistrationSuccess(true);
-      toast.success('Employer registration submitted successfully!');
+      toast.success(result.data.message || 'Employer registration submitted successfully!');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Registration failed. Please try again.');
     } finally {
@@ -113,7 +114,7 @@ export default function EmployerRegistrationPage() {
               Registration Successful
             </p>
             <p className="text-sm text-green-700">
-              Employer registration submitted successfully. Please wait for admin approval. 
+              Employer registration submitted successfully. Please wait for admin approval.
               You will receive an email once your account is approved.
             </p>
           </div>
@@ -275,8 +276,8 @@ export default function EmployerRegistrationPage() {
 
             <div className="rounded-lg bg-astu-navy/5 p-4">
               <p className="text-xs text-on-surface-variant">
-                <strong>Note:</strong> Your TIN will be verified against government records. 
-                Your registration will be reviewed by the university administration. 
+                <strong>Note:</strong> Your TIN will be verified against government records.
+                Your registration will be reviewed by the university administration.
                 You will receive an email once your account is approved.
               </p>
             </div>
@@ -292,7 +293,7 @@ export default function EmployerRegistrationPage() {
             <AuthFooterLink
               text="Already have an employer account?"
               linkText="Sign in"
-              to="/employers"
+              to="/Login"
             />
           </Form>
         )}
