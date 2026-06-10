@@ -7,7 +7,13 @@ export interface LoginCredentials {
 }
 
 export interface SignupData {
-  fullName: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  gender: string;
+  educationalQualification: string;
+  workPlace: string;
+  workPosition: string;
   studentId: string;
   email: string;
   password: string;

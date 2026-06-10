@@ -402,6 +402,9 @@ model DocumentRequest {
   documentType           String                // "TRANSCRIPT" | "DEGREE_VERIFICATION" | "RECOMMENDATION"
   status                 DocumentRequestStatus @default(PENDING)
   additionalInstructions String?
+  fileUrls               String[]              @default([])
+  notes                  String?
+  contactEmail           String?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
 }

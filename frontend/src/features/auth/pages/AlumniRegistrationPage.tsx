@@ -138,7 +138,13 @@ export default function AlumniRegistrationPage() {
     try {
       // Calls updated authService.signup
       const response = await authService.signup({
-        fullName: `${values.firstName} ${values.middleName} ${values.lastName}`,
+        firstName: values.firstName,
+        middleName: values.middleName,
+        lastName: values.lastName,
+        gender: values.gender,
+        educationalQualification: values.educationalQualification,
+        workPlace: values.workPlace,
+        workPosition: values.workPosition,
         studentId: values.idNumber,
         email: values.email,
         password: values.password,
@@ -162,7 +168,7 @@ export default function AlumniRegistrationPage() {
 
         // Always navigate to OTP verification page. The OTP page will handle whether to show the OTP input based on email presence.
         if (!matchedEmail) {
-          toast.success('Registration successful! No university email matched on record. Proceed to OTP verification.');
+          toast.success('Registration successful! Please select an alternative verification option.');
         } else {
           toast.success('Registration submitted! Please verify your email via OTP.');
         }

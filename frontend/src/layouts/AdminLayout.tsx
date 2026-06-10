@@ -203,7 +203,6 @@ export default function AdminLayout() {
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-      <Toaster position="top-right" />
 
       {mobileSidebarOpen && (
         <button

@@ -3,7 +3,9 @@ import { IAuditLogRepository } from '../ports/IAuditLogRepository';
 import { InvalidCredentialsError, AccountPendingApprovalError } from '../../domain/errors/AuthErrors';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken } from '../../../../core/utils/jwt.utils';
-import { Role } from '@prisma/client';
+import { Role, PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export class LoginUser {
   constructor(
@@ -12,7 +14,26 @@ export class LoginUser {
   ) {}
 
   async execute(data: any, ipAddress: string) {
-    const user = await this.userRepository.findByEmail(data.email.toLowerCase());
+    const identifier = data.emailOrStudentId?.trim();
+    if (!identifier) {
+      throw new InvalidCredentialsError();
+    }
+
+    let user: any = null;
+
+    // Check if identifier looks like an email
+    if (identifier.includes('@')) {
+      user = await this.userRepository.findByEmail(identifier.toLowerCase());
+    } else {
+      // Try to find by student ID through AlumniProfile
+      const profile = await prisma.alumniProfile.findUnique({
+        where: { studentId: identifier },
+        include: { user: true },
+      });
+      if (profile?.user) {
+        user = profile.user;
+      }
+    }
 
     if (!user) {
       throw new InvalidCredentialsError();
@@ -22,7 +43,7 @@ export class LoginUser {
       if (user.role === Role.ALUMNI || user.role === Role.EMPLOYER) {
         throw new AccountPendingApprovalError();
       }
-      throw new AccountPendingApprovalError(); // Custom message could be adapted
+      throw new AccountPendingApprovalError();
     }
 
     if (user.role === Role.EMPLOYER && !data.isEmployerLoginFlow) {
@@ -47,7 +68,7 @@ export class LoginUser {
 
     return {
       user: { id: user.id, email: user.email, role: user.role },
-      accessToken,
+      token: accessToken,
       refreshToken,
     };
   }

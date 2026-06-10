@@ -276,7 +276,6 @@ const AlumniDashboard = () => {
           transform: translateX(3px);
         }
       `}</style>
-      <Toaster position="top-right" reverseOrder={false} />
 
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation" onClick={() => setMobileSidebarOpen(false)}

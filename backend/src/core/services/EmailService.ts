@@ -43,7 +43,18 @@ export class EmailService {
     const subject = 'ASTU Alumni Verification Code';
     const text = `Your verification code for student ID ${studentId} is ${code}. It expires in 15 minutes.`;
     const html = `<p>Hello,</p><p>Your verification code for student ID <strong>${studentId}</strong> is <strong>${code}</strong>.</p><p>This code expires in 15 minutes.</p><p>If you did not request this code, please ignore this email.</p>`;
-    return this.sendMail({ to: email, subject, text, html });
+    
+    // Log for local testing
+    console.log(`\n================================`);
+    console.log(`[DEV TEST] OTP Code for ${email}: ${code}`);
+    console.log(`================================\n`);
+
+    try {
+      return await this.sendMail({ to: email, subject, text, html });
+    } catch (e) {
+      console.warn('Email send failed (ensure SMTP env variables are set). The code is logged above.');
+      return null;
+    }
   }
 
   async sendTemporaryPassword(email: string, temporaryPassword: string, role: string) {

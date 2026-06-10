@@ -73,7 +73,7 @@ export default function VerifyOtpPage() {
     setErrorType(null);
     
     try {
-      const result = await authService.verifyOtp(values.otp);
+      const result = await authService.verifyOtp(registrationDetails?.studentId || '', values.otp);
       if (result.ok) {
         toast.success('Registration completed successfully! Please log in.');
         clearRegistration(); // Minimize PII by clearing registration context on completion

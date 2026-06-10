@@ -411,7 +411,6 @@ return (
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
       `}</style>
-      <Toaster position="top-right" reverseOrder={false} />
 
       {mobileSidebarOpen && (
         <button

@@ -205,10 +205,6 @@ export default function CmsLayout() {
   return (
     <>
     <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
-      <Toaster position="top-right" toastOptions={{
-        style: { borderRadius: '12px', padding: '12px 16px', fontSize: '14px', fontWeight: 500, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' },
-      }} />
-
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}

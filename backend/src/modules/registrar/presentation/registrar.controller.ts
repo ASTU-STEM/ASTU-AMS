@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendSuccess, sendError } from '../../../core/utils/response.utils';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 import { PrismaGraduateRecordRepository } from '../infrastructure/repositories/PrismaGraduateRecordRepository';
 import { PrismaSyncLogRepository } from '../infrastructure/repositories/PrismaSyncLogRepository';
@@ -175,6 +178,31 @@ export class RegistrarController {
           [currentYear]: currentSync,
         },
       });
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  // View manual verification document requests
+  static async getDocumentRequests(req: Request, res: Response, next: NextFunction) {
+    try {
+      const requests = await prisma.documentRequest.findMany({
+        include: {
+          alumni: {
+            select: {
+              fullName: true,
+              studentId: true,
+              graduationYear: true,
+              email: true,
+              phone: true,
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      return sendSuccess(res, 'Fetched document requests.', requests);
     } catch (err: any) {
       next(err);
     }

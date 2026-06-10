@@ -360,7 +360,6 @@ useEffect(() => {
           transform: translateX(3px);
         }
       `}</style>
-      <Toaster position="top-right" reverseOrder={false} />
 
       {mobileSidebarOpen && (
         <button
@@ -442,7 +441,7 @@ useEffect(() => {
                     <span className="material-symbols-outlined">{item.icon}</span>
                     {item.badge && sidebarCollapsed && (
                       <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
-                        {item.badge > 99 ? '99+' : item.badge}
+                        {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                       </span>
                     )}
                   </span>
@@ -451,7 +450,7 @@ useEffect(() => {
                       <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
                       {item.badge && (
                         <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg ${String(item.id) === 'verification' || String(item.id) === 'documents' ? 'bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/30' : 'bg-white/10 text-white/70'}`}>
-                          {item.badge > 99 ? '99+' : item.badge}
+                          {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </span>
                       )}
                     </>

@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
+import { Toaster } from "react-hot-toast";
 import { store } from "./store";
 
 import HomePage from "./pages/HomePage";
@@ -127,6 +128,7 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
+      <Toaster position="top-right" />
       <RegistrationProvider>
         <AppContent />
       </RegistrationProvider>

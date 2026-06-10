@@ -48,31 +48,6 @@ export const authService = {
   // ==================== LOGIN ====================
   async login(credentials: LoginCredentials): Promise<ApiResult<AuthResponse['data']>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        // Mock success login for development testing
-        const mockUser = {
-          id: 'dev-alumni-id',
-          email: credentials.emailOrStudentId.includes('@') ? credentials.emailOrStudentId : 'alumni@astust.edu.et',
-          fullName: 'Test Alumni User',
-          role: (credentials.password === 'employer' ? 'EMPLOYER' : 'ALUMNI') as any,
-          studentId: 'ATR/1234/23'
-        };
-        localStorage.setItem('authToken', 'mock-dev-token');
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        localStorage.setItem('astu_ams_user_role', mockUser.role);
-        window.dispatchEvent(new Event('astu-auth-changed'));
-
-        return {
-          ok: true,
-          data: {
-            user: mockUser,
-            token: 'mock-dev-token',
-            refreshToken: 'mock-dev-refresh-token'
-          }
-        };
-      }
-
       const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
       const { data } = response;
 
@@ -109,29 +84,7 @@ export const authService = {
   // ==================== SIGNUP ====================
   async signup(data: SignupData): Promise<ApiResult<{ success: boolean; email?: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // If they did "I don't have ASTU email" and gave studentId
-        if (!data.email && data.studentId) {
-          if (data.studentId === 'NO_EMAIL') {
-            // No email on record -> Must route directly to National ID / Manual
-            return {
-              ok: true,
-              data: { success: true }
-            };
-          }
-          // Found match in registrar with ASTU email
-          return {
-            ok: true,
-            data: { success: true, email: 'matched.alumni@astust.edu.et' }
-          };
-        }
-
-        return { ok: true, data: { success: true, email: data.email } };
-      }
-
-      const response = await apiClient.post<{ success: boolean; message: string; data?: { email?: string } }>('/auth/register', data);
+      const response = await apiClient.post<{ success: boolean; message: string; data?: { email?: string; studentId?: string; verificationCodeSent?: boolean } }>('/auth/register', data);
       return { 
         ok: true, 
         data: { 
@@ -216,17 +169,7 @@ export const authService = {
   // ==================== PASSWORD RESET ====================
   async requestPasswordReset(emailOrPhone: string, method: 'email' | 'phone'): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { 
-          ok: true, 
-          data: { 
-            success: true, 
-            message: `A password recovery code/link has been sent to your ${method === 'email' ? 'email' : 'phone number'}.`
-          } 
-        };
-      }
-      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/forgot-password', { emailOrPhone, method });
+      const response = await apiClient.post<{ success: boolean; message: string; data?: any }>('/auth/forgot-password', { identifier: emailOrPhone, method });
       if (response.data.success) {
         return { ok: true, data: response.data };
       }
@@ -242,10 +185,6 @@ export const authService = {
 
   async resetPassword(token: string, newPassword: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { ok: true, data: { success: true, message: 'Your password has been reset successfully.' } };
-      }
       const response = await apiClient.post<AuthResponse>('/auth/reset-password', {
         token,
         newPassword,
@@ -264,24 +203,9 @@ export const authService = {
   },
 
   // ==================== OTP VERIFICATION ====================
-  async verifyOtp(otp: string): Promise<ApiResult<{ success: boolean; message: string }>> {
+  async verifyOtp(studentId: string, otp: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      // Mock cases for dev/preview
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        if (otp === '111111') {
-          return { ok: false, errorCode: 'EXPIRED', message: 'The verification code has expired.' };
-        }
-        if (otp === '222222') {
-          return { ok: false, errorCode: 'LOCKOUT', message: 'Too many attempts. Lockout triggered.' };
-        }
-        if (otp === '123456') {
-          return { ok: true, data: { success: true, message: 'OTP verified successfully!' } };
-        }
-        return { ok: false, errorCode: 'INVALID', message: 'The OTP code is incorrect. Please check and try again.' };
-      }
-
-      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/verify-otp', { otp });
+      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/register/verify-email', { studentId, code: otp });
       if (response.data.success) {
         return { ok: true, data: response.data };
       }
@@ -300,10 +224,6 @@ export const authService = {
 
   async resendOtp(email: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { ok: true, data: { success: true, message: 'OTP resent successfully!' } };
-      }
       const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-otp', { email });
       if (response.data.success) {
         return { ok: true, data: response.data };
@@ -321,27 +241,6 @@ export const authService = {
   // ==================== DIDIT VERIFICATION ====================
   async startDiditVerification(studentId: string): Promise<ApiResult<{ verificationUrl: string; sessionId: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        if (studentId === 'FAIL') {
-          return { ok: false, errorCode: 'DIDIT_INIT_FAILED', message: 'Didit verification initiation failed.' };
-        }
-        
-        // Generate a random dynamic session-specific ID
-        const generatedSessionId = `didit-sess-${Math.floor(100000 + Math.random() * 900000)}`;
-        // If studentId matches known status triggers, embed that in sessionId for callback checking
-        const finalSessionId = ['SUCCESS', 'CANCELLED', 'EXPIRED', 'FAIL'].includes(studentId) 
-          ? `${generatedSessionId}-${studentId}` 
-          : generatedSessionId;
-
-        return { 
-          ok: true, 
-          data: {
-            verificationUrl: `http://localhost:5173/verify-national-id/callback?sessionId=${finalSessionId}`,
-            sessionId: finalSessionId
-          }
-        };
-      }
       const response = await apiClient.post<{ success: boolean; data?: { verificationUrl: string; sessionId: string }; message?: string }>('/auth/didit-session', { studentId });
       if (response.data.success && response.data.data) {
         return { ok: true, data: response.data.data };
@@ -358,22 +257,6 @@ export const authService = {
 
   async getDiditStatus(sessionId: string): Promise<ApiResult<{ status: 'processing' | 'success' | 'failed' | 'cancelled' | 'expired' }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        let status: 'processing' | 'success' | 'failed' | 'cancelled' | 'expired' = 'success';
-        
-        if (sessionId.includes('SUCCESS')) status = 'success';
-        else if (sessionId.includes('CANCELLED')) status = 'cancelled';
-        else if (sessionId.includes('EXPIRED')) status = 'expired';
-        else if (sessionId.includes('FAIL')) status = 'failed';
-        else {
-          // If we poll, we can transition from processing to success. We'll simulate that with simple random
-          status = Math.random() > 0.3 ? 'success' : 'processing';
-        }
-
-        return { ok: true, data: { status } };
-      }
-
       const response = await apiClient.get<{ success: boolean; data?: { status: 'processing' | 'success' | 'failed' | 'cancelled' | 'expired' }; message?: string }>(`/auth/didit-status/${sessionId}`);
       if (response.data.success && response.data.data) {
         return { ok: true, data: response.data.data };
@@ -391,17 +274,7 @@ export const authService = {
   // ==================== MANUAL VERIFICATION ====================
   async submitManualVerification(formData: FormData): Promise<ApiResult<{ success: boolean; requestId?: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        return { 
-          ok: true, 
-          data: {
-            success: true, 
-            requestId: `REQ-${Math.floor(100000 + Math.random() * 900000)}`
-          }
-        };
-      }
-      const response = await apiClient.post<{ success: boolean; data?: { requestId: string }; message?: string }>('/auth/verify-manual', formData, {
+      const response = await apiClient.post<{ success: boolean; data?: { requestId: string }; message?: string }>('/auth/register/verify-manual', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
