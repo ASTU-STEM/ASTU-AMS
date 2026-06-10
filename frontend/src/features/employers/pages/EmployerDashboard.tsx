@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
@@ -38,6 +39,7 @@ import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
 
 const EmployerDashboard = () => {
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
@@ -375,9 +377,8 @@ const EmployerDashboard = () => {
   );
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    logout();
+    toast.success('Logged out successfully');
     window.location.href = '/login';
   };
 

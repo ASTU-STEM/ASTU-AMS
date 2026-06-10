@@ -30,6 +30,7 @@ const normalizeRole = (role?: string | null): UserRole | null => {
     case 'DEPARTMENT_HEAD': return 'DEPARTMENT_HEAD';
     case 'ADMIN': return 'ADMIN';
     case 'SUPER_ADMIN': return 'SUPER_ADMIN';
+    case 'ALUMNI_OFFICE':
     case 'CMS_MANAGER': return 'CMS_MANAGER';
     default: return null;
   }

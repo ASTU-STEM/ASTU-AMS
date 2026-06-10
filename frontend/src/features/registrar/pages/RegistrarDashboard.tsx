@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
@@ -29,6 +31,8 @@ import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 
 const RegistrarDashboard = () => {
+   const navigate = useNavigate();
+   const { logout } = useAuth();
    const [activeTab, setActiveTab] = useState<string>('dashboard');
    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('registrar_sidebar_collapsed') === 'true');
@@ -318,9 +322,8 @@ useEffect(() => {
    }, []);
 
    const handleLogout = () => {
-     localStorage.removeItem('authToken');
-     localStorage.removeItem('refreshToken');
-     localStorage.removeItem('user');
+     logout();
+     toast.success('Logged out successfully');
      window.location.href = '/login';
    };
 

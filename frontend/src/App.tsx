@@ -93,15 +93,6 @@ function AppContent() {
           }
         />
         <Route
-          path="/depthead/dashboard"
-          element={
-            <ProtectedRoute
-              element={<DepartmentDashboard />}
-              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
-            />
-          }
-        />
-        <Route
           path="/admin/*"
           element={
             <ProtectedRoute

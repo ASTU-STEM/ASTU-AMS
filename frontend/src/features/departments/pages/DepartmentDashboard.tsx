@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { HelpCircle, LogOut, Menu, ChevronDown, FileText, BarChart3, Settings } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
@@ -19,6 +20,7 @@ import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerS
 
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('department_sidebar_collapsed') === 'true');
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -33,9 +35,7 @@ const DepartmentDashboard = () => {
     ]);
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        logout();
         toast.success('Logged out successfully');
         navigate('/login');
     };

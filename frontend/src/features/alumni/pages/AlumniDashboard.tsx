@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
@@ -47,6 +48,7 @@ import { MessagingTab } from '../components/MessagingTab';
 
 const AlumniDashboard = () => {
    const navigate = useNavigate();
+   const { logout } = useAuth();
 
    const [activeTab, setActiveTab] = useState<string>('dashboard');
    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -169,9 +171,7 @@ const AlumniDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    logout();
     toast.success('Logged out successfully');
     navigate('/login');
   };
