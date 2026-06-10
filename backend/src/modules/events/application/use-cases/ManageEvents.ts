@@ -5,12 +5,20 @@ import {
   UnauthorizedEventActionError,
   DuplicateRSVPError
 } from '../../domain/errors/EventErrors';
+import { NotificationDispatcher } from '../../../notifications/application/services/NotificationDispatcher';
+
+const dispatcher = new NotificationDispatcher();
 
 export class CreateEvent {
   constructor(private readonly repo: IEventRepository) {}
 
   async execute(data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) {
-    return await this.repo.create(data);
+    const event = await this.repo.create(data);
+    
+    // Broadcast event notification
+    await dispatcher.broadcastEventNotification(event.title, event.date, event.location);
+    
+    return event;
   }
 }
 

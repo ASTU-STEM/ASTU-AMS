@@ -261,22 +261,13 @@ async function main() {
   const createdAlumni: any[] = [];
 
   for (const item of alumniData) {
-    const user = await prisma.user.upsert({
-      where: { email: item.email },
-      update: {},
-      create: {
-        email: item.email,
-        password: alumniPassword,
-        role: Role.ALUMNI,
-        isActive: true,
-      },
-    });
-
     const profile = await prisma.alumniProfile.upsert({
       where: { studentId: item.studentId },
-      update: {},
+      update: {
+        status: 'INACTIVE',
+        isVerified: false,
+      },
       create: {
-        userId: user.id,
         studentId: item.studentId,
         fullName: item.fullName,
         email: item.email,
@@ -284,8 +275,8 @@ async function main() {
         graduationYear: item.graduationYear,
         gender: item.gender,
         departmentId: item.deptId,
-        status: 'ACTIVE',
-        isVerified: true,
+        status: 'INACTIVE',
+        isVerified: false,
         employmentStatus: item.employmentStatus,
         salary: item.salary,
         skills: item.skills,

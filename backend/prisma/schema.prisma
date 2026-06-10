@@ -35,9 +35,28 @@ enum EmploymentStatus {
 
 enum ApplicationStatus {
   PENDING
+  REVIEWED
   SHORTLISTED
+  INTERVIEW_SCHEDULED
+  OFFERED
+  HIRED
   REJECTED
   ACCEPTED
+  WITHDRAWN
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }
 
 enum DocumentRequestStatus {
@@ -122,6 +141,9 @@ model AlumniProfile {
   eventRsvps     EventRSVP[]
   mentorRequests MentorshipRequest[] @relation("MentorRequests")
   menteeRequests MentorshipRequest[] @relation("MenteeRequests")
+  savedJobs      SavedJob[]
+  jobViews       JobView[]
+  jobRecommendations JobRecommendation[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 }
@@ -155,6 +177,11 @@ model EmployerProfile {
   isVerified  Boolean            @default(false)
   jobs        Job[]
   feedbacks   EmployerFeedback[]
+  description String?
+  companySize String?
+  contactPerson String?
+  contactEmail String?
+  phone       String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 }
@@ -166,6 +193,8 @@ model Job {
   title              String
   description        String
   salary             String?
+  salaryMin          Float?           // Numeric min for range filtering
+  salaryMax          Float?           // Numeric max for range filtering
   deadline           DateTime
   experienceRequired Int              @default(0) // in years
   skillsRequired     String[]
@@ -173,8 +202,22 @@ model Job {
   employmentType     String           // e.g. "FULL_TIME", "PART_TIME", "INTERNSHIP"
   isActive           Boolean          @default(true)
   applications       JobApplication[]
+  savedBy            SavedJob[]
+  views              JobView[]
+  recommendations    JobRecommendation[]
+  responsibilities   String?
+  requirements       String?
+  experienceLevel    String?
+  department         String?          // academic department code
+  status             JobStatus        @default(PUBLISHED)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+
+  @@index([status, isActive])
+  @@index([employmentType])
+  @@index([department])
+  @@index([deadline])
+  @@index([createdAt])
 }
 
 model JobApplication {
@@ -186,6 +229,9 @@ model JobApplication {
   resumeUrl   String?
   coverLetter String?
   status      ApplicationStatus @default(PENDING)
+  hiredAt     DateTime?
+  interviews  Interview[]
+  hiringEvent HiringEvent?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }
@@ -342,6 +388,10 @@ model EmployerFeedback {
   problemSolvingSkill Int          // 1 to 10 rating
   innovationSkill    Int           // 1 to 10 rating
   feedbackText       String?
+  overallSatisfaction Int          @default(8)
+  missingSkills      String[]      @default([])
+  technologiesNeeded String[]      @default([])
+  wouldHireAgain     Boolean       @default(true)
   createdAt          DateTime      @default(now())
 }
 
@@ -352,6 +402,9 @@ model DocumentRequest {
   documentType           String                // "TRANSCRIPT" | "DEGREE_VERIFICATION" | "RECOMMENDATION"
   status                 DocumentRequestStatus @default(PENDING)
   additionalInstructions String?
+  fileUrls               String[]              @default([])
+  notes                  String?
+  contactEmail           String?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
 }
@@ -446,4 +499,82 @@ model AnalyticsCache {
   data      Json
   updatedAt DateTime @default(now()) @updatedAt
   expiresAt DateTime
+}
+
+model Interview {
+  id            String          @id @default(uuid())
+  applicationId String
+  application   JobApplication  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interviewer   String
+  interviewDate DateTime
+  interviewType String          // "ONLINE" | "IN_PERSON" | "PHONE" etc.
+  meetingLink   String?
+  location      String?
+  notes         String?
+  status        InterviewStatus @default(SCHEDULED)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([applicationId])
+}
+
+model HiringEvent {
+  id            String         @id @default(uuid())
+  applicationId String         @unique
+  application   JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  employerId    String
+  alumniId      String
+  departmentId  String
+  hiredAt       DateTime       @default(now())
+  salary        Float?
+  timeToHireDays Float
+  createdAt     DateTime       @default(now())
+
+  @@index([employerId])
+  @@index([alumniId])
+  @@index([departmentId])
+}
+
+// ─── Job Board Models ────────────────────────────────────────────────
+
+model SavedJob {
+  id        String        @id @default(uuid())
+  alumniId  String
+  alumni    AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([alumniId, jobId])
+  @@index([alumniId])
+  @@index([jobId])
+}
+
+model JobView {
+  id        String         @id @default(uuid())
+  jobId     String
+  job       Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  viewerIp  String?
+  alumniId  String?
+  alumni    AlumniProfile? @relation(fields: [alumniId], references: [id], onDelete: SetNull)
+  createdAt DateTime       @default(now())
+
+  @@index([jobId])
+  @@index([alumniId])
+}
+
+model JobRecommendation {
+  id        String        @id @default(uuid())
+  alumniId  String
+  alumni    AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  score     Float
+  reasons   String[]
+  createdAt DateTime      @default(now())
+  expiresAt DateTime
+
+  @@unique([alumniId, jobId])
+  @@index([alumniId])
+  @@index([score])
 }

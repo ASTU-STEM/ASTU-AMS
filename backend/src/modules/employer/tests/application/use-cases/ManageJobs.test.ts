@@ -13,7 +13,7 @@ describe('ManageJobs Use Cases', () => {
 
   beforeEach(() => {
     mockJobRepo = { findById: jest.fn(), findByEmployerId: jest.fn(), search: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() };
-    mockEmpRepo = { findByUserId: jest.fn(), update: jest.fn() };
+    mockEmpRepo = { findByUserId: jest.fn(), update: jest.fn() } as any;
   });
 
   describe('CreateJob', () => {

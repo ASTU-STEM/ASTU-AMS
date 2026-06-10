@@ -3,12 +3,13 @@ import { env } from './core/config/env';
 import { initPrisma } from './core/config/db';
 import { Logger } from './core/utils/logger.utils';
 import { startTracerStudyCronJobs } from './services/tracer.service';
+import { initCronJobs } from './core/jobs/cron';
 
 const PORT = env.PORT || 5000;
 
 async function bootstrap() {
   try {
-    Logger.info('🚀 Bootstrapping ASTU-AMS API Server...');
+    Logger.info(' Bootstrapping ASTU-AMS API Server...');
 
     // 1. Validate Database Connection (with resilient fallback)
     Logger.info('📡 Initializing database client...');
@@ -17,6 +18,7 @@ async function bootstrap() {
 
     // 2. Initialize Background Cron Services
     startTracerStudyCronJobs();
+    initCronJobs();
     Logger.info('✅ Tracer study cron jobs started.');
 
     // 3. Start Server listener

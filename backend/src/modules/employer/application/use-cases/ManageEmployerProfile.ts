@@ -25,3 +25,30 @@ export class UpdateEmployerProfile {
     return updated;
   }
 }
+
+export class CreateEmployerProfile {
+  constructor(private readonly repo: IEmployerProfileRepository) {}
+
+  async execute(userId: string, data: any) {
+    const existing = await this.repo.findByUserId(userId);
+    if (existing) {
+      throw new Error('Employer profile already exists');
+    }
+    return await this.repo.create({
+      userId,
+      ...data,
+    });
+  }
+}
+
+export class DeleteEmployerProfile {
+  constructor(private readonly repo: IEmployerProfileRepository) {}
+
+  async execute(userId: string) {
+    const profile = await this.repo.findByUserId(userId);
+    if (!profile) {
+      throw new EmployerNotFoundError();
+    }
+    await this.repo.delete(userId);
+  }
+}

@@ -1,4 +1,4 @@
-import { StateGraph, START, END } from '../../infrastructure/agentic/StateGraph';
+import { StateGraph, START, END, Annotation } from '@langchain/langgraph';
 import { AnalyticsContextProvider } from '../context/AnalyticsContextProvider';
 import { OpenRouterService } from '../../infrastructure/services/OpenRouterService';
 import { EmploymentAgent } from '../agents/EmploymentAgent';
@@ -7,24 +7,27 @@ import { DepartmentAgent } from '../agents/DepartmentAgent';
 import { SkillGapAgent } from '../agents/SkillGapAgent';
 import { ReportAgent } from '../agents/ReportAgent';
 
-export interface ChatbotState {
-  query: string;
-  intent: string;
-  context: string;
-  response: string;
-}
+export const ChatbotStateAnnotation = Annotation.Root({
+  query: Annotation<string>,
+  intent: Annotation<string>,
+  context: Annotation<string>,
+  response: Annotation<string>,
+});
+
+export type ChatbotState = typeof ChatbotStateAnnotation.State;
 
 export class RunChatbotWorkflow {
-  private graph = new StateGraph<ChatbotState>();
+  private compiledGraph;
 
   constructor() {
-    this.setupGraph();
+    this.compiledGraph = this.setupGraph();
   }
 
   private setupGraph() {
-    // 1. Classification node
-    this.graph.addNode('classifier', async (state) => {
-      const prompt = `Classify the following user question into exactly one of these categories:
+    return new StateGraph(ChatbotStateAnnotation)
+      // 1. Classification node
+      .addNode('classifier', async (state) => {
+        const prompt = `Classify the following user question into exactly one of these categories:
 - "employment": questions about employment/unemployment rates, salaries, trends, or predictions.
 - "employer": questions about top companies, active employers, satisfaction, or demand.
 - "department": questions comparing departments or benchmarking specific engineering programs.
@@ -36,84 +39,93 @@ USER QUESTION: "${state.query}"
 
 Return a JSON object with a single field "intent" containing one of the string keys above.`;
 
-      const result = await OpenRouterService.generateJson<{ intent: string }>(prompt);
-      const intent = result.intent || 'general';
-      const context = await AnalyticsContextProvider.getContextForIntent(intent);
+        const result = await OpenRouterService.generateJson<{ intent: string }>(prompt);
+        const intent = result.intent || 'general';
+        const context = await AnalyticsContextProvider.getContextForIntent(intent);
 
-      return { intent, context };
-    });
+        return { intent, context };
+      })
 
-    // 2. Specialized Agent nodes
-    this.graph.addNode('employment_node', async (state) => {
-      const response = await EmploymentAgent.execute(state.query, state.context);
-      return { response };
-    });
+      // 2. Specialized Agent nodes
+      .addNode('employment_node', async (state) => {
+        const response = await EmploymentAgent.execute(state.query, state.context);
+        return { response };
+      })
 
-    this.graph.addNode('employer_node', async (state) => {
-      const response = await EmployerAgent.execute(state.query, state.context);
-      return { response };
-    });
+      .addNode('employer_node', async (state) => {
+        const response = await EmployerAgent.execute(state.query, state.context);
+        return { response };
+      })
 
-    this.graph.addNode('department_node', async (state) => {
-      const response = await DepartmentAgent.execute(state.query, state.context);
-      return { response };
-    });
+      .addNode('department_node', async (state) => {
+        const response = await DepartmentAgent.execute(state.query, state.context);
+        return { response };
+      })
 
-    this.graph.addNode('skill_gap_node', async (state) => {
-      const response = await SkillGapAgent.execute(state.query, state.context);
-      return { response };
-    });
+      .addNode('skill_gap_node', async (state) => {
+        const response = await SkillGapAgent.execute(state.query, state.context);
+        return { response };
+      })
 
-    this.graph.addNode('report_node', async (state) => {
-      // Extract report type from query
-      let reportType = 'executive';
-      const q = state.query.toLowerCase();
-      if (q.includes('tracer')) reportType = 'tracer';
-      else if (q.includes('accreditation')) reportType = 'accreditation';
-      else if (q.includes('curriculum')) reportType = 'curriculum';
-      else if (q.includes('employer')) reportType = 'employer';
-      else if (q.includes('department')) reportType = 'department';
+      .addNode('report_node', async (state) => {
+        // Extract report type from query
+        let reportType = 'executive';
+        const q = state.query.toLowerCase();
+        if (q.includes('tracer')) reportType = 'tracer';
+        else if (q.includes('accreditation')) reportType = 'accreditation';
+        else if (q.includes('curriculum')) reportType = 'curriculum';
+        else if (q.includes('employer')) reportType = 'employer';
+        else if (q.includes('department')) reportType = 'department';
 
-      const response = await ReportAgent.execute(reportType, state.context);
-      return { response };
-    });
+        const response = await ReportAgent.execute(reportType, state.context);
+        return { response };
+      })
 
-    this.graph.addNode('general_node', async (state) => {
-      const systemInstruction = `You are the general ASTU Alumni Intelligence Assistant. Answer the user's question using the provided university context. Keep responses concise and factual.`;
-      const prompt = `CONTEXT:
+      .addNode('general_node', async (state) => {
+        const systemInstruction = `You are the general ASTU Alumni Intelligence Assistant. Answer the user's question using the provided university context. Keep responses concise and factual.`;
+        const prompt = `CONTEXT:
 ${state.context}
 
 USER QUESTION:
 ${state.query}`;
-      const response = await OpenRouterService.generateText(prompt, systemInstruction);
-      return { response };
-    });
+        const response = await OpenRouterService.generateText(prompt, systemInstruction);
+        return { response };
+      })
 
-    // 3. Define Graph routing structure
-    this.graph.addEdge(START, 'classifier');
+      // 3. Define Graph routing structure
+      .addEdge(START, 'classifier')
 
-    this.graph.addConditionalEdges(
-      'classifier',
-      (state) => {
-        switch (state.intent) {
-          case 'employment': return 'employment_node';
-          case 'employer': return 'employer_node';
-          case 'department': return 'department_node';
-          case 'skill_gap': return 'skill_gap_node';
-          case 'report': return 'report_node';
-          case 'general':
-          default:
-            return 'general_node';
+      .addConditionalEdges(
+        'classifier',
+        (state) => {
+          switch (state.intent) {
+            case 'employment': return 'employment_node';
+            case 'employer': return 'employer_node';
+            case 'department': return 'department_node';
+            case 'skill_gap': return 'skill_gap_node';
+            case 'report': return 'report_node';
+            case 'general':
+            default:
+              return 'general_node';
+          }
+        },
+        {
+          employment_node: 'employment_node',
+          employer_node: 'employer_node',
+          department_node: 'department_node',
+          skill_gap_node: 'skill_gap_node',
+          report_node: 'report_node',
+          general_node: 'general_node',
         }
-      }
-    );
+      )
 
-    this.graph.addEdge('employment_node', END);
-    this.graph.addEdge('employer_node', END);
-    this.graph.addEdge('department_node', END);
-    this.graph.addEdge('skill_gap_node', END);
-    this.graph.addEdge('report_node', END);
-    this.graph.addEdge('general_node', END);
+      .addEdge('employment_node', END)
+      .addEdge('employer_node', END)
+      .addEdge('department_node', END)
+      .addEdge('skill_gap_node', END)
+      .addEdge('report_node', END)
+      .addEdge('general_node', END)
+      .compile();
   }
 
   async execute(query: string): Promise<ChatbotState> {
@@ -124,7 +136,6 @@ ${state.query}`;
       response: '',
     };
 
-    const compiledGraph = this.graph.compile();
-    return compiledGraph.execute(initialState);
+    return this.compiledGraph.invoke(initialState);
   }
 }

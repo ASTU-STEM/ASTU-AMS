@@ -2,9 +2,31 @@ import { z } from 'zod';
 import { Role } from '@prisma/client';
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  emailOrStudentId: z.string().min(1, 'Email or Student ID is required'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
+  rememberMe: z.boolean().optional(),
   isEmployerLoginFlow: z.boolean().optional(),
+});
+
+export const forgotPasswordSchema = z.object({
+  emailOrPhone: z.string().min(1, 'Email or phone is required'),
+  method: z.enum(['email', 'phone']),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters long'),
+});
+
+export const submitManualVerificationSchema = z.object({
+  studentId: z.string().min(1, 'Student ID is required'),
+  fullName: z.string().min(2, 'Full name is required'),
+  graduationYear: z.string().optional(),
+  country: z.string().min(1, 'Country is required'),
+  contactEmail: z.string().email('Invalid email'),
+  phone: z.string().optional(),
+  documentType: z.string().min(1, 'Document type is required'),
+  notes: z.string().optional(),
 });
 
 export const activateAlumniSchema = z.object({
@@ -25,10 +47,32 @@ export const registerEmployerSchema = z.object({
 
 // Alumni Registration Schemas
 export const registerAlumniSchema = z.object({
+  firstName: z.string().min(2, 'First name is required'),
+  middleName: z.string().min(2, 'Middle name is required'),
+  lastName: z.string().min(2, 'Last name is required'),
+  gender: z.string().min(1, 'Gender is required'),
+  educationalQualification: z.string().min(1, 'Educational qualification is required'),
+  workPlace: z.string().min(1, 'Work place is required'),
+  workPosition: z.string().min(1, 'Work position is required'),
   studentId: z.string().min(1, 'Student ID is required'),
-  fullName: z.string().min(2, 'Full name is required'),
+  batch: z.string().min(1, 'Year of graduation is required'),
+  department: z.string().min(1, 'Field of study is required'),
+  email: z.string().optional().or(z.literal('')),
+  phone: z.string().min(1, 'Phone is required'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
-  phone: z.string().optional(),
+  confirmPassword: z.string().min(6, 'Confirm password must be at least 6 characters long'),
+  hasNoAstuEmail: z.boolean().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+}).refine((data) => {
+  if (!data.hasNoAstuEmail && (!data.email || data.email.trim() === '')) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Email is required unless hasNoAstuEmail is true",
+  path: ["email"],
 });
 
 export const verifyAlumniEmailSchema = z.object({

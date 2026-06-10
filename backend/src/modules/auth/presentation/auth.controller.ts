@@ -11,6 +11,11 @@ import { RegisterAlumni } from '../application/use-cases/RegisterAlumni';
 import { VerifyAlumniEmail } from '../application/use-cases/VerifyAlumniEmail';
 import { VerifyAlumniNationalId } from '../application/use-cases/VerifyAlumniNationalId';
 import { CreateAdminUser } from '../application/use-cases/CreateAdminUser';
+import { ForgotPassword } from '../application/use-cases/ForgotPassword';
+import { ResetPassword } from '../application/use-cases/ResetPassword';
+import { StartDiditSession } from '../application/use-cases/StartDiditSession';
+import { GetDiditStatus } from '../application/use-cases/GetDiditStatus';
+import { SubmitManualVerification } from '../application/use-cases/SubmitManualVerification';
 import { DiditService } from '../infrastructure/services/DiditService';
 import { EmailService } from '../../../core/services/EmailService';
 import { loginSchema, activateAlumniSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
@@ -92,7 +97,7 @@ export class AuthController {
       const parsedData = registerAlumniSchema.parse(req.body);
       const useCase = new RegisterAlumni(userRepository, emailService);
       const result = await useCase.execute(parsedData);
-      return sendSuccess(res, 'Verification code sent to registered student email.', result, 201);
+      return sendSuccess(res, result.message, result, 201);
     } catch (err) {
       next(err);
     }
@@ -129,6 +134,73 @@ export class AuthController {
       const useCase = new CreateAdminUser(userRepository, emailService);
       const result = await useCase.execute(parsedData, adminId);
       return sendSuccess(res, 'User account created successfully.', result, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Forgot Password / Reset Password
+  static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { identifier, method } = req.body;
+      if (!identifier) throw new Error('Email or Student ID is required');
+      const useCase = new ForgotPassword(emailService);
+      const result = await useCase.execute({ emailOrPhone: identifier, method: method || 'email' });
+      return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) throw new Error('Token and new password are required');
+      const useCase = new ResetPassword();
+      const result = await useCase.execute({ token, newPassword });
+      return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Didit Verification Flow
+  static async startDiditSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { studentId } = req.body;
+      if (!studentId) throw new Error('Student ID is required');
+      const useCase = new StartDiditSession();
+      const result = await useCase.execute(studentId);
+      return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async getDiditStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { sessionId } = req.params;
+      if (!sessionId) throw new Error('Session ID is required');
+      const useCase = new GetDiditStatus();
+      const result = await useCase.execute(sessionId);
+      return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Manual Verification Upload
+  static async submitManualVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { studentId, fullName, graduationYear, country, contactEmail, phone, documentType, notes } = req.body;
+      const files = req.files as Express.Multer.File[];
+      const fileUrls = files?.map(f => f.path) || [];
+
+      const useCase = new SubmitManualVerification();
+      const result = await useCase.execute({
+        studentId, fullName, graduationYear, country, contactEmail, phone, documentType, notes, fileUrls
+      });
+      return sendSuccess(res, result.message, result);
     } catch (err) {
       next(err);
     }
