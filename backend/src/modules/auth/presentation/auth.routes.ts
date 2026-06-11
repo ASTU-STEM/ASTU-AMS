@@ -7,7 +7,24 @@ import { asyncHandler } from '../../../core/utils/asyncHandler';
 import multer from 'multer';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
+import fs from 'fs';
+import path from 'path';
+
+const uploadDir = path.join(process.cwd(), 'uploads', 'VerificationDocument');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
 
 // Public Routes
 router.post('/login', asyncHandler(AuthController.login));
@@ -29,6 +46,7 @@ router.post(
 // Didit Verification Flow
 router.post('/didit-session', asyncHandler(AuthController.startDiditSession));
 router.get('/didit-status/:sessionId', asyncHandler(AuthController.getDiditStatus));
+router.post('/didit-verify', asyncHandler(AuthController.verifyDiditSession));
 
 // Employer Specific Flows
 router.post('/employer/login', asyncHandler(AuthController.employerLogin));

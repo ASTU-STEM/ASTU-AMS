@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import type { User, UserRole } from '../types';
+import { authService } from '../features/auth/services/auth.service';
 
 interface AuthContextType {
   user: User | null;
@@ -95,13 +96,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(userData);
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('astu_ams_user_role');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    window.dispatchEvent(new Event('astu-auth-changed'));
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch (e) {
+      console.error('Logout error', e);
+    } finally {
+      setUser(null);
+    }
   }, []);
 
   const hasPermission = useCallback((allowedRoles: UserRole[]): boolean => {

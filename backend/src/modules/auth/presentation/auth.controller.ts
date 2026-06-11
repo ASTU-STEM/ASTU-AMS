@@ -16,6 +16,7 @@ import { ResetPassword } from '../application/use-cases/ResetPassword';
 import { StartDiditSession } from '../application/use-cases/StartDiditSession';
 import { GetDiditStatus } from '../application/use-cases/GetDiditStatus';
 import { SubmitManualVerification } from '../application/use-cases/SubmitManualVerification';
+import { VerifyDiditSession } from '../application/use-cases/VerifyDiditSession';
 import { DiditService } from '../infrastructure/services/DiditService';
 import { EmailService } from '../../../core/services/EmailService';
 import { loginSchema, activateAlumniSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
@@ -193,12 +194,27 @@ export class AuthController {
     try {
       const { studentId, fullName, graduationYear, country, contactEmail, phone, documentType, notes } = req.body;
       const files = req.files as Express.Multer.File[];
-      const fileUrls = files?.map(f => f.path) || [];
+      const fileUrls = files?.map(f => f.filename) || [];
 
       const useCase = new SubmitManualVerification();
       const result = await useCase.execute({
         studentId, fullName, graduationYear, country, contactEmail, phone, documentType, notes, fileUrls
       });
+      return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Didit Verification — compare National ID name against AlumniProfile
+  static async verifyDiditSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { sessionId, nationalIdName } = req.body;
+      if (!sessionId || !nationalIdName) {
+        throw new Error('Session ID and National ID name are required.');
+      }
+      const useCase = new VerifyDiditSession();
+      const result = await useCase.execute(sessionId, nationalIdName);
       return sendSuccess(res, result.message, result);
     } catch (err) {
       next(err);

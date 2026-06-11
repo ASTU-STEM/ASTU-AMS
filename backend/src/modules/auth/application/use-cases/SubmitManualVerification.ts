@@ -58,6 +58,25 @@ export class SubmitManualVerification {
       },
     });
 
+    // Notify Admins and Registrars
+    const staffMembers = await prisma.user.findMany({
+      where: {
+        role: { in: ['ADMIN', 'REGISTRAR'] },
+        isActive: true,
+      },
+      select: { id: true },
+    });
+
+    if (staffMembers.length > 0) {
+      await prisma.notification.createMany({
+        data: staffMembers.map(staff => ({
+          userId: staff.id,
+          title: 'New Manual Verification Request',
+          content: `Alumni ${fullName || profile.fullName} (${studentId}) has submitted a manual verification request. Please review the documents.`,
+        })),
+      });
+    }
+
     return {
       success: true,
       requestId: docRequest.id,
