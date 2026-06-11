@@ -1,200 +1,135 @@
 import { Survey, SurveyFilters, SurveyStats, SurveyResponse } from '../types/survey.types';
 
-// Base URL for API calls - will be configured via environment variables
 const getApiBaseUrl = () => {
   return (import.meta.env as any).REACT_APP_API_URL || 'http://localhost:5000/api';
 };
 
-// API client for surveys
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+});
+
 export const surveyService = {
-  // Get all surveys with optional filtering
-  async getSurveys(filters?: SurveyFilters): Promise<Survey[]> {
-    const queryParams = new URLSearchParams();
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== 'All') queryParams.append(key, String(value));
-      });
-    }
-    
-    const response = await fetch(`${getApiBaseUrl()}/surveys?${queryParams.toString()}`, {
+  // Admin: Get survey templates
+  async getSurveys(filters?: SurveyFilters): Promise<any[]> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/templates`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch surveys');
-    }
-    
-    return response.json();
+    if (!response.ok) throw new Error('Failed to fetch surveys');
+    const data = await response.json();
+    return data.data;
   },
 
-  // Get a single survey by ID
-  async getSurvey(id: number): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${id}`, {
+  // Admin: Get a single template
+  async getSurvey(id: string): Promise<any> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey');
-    }
-    
-    return response.json();
+    if (!response.ok) throw new Error('Failed to fetch survey');
+    const data = await response.json();
+    return data.data;
   },
 
-  // Create a new survey
-  async createSurvey(survey: Omit<Survey, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys`, {
+  // Admin: Create a new survey template
+  async createSurvey(surveyData: any): Promise<any> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/templates`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({
-        ...survey,
-        status: 'PENDING' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
+      headers: getHeaders(),
+      body: JSON.stringify(surveyData),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create survey');
-    }
-    
-    return response.json();
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to create survey');
+    return data.data;
   },
 
-  // Update an existing survey
-  async updateSurvey(survey: Survey): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${survey.id}`, {
+  // Admin: Update a survey template
+  async updateSurvey(id: string, surveyData: any): Promise<any> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({
-        ...survey,
-        updatedAt: new Date().toISOString()
-      })
+      headers: getHeaders(),
+      body: JSON.stringify(surveyData),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update survey');
-    }
-    
-    return response.json();
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update survey');
+    return data.data;
   },
 
-  // Delete a survey
-  async deleteSurvey(id: number): Promise<void> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${id}`, {
+  // Admin: Delete (archive) a survey template
+  async deleteSurvey(id: string): Promise<void> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete survey');
-    }
+    if (!response.ok) throw new Error('Failed to archive survey');
   },
 
-  // Get survey statistics
-  async getSurveyStats(): Promise<SurveyStats> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/stats`, {
+  // Admin: Get survey statistics
+  async getSurveyStats(): Promise<any> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/statistics`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey stats');
-    }
-    
-    return response.json();
+    if (!response.ok) throw new Error('Failed to fetch survey stats');
+    const data = await response.json();
+    return data.data;
   },
 
-  // Submit survey responses
-  async submitSurveyResponse(surveyId: number, answers: Record<string, any>): Promise<SurveyResponse> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/responses`, {
+  // Admin: Get assignments (scheduled waves)
+  async getSurveyAssignments(): Promise<any[]> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/assignments`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch survey assignments');
+    const data = await response.json();
+    return data.data;
+  },
+
+  // Admin: Get survey completion report
+  async getCompletionReport(): Promise<any[]> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/completion-report`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch completion report');
+    const data = await response.json();
+    return data.data;
+  },
+
+
+  // Alumni: Get My Surveys
+  async getMySurveys(): Promise<any[]> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/my-surveys`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch your surveys');
+    const data = await response.json();
+    return data.data;
+  },
+
+  // Alumni: Get specific assignment to fill
+  async getMySurveyAssignment(assignmentId: string): Promise<any> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/my-surveys/${assignmentId}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch survey assignment');
+    const data = await response.json();
+    return data.data;
+  },
+
+  // Alumni: Submit Survey
+  async submitAssignedSurvey(assignmentId: string, answers: { questionId: string; answerText: string }[]): Promise<any> {
+    const response = await fetch(`${getApiBaseUrl()}/surveys/submit`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({
-        surveyId,
-        respondentId: localStorage.getItem('userId'),
-        answers,
-        submittedAt: new Date().toISOString()
-      })
+      headers: getHeaders(),
+      body: JSON.stringify({ assignmentId, answers }),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to submit survey response');
-    }
-    
-    return response.json();
+    if (!response.ok) throw new Error('Failed to submit survey');
+    const data = await response.json();
+    return data.data;
   },
-
-  // Get survey responses
-  async getSurveyResponses(surveyId: number): Promise<SurveyResponse[]> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/responses`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey responses');
-    }
-    
-    return response.json();
-  },
-
-  // Schedule survey distribution
-  async scheduleSurvey(surveyId: number, scheduledDate: string): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/schedule`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({ scheduledDate })
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to schedule survey');
-    }
-    
-    return response.json();
-  },
-
-  // Export survey data
-  async exportSurveyData(surveyId: number, format: 'CSV' | 'PDF' | 'JSON'): Promise<Blob> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/export?format=${format}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to export survey data');
-    }
-    
-    return response.blob();
-  }
 };

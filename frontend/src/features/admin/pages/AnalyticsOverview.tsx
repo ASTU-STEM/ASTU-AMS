@@ -40,6 +40,10 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminBadge from '../components/AdminBadge';
 
+const getApiBaseUrl = () => {
+  return (import.meta.env as any).REACT_APP_API_URL || 'http://localhost:5000/api';
+};
+
 type AcademicYear = '2024-25' | '2023-24' | 'All Time';
 type DepartmentFilter = 'All' | 'Computer Science' | 'Software Engineering' | 'Electrical Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Chemical Engineering' | 'Information Engineering';
 
@@ -194,6 +198,22 @@ export default function AnalyticsOverview() {
   const [academicYear, setAcademicYear] = useState<AcademicYear>('2024-25');
   const [department, setDepartment] = useState<DepartmentFilter>('All');
   const [exportOpen, setExportOpen] = useState(false);
+  const [topEmployers, setTopEmployers] = useState<{ companyName: string, count: number }[]>([]);
+
+  React.useEffect(() => {
+    fetch(`${getApiBaseUrl()}/analytics/employers`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.data?.topHiringCompanies) {
+          setTopEmployers(data.data.topHiringCompanies);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const filteredDepartments = useMemo(() => {
     if (department === 'All') return employmentTable;
@@ -426,22 +446,40 @@ export default function AnalyticsOverview() {
               </div>
             </ChartCard>
 
-            <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <h4 className="text-sm font-semibold text-slate-900">Latest Employer Feedback</h4>
-              <p className="mt-1 text-xs text-slate-500">Most recent submitted review entries.</p>
-              <div className="mt-4 space-y-3">
-                {employerFeedback.map((entry) => (
-                  <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{entry.company}</div>
-                        <div className="text-xs text-slate-500">{entry.department}</div>
+            <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col gap-4">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-900">Latest Employer Feedback</h4>
+                <p className="mt-1 text-xs text-slate-500">Most recent submitted review entries.</p>
+                <div className="mt-4 space-y-3">
+                  {employerFeedback.map((entry) => (
+                    <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-slate-900">{entry.company}</div>
+                          <div className="text-xs text-slate-500">{entry.department}</div>
+                        </div>
+                        <AdminBadge variant="success">{entry.score}</AdminBadge>
                       </div>
-                      <AdminBadge variant="success">{entry.score}</AdminBadge>
+                      <p className="mt-2 text-xs leading-5 text-slate-600">{entry.note}</p>
                     </div>
-                    <p className="mt-2 text-xs leading-5 text-slate-600">{entry.note}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+              
+              <div className="border-t border-slate-200 pt-4">
+                <h4 className="text-sm font-semibold text-[#003580] flex items-center gap-2">
+                  <Building2 className="h-4 w-4" /> Top Companies Hiring ASTU Graduates
+                </h4>
+                <div className="mt-4 space-y-2">
+                  {topEmployers.length > 0 ? topEmployers.map((emp) => (
+                    <div key={emp.companyName} className="flex items-center justify-between p-2 rounded-md bg-[#003580]/5 border border-[#003580]/10">
+                      <span className="text-sm font-medium text-slate-700">{emp.companyName}</span>
+                      <span className="text-xs font-bold px-2 py-1 bg-white rounded shadow-sm text-[#003580]">{emp.count} hires</span>
+                    </div>
+                  )) : (
+                    <div className="text-xs text-slate-500 p-2 text-center border border-dashed rounded-md">Loading top companies...</div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
