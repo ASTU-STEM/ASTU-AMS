@@ -13,7 +13,6 @@ import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import authService from "../features/auth/services/auth.service";
 import AnnouncementPanel from "./AnnouncementPanel";
-import astuLogo from "../assets/logos/astu-icon.jpeg";
 
 interface MegaMenuItem {
   label: string;
@@ -227,13 +226,11 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 md:px-6">
         <Link to="/" className="flex items-center gap-3 py-3 group">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg border border-outline-variant bg-white p-0.5 shadow-sm overflow-hidden">
-              <img
-                src={astuLogo}
-                alt="ASTU"
-                className="h-9 w-9 rounded-md object-cover"
-              />
-            </div>
+            <img
+              src="/images/astu-logo-modified.png"
+              alt="ASTU"
+              className="h-11 w-11 rounded-full object-contain"
+            />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-astu-navy leading-tight">
                 ASTU-AMS

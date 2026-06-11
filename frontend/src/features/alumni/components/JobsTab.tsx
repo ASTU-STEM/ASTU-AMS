@@ -88,8 +88,8 @@ return (
           <div className="flex flex-col sm:flex-row items-start gap-5">
             <img
               alt="ASTU Logo"
-              className="h-16 w-16 object-contain rounded-xl bg-white p-1 border border-white/20 shadow-md"
-              src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+              className="h-16 w-16 rounded-full object-contain"
+              src="/images/astu-logo-modified.png"
               onError={(e) => {
                 // Fallback icon placeholder if your local image isn't loaded
                 (e.target as HTMLElement).style.display = 'none';

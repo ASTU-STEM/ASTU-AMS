@@ -140,8 +140,8 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           <div className="flex items-start gap-4">
             <img
               alt="ASTU Logo"
-              className="h-14 w-14 object-contain rounded-xl bg-white/10 p-1.5 border border-white/20 shadow-md flex-shrink-0"
-              src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+              className="h-14 w-14 rounded-full object-contain flex-shrink-0"
+              src="/images/astu-logo-modified.png"
             />
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">
@@ -502,8 +502,8 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                 <div className="flex items-center gap-3">
                   <img
                     alt="ASTU"
-                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                    src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                    className="h-9 w-9 rounded-full object-contain"
+                    src="/images/astu-logo-modified.png"
                   />
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">Mentorship Request</span>
@@ -563,8 +563,8 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                 <div className="flex items-center gap-3">
                   <img
                     alt="ASTU"
-                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                    src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                    className="h-9 w-9 rounded-full object-contain"
+                    src="/images/astu-logo-modified.png"
                   />
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">Schedule Session</span>

@@ -34,15 +34,15 @@ import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
 import { partnerLogos } from "../components/PartnerLogos";
 
-import astuLogo from "../assets/logos/astu-icon.jpeg";
 import gallery1 from "../assets/imgs/astu-building.jpg";
 import gallery2 from "../assets/imgs/campus-2.jpeg";
-import gallery3 from "../assets/imgs/astu-logo.jpeg";
 import arcImage from "../assets/images/arc.jpg";
 import stateM from "../assets/images/State-M.jpg";
 import gc7 from "../assets/images/gc7.jpg";
 import electricLabs from "../assets/images/electriclabs.jpeg";
 
+const astuLogo = "/images/astu-logo-modified.png";
+const gallery3 = "/images/astu-logo-modified.png";
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
 const stakeholders = [
@@ -1132,7 +1132,7 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <img
                   alt="ASTU Official Emblem"
-                  className="h-12 w-12 object-contain rounded-xl bg-white/10 p-1.5 border border-white/10 shadow-md"
+                  className="h-12 w-12 rounded-full object-contain"
                   src={astuLogo}
                 />
                 <div>
