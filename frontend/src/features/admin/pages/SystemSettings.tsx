@@ -58,7 +58,7 @@ const importHistory: ImportHistoryRow[] = [
 const systemFields = ['Student ID', 'Full Name', 'Email', 'Department', 'Graduation Year', 'CGPA'];
 const csvColumns = ['student_id', 'full_name', 'email', 'department', 'graduation_year', 'cgpa'];
 
-const defaultLogo = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH';
+const defaultLogo = '/images/astu-logo-modified.png';
 
 function SectionCard({
   title,
@@ -466,7 +466,7 @@ export default function SystemSettings() {
                   <AdminBadge variant="neutral">Preview</AdminBadge>
                 </div>
                 <div className="mt-4 flex items-center gap-4">
-                  <img src={logoPreview} alt="University logo preview" className="h-20 w-20 rounded-[10px] border border-slate-200 bg-white object-contain p-2" />
+                  <img src={logoPreview} alt="University logo preview" className="h-20 w-20 rounded-full object-cover shadow-sm ring-1 ring-slate-200" />
                   <button
                     type="button"
                     onClick={() => setLogoPreview(defaultLogo)}

@@ -17,7 +17,6 @@ import {
   Users,
   Zap,
   Activity,
-  RefreshCw,
   ExternalLink,
   ChevronRight,
   Database,
@@ -223,14 +222,6 @@ function StatusDot({ status }: { status: 'healthy' | 'warning' | 'critical' }) {
 
 export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
-  const today = new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date());
 
   const weeklyTotal = useMemo(() =>
     weeklyRegistrations.reduce((sum, d) => sum + d.alumni + d.employers, 0),
@@ -277,43 +268,10 @@ export default function AdminDashboard() {
                 </button>
               ))}
             </div>
-            <AdminBadge variant="success">Production Ready</AdminBadge>
+            <AdminBadge variant="success">All Systems Operational</AdminBadge>
           </div>
         }
       />
-
-      {/* Greeting Banner */}
-      <section className="pb-2">
-        <div className="relative overflow-hidden rounded-[20px] border border-slate-200 bg-gradient-to-br from-[#003580]/8 via-[#E8A020]/5 to-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#003580]/3 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-          <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Daily briefing</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-                {greeting}, System Administrator
-              </h2>
-              <div className="mt-2 flex items-center gap-3 text-sm text-slate-500">
-                <span>{today}</span>
-                <span className="w-1 h-1 rounded-full bg-slate-300" />
-                <span>Adama Science and Technology University</span>
-              </div>
-            </div>
-            <div className="inline-flex items-center gap-2 self-start rounded-full border border-emerald-500/20 bg-emerald-50 px-3.5 py-1.5 text-sm font-semibold text-emerald-700 shadow-sm">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              All Systems Operational
-              <span className="text-emerald-400 text-[10px] font-normal ml-1">v1.4</span>
-            </div>
-          </div>
-          <div className="relative mt-4 pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-400">
-            <span className="flex items-center gap-1"><RefreshCw className="w-3 h-3" /> Last sync: 2 min ago</span>
-            <span className="flex items-center gap-1"><Database className="w-3 h-3" /> 32.4k records</span>
-            <span className="flex items-center gap-1"><Users className="w-3 h-3" /> 156 active sessions</span>
-          </div>
-        </div>
-      </section>
 
       {/* KPI Stats Cards */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

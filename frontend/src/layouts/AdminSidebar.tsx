@@ -9,6 +9,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   LogOut,
+  Mail,
   PanelLeftClose,
   PanelLeftOpen,
   ScrollText,
@@ -47,6 +48,7 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Jobs Management', path: '/admin/jobs', icon: Briefcase, section: 'system', badge: '47', tooltip: '47 active job posts' },
   { label: 'Departments', path: '/admin/departments', icon: GraduationCap, section: 'system', tooltip: 'Manage departments' },
   { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'settings', badge: '5', tooltip: '5 unread notifications' },
+  { label: 'Email Center', path: '/admin/email', icon: Mail, section: 'settings', badge: '12', tooltip: 'Create targeted email campaigns' },
   { label: 'System Logs', path: '/admin/logs', icon: ScrollText, section: 'settings', tooltip: 'Audit trail & system logs' },
   { label: 'Backup & Security', path: '/admin/backup', icon: Shield, section: 'settings', tooltip: 'Backup & security settings' },
   { label: 'Settings', path: '/admin/settings', icon: Settings, section: 'settings', tooltip: 'System configuration' },
@@ -80,9 +82,9 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0">
               <img
-                src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                src="/images/astu-logo-modified.png"
                 alt="ASTU Logo"
-                className="h-10 w-10 rounded-xl bg-white/5 object-contain p-0.5 ring-1 ring-white/10 transition-all duration-300 group-hover/logo:ring-[#E8A020]/40"
+                className="h-11 w-11 rounded-full object-contain transition-all duration-300"
               />
               {!collapsed && (
                 <div className="absolute -top-1 -right-1 px-1 py-0.5 bg-[#E8A020]/20 text-[#E8A020] text-[7px] font-extrabold rounded border border-[#E8A020]/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Beta</div>

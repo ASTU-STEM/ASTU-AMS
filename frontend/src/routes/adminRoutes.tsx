@@ -14,6 +14,7 @@ import BackupSecurity from '../features/admin/pages/BackupSecurity';
 import SystemSettings from '../features/admin/pages/SystemSettings';
 import SuperAdminModules from '../features/admin/pages/SuperAdminModules';
 import ReportsCenter from '../features/admin/pages/ReportsCenter';
+import EmailCenter from '../features/admin/pages/EmailCenter';
 
 export default function AdminRoutes() {
   return (
@@ -31,6 +32,7 @@ export default function AdminRoutes() {
         <Route path="departments" element={<DepartmentManagement />} />
         <Route path="departments/:id" element={<DepartmentManagement />} />
         <Route path="notifications" element={<NotificationCenter />} />
+        <Route path="email" element={<EmailCenter />} />
         <Route path="logs" element={<SystemLogs />} />
         <Route path="backup" element={<BackupSecurity />} />
         <Route path="settings" element={<SystemSettings />} />

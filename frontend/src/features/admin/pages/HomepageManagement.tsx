@@ -142,7 +142,7 @@ const initialCampuses: Campus[] = [
 const initialGallery: GalleryImage[] = [
   { id: 'GI-1', title: 'ASTU Main Campus', src: '/src/assets/imgs/astu-building.jpg', active: true },
   { id: 'GI-2', title: 'Innovation and Collaboration', src: '/src/assets/imgs/campus-2.jpeg', active: true },
-  { id: 'GI-3', title: 'ASTU Alumni Identity', src: '/src/assets/imgs/astu-logo.jpeg', active: true },
+  { id: 'GI-3', title: 'ASTU Alumni Identity', src: '/images/astu-logo-modified.png', active: true },
 ];
 
 const initialVideos: VideoItem[] = [

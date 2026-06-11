@@ -78,9 +78,9 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="relative shrink-0">
               <img
-                src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                src="/images/astu-logo-modified.png"
                 alt="ASTU"
-                className="h-9 w-9 rounded-lg bg-white/8 object-contain p-0.5 ring-1 ring-white/10"
+                className="h-10 w-10 rounded-full object-contain"
               />
               {!collapsed && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F4B400] text-[7px] font-bold text-[#0B1A2E] shadow-sm">C</span>
