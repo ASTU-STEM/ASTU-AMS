@@ -31,7 +31,7 @@ export class TracerStudyService {
         where: {
           status: 'ACTIVE',
           isVerified: true,
-          graduationDate: { lte: cutoffDate },
+          graduationYear: { lte: cutoffDate.getFullYear() },
           userId: { not: null }
         }
       });

@@ -65,6 +65,13 @@ enum DocumentRequestStatus {
   REJECTED
 }
 
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 model User {
   id               String            @id @default(uuid())
   email            String            @unique
@@ -577,4 +584,25 @@ model JobRecommendation {
   @@unique([alumniId, jobId])
   @@index([alumniId])
   @@index([score])
+}
+
+model SupportTicket {
+  id             String              @id @default(uuid())
+  category       String
+  studentId      String?
+  fullName       String
+  graduationYear String?
+  contactEmail   String
+  phone          String?
+  message        String
+  attachments    String[]
+  status         SupportTicketStatus @default(OPEN)
+  
+  // Optional metadata from frontend
+  route          String?
+  lastErrorCode  String?
+  sessionId      String?
+  
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 }

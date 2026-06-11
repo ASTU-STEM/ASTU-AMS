@@ -6,18 +6,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 export const supportService = {
   async createTicket(formData: FormData): Promise<ApiResult<{ ticketId: string }>> {
     try {
-      if (import.meta.env.DEV) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        return {
-          ok: true,
-          data: {
-            ticketId: `TIC-${Math.floor(100000 + Math.random() * 900000)}`
-          }
-        };
-      }
-      
       const response = await axios.post<{ success: boolean; data?: { ticketId: string }; message?: string }>(
-        `${API_BASE_URL}/support/ticket`,
+        `${API_BASE_URL}/support/tickets`,
         formData,
         {
           headers: {
