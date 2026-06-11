@@ -136,8 +136,8 @@ export default function AlumniRegistrationPage() {
   const handleRegistrationSubmit = async (values: AlumniRegistrationFormData) => {
     setIsLoading(true);
     try {
-      // Calls updated authService.signup
-      const response = await authService.signup({
+// Calls updated authService.signup
+       const response = await authService.signup({
         fullName: `${values.firstName} ${values.middleName} ${values.lastName}`,
         studentId: values.idNumber,
         email: values.email,
@@ -196,7 +196,7 @@ export default function AlumniRegistrationPage() {
       title="Register Here"
       subtitle="Create your alumni account"
       showLogo={true}
-      maxWidth="max-w-5xl"
+      maxWidth="max-w-2xl"
       rightWidth="lg:w-1/2"
     >
       <div className="mb-6 text-center">
@@ -235,7 +235,7 @@ export default function AlumniRegistrationPage() {
                 <span className="bg-astu-navy/10 text-astu-navy px-2 py-0.5 rounded-full text-[10px]">Registration</span>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
                 {/* Left Column */}
                 <div className="space-y-5">
                   <FormField
@@ -283,45 +283,41 @@ export default function AlumniRegistrationPage() {
                     autoComplete="family-name"
                   />
 
-                  <div>
-                    <FormField
-                      name="gender"
-                      label="Gender *"
-                      as="select"
-                      value={values.gender}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.gender}
-                      touched={touched.gender}
-                      disabled={isLoading}
-                      required
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </FormField>
-                  </div>
+                  <FormField
+                    name="gender"
+                    label="Gender *"
+                    as="select"
+                    value={values.gender}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.gender}
+                    touched={touched.gender}
+                    disabled={isLoading}
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </FormField>
 
-                  <div>
-                    <FormField
-                      name="educationalQualification"
-                      label="Educational Qualification *"
-                      as="select"
-                      value={values.educationalQualification}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.educationalQualification}
-                      touched={touched.educationalQualification}
-                      disabled={isLoading}
-                      required
-                    >
-                      <option value="">Select Qualification</option>
-                      <option value="Bachelor's">Bachelor's Degree</option>
-                      <option value="Master's">Master's Degree</option>
-                      <option value="PhD">PhD</option>
-                      <option value="Diploma">Diploma</option>
-                    </FormField>
-                  </div>
+                  <FormField
+                    name="educationalQualification"
+                    label="Educational Qualification *"
+                    as="select"
+                    value={values.educationalQualification}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.educationalQualification}
+                    touched={touched.educationalQualification}
+                    disabled={isLoading}
+                    required
+                  >
+                    <option value="">Select Qualification</option>
+                    <option value="Bachelor's">Bachelor's Degree</option>
+                    <option value="Master's">Master's Degree</option>
+                    <option value="PhD">PhD</option>
+                    <option value="Diploma">Diploma</option>
+                  </FormField>
 
                   <FormField
                     name="workPlace"
@@ -357,40 +353,38 @@ export default function AlumniRegistrationPage() {
                 {/* Right Column */}
                 <div className="space-y-5">
                   <FormField
-                      name="idNumber"
-                      label="Student ID (University Student ID)"
-                      type="text"
-                      placeholder="UGR/XXXXX/YY"
-                      value={values.idNumber}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.idNumber}
-                      touched={touched.idNumber}
-                      disabled={isLoading}
-                      required
-                    />
+                    name="idNumber"
+                    label="Student ID (University Student ID)"
+                    type="text"
+                    placeholder="UGR/XXXXX/YY"
+                    value={values.idNumber}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.idNumber}
+                    touched={touched.idNumber}
+                    disabled={isLoading}
+                    required
+                  />
 
-                  <div>
-                    <FormField
-                      name="yearOfGraduation"
-                      label="Year of Graduation *"
-                      as="select"
-                      value={values.yearOfGraduation}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.yearOfGraduation}
-                      touched={touched.yearOfGraduation}
-                      disabled={isLoading}
-                      required
-                    >
-                      <option value="">Select Year</option>
-                      {graduationYears.map((year) => (
-                        <option key={year} value={year.toString()}>
-                          {year}
-                        </option>
-                      ))}
-                    </FormField>
-                  </div>
+                  <FormField
+                    name="yearOfGraduation"
+                    label="Year of Graduation *"
+                    as="select"
+                    value={values.yearOfGraduation}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.yearOfGraduation}
+                    touched={touched.yearOfGraduation}
+                    disabled={isLoading}
+                    required
+                  >
+                    <option value="">Select Year</option>
+                    {graduationYears.map((year) => (
+                      <option key={year} value={year.toString()}>
+                        {year}
+                      </option>
+                    ))}
+                  </FormField>
 
                   <FormField
                     name="fieldOfStudy"
@@ -419,7 +413,6 @@ export default function AlumniRegistrationPage() {
                         onChange={(e) => {
                           const checked = e.target.checked;
                           setFieldValue('hasNoAstuEmail', checked);
-                          // Clear email when checkbox is checked; navigation handled after form submission
                           if (checked) {
                             setFieldValue('email', '');
                           }
@@ -430,8 +423,6 @@ export default function AlumniRegistrationPage() {
                         I don't know / don't have my ASTU email
                       </label>
                     </div>
-
-
                   </div>
 
                   {/* ASTU Email Form Field (conditionally rendered) */}

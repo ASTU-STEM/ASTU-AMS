@@ -81,18 +81,121 @@ const DepartmentDashboard = () => {
         { title: 'Graduate Employability Reports', desc: 'Export accreditation-ready reports by batch, program, geography, and sector.', tab: 'export', icon: 'ios_share' },
     ];
 
+    const departmentTabMeta: Record<string, { eyebrow: string; title: string; subtitle: string; focus: string; metric: string; status: string }> = {
+        dashboard: {
+            eyebrow: 'Department workspace',
+            title: 'Welcome to Department Dashboard',
+            subtitle: 'Track graduate outcomes, tracer participation, employer feedback, and accreditation evidence from one consistent workspace.',
+            focus: 'Overview',
+            metric: 'Live KPIs',
+            status: 'Updated today',
+        },
+        management: {
+            eyebrow: 'Department management',
+            title: 'Manage analytics, curriculum, KPIs, partnerships, and reports',
+            subtitle: 'Create and review graduate outcomes, curriculum evidence, research collaboration, employability reports, and industry partnership analytics.',
+            focus: 'Management hub',
+            metric: '6 modules',
+            status: 'Ready',
+        },
+        'employment-analytics': {
+            eyebrow: 'Graduate outcomes',
+            title: 'Employment Analytics',
+            subtitle: 'Compare employment status, hiring sectors, salary bands, locations, and batch-level outcome trends.',
+            focus: 'Employment',
+            metric: 'Outcome trends',
+            status: 'Analyzing',
+        },
+        'skill-gap': {
+            eyebrow: 'Curriculum alignment',
+            title: 'Skill Gap Reports',
+            subtitle: 'Review employer demand, alumni skills, missing competencies, and recommended curriculum actions.',
+            focus: 'Skill gaps',
+            metric: 'Priority gaps',
+            status: 'Actionable',
+        },
+        'employer-feedback': {
+            eyebrow: 'Industry voice',
+            title: 'Employer Feedback',
+            subtitle: 'Monitor employer ratings, collaboration signals, hiring feedback, and program improvement evidence.',
+            focus: 'Feedback',
+            metric: 'Partner input',
+            status: 'Reviewed',
+        },
+        'tracer-reports': {
+            eyebrow: 'Tracer evidence',
+            title: 'Tracer Reports',
+            subtitle: 'Generate tracer study insights by batch, department, employment status, location, and survey wave.',
+            focus: 'Tracer study',
+            metric: 'Survey data',
+            status: 'Reportable',
+        },
+        curriculum: {
+            eyebrow: 'Academic quality',
+            title: 'Curriculum Insights',
+            subtitle: 'Connect outcome evidence, employer demand, course updates, and accreditation-ready curriculum recommendations.',
+            focus: 'Curriculum',
+            metric: 'Evidence mapped',
+            status: 'In review',
+        },
+        accreditation: {
+            eyebrow: 'Compliance evidence',
+            title: 'Accreditation Reports',
+            subtitle: 'Prepare department KPI evidence, tracer proof, curriculum alignment, and report-ready accreditation summaries.',
+            focus: 'Accreditation',
+            metric: 'KPI evidence',
+            status: 'Ready',
+        },
+        export: {
+            eyebrow: 'Reporting center',
+            title: 'Export Reports',
+            subtitle: 'Export clean department reports for accreditation, leadership review, graduate outcomes, and industry partnership follow-up.',
+            focus: 'Exports',
+            metric: 'Report formats',
+            status: 'Available',
+        },
+    };
+
+    const activeMeta = departmentTabMeta[activeTab] ?? departmentTabMeta.dashboard;
+
+    const renderDepartmentHero = () => (
+        <section className="relative overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-r from-astu-navy via-[#0f4f86] to-astu-green p-4 text-white shadow-md md:px-5 md:py-4">
+            <div className="absolute -right-20 -top-24 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -bottom-24 left-8 h-40 w-40 rounded-full bg-[#FFD700]/10 blur-3xl" />
+            <div className="relative z-10 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-2xl">
+                    <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white/75">
+                        <span className="material-symbols-outlined text-[14px] text-[#FFD700]">auto_awesome</span>
+                        {activeMeta.eyebrow}
+                    </div>
+                    <h2 className="text-xl font-bold leading-tight tracking-tight md:text-2xl">{activeMeta.title}</h2>
+                    <p className="mt-0.5 max-w-xl text-xs leading-relaxed text-white/80">{activeMeta.subtitle}</p>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-3 lg:w-[430px]">
+                    {[
+                        { label: 'Focus', value: activeMeta.focus, icon: 'center_focus_strong' },
+                        { label: 'Metric', value: activeMeta.metric, icon: 'monitoring' },
+                        { label: 'Status', value: activeMeta.status, icon: 'task_alt' },
+                    ].map((item) => (
+                        <div key={item.label} className="rounded-[10px] border border-white/10 bg-white/10 px-3 py-2 backdrop-blur-sm">
+                            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                                <span className="material-symbols-outlined text-[14px] text-emerald-300">{item.icon}</span>
+                                {item.label}
+                            </div>
+                            <p className="mt-0.5 truncate text-xs font-semibold text-white">{item.value}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+
     const renderSection = () => {
         switch (activeTab) {
             case 'management':
                 return (
-                    <section className="space-y-6 p-4 md:p-6">
-                        <div className="rounded-[20px] border border-white/10 bg-gradient-to-r from-astu-navy via-[#0f4f86] to-astu-green p-5 text-white shadow-md md:p-6">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Department management</p>
-                            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Manage analytics, curriculum, KPIs, partnerships, and reports</h2>
-                            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
-                                Graduate outcomes, curriculum review, ranking/KPI evidence, research collaboration, employability reporting, and industry partnership analytics.
-                            </p>
-                        </div>
+                    <section className="space-y-6">
                         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                             {departmentManagementActions.map((action) => (
                                 <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-astu-navy/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
@@ -155,10 +258,11 @@ const DepartmentDashboard = () => {
                 <div className="relative z-10 p-5 border-b border-white/10">
                     <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
                         <div className="relative group/logo">
-                            <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15 shadow-lg transition-all duration-300 group-hover/logo:border-emerald-400/50">
-                                <img alt="ASTU Logo" className="h-8 w-8 object-contain rounded-md"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" />
-                            </div>
+                            <img
+                                alt="ASTU Logo"
+                                className="h-11 w-11 rounded-full object-contain transition-all duration-300"
+                                src="/images/astu-logo-modified.png"
+                            />
                             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#001a33] shadow-lg animate-pulse" />
                             {!sidebarCollapsed && (
                                 <div className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[7px] font-extrabold rounded border border-emerald-500/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Live</div>
@@ -427,8 +531,11 @@ const DepartmentDashboard = () => {
                 </header>
 
                 {/* Dynamic Inner Tab View */}
-                <div className="flex-grow">
-                    {renderSection()}
+                <div className="flex-grow p-4 md:p-6">
+                    {renderDepartmentHero()}
+                    <div className="mt-6">
+                        {renderSection()}
+                    </div>
                 </div>
 
             </main>

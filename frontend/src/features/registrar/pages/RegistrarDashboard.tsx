@@ -385,13 +385,11 @@ useEffect(() => {
           <div className="relative z-10 p-5 border-b border-white/10">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative group/logo">
-                <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15 shadow-lg transition-all duration-300 group-hover/logo:border-emerald-400/50 group-hover/logo:shadow-emerald-400/20">
-                  <img
-                    alt="ASTU Official Logo"
-                    className="h-8 w-8 object-contain rounded-md"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-                  />
-                </div>
+                <img
+                  alt="ASTU Official Logo"
+                  className="h-11 w-11 rounded-full object-contain transition-all duration-300"
+                  src="/images/astu-logo-modified.png"
+                />
                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#001a33] shadow-lg animate-pulse" />
                 {!sidebarCollapsed && (
                   <div className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[7px] font-extrabold rounded border border-emerald-500/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">
@@ -1148,8 +1146,8 @@ useEffect(() => {
               <div className="flex items-center gap-3">
                 <img
                   alt="ASTU Official Emblem"
-                  className="h-10 w-10 object-contain rounded-lg bg-white/10 p-1"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                  className="h-10 w-10 rounded-full object-contain"
+                  src="/images/astu-logo-modified.png"
                 />
                 <div>
                   <h4 className="font-bold text-white text-sm">Adama Science and Technology University</h4>
