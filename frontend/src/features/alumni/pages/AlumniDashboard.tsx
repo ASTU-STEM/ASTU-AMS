@@ -45,6 +45,8 @@ import { DocumentServicesTab } from '../components/DocumentServicesTab';
 import { SettingsTab } from '../components/SettingsTab';
 import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
+import { SystemDocumentationTab } from '../components/SystemDocumentationTab';
+import { AIAssistantTab } from '../components/AIAssistantTab';
 
 const AlumniDashboard = () => {
    const navigate = useNavigate();
@@ -234,6 +236,8 @@ const AlumniDashboard = () => {
     { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3' },
     { id: 'forum', label: 'Community', icon: 'group' },
     { id: 'donations', label: 'Giving', icon: 'volunteer_activism' },
+    { id: 'ai-assistant', label: 'AI Assistant', icon: 'smart_toy' },
+    { id: 'system-docs', label: 'System Docs', icon: 'menu_book' },
   ];
 
   const commItems = [
@@ -539,6 +543,9 @@ const AlumniDashboard = () => {
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
           {activeTab === 'messages' && <MessagingTab darkMode={darkMode} />}
           {activeTab === 'settings' && <SettingsTab preferences={preferences} onSavePreferences={handleSavePreferences} />}
+          {activeTab === 'ai-assistant' && <AIAssistantTab />}
+          {activeTab === 'system-docs' && <SystemDocumentationTab />}
+
           {activeTab === 'forum' && (
             <div className="space-y-6 p-4 md:p-6">
               <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1d9e75)] p-5 text-white md:p-6">
