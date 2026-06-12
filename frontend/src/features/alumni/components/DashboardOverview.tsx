@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, DonationCampaign } from '../types/alumni.types';
+import { JobMatch, AlumniProfile, TracerSurvey } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
-import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
-import { getForumPosts, getDonationCampaigns } from '../services/mockAlumniData';
+import { ActivityTimeline } from '../../../components/ActivityTimeline';
+import { getForumPosts, getDonationCampaigns, getMilestones } from '../services/mockAlumniData';
+import {
+  INTELLIGENCE_CARDS,
+  COMMAND_SIGNALS,
+  PROFILE_READINESS,
+  NEXT_STEPS,
+  CHART_DATA,
+  ACTIVITY_ENTRIES,
+  SALARY_OPTIONS,
+} from '../config/alumni.config';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -45,33 +54,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [tempCompany, setTempCompany] = useState(profile.company);
   const [tempSalary, setTempSalary] = useState(profile.salaryRange || '30,001 - 60,000 ETB');
 
-  // Static/dynamic career milestones
-  const milestones: CareerMilestone[] = [
-    {
-      id: 1,
-      year: '2025 - Present',
-      title: profile.currentRole || 'Junior Fullstack Engineer',
-      company: profile.company || 'Chapa Financial Technologies',
-      description: 'Drives user acquisition interfaces, checkouts developer tools, and fintech integrations.',
-      type: 'professional'
-    },
-    {
-      id: 2,
-      year: '2024',
-      title: 'BSc degree in Computer Science and Engineering',
-      company: 'Adama Science and Technology University',
-      description: `Graduated with Great Distinction (CGPA: ${profile.cgpa || '3.78'}). Focused on Software Systems.`,
-      type: 'academic'
-    },
-    {
-      id: 3,
-      year: '2023',
-      title: 'Software DevOps Intern',
-      company: 'Safaricom Telecommunications',
-      description: 'Assisted DevOps teams in setting up automated GitLab pipelines and Kubernetes environments.',
-      type: 'professional'
-    }
-  ];
+  const milestones = getMilestones();
 
   const handleStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,29 +63,30 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     toast.success('Employment status updated successfully!');
   };
 
-  const intelligenceCards = [
-    { icon: 'auto_awesome', title: 'AI Career Coach', desc: 'CV score, missing skills, salary path, and job-fit guidance from your profile.', tab: 'career' },
-    { icon: 'event_available', title: 'Events & RSVP', desc: 'Career fairs, ASTU reunions, workshops, RSVP status, and ticket QR readiness.', tab: 'career' },
-    { icon: 'forum', title: 'Community Network', desc: 'Achievement sharing, alumni posts, mentor conversations, and peer discovery.', tab: 'messages' },
-    { icon: 'workspace_premium', title: 'Verified Documents', desc: 'Transcript, certificate, identity badge, and digital download tracking.', tab: 'documents' },
-  ];
-
   const pendingSurveyCount = surveys.filter((survey) => survey.status === 'PENDING').length;
   const appliedJobsCount = recentJobs.filter((job) => job.applied).length;
   const savedJobsCount = recentJobs.filter((job) => job.saved).length;
 
-  const commandSignals = [
-    { label: 'Employer visibility', value: completion >= 90 ? 'High' : 'Improve', icon: 'visibility', tone: completion >= 90 ? 'text-astu-green' : 'text-astu-red' },
-    { label: 'Applications sent', value: appliedJobsCount.toString(), icon: 'send', tone: 'text-astu-navy' },
-    { label: 'Saved roles', value: savedJobsCount.toString(), icon: 'bookmark', tone: 'text-[#8A5CF6]' },
-    { label: 'Tracer actions', value: pendingSurveyCount.toString(), icon: 'assignment_late', tone: pendingSurveyCount > 0 ? 'text-astu-red' : 'text-astu-green' },
-  ];
+  const commandSignals = COMMAND_SIGNALS.map(s => ({
+    ...s,
+    value: s.label === 'Employer visibility' ? (completion >= 90 ? 'High' : 'Improve')
+         : s.label === 'Applications sent' ? appliedJobsCount.toString()
+         : s.label === 'Saved roles' ? savedJobsCount.toString()
+         : pendingSurveyCount.toString(),
+    tone: s.label === 'Employer visibility' ? (completion >= 90 ? 'text-astu-green' : 'text-astu-red')
+        : s.label === 'Tracer actions' ? (pendingSurveyCount > 0 ? 'text-astu-red' : 'text-astu-green')
+        : s.tone,
+  }));
 
-  const profileReadiness = [
-    { label: 'Public profile', value: `${completion}%`, width: completion, icon: 'badge' },
-    { label: 'Career evidence', value: `${Math.min(100, completion + 8)}%`, width: Math.min(100, completion + 8), icon: 'fact_check' },
-    { label: 'Recruiter match', value: `${Math.min(98, completion + 14)}%`, width: Math.min(98, completion + 14), icon: 'target' },
-  ];
+  const profileReadiness = PROFILE_READINESS.map(p => ({
+    ...p,
+    value: p.label === 'Public profile' ? `${completion}%`
+         : p.label === 'Career evidence' ? `${Math.min(100, completion + 8)}%`
+         : `${Math.min(98, completion + 14)}%`,
+    width: p.label === 'Public profile' ? completion
+         : p.label === 'Career evidence' ? Math.min(100, completion + 8)
+         : Math.min(98, completion + 14),
+  }));
 
   return (
     <div className="space-y-6">
@@ -289,11 +273,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   onChange={(e) => setTempSalary(e.target.value)}
                   className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
                 >
-                  <option value="Under 15,000 ETB">Under 15,000 ETB</option>
-                  <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
-                  <option value="30,001 - 60,000 ETB">30,001 - 60,000 ETB</option>
-                  <option value="60,001 - 100,000 ETB">60,001 - 100,000 ETB</option>
-                  <option value="Over 100,000 ETB">Over 100,000 ETB</option>
+                  {SALARY_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
                 </select>
               </div>
               <button
@@ -398,7 +380,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </span>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {intelligenceCards.map((card) => (
+          {INTELLIGENCE_CARDS.map((card) => (
             <button
               key={card.title}
               onClick={() => onTabChange(card.tab)}
@@ -521,14 +503,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           type="area"
           title="Employment Rate Trend"
           subtitle="Graduate employment rates over recent years"
-          data={[
-            { year: '2020', rate: 72 },
-            { year: '2021', rate: 76 },
-            { year: '2022', rate: 79 },
-            { year: '2023', rate: 83 },
-            { year: '2024', rate: 87 },
-            { year: '2025', rate: 91 },
-          ]}
+          data={CHART_DATA.employmentTrend}
           xKey="year"
           series={[{ key: 'rate', label: 'Employment %' }]}
           height={220}
@@ -537,13 +512,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           type="pie"
           title="Skills Distribution"
           subtitle="Top skills reported by alumni"
-          data={[
-            { name: 'Software Engineering', value: 340 },
-            { name: 'Data Science', value: 180 },
-            { name: 'DevOps & Cloud', value: 120 },
-            { name: 'Electrical Eng.', value: 95 },
-            { name: 'Civil Eng.', value: 75 },
-          ]}
+          data={CHART_DATA.skillsDistribution}
           xKey="name"
           series={[{ key: 'value', label: 'Alumni Count' }]}
           height={220}
@@ -552,13 +521,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* Activity Timeline */}
       <ActivityTimeline
-        activities={[
-          { id: 1, type: 'job', title: 'New job match: Senior React Developer', description: 'Chapa Financial Technologies posted a role matching your profile.', timestamp: '2h ago', unread: true },
-          { id: 2, type: 'survey', title: 'Tracer Survey reminder', description: '12-month tracer survey is due by June 30, 2026.', timestamp: '1d ago', unread: true },
-          { id: 3, type: 'event', title: 'ASTU Alumni Meetup 2026', description: 'Annual networking event at ASTU Main Campus on July 15.', timestamp: '3d ago' },
-          { id: 4, type: 'document', title: 'Transcript request approved', description: 'Your official transcript has been digitally signed.', timestamp: '5d ago' },
-          { id: 5, type: 'message', title: 'Message from HR Manager', description: 'Hilina Sileshi sent you a message about the developer opening.', timestamp: '1w ago' },
-        ] as ActivityEntry[]}
+        activities={ACTIVITY_ENTRIES.map((e, i) => ({ ...e, id: i + 1, timestamp: ['2h ago', '1d ago', '3d ago', '5d ago', '1w ago'][i], unread: i < 2 })) as any}
         onViewAll={() => onTabChange('messages')}
       />
 
@@ -566,11 +529,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <h3 className="mb-4 text-sm font-semibold text-gray-900">Recommended Next Steps</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {[
-            { icon: 'edit', title: 'Update Skills', desc: 'Add new technical and soft skills' },
-            { icon: 'photo_camera', title: 'Upload Photo', desc: 'Add a professional profile picture' },
-            { icon: 'description', title: 'Update Resume', desc: 'Upload your latest resume' }
-          ].map((action, idx) => (
+          {NEXT_STEPS.map((action, idx) => (
             <div
               key={idx}
               className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-gray-50 p-4 text-center transition-all duration-300 hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"

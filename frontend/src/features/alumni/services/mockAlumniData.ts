@@ -619,3 +619,27 @@ export const getSkillPathways = (): SkillPathway[] => {
 export const saveSkillPathways = (pathways: SkillPathway[]): void => {
   localStorage.setItem('alumni_skill_pathways', JSON.stringify(pathways));
 };
+
+export interface AlumniNotification {
+  id: number;
+  text: string;
+  time: string;
+  unread: boolean;
+  category: 'jobs' | 'survey' | 'documents' | 'mentorship' | 'profile';
+}
+
+const defaultNotifications: AlumniNotification[] = [
+  { id: 1, text: 'Tracer Survey 2026 launched! Complete before March 15.', unread: true, time: '2 hours ago', category: 'survey' },
+  { id: 2, text: 'New job matches released for Computer Science graduates.', unread: true, time: '1 day ago', category: 'jobs' },
+  { id: 3, text: 'Helina Sileshi accepted your mentorship interest.', unread: false, time: '3 days ago', category: 'mentorship' },
+];
+
+export const getAlumniNotifications = (): AlumniNotification[] => {
+  const data = localStorage.getItem('alumni_notifications');
+  if (data) { try { return JSON.parse(data); } catch { return defaultNotifications; } }
+  return defaultNotifications;
+};
+
+export const saveAlumniNotifications = (notifications: AlumniNotification[]): void => {
+  localStorage.setItem('alumni_notifications', JSON.stringify(notifications));
+};
