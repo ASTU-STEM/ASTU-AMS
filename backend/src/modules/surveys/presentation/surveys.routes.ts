@@ -15,15 +15,17 @@ router.get('/my-surveys/:assignmentId', requireRoles([Role.ALUMNI]), asyncHandle
 router.post('/save-draft', requireRoles([Role.ALUMNI]), asyncHandler(SurveysController.saveDraft));
 router.post('/submit', requireRoles([Role.ALUMNI]), asyncHandler(SurveysController.submitAssignedSurvey));
 router.get('/my-history', requireRoles([Role.ALUMNI]), asyncHandler(SurveysController.getMyHistory));
-
 // Admin/Registrar/DepartmentHead survey templates and reports
-router.post('/templates', requireRoles([Role.ADMIN]), asyncHandler(SurveysController.createSurveyTemplate));
+router.post('/templates', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.createSurveyTemplate));
 router.get('/templates', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.listSurveyTemplates));
 router.get('/templates/:templateId', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getSurveyTemplate));
-router.put('/templates/:templateId', requireRoles([Role.ADMIN]), asyncHandler(SurveysController.updateSurveyTemplate));
-router.delete('/templates/:templateId', requireRoles([Role.ADMIN]), asyncHandler(SurveysController.archiveSurveyTemplate));
-router.post('/templates/:templateId/clone', requireRoles([Role.ADMIN]), asyncHandler(SurveysController.cloneSurveyTemplate));
-
+router.put('/templates/:templateId', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.updateSurveyTemplate));
+router.delete('/templates/:templateId', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.archiveSurveyTemplate));
+router.post('/templates/:templateId/clone', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.cloneSurveyTemplate));
+router.post('/templates/:templateId/activate', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.activateSurveyTemplate));
+router.post('/templates/:templateId/deactivate', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.deactivateSurveyTemplate));
+router.get('/templates/:templateId/analysis', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getSurveyAnalysis));
+router.get('/templates/:templateId/responses', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getResponsesBySurvey));
 router.get('/assignments', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.listAssignments));
 router.get('/assignments/:assignmentId', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD, Role.ALUMNI]), asyncHandler(SurveysController.getAssignmentById));
 
@@ -32,6 +34,7 @@ router.get('/responses/:responseId', requireRoles([Role.ADMIN, Role.REGISTRAR, R
 
 router.get('/statistics', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getStatistics));
 router.get('/completion-report', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getCompletionReport));
+router.get('/company-hiring-stats', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getCompanyHiringStats));
 
 // Legacy survey submission / backward compatibility
 router.post('/:surveyId/responses', requireRoles([Role.ALUMNI]), asyncHandler(SurveysController.submitResponse));

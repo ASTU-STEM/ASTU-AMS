@@ -32,6 +32,7 @@ export class Survey {
     public readonly description: string,
     public readonly type: string,
     public readonly milestoneMonths: number | null,
+    public readonly scheduledAt: Date | null,
     public readonly isActive: boolean,
     public readonly isArchived: boolean,
     public readonly sections?: SurveySection[],

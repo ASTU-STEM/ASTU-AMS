@@ -282,6 +282,7 @@ model Survey {
   description     String
   type            SurveyType           @default(CUSTOM)
   milestoneMonths Int?
+  scheduledAt     DateTime?
   isActive        Boolean              @default(true)
   isArchived      Boolean              @default(false)
   sections        SurveySection[]

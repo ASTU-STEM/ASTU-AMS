@@ -1,9 +1,14 @@
 import { ISurveyAssignmentRepository } from '../ports/ISurveyAssignmentRepository';
 import { ISurveyResponseRepository } from '../ports/ISurveyResponseRepository';
 import { ApiError } from '../../../../core/errors/ApiError';
+import { PrismaNotificationRepository } from '../../../notifications/infrastructure/repositories/PrismaNotificationRepository';
+import { EmailService } from '../../../../core/services/EmailService';
 import prisma from '../../../../core/config/db';
 
 export class SubmitAssignedSurvey {
+  private notificationRepo = new PrismaNotificationRepository();
+  private emailService = new EmailService();
+
   constructor(
     private readonly assignmentRepo: ISurveyAssignmentRepository,
     private readonly responseRepo: ISurveyResponseRepository
@@ -81,6 +86,55 @@ export class SubmitAssignedSurvey {
 
       return savedResponse;
     });
+
+    // ─── Post-submission notifications ─────────────────────────────────────
+    const surveyTitle = (assignment as any).survey?.title ?? 'Tracer Survey';
+
+    // 1. Notify the alumni: confirmation
+    try {
+      await this.notificationRepo.create({
+        userId: alumniId,
+        title: '✅ Survey Submitted Successfully',
+        content: `Your response for "${surveyTitle}" has been recorded. Thank you for participating!`,
+        isRead: false,
+      } as any);
+    } catch { /* non-critical */ }
+
+    // 2. Notify all admins and registrars
+    try {
+      const staff = await prisma.user.findMany({
+        where: { role: { in: ['ADMIN', 'REGISTRAR'] } },
+        select: { id: true, email: true },
+      });
+
+      const alumniUser = await prisma.user.findUnique({
+        where: { id: alumniId },
+        select: { email: true, firstName: true, lastName: true },
+      });
+
+      const alumniName = alumniUser
+        ? `${alumniUser.firstName ?? ''} ${alumniUser.lastName ?? ''}`.trim()
+        : 'An alumnus';
+
+      await Promise.allSettled([
+        ...staff.map((s: any) =>
+          this.notificationRepo.create({
+            userId: s.id,
+            title: '📬 New Survey Response',
+            content: `${alumniName} submitted a response for "${surveyTitle}".`,
+            isRead: false,
+          } as any)
+        ),
+        // Email confirmation to alumni
+        alumniUser?.email
+          ? this.emailService.sendGenericNotification(
+              alumniUser.email,
+              `Survey Submitted: ${surveyTitle}`,
+              `Your response for the survey "<strong>${surveyTitle}</strong>" has been received. Thank you for helping ASTU maintain ABET accreditation standards.`
+            )
+          : Promise.resolve(),
+      ]);
+    } catch { /* non-critical */ }
 
     return result;
   }

@@ -16,6 +16,7 @@ export const createSurveyTemplateSchema = z.object({
   description: z.string().min(10),
   type: z.enum(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH', 'CUSTOM']),
   milestoneMonths: z.number().int().positive().optional(),
+  scheduledAt: z.string().datetime().nullable().optional().or(z.string().date().nullable().optional()),
   isActive: z.boolean().optional(),
   questions: z.array(questionSchema).optional(),
   sections: z.array(z.object({
@@ -33,6 +34,7 @@ export const updateSurveyTemplateSchema = z.object({
   description: z.string().min(10).optional(),
   type: z.enum(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH', 'CUSTOM']).optional(),
   milestoneMonths: z.number().int().positive().optional(),
+  scheduledAt: z.string().datetime().nullable().optional().or(z.string().date().nullable().optional()),
   isActive: z.boolean().optional(),
   questions: z.array(questionSchema).optional(),
   sections: z.array(z.object({
@@ -41,7 +43,7 @@ export const updateSurveyTemplateSchema = z.object({
     order: z.number().int().nonnegative(),
     questions: z.array(questionSchema).min(1)
   })).optional()
-}).refine((data) => Boolean(data.questions?.length || data.sections?.length || data.title || data.description || data.type || data.milestoneMonths !== undefined || data.isActive !== undefined), {
+}).refine((data) => Boolean(data.questions?.length || data.sections?.length || data.title || data.description || data.type || data.milestoneMonths !== undefined || data.scheduledAt !== undefined || data.isActive !== undefined), {
   message: 'At least one field must be updated.'
 });
 

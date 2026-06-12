@@ -19,9 +19,11 @@ export class TracerStudyService {
   private tracerNotificationRepo = new PrismaTracerNotificationRepository();
 
   async checkEligibleAlumni() {
-    const templates = await this.surveyRepo.findAll(true, false);
+    const allTemplates = await this.surveyRepo.findAll(true, false);
+    // Filter out templates that are scheduled for a future date
     const now = new Date();
-
+    const templates = allTemplates.filter(t => !t.scheduledAt || new Date(t.scheduledAt) <= now);
+    // const now is defined above after filtering
     for (const template of templates) {
       const milestoneMonths = template.milestoneMonths ?? milestoneTypeMap[template.type] ?? 0;
       if (!milestoneMonths || milestoneMonths <= 0) continue;

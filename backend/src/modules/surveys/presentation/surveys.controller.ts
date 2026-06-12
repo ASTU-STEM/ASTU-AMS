@@ -247,4 +247,101 @@ export class SurveysController {
       return sendSuccess(res, 'Survey response submitted successfully.', result, 201);
     } catch (err) { next(err); }
   }
+
+  // ─── Analysis endpoints ────────────────────────────────────────────────
+  static async getSurveyAnalysis(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { templateId } = req.params;
+      const responses = await responseRepo.findBySurveyId(templateId);
+      const template = await surveyRepo.findById(templateId);
+      if (!template) return sendSuccess(res, 'Survey not found', null, 404);
+
+      const allQuestions = [
+        ...(template.questions ?? []),
+        ...((template.sections ?? []).flatMap((s: any) => s.questions ?? []))
+      ];
+
+      const questionAnalytics = allQuestions.map((q: any) => {
+        const qAnswers = responses.flatMap((r: any) =>
+          (r.answers ?? []).filter((a: any) => a.questionId === q.id)
+        );
+        const answerTexts = qAnswers.map((a: any) => a.answerText).filter(Boolean);
+        const distribution: Record<string, number> = {};
+        for (const text of answerTexts) {
+          distribution[text] = (distribution[text] || 0) + 1;
+        }
+        return {
+          questionId: q.id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          totalAnswers: answerTexts.length,
+          distribution,
+        };
+      });
+
+      return sendSuccess(res, 'Survey analysis retrieved.', {
+        surveyId: templateId,
+        surveyTitle: template.title,
+        totalResponses: responses.length,
+        questionAnalytics,
+      });
+    } catch (err) { next(err); }
+  }
+
+  static async getCompanyHiringStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Gather company/employer mentions across all survey answers
+      const allResponses = await responseRepo.findAll();
+      const companyCount: Record<string, number> = {};
+
+      for (const response of allResponses) {
+        for (const answer of (response as any).answers ?? []) {
+          const q = (answer as any).question;
+          if (!q) continue;
+          const qText: string = q.questionText?.toLowerCase() ?? '';
+          if (
+            qText.includes('company') ||
+            qText.includes('employer') ||
+            qText.includes('organization') ||
+            qText.includes('workplace')
+          ) {
+            const company = (answer.answerText ?? '').trim();
+            if (company && company.length > 2) {
+              companyCount[company] = (companyCount[company] || 0) + 1;
+            }
+          }
+        }
+      }
+
+      const sorted = Object.entries(companyCount)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 20)
+        .map(([name, count]) => ({ name, count }));
+
+      return sendSuccess(res, 'Company hiring stats retrieved.', sorted);
+    } catch (err) { next(err); }
+  }
+
+  static async activateSurveyTemplate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await surveyRepo.update(req.params.templateId, { isActive: true });
+      return sendSuccess(res, 'Survey template activated.', result);
+    } catch (err) { next(err); }
+  }
+
+  static async deactivateSurveyTemplate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await surveyRepo.update(req.params.templateId, { isActive: false });
+      return sendSuccess(res, 'Survey template deactivated.', result);
+    } catch (err) { next(err); }
+  }
+
+  static async getResponsesBySurvey(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { templateId } = req.params;
+      const responses = await responseRepo.findBySurveyId(templateId);
+      return sendSuccess(res, 'Responses retrieved.', responses);
+    } catch (err) { next(err); }
+  }
 }
+

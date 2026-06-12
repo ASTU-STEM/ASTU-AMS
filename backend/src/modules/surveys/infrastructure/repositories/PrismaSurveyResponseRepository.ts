@@ -30,9 +30,23 @@ export class PrismaSurveyResponseRepository implements ISurveyResponseRepository
     return response as any as SurveyResponse;
   }
 
+  async findBySurveyId(surveyId: string): Promise<SurveyResponse[]> {
+    const responses = await prisma.surveyResponse.findMany({
+      where: { surveyId, isDraft: false },
+      include: {
+        answers: { include: { question: true } },
+      },
+      orderBy: { submittedAt: 'desc' }
+    });
+    return responses as any as SurveyResponse[];
+  }
+
   async findAll(): Promise<SurveyResponse[]> {
     const responses = await prisma.surveyResponse.findMany({
-      include: { answers: true },
+      where: { isDraft: false },
+      include: {
+        answers: { include: { question: true } }
+      },
       orderBy: { createdAt: 'desc' }
     });
     return responses as any as SurveyResponse[];

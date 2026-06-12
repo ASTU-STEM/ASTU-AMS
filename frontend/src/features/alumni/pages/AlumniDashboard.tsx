@@ -5,6 +5,8 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
 import TelebirrDonationModal from '../../../components/TelebirrDonationModal';
+import { surveyService } from '../../surveys/services/survey.service';
+import { notificationService } from '../../notifications/services/notification.service';
 
 import {
   JobMatch,
@@ -58,7 +60,8 @@ const AlumniDashboard = () => {
 
   const [profile, setProfile] = useState<AlumniProfile>(getAlumniProfile());
   const [jobs, setJobs] = useState<JobMatch[]>(getJobMatches());
-  const [surveys, setSurveys] = useState<TracerSurvey[]>(getTracerSurveys());
+  const [surveys, setSurveys] = useState<TracerSurvey[]>([]);
+  const [realPendingSurveysCount, setRealPendingSurveysCount] = useState<number>(0);
   const [mentors, setMentors] = useState<Mentor[]>(getMentors());
   const [events, setEvents] = useState<CareerEvent[]>(getCareerEvents());
   const [documents, setDocuments] = useState<DocumentRequest[]>(getDocumentRequests());
@@ -69,14 +72,10 @@ const AlumniDashboard = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [donationCampaign, setDonationCampaign] = useState<{ title: string; category: string } | null>(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Tracer Survey 2026 launched! Complete before March 15.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New job matches released for Computer Science graduates.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Helina Sileshi accepted your mentorship interest.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const profileCompletion = calculateCompletion(profile);
-  const pendingSurveysCount = surveys.filter(s => s.status === 'PENDING').length;
+  const pendingSurveysCount = realPendingSurveysCount;
   const matchCount = jobs.filter(j => !j.applied).length;
   const connectedMentorsCount = mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length + 347;
 
@@ -176,8 +175,36 @@ const AlumniDashboard = () => {
     navigate('/login');
   };
 
-  const handleMarkNotificationsRead = () => setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-  const handleClearNotification = (id: number) => setNotifications(prev => prev.filter(n => n.id !== id));
+  const handleMarkNotificationsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      const data = await notificationService.getMyNotifications();
+      setNotifications((data || []).map((n: any) => ({
+        id: n.id,
+        text: n.content,
+        unread: !n.isRead,
+        time: new Date(n.createdAt).toLocaleDateString()
+      })));
+    } catch (err) {
+      console.error('Failed to mark all notifications as read', err);
+    }
+  };
+
+  const handleClearNotification = async (id: string) => {
+    try {
+      await notificationService.markAsRead(id);
+      const data = await notificationService.getMyNotifications();
+      setNotifications((data || []).map((n: any) => ({
+        id: n.id,
+        text: n.content,
+        unread: !n.isRead,
+        time: new Date(n.createdAt).toLocaleDateString()
+      })));
+    } catch (err) {
+      console.error('Failed to mark notification as read', err);
+    }
+  };
+
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   useEffect(() => {
@@ -198,6 +225,61 @@ const AlumniDashboard = () => {
     window.addEventListener('mousedown', handleClickOutside);
     return () => window.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const fetchPendingSurveys = async () => {
+      try {
+        const data = await surveyService.getMySurveys();
+        const pending = data.filter((item: any) => item.status === 'PENDING' || item.status === 'IN_PROGRESS').length;
+        setRealPendingSurveysCount(pending);
+        
+        let historyData: any[] = [];
+        try {
+          historyData = await surveyService.getMyHistory();
+        } catch (err) {
+          console.error('Failed to load history surveys', err);
+        }
+
+        const allAssignments = [...data, ...historyData];
+        const mappedSurveys: TracerSurvey[] = allAssignments.map((assignment: any) => {
+          let surveyType: any = 'Custom';
+          const milestone = assignment.survey?.milestoneMonths;
+          if (milestone === 6) surveyType = '6-Month';
+          else if (milestone === 12) surveyType = '12-Month';
+          else if (milestone === 24) surveyType = '24-Month';
+
+          return {
+            id: assignment.id,
+            title: assignment.survey?.title || 'Tracer Survey',
+            description: assignment.survey?.description || '',
+            deadline: assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : '',
+            status: assignment.status as any,
+            completedAt: assignment.completedAt ? new Date(assignment.completedAt).toLocaleDateString() : undefined,
+            type: surveyType,
+            questions: []
+          };
+        });
+        setSurveys(mappedSurveys);
+      } catch (err) {
+        console.error('Failed to load pending surveys count', err);
+      }
+    };
+    const fetchNotifications = async () => {
+      try {
+        const data = await notificationService.getMyNotifications();
+        setNotifications((data || []).map((n: any) => ({
+          id: n.id,
+          text: n.content,
+          unread: !n.isRead,
+          time: new Date(n.createdAt).toLocaleDateString()
+        })));
+      } catch (err) {
+        console.error('Failed to load notifications', err);
+      }
+    };
+    fetchPendingSurveys();
+    fetchNotifications();
+  }, [activeTab]);
 
   const menu = (
     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
@@ -323,11 +405,19 @@ const AlumniDashboard = () => {
                   : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'} relative`}>
                   <span className="material-symbols-outlined">{item.icon}</span>
+                  {item.id === 'surveys' && realPendingSurveysCount > 0 && sidebarCollapsed && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-[#001a33] animate-pulse" />
+                  )}
                 </span>
                 {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                {activeTab === item.id && !sidebarCollapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                {item.id === 'surveys' && realPendingSurveysCount > 0 && !sidebarCollapsed && (
+                  <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[9px] font-extrabold text-white shadow-md">
+                    {realPendingSurveysCount}
+                  </span>
+                )}
+                {activeTab === item.id && !sidebarCollapsed && (item.id !== 'surveys' || realPendingSurveysCount === 0) && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
               </button>
             ))}
           </div>
@@ -533,7 +623,7 @@ const AlumniDashboard = () => {
 
           {activeTab === 'profile' && <ProfileTab profile={profile} onSave={handleSaveProfile} />}
           {activeTab === 'career' && <CareerTab events={events} onRegisterEvent={handleRegisterEvent} />}
-          {activeTab === 'surveys' && <SurveysTab surveys={surveys} onCompleteSurvey={handleCompleteSurvey} />}
+          {activeTab === 'surveys' && <SurveysTab />}
           {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={setSelectedJobForModal} onToggleSaveJob={handleToggleSaveJob} />}
           {activeTab === 'mentorship' && <MentorshipTab mentors={mentors} onRequestMentorship={handleRequestMentorship} onScheduleSession={handleScheduleSession} />}
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}

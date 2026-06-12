@@ -49,6 +49,7 @@ export class PrismaSurveyRepository implements ISurveyRepository {
           description: data.description,
           type: data.type,
           milestoneMonths: data.milestoneMonths ?? null,
+          scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
           isActive: data.isActive,
           isArchived: data.isArchived,
         }
@@ -126,6 +127,7 @@ export class PrismaSurveyRepository implements ISurveyRepository {
           description: data.description ?? existing.description,
           type: data.type ?? existing.type,
           milestoneMonths: data.milestoneMonths ?? existing.milestoneMonths,
+          scheduledAt: data.scheduledAt !== undefined ? (data.scheduledAt ? new Date(data.scheduledAt) : null) : existing.scheduledAt,
           isActive: data.isActive ?? existing.isActive,
           isArchived: data.isArchived ?? existing.isArchived,
         }
@@ -217,6 +219,7 @@ export class PrismaSurveyRepository implements ISurveyRepository {
           description: source.description,
           type: source.type,
           milestoneMonths: source.milestoneMonths,
+          scheduledAt: source.scheduledAt,
           isActive: false,
           isArchived: false,
         }

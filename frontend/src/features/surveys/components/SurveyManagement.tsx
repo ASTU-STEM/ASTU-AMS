@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { surveyService } from '../services/survey.service';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -1759,12 +1760,131 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
   );
 }
 
+// ─── Type mapping helpers ─────────────────────────────────────────────────────
+
+const FRONTEND_TO_BACKEND_TYPE: Record<string, string> = {
+  'short-text': 'TEXT',
+  'long-text': 'TEXTAREA',
+  'single-choice': 'RADIO',
+  'multiple-choice': 'CHECKBOX',
+  dropdown: 'SELECT',
+  rating: 'RATING',
+  'yes-no': 'RADIO',
+  scale: 'NUMBER',
+  date: 'DATE',
+  email: 'TEXT',
+};
+
+const BACKEND_TO_FRONTEND_TYPE: Record<string, QuestionType> = {
+  TEXT: 'short-text',
+  TEXTAREA: 'long-text',
+  RADIO: 'single-choice',
+  CHECKBOX: 'multiple-choice',
+  SELECT: 'dropdown',
+  RATING: 'rating',
+  NUMBER: 'scale',
+  DATE: 'date',
+};
+
+const SURVEY_TYPE_TO_BACKEND: Record<string, string> = {
+  '6-Month': 'SIX_MONTH',
+  '12-Month': 'TWELVE_MONTH',
+  '18-Month': 'EIGHTEEN_MONTH',
+  '24-Month': 'TWENTY_FOUR_MONTH',
+  Custom: 'CUSTOM',
+};
+
+const BACKEND_TO_SURVEY_TYPE: Record<string, SurveyType> = {
+  SIX_MONTH: '6-Month',
+  TWELVE_MONTH: '12-Month',
+  EIGHTEEN_MONTH: '12-Month',
+  TWENTY_FOUR_MONTH: '24-Month',
+  CUSTOM: 'Custom',
+};
+
+function mapBackendSurvey(s: any): Survey {
+  const questions: SurveyQuestion[] = [
+    ...(s.questions ?? []).map((q: any) => ({
+      id: q.id,
+      text: q.questionText,
+      type: (BACKEND_TO_FRONTEND_TYPE[q.questionType] ?? 'short-text') as QuestionType,
+      required: q.required ?? false,
+      placeholder: q.placeholder,
+      helperText: q.helpText,
+      options: Array.isArray(q.options) && q.options.length > 0
+        ? q.options.map((o: string, i: number) => ({ id: `${q.id}-o${i}`, label: o, value: o }))
+        : undefined,
+    })),
+    ...(s.sections ?? []).flatMap((sec: any) =>
+      (sec.questions ?? []).map((q: any) => ({
+        id: q.id,
+        text: q.questionText,
+        type: (BACKEND_TO_FRONTEND_TYPE[q.questionType] ?? 'short-text') as QuestionType,
+        required: q.required ?? false,
+        placeholder: q.placeholder,
+        helperText: q.helpText,
+        options: Array.isArray(q.options) && q.options.length > 0
+          ? q.options.map((o: string, i: number) => ({ id: `${q.id}-o${i}`, label: o, value: o }))
+          : undefined,
+      }))
+    ),
+  ];
+
+  const responsesCount = s._count?.responses ?? 0;
+  const assignmentsCount = s._count?.assignments ?? 0;
+
+  let status: SurveyStatus = 'DRAFT';
+  if (s.isArchived) status = 'ARCHIVED';
+  else if (!s.isActive) status = 'DRAFT';
+  else if (responsesCount > 0 && responsesCount >= assignmentsCount && assignmentsCount > 0) status = 'COMPLETED';
+  else if (responsesCount > 0 || assignmentsCount > 0) status = 'IN_PROGRESS';
+  else if (s.scheduledAt) status = 'PENDING';
+  else status = 'DRAFT';
+
+  return {
+    id: s.id as any,
+    title: s.title,
+    description: s.description ?? '',
+    deadline: s.scheduledAt ? new Date(s.scheduledAt).toISOString().split('T')[0] : '',
+    type: BACKEND_TO_SURVEY_TYPE[s.type] ?? 'Custom',
+    status,
+    questions,
+    responses: responsesCount,
+    sent: assignmentsCount,
+    scheduledDate: s.scheduledAt ? new Date(s.scheduledAt).toISOString().split('T')[0] : null,
+    createdAt: new Date(s.createdAt).toISOString().split('T')[0],
+  };
+}
+
+function mapQuestionToBackend(q: SurveyQuestion, index: number) {
+  return {
+    questionText: q.text,
+    questionType: FRONTEND_TO_BACKEND_TYPE[q.type] ?? 'TEXT',
+    required: q.required,
+    placeholder: q.placeholder,
+    helpText: q.helperText,
+    options: q.options?.map(o => o.label) ?? [],
+    order: index,
+  };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export default function SurveyManagement() {
-  const [surveys, setSurveys] = useState<Survey[]>(MOCK_SURVEYS);
+  const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [companyStats, setCompanyStats] = useState<any[]>([]);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [selectedAnalysisSurvey, setSelectedAnalysisSurvey] = useState<string | null>(null);
+  const [responsesData, setResponsesData] = useState<any[]>([]);
+  const [showResponsesModal, setShowResponsesModal] = useState(false);
+  const [responsesModalTitle, setResponsesModalTitle] = useState('');
+  const [completionReport, setCompletionReport] = useState<any[]>([]);
+
   const [filters, setFilters] = useState({
     type: "All",
     status: "All",
@@ -1773,7 +1893,7 @@ export default function SurveyManagement() {
   const [showCreate, setShowCreate] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [showDetail, setShowDetail] = useState<Survey | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<any>(null);
   const [scheduleDate, setScheduleDate] = useState("");
   const [toast, setToast] = useState<ToastState>({
     visible: false,
@@ -1795,6 +1915,7 @@ export default function SurveyManagement() {
 
   // Question builder state
   const [showTypeSelector, setShowTypeSelector] = useState(false);
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
   const [typeCategory, setTypeCategory] = useState("All");
   const [questionDraft, setQuestionDraft] = useState<QuestionDraft>({
     text: "",
@@ -1808,6 +1929,60 @@ export default function SurveyManagement() {
     scaleMinLabel: "",
     scaleMaxLabel: "",
   });
+
+  // ─── Load surveys from API on mount ─────────────────────────────────────────
+  useEffect(() => {
+    loadSurveys();
+    loadCompanyStats();
+    loadCompletionReport();
+  }, []);
+
+  const loadSurveys = async () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const data = await surveyService.getSurveys();
+      setSurveys((data ?? []).map(mapBackendSurvey));
+    } catch (e: any) {
+      setApiError(e.message ?? 'Failed to load surveys');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCompanyStats = async () => {
+    try {
+      const stats = await surveyService.getCompanyHiringStats();
+      setCompanyStats(stats ?? []);
+    } catch { /* not critical */ }
+  };
+
+  const loadCompletionReport = async () => {
+    try {
+      const report = await surveyService.getCompletionReport();
+      setCompletionReport(report ?? []);
+    } catch { /* not critical */ }
+  };
+
+  const loadAnalysis = async (surveyId: string, surveyTitle: string) => {
+    setAnalysisLoading(true);
+    setSelectedAnalysisSurvey(surveyTitle);
+    try {
+      const data = await surveyService.getSurveyAnalysis(surveyId);
+      setAnalysisData(data);
+    } catch { setAnalysisData(null); }
+    finally { setAnalysisLoading(false); }
+  };
+
+  const loadResponses = async (surveyId: string, surveyTitle: string) => {
+    setResponsesModalTitle(surveyTitle);
+    setShowResponsesModal(true);
+    try {
+      const data = await surveyService.getResponsesBySurvey(surveyId);
+      setResponsesData(data ?? []);
+    } catch { setResponsesData([]); }
+  };
+
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -1849,6 +2024,7 @@ export default function SurveyManagement() {
       scaleMaxLabel: "",
     });
     setShowTypeSelector(false);
+    setIsEditingQuestion(true);
   };
 
   const handleAddQuestion = () => {
@@ -1888,6 +2064,7 @@ export default function SurveyManagement() {
       scaleMinLabel: "",
       scaleMaxLabel: "",
     });
+    setIsEditingQuestion(false);
 
     showToast("Question added!", "success");
   };
@@ -1908,54 +2085,75 @@ export default function SurveyManagement() {
     }));
   };
 
-  const handleCreateSurvey = () => {
+  const handleCreateSurvey = async () => {
     if (!newSurvey.title || !newSurvey.deadline || newSurvey.questions.length === 0)
       return;
-    const created: Survey = {
-      ...newSurvey,
-      id: Date.now(),
-      status: "PENDING",
-      responses: 0,
-      sent: 0,
-      scheduledDate: null,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setSurveys((s) => [created, ...s]);
-    setShowCreate(false);
-    setNewSurvey({
-      title: "",
-      description: "",
-      deadline: "",
-      type: "6-Month",
-      questions: [],
-    });
-    setStep(1);
-    setShowTypeSelector(false);
-    showToast("Survey created successfully!");
+    try {
+      const payload = {
+        title: newSurvey.title,
+        description: newSurvey.description || 'No description provided.',
+        type: SURVEY_TYPE_TO_BACKEND[newSurvey.type] ?? 'CUSTOM',
+        scheduledAt: newSurvey.deadline ? new Date(newSurvey.deadline).toISOString() : null,
+        isActive: false,
+        questions: newSurvey.questions.map(mapQuestionToBackend),
+      };
+      await surveyService.createSurvey(payload);
+      await loadSurveys();
+      setShowCreate(false);
+      setNewSurvey({ title: '', description: '', deadline: '', type: '6-Month', questions: [] });
+      setStep(1);
+      setShowTypeSelector(false);
+      setIsEditingQuestion(false);
+      showToast('Survey created successfully!');
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to create survey', 'error');
+    }
   };
 
-  const handleSchedule = () => {
+  const handleSchedule = async () => {
     if (!selectedId || !scheduleDate) return;
-    setSurveys((s) =>
-      s.map((sv) =>
-        sv.id === selectedId
-          ? { ...sv, scheduledDate: scheduleDate, status: "IN_PROGRESS" }
-          : sv
-      )
-    );
-    setShowSchedule(false);
-    setScheduleDate("");
-    setSelectedId(null);
-    showToast("Survey scheduled successfully!");
+    try {
+      await surveyService.updateSurvey(String(selectedId), {
+        scheduledAt: new Date(scheduleDate).toISOString(),
+        isActive: true,
+      });
+      await loadSurveys();
+      setShowSchedule(false);
+      setScheduleDate('');
+      setSelectedId(null);
+      showToast('Survey scheduled and activated!');
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to schedule survey', 'error');
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setSurveys((s) => s.filter((sv) => sv.id !== id));
-    showToast("Survey deleted.", "error");
+  const handleDelete = async (id: any) => {
+    try {
+      await surveyService.deleteSurvey(String(id));
+      setSurveys((s) => s.filter((sv) => sv.id !== id));
+      showToast('Survey archived.', 'info');
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to archive survey', 'error');
+    }
   };
 
-  const handleExport = (id: number, format: string) => {
-    showToast(`Exported survey as ${format}`, "info");
+  const handleToggleActive = async (id: any, currentlyActive: boolean) => {
+    try {
+      if (currentlyActive) {
+        await surveyService.deactivateSurvey(String(id));
+        showToast('Survey deactivated.', 'info');
+      } else {
+        await surveyService.activateSurvey(String(id));
+        showToast('Survey activated!', 'success');
+      }
+      await loadSurveys();
+    } catch (e: any) {
+      showToast(e.message ?? 'Failed to update survey', 'error');
+    }
+  };
+
+  const handleExport = (_id: any, format: string) => {
+    showToast(`Exported survey as ${format}`, 'info');
   };
 
   // Analytics
@@ -2148,6 +2346,20 @@ export default function SurveyManagement() {
 
         {activeTab === "list" && (
           <>
+            {/* Loading / Error */}
+            {loading && (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#9CA3AF', fontSize: 14, fontWeight: 600 }}>
+                <div style={{ fontSize: 28, marginBottom: 10, opacity: 0.3 }}>⟳</div>
+                Loading surveys...
+              </div>
+            )}
+            {apiError && !loading && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, padding: '14px 18px', color: '#B91C1C', fontSize: 13, fontWeight: 600, marginBottom: 12 }}>
+                ⚠ {apiError} — <button onClick={loadSurveys} style={{ background: 'none', border: 'none', color: '#E53935', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Retry</button>
+              </div>
+            )}
+            {!loading && (
+            <>
             {/* ── Filters ── */}
             <div
               style={{
@@ -2418,61 +2630,47 @@ export default function SurveyManagement() {
                       </div>
 
                       {/* Actions */}
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 6,
-                          alignItems: "flex-end",
-                        }}
-                      >
-                        <div style={{ display: "flex", gap: 6 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                        <div style={{ display: 'flex', gap: 6 }}>
                           <button
                             title="View details"
                             className="icon-btn"
                             onClick={() => setShowDetail(s)}
-                            style={{
-                              background: "#EDE9FE",
-                              color: "#6D28D9",
-                            }}
+                            style={{ background: '#EDE9FE', color: '#6D28D9' }}
                           >
-                            <span style={{ fontSize: 12, fontWeight: 700 }}>V</span>
+                            <span style={{ fontSize: 11, fontWeight: 700 }}>👁</span>
                           </button>
                           <button
-                            title="Schedule"
+                            title="Analyze responses"
                             className="icon-btn"
-                            onClick={() => {
-                              setSelectedId(s.id);
-                              setShowSchedule(true);
-                            }}
-                            style={{
-                              background: "#DBEAFE",
-                              color: "#1D4ED8",
-                            }}
+                            onClick={() => { setActiveTab('analytics'); loadAnalysis(String(s.id), s.title); }}
+                            style={{ background: '#D1FAE5', color: '#065F46' }}
                           >
-                            <span style={{ fontSize: 12, fontWeight: 700 }}>S</span>
+                            <span style={{ fontSize: 11, fontWeight: 700 }}>📊</span>
                           </button>
                           <button
-                            title="Export CSV"
+                            title="View individual responses"
                             className="icon-btn"
-                            onClick={() => handleExport(s.id, "CSV")}
-                            style={{
-                              background: "#D1FAE5",
-                              color: "#065F46",
-                            }}
+                            onClick={() => loadResponses(String(s.id), s.title)}
+                            style={{ background: '#E0E7FF', color: '#3730A3' }}
                           >
-                            <span style={{ fontSize: 12, fontWeight: 700 }}>E</span>
+                            <span style={{ fontSize: 11, fontWeight: 700 }}>📋</span>
                           </button>
                           <button
-                            title="Delete"
+                            title={s.status === 'DRAFT' ? 'Activate Survey' : 'Schedule'}
+                            className="icon-btn"
+                            onClick={() => { setSelectedId(s.id); setShowSchedule(true); }}
+                            style={{ background: '#DBEAFE', color: '#1D4ED8' }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 700 }}>📅</span>
+                          </button>
+                          <button
+                            title={s.status === 'ARCHIVED' ? 'Archived' : 'Archive'}
                             className="icon-btn"
                             onClick={() => handleDelete(s.id)}
-                            style={{
-                              background: "#FEE2E2",
-                              color: "#B91C1C",
-                            }}
+                            style={{ background: '#FEE2E2', color: '#B91C1C' }}
                           >
-                            <span style={{ fontSize: 12, fontWeight: 700 }}>×</span>
+                            <span style={{ fontSize: 11, fontWeight: 700 }}>🗑</span>
                           </button>
                         </div>
                       </div>
@@ -2481,232 +2679,212 @@ export default function SurveyManagement() {
                 })}
               </div>
             )}
+            </>
+            )}
           </>
         )}
 
         {/* ── Analytics Tab ── */}
         {activeTab === "analytics" && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-            }}
-          >
-            {/* Response Rate Per Survey */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #F3F4F6",
-                borderRadius: 16,
-                padding: 22,
-                gridColumn: "1 / -1",
-              }}
-            >
-              <h4
-                style={{
-                  margin: "0 0 18px",
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: "#374151",
-                }}
-              >
-                Response Rate by Survey
-              </h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 14,
-                }}
-              >
-                {surveys
-                  .filter((s) => s.sent > 0)
-                  .map((s) => (
-                    <div key={s.id}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: 5,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: "#374151",
-                          }}
-                        >
-                          {s.title}
-                        </span>
-                        <span
-                          style={{ fontSize: 11, color: "#6B7280" }}
-                        >
-                          {s.responses} / {s.sent}
-                        </span>
-                      </div>
-                      <ProgressBar
-                        value={s.responses}
-                        max={s.sent}
-                        color={
-                          s.type === "6-Month"
-                            ? "#6366F1"
-                            : s.type === "12-Month"
-                              ? "#10B981"
-                              : "#3B82F6"
-                        }
-                      />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* ── Survey Selector for Drill-Down ── */}
+            <div style={{ background: '#fff', border: '1px solid #F3F4F6', borderRadius: 16, padding: '18px 22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#374151' }}>Per-Survey Question Analysis</h4>
+                {analysisLoading && <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600 }}>Loading...</span>}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                {surveys.map((s) => (
+                  <button
+                    key={String(s.id)}
+                    onClick={() => loadAnalysis(String(s.id), s.title)}
+                    style={{
+                      padding: '6px 14px', borderRadius: 9, border: '1.5px solid',
+                      borderColor: selectedAnalysisSurvey === s.title ? '#E53935' : '#E5E7EB',
+                      background: selectedAnalysisSurvey === s.title ? '#E53935' : '#fff',
+                      color: selectedAnalysisSurvey === s.title ? '#fff' : '#374151',
+                      fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                  >{s.title}</button>
+                ))}
+              </div>
+              {analysisData ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{analysisData.surveyTitle}</span>
+                    <span style={{ background: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 99 }}>
+                      {analysisData.totalResponses} responses
+                    </span>
+                  </div>
+                  {(analysisData.questionAnalytics ?? []).map((qa: any) => (
+                    <div key={qa.questionId} style={{ background: '#FAFBFC', border: '1px solid #F3F4F6', borderRadius: 12, padding: '14px 16px' }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', marginBottom: 10 }}>{qa.questionText}</div>
+                      {Object.keys(qa.distribution).length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {Object.entries(qa.distribution)
+                            .sort(([, a], [, b]) => (b as number) - (a as number))
+                            .slice(0, 8)
+                            .map(([ans, cnt]) => {
+                              const pct = qa.totalAnswers > 0 ? Math.round(((cnt as number) / qa.totalAnswers) * 100) : 0;
+                              return (
+                                <div key={ans} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                  <span style={{ fontSize: 11, color: '#374151', minWidth: 120, fontWeight: 600 }}>{ans}</span>
+                                  <div style={{ flex: 1, height: 8, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden' }}>
+                                    <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg,#E53935,#F87171)', borderRadius: 99, transition: 'width 0.5s ease' }} />
+                                  </div>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', minWidth: 38, textAlign: 'right' }}>{cnt as number} ({pct}%)</span>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: 11, color: '#9CA3AF' }}>{qa.totalAnswers} text responses</span>
+                      )}
                     </div>
                   ))}
+                </div>
+              ) : (
+                !analysisLoading && <div style={{ textAlign: 'center', padding: '24px', color: '#9CA3AF', fontSize: 12, fontWeight: 600 }}>Select a survey above to view question analytics</div>
+              )}
+            </div>
+
+            {/* ── Two-column: Response Rate + Status ── */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {/* Response Rate Per Survey */}
+              <div style={{ background: '#fff', border: '1px solid #F3F4F6', borderRadius: 16, padding: 22 }}>
+                <h4 style={{ margin: '0 0 18px', fontSize: 14, fontWeight: 800, color: '#374151' }}>Response Rate by Survey</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {completionReport.length > 0 ? completionReport.map((r: any) => (
+                    <div key={r.surveyId}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{r.surveyTitle}</span>
+                        <span style={{ fontSize: 11, color: '#6B7280' }}>{r.completed} / {r.totalAssigned}</span>
+                      </div>
+                      <ProgressBar value={r.completed} max={r.totalAssigned || 1} color="#E53935" />
+                    </div>
+                  )) : surveys.filter((s) => s.sent > 0).map((s) => (
+                    <div key={String(s.id)}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{s.title}</span>
+                        <span style={{ fontSize: 11, color: '#6B7280' }}>{s.responses} / {s.sent}</span>
+                      </div>
+                      <ProgressBar value={s.responses} max={s.sent} color={s.type === '6-Month' ? '#6366F1' : s.type === '12-Month' ? '#10B981' : '#3B82F6'} />
+                    </div>
+                  ))}
+                  {surveys.filter(s => s.sent > 0).length === 0 && completionReport.length === 0 && (
+                    <div style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>No survey responses yet</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Status Breakdown */}
+              <div style={{ background: '#fff', border: '1px solid #F3F4F6', borderRadius: 16, padding: 22 }}>
+                <h4 style={{ margin: '0 0 18px', fontSize: 14, fontWeight: 800, color: '#374151' }}>Status Breakdown</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {Object.entries(statusConfig).map(([key, c]) => {
+                    const count = surveys.filter((s) => s.status === key).length;
+                    if (count === 0) return null;
+                    return (
+                      <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: c.bg, borderRadius: 10 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: c.color }}>{c.label}</span>
+                        <span style={{ fontSize: 18, fontWeight: 800, color: c.color }}>{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* Status Breakdown */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #F3F4F6",
-                borderRadius: 16,
-                padding: 22,
-              }}
-            >
-              <h4
-                style={{
-                  margin: "0 0 18px",
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: "#374151",
-                }}
-              >
-                Status Breakdown
-              </h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                }}
-              >
-                {Object.entries(statusConfig).map(([key, c]) => {
-                  const count = surveys.filter(
-                    (s) => s.status === key
-                  ).length;
-                  if (count === 0 && key !== "PENDING" && key !== "IN_PROGRESS" && key !== "COMPLETED") return null;
-                  return (
-                    <div
-                      key={key}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "10px 14px",
-                        background: c.bg,
-                        borderRadius: 10,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: c.color,
-                        }}
-                      >
-                        {c.label}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 18,
-                          fontWeight: 800,
-                          color: c.color,
-                        }}
-                      >
-                        {count}
-                      </span>
-                    </div>
-                  );
-                })}
+            {/* ── Top Companies Hiring ASTU Graduates ── */}
+            <div style={{ background: '#fff', border: '1px solid #F3F4F6', borderRadius: 16, padding: 22 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#374151' }}>🏢 Top Companies Hiring ASTU Graduates</h4>
+                  <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9CA3AF', fontWeight: 500 }}>Extracted from alumni employer responses across all surveys</p>
+                </div>
+                <button onClick={loadCompanyStats} style={{ padding: '6px 14px', borderRadius: 8, border: '1.5px solid #E5E7EB', background: '#F9FAFB', fontSize: 11, fontWeight: 700, cursor: 'pointer', color: '#374151' }}>↻ Refresh</button>
               </div>
+              {companyStats.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+                  {companyStats.map((c, i) => (
+                    <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: i < 3 ? 'linear-gradient(135deg,#FFF7ED,#FFFBEB)' : '#FAFBFC', border: `1.5px solid ${i < 3 ? '#FED7AA' : '#F3F4F6'}`, borderRadius: 12 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: i === 0 ? '#F59E0B' : i === 1 ? '#6B7280' : i === 2 ? '#B45309' : '#E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+                        #{i + 1}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                        <div style={{ fontSize: 11, color: '#6B7280', fontWeight: 500 }}>{c.count} hire{c.count !== 1 ? 's' : ''}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '24px', color: '#9CA3AF', fontSize: 12, fontWeight: 600 }}>
+                  No company data yet. Alumni employer fields from submitted surveys will appear here.
+                </div>
+              )}
             </div>
 
-            {/* Type Breakdown */}
-            <div
-              style={{
-                background: "#fff",
-                border: "1px solid #F3F4F6",
-                borderRadius: 16,
-                padding: 22,
-              }}
-            >
-              <h4
-                style={{
-                  margin: "0 0 18px",
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: "#374151",
-                }}
-              >
-                Survey Types
-              </h4>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                }}
-              >
-                {Object.entries(typeConfig).map(([type, c]) => {
-                  const count = surveys.filter(
-                    (s) => s.type === type
-                  ).length;
-                  if (!count) return null;
-                  return (
-                    <div
-                      key={type}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "10px 14px",
-                        background: c.bg,
-                        borderRadius: 10,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: c.color,
-                        }}
-                      >
-                        {type} Tracer
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 18,
-                          fontWeight: 800,
-                          color: c.color,
-                        }}
-                      >
-                        {count}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         )}
+
+        {/* ─── Individual Responses Modal ─── */}
+        <Modal
+          show={showResponsesModal}
+          onClose={() => { setShowResponsesModal(false); setResponsesData([]); }}
+          title="Individual Responses"
+          subtitle={responsesModalTitle}
+          width={720}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {responsesData.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px', color: '#9CA3AF', fontSize: 13, fontWeight: 600 }}>
+                <div style={{ fontSize: 32, marginBottom: 10, opacity: 0.2 }}>📋</div>
+                No responses submitted yet for this survey.
+              </div>
+            ) : responsesData.map((resp: any, ri: number) => (
+              <div key={resp.id || ri} style={{ background: '#FAFBFC', border: '1px solid #E5E7EB', borderRadius: 14, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: '#F3F4F6', borderBottom: '1px solid #E5E7EB' }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#374151' }}>Response #{ri + 1}</span>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    {resp.isDraft && <span style={{ fontSize: 10, background: '#FEF3C7', color: '#92400E', padding: '2px 8px', borderRadius: 99, fontWeight: 700 }}>Draft</span>}
+                    <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 500 }}>
+                      {resp.submittedAt ? new Date(resp.submittedAt).toLocaleString() : '—'}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {(resp.answers ?? []).map((ans: any, ai: number) => (
+                    <div key={ans.id || ai} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '8px 0', borderBottom: ai < (resp.answers.length - 1) ? '1px solid #F3F4F6' : 'none' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#6B7280' }}>
+                        {ans.question?.questionText ?? `Question ${ai + 1}`}
+                      </span>
+                      <span style={{ fontSize: 12, color: '#111827', fontWeight: 500, wordBreak: 'break-word' }}>
+                        {ans.answerText || <em style={{ color: '#9CA3AF' }}>No answer</em>}
+                      </span>
+                    </div>
+                  ))}
+                  {(!resp.answers || resp.answers.length === 0) && (
+                    <span style={{ fontSize: 12, color: '#9CA3AF', fontStyle: 'italic' }}>No answers recorded</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Modal>
 
         {/* ═══════════════════════════════════════════════════════════════
             CREATE SURVEY MODAL
             ═══════════════════════════════════════════════════════════════ */}
         <Modal
           show={showCreate}
+
           onClose={() => {
             setShowCreate(false);
             setStep(1);
             setShowTypeSelector(false);
+            setIsEditingQuestion(false);
           }}
           title="Create New Survey"
           subtitle="Build a graduate tracer survey with custom question types"
@@ -3039,6 +3217,16 @@ export default function SurveyManagement() {
                     setCategory={setTypeCategory}
                   />
                 </div>
+              ) : isEditingQuestion ? (
+                <QuestionEditorForm
+                  draft={questionDraft}
+                  setDraft={setQuestionDraft}
+                  onAdd={handleAddQuestion}
+                  onCancel={() => {
+                    setIsEditingQuestion(false);
+                    setQuestionDraft((prev) => ({ ...prev, text: "" }));
+                  }}
+                />
               ) : (
                 <button
                   onClick={() => setShowTypeSelector(true)}
@@ -3077,18 +3265,6 @@ export default function SurveyManagement() {
                   </span>
                   Add Question
                 </button>
-              )}
-
-              {/* Question Editor */}
-              {!showTypeSelector && questionDraft.text !== "" && (
-                <QuestionEditorForm
-                  draft={questionDraft}
-                  setDraft={setQuestionDraft}
-                  onAdd={handleAddQuestion}
-                  onCancel={() =>
-                    setQuestionDraft((prev) => ({ ...prev, text: "" }))
-                  }
-                />
               )}
 
               {/* Navigation */}
