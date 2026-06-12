@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { adminMockData } from '../api/mockData';
+import { useState, useEffect, useCallback } from 'react';
+import { adminApi } from '../api/adminApi';
 
 export interface AdminUserRecord {
   id: string;
@@ -9,12 +9,30 @@ export interface AdminUserRecord {
   status: 'Active' | 'Suspended' | 'Pending';
 }
 
-export default function useAdminUsers() {
-  const data = useMemo<AdminUserRecord[]>(
-    () =>
-      adminMockData.alumniUsers.slice(0, 20).map((user) => ({
+export interface UserListParams {
+  page?: number;
+  limit?: number;
+  role?: string;
+  status?: string;
+  search?: string;
+}
+
+export default function useAdminUsers(params?: UserListParams) {
+  const [data, setData] = useState<AdminUserRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await adminApi.listUsers(params);
+
+      // Transform API response to match AdminUserRecord interface
+      const transformedData = response.map((user: any) => ({
         id: user.id,
-        name: user.name,
+        name: user.fullName || user.name,
         email: user.email,
         role: user.role,
         status:
@@ -23,14 +41,25 @@ export default function useAdminUsers() {
             : user.status === 'Suspended'
               ? 'Suspended'
               : 'Pending',
-      })),
-    []
-  );
+      }));
+
+      setData(transformedData);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [params]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   return {
     data,
-    isLoading: false,
-    error: null,
-    refetch: async () => undefined,
+    isLoading,
+    error,
+    refetch: fetchUsers,
   };
 }

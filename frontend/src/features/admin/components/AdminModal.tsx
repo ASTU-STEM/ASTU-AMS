@@ -39,7 +39,7 @@ export default function AdminModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-start justify-center bg-slate-950/60 px-4 py-12 backdrop-blur-sm overflow-y-auto animate-[fadeIn_0.2s_ease]"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 py-4 backdrop-blur-sm overflow-y-auto animate-[fadeIn_0.2s_ease]"
       onMouseDown={(event) => {
         if (closeOnBackdrop && event.target === event.currentTarget) {
           onClose();
