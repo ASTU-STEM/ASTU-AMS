@@ -45,6 +45,7 @@ import { DocumentServicesTab } from '../components/DocumentServicesTab';
 import { SettingsTab } from '../components/SettingsTab';
 import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
+import { SystemDocumentationTab } from '../components/SystemDocumentationTab';
 
 import { NAV_ITEMS, COMM_ITEMS, MANAGEMENT_ACTIONS, STATS_CONFIG } from '../config/alumni.config';
 
@@ -514,6 +515,7 @@ const AlumniDashboard = () => {
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
           {activeTab === 'messages' && <MessagingTab darkMode={darkMode} />}
           {activeTab === 'settings' && <SettingsTab preferences={preferences} onSavePreferences={handleSavePreferences} />}
+          {activeTab === 'system-docs' && <SystemDocumentationTab />}
           {activeTab === 'forum' && (
             <div className="space-y-6 p-4 md:p-6">
               <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1d9e75)] p-5 text-white md:p-6">
