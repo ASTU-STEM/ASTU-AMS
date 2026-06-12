@@ -32,19 +32,8 @@ import {
   saveDocumentRequests,
   getAlumniPreferences,
   saveAlumniPreferences,
-  getAlumniNotifications,
-  saveAlumniNotifications,
-  getForumPosts,
-  getDonationCampaigns,
   calculateCompletion
 } from '../services/mockAlumniData';
-
-import {
-  NAV_ITEMS,
-  COMM_ITEMS,
-  MANAGEMENT_ACTIONS,
-  STATS_CONFIG,
-} from '../config/alumni.config';
 
 import { DashboardOverview } from '../components/DashboardOverview';
 import { ProfileTab } from '../components/ProfileTab';
@@ -56,8 +45,8 @@ import { DocumentServicesTab } from '../components/DocumentServicesTab';
 import { SettingsTab } from '../components/SettingsTab';
 import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
-import { SystemDocumentationTab } from '../components/SystemDocumentationTab';
-import { AIAssistantTab } from '../components/AIAssistantTab';
+
+import { NAV_ITEMS, COMM_ITEMS, MANAGEMENT_ACTIONS, STATS_CONFIG } from '../config/alumni.config';
 
 const AlumniDashboard = () => {
    const navigate = useNavigate();
@@ -82,19 +71,31 @@ const AlumniDashboard = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [donationCampaign, setDonationCampaign] = useState<{ title: string; category: string } | null>(null);
-  const [notifications, setNotifications] = useState(getAlumniNotifications());
+  const [notifications, setNotifications] = useState<Array<{ id: number; text: string; unread: boolean; time: string }>>([]);
 
   const profileCompletion = calculateCompletion(profile);
   const pendingSurveysCount = surveys.filter(s => s.status === 'PENDING').length;
   const matchCount = jobs.filter(j => !j.applied).length;
-  const connectedMentorsCount = mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length + 347;
+  const connectedMentorsCount = mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length;
 
-  const stats = [
-    { id: 1, ...STATS_CONFIG[0], value: `${profileCompletion}%` },
-    { id: 2, ...STATS_CONFIG[1], value: `${matchCount}` },
-    { id: 3, ...STATS_CONFIG[2], value: `${pendingSurveysCount}`, ...(pendingSurveysCount > 0 ? {} : { trend: 'All studies submitted', trendIcon: 'check_circle', trendColor: 'astu-green' }) },
-    { id: 4, ...STATS_CONFIG[3], value: `${connectedMentorsCount}` },
-  ];
+  const stats = STATS_CONFIG.map((cfg, i) => ({
+    id: i + 1,
+    label: cfg.label,
+    value: cfg.label === 'Profile Status' ? `${profileCompletion}%`
+         : cfg.label === 'Job Matches' ? `${matchCount}`
+         : cfg.label === 'Pending Surveys' ? `${pendingSurveysCount}`
+         : `${connectedMentorsCount}`,
+    color: cfg.color,
+    icon: cfg.icon,
+    bgGradient: cfg.bgGradient,
+    trend: cfg.label === 'Pending Surveys' && pendingSurveysCount > 0 ? 'Urgent Tracer studies'
+         : cfg.label === 'Pending Surveys' ? 'All studies submitted'
+         : cfg.trend,
+    trendIcon: cfg.label === 'Pending Surveys' && pendingSurveysCount > 0 ? 'schedule'
+             : cfg.label === 'Pending Surveys' ? 'check_circle'
+             : cfg.trendIcon,
+    trendColor: cfg.label === 'Pending Surveys' && pendingSurveysCount > 0 ? cfg.trendColor : 'astu-green',
+  }));
 
   const handleSaveProfile = (updatedProfile: AlumniProfile) => {
     setProfile(updatedProfile);
@@ -114,8 +115,7 @@ const AlumniDashboard = () => {
     const appliedJob = jobs.find(j => j.id === jobId);
     if (appliedJob) {
       toast.success(`Application sent to ${appliedJob.company}!`);
-      const newNotif = { id: Date.now(), text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`, unread: true, time: 'Just now', category: 'jobs' as const };
-      setNotifications(prev => { const u = [newNotif, ...prev]; saveAlumniNotifications(u); return u; });
+      setNotifications(prev => [{ id: Date.now(), text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`, unread: true, time: 'Just now' }, ...prev]);
     }
   };
 
@@ -129,24 +129,21 @@ const AlumniDashboard = () => {
     const updatedSurveys = surveys.map(s => s.id === surveyId ? { ...s, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() } : s);
     setSurveys(updatedSurveys);
     saveTracerSurveys(updatedSurveys);
-    const n = { id: Date.now(), text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`, unread: true, time: 'Just now', category: 'survey' as const };
-    setNotifications(prev => { const u = [n, ...prev]; saveAlumniNotifications(u); return u; });
+    setNotifications(prev => [{ id: Date.now(), text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
   const handleRegisterEvent = (eventId: number) => {
     const updatedEvents = events.map(e => e.id === eventId ? { ...e, registered: true } : e);
     setEvents(updatedEvents);
     saveCareerEvents(updatedEvents);
-    const n = { id: Date.now(), text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`, unread: true, time: 'Just now', category: 'profile' as const };
-    setNotifications(prev => { const u = [n, ...prev]; saveAlumniNotifications(u); return u; });
+    setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
   const handleRequestMentorship = (mentorId: number) => {
     const updatedMentors = mentors.map(m => m.id === mentorId ? { ...m, status: 'REQUEST_PENDING' as const } : m);
     setMentors(updatedMentors);
     saveMentors(updatedMentors);
-    const n = { id: Date.now(), text: `Requested mentorship connection with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now', category: 'mentorship' as const };
-    setNotifications(prev => { const u = [n, ...prev]; saveAlumniNotifications(u); return u; });
+    setNotifications(prev => [{ id: Date.now(), text: `Requested mentorship connection with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
   const handleScheduleSession = (mentorId: number, sessionDetails: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => {
@@ -159,16 +156,14 @@ const AlumniDashboard = () => {
     });
     setMentors(updatedMentors);
     saveMentors(updatedMentors);
-    const n = { id: Date.now(), text: `Scheduled mentorship session with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now', category: 'mentorship' as const };
-    setNotifications(prev => { const u = [n, ...prev]; saveAlumniNotifications(u); return u; });
+    setNotifications(prev => [{ id: Date.now(), text: `Scheduled mentorship session with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
   const handleRequestDocument = (type: DocumentRequest['type'], notes?: string) => {
     const newDoc: DocumentRequest = { id: documents.length + 1, type, requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), status: 'Pending', notes: notes || 'Awaiting registrar verification.' };
     setDocuments([newDoc, ...documents]);
     saveDocumentRequests([newDoc, ...documents]);
-    const n = { id: Date.now(), text: `Submitted official request for: ${type}.`, unread: true, time: 'Just now', category: 'documents' as const };
-    setNotifications(prev => { const u = [n, ...prev]; saveAlumniNotifications(u); return u; });
+    setNotifications(prev => [{ id: Date.now(), text: `Submitted official request for: ${type}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
   const handleSavePreferences = (updatedPrefs: AlumniPreferences) => {
@@ -182,16 +177,8 @@ const AlumniDashboard = () => {
     navigate('/login');
   };
 
-  const handleMarkNotificationsRead = () => {
-    const updated = notifications.map(n => ({ ...n, unread: false }));
-    setNotifications(updated);
-    saveAlumniNotifications(updated);
-  };
-  const handleClearNotification = (id: number) => {
-    const updated = notifications.filter(n => n.id !== id);
-    setNotifications(updated);
-    saveAlumniNotifications(updated);
-  };
+  const handleMarkNotificationsRead = () => setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  const handleClearNotification = (id: number) => setNotifications(prev => prev.filter(n => n.id !== id));
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   useEffect(() => {
@@ -238,9 +225,6 @@ const AlumniDashboard = () => {
     </div>
   );
 
-  const navItems = NAV_ITEMS;
-  const commItems = COMM_ITEMS;
-
   return (
     <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
@@ -281,9 +265,7 @@ const AlumniDashboard = () => {
           className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden" />
       )}
 
-      {/* Enhanced Sidebar with Animated Gradient */}
       <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-gradient-to-b from-[#001a33] via-[#002a55] to-[#003366] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-        {/* Animated overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite]" />
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-emerald-400/30 sidebar-particle" />
@@ -291,7 +273,6 @@ const AlumniDashboard = () => {
           <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-blue-400/20 sidebar-particle" />
         </div>
 
-        {/* Sidebar Logo */}
         <div className="relative z-10 p-5 border-b border-white/10">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="relative">
@@ -308,11 +289,10 @@ const AlumniDashboard = () => {
           </div>
         </div>
 
-        {/* Navigation Links */}
         <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin">
           {!sidebarCollapsed && <p className="px-3 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Main Menu</p>}
           <div className="space-y-0.5">
-            {navItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
@@ -333,7 +313,7 @@ const AlumniDashboard = () => {
 
           {!sidebarCollapsed && <p className="px-3 mt-5 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Communication</p>}
           <div className="space-y-0.5">
-            {commItems.map((item) => (
+            {COMM_ITEMS.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
@@ -356,7 +336,6 @@ const AlumniDashboard = () => {
           </div>
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
           <button onClick={() => setHelpOpen(true)} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'Help Center' : undefined}>
             <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
@@ -380,9 +359,7 @@ const AlumniDashboard = () => {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-        {/* Enhanced Header with Glass Effect */}
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
           style={{
@@ -444,7 +421,7 @@ const AlumniDashboard = () => {
                         <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
                         <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
                       </div>
-                      <button onClick={() => { setNotifications([]); saveAlumniNotifications([]); }} className="text-xs font-semibold text-[#E24B4A] hover:underline">Clear All</button>
+                      <button onClick={() => setNotifications([])} className="text-xs font-semibold text-[#E24B4A] hover:underline">Clear All</button>
                     </div>
                   </div>
                   <div className="max-h-60 space-y-1 overflow-y-auto p-2">
@@ -486,7 +463,6 @@ const AlumniDashboard = () => {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {activeTab === 'dashboard' && (
             <DashboardOverview
@@ -538,9 +514,6 @@ const AlumniDashboard = () => {
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
           {activeTab === 'messages' && <MessagingTab darkMode={darkMode} />}
           {activeTab === 'settings' && <SettingsTab preferences={preferences} onSavePreferences={handleSavePreferences} />}
-          {activeTab === 'ai-assistant' && <AIAssistantTab />}
-          {activeTab === 'system-docs' && <SystemDocumentationTab />}
-
           {activeTab === 'forum' && (
             <div className="space-y-6 p-4 md:p-6">
               <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1d9e75)] p-5 text-white md:p-6">
@@ -554,33 +527,11 @@ const AlumniDashboard = () => {
                   </p>
                 </div>
               </section>
-              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
-                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Recent Posts</h3>
-                <div className="space-y-3">
-                  {getForumPosts().slice(0, 3).map((post) => (
-                    <div key={post.id} className="flex gap-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
-                      <img src={post.authorAvatar} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-[var(--text-primary)]">{post.author}</span>
-                          <span className="text-[9px] text-[var(--text-secondary)]">{post.authorRole}</span>
-                          <span className="text-[9px] text-[var(--text-muted)] ml-auto">{post.timestamp}</span>
-                        </div>
-                        <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{post.content}</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <button className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                            {post.likes}
-                          </button>
-                          <button className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                            {post.comments}
-                          </button>
-                          <button className="text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">Share</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-10 shadow-sm">
+                <div className="flex flex-col items-center justify-center text-gray-400">
+                  <span className="material-symbols-outlined text-5xl mb-3">forum</span>
+                  <p className="text-sm font-medium">No forum posts yet</p>
+                  <p className="text-xs mt-1">Posts from alumni will appear here once the community feature is live.</p>
                 </div>
               </div>
             </div>
@@ -597,35 +548,12 @@ const AlumniDashboard = () => {
                   </p>
                 </div>
               </section>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {getDonationCampaigns().slice(0, 3).map((campaign) => {
-                  const progress = Math.round((campaign.raised / campaign.goal) * 100);
-                  return (
-                    <div key={campaign.id} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="px-2 py-0.5 bg-[#003366]/10 text-[#003366] text-[9px] font-bold rounded-full uppercase">{campaign.category}</span>
-                        <span className="text-[10px] text-[var(--text-secondary)]">{campaign.donorCount} donors</span>
-                      </div>
-                      <h3 className="text-sm font-bold text-[var(--text-primary)]">{campaign.title}</h3>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{campaign.description}</p>
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between text-xs mb-1.5">
-                          <span className="font-bold text-[#003366]">{campaign.raised.toLocaleString()} ETB</span>
-                          <span className="text-[var(--text-muted)]">of {campaign.goal.toLocaleString()} ETB</span>
-                        </div>
-                        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setDonationCampaign({ title: campaign.title, category: campaign.category })}
-                        className="mt-4 w-full py-2.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-bold hover:shadow-lg transition-all"
-                      >
-                        Donate Now
-                      </button>
-                    </div>
-                  );
-                })}
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-10 shadow-sm">
+                <div className="flex flex-col items-center justify-center text-gray-400">
+                  <span className="material-symbols-outlined text-5xl mb-3">volunteer_activism</span>
+                  <p className="text-sm font-medium">No donation campaigns yet</p>
+                  <p className="text-xs mt-1">Campaigns will be listed here once published by the alumni office.</p>
+                </div>
               </div>
             </div>
           )}
