@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  ChevronDown,
   Globe,
   Handshake,
   LineChart,
@@ -384,7 +385,7 @@ export default function HomePage() {
       </div>
 
       <main id="home">
-        <section className="relative overflow-hidden h-[500px] md:h-[580px] lg:h-[650px] bg-slate-950">
+        <section className="relative overflow-hidden min-h-[700px] md:h-[580px] lg:h-[750px] bg-slate-950">
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
             <div className="absolute top-20 left-[10%] w-2 h-2 rounded-full bg-astu-green/30 animate-float" style={{ animationDelay: "0s", animationDuration: "5s" }} />
             <div className="absolute top-40 left-[30%] w-1.5 h-1.5 rounded-full bg-astu-red/30 animate-float" style={{ animationDelay: "1s", animationDuration: "7s" }} />
@@ -481,9 +482,21 @@ export default function HomePage() {
               />
             ))}
           </div>
+          <button
+            onClick={() => {
+              window.scrollTo({
+                top: window.innerHeight,
+                behavior: "smooth",
+              });
+            }}
+            className="absolute bottom-12 left-1/2 z-40 -translate-x-1/2 text-white animate-bounce"
+            aria-label="Scroll down"
+          >
+            <ChevronDown className="h-8 w-8 md:h-10 md:w-10" style={{ marginTop: "-100px" }} />
+          </button>
         </section>
 
-        <section className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8">
+        <section className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8" style={{ marginTop: "100px" }}>
           <div className="grid overflow-hidden rounded-xl shadow-[0_8px_32px_rgba(0,51,102,0.12)] md:grid-cols-5 glass">
             <article className="flex flex-col items-center gap-3 border-b border-white/20 p-8 text-center md:border-b-0 md:border-r card-hover">
               <div className="rounded-full bg-astu-navy/10 p-3 text-astu-navy">
@@ -1080,14 +1093,14 @@ export default function HomePage() {
             <p className="mt-4 text-slate-200 max-w-2xl mx-auto">
               Connect with fellow alumni, discover career opportunities, and contribute to university excellence.
             </p>
-<div className="mt-8 flex flex-wrap justify-center gap-4">
-               <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md hover:scale-105 btn-magnetic" onClick={() => navigate("/login")}>
-                 Alumni Portal
-               </button>
-               <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all hover:scale-105 btn-magnetic" onClick={() => navigate("/login")}>
-                 Employer Portal
-               </button>
-             </div>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md hover:scale-105 btn-magnetic" onClick={() => navigate("/login")}>
+                Alumni Portal
+              </button>
+              <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all hover:scale-105 btn-magnetic" onClick={() => navigate("/login")}>
+                Employer Portal
+              </button>
+            </div>
           </div>
         </section>
 
