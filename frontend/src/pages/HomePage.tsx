@@ -384,7 +384,7 @@ export default function HomePage() {
       </div>
 
       <main id="home">
-        <section className="relative overflow-hidden h-[500px] md:h-[580px] lg:h-[650px] bg-slate-950">
+        <section className="relative overflow-hidden h-[100dvh] sm:h-[580px] md:h-[650px] lg:h-[700px] bg-slate-950">
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
             <div className="absolute top-20 left-[10%] w-2 h-2 rounded-full bg-astu-green/30 animate-float" style={{ animationDelay: "0s", animationDuration: "5s" }} />
             <div className="absolute top-40 left-[30%] w-1.5 h-1.5 rounded-full bg-astu-red/30 animate-float" style={{ animationDelay: "1s", animationDuration: "7s" }} />
@@ -415,12 +415,12 @@ export default function HomePage() {
           </div>
 
           {/* Compact text - hero is immediately visible below navbar */}
-          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-16 md:px-6 lg:py-20">
-            <div className="max-w-2xl space-y-4">
-              <span className="inline-block rounded-full bg-astu-red px-3 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-lg animate-glow">
+          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-12 sm:py-16 md:px-6 lg:py-20">
+            <div className="max-w-2xl space-y-4 sm:space-y-5">
+              <span className="inline-block rounded-full bg-astu-red px-3 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white shadow-lg animate-glow">
                 {slides[currentSlide].tagline}
               </span>
-              <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+              <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
                 {slides[currentSlide].title.split(" to the ")[0]}
                 <br />
                 {slides[currentSlide].title.includes(" to the ") ? (
@@ -431,23 +431,23 @@ export default function HomePage() {
                   slides[currentSlide].title
                 )}
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 md:text-base">
+              <p className="mt-3 max-w-xl text-xs leading-relaxed text-slate-100 sm:text-sm md:text-base">
                 {slides[currentSlide].description}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 sm:mt-5 flex flex-col gap-3 sm:flex-row sm:gap-2">
                 <button
-                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-lg hover:shadow-xl hover:shadow-astu-red/20 hover:scale-105 btn-magnetic"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-astu-red px-4 py-2.5 text-xs sm:text-sm font-semibold text-white hover:brightness-110 transition-all shadow-lg hover:shadow-xl hover:shadow-astu-red/20 hover:scale-105 btn-magnetic"
                   onClick={() => navigate("/info/alumni-portal")}
                 >
                   Alumni Portal
                 </button>
                 <button
-                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 btn-magnetic backdrop-blur-sm"
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-white/40 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 btn-magnetic backdrop-blur-sm"
                   onClick={() => navigate("/info/employer-portal")}
                 >
                   Employer Partnership
-                  <Handshake className="h-4 w-4" />
+                  <Handshake className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>
               </div>
             </div>
@@ -456,26 +456,26 @@ export default function HomePage() {
           {/* Left/Right navigation arrow buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
+            className="absolute left-3 sm:left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2 sm:p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl"
             aria-label="Previous slide"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
+            className="absolute right-3 sm:right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2 sm:p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-xl"
             aria-label="Next slide"
           >
-            <ArrowRight className="h-5 w-5" />
+            <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
 
           {/* Bottom active slide indicator dots */}
-          <div className="absolute bottom-6 left-1/2 z-35 flex -translate-x-1/2 gap-2.5">
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 z-35 flex -translate-x-1/2 gap-2 sm:gap-2.5">
             {slides.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-6 bg-[#FFD700]" : "w-2.5 bg-white/40 hover:bg-white/60"
+                className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-5 sm:w-6 bg-[#FFD700]" : "w-2 sm:w-2.5 bg-white/40 hover:bg-white/60"
                   }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -483,7 +483,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8">
+        <section className="relative z-20 mx-auto mt-8 mb-16 max-w-[1440px] px-4 sm:-mt-12 md:-mt-16 md:px-8">
           <div className="grid overflow-hidden rounded-xl shadow-[0_8px_32px_rgba(0,51,102,0.12)] md:grid-cols-5 glass">
             <article className="flex flex-col items-center gap-3 border-b border-white/20 p-8 text-center md:border-b-0 md:border-r card-hover">
               <div className="rounded-full bg-astu-navy/10 p-3 text-astu-navy">
