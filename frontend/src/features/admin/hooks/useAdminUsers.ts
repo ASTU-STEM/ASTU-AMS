@@ -6,7 +6,14 @@ export interface AdminUserRecord {
   name: string;
   email: string;
   role: string;
-  status: 'Active' | 'Suspended' | 'Pending';
+  status: 'Active' | 'Inactive' | 'Suspended' | 'Pending Verification';
+  studentId?: string;
+  department?: string;
+  batch?: string;
+  lastLogin?: string;
+  registeredAt?: string;
+  phone?: string;
+  adminNotes?: string;
 }
 
 export interface UserListParams {
@@ -36,11 +43,20 @@ export default function useAdminUsers(params?: UserListParams) {
         email: user.email,
         role: user.role,
         status:
-          user.status === 'Active'
+          user.status === 'Active' || user.status === 'ACTIVE'
             ? 'Active'
-            : user.status === 'Suspended'
+            : user.status === 'Suspended' || user.status === 'SUSPENDED'
               ? 'Suspended'
-              : 'Pending',
+              : user.status === 'Inactive' || user.status === 'INACTIVE'
+                ? 'Inactive'
+                : 'Pending Verification',
+        studentId: user.studentId || '',
+        department: user.department || '',
+        batch: user.batch || '',
+        lastLogin: user.lastLogin || '',
+        registeredAt: user.registeredAt || '',
+        phone: user.phone || '',
+        adminNotes: user.adminNotes || '',
       }));
 
       setData(transformedData);

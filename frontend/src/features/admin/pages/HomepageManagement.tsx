@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   BarChart3,
   BookOpen,
@@ -48,6 +48,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import { adminApi } from '../api/adminApi';
 import AdminModal from '../components/AdminModal';
 
 /* ─── Types ─── */

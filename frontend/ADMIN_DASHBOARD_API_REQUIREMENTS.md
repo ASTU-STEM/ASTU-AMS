@@ -1,6 +1,20 @@
-# Missing Backend Endpoints Documentation
+# Admin Dashboard Backend API Requirements
 
-This document lists backend API endpoints that the Admin Dashboard frontend requires but are not documented in the current API specification.
+This document lists backend API endpoints that the Admin Dashboard frontend requires but are not documented in the current API specification (`api_documentation.md`). These endpoints are specific to admin functionality and need to be implemented for the admin dashboard to work properly.
+
+**Note:** The following endpoints are already documented in `api_documentation.md` and should NOT be included in this list:
+- `POST /auth/admin/create-user` (Authentication Module)
+- `PUT /registrar/alumni/:id/status` (Registrar Module)
+- `GET /jobs` (Job Board Module)
+- `POST /surveys/templates` (Tracer Surveys Module)
+- `GET /analytics/dashboard` (Analytics Module)
+- `GET /analytics/employment` (Analytics Module)
+- `GET /analytics/skills` (Analytics Module)
+- `GET /departments/` (Department Module)
+- `GET /departments/my-stats` (Department Module)
+- `POST /notifications/` (Notifications Module)
+- `PUT /notifications/:id/read` (Notifications Module)
+- `DELETE /audit/purge` (Audit Logs Module)
 
 ---
 
@@ -73,11 +87,11 @@ PUT /auth/admin/users/:id
 
 ## 2. Audit/Log Management Endpoints
 
-### GET /audit/logs or GET /admin/logs
+### GET /audit/logs
 **Purpose:** View system audit logs with filtering
 **Access:** ADMIN
 **Required by:** AdminDashboard.tsx (System Activities section), SystemLogs.tsx page
-**Current Status:** Only `DELETE /audit/purge` exists for purging old logs
+**Current Status:** Only `DELETE /audit/purge` exists in API documentation
 **Suggested Request:**
 ```json
 GET /audit/logs?page=1&limit=50&userId=uuid&action=LOGIN&startDate=2024-01-01&endDate=2024-12-31
@@ -202,7 +216,7 @@ GET /audit/logs?page=1&limit=50&userId=uuid&action=LOGIN&startDate=2024-01-01&en
 **Purpose:** Get alumni geographic distribution
 **Access:** ADMIN
 **Required by:** AnalyticsOverview.tsx (Geographic Distribution chart)
-**Current Status:** Not documented
+**Current Status:** Not documented in API documentation (only /analytics/dashboard, /analytics/employment, /analytics/skills exist)
 **Suggested Response:**
 ```json
 {
@@ -223,7 +237,7 @@ GET /audit/logs?page=1&limit=50&userId=uuid&action=LOGIN&startDate=2024-01-01&en
 **Purpose:** Get average time-to-hire statistics
 **Access:** ADMIN
 **Required by:** AnalyticsOverview.tsx (Time to Hire chart)
-**Current Status:** Not documented
+**Current Status:** Not documented in API documentation (only /analytics/dashboard, /analytics/employment, /analytics/skills exist)
 **Suggested Response:**
 ```json
 {
@@ -248,7 +262,7 @@ GET /audit/logs?page=1&limit=50&userId=uuid&action=LOGIN&startDate=2024-01-01&en
 **Purpose:** Get aggregated statistics across all departments
 **Access:** ADMIN
 **Required by:** AdminDashboard.tsx, DepartmentManagement.tsx
-**Current Status:** Only `GET /departments/my-stats` exists for single department
+**Current Status:** Only `GET /departments/my-stats` exists in API documentation for single department
 **Suggested Response:**
 ```json
 {
@@ -296,6 +310,221 @@ POST /admin/users/bulk-action
 
 ---
 
+## 7. Role Management Endpoints
+
+### GET /admin/roles
+**Purpose:** List all roles with their permissions and user counts
+**Access:** ADMIN
+**Required by:** RoleManagement.tsx
+**Current Status:** Frontend has full role management UI but no backend endpoints
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "roles": [
+      {
+        "id": "uuid",
+        "name": "ADMIN",
+        "description": "Full system governance, security, and administrative control",
+        "userCount": 18,
+        "permissions": {
+          "view_users": true,
+          "create_users": true,
+          "edit_users": true,
+          "manage_roles": true,
+          "suspend_users": true
+        }
+      }
+    ]
+  }
+}
+```
+
+### PUT /admin/roles/:id/permissions
+**Purpose:** Update permissions for a specific role
+**Access:** ADMIN
+**Required by:** RoleManagement.tsx
+**Current Status:** Not documented
+**Suggested Request:**
+```json
+PUT /admin/roles/:id/permissions
+{
+  "permissions": {
+    "view_users": true,
+    "create_users": true,
+    "edit_users": true
+  }
+}
+```
+
+---
+
+## 8. Jobs Management Endpoints
+
+### GET /admin/jobs
+**Purpose:** List all job postings with approval status (admin-specific for management)
+**Access:** ADMIN
+**Required by:** JobsManagement.tsx
+**Current Status:** `GET /jobs` exists in API documentation for public job search, but admin-specific endpoint for managing/approving jobs is missing
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "jobs": [
+      {
+        "id": "uuid",
+        "title": "Senior Software Engineer",
+        "company": "Tech Corp",
+        "status": "PENDING_APPROVAL",
+        "applicationsCount": 15
+      }
+    ],
+    "pendingApprovalCount": 47
+  }
+}
+```
+
+### PUT /admin/jobs/:id/approve
+**Purpose:** Approve a job posting
+**Access:** ADMIN
+**Required by:** JobsManagement.tsx
+**Current Status:** Not documented
+```
+
+---
+
+## 9. Notifications Endpoints
+
+### GET /admin/notifications
+**Purpose:** Get system notifications for admin (admin-specific notification center)
+**Access:** ADMIN
+**Required by:** NotificationCenter.tsx
+**Current Status:** `POST /notifications/` and `PUT /notifications/:id/read` exist in API documentation for general notifications, but admin-specific endpoint for viewing admin notifications is missing
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "notifications": [
+      {
+        "id": "uuid",
+        "type": "VERIFICATION_REQUEST",
+        "title": "New verification request",
+        "isRead": false,
+        "createdAt": "2024-06-11T09:00:00Z"
+      }
+    ],
+    "unreadCount": 5
+  }
+}
+```
+
+---
+
+## 10. Reports Center Endpoints
+
+### GET /admin/reports
+**Purpose:** List available reports
+**Access:** ADMIN
+**Required by:** ReportsCenter.tsx
+**Current Status:** Not documented
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "reports": [
+      {
+        "id": "uuid",
+        "name": "Monthly Employment Report",
+        "type": "EMPLOYMENT",
+        "lastGenerated": "2024-06-01T00:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 11. System Settings Endpoints
+
+### GET /admin/settings
+**Purpose:** Get system-wide settings
+**Access:** ADMIN
+**Required by:** SystemSettings.tsx
+**Current Status:** Not documented
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "settings": {
+      "siteName": "ASTU Alumni Management System",
+      "maintenanceMode": false,
+      "registrationEnabled": true
+    }
+  }
+}
+```
+
+### PUT /admin/settings
+**Purpose:** Update system settings
+**Access:** ADMIN
+**Required by:** SystemSettings.tsx
+**Current Status:** Not documented
+```
+
+---
+
+## 12. Backup & Security Endpoints
+
+### POST /admin/backup/create
+**Purpose:** Create system backup
+**Access:** ADMIN
+**Required by:** BackupSecurity.tsx
+**Current Status:** Not documented
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "backupId": "uuid",
+    "filename": "backup-2024-06-11.sql",
+    "createdAt": "2024-06-11T12:00:00Z"
+  }
+}
+```
+
+---
+
+## 13. Super Admin Modules Endpoints
+
+### GET /admin/modules
+**Purpose:** List available super admin modules
+**Access:** ADMIN
+**Required by:** SuperAdminModules.tsx
+**Current Status:** Not documented
+**Suggested Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "modules": [
+      {
+        "id": "uuid",
+        "name": "Content Management",
+        "status": "ACTIVE"
+      }
+    ]
+  }
+}
+```
+
+---
+
 ## Summary of Missing Endpoints
 
 | Endpoint | Purpose | Priority |
@@ -309,24 +538,14 @@ POST /admin/users/bulk-action
 | GET /analytics/geographic | Geographic distribution | MEDIUM |
 | GET /analytics/time-to-hire | Time-to-hire statistics | MEDIUM |
 | GET /departments/stats | All departments stats | MEDIUM |
-| POST /admin/users/bulk-action | Bulk user operations | LOW |
-
----
-
-## How to Document These Endpoints
-
-To add these endpoints to the official API documentation:
-
-1. **Open** `c:\Users\Cherinet\Downloads\api_documentation.md`
-2. **Add each endpoint** under the appropriate module section:
-   - User endpoints under "Authentication Module" or create new "Admin Module"
-   - Audit logs under new "Audit Module" or "Admin Module"
-   - Dashboard endpoints under new "Admin Module"
-   - Analytics endpoints under existing "Analytics Module"
-   - Department stats under existing "Department Module"
-3. **Follow the existing format** with Access, Request Body, and Response sections
-4. **Include role requirements** (ADMIN, REGISTRAR, etc.)
-5. **Add example payloads** for request and response
-6. **Document error responses** for each endpoint
-
-Alternatively, create a new section in the API documentation called "## 15. Admin Module (`/api/admin`)" to group all admin-specific endpoints together.
+| POST /admin/users/bulk-action | Bulk user operations | HIGH |
+| GET /admin/roles | List roles with permissions | HIGH |
+| PUT /admin/roles/:id/permissions | Update role permissions | HIGH |
+| GET /admin/jobs | List job postings | HIGH |
+| PUT /admin/jobs/:id/approve | Approve job | HIGH |
+| GET /admin/notifications | Get notifications | MEDIUM |
+| GET /admin/reports | List reports | MEDIUM |
+| GET /admin/settings | Get system settings | HIGH |
+| PUT /admin/settings | Update settings | HIGH |
+| POST /admin/backup/create | Create backup | HIGH |
+| GET /admin/modules | List super admin modules | LOW |

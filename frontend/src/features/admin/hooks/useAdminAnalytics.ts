@@ -12,32 +12,15 @@ export default function useAdminAnalytics() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch all analytics data in parallel
-        const [
-          dashboardOverview,
-          employmentAnalytics,
-          skillsAnalytics,
-          topEmployers,
-          geographicDistribution,
-          timeToHire
-        ] = await Promise.all([
-          adminApi.getDashboardOverview(),
-          adminApi.getEmploymentAnalytics(),
-          adminApi.getSkillsAnalytics(),
-          adminApi.getTopEmployers(),
-          adminApi.getGeographicDistribution(),
-          adminApi.getTimeToHire()
-        ]);
-
-        setData({
-          employmentRate: dashboardOverview?.employmentRateByDepartment || [],
-          surveyCompletion: dashboardOverview?.surveyCompletion || {},
-          departmentBreakdown: employmentAnalytics?.departmentYearTable || [],
-          hiringTrend: timeToHire || [],
-          skillGaps: skillsAnalytics?.skillGapTop10 || [],
-          topEmployers: topEmployers || [],
-          geographicDistribution: geographicDistribution || [],
-        });
+        const response = await adminApi.getDashboardOverview();
+        if (response && response.success && response.data) {
+          setData(response.data);
+        } else if (response && response.overallEmployment) {
+          // Direct payload fallback
+          setData(response);
+        } else {
+          setData(null);
+        }
       } catch (err) {
         console.error('Error fetching analytics data:', err);
         setError(err as Error);
@@ -55,3 +38,4 @@ export default function useAdminAnalytics() {
     error,
   };
 }
+

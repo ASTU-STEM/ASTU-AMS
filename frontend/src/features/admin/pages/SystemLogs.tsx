@@ -13,11 +13,12 @@ import {
   Users,
   Wifi,
   X,
+  Activity,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import { adminApi } from '../api/adminApi';
 
 type ActionType = 'All' | 'Login' | 'Data Import' | 'User Action' | 'Error' | 'System' | 'API';
 type Severity = 'All' | 'Info' | 'Warning' | 'Error' | 'Success';
@@ -34,81 +35,6 @@ type LogRow = {
   requestId: string;
   payload: string;
 };
-
-const logs: LogRow[] = [
-  {
-    id: 'LOG-001',
-    timestamp: '2026-05-29T08:12:10Z',
-    userEmail: 'admin@astu.edu.et',
-    role: 'Admin',
-    action: 'System',
-    details: 'Backup job completed successfully for nightly archival.',
-    ipAddress: '154.78.22.14',
-    severity: 'Success',
-    requestId: 'REQ-9A44',
-    payload: '{"job":"backup","status":"success","duration":"4m"}',
-  },
-  {
-    id: 'LOG-002',
-    timestamp: '2026-05-29T08:20:44Z',
-    userEmail: 'registrar@astu.edu.et',
-    role: 'Registrar',
-    action: 'Data Import',
-    details: 'Imported graduate batch file for 2024 alumni cohort.',
-    ipAddress: '154.78.22.18',
-    severity: 'Info',
-    requestId: 'REQ-8B11',
-    payload: '{"file":"graduates_2024.xlsx","rows":245}',
-  },
-  {
-    id: 'LOG-003',
-    timestamp: '2026-05-29T08:35:02Z',
-    userEmail: 'cs.head@astu.edu.et',
-    role: 'Department Head',
-    action: 'User Action',
-    details: 'Updated department analytics access for two staff accounts.',
-    ipAddress: '154.78.22.55',
-    severity: 'Info',
-    requestId: 'REQ-7C55',
-    payload: '{"usersUpdated":2,"permissions":["analytics"]}',
-  },
-  {
-    id: 'LOG-004',
-    timestamp: '2026-05-29T09:02:18Z',
-    userEmail: 'anonymous',
-    role: 'Guest',
-    action: 'Login',
-    details: 'Failed login attempt with invalid password.',
-    ipAddress: '197.190.12.44',
-    severity: 'Warning',
-    requestId: 'REQ-1D02',
-    payload: '{"attempts":5,"locked":false}',
-  },
-  {
-    id: 'LOG-005',
-    timestamp: '2026-05-29T09:08:31Z',
-    userEmail: 'api@astu.edu.et',
-    role: 'System',
-    action: 'API',
-    details: 'GET /admin/users responded with 200 OK.',
-    ipAddress: '10.0.2.15',
-    severity: 'Info',
-    requestId: 'REQ-6F10',
-    payload: '{"status":200,"route":"/admin/users"}',
-  },
-  {
-    id: 'LOG-006',
-    timestamp: '2026-05-29T09:11:47Z',
-    userEmail: 'system@astu.edu.et',
-    role: 'System',
-    action: 'Error',
-    details: 'Survey dispatch worker failed to enqueue batch wave.',
-    ipAddress: '10.0.2.16',
-    severity: 'Error',
-    requestId: 'REQ-5E90',
-    payload: '{"worker":"survey-dispatch","error":"timeout"}',
-  },
-];
 
 function actionBadge(action: ActionType) {
   switch (action) {
@@ -144,24 +70,28 @@ function severityClass(severity: Exclude<Severity, 'All'>) {
   }
 }
 
-function summaryCard({ label, value, icon: Icon, hint }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string }) {
+function summaryCard({ label, value, icon: Icon, hint, color }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string; color?: string }) {
+  const iconColor = color || '#003580';
   return (
-    <div className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="flex items-start justify-between gap-3">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-900">{value}</p>
+          <p className="mt-3 text-3xl font-bold text-slate-900">{value}</p>
         </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#003580]/10 text-[#003580]">
-          <Icon className="h-5 w-5" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
+          <Icon className="h-6 w-6" />
         </div>
       </div>
-      <p className="mt-4 text-xs text-slate-500">{hint}</p>
+      <p className="mt-4 text-sm text-slate-500">{hint}</p>
     </div>
   );
 }
 
 export default function SystemLogs() {
+  const [logs, setLogs] = useState<LogRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [actionType, setActionType] = useState<ActionType>('All');
   const [userSearch, setUserSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -176,6 +106,54 @@ export default function SystemLogs() {
     sessions: 47,
     uptime: 99.8,
   });
+
+  useEffect(() => {
+    async function fetchLogs() {
+      try {
+        setLoading(true);
+        setError(null);
+        const logsData = await adminApi.listLogs({ limit: 100 });
+        const rawLogs = logsData?.logs || [];
+        const mappedLogs = rawLogs.map((log: any) => {
+          let normalizedAction: ActionType = 'User Action';
+          const actionUpper = String(log.action).toUpperCase();
+          if (actionUpper === 'LOGIN') normalizedAction = 'Login';
+          else if (actionUpper === 'DATA IMPORT' || actionUpper === 'DATA_IMPORT') normalizedAction = 'Data Import';
+          else if (actionUpper === 'ERROR') normalizedAction = 'Error';
+          else if (actionUpper === 'SYSTEM') normalizedAction = 'System';
+          else if (actionUpper === 'API') normalizedAction = 'API';
+          else if (actionUpper === 'ALL') normalizedAction = 'All';
+          else normalizedAction = 'User Action';
+
+          let normalizedSeverity: Exclude<Severity, 'All'> = 'Info';
+          const sevUpper = String(log.severity).toUpperCase();
+          if (sevUpper === 'INFO') normalizedSeverity = 'Info';
+          else if (sevUpper === 'WARNING') normalizedSeverity = 'Warning';
+          else if (sevUpper === 'ERROR') normalizedSeverity = 'Error';
+          else if (sevUpper === 'SUCCESS') normalizedSeverity = 'Success';
+
+          return {
+            id: log.id,
+            timestamp: log.timestamp || log.createdAt || new Date().toISOString(),
+            userEmail: log.userEmail || (log.user ? log.user.email : '') || 'System',
+            role: log.role || (log.user ? log.user.role : '') || 'System',
+            action: normalizedAction,
+            details: log.details || '',
+            ipAddress: log.ipAddress || '',
+            severity: normalizedSeverity,
+            requestId: log.requestId || '',
+            payload: log.payload || '',
+          };
+        });
+        setLogs(mappedLogs);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load logs');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLogs();
+  }, []);
 
   useEffect(() => {
     const updateHealth = () => {
@@ -198,6 +176,20 @@ export default function SystemLogs() {
     const interval = window.setInterval(updateHealth, 30000);
     return () => window.clearInterval(interval);
   }, []);
+
+  const logStats = useMemo(() => {
+    const totalEvents = logs.length;
+    const errorsCount = logs.filter((l) => l.severity === 'Error').length;
+    const loginsCount = logs.filter((l) => l.action === 'Login').length;
+    const failedLogins = logs.filter((l) => l.action === 'Login' && l.severity === 'Error').length;
+
+    return [
+      { label: 'Total events', value: String(totalEvents), icon: History, hint: 'Total logs currently loaded in this set', color: '#003580' },
+      { label: 'Errors recorded', value: String(errorsCount), icon: X, hint: 'Critical log failures in this set', color: '#E24B4A' },
+      { label: 'Logins logged', value: String(loginsCount), icon: Wifi, hint: 'Authentication events in this set', color: '#1D9E75' },
+      { label: 'Failed logins', value: String(failedLogins), icon: KeyRound, hint: 'Failed login attempts in this set', color: '#E8A020' },
+    ];
+  }, [logs]);
 
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
@@ -232,79 +224,82 @@ export default function SystemLogs() {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="flex flex-col gap-4 border-b border-[var(--border-color)] pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">System Logs</h1>
-            <span
-              className="inline-flex items-center gap-2 rounded-full border border-[#1D9E75]/20 bg-[#1D9E75]/10 px-2.5 py-1 text-xs font-semibold text-[#1D9E75]"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#1D9E75]" style={{ animation: 'blink 1.5s ease-in-out infinite' }} />
-              Live
-            </span>
-          </div>
-          <p className="text-sm text-[var(--text-secondary)]">Audit administrative actions and system events.</p>
-          <div className="flex flex-wrap items-center gap-1 text-[13px] font-medium text-[var(--text-secondary)]">
-            <span>Admin</span>
-            <span>/</span>
-            <span>System Logs</span>
-          </div>
-        </div>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setExportOpen((current) => !current)}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
-          >
-            <Download className="h-4 w-4" />
-            Export Logs
-            <ChevronDown className="h-4 w-4" />
-          </button>
-          {exportOpen && (
-            <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-              {(['CSV', 'JSON'] as const).map((exportFormat) => (
-                <button
-                  key={exportFormat}
-                  type="button"
-                  onClick={() => exportLogs(exportFormat)}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5"
-                >
-                  <Download className="h-4 w-4" />
-                  {exportFormat}
-                </button>
-              ))}
+    <div className="space-y-8">
+      {/* Custom Gradient Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003580] via-[#004499] to-[#1D9E75] p-8 shadow-[0_8px_30px_rgba(0,51,128,0.3)]">
+        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_0%,transparent_40%,rgba(232,160,32,0.08)_60%,transparent_100%)]" />
+        <div className="relative flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-4">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
+                <Activity className="h-6 w-6 text-[#E8A020]" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-white">System Logs</h1>
+                <p className="mt-1 text-sm text-white/80">
+                  Audit administrative actions and system events.
+                </p>
+              </div>
             </div>
-          )}
+            <div className="mt-4 flex items-center gap-2">
+              <span
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white"
+              >
+                <span className="h-2 w-2 rounded-full bg-[#1D9E75]" style={{ animation: 'blink 1.5s ease-in-out infinite' }} />
+                Live
+              </span>
+            </div>
+          </div>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setExportOpen((current) => !current)}
+              className="inline-flex items-center gap-2.5 rounded-xl bg-white/10 backdrop-blur-sm px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all hover:bg-white/20 hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)]"
+            >
+              <Download className="h-4.5 w-4.5" />
+              Export Logs
+              <ChevronDown className="h-4.5 w-4.5" />
+            </button>
+            {exportOpen && (
+              <div className="absolute right-0 top-14 z-20 w-48 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+                {(['CSV', 'JSON'] as const).map((exportFormat) => (
+                  <button
+                    key={exportFormat}
+                    type="button"
+                    onClick={() => exportLogs(exportFormat)}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-4 py-2.5 text-left text-sm font-medium text-white hover:bg-white/20 transition-all"
+                  >
+                    <Download className="h-4 w-4" />
+                    {exportFormat}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section className="rounded-[10px] bg-[#0A1628] px-5 py-3 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
-          <span className="rounded-full bg-white/10 px-3 py-1">CPU: {health.cpu}%</span>
-          <span className="rounded-full bg-white/10 px-3 py-1">
+      <section className="rounded-2xl bg-gradient-to-br from-[#0A1628] to-[#0F1F3D] px-6 py-4 text-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
+        <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
+          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">CPU: {health.cpu}%</span>
+          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
             Memory: {health.memoryUsed.toFixed(1)}GB / {health.memoryTotal}GB
           </span>
-          <span className="rounded-full bg-white/10 px-3 py-1">Sessions: {health.sessions}</span>
-          <span className="rounded-full bg-white/10 px-3 py-1">Uptime: {health.uptime.toFixed(1)}%</span>
+          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">Sessions: {health.sessions}</span>
+          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">Uptime: {health.uptime.toFixed(1)}%</span>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Total events today', value: '1,248', icon: History, hint: 'All system events logged in the last 24 hours' },
-          { label: 'Errors today', value: '3', icon: X, hint: 'Critical failures requiring attention' },
-          { label: 'Active sessions', value: '47', icon: Wifi, hint: 'Currently authenticated and active sessions' },
-          { label: 'Failed logins (24h)', value: '12', icon: KeyRound, hint: 'Blocked or invalid authentication attempts' },
-        ].map((card) => (
+      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {logStats.map((card) => (
           <React.Fragment key={card.label}>{summaryCard(card)}</React.Fragment>
         ))}
       </section>
 
-      <section className="admin-card rounded-[10px] border border-slate-200 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        <div className="grid gap-3 xl:grid-cols-12">
-          <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <Filter className="h-4 w-4 text-slate-400" />
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <div className="grid gap-4 xl:grid-cols-12">
+          <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-3 hover:border-slate-300 transition-all">
+            <Filter className="h-4.5 w-4.5 text-slate-400" />
             <select value={actionType} onChange={(event) => setActionType(event.target.value as ActionType)} className="w-full bg-transparent outline-none">
               {['All', 'Login', 'Data Import', 'User Action', 'Error', 'System', 'API'].map((item) => (
                 <option key={item} value={item}>
@@ -314,8 +309,8 @@ export default function SystemLogs() {
             </select>
           </label>
 
-          <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <Search className="h-4 w-4 text-slate-400" />
+          <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-3 hover:border-slate-300 transition-all">
+            <Search className="h-4.5 w-4.5 text-slate-400" />
             <input
               value={userSearch}
               onChange={(event) => setUserSearch(event.target.value)}
@@ -324,8 +319,8 @@ export default function SystemLogs() {
             />
           </label>
 
-          <div className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <CalendarDays className="h-4 w-4 text-slate-400" />
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-3">
+            <CalendarDays className="h-4.5 w-4.5 text-slate-400" />
             <input
               type="date"
               value={dateFrom}
@@ -334,8 +329,8 @@ export default function SystemLogs() {
             />
           </div>
 
-          <div className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <CalendarDays className="h-4 w-4 text-slate-400" />
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-3">
+            <CalendarDays className="h-4.5 w-4.5 text-slate-400" />
             <input
               type="date"
               value={dateTo}
@@ -344,8 +339,8 @@ export default function SystemLogs() {
             />
           </div>
 
-          <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <Shield className="h-4 w-4 text-slate-400" />
+          <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-3 hover:border-slate-300 transition-all">
+            <Shield className="h-4.5 w-4.5 text-slate-400" />
             <select value={severity} onChange={(event) => setSeverity(event.target.value as Severity)} className="w-full bg-transparent outline-none">
               {['All', 'Info', 'Warning', 'Error', 'Success'].map((item) => (
                 <option key={item} value={item}>
@@ -357,13 +352,13 @@ export default function SystemLogs() {
         </div>
       </section>
 
-      <section className="admin-card overflow-hidden rounded-[10px] border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="overflow-hidden rounded-2xl border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50">
+            <thead className="bg-gradient-to-r from-slate-50 to-slate-100/50">
               <tr>
                 {['Timestamp', 'User', 'Action', 'Details', 'IP Address', 'Severity'].map((head) => (
-                  <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <th key={head} className="px-5 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     {head}
                   </th>
                 ))}
@@ -373,26 +368,26 @@ export default function SystemLogs() {
               {filteredLogs.map((log) => (
                 <tr
                   key={log.id}
-                  className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
+                  className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/80 transition-all"
                   onClick={() => setSelectedLog(log)}
                 >
-                  <td className="px-4 py-4 text-slate-600" title={format(new Date(log.timestamp), 'PPpp')}>
+                  <td className="px-5 py-4 text-slate-600" title={format(new Date(log.timestamp), 'PPpp')}>
                     {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                   </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
+                  <td className="px-5 py-4">
+                    <div className="space-y-1.5">
                       <div className="font-semibold text-slate-900">{log.userEmail}</div>
                       <AdminBadge variant="neutral">{log.role}</AdminBadge>
                     </div>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-5 py-4">
                     <AdminBadge variant="default" className={actionBadge(log.action)}>
                       {log.action}
                     </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 text-slate-600">{log.details}</td>
-                  <td className="px-4 py-4 text-slate-600">{log.ipAddress}</td>
-                  <td className="px-4 py-4">
+                  <td className="px-5 py-4 text-slate-600">{log.details}</td>
+                  <td className="px-5 py-4 text-slate-600">{log.ipAddress}</td>
+                  <td className="px-5 py-4">
                     <AdminBadge variant="default" className={severityClass(log.severity)}>
                       {log.severity}
                     </AdminBadge>
@@ -413,7 +408,7 @@ export default function SystemLogs() {
             <button
               type="button"
               onClick={() => setSelectedLog(null)}
-              className="rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+              className="rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
             >
               Close
             </button>
@@ -421,8 +416,8 @@ export default function SystemLogs() {
         }
       >
         {selectedLog && (
-          <div className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-2">
+          <div className="space-y-5">
+            <div className="grid gap-4 md:grid-cols-2">
               <Detail label="Timestamp" value={new Date(selectedLog.timestamp).toLocaleString()} />
               <Detail label="User" value={selectedLog.userEmail} />
               <Detail label="Role" value={selectedLog.role} />
@@ -436,7 +431,7 @@ export default function SystemLogs() {
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Payload</p>
-              <pre className="mt-2 overflow-x-auto rounded-[10px] border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700">
+              <pre className="mt-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-slate-50/80 p-5 text-xs text-slate-700">
                 {selectedLog.payload}
               </pre>
             </div>
@@ -449,9 +444,9 @@ export default function SystemLogs() {
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
+    <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-medium text-slate-800">{value}</p>
+      <p className="mt-2 text-sm font-bold text-slate-800">{value}</p>
     </div>
   );
 }
