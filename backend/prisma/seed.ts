@@ -1,5 +1,6 @@
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import process from 'process';
 
 const prisma = new PrismaClient();
 
@@ -56,6 +57,18 @@ async function main() {
       email: 'registrar@astu.edu.et',
       password: defaultPassword,
       role: Role.REGISTRAR,
+      isActive: true,
+    },
+  });
+
+  // Alumni Office (CMS) Account
+  await prisma.user.upsert({
+    where: { email: 'alumnioffice@astu.edu.et' },
+    update: {},
+    create: {
+      email: 'alumnioffice@astu.edu.et',
+      password: defaultPassword,
+      role: Role.ALUMNI_OFFICE,
       isActive: true,
     },
   });

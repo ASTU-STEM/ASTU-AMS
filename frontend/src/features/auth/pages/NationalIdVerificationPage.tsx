@@ -22,19 +22,16 @@ export default function NationalIdVerificationPage() {
       const studentId = registrationDetails?.studentId || 'DEFAULT';
       const result = await authService.startDiditVerification(studentId);
       
-      if (result.ok && result.data.verificationUrl) {
-        toast.loading('Redirecting to didit.me verification session...', { duration: 2500 });
-        
-        // Redirect the user to the session-specific verification URL
-        setTimeout(() => {
-          window.location.href = result.data.verificationUrl;
-        }, 1500);
+      if (result.ok && result.data.sessionId) {
+        toast.loading('Starting identity verification...', { duration: 2000 });
+        // Navigate directly to the callback page with the sessionId
+        navigate(`/verify-national-id/callback?sessionId=${result.data.sessionId}`);
       } else {
-        setErrorMsg(result.message || 'Could not initialize Didit verification session.');
+        setErrorMsg((result as any).message || 'Could not initialize Didit verification session.');
+        setIsLoading(false);
       }
     } catch (err) {
       setErrorMsg('Didit.me verification service is temporarily unavailable.');
-    } finally {
       setIsLoading(false);
     }
   };

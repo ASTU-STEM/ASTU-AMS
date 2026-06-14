@@ -5,6 +5,7 @@ export interface ISurveyResponseRepository {
   findByAlumniAndSurvey(alumniId: string, surveyId: string): Promise<SurveyResponse | null>;
   findDraftByAssignment(assignmentId: string): Promise<SurveyResponse | null>;
   findAll(): Promise<SurveyResponse[]>;
+  findBySurveyId(surveyId: string): Promise<SurveyResponse[]>;
   create(data: Omit<SurveyResponse, 'id' | 'createdAt' | 'updatedAt'> & Partial<Pick<SurveyResponse, 'assignmentId' | 'submittedAt'>>): Promise<SurveyResponse>;
   update(id: string, data: Partial<Omit<SurveyResponse, 'id'>>): Promise<SurveyResponse>;
 }

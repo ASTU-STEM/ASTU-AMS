@@ -295,6 +295,22 @@ export const authService = {
     }
   },
 
+  async verifyDiditSession(sessionId: string, nationalIdName: string): Promise<ApiResult<{ status: 'success' | 'failed' | 'expired'; message: string }>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data?: { status: 'success' | 'failed' | 'expired'; message: string }; message?: string }>('/auth/didit-verify', { sessionId, nationalIdName });
+      if (response.data.success && response.data.data) {
+        return { ok: true, data: response.data.data };
+      }
+      return { ok: false, errorCode: 'DIDIT_VERIFY_FAILED', message: response.data.message || 'Verification failed.' };
+    } catch (error) {
+      let message = 'An unexpected error occurred.';
+      if (axios.isAxiosError(error) && error.response?.data) {
+        message = (error.response.data as any).message || message;
+      }
+      return { ok: false, errorCode: 'DIDIT_VERIFY_ERROR', message };
+    }
+  },
+
   // ==================== MANUAL VERIFICATION ====================
   async submitManualVerification(formData: FormData): Promise<ApiResult<{ success: boolean; requestId?: string }>> {
     try {

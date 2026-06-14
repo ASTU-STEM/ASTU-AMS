@@ -16,7 +16,8 @@ export class PrismaSurveyRepository implements ISurveyRepository {
       where: { id },
       include: {
         questions: { orderBy: { order: 'asc' } },
-        sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } }
+        sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } },
+        _count: { select: { assignments: true, responses: true } }
       }
     });
     if (!survey) return null;
@@ -32,7 +33,8 @@ export class PrismaSurveyRepository implements ISurveyRepository {
       where: Object.keys(filters).length ? filters : undefined,
       include: {
         questions: { orderBy: { order: 'asc' } },
-        sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } }
+        sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } },
+        _count: { select: { assignments: true, responses: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -40,52 +42,74 @@ export class PrismaSurveyRepository implements ISurveyRepository {
   }
 
   async create(data: Omit<Survey, 'id'>): Promise<Survey> {
-    const survey = await prisma.survey.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        milestoneMonths: data.milestoneMonths ?? null,
-        isActive: data.isActive,
-        isArchived: data.isArchived,
-        sections: {
-          create: data.sections?.map((section: any) => ({
-            title: section.title,
-            description: section.description,
-            order: section.order,
-            questions: {
-              create: section.questions?.map((q: any) => ({
-                questionText: q.questionText,
-                questionType: q.questionType,
-                required: q.required ?? false,
-                placeholder: q.placeholder,
-                helpText: q.helpText,
-                validationRules: q.validationRules ?? null,
-                options: q.options || [],
-                order: q.order,
-              })) || []
-            }
-          })) || []
-        },
-        questions: {
-          create: data.questions?.map((q: any) => ({
-            questionText: q.questionText,
-            questionType: q.questionType,
-            required: q.required ?? false,
-            placeholder: q.placeholder,
-            helpText: q.helpText,
-            validationRules: q.validationRules ?? null,
-            options: q.options || [],
-            order: q.order,
-          })) || []
+    return await prisma.$transaction(async (tx: any) => {
+      const survey = await tx.survey.create({
+        data: {
+          title: data.title,
+          description: data.description,
+          type: data.type,
+          milestoneMonths: data.milestoneMonths ?? null,
+          scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
+          isActive: data.isActive,
+          isArchived: data.isArchived,
         }
-      },
-      include: {
-        questions: { orderBy: { order: 'asc' } },
-        sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } }
+      });
+
+      if (data.questions && data.questions.length > 0) {
+        const directQuestions = data.questions.map((q: any) => ({
+          surveyId: survey.id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          required: q.required ?? false,
+          placeholder: q.placeholder,
+          helpText: q.helpText,
+          validationRules: q.validationRules ?? null,
+          options: q.options || [],
+          order: q.order,
+        }));
+        await tx.surveyQuestion.createMany({ data: directQuestions });
       }
+
+      if (data.sections && data.sections.length > 0) {
+        for (const sectionData of data.sections) {
+          const section = await tx.surveySection.create({
+            data: {
+              surveyId: survey.id,
+              title: sectionData.title,
+              description: sectionData.description,
+              order: sectionData.order,
+            }
+          });
+
+          if (sectionData.questions && sectionData.questions.length > 0) {
+            const sectionQuestions = sectionData.questions.map((q: any) => ({
+              surveyId: survey.id,
+              sectionId: section.id,
+              questionText: q.questionText,
+              questionType: q.questionType,
+              required: q.required ?? false,
+              placeholder: q.placeholder,
+              helpText: q.helpText,
+              validationRules: q.validationRules ?? null,
+              options: q.options || [],
+              order: q.order,
+            }));
+            await tx.surveyQuestion.createMany({ data: sectionQuestions });
+          }
+        }
+      }
+
+      const fullSurvey = await tx.survey.findUnique({
+        where: { id: survey.id },
+        include: {
+          questions: { orderBy: { order: 'asc' } },
+          sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } },
+          _count: { select: { assignments: true, responses: true } }
+        }
+      });
+
+      return fullSurvey as any as Survey;
     });
-    return survey as any as Survey;
   }
 
   async update(id: string, data: Partial<Omit<Survey, 'id'>>): Promise<Survey> {
@@ -103,29 +127,42 @@ export class PrismaSurveyRepository implements ISurveyRepository {
           description: data.description ?? existing.description,
           type: data.type ?? existing.type,
           milestoneMonths: data.milestoneMonths ?? existing.milestoneMonths,
+          scheduledAt: data.scheduledAt !== undefined ? (data.scheduledAt ? new Date(data.scheduledAt) : null) : existing.scheduledAt,
           isActive: data.isActive ?? existing.isActive,
           isArchived: data.isArchived ?? existing.isArchived,
-          sections: {
-            create: data.sections?.map((section: any) => ({
-              title: section.title,
-              description: section.description,
-              order: section.order,
-              questions: {
-                create: section.questions?.map((q: any) => ({
-                  questionText: q.questionText,
-                  questionType: q.questionType,
-                  required: q.required ?? false,
-                  placeholder: q.placeholder,
-                  helpText: q.helpText,
-                  validationRules: q.validationRules ?? null,
-                  options: q.options || [],
-                  order: q.order,
-                })) || []
-              }
-            })) || []
-          },
-          questions: {
-            create: data.questions?.map((q: any) => ({
+        }
+      });
+
+      if (data.questions && data.questions.length > 0) {
+        const directQuestions = data.questions.map((q: any) => ({
+          surveyId: id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          required: q.required ?? false,
+          placeholder: q.placeholder,
+          helpText: q.helpText,
+          validationRules: q.validationRules ?? null,
+          options: q.options || [],
+          order: q.order,
+        }));
+        await tx.surveyQuestion.createMany({ data: directQuestions });
+      }
+
+      if (data.sections && data.sections.length > 0) {
+        for (const sectionData of data.sections) {
+          const section = await tx.surveySection.create({
+            data: {
+              surveyId: id,
+              title: sectionData.title,
+              description: sectionData.description,
+              order: sectionData.order,
+            }
+          });
+
+          if (sectionData.questions && sectionData.questions.length > 0) {
+            const sectionQuestions = sectionData.questions.map((q: any) => ({
+              surveyId: id,
+              sectionId: section.id,
               questionText: q.questionText,
               questionType: q.questionType,
               required: q.required ?? false,
@@ -134,16 +171,22 @@ export class PrismaSurveyRepository implements ISurveyRepository {
               validationRules: q.validationRules ?? null,
               options: q.options || [],
               order: q.order,
-            })) || []
+            }));
+            await tx.surveyQuestion.createMany({ data: sectionQuestions });
           }
-        },
+        }
+      }
+
+      const fullSurvey = await tx.survey.findUnique({
+        where: { id },
         include: {
           questions: { orderBy: { order: 'asc' } },
-          sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } }
+          sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } },
+          _count: { select: { assignments: true, responses: true } }
         }
       });
 
-      return updated as any as Survey;
+      return fullSurvey as any as Survey;
     });
   }
 
@@ -169,53 +212,73 @@ export class PrismaSurveyRepository implements ISurveyRepository {
     });
     if (!source) throw new Error('Survey template not found');
 
-    const clone = await prisma.survey.create({
-      data: {
-        title: `Copy of ${source.title}`,
-        description: source.description,
-        type: source.type,
-        milestoneMonths: source.milestoneMonths,
-        isActive: false,
-        isArchived: false,
-        sections: {
-          create: source.sections.map((section: any) => ({
-            title: section.title,
-            description: section.description,
-            order: section.order,
-            questions: {
-              create: section.questions.map((question: any) => ({
-                questionText: question.questionText,
-                questionType: question.questionType,
-                required: question.required,
-                placeholder: question.placeholder,
-                helpText: question.helpText,
-                validationRules: question.validationRules,
-                options: question.options,
-                order: question.order,
-              }))
-            }
-          }))
-        },
-        questions: {
-          create: source.questions.map((question: any) => ({
-            questionText: question.questionText,
-            questionType: question.questionType,
-            required: question.required,
-            placeholder: question.placeholder,
-            helpText: question.helpText,
-            validationRules: question.validationRules,
-            options: question.options,
-            order: question.order,
-          }))
+    return await prisma.$transaction(async (tx: any) => {
+      const clone = await tx.survey.create({
+        data: {
+          title: `Copy of ${source.title}`,
+          description: source.description,
+          type: source.type,
+          milestoneMonths: source.milestoneMonths,
+          scheduledAt: source.scheduledAt,
+          isActive: false,
+          isArchived: false,
         }
-      },
-      include: {
-        questions: { orderBy: { order: 'asc' } },
-        sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } }
-      }
-    });
+      });
 
-    return clone as any as Survey;
+      if (source.questions && source.questions.length > 0) {
+        const directQuestions = source.questions.map((question: any) => ({
+          surveyId: clone.id,
+          questionText: question.questionText,
+          questionType: question.questionType,
+          required: question.required,
+          placeholder: question.placeholder,
+          helpText: question.helpText,
+          validationRules: question.validationRules,
+          options: question.options,
+          order: question.order,
+        }));
+        await tx.surveyQuestion.createMany({ data: directQuestions });
+      }
+
+      if (source.sections && source.sections.length > 0) {
+        for (const section of source.sections) {
+          const newSection = await tx.surveySection.create({
+            data: {
+              surveyId: clone.id,
+              title: section.title,
+              description: section.description,
+              order: section.order,
+            }
+          });
+
+          if (section.questions && section.questions.length > 0) {
+            const sectionQuestions = section.questions.map((question: any) => ({
+              surveyId: clone.id,
+              sectionId: newSection.id,
+              questionText: question.questionText,
+              questionType: question.questionType,
+              required: question.required,
+              placeholder: question.placeholder,
+              helpText: question.helpText,
+              validationRules: question.validationRules,
+              options: question.options,
+              order: question.order,
+            }));
+            await tx.surveyQuestion.createMany({ data: sectionQuestions });
+          }
+        }
+      }
+
+      const fullClone = await tx.survey.findUnique({
+        where: { id: clone.id },
+        include: {
+          questions: { orderBy: { order: 'asc' } },
+          sections: { include: { questions: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } }
+        }
+      });
+
+      return fullClone as any as Survey;
+    });
   }
 
   async findByMilestone(months: number): Promise<Survey | null> {

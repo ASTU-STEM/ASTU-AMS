@@ -72,8 +72,8 @@ export default function VerifyManualPage() {
       formData.append('documentType', values.documentType);
       formData.append('notes', values.notes);
       
-      files.forEach((file, index) => {
-        formData.append(`document_${index}`, file);
+      files.forEach((file) => {
+        formData.append('documents', file);
       });
 
       const response = await authService.submitManualVerification(formData);
@@ -82,7 +82,7 @@ export default function VerifyManualPage() {
         setRequestId(response.data.requestId || 'N/A');
         setIsSuccess(true);
         toast.success('Manual verification request submitted successfully!');
-        clearRegistration(); // Clear context on success
+        // Do NOT call clearRegistration() here, otherwise VerificationRouteGuard will unmount this page instantly!
       } else {
         toast.error((response as any).message || 'Submission failed.');
       }
@@ -125,7 +125,10 @@ export default function VerifyManualPage() {
           </div>
 
           <PrimaryButton
-            onClick={() => navigate('/login')}
+            onClick={() => {
+              clearRegistration();
+              navigate('/login');
+            }}
             variant="primary"
           >
             Go to Login

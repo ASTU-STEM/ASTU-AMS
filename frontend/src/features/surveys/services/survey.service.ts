@@ -1,200 +1,160 @@
-import { Survey, SurveyFilters, SurveyStats, SurveyResponse } from '../types/survey.types';
-
-// Base URL for API calls - will be configured via environment variables
 const getApiBaseUrl = () => {
-  return (import.meta.env as any).REACT_APP_API_URL || 'http://localhost:5000/api';
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 };
 
-// API client for surveys
+const getHeaders = () => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+});
+
+async function handleResponse(res: Response) {
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+  return data.data;
+}
+
 export const surveyService = {
-  // Get all surveys with optional filtering
-  async getSurveys(filters?: SurveyFilters): Promise<Survey[]> {
-    const queryParams = new URLSearchParams();
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== 'All') queryParams.append(key, String(value));
-      });
-    }
-    
-    const response = await fetch(`${getApiBaseUrl()}/surveys?${queryParams.toString()}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch surveys');
-    }
-    
-    return response.json();
+  // ─── Registrar / Admin: Templates ────────────────────────────────────────
+  async getSurveys(): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates`, { headers: getHeaders() });
+    return handleResponse(res);
   },
 
-  // Get a single survey by ID
-  async getSurvey(id: number): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey');
-    }
-    
-    return response.json();
+  async getSurvey(id: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}`, { headers: getHeaders() });
+    return handleResponse(res);
   },
 
-  // Create a new survey
-  async createSurvey(survey: Omit<Survey, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys`, {
+  async createSurvey(surveyData: any): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({
-        ...survey,
-        status: 'PENDING' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
+      headers: getHeaders(),
+      body: JSON.stringify(surveyData),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create survey');
-    }
-    
-    return response.json();
+    return handleResponse(res);
   },
 
-  // Update an existing survey
-  async updateSurvey(survey: Survey): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${survey.id}`, {
+  async updateSurvey(id: string, surveyData: any): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({
-        ...survey,
-        updatedAt: new Date().toISOString()
-      })
+      headers: getHeaders(),
+      body: JSON.stringify(surveyData),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to update survey');
-    }
-    
-    return response.json();
+    return handleResponse(res);
   },
 
-  // Delete a survey
-  async deleteSurvey(id: number): Promise<void> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${id}`, {
+  async deleteSurvey(id: string): Promise<void> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to delete survey');
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Failed to archive survey');
     }
   },
 
-  // Get survey statistics
-  async getSurveyStats(): Promise<SurveyStats> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/stats`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey stats');
-    }
-    
-    return response.json();
-  },
-
-  // Submit survey responses
-  async submitSurveyResponse(surveyId: number, answers: Record<string, any>): Promise<SurveyResponse> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/responses`, {
+  async cloneSurvey(id: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}/clone`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({
-        surveyId,
-        respondentId: localStorage.getItem('userId'),
-        answers,
-        submittedAt: new Date().toISOString()
-      })
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to submit survey response');
-    }
-    
-    return response.json();
+    return handleResponse(res);
   },
 
-  // Get survey responses
-  async getSurveyResponses(surveyId: number): Promise<SurveyResponse[]> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/responses`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch survey responses');
-    }
-    
-    return response.json();
-  },
-
-  // Schedule survey distribution
-  async scheduleSurvey(surveyId: number, scheduledDate: string): Promise<Survey> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/schedule`, {
+  async activateSurvey(id: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}/activate`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      },
-      body: JSON.stringify({ scheduledDate })
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to schedule survey');
-    }
-    
-    return response.json();
+    return handleResponse(res);
   },
 
-  // Export survey data
-  async exportSurveyData(surveyId: number, format: 'CSV' | 'PDF' | 'JSON'): Promise<Blob> {
-    const response = await fetch(`${getApiBaseUrl()}/surveys/${surveyId}/export?format=${format}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+  async deactivateSurvey(id: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}/deactivate`, {
+      method: 'POST',
+      headers: getHeaders(),
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to export survey data');
-    }
-    
-    return response.blob();
-  }
+    return handleResponse(res);
+  },
+
+  async scheduleSurvey(id: string, scheduledAt: string): Promise<any> {
+    return surveyService.updateSurvey(id, { scheduledAt });
+  },
+
+  // ─── Registrar / Admin: Analysis ─────────────────────────────────────────
+  async getSurveyAnalysis(templateId: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${templateId}/analysis`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async getResponsesBySurvey(templateId: string): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${templateId}/responses`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async getCompanyHiringStats(): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/company-hiring-stats`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async getSurveyStats(): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/statistics`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
+
+  async getSurveyAssignments(): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/assignments`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
+
+  async getCompletionReport(): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/completion-report`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
+
+  // ─── Alumni ───────────────────────────────────────────────────────────────
+  async getMySurveys(): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/my-surveys`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
+
+  async getMySurveyAssignment(assignmentId: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/my-surveys/${assignmentId}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async saveDraft(assignmentId: string, answers: { questionId: string; answerText: string }[]): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/save-draft`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ assignmentId, answers }),
+    });
+    return handleResponse(res);
+  },
+
+  async submitAssignedSurvey(
+    assignmentId: string,
+    answers: { questionId: string; answerText: string }[]
+  ): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/submit`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ assignmentId, answers }),
+    });
+    return handleResponse(res);
+  },
+
+  async getMyHistory(): Promise<any[]> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/my-history`, { headers: getHeaders() });
+    return handleResponse(res);
+  },
 };
