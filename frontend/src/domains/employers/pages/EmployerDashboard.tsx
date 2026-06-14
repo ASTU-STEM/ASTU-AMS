@@ -3,6 +3,7 @@ import { useAuth } from '../../../shared/contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Sun } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
+import AiAssistant from '../../../shared/components/AiAssistant';
 
 import {
   CompanyProfile,
@@ -30,6 +31,7 @@ const EmployerDashboard = () => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; text: string; unread: boolean; time: string }>>([]);
 
   const [profile, setProfile] = useState<CompanyProfile>(() => ({
@@ -282,6 +284,11 @@ const EmployerDashboard = () => {
             <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
             {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
           </button>
+          <button onClick={() => setAiAssistantOpen(true)}
+            className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
+            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+            {!sidebarCollapsed && <><span className="text-sm font-medium">AI Assistant</span><span className="ml-auto text-[8px] text-emerald-400/80 font-bold px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">NEW</span></>}
+          </button>
           <button onClick={handleLogout}
             className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-left group gap-3">
             <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
@@ -487,6 +494,7 @@ const EmployerDashboard = () => {
       </div>
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+      <AiAssistant role="employer" isOpen={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
     </div>
   );
 };

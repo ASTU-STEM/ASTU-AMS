@@ -3,6 +3,7 @@ import { useAuth } from '../../../shared/contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Sun } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
+import AiAssistant from '../../../shared/components/AiAssistant';
 
 import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
 import { registrarService } from '../services/registrar.service';
@@ -25,6 +26,7 @@ const RegistrarDashboard = () => {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; text: string; unread: boolean; time: string }>>([]);
 
@@ -280,6 +282,11 @@ const RegistrarDashboard = () => {
             className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group gap-3">
             <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
             {!sidebarCollapsed && <span className="text-sm font-medium">Help Center</span>}
+          </button>
+          <button onClick={() => setAiAssistantOpen(true)}
+            className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group gap-3">
+            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+            {!sidebarCollapsed && <><span className="text-sm font-medium">AI Assistant</span><span className="ml-auto text-[8px] text-emerald-400/80 font-bold px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">NEW</span></>}
           </button>
           <button onClick={handleLogout}
             className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all group gap-3">
@@ -545,6 +552,7 @@ const RegistrarDashboard = () => {
       </main>
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+      <AiAssistant role="registrar" isOpen={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
     </div>
   );
 };

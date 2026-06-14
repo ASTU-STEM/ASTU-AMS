@@ -5,6 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
 import TelebirrDonationModal from '../../../shared/components/TelebirrDonationModal';
+import AiAssistant from '../../../shared/components/AiAssistant';
 import { surveyService } from '../../surveys/services/survey.service';
 import { notificationService } from '../../notifications/services/notification.service';
 
@@ -58,6 +59,7 @@ const AlumniDashboard = () => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [donationCampaign, setDonationCampaign] = useState<{ title: string; category: string } | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
 
@@ -442,6 +444,18 @@ const AlumniDashboard = () => {
               <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
             )}
           </button>
+          <button onClick={() => setAiAssistantOpen(true)} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'AI Assistant' : undefined}>
+            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+            {!sidebarCollapsed && (
+              <>
+                <span className="text-sm font-medium">AI Assistant</span>
+                <span className="ml-auto text-[8px] text-emerald-400/80 font-bold px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">NEW</span>
+              </>
+            )}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">AI Assistant</div>
+            )}
+          </button>
           <button onClick={handleLogout} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'Logout' : undefined}>
             <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 material-symbols-outlined">logout</span>
             {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
@@ -657,6 +671,7 @@ const AlumniDashboard = () => {
       <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+      <AiAssistant role="alumni" isOpen={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
       <TelebirrDonationModal
         isOpen={!!donationCampaign}
         onClose={() => setDonationCampaign(null)}
