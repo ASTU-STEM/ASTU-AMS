@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { ApiResult } from '../../auth/services/auth.service';
+import config from '../../../shared/config';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = config.apiUrl;
 
 export const supportService = {
   async createTicket(formData: FormData): Promise<ApiResult<{ ticketId: string }>> {

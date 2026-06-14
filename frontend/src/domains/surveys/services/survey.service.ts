@@ -1,6 +1,6 @@
-const getApiBaseUrl = () => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-};
+import config from '../../../shared/config';
+
+const getApiBaseUrl = () => config.apiUrl;
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',

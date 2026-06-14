@@ -39,10 +39,9 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminBadge from '../components/AdminBadge';
+import config from '../../../shared/config';
 
-const getApiBaseUrl = () => {
-  return (import.meta.env as any).REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+const getApiBaseUrl = () => config.apiUrl;
 
 type AcademicYear = '2024-25' | '2023-24' | 'All Time';
 type DepartmentFilter = 'All' | 'Computer Science' | 'Software Engineering' | 'Electrical Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Chemical Engineering' | 'Information Engineering';

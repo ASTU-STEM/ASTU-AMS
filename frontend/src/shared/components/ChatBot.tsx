@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import config from "../config";
 
 type MessageSender = "user" | "bot";
 
@@ -66,7 +67,7 @@ function getFallback(input: string) {
 }
 
 async function askAssistant(userMessage: string, history: ChatMessage[]) {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const apiBaseUrl = config.apiUrl;
   const messages: ChatApiMessage[] = [
     ...history.map((m) => ({
       role: m.sender === "user" ? "user" as const : "assistant" as const,
