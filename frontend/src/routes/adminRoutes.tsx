@@ -1,19 +1,19 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import AdminLayout from '../layouts/AdminLayout';
-import AdminDashboard from '../features/admin/pages/AdminDashboard';
-import UserManagement from '../features/admin/pages/UserManagement';
-import RoleManagement from '../features/admin/pages/RoleManagement';
-import SurveyManagement from '../features/admin/pages/SurveyManagement';
-import JobsManagement from '../features/admin/pages/JobsManagement';
-import AnalyticsOverview from '../features/admin/pages/AnalyticsOverview';
-import DepartmentManagement from '../features/admin/pages/DepartmentManagement';
-import NotificationCenter from '../features/admin/pages/NotificationCenter';
-import SystemLogs from '../features/admin/pages/SystemLogs';
-import BackupSecurity from '../features/admin/pages/BackupSecurity';
-import SystemSettings from '../features/admin/pages/SystemSettings';
-import SuperAdminModules from '../features/admin/pages/SuperAdminModules';
-import ReportsCenter from '../features/admin/pages/ReportsCenter';
+import AdminLayout from '../shared/layouts/AdminLayout';
+import AdminDashboard from '../domains/admin/pages/AdminDashboard';
+import UserManagement from '../domains/admin/pages/UserManagement';
+import RoleManagement from '../domains/admin/pages/RoleManagement';
+import SurveyManagement from '../domains/admin/pages/SurveyManagement';
+import JobsManagement from '../domains/admin/pages/JobsManagement';
+import AnalyticsOverview from '../domains/admin/pages/AnalyticsOverview';
+import DepartmentManagement from '../domains/admin/pages/DepartmentManagement';
+import NotificationCenter from '../domains/admin/pages/NotificationCenter';
+import SystemLogs from '../domains/admin/pages/SystemLogs';
+import BackupSecurity from '../domains/admin/pages/BackupSecurity';
+import SystemSettings from '../domains/admin/pages/SystemSettings';
+import SuperAdminModules from '../domains/admin/pages/SuperAdminModules';
+import ReportsCenter from '../domains/admin/pages/ReportsCenter';
 
 export default function AdminRoutes() {
   return (
