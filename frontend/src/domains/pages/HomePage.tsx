@@ -153,14 +153,14 @@ const events = [
     date: "April 25-26, 2026",
     location: "Main Campus",
     image:
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+      arcImage,
   },
   {
     title: "DAAD Alumni Workshop",
     date: "March 2026",
     location: "ASTU Research Center",
     image:
-      "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80",
+      gc7,
   },
 ];
 
@@ -274,7 +274,7 @@ export default function HomePage() {
       description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
     },
     {
-      image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80", // third beautiful campus photo
+      image: gc7, // third beautiful campus photo
       tagline: "Academic Innovation & Tracer Feedback",
       title: "Coordinating Strategic Tracer Studies & Skill Gaps",
       description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.",
@@ -715,7 +715,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { title: "Career Expo Highlights", image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80" },
+              { title: "Career Expo Highlights", image: stateM },
               { title: "Research & Innovation Forum", image: arcImage },
               { title: "Graduation Ceremony Replay", image: gc7 },
             ].map((video, idx) => (

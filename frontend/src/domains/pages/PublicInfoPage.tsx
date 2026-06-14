@@ -28,6 +28,27 @@ import {
 } from "lucide-react";
 import Navbar from "../../shared/components/Navbar";
 
+import astuBuilding from "../../assets/imgs/astu-building.jpg";
+import campusImg from "../../assets/imgs/campus-2.jpeg";
+import astuLogo from "../../assets/imgs/astu-logo.jpeg";
+import arcImage from "../../assets/images/arc.jpg";
+import stateM from "../../assets/images/State-M.jpg";
+import gc7 from "../../assets/images/gc7.jpg";
+import electricLabs from "../../assets/images/electriclabs.jpeg";
+import astuBuilding2 from "../../assets/images/Astu-buliding.jpg";
+import regOffice from "../../assets/images/regofficephoto.jpg";
+
+const heroImages = [
+  astuBuilding, campusImg, gc7, arcImage, stateM,
+  electricLabs, astuBuilding2, regOffice, astuLogo, astuBuilding
+];
+let imgIdx = 0;
+const nextImg = () => {
+  const img = heroImages[imgIdx % heroImages.length];
+  imgIdx++;
+  return img;
+};
+
 const pages: Record<string, {
   title: string;
   subtitle: string;
@@ -39,7 +60,7 @@ const pages: Record<string, {
     title: "ASTU-AMS Overview",
     subtitle: "An integrated Alumni Management System connecting graduates, employers, and departments. Developed in-house by ASTU to enable longitudinal employment tracking and accreditation compliance.",
     icon: Trophy,
-    image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "What is ASTU-AMS?", body: "ASTU-AMS is a comprehensive alumni management platform designed to bridge the gap between Adama Science and Technology University graduates, employers, and academic departments. With nearly three decades since ASTU's establishment, the platform boasts 1,238+ alumni members across 5 fields of study succeeding in business ventures, national and international companies, research institutes, and leadership positions." },
       { heading: "Background & Rationale", body: "ASTU previously lacked a centralized, automated system to track graduate career trajectories. Graduate data was fragmented across departments and the Registrar's office. Without a unified digital ecosystem, the university remained unable to perform meaningful longitudinal analysis or maintain continuous relationships with its alumni network. The ASTU-AMS solves this by providing a centralized alumni database integrated with the Registrar and ERP systems." },
@@ -53,7 +74,7 @@ const pages: Record<string, {
     title: "Impact Numbers",
     subtitle: "Key statistics demonstrating ASTU-AMS reach and effectiveness.",
     icon: LineChart,
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "1,238+ Alumni Members", body: "Registered alumni actively connected through the platform, spanning diverse industries and leadership positions." },
       { heading: "5 Fields of Study", body: "Comprehensive coverage across Engineering, Natural Sciences, Technology, Business, and Research programs." },
@@ -67,7 +88,7 @@ const pages: Record<string, {
     title: "Accreditation",
     subtitle: "Quality assurance framework ensuring academic excellence and industry alignment.",
     icon: ShieldCheck,
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Data-Driven Accreditation", body: "ASTU-AMS provides verified tracer data, employment analytics, and employer feedback essential for accreditation agencies and university management." },
       { heading: "Global Standards", body: "Build transparent, audited institutional reports that meet international accreditation standards and quality assurance requirements." },
@@ -78,7 +99,7 @@ const pages: Record<string, {
     title: "University Achievements",
     subtitle: "Awards, recognitions, and milestones of Adama Science and Technology University.",
     icon: Award,
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c7f1?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Research Excellence", body: "1,240+ research publications and 38 startup showcases demonstrating ASTU's commitment to innovation and knowledge creation." },
       { heading: "Industry Partnerships", body: "72 active industry projects and 80+ industry partners collaborating on research, internships, and curriculum development." },
@@ -91,7 +112,7 @@ const pages: Record<string, {
     title: "FAQ",
     subtitle: "Common questions for alumni, employers, registrar services, and department users.",
     icon: HelpCircle,
-    image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Who can use ASTU-AMS?", body: "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services through dedicated portals." },
       { heading: "How are tracer studies used?", body: "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence collection." },
@@ -104,7 +125,7 @@ const pages: Record<string, {
     title: "Contact Us",
     subtitle: "Reach ASTU alumni relations, registrar support, and employer partnership teams.",
     icon: Building2,
-    image: "https://images.unsplash.com/photo-1423666639041-f56000c27a9a?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Address", body: "Adama Science and Technology University, Adama, Oromia, Ethiopia" },
       { heading: "P.O. Box", body: "1888 Adama, Ethiopia" },
@@ -118,7 +139,7 @@ const pages: Record<string, {
     title: "Community Feed",
     subtitle: "Stay connected with alumni stories, employer announcements, and career opportunities.",
     icon: Users,
-    image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Alumni Discussions & Updates", body: "Engage with fellow alumni, share achievements, and stay informed about university developments." },
       { heading: "Employer Announcements", body: "Partner companies post job openings, internship opportunities, and recruitment event notifications." },
@@ -130,7 +151,7 @@ const pages: Record<string, {
     title: "Events Calendar",
     subtitle: "Workshops, reunions, conferences, and professional development opportunities.",
     icon: CalendarDays,
-    image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "ASTU Alumni Carnival 2026", body: "April 25-26, 2026 - Main Campus. A homecoming event uniting graduates, academic staff, current students, and stakeholders to celebrate ASTU's legacy and achievements over the past thirty years." },
       { heading: "DAAD Alumni Workshop", body: "March 2026 - ASTU Research Center. A five-day workshop hosted in collaboration with the German Academic Exchange Service (DAAD) for research and academic networking." },
@@ -142,7 +163,7 @@ const pages: Record<string, {
     title: "Mentorship Program",
     subtitle: "Connect with experienced alumni mentors to guide your career journey.",
     icon: GraduationCap,
-    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Find a Mentor", body: "Browse available mentors by industry, department, or expertise area. Send connection requests directly." },
       { heading: "Become a Mentor", body: "Experienced alumni can sign up to mentor current students and recent graduates, sharing industry insights." },
@@ -153,7 +174,7 @@ const pages: Record<string, {
     title: "Career Fair",
     subtitle: "Job opportunities, networking, and recruitment events for ASTU alumni and students.",
     icon: Briefcase,
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Annual Career Expo", body: "Meet 50+ employers, attend workshops, and apply for open positions at our flagship career event." },
       { heading: "On-Campus Recruitment", body: "Employers conduct interviews and information sessions throughout the academic year." },
@@ -164,7 +185,7 @@ const pages: Record<string, {
     title: "Photo Gallery",
     subtitle: "Campus life, events, and memorable moments at ASTU.",
     icon: GalleryHorizontal,
-    image: "https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Campus Life", body: "Explore vibrant campus life through photographs of academic buildings, labs, and student activities." },
       { heading: "Graduation Ceremonies", body: "Relive memorable graduation moments captured across years of ASTU history." },
@@ -175,7 +196,7 @@ const pages: Record<string, {
     title: "Video Gallery",
     subtitle: "Research presentations, event recordings, and university highlights.",
     icon: PlayCircle,
-    image: "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Research Showcases", body: "Watch research presentations, innovation demos, and faculty interviews." },
       { heading: "Event Recordings", body: "Access recordings of career expos, workshops, graduation ceremonies, and guest lectures." },
@@ -186,7 +207,7 @@ const pages: Record<string, {
     title: "Research Publications",
     subtitle: "Academic research outputs and innovation highlights from ASTU.",
     icon: BookOpen,
-    image: "https://images.unsplash.com/photo-1504711434969-e33886168d6c?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Research Database", body: "Browse 1,240+ research publications across engineering, natural sciences, and technology fields." },
       { heading: "Innovation Hub", body: "Explore 38 startup showcases and 72 industry projects emerging from ASTU research." },
@@ -197,7 +218,7 @@ const pages: Record<string, {
     title: "Innovation Hub",
     subtitle: "Student and faculty innovations driving technological advancement.",
     icon: Lightbulb,
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Startup Incubation", body: "ASTU supports student and alumni startups through incubation programs, funding access, and mentorship." },
       { heading: "Research Centers", body: "12+ specialized research centers focusing on AI, renewable energy, biotechnology, and more." },
@@ -208,7 +229,7 @@ const pages: Record<string, {
     title: "Alumni Portal",
     subtitle: "Career tracking, networking, mentorship, and tracer surveys for ASTU graduates.",
     icon: GraduationCap,
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0d6440?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Professional Profile", body: "Create and maintain a rich professional profile showcasing your education, work experience, skills, and achievements." },
       { heading: "Job & Internship Matching", body: "Access verified job listings and internship opportunities matched to your skills, department, and career goals." },
@@ -220,7 +241,7 @@ const pages: Record<string, {
     title: "Employer Portal",
     subtitle: "Talent recruitment, job posting, and feedback tools for employer partners.",
     icon: Briefcase,
-    image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Post Opportunities", body: "Publish job openings, internships, and graduate trainee positions to reach qualified ASTU alumni." },
       { heading: "Talent Search", body: "Search alumni profiles by department, graduation year, skills, and experience to find ideal candidates." },
@@ -232,7 +253,7 @@ const pages: Record<string, {
     title: "Registrar Portal",
     subtitle: "Document verification, transcript processing, and graduate data management.",
     icon: FileText,
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Credential Verification", body: "Validate alumni academic credentials against the Student Information System (SIS)." },
       { heading: "Document Processing", body: "Process transcript requests, certificate issuances, and ID card services efficiently." },
@@ -244,7 +265,7 @@ const pages: Record<string, {
     title: "Department Portal",
     subtitle: "Program analytics, graduate outcomes, and accreditation readiness for department heads.",
     icon: BarChart3,
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Graduate Outcomes", body: "Monitor employment rates, industry placement, and skill gaps for your department's graduates." },
       { heading: "Accreditation Reports", body: "Generate data-rich reports with verified tracer evidence for accreditation and quality assurance." },
@@ -256,7 +277,7 @@ const pages: Record<string, {
     title: "Featured Employers",
     subtitle: "Verified partner companies supporting jobs, internships, and campus recruitment.",
     icon: Building2,
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80",
+    image: nextImg(),
     sections: [
       { heading: "Ethio Telecom", body: "Telecom & Cloud - 14 graduate roles available for ASTU alumni." },
       { heading: "Ethiopian Airlines", body: "Aviation Technology - 8 internship tracks for engineering graduates." },
@@ -270,7 +291,7 @@ const fallbackPage = {
   title: "Page Not Found",
   subtitle: "The requested page is not available.",
   icon: HelpCircle,
-  image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1800&q=80",
+  image: nextImg(),
   sections: [{ heading: "Navigation", body: "Please use the navigation menu to find the information you need." }],
 };
 

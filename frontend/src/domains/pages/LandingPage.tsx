@@ -23,6 +23,8 @@ import {
   Heart
 } from "lucide-react";
 
+import astuBuilding from "../../assets/imgs/astu-building.jpg";
+import campusImg from "../../assets/imgs/campus-2.jpeg";
 import arcImage from "../../assets/images/arc.jpg";
 import stateM from "../../assets/images/State-M.jpg";
 import gc7 from "../../assets/images/gc7.jpg";
@@ -148,14 +150,14 @@ const events = [
     date: "June 30, 2026",
     location: "Main Campus",
     image:
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+      arcImage,
   },
   {
     title: "Class of 2014 Decade Reunion",
     date: "July 28, 2026",
     location: "Networking Hall",
     image:
-      "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80",
+      gc7,
   },
 ];
 
@@ -381,7 +383,7 @@ export default function LandingPage() {
             <img
               alt="ASTU campus"
               className="h-full w-full object-cover"
-              src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80"
+              src={astuBuilding}
               onError={handleImageError}
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,51,102,0.84),rgba(0,30,64,0.94))]" />

@@ -103,7 +103,7 @@ type SectionTab = 'hero' | 'stats' | 'portals' | 'campus-life' | 'campuses' | 'g
 const initialHeroSlides: HeroSlide[] = [
   { id: 'HS-1', image: '/src/assets/imgs/astu-building.jpg', tagline: 'Quality Assurance & Accreditation', title: "Connecting ASTU's Excellence to the Global Industry", description: 'A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.', active: true },
   { id: 'HS-2', image: '/src/assets/imgs/campus-2.jpeg', tagline: 'Enterprise Networking & Placement', title: 'Empowering ASTU Graduates in Modern Workspaces', description: 'Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.', active: true },
-  { id: 'HS-3', image: 'https://images.unsplash.com/photo-1562774053-701939374585', tagline: 'Academic Innovation & Tracer Feedback', title: 'Coordinating Strategic Tracer Studies & Skill Gaps', description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.', active: true },
+  { id: 'HS-3', image: '/src/assets/images/gc7.jpg', tagline: 'Academic Innovation & Tracer Feedback', title: 'Coordinating Strategic Tracer Studies & Skill Gaps', description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.', active: true },
 ];
 
 const initialImpactStats: ImpactStat[] = [
@@ -146,14 +146,14 @@ const initialGallery: GalleryImage[] = [
 ];
 
 const initialVideos: VideoItem[] = [
-  { id: 'VI-1', title: 'Career Expo Highlights', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80', active: true },
+  { id: 'VI-1', title: 'Career Expo Highlights', image: '/src/assets/images/State-M.jpg', active: true },
   { id: 'VI-2', title: 'Research & Innovation Forum', image: '/src/assets/images/arc.jpg', active: true },
   { id: 'VI-3', title: 'Graduation Ceremony Replay', image: '/src/assets/images/gc7.jpg', active: true },
 ];
 
 const initialEvents: EventItem[] = [
-  { id: 'EV-1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80', active: true },
-  { id: 'EV-2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'ASTU Research Center', image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80', active: true },
+  { id: 'EV-1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus', image: '/src/assets/images/arc.jpg', active: true },
+  { id: 'EV-2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'ASTU Research Center', image: '/src/assets/images/gc7.jpg', active: true },
 ];
 
 const initialWorkshops: WorkshopItem[] = [

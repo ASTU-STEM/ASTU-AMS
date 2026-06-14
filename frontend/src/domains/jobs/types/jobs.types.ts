@@ -1,43 +1,49 @@
 export interface Job {
-  id: number;
+  id: string;
+  employerId?: string;
   title: string;
-  company: string;
+  company?: string;
   companyLogo?: string;
   location: string;
-  type: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'REMOTE';
-  category: string;
+  employmentType: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'REMOTE';
+  category?: string;
   description: string;
-  requirements: string[];
+  requirements?: string;
+  skillsRequired?: string[];
+  salary?: string;
   salaryMin?: number;
   salaryMax?: number;
-  currency: string;
-  applicationDeadline: string;
-  postedDate: string;
-  status: 'PUBLISHED' | 'DRAFT' | 'CLOSED' | 'FILLED';
-  applicationsCount: number;
-  postedBy: string;
+  deadline: string;
+  experienceRequired: number;
+  createdAt: string;
+  updatedAt: string;
+  status: 'PUBLISHED' | 'DRAFT' | 'CLOSED' | 'ARCHIVED';
+  applicationsCount?: number;
   department?: string;
-  experienceLevel: 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD';
+  experienceLevel?: string;
+  responsibilities?: string;
+  isActive?: boolean;
 }
 
 export interface JobApplication {
-  id: number;
-  jobId: number;
+  id: string;
+  jobId: string;
   alumniId: string;
-  alumniName: string;
-  alumniEmail: string;
-  alumniDepartment: string;
-  graduationYear: number;
+  alumniName?: string;
+  alumniEmail?: string;
+  alumniDepartment?: string;
+  graduationYear?: number;
+  resumeUrl?: string;
   coverLetter?: string;
-  status: 'PENDING' | 'REVIEWING' | 'SHORTLISTED' | 'INTERVIEWED' | 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
-  appliedDate: string;
-  updatedDate: string;
+  status: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEW_SCHEDULED' | 'OFFERED' | 'HIRED' | 'REJECTED' | 'ACCEPTED' | 'WITHDRAWN';
+  createdAt: string;
+  updatedAt: string;
   notes?: string;
 }
 
 export interface JobBookmark {
-  id: number;
-  jobId: number;
+  id: string;
+  jobId: string;
   alumniId: string;
   createdAt: string;
 }
