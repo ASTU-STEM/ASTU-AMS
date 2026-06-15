@@ -367,8 +367,7 @@ a {
 .admin-shell main section,
 .admin-shell main article,
 .admin-shell main .admin-card,
-.admin-shell main .shadow-\[0_1px_3px_rgba\(0,0,0,0.06\)\],
-.admin-shell main .shadow-\[0_4px_16px_rgba\(0,0,0,0.08\)\] {
+.admin-shell main [class*="shadow-\["] {
   animation: admin-float-in 260ms ease-out both;
 }
 
@@ -426,8 +425,7 @@ a {
   color: var(--text-muted) !important;
 }
 
-.dark .admin-shell .shadow-\[0_1px_3px_rgba\(0,0,0,0.06\)\],
-.dark .admin-shell .shadow-\[0_4px_16px_rgba\(0,0,0,0.08\)\] {
+.dark .admin-shell [class*="shadow-\["] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
 }
 

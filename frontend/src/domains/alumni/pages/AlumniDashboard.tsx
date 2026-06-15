@@ -5,7 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
 import TelebirrDonationModal from '../../../shared/components/TelebirrDonationModal';
-import AiAssistant from '../../../shared/components/AiAssistant';
+import { AiAssistant } from '../../ai/components/AiAssistant';
 import { surveyService } from '../../surveys/services/survey.service';
 import { notificationService } from '../../notifications/services/notification.service';
 

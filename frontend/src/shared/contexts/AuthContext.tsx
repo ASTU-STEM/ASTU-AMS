@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import type { User, UserRole } from '../types';
 import { authService } from '../../domains/auth/services/auth.service';
+import config from '../config';
 
 interface AuthContextType {
   user: User | null;
@@ -30,7 +31,7 @@ const normalizeRole = (role?: string | null): UserRole | null => {
 };
 
 const readStoredUser = (): User | null => {
-  const storedUser = localStorage.getItem('user');
+  const storedUser = localStorage.getItem(config.auth.userStorageKey);
   if (storedUser) {
     try {
       const parsed = JSON.parse(storedUser);
@@ -57,7 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem(config.auth.storageKey);
     if (token) {
       authService.getCurrentUser()
         .then(result => {
@@ -74,8 +75,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 updatedAt: new Date().toISOString(),
               };
               setUser(userData);
-              localStorage.setItem('user', JSON.stringify(userData));
-              localStorage.setItem('astu_ams_user_role', role);
+              localStorage.setItem(config.auth.userStorageKey, JSON.stringify(userData));
+              localStorage.setItem(config.auth.roleStorageKey, role);
             }
           }
           setIsLoading(false);
@@ -117,9 +118,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       createdAt: '2024-01-01',
       updatedAt: '2026-01-01',
     };
-    localStorage.setItem('astu_ams_user_role', role);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('authToken', 'mock-jwt-token-' + Date.now());
+    localStorage.setItem(config.auth.roleStorageKey, role);
+    localStorage.setItem(config.auth.userStorageKey, JSON.stringify(userData));
+    localStorage.setItem(config.auth.storageKey, 'mock-jwt-token-' + Date.now());
     window.dispatchEvent(new Event('astu-auth-changed'));
     setUser(userData);
   }, []);

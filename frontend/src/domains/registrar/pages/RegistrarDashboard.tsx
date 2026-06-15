@@ -3,7 +3,7 @@ import { useAuth } from '../../../shared/contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Sun } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
-import AiAssistant from '../../../shared/components/AiAssistant';
+import { AiAssistant } from '../../ai/components/AiAssistant';
 
 import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
 import { registrarService } from '../services/registrar.service';

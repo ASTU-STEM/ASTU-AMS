@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { globalErrorHandler } from './core/middleware/error.middleware';
 import { sendSuccess } from './core/utils/response.utils';
+import { env } from './core/config/env';
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(helmet({
 
 // 2. CORS Policy Configuration
 app.use(cors({
-  origin: '*', // In production, replace with specific frontend URL (e.g. env.FRONTEND_URL)
+  origin: env.FRONTEND_URL, // Replace wildcard with specific frontend URL
   credentials: true,
 }));
 
