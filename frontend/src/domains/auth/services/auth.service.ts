@@ -18,9 +18,9 @@ apiClient.interceptors.request.use(
   (configData) => {
     const token = localStorage.getItem(config.auth.storageKey);
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      configData.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return configData;
   },
   (error) => Promise.reject(error)
 );
