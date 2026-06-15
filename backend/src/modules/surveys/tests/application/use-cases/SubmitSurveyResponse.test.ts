@@ -17,7 +17,7 @@ describe('SubmitSurveyResponse Use Case', () => {
   let mockSurveyRepo: jest.Mocked<ISurveyRepository>;
   let mockRespRepo: jest.Mocked<ISurveyResponseRepository>;
 
-  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', 6, true, false, []);
+  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', 6, null, true, false, []);
   const mockResponse = new SurveyResponse('r1', 's1', 'a1', null, []);
 
   beforeEach(() => {

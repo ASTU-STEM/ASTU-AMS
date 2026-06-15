@@ -29,42 +29,42 @@ ________________
 
 2. OVERALL SYSTEM ARCHITECTURE
 High-Level Architecture
-                   ┌─────────────────────┐
-                   │  Registrar Office   │
-                   │ Student Database    │
-                   └──────────┬──────────┘
-                              │
-                        Data Sync/API
-                              │
-                              ▼
+     ┌─────────────────────┐
+     │  Registrar Office   │
+     │ Student Database    │
+     └──────────┬──────────┘
+                │
+            Data Sync/API
+                │
+                ▼
 ┌───────────────────────────────────────────────────────┐
-│                 ASTU-AMS Backend                     │
-│------------------------------------------------------│
-│ Authentication Service                               │
-│ Alumni Management Service                            │
-│ Tracer Study Engine                                  │
-│ Job Board Service                                    │
-│ Employer Feedback System                             │
-│ Analytics Engine                                     │
-│ Notification Service                                 │
-│ Admin Management                                     │
+│                 ASTU-AMS Backend                      │
+│-------------------------------------------------------│
+│ Authentication Service                                │
+│ Alumni Management Service                             │
+│ Tracer Study Engine                                   │
+│ Job Board Service                                     │
+│ Employer Feedback System                              │
+│ Analytics Engine                                      │
+│ Notification Service                                  │
+│ Admin Management                                      │
 └───────────────┬───────────────────────────────────────┘
-               │
-       REST APIs / JWT
-               │
-               ▼
+                │
+        REST APIs / JWT
+                │
+                ▼
 ┌───────────────────────────────────────────────────────┐
-│                 React Frontend                       │
-│------------------------------------------------------│
-│ Alumni Portal                                        │
-│ Admin Portal                                         │
-│ Employer Portal                                      │
-│ Analytics Dashboard                                  │
+│                 React Frontend                        │
+│-------------------------------------------------------│
+│ Alumni Portal                                         │
+│ Admin Portal                                          │
+│ Employer Portal                                       │
+│ Analytics Dashboard                                   │
 └───────────────────────────────────────────────────────┘
                │
                ▼
 ┌───────────────────────────────────────────────────────┐
-│                 PostgreSQL Database                  │
+│                 PostgreSQL Database                   │
 └───────────────────────────────────────────────────────┘
 ________________
 

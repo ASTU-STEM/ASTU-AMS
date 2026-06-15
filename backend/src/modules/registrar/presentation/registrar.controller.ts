@@ -16,6 +16,7 @@ import { FetchGraduatesByAPI } from '../application/use-cases/FetchGraduatesByAP
 import { updateAlumniStatusSchema } from './registrar.validation';
 // We will mock CSV parsing here since it's just a controller representation
 import fs from 'fs';
+import csvParser from 'csv-parser';
 
 const gradRepo = new PrismaGraduateRecordRepository();
 const syncRepo = new PrismaSyncLogRepository();
@@ -34,14 +35,44 @@ export class RegistrarController {
       const file = (req as any).file;
       if (!file) throw new Error('No file uploaded.');
 
-      // Mock implementation of extracting data from CSV/Excel
-      // In reality, you'd use 'csv-parser' or 'xlsx' to read `file.path`
-      const mockExtractedRecords = [
-        { studentId: 'S100', fullName: 'Mock Student 1', department: 'CS', departmentCode: 'CS', cgpa: 3.5, graduationYear: 2022, email: null, phone: null, source: 'EXCEL', graduationDate: new Date() }
-      ];
+      const results: any[] = [];
+
+      await new Promise<void>((resolve, reject) => {
+        fs.createReadStream(file.path)
+          .pipe(csvParser())
+          .on('data', (data) => {
+            if (data.studentId && data.fullName) {
+              results.push({
+                studentId: data.studentId.trim(),
+                fullName: data.fullName.trim(),
+                department: data.departmentCode?.trim() || 'Unknown',
+                departmentCode: data.departmentCode?.trim() || 'UNK',
+                cgpa: parseFloat(data.cgpa) || 0.0,
+                graduationYear: parseInt(data.graduationYear, 10) || new Date().getFullYear(),
+                email: null,
+                phone: null,
+                source: 'CSV',
+                graduationDate: new Date(parseInt(data.graduationYear, 10) || new Date().getFullYear(), 5, 30),
+              });
+            }
+          })
+          .on('end', () => {
+            resolve();
+          })
+          .on('error', (error) => {
+            reject(error);
+          });
+      });
+
+      // Cleanup uploaded file
+      try {
+        fs.unlinkSync(file.path);
+      } catch (e) {
+        console.error('Error removing temporary file', e);
+      }
 
       const useCase = new ImportGraduateData(gradRepo, syncRepo);
-      const result = await useCase.execute(mockExtractedRecords);
+      const result = await useCase.execute(results);
 
       return sendSuccess(res, 'File import completed.', result);
     } catch (err: any) {
