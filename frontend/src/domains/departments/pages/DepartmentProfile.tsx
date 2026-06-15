@@ -16,7 +16,7 @@ import {
   EyeOff,
   Building2,
 } from 'lucide-react';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../../shared/contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 
 export const DepartmentProfile: React.FC = () => {

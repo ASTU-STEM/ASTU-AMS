@@ -22,7 +22,7 @@ import SupportPage from "./domains/support/pages/SupportPage";
 import AlumniDashboard from "./domains/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./domains/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./domains/registrar/pages/RegistrarDashboard";
-import DepartmentDashboard from "./domains/departments/pages/DepartmentDashboard";
+import DepartmentRoutes from "./routes/departmentRoutes";
 import NotFoundPage from "./domains/pages/NotFoundPage";
 import ProtectedRoute from "./shared/components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";

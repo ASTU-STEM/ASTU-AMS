@@ -22,9 +22,12 @@ interface SkillGapAnalysisProps {
 export const SkillGapAnalysis: React.FC<SkillGapAnalysisProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<SkillGapFilterState>({
     department: 'Computer Science',
-    academicYear: '2024',
+    program: 'All',
+    graduationBatch: '2024',
+    industry: 'All',
     skillCategory: 'All',
-    severity: 'All'
+    gapSeverity: 'All',
+    dateRange: 'All',
   });
 
   // Use data from props or provide empty defaults

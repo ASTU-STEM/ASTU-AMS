@@ -19,8 +19,7 @@ import {
 } from "lucide-react";
 import { useCmsListSection } from '../hooks/useCmsSection';
 import { CmsSkeleton, CmsError } from '../components/CmsLoadingState';
-import { fetchWorkflowItems, updateWorkflowItem } from '../services/cmsService';
-import type { WorkflowItem } from '../services/cmsService';
+import { fetchWorkflowItems } from '../services/cmsService';
 
 type WorkflowStatus =
   | "Pending Review"

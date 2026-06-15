@@ -22,9 +22,10 @@ interface TracerReportsProps {
 export const TracerReports: React.FC<TracerReportsProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<TracerFilterState>({
     department: 'Computer Science',
-    batch: '2024',
+    tracerPeriod: 'all',
+    graduationBatch: '2024',
     academicYear: '2024',
-    employmentStatus: 'All'
+    employmentStatus: 'All',
   });
 
   // Use data from props or provide empty defaults

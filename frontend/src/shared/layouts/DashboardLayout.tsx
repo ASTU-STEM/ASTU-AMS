@@ -25,8 +25,9 @@ import MediaLibrary from "../../domains/admin/pages/MediaLibrary";
 import SEOManagement from "../../domains/admin/pages/SEOManagement";
 import ContentTemplates from "../../domains/admin/pages/ContentTemplates";
 import CmsSettings from "../../domains/admin/pages/CmsSettings";
-import { PageHeader } from "../shared/components/PageHeader";
-import { LoadingSkeleton } from "../shared/components/LoadingSkeleton";
+import { PageHeader } from "../components/PageHeader";
+import { LoadingSkeleton } from "../components/LoadingSkeleton";
+import { ChevronRight } from "lucide-react";
 
 // No backend call here (logout is purely local for now)
 const logoutLocally = () => {

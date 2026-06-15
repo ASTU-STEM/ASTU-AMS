@@ -21,8 +21,11 @@ interface AccreditationReportsProps {
 export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<AccreditationFilterState>({
     department: 'Computer Science',
-    accreditationBody: 'All',
-    status: 'All'
+    academicYear: '2024',
+    graduationBatch: '2024',
+    accreditationCycle: 'All',
+    reportType: 'All',
+    dateRange: 'All',
   });
 
   // Use data from props or provide empty defaults

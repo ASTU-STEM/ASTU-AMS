@@ -16,7 +16,7 @@
  * GET    /api/department/export              - Export report generation
  */
 
-import api from "../../../services/api";
+import api from "../../../shared/services/api";
 
 // ─── Types ───────────────────────────────────────────────────────────
 import type {
@@ -58,7 +58,7 @@ export const departmentApi = {
         "/department/overview",
         params as unknown as Record<string, unknown>,
       );
-      return response ?? ({} as DepartmentOverview);
+      return response.data ?? ({} as DepartmentOverview);
     } catch {
       console.warn("[DepartmentAPI] getOverview failed — returning empty data");
       return {} as DepartmentOverview;
@@ -77,7 +77,7 @@ export const departmentApi = {
         "/department/employment",
         params as unknown as Record<string, unknown>,
       );
-      return response ?? ({} as EmploymentData);
+      return response.data ?? ({} as EmploymentData);
     } catch {
       console.warn(
         "[DepartmentAPI] getEmploymentData failed — returning empty data",
@@ -98,7 +98,7 @@ export const departmentApi = {
         "/department/employer-feedback",
         params as unknown as Record<string, unknown>,
       );
-      return response ?? ({} as EmployerFeedbackData);
+      return response.data ?? ({} as EmployerFeedbackData);
     } catch {
       console.warn(
         "[DepartmentAPI] getEmployerFeedback failed — returning empty data",
@@ -119,7 +119,7 @@ export const departmentApi = {
         "/department/skill-gap",
         params as unknown as Record<string, unknown>,
       );
-      return response ?? ({} as SkillGapData);
+      return response.data ?? ({} as SkillGapData);
     } catch {
       console.warn(
         "[DepartmentAPI] getSkillGapData failed — returning empty data",
@@ -140,7 +140,7 @@ export const departmentApi = {
         "/department/tracer-surveys",
         params as unknown as Record<string, unknown>,
       );
-      return response ?? ({} as TracerSurveyData);
+      return response.data ?? ({} as TracerSurveyData);
     } catch {
       console.warn(
         "[DepartmentAPI] getTracerSurveyData failed — returning empty data",
@@ -161,7 +161,7 @@ export const departmentApi = {
         "/department/curriculum",
         params as unknown as Record<string, unknown>,
       );
-      return response ?? ({} as CurriculumInsight);
+      return response.data ?? ({} as CurriculumInsight);
     } catch {
       console.warn(
         "[DepartmentAPI] getCurriculumInsights failed — returning empty data",
@@ -179,7 +179,7 @@ export const departmentApi = {
       const response = await api.get<AccreditationReport[]>(
         "/department/accreditation",
       );
-      return response ?? [];
+      return response.data ?? [];
     } catch {
       console.warn(
         "[DepartmentAPI] getAccreditationReports failed — returning empty array",
@@ -195,7 +195,7 @@ export const departmentApi = {
   async getExportReports(): Promise<ExportReport[]> {
     try {
       const response = await api.get<ExportReport[]>("/department/export");
-      return response ?? [];
+      return response.data ?? [];
     } catch {
       console.warn(
         "[DepartmentAPI] getExportReports failed — returning empty array",
@@ -216,7 +216,7 @@ export const departmentApi = {
       const response = await api.get<Blob>(`/department/export/${reportId}`, {
         format,
       } as unknown as Record<string, unknown>);
-      return response ?? new Blob();
+      return response.data ?? new Blob();
     } catch {
       console.warn(
         "[DepartmentAPI] generateReport failed — returning empty blob",

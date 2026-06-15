@@ -540,7 +540,7 @@ export default function CmsDashboard() {
                         <Users className="w-3.5 h-3.5" /> {item.author}
                       </span>
                       <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-                      <span>{item.updated}</span>
+                      <span>{item.updatedAt}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">

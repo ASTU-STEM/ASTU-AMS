@@ -1,16 +1,16 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import DepartmentLayout from '../layouts/DepartmentLayout';
-import { ManagementHub } from '../features/departments/pages/ManagementHub';
-import { DepartmentProfile } from '../features/departments/pages/DepartmentProfile';
-import { DashboardOverview } from '../features/departments/components/DashboardOverview';
-import { EmploymentAnalytics } from '../features/departments/components/EmploymentAnalytics';
-import { SkillGapAnalysis } from '../features/departments/components/SkillGapAnalysis';
-import { EmployerFeedback } from '../features/departments/components/EmployerFeedback';
-import { TracerReports } from '../features/departments/components/TracerReports';
-import { CurriculumInsights } from '../features/departments/components/CurriculumInsights';
-import { AccreditationReports } from '../features/departments/components/AccreditationReports';
-import { ExportCenter } from '../features/departments/components/ExportCenter';
+import DepartmentLayout from '../shared/layouts/DepartmentLayout';
+import { ManagementHub } from '../domains/departments/pages/ManagementHub';
+import { DepartmentProfile } from '../domains/departments/pages/DepartmentProfile';
+import { DashboardOverview } from '../domains/departments/components/DashboardOverview';
+import { EmploymentAnalytics } from '../domains/departments/components/EmploymentAnalytics';
+import { SkillGapAnalysis } from '../domains/departments/components/SkillGapAnalysis';
+import { EmployerFeedback } from '../domains/departments/components/EmployerFeedback';
+import { TracerReports } from '../domains/departments/components/TracerReports';
+import { CurriculumInsights } from '../domains/departments/components/CurriculumInsights';
+import { AccreditationReports } from '../domains/departments/components/AccreditationReports';
+import { ExportCenter } from '../domains/departments/components/ExportCenter';
 import {
   mockEmploymentData,
   mockSkillGapData,
@@ -18,7 +18,7 @@ import {
   mockTracerSurveyData,
   mockCurriculumInsights,
   mockExportReports
-} from '../features/departments/services/mockDepartmentData';
+} from '../domains/departments/services/mockDepartmentData';
 
 
 // Wrapper component to pass common props (darkMode) that the components currently expect

@@ -20,9 +20,12 @@ interface EmployerFeedbackProps {
 export const EmployerFeedback: React.FC<EmployerFeedbackProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<EmployerFeedbackFilterState>({
     department: 'Computer Science',
-    academicYear: '2024',
+    graduationBatch: '2024',
     industry: 'All',
-    satisfaction: 'All'
+    employer: 'All',
+    employmentType: 'All',
+    dateRange: 'All',
+    ratingRange: 'All',
   });
 
   // Use data from props or provide empty defaults
