@@ -65,6 +65,7 @@ import EmployerDashboard from '../../domains/employers/pages/EmployerDashboard';
 import RegistrarDashboard from '../../domains/registrar/pages/RegistrarDashboard';
 import DepartmentDashboard from '../../domains/departments/pages/DepartmentDashboard';
 import AdminDashboard from '../../domains/admin/pages/AdminDashboard';
+import UnifiedSidebar from './UnifiedSidebar';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 
@@ -117,86 +118,54 @@ export function DashboardLayout({
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
       )}
 
-{/* Sidebar Container */}
-       <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-shrink-0 flex-col bg-white border-r border-slate-200 transition-all duration-300 lg:relative lg:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
-         
-         {/* Sidebar Header */}
-         <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-           <Link to="/" className={`flex items-center ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}>
-             <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md flex-shrink-0">
-               <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
-             </div>
-             {!sidebarDisplayCollapsed && <div className="overflow-hidden">
-               <span className="font-extrabold text-md tracking-tight text-[#003366] block whitespace-nowrap">ASTU-AMS</span>
-               <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block whitespace-nowrap">{role}</span>
-             </div>}
-           </Link>
-         </div>
+      {/* Unified Sidebar */}
+      <UnifiedSidebar
+        onLogout={() => {
+          logoutLocally();
+          window.location.href = '/login';
+        }}
+        isOpen={sidebarOpen}
+        onNavigate={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        onOpenAiAssistant={() => {
+          // Handle AI assistant opening
+          console.log('Open AI Assistant');
+        }}
+      />
 
-         {/* Navigation Links */}
-         <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-           {navItems.map((item: { path: string; label: string; icon: React.ComponentType<any> }, idx: number) => {
-             const isActive = location.pathname === item.path;
-             return (
-               <Link
-                 key={idx}
-                 to={item.path}
-                 onClick={() => setSidebarOpen(false)}
-                 title={sidebarDisplayCollapsed ? item.label : undefined}
-                 className={`w-full flex items-center rounded-xl transition-all duration-200 px-4 py-3 ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-4'} ${isActive
-                   ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-sm'
-                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                   }`}
-               >
-                 <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-[#003366]' : 'text-slate-500'}`} />
-                 {!sidebarDisplayCollapsed && <span className="text-sm tracking-wide font-medium truncate">
-                   {item.label}
-                 </span>}
-               </Link>
-             );
-           })}
-         </nav>
+      {/* Mobile Sidebar Toggle */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="fixed top-4 left-4 z-50 lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl"
+        aria-label="Open navigation"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
 
-         {/* Sidebar Footer */}
-         <div className="border-t border-slate-100 flex-shrink-0 p-4">
-           <button
-             type="button"
-             onClick={() => {
-               logoutLocally();
-               window.location.href = '/login';
-             }}
-             title={sidebarDisplayCollapsed ? 'Exit Workspace' : undefined}
-             className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}
-           >
-             <LogOut className="h-4 w-4 flex-shrink-0" />
-             {!sidebarDisplayCollapsed && <span>Exit Workspace</span>}
-           </button>
-         </div>
-       </aside>
-
-       {/* Fluid Canvas - main content area */}
-       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-         
-         {/* Clean Top Header Bar */}
-         <header className="bg-white h-16 border-b border-gray-200 flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
-           <div className="flex items-center gap-4">
-             {/* Mobile menu button */}
-             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
-               <Menu className="h-5 w-5" />
-             </button>
-             <button
-               type="button"
-               onClick={() => setSidebarCollapsed((value) => !value)}
-               className="hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:inline-flex"
-               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-             >
-               <Menu className="h-5 w-5" />
-             </button>
-             {/* Breadcrumbs / Title */}
-             <h1 className="truncate text-base font-bold text-slate-900 tracking-tight sm:text-lg">{title}</h1>
-           </div>
-
+      {/* Fluid Canvas - main content area */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        
+        {/* Clean Top Header Bar */}
+        <header className="bg-white h-16 border-b border-gray-200 flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
           <div className="flex items-center gap-4">
+            {/* Mobile menu button */}
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
+              <Menu className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed((value) => !value)}
+              className="hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:inline-flex"
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            {/* Breadcrumbs / Title */}
+            <h1 className="truncate text-base font-bold text-slate-900 tracking-tight sm:text-lg">{title}</h1>
+          </div>
+
+         <div className="flex items-center gap-4">
             <button className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-xl relative shadow-sm">
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#CC0033] rounded-full"></span>
@@ -498,13 +467,13 @@ function RegistrarPortal() {
               <h2 className="text-lg font-black text-[#003366]">Excel Data Import Pipeline</h2>
               <p className="text-xs text-slate-500">Upload official graduate roster files from the student information system to create accounts.</p>
             </div>
-<div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center bg-slate-50 hover:bg-slate-100/50 transition-all cursor-pointer group shadow-inner">
-               <Upload className="mx-auto h-10 w-10 text-slate-400 group-hover:text-[#003366] transition-colors mb-4" />
-               <span className="font-bold text-sm text-slate-700 block mb-1">Drag and drop graduates_ratios.xlsx</span>
-               <span className="text-xs text-slate-400 block">Supports standard column templates (Student ID, Name, Department, Year, CGPA)</span>
-             </div>
-           </div>
-         } />
+ <div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center bg-slate-50 hover:bg-slate-100/50 transition-all cursor-pointer group shadow-inner">
+                <Upload className="mx-auto h-10 w-10 text-slate-400 group-hover:text-[#003366] transition-colors mb-4" />
+                <span className="font-bold text-sm text-slate-700 block mb-1">Drag and drop graduates_ratios.xlsx</span>
+                <span className="text-xs text-slate-400 block">Supports standard column templates (Student ID, Name, Department, Year, CGPA)</span>
+              </div>
+            </div>
+          } />
         <Route path="/transcript" element={<div className="p-6"><h2 className="text-lg font-bold">Digital Transcript Verification</h2><p className="text-sm text-slate-500">Verify and issue digital transcripts.</p></div>} />
         <Route path="/clearance" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Clearance Tracking</h2><p className="text-sm text-slate-500">Track clearance status for graduates.</p></div>} />
         <Route path="/certificates" element={<div className="p-6"><h2 className="text-lg font-bold">Certificate Verification Portal</h2><p className="text-sm text-slate-500">Validate and verify certificates.</p></div>} />
@@ -754,6 +723,8 @@ export default function App() {
         <Route path="/registrar/*" element={<RegistrarPortal />} />
         <Route path="/employer/*" element={<EmployerPortal />} />
         <Route path="/department/*" element={<DepartmentPortal />} />
+
+        {/* System Governance Portal */}
         <Route path="/admin/*" element={<AdminPortal />} />
       </Routes>
     </BrowserRouter>
