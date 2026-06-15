@@ -61,7 +61,7 @@ export const CareerAlignmentAnalytics: React.FC<CareerAlignmentAnalyticsProps> =
 
       {/* Benchmark Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+        <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Industry Benchmark</p>
           <p className="text-2xl font-bold text-astu-green">78%</p>
           <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Average alignment score</p>

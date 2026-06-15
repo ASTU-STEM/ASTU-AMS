@@ -279,16 +279,16 @@ export default function SurveyManagement() {
                 <ClipboardList className="h-6 w-6 text-[#E8A020]" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">Tracer Surveys</h1>
-                <p className="mt-1 text-sm text-white/80">
+                <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#ffffff' }}>Tracer Surveys</h1>
+                <p className="mt-1 text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                   Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month response rates and export accreditation-ready data.
                 </p>
               </div>
             </div>
             <div className="mt-4 flex items-center gap-2">
-              <AdminBadge variant="success" className="border-white/20 bg-white/10 text-white">Tracer Studies</AdminBadge>
+              <AdminBadge variant="success" className="border-white/20 bg-white/10" style={{ color: '#ffffff' }}>Tracer Studies</AdminBadge>
               <div className="h-6 w-px bg-white/20" />
-              <span className="text-xs text-white/70">Total Surveys: {totalSurveys}</span>
+              <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Total Surveys: {totalSurveys}</span>
             </div>
           </div>
         </div>
@@ -302,7 +302,8 @@ export default function SurveyManagement() {
         </div>
         <button
           onClick={() => { resetBuilder(); setActiveTab('create'); }}
-          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-2.5 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+          style={{ color: '#ffffff' }}
         >
           <Plus className="h-4.5 w-4.5" /> Create Survey
         </button>
@@ -313,6 +314,7 @@ export default function SurveyManagement() {
         <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
           <div className="text-3xl font-bold text-slate-900">{totalSurveys}</div>
           <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Total Surveys</div>
+          <div className="mt-1 text-xs font-semibold text-[#8b5cf6]">Across all surveys</div>
         </div>
         <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
           <div className="text-3xl font-bold text-slate-900">{pendingSurveys}</div>
@@ -338,15 +340,19 @@ export default function SurveyManagement() {
 
       {/* Tab Bar */}
       <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
-        {['all', 'create', 'analytics', 'waves'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab as any)}
-            className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${activeTab === tab || (activeTab === 'edit' && tab === 'create') || (activeTab === 'details' && tab === 'all') ? 'bg-gradient-to-r from-[#003580] to-[#004499] text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)]' : 'text-slate-600 hover:bg-slate-100'}`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)} Surveys
-          </button>
-        ))}
+        {['all', 'create', 'analytics', 'waves'].map(tab => {
+          const isActive = activeTab === tab || (activeTab === 'edit' && tab === 'create') || (activeTab === 'details' && tab === 'all');
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as any)}
+              className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${isActive ? 'bg-gradient-to-r from-[#003580] to-[#004499] shadow-[0_4px_12px_rgba(0,51,128,0.25)]' : 'text-slate-600 hover:bg-slate-100'}`}
+              style={isActive ? { color: '#ffffff' } : undefined}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)} Surveys
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === 'all' && (

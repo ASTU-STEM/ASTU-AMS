@@ -20,7 +20,7 @@ export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, da
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className={`p-5 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+        <div className={`p-5 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-astu-green/10 rounded-lg">
               <CheckCircle className="text-astu-green h-5 w-5" />

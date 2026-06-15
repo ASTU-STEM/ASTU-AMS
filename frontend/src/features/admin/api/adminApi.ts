@@ -206,6 +206,180 @@ export const adminApi = {
     const response = await adminApiClient.get('/admin/reports');
     return response.data;
   },
+
+  // --- Consolidated Departments Service ---
+  async getDepartments() {
+    const response = await adminApiClient.get('/admin/departments');
+    return response.data;
+  },
+  async getDepartmentById(id: string) {
+    const response = await adminApiClient.get(`/admin/departments/${id}`);
+    return response.data;
+  },
+  async getDepartmentAlumni(departmentId: string) {
+    const response = await adminApiClient.get(`/admin/departments/${departmentId}/alumni`);
+    return response.data;
+  },
+  async updateDepartment(id: string, data: any) {
+    const response = await adminApiClient.put(`/admin/departments/${id}`, data);
+    return response.data;
+  },
+  async exportDepartmentData(departmentId: string, format: 'csv' | 'excel') {
+    const response = await adminApiClient.get(`/admin/departments/${departmentId}/export/${format}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  // --- Consolidated Roles Service ---
+  async getRoles() {
+    const response = await adminApiClient.get('/admin/roles');
+    return response.data;
+  },
+  async getRoleById(id: string) {
+    const response = await adminApiClient.get(`/admin/roles/${id}`);
+    return response.data;
+  },
+  async createRole(data: any) {
+    const response = await adminApiClient.post('/admin/roles', data);
+    return response.data;
+  },
+  async updateRole(id: string, data: any) {
+    const response = await adminApiClient.put(`/admin/roles/${id}`, data);
+    return response.data;
+  },
+  async deleteRole(id: string) {
+    const response = await adminApiClient.delete(`/admin/roles/${id}`);
+    return response.data;
+  },
+  async getPermissions() {
+    const response = await adminApiClient.get('/admin/roles/permissions');
+    return response.data;
+  },
+  async savePermissions(roleId: string, permissions: string[]) {
+    const response = await adminApiClient.put(`/admin/roles/${roleId}/permissions`, { permissions });
+    return response.data;
+  },
+  async exportRoles(format: 'csv' | 'excel') {
+    const response = await adminApiClient.get(`/admin/roles/export/${format}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  // --- Consolidated Jobs Service ---
+  async getJobs(params?: any) {
+    const response = await adminApiClient.get('/admin/jobs', { params });
+    return response.data;
+  },
+  async getJobById(id: string) {
+    const response = await adminApiClient.get(`/admin/jobs/${id}`);
+    return response.data;
+  },
+  async createJob(data: any) {
+    const response = await adminApiClient.post('/admin/jobs', data);
+    return response.data;
+  },
+  async updateJob(id: string, data: any) {
+    const response = await adminApiClient.put(`/admin/jobs/${id}`, data);
+    return response.data;
+  },
+  async deleteJob(id: string) {
+    const response = await adminApiClient.delete(`/admin/jobs/${id}`);
+    return response.data;
+  },
+  async getApplications(jobId: string) {
+    const response = await adminApiClient.get(`/admin/jobs/${jobId}/applications`);
+    return response.data;
+  },
+  async updateApplicationStatus(applicationId: string, status: string) {
+    const response = await adminApiClient.put(`/admin/jobs/applications/${applicationId}`, { status });
+    return response.data;
+  },
+  async exportJobs(format: 'csv' | 'excel') {
+    const response = await adminApiClient.get(`/admin/jobs/export/${format}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  // --- Consolidated Profile Service ---
+  async getProfile() {
+    const response = await adminApiClient.get('/admin/profile');
+    return response.data;
+  },
+  async updateProfile(data: any) {
+    const response = await adminApiClient.put('/admin/profile', data);
+    return response.data;
+  },
+  async changePassword(data: any) {
+    const response = await adminApiClient.post('/admin/profile/change-password', data);
+    return response.data;
+  },
+  async updateNotificationSettings(settings: any) {
+    const response = await adminApiClient.put('/admin/profile/notifications', settings);
+    return response.data;
+  },
+  async uploadPhoto(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await adminApiClient.post('/admin/profile/photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  async deletePhoto() {
+    const response = await adminApiClient.delete('/admin/profile/photo');
+    return response.data;
+  },
+
+  // --- Department Head Portal Endpoints ---
+  async getDepartmentOverview(filters?: any) {
+    const response = await adminApiClient.get('/department/overview', { params: filters });
+    return response.data;
+  },
+  async getEmploymentData(filters?: any) {
+    const response = await adminApiClient.get('/department/employment', { params: filters });
+    return response.data;
+  },
+  async getEmployerFeedback(filters?: any) {
+    const response = await adminApiClient.get('/department/employer-feedback', { params: filters });
+    return response.data;
+  },
+  async getSkillGapData(filters?: any) {
+    const response = await adminApiClient.get('/department/skill-gap', { params: filters });
+    return response.data;
+  },
+  async getTracerSurveyData(filters?: any) {
+    const response = await adminApiClient.get('/department/tracer-surveys', { params: filters });
+    return response.data;
+  },
+  async getCurriculumInsights(filters?: any) {
+    const response = await adminApiClient.get('/department/curriculum', { params: filters });
+    return response.data;
+  },
+  async getAccreditationReports() {
+    const response = await adminApiClient.get('/department/accreditation-reports');
+    return response.data;
+  },
+  async getExportReports() {
+    const response = await adminApiClient.get('/department/export-reports');
+    return response.data;
+  },
+  async generateReport(reportId: string, format: 'pdf' | 'excel') {
+    const response = await adminApiClient.get(`/department/export/${reportId}?format=${format}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
+
+export const departmentsService = adminApi;
+export const rolesService = adminApi;
+export const jobsService = adminApi;
+export const surveysService = adminApi;
+export const profileService = adminApi;
 
 export default adminApi;

@@ -19,7 +19,7 @@ export const mockDepartmentMetrics: DepartmentMetric[] = [
     value: '87%',
     color: 'astu-green',
     icon: 'Briefcase',
-    bgGradient: 'from-emerald-50 to-green-50',
+    bgGradient: 'from-blue-50 to-green-50',
     trend: '+3% vs 2022',
     trendIcon: 'TrendingUp'
   },

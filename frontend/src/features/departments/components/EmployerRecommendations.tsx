@@ -29,11 +29,11 @@ export const EmployerRecommendations: React.FC<EmployerRecommendationsProps> = (
   const getCategoryColor = (category: EmployerRecommendation['category']) => {
     switch (category) {
       case 'curriculum':
-        return 'text-blue-600 bg-blue-50 border-blue-200';
+        return 'text-astu-navy bg-blue-50 border-blue-200';
       case 'laboratory':
         return 'text-purple-600 bg-purple-50 border-purple-200';
       case 'internship':
-        return 'text-astu-green bg-emerald-50 border-emerald-200';
+        return 'text-astu-green bg-blue-50 border-emerald-200';
       case 'research':
         return 'text-astu-navy bg-blue-50 border-blue-200';
       case 'softSkills':
@@ -61,9 +61,9 @@ export const EmployerRecommendations: React.FC<EmployerRecommendationsProps> = (
   const getImpactColor = (impact: EmployerRecommendation['impactLevel']) => {
     switch (impact) {
       case 'high':
-        return 'text-astu-green bg-emerald-100';
+        return 'text-astu-green bg-blue-100';
       case 'medium':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-astu-navy bg-blue-100';
       case 'low':
         return 'text-gray-600 bg-gray-100';
       default:

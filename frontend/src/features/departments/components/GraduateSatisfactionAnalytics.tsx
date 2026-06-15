@@ -42,7 +42,7 @@ export const GraduateSatisfactionAnalytics: React.FC<GraduateSatisfactionAnalyti
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Good</span>
-                <span className="text-blue-600 font-bold">{metric.breakdown.good}%</span>
+                <span className="text-astu-navy font-bold">{metric.breakdown.good}%</span>
               </div>
               <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${metric.breakdown.good}%` }}></div>

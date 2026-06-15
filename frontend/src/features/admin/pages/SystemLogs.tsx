@@ -73,17 +73,17 @@ function severityClass(severity: Exclude<Severity, 'All'>) {
 function summaryCard({ label, value, icon: Icon, hint, color }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string; color?: string }) {
   const iconColor = color || '#003580';
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
-      <div className="flex items-start justify-between gap-4">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-bold text-slate-900">{value}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+          <p className="mt-2 text-xl font-bold text-slate-900">{value}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
-          <Icon className="h-6 w-6" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-4 text-sm text-slate-500">{hint}</p>
+      <p className="mt-2 text-xs text-slate-500">{hint}</p>
     </div>
   );
 }
@@ -224,28 +224,32 @@ export default function SystemLogs() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Custom Gradient Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003580] via-[#004499] to-[#1D9E75] p-8 shadow-[0_8px_30px_rgba(0,51,128,0.3)]">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_0%,transparent_40%,rgba(232,160,32,0.08)_60%,transparent_100%)]" />
+    <div className="space-y-6">
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6"
+        style={{ background: 'linear-gradient(135deg, #001f4d 0%, #003580 50%, #00508a 100%)', boxShadow: '0 8px 30px rgba(0,53,128,0.35)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% -5%, rgba(29,158,117,0.30), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 70% at -5% 70%, rgba(232,160,32,0.10), transparent)' }} />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(29,158,117,0.15)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="relative flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
-                <Activity className="h-6 w-6 text-[#E8A020]" />
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+                <Activity className="h-5 w-5" style={{ color: '#E8A020' }} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">System Logs</h1>
-                <p className="mt-1 text-sm text-white/80">
+                <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>System Logs</h1>
+                <p className="mt-0.5 text-xs font-medium" style={{ color: 'rgba(255,255,255,0.78)' }}>
                   Audit administrative actions and system events.
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              <span
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white"
-              >
-                <span className="h-2 w-2 rounded-full bg-[#1D9E75]" style={{ animation: 'blink 1.5s ease-in-out infinite' }} />
+            <div className="mt-3 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#ffffff', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)' }}>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" style={{ animation: 'blink 1.5s ease-in-out infinite' }} />
                 Live
               </span>
             </div>
@@ -254,11 +258,12 @@ export default function SystemLogs() {
             <button
               type="button"
               onClick={() => setExportOpen((current) => !current)}
-              className="inline-flex items-center gap-2.5 rounded-xl bg-white/10 backdrop-blur-sm px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all hover:bg-white/20 hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)]"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', color: '#ffffff', backdropFilter: 'blur(8px)' }}
             >
-              <Download className="h-4.5 w-4.5" />
+              <Download className="h-3.5 w-3.5" />
               Export Logs
-              <ChevronDown className="h-4.5 w-4.5" />
+              <ChevronDown className="h-3.5 w-3.5" />
             </button>
             {exportOpen && (
               <div className="absolute right-0 top-14 z-20 w-48 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
@@ -279,18 +284,18 @@ export default function SystemLogs() {
         </div>
       </div>
 
-      <section className="rounded-2xl bg-gradient-to-br from-[#0A1628] to-[#0F1F3D] px-6 py-4 text-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
-        <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
-          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">CPU: {health.cpu}%</span>
-          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+      <section className="px-2 py-4">
+        <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-white">
+          <span>CPU: {health.cpu}%</span>
+          <span>
             Memory: {health.memoryUsed.toFixed(1)}GB / {health.memoryTotal}GB
           </span>
-          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">Sessions: {health.sessions}</span>
-          <span className="rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">Uptime: {health.uptime.toFixed(1)}%</span>
+          <span>Sessions: {health.sessions}</span>
+          <span>Uptime: {health.uptime.toFixed(1)}%</span>
         </div>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {logStats.map((card) => (
           <React.Fragment key={card.label}>{summaryCard(card)}</React.Fragment>
         ))}
@@ -408,7 +413,7 @@ export default function SystemLogs() {
             <button
               type="button"
               onClick={() => setSelectedLog(null)}
-              className="rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+              className="rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105" style={{ color: '#ffffff' }}
             >
               Close
             </button>

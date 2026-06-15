@@ -83,7 +83,7 @@ export const DepartmentGapAnalytics: React.FC<DepartmentGapAnalyticsProps> = ({ 
           <div className="space-y-3">
             {sortedByPriority.slice(0, 3).map((dept, idx) => (
               <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-red-50 to-orange-50 border-gray-200/60'}`}>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-astu-red/10 flex items-center justify-center">
                     <span className="text-sm font-bold text-astu-red">{idx + 1}</span>
                   </div>
@@ -106,8 +106,8 @@ export const DepartmentGapAnalytics: React.FC<DepartmentGapAnalyticsProps> = ({ 
           <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Best Performing Departments</h4>
           <div className="space-y-3">
             {sortedByPriority.slice(-3).reverse().map((dept, idx) => (
-              <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
-                <div className="flex items-center gap-3">
+              <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-astu-green/10 flex items-center justify-center">
                     <Award className="h-4 w-4 text-astu-green" />
                   </div>

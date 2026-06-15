@@ -1,50 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import {
-  BarChart3,
-  BookOpen,
-  Briefcase,
-  Building2,
-  CalendarDays,
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  Edit3,
-  Eye,
-  FileText,
-  Globe,
-  GraduationCap,
-  Handshake,
-  HelpCircle,
-  Image,
-  ImagePlus,
-  Megaphone,
-  Newspaper,
-  PlayCircle,
-  Plus,
-  Quote,
-  Save,
-  ShieldCheck,
-  Star,
-  Trash2,
-  Trophy,
-  Upload,
-  Users,
-  X,
-  Zap,
-  MessageSquareText,
-  Mail,
-  Bell,
-  UserRoundCheck,
-  LineChart,
-  LockKeyhole,
-  FileCheck2,
-  MapPin,
-  Phone,
-  ArrowLeft,
-  ArrowRight,
-  ExternalLink,
-  RefreshCw,
-} from 'lucide-react';
+import { BarChart3, BookOpen, Briefcase, Building2, CalendarDays, CheckCircle2, ChevronDown, Clock, Edit3, Eye, FileText, Globe, GraduationCap, Handshake, HelpCircle, Image, ImagePlus, Megaphone, Newspaper, PlayCircle, Plus, Quote, Save, ShieldCheck, Star, Trash2, Trophy, Upload, Users, X, Activity, MessageSquareText, Mail, Bell, UserRoundCheck, LineChart, LockKeyhole, FileCheck2, MapPin, Phone, ArrowLeft, ArrowRight, ExternalLink, RefreshCw } from "lucide-react";
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
@@ -116,7 +71,7 @@ const initialImpactStats: ImpactStat[] = [
 ];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, GraduationCap, Zap,
+  Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, GraduationCap, Activity,
 };
 
 const initialPortals: StakeholderPortal[] = [
@@ -223,7 +178,7 @@ const tabConfig: { id: SectionTab; label: string; icon: React.ComponentType<{ cl
   { id: 'partners', label: 'Partners', icon: Handshake, count: 0 },
   { id: 'testimonials', label: 'Testimonials', icon: Quote, count: 0 },
   { id: 'faq', label: 'FAQ', icon: HelpCircle, count: 0 },
-  { id: 'proposal', label: 'Proposal Features', icon: Zap, count: 0 },
+  { id: 'proposal', label: 'Proposal Features', icon: Activity, count: 0 },
 ];
 
 /* ─── Reusable inline editor row ─── */
@@ -237,19 +192,19 @@ function InlineEditor<T extends { id: string; active: boolean }>({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{items.filter(i => i.active).length} active of {items.length} total</span>
-        <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 px-2.5 py-1.5 text-[10px] font-semibold text-[#003580] hover:bg-[#003580]/20 transition-all"><Plus className="h-3 w-3" /> Add</button>
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{items.filter(i => i.active).length} active of {items.length} total</span>
+        <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 dark:bg-blue-500/10 px-2.5 py-1.5 text-[10px] font-semibold text-[#003580] dark:text-blue-400 hover:bg-[#003580]/20 dark:hover:bg-blue-500/20 transition-all"><Plus className="h-3 w-3" /> Add</button>
       </div>
       {items.map((item, idx) => (
-        <div key={item.id} className="group flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 hover:border-[#003580]/20 transition-all">
+        <div key={item.id} className="group flex items-start gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/30 p-3 hover:border-[#003580]/20 dark:hover:border-blue-500/30 transition-all">
           <div className="min-w-0 flex-1">{renderItem(item, idx)}</div>
           <div className="flex shrink-0 items-center gap-1">
             <button onClick={() => setItems(prev => prev.map(i => i.id === item.id ? { ...i, active: !i.active } : i))}
-              className={`rounded p-1 transition-all ${item.active ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-300 hover:bg-slate-100'}`} title={item.active ? 'Deactivate' : 'Activate'}>
+              className={`rounded p-1 transition-all ${item.active ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20' : 'text-slate-300 dark:text-slate-655 hover:bg-slate-100 dark:hover:bg-slate-800'}`} title={item.active ? 'Deactivate' : 'Activate'}>
               <CheckCircle2 className="h-3.5 w-3.5" />
             </button>
             <button onClick={() => { setItems(prev => prev.filter(i => i.id !== item.id)); toast.success('Item removed'); }}
-              className="rounded p-1 text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-all" title="Delete">
+              className="rounded p-1 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 dark:hover:text-rose-450 transition-all" title="Delete">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -952,7 +907,7 @@ export default function HomepageManagement() {
       /* ─── PROPOSAL FEATURES ─── */
       case 'proposal': {
         return (
-          <SectionPanel title="Proposal-Specific Features" subtitle="Content modules derived from the ASTU-AMS project proposal (Tracer Study, Employer Feedback, Mentorship, Newsletter)." icon={Zap}>
+          <SectionPanel title="Proposal-Specific Features" subtitle="Content modules derived from the ASTU-AMS project proposal (Tracer Study, Employer Feedback, Mentorship, Newsletter)." icon={Activity}>
             <div className="space-y-6">
               {/* Tracer Study Spotlight */}
               <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -1093,7 +1048,7 @@ export default function HomepageManagement() {
       <style>{`
         @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .fade-up { animation: fade-up 0.35s ease-out both; }
-        .tab-active { box-shadow: 0 -2px 0 0 #003580 inset; background: rgba(0,53,128,0.04); }
+        .tab-active { box-shadow: 0 -2px 0 0 #3b82f6 inset; background: rgba(59,130,246,0.08); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
@@ -1106,7 +1061,7 @@ export default function HomepageManagement() {
           <div className="flex items-center gap-2">
             <AdminBadge variant="info">{totalActive} active items</AdminBadge>
             <button onClick={() => { toast.success('Homepage changes published to live site'); }}
-              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all shadow-sm">
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] hover:bg-[#00254d] dark:bg-blue-600 dark:hover:bg-blue-700 px-3 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all shadow-sm">
               <Save className="h-3.5 w-3.5" /> Publish All
             </button>
           </div>
@@ -1116,18 +1071,18 @@ export default function HomepageManagement() {
       {/* Stats Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Items', value: totalSections, icon: Globe, tone: 'text-[#003580]', bg: 'bg-[#003580]/10' },
-          { label: 'Active', value: totalActive, icon: CheckCircle2, tone: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Content Tabs', value: tabConfig.length, icon: FileText, tone: 'text-slate-600', bg: 'bg-slate-100' },
-          { label: 'Sections Managed', value: Object.keys({ heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq }).length, icon: BarChart3, tone: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Total Items', value: totalSections, icon: Globe, tone: 'text-[#003580] dark:text-blue-400', bg: 'bg-[#003580]/10 dark:bg-blue-500/10' },
+          { label: 'Active', value: totalActive, icon: CheckCircle2, tone: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
+          { label: 'Content Tabs', value: tabConfig.length, icon: FileText, tone: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' },
+          { label: 'Sections Managed', value: Object.keys({ heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq }).length, icon: BarChart3, tone: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/20' },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="fade-up rounded-[10px] border border-slate-200 bg-white p-4 shadow-sm flex items-center gap-3" style={{ animationDelay: `${idx * 0.05}s` }}>
+            <div key={stat.label} className="fade-up rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a1d27]/90 p-4 shadow-sm flex items-center gap-3" style={{ animationDelay: `${idx * 0.05}s` }}>
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.bg} ${stat.tone}`}><Icon className="h-5 w-5" /></div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{stat.label}</p>
-                <p className="text-xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{stat.label}</p>
+                <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{stat.value}</p>
               </div>
             </div>
           );
@@ -1135,11 +1090,11 @@ export default function HomepageManagement() {
       </div>
 
       {/* Welcome Message */}
-      <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a1d27]/90 p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <MessageSquareText className="h-4 w-4 text-slate-500" />
-            <h2 className="text-sm font-semibold text-slate-900">Homepage Welcome Message</h2>
+            <MessageSquareText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Homepage Welcome Message</h2>
           </div>
           <button onClick={saveWelcome}
             className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all shadow-sm ${welcomeSaved ? 'bg-emerald-500 text-white' : 'bg-[#1D9E75] text-white hover:brightness-110'}`}>
@@ -1147,18 +1102,18 @@ export default function HomepageManagement() {
           </button>
         </div>
         <textarea value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)}
-          className="mt-3 min-h-20 w-full rounded-[8px] border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 resize-none" />
+          className="mt-3 min-h-20 w-full rounded-[8px] border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900/40 p-3 text-sm text-slate-700 dark:text-slate-300 outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 resize-none" />
       </div>
 
       {/* Tab Navigation */}
-      <div className="overflow-x-auto hide-scrollbar rounded-[12px] border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto hide-scrollbar rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a1d27]/90 shadow-sm">
         <nav className="flex gap-1 p-1.5 min-w-max">
           {tabConfig.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all ${isActive ? 'tab-active bg-[#003580]/5 text-[#003580]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}>
+                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all ${isActive ? 'tab-active bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850 hover:text-slate-700 dark:hover:text-slate-200'}`}>
                 <Icon className="h-3.5 w-3.5" /> {tab.label}
               </button>
             );
@@ -1177,14 +1132,14 @@ export default function HomepageManagement() {
 /* ─── Section Panel Wrapper ─── */
 function SectionPanel({ title, subtitle, icon: Icon, children }: { title: string; subtitle: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <section className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1a1d27]/90 p-5 shadow-sm">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#003580]/10 text-[#003580]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#003580]/10 dark:bg-blue-500/10 text-[#003580] dark:text-blue-400">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-          <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
         </div>
       </div>
       <div className="mt-5">{children}</div>

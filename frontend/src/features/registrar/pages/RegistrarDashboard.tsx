@@ -1123,9 +1123,9 @@ useEffect(() => {
                   <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
                   <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/10 rounded-full translate-y-1/3 -translate-x-1/4" />
                   <div className="relative z-10">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300">Tracer Studies</span>
-                    <h2 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight">Tracer Surveys</h2>
-                    <p className="mt-2 max-w-2xl text-sm text-white/80">Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month response rates and export accreditation-ready data.</p>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.25em]" style={{ color: '#6ee7b7' }}>Tracer Studies</span>
+                    <h2 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: '#ffffff' }}>Tracer Surveys</h2>
+                    <p className="mt-2 max-w-2xl text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month response rates and export accreditation-ready data.</p>
                   </div>
                 </div>
                 <SurveyManagement />

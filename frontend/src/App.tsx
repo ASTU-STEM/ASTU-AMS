@@ -22,7 +22,7 @@ import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
-import DepartmentDashboard from "./features/departments/pages/DepartmentDashboard";
+import DepartmentRoutes from "./routes/departmentRoutes";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
@@ -84,10 +84,10 @@ function AppContent() {
           }
         />
         <Route
-          path="/department/dashboard"
+          path="/department/*"
           element={
             <ProtectedRoute
-              element={<DepartmentDashboard />}
+              element={<DepartmentRoutes />}
               allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
             />
           }

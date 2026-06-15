@@ -50,6 +50,7 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/cms/templates': { title: 'Content Templates', breadcrumb: [{ label: 'CMS' }, { label: 'Templates' }] },
   '/cms/approvals': { title: 'Approval Workflow', breadcrumb: [{ label: 'CMS' }, { label: 'Approvals' }] },
   '/cms/settings': { title: 'CMS Settings', breadcrumb: [{ label: 'CMS' }, { label: 'Settings' }] },
+  '/cms/profile': { title: 'My Profile', breadcrumb: [{ label: 'CMS' }, { label: 'Profile' }] },
 };
 
 const searchSuggestions = [
@@ -71,7 +72,7 @@ function formatHeaderDate() {
 }
 
 export default function CmsLayout() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('cmsTheme') ?? localStorage.getItem('theme') ?? 'dark') === 'light' ? 'light' : 'dark');
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -116,9 +117,9 @@ export default function CmsLayout() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    // CMS uses a scoped theme class on its shell — does NOT modify <html> to avoid
+    // bleeding into other layouts. Persists with its own key.
+    localStorage.setItem('cmsTheme', theme);
   }, [theme]);
 
   useEffect(() => {
@@ -158,7 +159,7 @@ export default function CmsLayout() {
   };
 
   const notifications = [
-    { color: 'bg-emerald-500', text: 'Homepage hero updated and published', time: '4 min ago' },
+    { color: 'bg-blue-500', text: 'Homepage hero updated and published', time: '4 min ago' },
     { color: 'bg-blue-500', text: 'New gallery album "Graduation 2026" created', time: '15 min ago' },
     { color: 'bg-amber-500', text: 'Event "Career Fair" awaiting approval', time: '1 hour ago' },
     { color: 'bg-rose-500', text: 'Community report flagged for review', time: '2 hours ago' },
@@ -169,32 +170,32 @@ export default function CmsLayout() {
     : searchSuggestions;
 
   const menu = (
-    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-lg shadow-slate-200/50 dark:shadow-black/30">
+    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-1 shadow-xl">
       <div className="px-3 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-sm font-bold text-[#0B1A2E] shadow-sm">
             {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'CM'}
           </div>
           <div>
-            <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}` : 'Content Manager'}</div>
-            <div className="text-xs text-[var(--text-secondary)]">CMS Editor</div>
+            <div className="text-sm font-semibold text-slate-900 dark:text-white">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}` : 'Content Manager'}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">CMS Editor</div>
           </div>
         </div>
       </div>
-      <div className="h-px bg-[var(--border-color)]" />
-      <button type="button" onClick={() => { setMenuOpen(false); toast('Profile panel coming soon.'); }}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]">
+      <div className="h-px bg-slate-200 dark:bg-slate-700" />
+      <button type="button" onClick={() => { setMenuOpen(false); navigate('/cms/profile'); }}
+        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
         <User className="h-4 w-4" /> My Profile
       </button>
       <NavLink to="/cms/settings" onClick={() => setMenuOpen(false)}
-        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]">
+        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
         <UserCircle2 className="h-4 w-4" /> CMS Settings
       </NavLink>
       <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]">
+        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
         <HelpCircle className="h-4 w-4" /> Help
       </button>
-      <div className="h-px bg-[var(--border-color)]" />
+      <div className="h-px bg-slate-200 dark:bg-slate-700" />
       <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }}
         className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30">
         <LogOut className="h-4 w-4" /> Logout
@@ -204,7 +205,7 @@ export default function CmsLayout() {
 
   return (
     <>
-    <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
+    <div className={`admin-shell min-h-screen font-['Inter',sans-serif] antialiased ${theme === 'dark' ? 'dark bg-[#0f1117] text-white' : 'bg-slate-50 text-slate-900'}`}>
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}
@@ -219,27 +220,18 @@ export default function CmsLayout() {
         onToggleCollapse={toggleSidebarCollapse}
       />
 
-      <div className={`min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-72'}`}>
+      <div className={`min-h-screen overflow-x-hidden transition-[margin-left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-64'}`}>
         {/* Glassmorphism Header */}
-        <header className="sticky top-0 z-20 bg-[var(--bg-navbar)]/80 backdrop-blur-xl border-b border-[var(--border-color)]/60">
+        <header className="sticky top-0 z-20 bg-white/80 dark:bg-[#13161f]/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6">
             {/* Left: mobile hamburger + breadcrumb + status */}
             <div className="flex min-w-0 items-center gap-3 flex-1">
               <button type="button" onClick={() => setMobileSidebarOpen(true)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-page)] lg:hidden" aria-label="Open navigation">
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden" aria-label="Open navigation">
                 <Menu className="h-5 w-5" />
               </button>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-muted)]">
-                  <a href="/cms/dashboard" className="hover:text-[#003580] transition-colors">CMS</a>
-                  <span>/</span>
-                  <span className="text-[var(--text-secondary)]">{meta.breadcrumb[meta.breadcrumb.length - 1]?.label ?? 'Dashboard'}</span>
-                  <span className="hidden sm:inline-flex items-center gap-1 ml-2 text-[11px] text-[var(--text-muted)] bg-[var(--bg-card)] rounded-full px-2.5 py-0.5">
-                    <Clock className="h-3 w-3" />
-                    {headerTime.date} · {headerTime.time}
-                  </span>
-                </div>
-                <h1 className="truncate text-lg font-bold tracking-tight text-[var(--text-primary)]">{meta.title}</h1>
+                <h1 className="truncate text-lg font-bold tracking-tight text-slate-900 dark:text-white">{meta.title}</h1>
               </div>
             </div>
 
@@ -248,7 +240,7 @@ export default function CmsLayout() {
               {/* Search */}
               <div className="relative hidden md:block" ref={searchRef}>
                 <button onClick={() => setSearchOpen(true)}
-                  className="flex h-10 w-[320px] items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 px-3.5 text-sm text-[var(--text-muted)] hover:border-slate-300 dark:hover:border-slate-600 hover:bg-[var(--bg-card)] transition-all focus:outline-none">
+                  className="flex h-10 w-[320px] items-center gap-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 px-3.5 text-sm text-slate-400 dark:text-slate-500 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all focus:outline-none">
                   <Search className="h-4 w-4" />
                   <span>Search content...</span>
                   <span className="ml-auto flex items-center gap-0.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-sm">
@@ -256,17 +248,17 @@ export default function CmsLayout() {
                   </span>
                 </button>
                 {searchOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-[420px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg shadow-slate-200/50 dark:shadow-black/30">
-                    <div className="flex items-center gap-2.5 border-b border-[var(--border-color)] px-4 py-3">
+                  <div className="absolute right-0 top-12 z-50 w-[420px] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
+                    <div className="flex items-center gap-2.5 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
                       <Search className="h-4 w-4 text-[var(--text-muted)]" />
                       <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search pages, posts, media..."
-                        className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]" autoFocus />
+                        className="w-full bg-transparent text-sm text-slate-800 dark:text-slate-200 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500" autoFocus />
                     </div>
                     <div className="p-2">
                       {filteredSuggestions.map((s, idx) => (
                         <button key={idx} onClick={() => { navigate(s.path); setSearchOpen(false); setSearchQuery(''); }}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all">
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
                           <Sparkles className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                           {s.label}
                         </button>
@@ -287,19 +279,19 @@ export default function CmsLayout() {
 
               {/* Theme toggle */}
               <button type="button" onClick={toggleTheme}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all" aria-label="Toggle dark mode">
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
                 {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
               </button>
 
               {/* Notifications */}
               <div className="relative" data-cms-notifications>
                 <button type="button" onClick={() => setNotificationOpen(v => !v)}
-                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all">
+                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
                   <Bell className="h-4.5 w-4.5" />
                   <span className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold leading-none text-white shadow-sm">4</span>
                 </button>
                 {notificationOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg shadow-slate-200/50 dark:shadow-black/30">
+                  <div className="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
                     <div className="flex items-center justify-between border-b border-[var(--border-color)] px-4 py-3">
                       <div>
                         <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
@@ -330,21 +322,21 @@ export default function CmsLayout() {
               {/* User menu */}
               <div className="relative" data-cms-menu>
                 <button type="button" onClick={() => setMenuOpen(v => !v)}
-                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:shadow transition-all">
+                  className="flex items-center gap-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 py-1.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:shadow transition-all">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-xs font-bold text-[#0B1A2E] shadow-sm">
                     {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'CM'}
                   </div>
                   <div className="hidden text-left sm:block">
-                    <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}` : 'Content Manager'}</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}` : 'Content Manager'}</div>
                     <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
                       <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-400" />
                       </span>
                       Online
                     </div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
+                  <ChevronDown className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                 </button>
                 {menuOpen && menu}
               </div>
@@ -353,7 +345,7 @@ export default function CmsLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
+        <main className="h-[calc(100dvh-4rem)] overflow-y-auto px-5 py-5 lg:px-7 lg:py-6" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
           <style>{`@keyframes cms-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <CmsRouteBoundary key={location.pathname}>
             <Outlet />

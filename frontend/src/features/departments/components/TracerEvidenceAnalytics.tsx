@@ -11,7 +11,7 @@ export const TracerEvidenceAnalytics: React.FC<TracerEvidenceAnalyticsProps> = (
     { label: 'Survey Completion Rate', value: data.surveyCompletionRate, color: 'astu-green' },
     { label: 'Response Rate by Batch', value: data.responseRateByBatch, color: 'astu-navy' },
     { label: 'Employment Outcomes', value: data.employmentOutcomes, color: 'astu-green' },
-    { label: 'Salary Progression', value: data.salaryProgression, color: 'blue-600' },
+    { label: 'Salary Progression', value: data.salaryProgression, color: 'astu-navy' },
     { label: 'Alignment Metrics', value: data.alignmentMetrics, color: 'purple-600' },
     { label: 'Geographic Distribution', value: data.geographicDistribution, color: 'orange-600' }
   ];

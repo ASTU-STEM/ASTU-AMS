@@ -12,114 +12,105 @@ import {
   DepartmentFilterState,
   ExportReport
 } from '../types/department.types';
-
-// API endpoints (to be implemented when backend is ready)
-const API_BASE = '/api/department';
+import { adminApi } from '../../admin/api/adminApi';
 
 export const departmentService = {
   // Overview metrics
   async getOverview(filters?: DepartmentFilterState): Promise<DepartmentOverview> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/overview`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // });
-    // return response.json();
-    
-    // For now, return mock data
-    return {} as DepartmentOverview;
+    try {
+      const response = await adminApi.getDepartmentOverview(filters);
+      return response || {} as DepartmentOverview;
+    } catch (error) {
+      console.error('Failed to fetch department overview:', error);
+      return {} as DepartmentOverview;
+    }
   },
 
   // Employment analytics
   async getEmploymentData(filters?: DepartmentFilterState): Promise<EmploymentData> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/employment`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // });
-    // return response.json();
-    
-    return {} as EmploymentData;
+    try {
+      const response = await adminApi.getEmploymentData(filters);
+      return response || {} as EmploymentData;
+    } catch (error) {
+      console.error('Failed to fetch employment data:', error);
+      return {} as EmploymentData;
+    }
   },
 
   // Employer feedback
   async getEmployerFeedback(filters?: DepartmentFilterState): Promise<EmployerFeedbackData> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/employer-feedback`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // });
-    // return response.json();
-    
-    return {} as EmployerFeedbackData;
+    try {
+      const response = await adminApi.getEmployerFeedback(filters);
+      return response || {} as EmployerFeedbackData;
+    } catch (error) {
+      console.error('Failed to fetch employer feedback:', error);
+      return {} as EmployerFeedbackData;
+    }
   },
 
   // Skill gap analysis
   async getSkillGapData(filters?: DepartmentFilterState): Promise<SkillGapData> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/skill-gap`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // });
-    // return response.json();
-    
-    return {} as SkillGapData;
+    try {
+      const response = await adminApi.getSkillGapData(filters);
+      return response || {} as SkillGapData;
+    } catch (error) {
+      console.error('Failed to fetch skill gap data:', error);
+      return {} as SkillGapData;
+    }
   },
 
   // Tracer survey data
   async getTracerSurveyData(filters?: DepartmentFilterState): Promise<TracerSurveyData> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/tracer-surveys`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // });
-    // return response.json();
-    
-    return {} as TracerSurveyData;
+    try {
+      const response = await adminApi.getTracerSurveyData(filters);
+      return response || {} as TracerSurveyData;
+    } catch (error) {
+      console.error('Failed to fetch tracer survey data:', error);
+      return {} as TracerSurveyData;
+    }
   },
 
   // Curriculum insights
   async getCurriculumInsights(filters?: DepartmentFilterState): Promise<CurriculumInsight> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/curriculum`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(filters)
-    // });
-    // return response.json();
-    
-    return {} as CurriculumInsight;
+    try {
+      const response = await adminApi.getCurriculumInsights(filters);
+      return response || {} as CurriculumInsight;
+    } catch (error) {
+      console.error('Failed to fetch curriculum insights:', error);
+      return {} as CurriculumInsight;
+    }
   },
 
   // Accreditation reports
   async getAccreditationReports(): Promise<AccreditationReport[]> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/accreditation-reports`);
-    // return response.json();
-    
-    return [];
+    try {
+      const response = await adminApi.getAccreditationReports();
+      return response || [];
+    } catch (error) {
+      console.error('Failed to fetch accreditation reports:', error);
+      return [];
+    }
   },
 
   // Export reports
   async getExportReports(): Promise<ExportReport[]> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/export-reports`);
-    // return response.json();
-    
-    return [];
+    try {
+      const response = await adminApi.getExportReports();
+      return response || [];
+    } catch (error) {
+      console.error('Failed to fetch export reports:', error);
+      return [];
+    }
   },
 
   // Generate/export report
   async generateReport(reportId: string, format: 'pdf' | 'excel'): Promise<Blob> {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${API_BASE}/export/${reportId}?format=${format}`);
-    // return response.blob();
-    
-    return new Blob();
+    try {
+      const response = await adminApi.generateReport(reportId, format);
+      return response || new Blob();
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+      return new Blob();
+    }
   }
 };

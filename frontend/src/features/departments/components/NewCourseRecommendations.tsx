@@ -13,9 +13,9 @@ export const NewCourseRecommendations: React.FC<NewCourseRecommendationsProps> =
   const getImpactColor = (impact: NewCourseRecommendation['expectedImpact']) => {
     switch (impact) {
       case 'high':
-        return 'text-astu-green bg-emerald-100';
+        return 'text-astu-green bg-blue-100';
       case 'medium':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-astu-navy bg-blue-100';
       case 'low':
         return 'text-gray-600 bg-gray-100';
       default:
@@ -51,7 +51,7 @@ export const NewCourseRecommendations: React.FC<NewCourseRecommendationsProps> =
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Industry Relevance</span>
-                <span className="text-blue-600 font-bold">{course.industryRelevance}%</span>
+                <span className="text-astu-navy font-bold">{course.industryRelevance}%</span>
               </div>
               <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${course.industryRelevance}%` }}></div>
@@ -69,8 +69,8 @@ export const NewCourseRecommendations: React.FC<NewCourseRecommendationsProps> =
         <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Top Priority Recommendations</h4>
         <div className="space-y-3">
           {sortedByPriority.slice(0, 3).map((course, idx) => (
-            <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
-              <div className="flex items-center gap-3">
+            <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                 <div className="w-8 h-8 rounded-full bg-astu-green/10 flex items-center justify-center">
                   <span className="text-sm font-bold text-astu-green">{idx + 1}</span>
                 </div>

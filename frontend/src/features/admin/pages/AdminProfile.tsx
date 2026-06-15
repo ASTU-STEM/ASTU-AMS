@@ -15,7 +15,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { profileService } from '../api/profile.service';
+import { profileService } from '../api/adminApi';
 
 export default function AdminProfile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -146,7 +146,7 @@ export default function AdminProfile() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#003580] to-[#004499] rounded-xl p-6 text-white shadow-md">
+      <div className="bg-gradient-to-r from-[#003580] to-[#004499] rounded-xl p-6 shadow-md" style={{ color: '#ffffff' }}>
         <div className="flex items-center gap-6">
           <div className="relative">
             {profilePhoto ? (
@@ -445,7 +445,7 @@ export default function AdminProfile() {
               </button>
               <button
                 onClick={handlePasswordChange}
-                className="flex-1 rounded-lg bg-gradient-to-r from-[#003580] to-[#004499] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                className="flex-1 rounded-lg bg-gradient-to-r from-[#003580] to-[#004499] px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity" style={{ color: '#ffffff' }}
               >
                 Change Password
               </button>
@@ -550,7 +550,7 @@ export default function AdminProfile() {
               </button>
               <button
                 onClick={handleNotificationSave}
-                className="flex-1 rounded-lg bg-gradient-to-r from-[#003580] to-[#004499] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                className="flex-1 rounded-lg bg-gradient-to-r from-[#003580] to-[#004499] px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity" style={{ color: '#ffffff' }}
               >
                 Save Settings
               </button>

@@ -30,8 +30,7 @@ import {
 } from 'lucide-react';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
-import { adminApi } from '../api/adminApi';
-import { departmentsService } from '../api/departments.service';
+import { adminApi, departmentsService } from '../api/adminApi';
 
 type DepartmentRecord = {
   id: string;
@@ -80,17 +79,17 @@ function statusBadge(status: DepartmentRecord['alumni'][number]['status']) {
 function StatCard({ label, value, icon: Icon, hint, color }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string; color?: string }) {
   const iconColor = color || '#003580';
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
-      <div className="flex items-start justify-between gap-4">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+          <p className="mt-2 text-xl font-bold tracking-tight text-slate-900">{value}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
-          <Icon className="h-6 w-6" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-4 text-sm text-slate-500">{hint}</p>
+      <p className="mt-2 text-xs text-slate-500">{hint}</p>
     </div>
   );
 }
@@ -231,19 +230,25 @@ export default function DepartmentManagement() {
   const detailOpen = Boolean(params.id);
 
   return (
-    <div className="space-y-8">
-      {/* Custom Gradient Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003580] via-[#004499] to-[#1D9E75] p-8 shadow-[0_8px_30px_rgba(0,51,128,0.3)]">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_0%,transparent_40%,rgba(232,160,32,0.08)_60%,transparent_100%)]" />
+    <div className="space-y-6">
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6"
+        style={{ background: 'linear-gradient(135deg, #001f4d 0%, #003580 50%, #00508a 100%)', boxShadow: '0 8px 30px rgba(0,53,128,0.35)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% -5%, rgba(29,158,117,0.30), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 70% at -5% 70%, rgba(232,160,32,0.10), transparent)' }} />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(29,158,117,0.15)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="relative flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
-                <GraduationCap className="h-6 w-6 text-[#E8A020]" />
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+                <GraduationCap className="h-5 w-5" style={{ color: '#E8A020' }} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">Department Management</h1>
-                <p className="mt-1 text-sm text-white/80">
+                <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>Department Management</h1>
+                <p className="mt-0.5 text-xs font-medium" style={{ color: 'rgba(255,255,255,0.78)' }}>
                   Configure department-level reporting and settings.
                 </p>
               </div>
@@ -253,16 +258,18 @@ export default function DepartmentManagement() {
             <button
               type="button"
               onClick={openAddModal}
-              className="inline-flex items-center gap-2.5 rounded-xl bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all hover:bg-white/20 hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)]"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', color: '#ffffff', backdropFilter: 'blur(8px)' }}
             >
-              <Plus className="h-4.5 w-4.5" />
+              <Plus className="h-3.5 w-3.5" />
               Add Department
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-2.5 rounded-xl bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all hover:bg-white/20 hover:shadow-[0_6px_20px_rgba(0,0,0,0.25)]"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', color: '#ffffff', backdropFilter: 'blur(8px)' }}
             >
-              <Download className="h-4.5 w-4.5" />
+              <Download className="h-3.5 w-3.5" />
               Export
             </button>
           </div>
@@ -308,7 +315,8 @@ export default function DepartmentManagement() {
 
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105 xl:col-span-2"
+            className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105 xl:col-span-2"
+            style={{ color: '#ffffff' }}
           >
             <Building2 className="h-4.5 w-4.5" />
             Sync Colleges
@@ -316,7 +324,7 @@ export default function DepartmentManagement() {
         </div>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Departments" value={`${filteredDepartments.length}`} icon={Building2} hint="Across all colleges and reporting groups" color="#003580" />
         <StatCard label="Total Graduates" value={totalGrads.toLocaleString()} icon={Users} hint="Combined across the selected department set" color="#1D9E75" />
         <StatCard label="Average Employment" value={`${avgEmployment.toFixed(1)}%`} icon={ChevronRight} hint="Average employment rate for the visible departments" color="#E8A020" />
@@ -325,74 +333,97 @@ export default function DepartmentManagement() {
 
       <div className={`grid gap-8 ${detailOpen ? 'xl:grid-cols-[minmax(0,1fr)_420px]' : 'xl:grid-cols-1'}`}>
         <section className="space-y-8">
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {filteredDepartments.map((department) => {
-              const lastRate = department.spark[department.spark.length - 1];
-              return (
-                <article
-                  key={department.id}
-                  className="group rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:scale-[1.02]"
+          {filteredDepartments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 py-16 text-center">
+              <Building2 className="h-12 w-12 text-slate-400" />
+              <h3 className="mt-4 text-sm font-semibold text-slate-900">No departments found</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {query || collegeFilter !== 'All' 
+                  ? 'Try adjusting your search or filters.' 
+                  : 'Get started by adding a new department.'}
+              </p>
+              {!(query || collegeFilter !== 'All') && (
+                <button
+                  type="button"
+                  onClick={openAddModal}
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-4 py-2 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+                  style={{ color: '#ffffff' }}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900">{department.name}</h3>
-                      <p className="mt-1 text-sm text-slate-500">{department.college}</p>
+                  <Plus className="h-4 w-4" /> Add Department
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {filteredDepartments.map((department) => {
+                const lastRate = department.spark[department.spark.length - 1];
+                return (
+                  <article
+                    key={department.id}
+                    className="group rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:scale-[1.02]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900">{department.name}</h3>
+                        <p className="mt-1 text-sm text-slate-500">{department.college}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(department)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/40 hover:bg-[#003580]/5 hover:text-[#003580]"
+                      >
+                        <PencilLine className="h-4.5 w-4.5" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => openEditModal(department)}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/40 hover:bg-[#003580]/5 hover:text-[#003580]"
-                    >
-                      <PencilLine className="h-4.5 w-4.5" />
-                    </button>
-                  </div>
 
-                  <div className="mt-5 space-y-3 text-sm text-slate-600">
-                    <div>
-                      <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Head</span>
-                      <span className="font-medium text-slate-700">{department.head}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="mt-5 space-y-3 text-sm text-slate-600">
                       <div>
-                        <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Total Graduates</span>
-                        <span className="font-semibold text-slate-900">{department.totalGraduates}</span>
+                        <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Head</span>
+                        <span className="font-medium text-slate-700">{department.head}</span>
                       </div>
-                      <div>
-                        <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Active Alumni</span>
-                        <span className="font-semibold text-slate-900">{department.activeAlumni}</span>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Total Graduates</span>
+                          <span className="font-semibold text-slate-900">{department.totalGraduates}</span>
+                        </div>
+                        <div>
+                          <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Active Alumni</span>
+                          <span className="font-semibold text-slate-900">{department.activeAlumni}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-end justify-between gap-4 pt-3">
-                      <div>
-                        <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Employment Rate</span>
-                        <span className="text-2xl font-bold text-slate-900">{department.employmentRate.toFixed(1)}%</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-14">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={department.spark.map((value, index) => ({ index, value }))}>
-                              <Line type="monotone" dataKey="value" stroke={sparkColor(lastRate)} strokeWidth={2.5} dot={false} />
-                            </LineChart>
-                          </ResponsiveContainer>
+                      <div className="flex items-end justify-between gap-4 pt-3">
+                        <div>
+                          <span className="block text-[11px] uppercase tracking-[0.14em] text-slate-400">Employment Rate</span>
+                          <span className="text-2xl font-bold text-slate-900">{department.employmentRate.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="h-14">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={department.spark.map((value, index) => ({ index, value }))}>
+                                <Line type="monotone" dataKey="value" stroke={sparkColor(lastRate)} strokeWidth={2.5} dot={false} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/admin/departments/${department.id}`)}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
-                    >
-                      View Details
-                    </button>
-                    <AdminBadge variant="neutral">{department.topSector}</AdminBadge>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/departments/${department.id}`)}
+                        className="flex-1 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+                        style={{ color: '#ffffff' }}
+                      >
+                        View Details
+                      </button>
+                      <AdminBadge variant="neutral">{department.topSector}</AdminBadge>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {detailOpen && (
@@ -512,7 +543,8 @@ export default function DepartmentManagement() {
             </button>
             <button
               type="button"
-              className="rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+              className="rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+              style={{ color: '#ffffff' }}
             >
               Save Department
             </button>
@@ -553,14 +585,16 @@ export default function DepartmentManagement() {
               ))}
             </datalist>
           </Field>
-          <Field label="Description">
-            <textarea
-              rows={4}
-              value={form.description}
-              onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-              className="w-full rounded-xl border border-slate-200/80 px-4 py-3 outline-none focus:border-[#003580] transition-all"
-            />
-          </Field>
+          <div className="md:col-span-2">
+            <Field label="Description">
+              <textarea
+                rows={4}
+                value={form.description}
+                onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                className="w-full rounded-xl border border-slate-200/80 px-4 py-3 outline-none focus:border-[#003580] transition-all"
+              />
+            </Field>
+          </div>
         </div>
       </AdminModal>
     </div>

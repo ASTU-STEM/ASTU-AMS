@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, AlertCircle, Archive, AppWindow, BarChart, BarChart2, BellRing, Blocks, Brush, Calendar, CheckCircle, ClipboardCheck, CloudCog, Code2, DatabaseBackup, Edit, FileCheck, FileCode, FileQuestion, GalleryHorizontal, Globe2, HardDrive, Handshake, History, KeyRound, Layers3, LockKeyhole, MailCheck, MenuSquare, MessageCircle, Mic, MonitorDot, Newspaper, Palette, PanelTop, Plus, RefreshCw, Search, SearchCode, Shield, ShieldAlert, Share2, SlidersHorizontal, Ticket, ThumbsUp, Upload, UserCog, UsersRound, Video, Settings, Zap, Lock, Globe, Server, Cpu, Network, ShieldCheck } from 'lucide-react';
+import { Activity, AlertCircle, Archive, AppWindow, BarChart, BarChart2, BellRing, Blocks, Brush, Calendar, CheckCircle, ClipboardCheck, CloudCog, Code2, DatabaseBackup, Edit, FileCheck, FileCode, FileQuestion, GalleryHorizontal, Globe2, HardDrive, Handshake, History, KeyRound, Layers3, LockKeyhole, MailCheck, MenuSquare, MessageCircle, Mic, MonitorDot, Newspaper, Palette, PanelTop, Plus, RefreshCw, Search, SearchCode, Shield, ShieldAlert, Share2, SlidersHorizontal, Ticket, ThumbsUp, Upload, UserCog, UsersRound, Video, Settings, Lock, Globe, Server, Cpu, Network, ShieldCheck } from "lucide-react";
 import AdminBadge from '../components/AdminBadge';
 import { adminApi } from '../api/adminApi';
 
@@ -115,27 +115,34 @@ export default function SuperAdminModules() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Custom Gradient Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003580] via-[#004499] to-[#1D9E75] p-8 shadow-[0_8px_30px_rgba(0,51,128,0.3)]">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_0%,transparent_40%,rgba(232,160,32,0.08)_60%,transparent_100%)]" />
+    <div className="space-y-6">
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6"
+        style={{ background: 'linear-gradient(135deg, #001f4d 0%, #003580 50%, #00508a 100%)', boxShadow: '0 8px 30px rgba(0,53,128,0.35)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% -5%, rgba(29,158,117,0.30), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 70% at -5% 70%, rgba(232,160,32,0.10), transparent)' }} />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(29,158,117,0.15)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="relative flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
-                <ShieldCheck className="h-6 w-6 text-[#E8A020]" />
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+                <ShieldCheck className="h-5 w-5" style={{ color: '#E8A020' }} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white tracking-tight">Super Admin Modules</h1>
-                <p className="mt-1 text-sm text-white/80">
-                  Enterprise control plane for CMS, digital assets, security, API governance, notifications, monitoring, templates, backups, and data exports.
+                <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>Super Admin Modules</h1>
+                <p className="mt-0.5 text-xs font-medium" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                  Enterprise control plane for CMS, security, API governance, notifications, and monitoring.
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              <AdminBadge variant="danger" className="border-white/20 bg-white/10 text-white">Super Admin</AdminBadge>
-              <div className="h-6 w-px bg-white/20" />
-              <span className="text-xs text-white/70">Total Modules: {dynamicGroups.reduce((acc, group) => acc + group.modules.length, 0)}</span>
+            <div className="mt-3 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#ffffff', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)' }}>
+                Super Admin
+              </span>
+              <span className="text-[10px] font-medium" style={{ color: 'rgba(255,255,255,0.70)' }}>Total Modules: {dynamicGroups.reduce((acc, group) => acc + group.modules.length, 0)}</span>
             </div>
           </div>
         </div>
@@ -176,7 +183,7 @@ export default function SuperAdminModules() {
             <button
               type="button"
               onClick={handleConfigureGroup}
-              className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-2.5 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105" style={{ color: '#ffffff' }}
             >
               <SlidersHorizontal className="h-4.5 w-4.5" />
               Configure Group

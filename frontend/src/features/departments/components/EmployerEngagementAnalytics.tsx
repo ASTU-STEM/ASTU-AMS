@@ -53,7 +53,7 @@ export const EmployerEngagementAnalytics: React.FC<EmployerEngagementAnalyticsPr
               
               <div className="flex items-center gap-2 mt-2">
                 {engagement.internshipProvided && (
-                  <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="text-xs bg-blue-100 text-blue-900 px-2 py-1 rounded-full flex items-center gap-1">
                     <Briefcase className="h-3 w-3" />
                     Internship
                   </span>
@@ -76,8 +76,8 @@ export const EmployerEngagementAnalytics: React.FC<EmployerEngagementAnalyticsPr
           <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">Top Hiring Partners</h4>
           <div className="space-y-3">
             {sortedByHiring.slice(0, 3).map((employer, idx) => (
-              <div key={idx} className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-gray-200/60 rounded-xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div key={idx} className="p-4 bg-gradient-to-br from-blue-50 to-green-50 border border-gray-200/60 rounded-xl flex items-center justify-between">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-astu-green/10 flex items-center justify-center">
                     <span className="text-sm font-bold text-astu-green">{idx + 1}</span>
                   </div>
@@ -100,7 +100,7 @@ export const EmployerEngagementAnalytics: React.FC<EmployerEngagementAnalyticsPr
           <div className="space-y-3">
             {sortedByCollaboration.slice(0, 3).map((employer, idx) => (
               <div key={idx} className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border border-gray-200/60 rounded-xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-purple-600/10 flex items-center justify-center">
                     <span className="text-sm font-bold text-purple-600">{idx + 1}</span>
                   </div>

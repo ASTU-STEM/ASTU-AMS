@@ -20,7 +20,7 @@ import {
   Users,
   X,
   MapPin,
-  Heart
+  Heart,
 } from "lucide-react";
 
 import arcImage from "../assets/images/arc.jpg";
@@ -103,7 +103,7 @@ const navSections = [
   { label: "Events", id: "events" },
   { label: "News", id: "news" },
   { label: "Success Stories", id: "success-stories" },
-  { label: "Contact", id: "contact" }
+  { label: "Contact", id: "contact" },
 ];
 
 const searchItems = [
@@ -113,7 +113,11 @@ const searchItems = [
   { label: "Go to Community section", type: "section", id: "community" },
   { label: "Go to Events section", type: "section", id: "events" },
   { label: "Go to News section", type: "section", id: "news" },
-  { label: "Go to Success Stories section", type: "section", id: "success-stories" },
+  {
+    label: "Go to Success Stories section",
+    type: "section",
+    id: "success-stories",
+  },
   { label: "Alumni Portal", type: "route", route: "/alumni" },
   { label: "Employer Portal", type: "route", route: "/employer" },
   { label: "Registrar Portal", type: "route", route: "/registrar" },
@@ -173,7 +177,9 @@ export default function LandingPage() {
     }
 
     return searchItems
-      .filter((item) => item.label.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
       .slice(0, 6);
   }, [searchQuery]);
 
@@ -217,7 +223,7 @@ export default function LandingPage() {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
 
     const nodes = document.querySelectorAll(".reveal");
@@ -235,7 +241,7 @@ export default function LandingPage() {
           }
         });
       },
-      { rootMargin: "-30% 0px -50% 0px", threshold: 0.1 }
+      { rootMargin: "-30% 0px -50% 0px", threshold: 0.1 },
     );
 
     navSections.forEach((section) => {
@@ -250,7 +256,10 @@ export default function LandingPage() {
 
   useEffect(() => {
     const closeOnOutside = (event) => {
-      if (searchWrapRef.current && !searchWrapRef.current.contains(event.target)) {
+      if (
+        searchWrapRef.current &&
+        !searchWrapRef.current.contains(event.target)
+      ) {
         setIsSearchOpen(false);
       }
     };
@@ -268,12 +277,19 @@ export default function LandingPage() {
               <GraduationCap className="h-4 w-4 text-astu-red" />
             </div>
             <div>
-              <p className="text-sm font-bold leading-none text-astu-navy">ASTU-AMS</p>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">Alumni Ecosystem</p>
+              <p className="text-sm font-bold leading-none text-astu-navy">
+                ASTU-AMS
+              </p>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
+                Alumni Ecosystem
+              </p>
             </div>
           </Link>
 
-          <div ref={searchWrapRef} className="relative hidden flex-1 max-w-xl md:block">
+          <div
+            ref={searchWrapRef}
+            className="relative hidden flex-1 max-w-xl md:block"
+          >
             <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
             <input
               value={searchQuery}
@@ -332,7 +348,11 @@ export default function LandingPage() {
               className="rounded-full p-2 hover:bg-surface-container-low xl:hidden"
               onClick={() => setIsMobileNavOpen((prev) => !prev)}
             >
-              {isMobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {isMobileNavOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
             </button>
             <button
               aria-label="profile"
@@ -392,11 +412,13 @@ export default function LandingPage() {
               <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
                 Connecting ASTU&apos;s
                 <br />
-                Excellence to the <span className="text-astu-green">Global Industry</span>
+                Excellence to the{" "}
+                <span className="text-astu-green">Global Industry</span>
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-100 md:text-base">
-                A unified gateway for alumni, employers, and departments to foster professional growth,
-                talent acquisition, and academic innovation at Adama Science and Technology University.
+                A unified gateway for alumni, employers, and departments to
+                foster professional growth, talent acquisition, and academic
+                innovation at Adama Science and Technology University.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
@@ -424,34 +446,46 @@ export default function LandingPage() {
                 <Users className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">24,000+</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Global ASTU Alumni</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
+                Global ASTU Alumni
+              </p>
             </article>
             <article className="flex flex-col items-center gap-3 border-b border-outline-variant p-8 text-center md:border-b-0 md:border-r">
               <div className="rounded-full bg-astu-red/10 p-3 text-astu-red">
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">500+</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Partner Organizations</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
+                Partner Organizations
+              </p>
             </article>
             <article className="flex flex-col items-center gap-3 p-8 text-center">
               <div className="rounded-full bg-astu-green/10 p-3 text-astu-green">
                 <LineChart className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">87%</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Employment Rate</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
+                Employment Rate
+              </p>
             </article>
           </div>
         </section>
 
-        <section id="stakeholders" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+        <section
+          id="stakeholders"
+          className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
+        >
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Stakeholder Portals</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
+              Stakeholder Portals
+            </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Dedicated interfaces for alumni, employers, departments, registrar, and administrators.
+              Dedicated interfaces for alumni, employers, departments,
+              registrar, and administrators.
             </p>
           </div>
 
-<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {stakeholders.map((item) => {
               const Icon = item.icon;
               return (
@@ -459,17 +493,21 @@ export default function LandingPage() {
                   key={item.title}
                   className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <div className={`mb-4 inline-flex rounded-lg p-3 ${item.tint}`}>
+                  <div
+                    className={`mb-4 inline-flex rounded-lg p-3 ${item.tint}`}
+                  >
                     <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <h4 className="mb-3 text-base font-semibold text-astu-navy sm:text-lg">{item.title}</h4>
+                  <h4 className="mb-3 text-base font-semibold text-astu-navy sm:text-lg">
+                    {item.title}
+                  </h4>
                   <ul className="space-y-2.5 text-sm text-on-surface-variant">
                     {item.points.map((point) => (
                       <li key={point} className="flex items-start gap-2">
                         <span>{point}</span>
                       </li>
                     ))}
-</ul>
+                  </ul>
                   <button
                     className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy hover:text-astu-red"
                     onClick={() => navigate(item.route)}
@@ -482,22 +520,34 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="impact" className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
+        <section
+          id="impact"
+          className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16"
+        >
           <article className="reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Industry-Campus Bridge</p>
-            <h3 className="mt-2 text-3xl font-bold text-astu-navy">Nurturing Innovation in Modern Laboratories</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">
+              Industry-Campus Bridge
+            </p>
+            <h3 className="mt-2 text-3xl font-bold text-astu-navy">
+              Nurturing Innovation in Modern Laboratories
+            </h3>
             <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">
-              ASTU combines rigorous engineering education with practical lab training. Through ASTU-AMS,
-              graduate outcomes and employer feedback feed directly into curriculum updates.
+              ASTU combines rigorous engineering education with practical lab
+              training. Through ASTU-AMS, graduate outcomes and employer
+              feedback feed directly into curriculum updates.
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div>
                 <p className="text-3xl font-bold text-astu-navy">12+</p>
-                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">Research Centers</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">
+                  Research Centers
+                </p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-astu-navy">80+</p>
-                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">Industry Partners</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">
+                  Industry Partners
+                </p>
               </div>
             </div>
             <button
@@ -518,12 +568,18 @@ export default function LandingPage() {
           </article>
         </section>
 
-        <section id="community" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+        <section
+          id="community"
+          className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
+        >
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Community Feed</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
+              Community Feed
+            </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay connected with alumni stories, employer announcements, and career opportunities.
-</p>
+              Stay connected with alumni stories, employer announcements, and
+              career opportunities.
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -534,31 +590,56 @@ export default function LandingPage() {
                   Share an update with the ASTU community...
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">Media</button>
-                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">Event</button>
-                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">Article</button>
+                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">
+                    Media
+                  </button>
+                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">
+                    Event
+                  </button>
+                  <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">
+                    Article
+                  </button>
                 </div>
               </div>
 
               {communityPosts.map((post) => (
-                <article key={post.name} className="reveal rounded-xl border border-outline-variant bg-white p-5">
+                <article
+                  key={post.name}
+                  className="reveal rounded-xl border border-outline-variant bg-white p-5"
+                >
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {post.image && (
-                        <img src={post.image} alt={post.name} className="h-10 w-10 rounded-full object-cover" />
+                        <img
+                          src={post.image}
+                          alt={post.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
                       )}
                       <div>
-                        <h4 className="font-semibold text-astu-navy">{post.name}</h4>
-                        <p className="text-xs text-on-surface-variant">{post.role}</p>
+                        <h4 className="font-semibold text-astu-navy">
+                          {post.name}
+                        </h4>
+                        <p className="text-xs text-on-surface-variant">
+                          {post.role}
+                        </p>
                       </div>
                     </div>
-                    <button className="rounded-md px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low">...</button>
+                    <button className="rounded-md px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low">
+                      ...
+                    </button>
                   </div>
                   <p className="text-sm text-on-surface-variant">{post.text}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">Like</button>
-                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">Comment</button>
-                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">Share</button>
+                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">
+                      Like
+                    </button>
+                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">
+                      Comment
+                    </button>
+                    <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">
+                      Share
+                    </button>
                     <button
                       className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low"
                       onClick={() => navigate("/alumni/dashboard")}
@@ -572,7 +653,9 @@ export default function LandingPage() {
 
             <aside className="space-y-4 lg:col-span-1">
               <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
-                <h4 className="text-sm font-semibold text-astu-navy">Recommended Connections</h4>
+                <h4 className="text-sm font-semibold text-astu-navy">
+                  Recommended Connections
+                </h4>
                 <div className="mt-3 space-y-3 text-sm">
                   <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
                     <span>Meta Finetec PLC</span>
@@ -584,7 +667,9 @@ export default function LandingPage() {
               </article>
 
               <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
-                <h4 className="text-sm font-semibold text-astu-navy">ASTU Trending Topics</h4>
+                <h4 className="text-sm font-semibold text-astu-navy">
+                  ASTU Trending Topics
+                </h4>
                 <ul className="mt-3 space-y-2 text-sm text-on-surface-variant">
                   <li>#EngineeringCareers</li>
                   <li>#TracerStudy2026</li>
@@ -607,21 +692,30 @@ export default function LandingPage() {
               <p className="inline-flex rounded-full bg-astu-red px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]">
                 Quality Assurance
               </p>
-              <h3 className="mt-4 text-3xl font-bold">Data-Driven Accreditation & Excellence</h3>
+              <h3 className="mt-4 text-3xl font-bold">
+                Data-Driven Accreditation & Excellence
+              </h3>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-200">
-                ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required
-                by accreditation agencies and university management.
+                ASTU-AMS provides verified tracer data, employment analytics,
+                and employer feedback required by accreditation agencies and
+                university management.
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/20 bg-white/5 p-4">
                   <Globe className="mb-2 h-5 w-5 text-astu-green" />
-                  <h4 className="text-sm font-semibold">Global Accreditation</h4>
-                  <p className="mt-1 text-xs text-slate-300">Build transparent, audited institutional reports.</p>
+                  <h4 className="text-sm font-semibold">
+                    Global Accreditation
+                  </h4>
+                  <p className="mt-1 text-xs text-slate-300">
+                    Build transparent, audited institutional reports.
+                  </p>
                 </div>
                 <div className="rounded-lg border border-white/20 bg-white/5 p-4">
                   <Handshake className="mb-2 h-5 w-5 text-astu-green" />
                   <h4 className="text-sm font-semibold">Market Alignment</h4>
-                  <p className="mt-1 text-xs text-slate-300">Align curriculum with industry expectations.</p>
+                  <p className="mt-1 text-xs text-slate-300">
+                    Align curriculum with industry expectations.
+                  </p>
                 </div>
               </div>
               <button
@@ -649,11 +743,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="events" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+        <section
+          id="events"
+          className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
+        >
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">Upcoming Alumni Events</h3>
-              <p className="mt-2 text-sm text-on-surface-variant">Networking, learning, and professional growth opportunities.</p>
+              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">
+                Upcoming Alumni Events
+              </h3>
+              <p className="mt-2 text-sm text-on-surface-variant">
+                Networking, learning, and professional growth opportunities.
+              </p>
             </div>
             <button
               className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low"
@@ -665,7 +766,10 @@ export default function LandingPage() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             {events.map((event) => (
-              <article key={event.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
+              <article
+                key={event.title}
+                className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm"
+              >
                 <img
                   alt={event.title}
                   className="h-48 w-full object-cover sm:h-52"
@@ -673,8 +777,12 @@ export default function LandingPage() {
                   onError={handleImageError}
                 />
                 <div className="p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-astu-red">Career Development</p>
-                  <h4 className="mt-2 text-lg font-semibold text-astu-navy">{event.title}</h4>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-astu-red">
+                    Career Development
+                  </p>
+                  <h4 className="mt-2 text-lg font-semibold text-astu-navy">
+                    {event.title}
+                  </h4>
                   <div className="mt-3 flex flex-col gap-2 text-xs text-on-surface-variant sm:flex-row sm:flex-wrap sm:gap-4">
                     <p className="inline-flex items-center gap-1">
                       <CalendarDays className="h-4 w-4" />
@@ -699,50 +807,97 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="news" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-surface-container-low/30">
+        <section
+          id="news"
+          className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-surface-container-low/30"
+        >
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Latest News</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
+              Latest News
+            </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay updated with the latest ASTU announcements and university news.
+              Stay updated with the latest ASTU announcements and university
+              news.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-            {['New Engineering Lab Opened', 'Research Grant Results', 'Career Expo 2026'].map((news, i) => (
-              <article key={i} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-wider text-astu-red">Announcement</p>
+            {[
+              "New Engineering Lab Opened",
+              "Research Grant Results",
+              "Career Expo 2026",
+            ].map((news, i) => (
+              <article
+                key={i}
+                className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wider text-astu-red">
+                  Announcement
+                </p>
                 <h4 className="mt-2 font-semibold text-astu-navy">{news}</h4>
-                <p className="mt-2 text-xs text-on-surface-variant">May {15 + i * 5}, 2026</p>
-                <button className="mt-3 text-xs text-astu-navy hover:underline" onClick={() => navigate("/alumni")}>Read More</button>
+                <p className="mt-2 text-xs text-on-surface-variant">
+                  May {15 + i * 5}, 2026
+                </p>
+                <button
+                  className="mt-3 text-xs text-astu-navy hover:underline"
+                  onClick={() => navigate("/alumni")}
+                >
+                  Read More
+                </button>
               </article>
             ))}
           </div>
         </section>
 
-        <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+        <section
+          id="success-stories"
+          className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16"
+        >
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Alumni Success Stories</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
+              Alumni Success Stories
+            </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
               Inspiring journeys of ASTU graduates making global impact.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
             {communityPosts.map((post, i) => (
-              <article key={i} className="reveal rounded-xl border border-outline-variant bg-white overflow-hidden shadow-sm">
-                {post.image && <img src={post.image} alt={post.name} className="h-48 w-full object-cover" onError={handleImageError} />}
+              <article
+                key={i}
+                className="reveal rounded-xl border border-outline-variant bg-white overflow-hidden shadow-sm"
+              >
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt={post.name}
+                    className="h-48 w-full object-cover"
+                    onError={handleImageError}
+                  />
+                )}
                 <div className="p-4">
                   <h4 className="font-semibold text-astu-navy">{post.name}</h4>
                   <p className="text-xs text-on-surface-variant">{post.role}</p>
                   <p className="mt-2 text-sm line-clamp-2">{post.text}</p>
-                  <button className="mt-3 text-xs text-astu-navy hover:underline" onClick={() => navigate("/alumni")}>Read Story</button>
+                  <button
+                    className="mt-3 text-xs text-astu-navy hover:underline"
+                    onClick={() => navigate("/alumni")}
+                  >
+                    Read Story
+                  </button>
                 </div>
               </article>
             ))}
           </div>
         </section>
 
-        <section id="contact" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-surface-container-low/30">
+        <section
+          id="contact"
+          className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-surface-container-low/30"
+        >
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Contact Us</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
+              Contact Us
+            </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
               Connect with the ASTU Alumni Relations Office.
             </p>
@@ -751,17 +906,27 @@ export default function LandingPage() {
             <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
               <MapPin className="h-8 w-8 mx-auto text-astu-navy mb-3" />
               <h4 className="font-semibold text-astu-navy">Address</h4>
-              <p className="text-xs text-on-surface-variant mt-1">Adama, Oromia, Ethiopia</p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                Adama, Oromia, Ethiopia
+              </p>
             </div>
             <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">phone</span>
+              <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">
+                phone
+              </span>
               <h4 className="font-semibold text-astu-navy">Phone</h4>
-              <p className="text-xs text-on-surface-variant mt-1">+251-221-110000</p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                +251-221-110000
+              </p>
             </div>
             <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">mail</span>
+              <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">
+                mail
+              </span>
               <h4 className="font-semibold text-astu-navy">Email</h4>
-              <p className="text-xs text-on-surface-variant mt-1">alumni.office@astu.edu.et</p>
+              <p className="text-xs text-on-surface-variant mt-1">
+                alumni.office@astu.edu.et
+              </p>
             </div>
           </div>
         </section>
@@ -772,45 +937,112 @@ export default function LandingPage() {
           <div>
             <h5 className="text-sm font-bold text-astu-navy">ASTU-AMS</h5>
             <p className="mt-2 text-xs text-on-surface-variant">
-              The ASTU Alumni Management System connects graduates, employers, and departments in one platform.
+              The ASTU Alumni Management System connects graduates, employers,
+              and departments in one platform.
             </p>
             <div className="mt-4 flex gap-2">
-              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">FB</button>
-              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">X</button>
-              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">IN</button>
+              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">
+                FB
+              </button>
+              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">
+                X
+              </button>
+              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">
+                IN
+              </button>
             </div>
           </div>
 
           <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">Resources</h6>
+            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">
+              Resources
+            </h6>
             <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/alumni")}>Career Portal</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/alumni")}>Tracer Survey</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/alumni")}>Mentorship</button></li>
+              <li>
+                <button
+                  className="hover:text-astu-navy"
+                  onClick={() => navigate("/alumni")}
+                >
+                  Career Portal
+                </button>
+              </li>
+              <li>
+                <button
+                  className="hover:text-astu-navy"
+                  onClick={() => navigate("/alumni")}
+                >
+                  Tracer Survey
+                </button>
+              </li>
+              <li>
+                <button
+                  className="hover:text-astu-navy"
+                  onClick={() => navigate("/alumni")}
+                >
+                  Mentorship
+                </button>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">University</h6>
+            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">
+              University
+            </h6>
             <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
-              <li><button className="hover:text-astu-navy">Official Website</button></li>
-              <li><button className="hover:text-astu-navy">Research Centers</button></li>
-              <li><button className="hover:text-astu-navy">Accreditation</button></li>
+              <li>
+                <button className="hover:text-astu-navy">
+                  Official Website
+                </button>
+              </li>
+              <li>
+                <button className="hover:text-astu-navy">
+                  Research Centers
+                </button>
+              </li>
+              <li>
+                <button className="hover:text-astu-navy">Accreditation</button>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">Support</h6>
+            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">
+              Support
+            </h6>
             <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/registrar/dashboard")}>Help Center</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/admin/dashboard")}>Privacy Policy</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/registrar/dashboard")}>Contact Us</button></li>
+              <li>
+                <button
+                  className="hover:text-astu-navy"
+                  onClick={() => navigate("/registrar/dashboard")}
+                >
+                  Help Center
+                </button>
+              </li>
+              <li>
+                <button
+                  className="hover:text-astu-navy"
+                  onClick={() => navigate("/admin/dashboard")}
+                >
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <button
+                  className="hover:text-astu-navy"
+                  onClick={() => navigate("/registrar/dashboard")}
+                >
+                  Contact Us
+                </button>
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="mx-auto mt-8 flex max-w-[1440px] flex-col justify-between gap-2 border-t border-outline-variant px-4 pt-5 text-xs text-on-surface-variant md:flex-row md:px-8">
-          <p>© 2026 Adama Science and Technology University. All rights reserved.</p>
+          <p>
+            © 2026 Adama Science and Technology University. All rights reserved.
+          </p>
           <p>Designed for ASTU ICT and Tracer Study Coordination.</p>
         </div>
       </footer>

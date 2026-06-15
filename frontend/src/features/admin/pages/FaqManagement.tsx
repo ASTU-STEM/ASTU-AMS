@@ -13,31 +13,31 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
-
-interface FaqEntry {
-  id: string;
-  question: string;
-  answer: string;
-  category: string;
-  order: number;
-}
+import { useCmsListSection } from '../hooks/useCmsSection';
+import { CmsSkeleton, CmsError } from '../components/CmsLoadingState';
+import { fetchFaqList, createFaq, updateFaq, deleteFaq } from '../services/cmsService';
+import type { FaqEntry } from '../services/cmsService';
 
 const categories = ['Account & Profile', 'Jobs & Careers', 'Mentorship', 'Documents & Transcripts', 'Tracer Surveys', 'Events & Networking', 'Technical Support', 'General'];
 
-const initialFaqs: FaqEntry[] = [
-  { id: 'FQ-01', question: 'How do I register as an alumni?', answer: 'Visit the registration page and complete the form with your student ID, personal details, and graduation information. You will receive a verification email to activate your account.', category: 'Account & Profile', order: 1 },
-  { id: 'FQ-02', question: 'How can employers post jobs?', answer: 'Employers can register through the employer portal, get verified by the admin, and then post job opportunities for ASTU alumni and students.', category: 'Jobs & Careers', order: 1 },
-  { id: 'FQ-03', question: 'What is the Tracer Study?', answer: 'The Tracer Study tracks graduate career outcomes at 6, 12, and 24-month intervals after graduation to measure employability and inform curriculum improvements.', category: 'Tracer Surveys', order: 1 },
-  { id: 'FQ-04', question: 'How do I request a transcript?', answer: 'Log into your alumni dashboard, navigate to Document Requests, select Transcript, and complete the request form. Processing takes 3-5 business days.', category: 'Documents & Transcripts', order: 1 },
-  { id: 'FQ-05', question: 'Can I update my profile information?', answer: 'Yes, log into your alumni dashboard and click Edit Profile to update your contact details, employment status, and professional information.', category: 'Account & Profile', order: 2 },
-  { id: 'FQ-06', question: 'How do I find a mentor?', answer: 'Browse the Mentorship section in your dashboard, filter by industry or expertise, and send a mentorship request to available alumni mentors.', category: 'Mentorship', order: 1 },
-  { id: 'FQ-07', question: 'How do I RSVP for events?', answer: 'Visit the Events page in your dashboard, select an event, and click RSVP. You will receive a confirmation with event details and a QR code for check-in.', category: 'Events & Networking', order: 1 },
-  { id: 'FQ-08', question: 'What technical support is available?', answer: 'You can access the Help Center from any page, submit a support ticket, or contact the ICT helpdesk at support@astu.edu.et for assistance.', category: 'Technical Support', order: 1 },
-  { id: 'FQ-09', question: 'Who can use the ASTU-AMS platform?', answer: 'The platform serves alumni, employers, department heads, registrar staff, and university administrators. Each role has tailored features and permissions.', category: 'General', order: 1 },
-];
-
 export default function FaqManagement() {
-  const [faqs, setFaqs] = useState<FaqEntry[]>(initialFaqs);
+
+  // Integration-ready: uses useCmsListSection with cmsService stubs
+  // To connect to backend, update fetchFaqList/createFaq/updateFaq/deleteFaq in cmsService.ts
+  const {
+    items: faqs,
+    isLoading,
+    error,
+    refetch,
+    add: addFaq,
+    update: updateFaqItem,
+    remove: removeFaq,
+  } = useCmsListSection<FaqEntry>(fetchFaqList, {
+    createFn: createFaq as any,
+    updateFn: updateFaq as any,
+    deleteFn: deleteFaq,
+  });
+
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -65,20 +65,17 @@ export default function FaqManagement() {
     return counts;
   }, [faqs]);
 
-  const createFaq = useCallback(() => {
+  const handleCreate = useCallback(() => {
     if (!formQuestion.trim() || !formAnswer.trim()) { toast.error('Question and answer are required'); return; }
-    const entry: FaqEntry = {
-      id: `FQ-${String(faqs.length + 1).padStart(3, '0')}`,
+    addFaq({
       question: formQuestion.trim(),
       answer: formAnswer.trim(),
       category: formCategory,
       order: faqs.filter(f => f.category === formCategory).length + 1,
-    };
-    setFaqs(prev => [...prev, entry]);
+    });
     setFormQuestion(''); setFormAnswer('');
     setShowCreate(false);
-    toast.success('FAQ entry created');
-  }, [formQuestion, formAnswer, formCategory, faqs]);
+  }, [formQuestion, formAnswer, formCategory, faqs, addFaq]);
 
   const startEdit = useCallback((faq: FaqEntry) => {
     setEditingId(faq.id);
@@ -88,18 +85,20 @@ export default function FaqManagement() {
 
   const saveEdit = useCallback((id: string) => {
     if (!editQuestion.trim() || !editAnswer.trim()) { toast.error('Question and answer are required'); return; }
-    setFaqs(prev => prev.map(f => f.id === id ? { ...f, question: editQuestion.trim(), answer: editAnswer.trim() } : f));
+    updateFaqItem(id, { question: editQuestion.trim(), answer: editAnswer.trim() });
     setEditingId(null);
     toast.success('FAQ updated');
-  }, [editQuestion, editAnswer]);
+  }, [editQuestion, editAnswer, updateFaqItem]);
 
-  const deleteFaq = useCallback((id: string) => {
+  const handleDelete = useCallback((id: string) => {
     const item = faqs.find(f => f.id === id);
-    setFaqs(prev => prev.filter(f => f.id !== id));
-    toast.success(`"${item?.question}" deleted`);
-  }, [faqs]);
+    removeFaq(id, item?.question);
+  }, [faqs, removeFaq]);
 
   const allCategories = ['All', ...categories];
+
+  if (isLoading) return <CmsSkeleton rows={6} />;
+  if (error) return <CmsError message={error} onRetry={refetch} />;
 
   return (
     <div className="space-y-6">
@@ -136,7 +135,7 @@ export default function FaqManagement() {
               className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#003580]">
               {categories.map(c => <option key={c}>{c}</option>)}
             </select>
-            <button onClick={createFaq} className="inline-flex items-center justify-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-sm">
+            <button onClick={handleCreate} className="inline-flex items-center justify-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-sm">
               <Plus className="h-4 w-4" /> Create FAQ
             </button>
           </div>
@@ -201,7 +200,7 @@ export default function FaqManagement() {
                         className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
                         <Edit3 className="h-3 w-3" /> Edit
                       </button>
-                      <button onClick={() => deleteFaq(faq.id)}
+                      <button onClick={() => handleDelete(faq.id)}
                         className="inline-flex items-center gap-1 rounded-md border border-rose-100 bg-rose-50 px-2.5 py-1.5 text-[10px] font-semibold text-rose-600 hover:bg-rose-100 transition-all">
                         <Trash2 className="h-3 w-3" /> Delete
                       </button>

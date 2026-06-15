@@ -94,7 +94,7 @@ export const SkillGapTable: React.FC<SkillGapTableProps> = ({ records, darkMode 
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Skill Gap Records</h3>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
             <div className="relative">
               <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`} />
               <input

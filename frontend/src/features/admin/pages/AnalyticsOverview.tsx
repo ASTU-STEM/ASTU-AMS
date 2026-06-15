@@ -81,15 +81,15 @@ function SectionCard({
 }: {
   title: string;
   subtitle?: string;
-  children: React.ReactNode;
   action?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-      <div className="flex items-start justify-between gap-4 mb-5">
+    <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex-1">
-          <h3 className="text-base font-bold text-slate-900">{title}</h3>
-          {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
+          <h3 className="text-sm font-bold text-slate-900">{title}</h3>
+          {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -101,15 +101,15 @@ function SectionCard({
 function SmallStat({ label, value, icon: Icon, color, meta }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; color: string; meta?: string }) {
   const iconColor = color || '#003580';
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02] cursor-pointer">
-      <div className="flex items-start justify-between gap-4">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02] cursor-pointer">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
-          {meta && <p className="mt-2 text-xs font-semibold" style={{ color: iconColor }}>{meta}</p>}
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+          <p className="mt-2 text-xl font-bold text-slate-900">{value}</p>
+          {meta && <p className="mt-1 text-xs font-semibold" style={{ color: iconColor }}>{meta}</p>}
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-lg" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
-          <Icon className="h-6 w-6" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
     </div>
@@ -459,33 +459,39 @@ export default function AnalyticsOverview() {
   };
 
   return (
-    <div className="space-y-8 relative">
-      {/* Custom Gradient Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003580] via-[#004499] to-[#1D9E75] p-8 shadow-[0_8px_30px_rgba(0,51,128,0.3)]">
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_0%,transparent_40%,rgba(232,160,32,0.08)_60%,transparent_100%)]" />
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 relative">
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6"
+        style={{ background: 'linear-gradient(135deg, #001f4d 0%, #003580 50%, #00508a 100%)', boxShadow: '0 8px 30px rgba(0,53,128,0.35)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% -5%, rgba(29,158,117,0.30), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 70% at -5% 70%, rgba(232,160,32,0.10), transparent)' }} />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(29,158,117,0.15)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-4">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
-                <BarChart3 className="h-6 w-6 text-[#E8A020]" />
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+                <BarChart3 className="h-5 w-5" style={{ color: '#E8A020' }} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-white">Analytics Overview</h1>
-                <p className="mt-1 text-sm text-white/80">System-wide intelligence center for alumni outcomes, skills, and employer feedback</p>
+                <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>Analytics Overview</h1>
+                <p className="mt-0.5 text-xs font-medium" style={{ color: 'rgba(255,255,255,0.78)' }}>System-wide intelligence center for alumni outcomes, skills, and employer feedback</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-white">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold" style={{ color: '#ffffff' }}>
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Insights Live
             </div>
           </div>
         </div>
-        <div className="relative mt-6 pt-5 border-t border-white/20 flex items-center gap-8 text-sm text-white/80">
-          <span className="flex items-center gap-2 font-medium"><RefreshCw className="w-4.5 h-4.5" /> Last sync: 2 min ago</span>
-          <span className="flex items-center gap-2 font-medium"><Database className="w-4.5 h-4.5" /> {analyticsData ? 'Live data' : 'Cached data'}</span>
-          <span className="flex items-center gap-2 font-medium"><Sparkles className="w-4.5 h-4.5" /> AI-powered insights</span>
+        <div className="relative mt-4 pt-4 border-t border-white/20 flex items-center gap-6 text-xs" style={{ color: 'rgba(255,255,255,0.78)' }}>
+          <span className="flex items-center gap-1.5 font-medium"><RefreshCw className="w-3.5 h-3.5" /> Last sync: 2 min ago</span>
+          <span className="flex items-center gap-1.5 font-medium"><Database className="w-3.5 h-3.5" /> {analyticsData ? 'Live data' : 'Cached data'}</span>
+          <span className="flex items-center gap-1.5 font-medium"><Sparkles className="w-3.5 h-3.5" /> AI-powered insights</span>
         </div>
       </div>
 
@@ -547,7 +553,7 @@ export default function AnalyticsOverview() {
             <button
               type="button"
               onClick={printDashboard}
-              className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-md hover:brightness-110 transition-all hover:shadow-lg hover:scale-105"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-md hover:brightness-110 transition-all hover:shadow-lg hover:scale-105" style={{ color: '#ffffff' }}
             >
               <Printer className="h-4.5 w-4.5" />
               Print Dashboard
@@ -574,7 +580,7 @@ export default function AnalyticsOverview() {
       )}
 
       {/* Stats Cards */}
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {analyticsLoading ? (
           Array.from({ length: 4 }).map((_, index) => (
             <div key={`skeleton-card-${index}`} className="rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
@@ -925,7 +931,7 @@ export default function AnalyticsOverview() {
             <button 
               type="button" 
               onClick={() => generateReport('eta-tracer-study')}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-md hover:brightness-110 transition-all hover:shadow-lg hover:scale-105"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-md hover:brightness-110 transition-all hover:shadow-lg hover:scale-105" style={{ color: '#ffffff' }}
             >
               <Printer className="h-4 w-4" />
               Generate PDF
@@ -945,7 +951,7 @@ export default function AnalyticsOverview() {
             <button 
               type="button" 
               onClick={() => generateReport('department-performance')}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold text-white shadow-md hover:brightness-110 transition-all hover:shadow-lg hover:scale-105"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-md hover:brightness-110 transition-all hover:shadow-lg hover:scale-105" style={{ color: '#ffffff' }}
             >
               <Printer className="h-4 w-4" />
               Generate PDF

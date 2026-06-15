@@ -1,5 +1,8 @@
-/* ── Import additional animation styles (must be first) ── */
-@import "./styles/animations.css";
+﻿@import "./styles/animations.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════
    GLOBAL SPACING SCALE & THEME TOKENS (4px base unit)
@@ -84,8 +87,8 @@ html {
 
 body {
   font-family: "Hanken Grotesk", sans-serif;
-  background: var(--bg-page);
-  color: var(--text-primary);
+  background: var(--bg-page) !important;
+  color: var(--text-primary) !important;
   overflow-x: hidden;
 }
 
@@ -367,8 +370,8 @@ a {
 .admin-shell main section,
 .admin-shell main article,
 .admin-shell main .admin-card,
-.admin-shell main .shadow-\[0_1px_3px_rgba\(0,0,0,0.06\)\],
-.admin-shell main .shadow-\[0_4px_16px_rgba\(0,0,0,0.08\)\] {
+.admin-shell main [class*="shadow-\[0_1px_3px"],
+.admin-shell main [class*="shadow-\[0_4px_16px"] {
   animation: admin-float-in 260ms ease-out both;
 }
 
@@ -390,45 +393,123 @@ a {
 
 /* Admin shell dark mode */
 .dark .admin-card {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-}
-
-.dark .admin-shell .bg-white {
-  background-color: var(--bg-card) !important;
-}
-
-.dark .admin-shell .bg-slate-50 {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-}
-
-.dark .admin-shell .bg-slate-100 {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-}
-
-.dark .admin-shell .border-slate-200,
-.dark .admin-shell .border-slate-100 {
+  background: var(--bg-card) !important;
   border-color: var(--border-color) !important;
 }
 
-.dark .admin-shell .text-slate-900,
-.dark .admin-shell .text-slate-800 {
+/* Gradient card fixes: turn white/light gradients into card backgrounds */
+.dark .admin-shell main .from-white,
+.dark .admin-shell main .from-slate-50,
+.dark .admin-shell main .from-slate-100,
+.dark .admin-shell main .to-white,
+.dark .admin-shell main .to-slate-50,
+.dark .admin-shell main .to-slate-50\/50,
+.dark .admin-shell main .to-slate-100 {
+  --tw-gradient-from: var(--bg-card) !important;
+  --tw-gradient-to: var(--tw-gradient-from) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+  background-color: var(--bg-card) !important;
+}
+
+.dark .admin-shell main .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+.dark .admin-shell main .bg-slate-50 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dark .admin-shell main .bg-slate-100 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .admin-shell main .border-slate-200,
+.dark .admin-shell main .border-slate-200\/80,
+.dark .admin-shell main .border-slate-100,
+.dark .admin-shell main .border-gray-250,
+.dark .admin-shell main .border-gray-200,
+.dark .admin-shell main .border-gray-200\/60,
+.dark .admin-shell main .border-gray-150,
+.dark .admin-shell main .border-gray-100 {
+  border-color: var(--border-color) !important;
+}
+
+.dark .admin-shell main .text-slate-900,
+.dark .admin-shell main .text-slate-800,
+.dark .admin-shell main .text-gray-900,
+.dark .admin-shell main .text-gray-800,
+.dark .admin-shell main .text-slate-955,
+.dark .admin-shell main .text-slate-950,
+.dark .admin-shell main .text-gray-950 {
   color: var(--text-primary) !important;
 }
 
-.dark .admin-shell .text-slate-700,
-.dark .admin-shell .text-slate-600 {
+.dark .admin-shell main .text-slate-700,
+.dark .admin-shell main .text-slate-600,
+.dark .admin-shell main .text-slate-550,
+.dark .admin-shell main .text-gray-700,
+.dark .admin-shell main .text-gray-605,
+.dark .admin-shell main .text-gray-600 {
   color: var(--text-secondary) !important;
 }
 
-.dark .admin-shell .text-slate-500,
-.dark .admin-shell .text-slate-400 {
+.dark .admin-shell main .text-slate-500,
+.dark .admin-shell main .text-slate-400,
+.dark .admin-shell main .text-gray-500,
+.dark .admin-shell main .text-gray-400 {
   color: var(--text-muted) !important;
 }
 
-.dark .admin-shell .shadow-\[0_1px_3px_rgba\(0,0,0,0.06\)\],
-.dark .admin-shell .shadow-\[0_4px_16px_rgba\(0,0,0,0.08\)\] {
+.dark .admin-shell main [class*="shadow-\[0_1px_3px"],
+.dark .admin-shell main [class*="shadow-\[0_4px_16px"] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* SVG Chart Dark Mode Adjustments */
+.dark .admin-shell .recharts-cartesian-grid-horizontal line,
+.dark .admin-shell .recharts-cartesian-grid-vertical line {
+  stroke: var(--border-color) !important;
+  opacity: 0.5;
+}
+
+.dark .admin-shell .recharts-text.recharts-cartesian-axis-tick-value {
+  fill: var(--text-secondary) !important;
+}
+
+.dark .admin-shell .recharts-label-list text,
+.dark .admin-shell .recharts-label text {
+  fill: var(--text-primary) !important;
+}
+
+.dark .admin-shell .recharts-legend-item-text {
+  color: var(--text-secondary) !important;
+}
+
+.dark .admin-shell .recharts-default-tooltip {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Make custom gradient headers responsive on mobile devices */
+.admin-shell main > div > div:first-child > div.flex {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+}
+
+.admin-shell main > div > div:first-child > div.flex > div:last-child {
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+@media (min-width: 640px) {
+  .admin-shell main > div > div:first-child > div.flex {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+  }
 }
 
 .dark table tr:hover {
@@ -754,3 +835,446 @@ a {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   SCOPED DEPARTMENT PORTAL PREMIUM UI/UX COMPONENTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Smooth fade-in overlay for the tab transition */
+.dept-tab-transition {
+  animation: dept-fade-slide 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dept-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glassmorphism containers */
+.dept-glass-card {
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dark .dept-glass-card {
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dept-glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 51, 102, 0.08);
+  border-color: rgba(0, 51, 102, 0.2);
+}
+
+.dark .dept-glass-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Premium KPI widget */
+.dept-kpi-glowing {
+  position: relative;
+  overflow: hidden;
+}
+
+.dept-kpi-glowing::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.dept-kpi-glowing:hover::after {
+  transform: translateX(100%);
+}
+
+/* Premium Buttons */
+.dept-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.dept-btn-primary {
+  background: linear-gradient(135deg, #003366, #002244);
+  color: #ffffff;
+  border: 1px solid rgba(0, 51, 102, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.12);
+}
+
+.dept-btn-primary:hover {
+  background: linear-gradient(135deg, #004488, #003366);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 51, 102, 0.2);
+}
+
+.dept-btn-success {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+}
+
+.dept-btn-success:hover {
+  background: linear-gradient(135deg, #34D399, #10B981);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
+}
+
+.dept-btn-secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.dark .dept-btn-secondary {
+  background: rgba(30, 41, 59, 0.8);
+  color: #e2e8f0;
+  border: 1px solid #334155;
+}
+
+.dept-btn-secondary:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.dark .dept-btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: #475569;
+}
+
+/* Custom input controls */
+.dept-input, .dept-select {
+  border-radius: 12px !important;
+  border: 1px solid #d1d5db !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  padding: 10px 16px !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s ease-in-out !important;
+  color: #1f2937 !important;
+}
+
+.dark .dept-input, .dark .dept-select {
+  border: 1px solid #334155 !important;
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  color: #f3f4f6 !important;
+}
+
+.dept-input:focus, .dept-select:focus {
+  border-color: #003366 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.15) !important;
+}
+
+.dark .dept-input:focus, .dark .dept-select:focus {
+  border-color: #10B981 !important;
+  background-color: rgba(15, 23, 42, 1) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Premium Tables */
+.dept-table-wrapper {
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.dark .dept-table-wrapper {
+  border-color: #334155;
+  background: #0f172a;
+}
+
+.dept-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dept-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 14px 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.dark .dept-table th {
+  background: #1e293b;
+  color: #94a3b8;
+  border-bottom-color: #334155;
+}
+
+.dept-table td {
+  padding: 16px 20px;
+  font-size: 0.875rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.dark .dept-table td {
+  color: #cbd5e1;
+  border-bottom-color: #1e293b;
+}
+
+.dept-table tr:hover td {
+  background-color: rgba(0, 51, 102, 0.02);
+}
+
+.dark .dept-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Glowing Neon Badges */
+.dept-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dept-badge-success {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.dark .dept-badge-success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.dept-badge-danger {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.dark .dept-badge-danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.dept-badge-warning {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.dark .dept-badge-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.dept-badge-info {
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.dark .dept-badge-info {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+
+
+/* -----------------------------------------------------------
+   CMS LAYOUT � LIGHT MODE THEME FIXES
+   The redesigned CMS pages use dark-first styles. These rules
+   neutralize those dark backgrounds in light mode.
+   ----------------------------------------------------------- */
+
+/* Light mode: override always-dark glassmorphism panels */
+.light .admin-shell main .bg-\[#1a1f35\]\/80,
+.light .admin-shell main .bg-\[#1a1f35\]\/90 {
+  background-color: #ffffff !important;
+}
+
+.light .admin-shell main .bg-\[#12172a\] {
+  background-color: #f8fafc !important;
+}
+
+/* Light mode: border-white/X -> real border color */
+.light .admin-shell main [class*='border-white/'] {
+  border-color: #e8edf5 !important;
+}
+
+/* Light mode: text-white on non-gradient backgrounds */
+.light .admin-shell main .space-y-6 .text-white\/90,
+.light .admin-shell main .space-y-6 .text-white {
+  color: #1e293b;
+}
+.light .admin-shell main .space-y-6 .text-slate-400,
+.light .admin-shell main .space-y-6 .text-slate-500 {
+  color: #64748b;
+}
+
+/* Light mode: row/list items */
+.light .admin-shell main .bg-white\/3,
+.light .admin-shell main .bg-white\/4,
+.light .admin-shell main .bg-white\/5,
+.light .admin-shell main .bg-white\/6,
+.light .admin-shell main .bg-white\/8 {
+  background-color: #f8fafc !important;
+}
+
+/* Light mode: stat cards */
+.light .admin-shell main .cg-stat-card,
+.light .admin-shell main .ew-stat,
+.light .admin-shell main .aw-stat,
+.light .admin-shell main .seo-stat,
+.light .admin-shell main .ct-stat {
+  background: #ffffff !important;
+  border-color: #e8edf5 !important;
+  box-shadow: 0 1px 4px rgba(0,53,128,0.06) !important;
+}
+
+/* Light mode: stat number text */
+.light .admin-shell main .cg-stat-card .text-white,
+.light .admin-shell main .ew-stat .text-white,
+.light .admin-shell main .aw-stat .text-white,
+.light .admin-shell main .seo-stat .text-white,
+.light .admin-shell main .ct-stat .text-white {
+  color: #1e293b !important;
+}
+
+/* Light mode: input fields */
+.light .admin-shell main .cms-input,
+.light .admin-shell main .cg-input,
+.light .admin-shell main .gm-input,
+.light .admin-shell main .ew-input,
+.light .admin-shell main .seo-input,
+.light .admin-shell main .ct-input,
+.light .admin-shell main .aw-textarea {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+/* Gradient headers always stay with white text on the gradient background */
+.admin-shell main [class*='from-\[#003580\]'] h1,
+.admin-shell main [class*='from-\[#003580\]'] h2,
+.admin-shell main [class*='from-\[#003580\]'] p {
+  color: inherit;
+}
+
+
+/* -----------------------------------------------------------
+   CMS LIGHT MODE � COMPREHENSIVE PHASE-2 FIX
+   CMS pages are dark-first. When .admin-shell lacks .dark,
+   we neutralize every hardcoded dark color.
+   ----------------------------------------------------------- */
+
+/* 1. Panel containers: bg-[#1a1f35]/80|/90 ? white */
+.admin-shell:not(.dark) main [class*="1a1f35"] {
+  background-color: #ffffff !important;
+}
+
+/* 2. Sticky-bar / modal base: bg-[#12172a] ? light */
+.admin-shell:not(.dark) main [class*="12172a"] {
+  background-color: #f8fafc !important;
+}
+
+/* 3. Borders inside panels: border-white/X ? slate-200 */
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="border-white"] {
+  border-color: #e2e8f0 !important;
+}
+.admin-shell:not(.dark) main [class*="12172a"] [class*="border-white"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* 4. Text inside panels: text-white ? dark slate */
+.admin-shell:not(.dark) main [class*="1a1f35"] .text-white {
+  color: #1e293b !important;
+}
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="text-white\/"] {
+  color: #334155 !important;
+}
+.admin-shell:not(.dark) main [class*="12172a"] .text-white {
+  color: #1e293b !important;
+}
+.admin-shell:not(.dark) main [class*="12172a"] [class*="text-white\/"] {
+  color: #475569 !important;
+}
+
+/* 4b. Exception: keep text WHITE on gradient/solid colored buttons inside panels */
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="from-[#003580]"].text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="from-[#003580]"] .text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-[#003580]"].text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-gradient"].text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-rose-5"].text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-amber-5"].text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-emerald-5"].text-white,
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-blue-5"].text-white {
+  color: #ffffff !important;
+}
+
+/* 5. Row/item backgrounds inside panels: bg-white/X ? pale slate */
+.admin-shell:not(.dark) main [class*="1a1f35"] [class*="bg-white\/"] {
+  background-color: #f8fafc !important;
+}
+
+/* 6. Stat-card named classes (siblings of panels, not descendants) */
+.admin-shell:not(.dark) main .cg-stat-card,
+.admin-shell:not(.dark) main .ew-stat,
+.admin-shell:not(.dark) main .aw-stat,
+.admin-shell:not(.dark) main .seo-stat,
+.admin-shell:not(.dark) main .ct-stat {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(0,53,128,0.08) !important;
+}
+.admin-shell:not(.dark) main .cg-stat-card .text-white,
+.admin-shell:not(.dark) main .ew-stat .text-white,
+.admin-shell:not(.dark) main .aw-stat .text-white,
+.admin-shell:not(.dark) main .seo-stat .text-white,
+.admin-shell:not(.dark) main .ct-stat .text-white {
+  color: #1e293b !important;
+}
+
+/* 7. Hover shadows � lighter for light mode */
+.admin-shell:not(.dark) main .cg-stat-card:hover,
+.admin-shell:not(.dark) main .ew-stat:hover,
+.admin-shell:not(.dark) main .aw-stat:hover,
+.admin-shell:not(.dark) main .seo-stat:hover,
+.admin-shell:not(.dark) main .ct-stat:hover {
+  box-shadow: 0 8px 30px rgba(0,53,128,0.12) !important;
+  border-color: #cbd5e1 !important;
+}
+.admin-shell:not(.dark) main .aw-hover:hover,
+.admin-shell:not(.dark) main .seo-hover:hover,
+.admin-shell:not(.dark) main .gm-hover:hover,
+.admin-shell:not(.dark) main .cg-card-hover:hover {
+  box-shadow: 0 8px 24px rgba(0,53,128,0.12) !important;
+}
