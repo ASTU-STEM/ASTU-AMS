@@ -11,6 +11,13 @@ export class PrismaGraduateRecordRepository implements IGraduateRecordRepository
     return record as any as GraduateRecord;
   }
 
+  async findAll(): Promise<GraduateRecord[]> {
+    const records = await prisma.registrarStudent.findMany({
+      orderBy: { importedAt: 'desc' },
+    });
+    return records as any[] as GraduateRecord[];
+  }
+
   async upsertMany(records: Omit<GraduateRecord, 'id'>[]): Promise<{ added: number; updated: number }> {
     let added = 0;
     let updated = 0;

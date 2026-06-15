@@ -10,6 +10,8 @@ import { PrismaRegistrarAlumniRepository } from '../infrastructure/repositories/
 
 import { ImportGraduateData } from '../application/use-cases/ImportGraduateData';
 import { GetGraduateRecord, VerifyStudentId } from '../application/use-cases/GraduateLookups';
+import { GetAllGraduateRecords } from '../application/use-cases/GetAllGraduateRecords';
+import { GetPendingVerifications } from '../application/use-cases/GetPendingVerifications';
 import { ManageAlumniStatus } from '../application/use-cases/ManageAlumniStatus';
 import { FetchGraduatesByAPI } from '../application/use-cases/FetchGraduatesByAPI';
 
@@ -94,6 +96,37 @@ export class RegistrarController {
       const useCase = new GetGraduateRecord(gradRepo);
       const record = await useCase.execute(req.params.studentId);
       return sendSuccess(res, 'Fetched registrar student record.', record);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async getAllGraduates(req: Request, res: Response, next: NextFunction) {
+    try {
+      const useCase = new GetAllGraduateRecords(gradRepo);
+      const records = await useCase.execute();
+      return sendSuccess(res, 'Fetched all graduate records.', records);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async getVerifications(req: Request, res: Response, next: NextFunction) {
+    try {
+      const useCase = new GetPendingVerifications(alumniRepo);
+      const pendingAlumni = await useCase.execute();
+      
+      // Map AlumniProfile to the VerificationRequest format expected by frontend
+      const verifications = pendingAlumni.map((alumni: any) => ({
+        id: alumni.id,
+        studentId: alumni.studentId,
+        fullName: alumni.fullName,
+        email: alumni.email,
+        status: alumni.status,
+        createdAt: alumni.createdAt,
+      }));
+      
+      return sendSuccess(res, 'Fetched pending verifications.', verifications);
     } catch (err: any) {
       next(err);
     }

@@ -22,6 +22,8 @@ router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGrad
 router.post('/fetch-graduates/current-and-previous', asyncHandler(RegistrarController.fetchCurrentAndPreviousGraduates));
 
 router.get('/students/:studentId', asyncHandler(RegistrarController.getStudentRecord));
+router.get('/graduates', asyncHandler(RegistrarController.getAllGraduates));
+router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
 
 // Document Requests (Manual verification)
 router.get('/document-requests', asyncHandler(RegistrarController.getDocumentRequests));
