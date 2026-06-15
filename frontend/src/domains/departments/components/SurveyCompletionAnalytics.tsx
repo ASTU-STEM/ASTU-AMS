@@ -35,7 +35,7 @@ export const SurveyCompletionAnalytics: React.FC<SurveyCompletionAnalyticsProps>
           <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Highest Performing</h4>
           <div className="space-y-3">
             {sortedData.slice(0, 3).map((item, idx) => (
-              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
                 <div className="flex justify-between items-start mb-2">
                   <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{item.category}</span>
                   <div className="flex items-center gap-1">
@@ -50,7 +50,7 @@ export const SurveyCompletionAnalytics: React.FC<SurveyCompletionAnalyticsProps>
                   <span className="text-astu-green font-bold">{item.completionRate}%</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                  <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full transition-all duration-500" style={{ width: `${item.completionRate}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-green to-blue-400 h-full rounded-full transition-all duration-500" style={{ width: `${item.completionRate}%` }}></div>
                 </div>
               </div>
             ))}

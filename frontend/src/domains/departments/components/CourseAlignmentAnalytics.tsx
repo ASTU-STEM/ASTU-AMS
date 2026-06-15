@@ -46,7 +46,7 @@ export const CourseAlignmentAnalytics: React.FC<CourseAlignmentAnalyticsProps> =
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Skill Coverage</span>
-                <span className="text-blue-600 font-bold">{course.skillCoverage}%</span>
+                <span className="text-astu-navy font-bold">{course.skillCoverage}%</span>
               </div>
               <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${course.skillCoverage}%` }}></div>
@@ -90,7 +90,7 @@ export const CourseAlignmentAnalytics: React.FC<CourseAlignmentAnalyticsProps> =
           <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Highest Industry Relevance</h4>
           <div className="space-y-3">
             {sortedByIndustry.slice(0, 3).map((course, idx) => (
-              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{course.course}</span>
                   <div className="flex items-center gap-1">
@@ -102,7 +102,7 @@ export const CourseAlignmentAnalytics: React.FC<CourseAlignmentAnalyticsProps> =
                   <span className="text-astu-green font-bold">{course.industryRelevance}%</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                  <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full" style={{ width: `${course.industryRelevance}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-green to-blue-400 h-full rounded-full" style={{ width: `${course.industryRelevance}%` }}></div>
                 </div>
               </div>
             ))}

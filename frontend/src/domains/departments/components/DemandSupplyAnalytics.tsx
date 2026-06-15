@@ -40,7 +40,7 @@ export const DemandSupplyAnalytics: React.FC<DemandSupplyAnalyticsProps> = ({ da
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Coverage</span>
-                <span className="text-blue-600 font-bold">{skill.coverageLevel}%</span>
+                <span className="text-astu-navy font-bold">{skill.coverageLevel}%</span>
               </div>
               <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${skill.coverageLevel}%` }}></div>
@@ -87,7 +87,7 @@ export const DemandSupplyAnalytics: React.FC<DemandSupplyAnalyticsProps> = ({ da
           <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Highest Demand Skills</h4>
           <div className="space-y-3">
             {sortedByDemand.slice(0, 3).map((skill, idx) => (
-              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{skill.skill}</span>
                   <div className="flex items-center gap-1">
@@ -102,7 +102,7 @@ export const DemandSupplyAnalytics: React.FC<DemandSupplyAnalyticsProps> = ({ da
                   <span className="text-astu-green font-bold">{skill.demandLevel}%</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                  <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full" style={{ width: `${skill.demandLevel}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-green to-blue-400 h-full rounded-full" style={{ width: `${skill.demandLevel}%` }}></div>
                 </div>
               </div>
             ))}

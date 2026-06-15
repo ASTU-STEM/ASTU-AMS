@@ -26,7 +26,8 @@ export default function AdminBadge({
   label,
   variant = 'default',
   className = '',
-}: AdminBadgeProps) {
+  style,
+}: AdminBadgeProps & { style?: React.CSSProperties }) {
   const content = label ?? children;
 
   return (
@@ -36,6 +37,7 @@ export default function AdminBadge({
         variantClasses[variant],
         className,
       ].join(' ')}
+      style={style}
     >
       {content}
     </span>

@@ -193,30 +193,30 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-      <div className="hidden bg-astu-navy text-white md:block">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
-          <div className="flex items-center gap-4 text-[13px] text-white/80">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
+      <div className="hidden bg-[#003580] text-white md:block">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1.5">
+          <div className="flex items-center gap-4 text-xs text-white/80">
             <a
               href="mailto:alumni.office@astu.edu.et"
-              className="hover:text-white transition-colors font-medium"
+              className="hover:text-white transition-colors"
             >
               alumni.office@astu.edu.et
             </a>
             <span className="text-white/20">|</span>
-            <span className="font-medium">+251-221-110000</span>
+            <span>+251-221-110000</span>
           </div>
-          <div className="flex items-center gap-3 text-[13px]">
+          <div className="flex items-center gap-3 text-xs">
             <Link
               to="/login"
-              className="text-white/80 hover:text-white transition-colors font-medium"
+              className="text-white/80 hover:text-white transition-colors"
             >
               Login
             </Link>
             <span className="text-white/20">|</span>
             <Link
               to="/register"
-              className="text-white/80 hover:text-white transition-colors font-medium"
+              className="text-white/80 hover:text-white transition-colors"
             >
               Register
             </Link>
@@ -225,20 +225,18 @@ export default function Navbar() {
       </div>
 
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-3 py-3 group">
-          <div className="flex items-center gap-2">
-            <div className="rounded-lg border border-outline-variant bg-white p-0.5 shadow-sm overflow-hidden">
-              <img
-                src={astuLogo}
-                alt="ASTU"
-                className="h-9 w-9 rounded-md object-cover"
-              />
-            </div>
+        <Link to="/" className="flex items-center gap-3 py-4">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={astuLogo}
+              alt="ASTU"
+              className="h-10 w-10 rounded-lg object-contain"
+            />
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-astu-navy leading-tight">
+              <p className="text-base font-bold text-[#003580] leading-tight">
                 ASTU-AMS
               </p>
-              <p className="text-[9px] uppercase tracking-[0.2em] text-astu-green font-semibold">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#1D9E75] font-semibold">
                 Alumni Management System
               </p>
             </div>
@@ -252,7 +250,7 @@ export default function Navbar() {
               <button
                 key={item.sectionId || item.route}
                 onClick={() => handleNavClick(item)}
-                className="relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide text-on-surface-variant hover:text-astu-navy transition-colors duration-200"
+                className="flex items-center gap-2 px-4 py-4 text-sm font-medium text-slate-600 hover:text-[#003580] transition-colors"
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -271,37 +269,37 @@ export default function Navbar() {
                 onMouseLeave={handleMegaLeave}
               >
                 <button
-                  className={`relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide transition-colors duration-200 ${
+                  className={`flex items-center gap-2 px-4 py-4 text-sm font-medium transition-colors ${
                     isOpen
-                      ? "text-astu-navy"
-                      : "text-on-surface-variant hover:text-astu-navy"
+                      ? "text-[#003580]"
+                      : "text-slate-600 hover:text-[#003580]"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                   {menu.label}
                   <HiChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                    className={`h-4 w-4 transition-transform ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="absolute left-0 top-full animate-[mega-menu-fade-in_150ms_ease-out_both]">
-                    <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl min-w-[240px]">
-                      <div className="p-2">
+                  <div className="absolute left-0 top-full">
+                    <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg min-w-[240px]">
+                      <div className="p-1">
                         {menu.items.map((item) => (
                           <button
                             key={item.sectionId}
                             onClick={() => handleMegaItemClick(item.sectionId)}
-                            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-astu-navy/5"
+                            className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-left transition-colors hover:bg-slate-50"
                           >
                             <div>
-                              <p className="text-sm font-bold text-astu-navy">
+                              <p className="text-sm font-medium text-slate-900">
                                 {item.label}
                               </p>
                               {item.description && (
-                                <p className="text-xs text-on-surface-variant/70 mt-0.5">
+                                <p className="text-xs text-slate-500 mt-0.5">
                                   {item.description}
                                 </p>
                               )}
@@ -317,9 +315,9 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div ref={searchWrapRef} className="relative hidden lg:block">
-            <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant" />
+            <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               value={searchQuery}
               onChange={(e) => {
@@ -329,19 +327,19 @@ export default function Navbar() {
               onFocus={() => setIsSearchOpen(true)}
               onKeyDown={handleSearchKeyDown}
               onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
-              className="w-48 rounded-full border border-outline-variant bg-surface-container-low py-2.5 pl-8 pr-3 text-sm focus:w-60 focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all placeholder:text-on-surface-variant/60"
-              placeholder="Search sections..."
+              className="w-48 rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm focus:w-64 focus:border-[#003580] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003580] transition-all placeholder:text-slate-400"
+              placeholder="Search..."
               type="text"
             />
             {isSearchOpen && filteredSearch.length > 0 && (
-              <div className="absolute right-0 top-11 w-64 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl animate-[mega-menu-fade-in_150ms_ease-out_both]">
+              <div className="absolute right-0 top-11 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}
                     onClick={() => handleSearchSelect(item)}
-                    className="flex w-full items-center border-b border-outline-variant/50 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-astu-navy/5 transition-colors"
+                    className="flex w-full items-center border-b border-slate-100 px-4 py-3 text-left text-sm last:border-b-0 transition-colors hover:bg-slate-50"
                   >
-                    <span className="font-semibold text-on-surface">
+                    <span className="font-medium text-slate-700">
                       {item.label}
                     </span>
                   </button>
@@ -352,7 +350,7 @@ export default function Navbar() {
 
           <button
             aria-label="announcements"
-            className="relative rounded-full p-2 text-on-surface-variant hover:bg-astu-navy/5 hover:text-astu-navy transition-all"
+            className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-[#003580] transition-colors"
             onClick={() => setIsAnnouncementOpen(true)}
             title="Announcements"
           >
@@ -361,14 +359,14 @@ export default function Navbar() {
 
           <Link
             to="/register"
-            className="hidden sm:inline-flex rounded-lg bg-astu-navy px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-astu-navy/90 hover:shadow-lg"
+            className="hidden sm:inline-flex rounded-lg bg-[#003580] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#004499]"
           >
             Join Network
           </Link>
 
           <button
             aria-label="mobile navigation"
-            className="rounded-full p-2 text-on-surface-variant hover:bg-surface-container-low lg:hidden"
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
             onClick={() => setIsMobileNavOpen((prev) => !prev)}
           >
             {isMobileNavOpen ? (
@@ -381,35 +379,35 @@ export default function Navbar() {
       </div>
 
       {isMobileNavOpen && (
-        <div className="border-t border-outline-variant bg-white px-4 py-4 lg:hidden shadow-lg">
+        <div className="border-t border-slate-200 bg-white px-4 py-4 lg:hidden">
           {/* Mobile Quick Action Headers */}
-          <div className="mb-4 pb-4 border-b border-outline-variant/60">
+          <div className="mb-4 pb-4 border-b border-slate-200">
             {!user ? (
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   to="/login"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="rounded-lg border border-outline-variant px-3 py-2.5 text-sm font-bold text-astu-navy text-center hover:bg-astu-navy/5"
+                  className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-[#003580] text-center hover:bg-slate-50 transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="rounded-lg bg-astu-navy px-3 py-2.5 text-sm font-bold text-white text-center hover:brightness-95"
+                  className="rounded-lg bg-[#003580] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#004499] transition-colors"
                 >
                   Join Network
                 </Link>
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <span className="text-xs text-on-surface-variant font-medium">Logged in</span>
+                <span className="text-xs text-slate-500">Logged in</span>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
                     handleLogout();
                   }}
-                  className="rounded-lg border border-astu-red px-3 py-1.5 text-xs font-bold text-astu-red hover:bg-astu-red/5"
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
                 >
                   Sign Out
                 </button>
@@ -419,25 +417,25 @@ export default function Navbar() {
 
           <div className="flex flex-col gap-2 mb-4">
             <div className="relative flex-1">
-              <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant" />
+              <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="w-full rounded-full border border-outline-variant bg-surface-container-low py-2.5 pl-10 pr-3 text-base focus:outline-none"
-                placeholder="Search sections..."
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-base focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580] transition-all placeholder:text-slate-400"
+                placeholder="Search..."
                 type="text"
               />
             </div>
             {filteredSearch.length > 0 && (
-              <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-md max-h-60 overflow-y-auto">
+              <div className="mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg max-h-60 overflow-y-auto">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}
                     onClick={() => handleSearchSelect(item)}
-                    className="flex w-full items-center border-b border-outline-variant/50 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-astu-navy/5 transition-colors"
+                    className="flex w-full items-center border-b border-slate-100 px-4 py-3 text-left text-sm last:border-b-0 transition-colors hover:bg-slate-50"
                   >
-                    <span className="font-semibold text-on-surface">
+                    <span className="font-medium text-slate-700">
                       {item.label}
                     </span>
                   </button>
@@ -453,9 +451,9 @@ export default function Navbar() {
                 <button
                   key={item.sectionId || item.route}
                   onClick={() => handleNavClick(item)}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-base font-bold text-on-surface hover:bg-astu-navy/5 transition-all text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors text-left"
                 >
-                  <Icon className="h-5 w-5 text-astu-navy/60" />
+                  <Icon className="h-5 w-5 text-slate-400" />
                   {item.label}
                 </button>
               );
@@ -470,14 +468,14 @@ export default function Navbar() {
                     onClick={() =>
                       setOpenMega(isOpen ? null : menu.label)
                     }
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-base font-bold text-on-surface hover:bg-astu-navy/5 transition-all text-left"
+                    className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 transition-colors text-left"
                   >
                     <span className="flex items-center gap-3">
-                      <Icon className="h-5 w-5 text-astu-navy/60" />
+                      <Icon className="h-5 w-5 text-slate-400" />
                       {menu.label}
                     </span>
                     <HiChevronDown
-                      className={`h-4 w-4 text-on-surface-variant transition-transform ${
+                      className={`h-4 w-4 text-slate-400 transition-transform ${
                         isOpen ? "rotate-180" : ""
                       }`}
                     />
@@ -488,7 +486,7 @@ export default function Navbar() {
                         <button
                           key={item.sectionId}
                           onClick={() => handleMegaItemClick(item.sectionId)}
-                          className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-astu-navy/5 transition-all text-left"
+                          className="flex w-full items-center rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors text-left"
                         >
                           {item.label}
                         </button>

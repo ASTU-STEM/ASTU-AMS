@@ -13,18 +13,7 @@ import { CurriculumInsightsPanel } from './CurriculumInsightsPanel';
 import { CurriculumTable } from './CurriculumTable';
 import { CurriculumExport } from './CurriculumExport';
 
-// Mock data
-import {
-  mockCurriculumKPIMetrics,
-  mockCurriculumOverview,
-  mockCourseAlignment,
-  mockNewCourseRecommendations,
-  mockCourseUpdates,
-  mockAccreditationAlignment,
-  mockIndustryAlignment,
-  mockCurriculumInsights,
-  mockCurriculumRecords
-} from '../services/mockCurriculumData';
+
 
 interface CurriculumInsightsProps {
   data?: any;
@@ -77,7 +66,7 @@ export const CurriculumInsights: React.FC<CurriculumInsightsProps> = ({ data, da
             <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Curriculum Insights & Academic Alignment Intelligence</h2>
             <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Align academic programs with industry demand and graduate outcomes</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
             <button
               onClick={handleRefresh}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
@@ -151,31 +140,41 @@ export const CurriculumInsights: React.FC<CurriculumInsightsProps> = ({ data, da
       </div>
 
       {/* KPI Section */}
-      <TracerKPI metrics={mockCurriculumKPIMetrics} darkMode={darkMode} />
+      {(data?.kpiMetrics || []).length > 0 ? (
+        <TracerKPI metrics={data?.kpiMetrics || []} darkMode={darkMode} />
+      ) : null}
 
       {/* Curriculum Overview */}
-      <CurriculumOverview data={mockCurriculumOverview} darkMode={darkMode} />
+      <CurriculumOverview data={data?.overview || {}} darkMode={darkMode} />
 
       {/* Course Alignment Analytics */}
-      <CourseAlignmentAnalytics data={mockCourseAlignment} darkMode={darkMode} />
+      {(data?.courseAlignment || []).length > 0 ? (
+        <CourseAlignmentAnalytics data={data?.courseAlignment || []} darkMode={darkMode} />
+      ) : null}
 
       {/* New Course Recommendations */}
-      <NewCourseRecommendations data={mockNewCourseRecommendations} darkMode={darkMode} />
+      <NewCourseRecommendations data={data?.recommendations || []} darkMode={darkMode} />
 
       {/* Course Update Analytics */}
-      <CourseUpdateAnalytics data={mockCourseUpdates} />
+      {(data?.courseUpdates || []).length > 0 ? (
+        <CourseUpdateAnalytics data={data?.courseUpdates || []} />
+      ) : null}
 
       {/* Accreditation Alignment Analytics */}
-      <AccreditationAlignmentAnalytics data={mockAccreditationAlignment} />
+      <AccreditationAlignmentAnalytics data={data?.accreditation || {}} />
 
       {/* Industry Alignment Panel */}
-      <IndustryAlignmentPanel data={mockIndustryAlignment} />
+      {(data?.industryAlignment || []).length > 0 ? (
+        <IndustryAlignmentPanel data={data?.industryAlignment || []} />
+      ) : null}
 
       {/* Executive Insights Panel */}
-      <CurriculumInsightsPanel insights={mockCurriculumInsights} />
+      <CurriculumInsightsPanel insights={data?.insights || []} />
 
       {/* Curriculum Table */}
-      <CurriculumTable records={mockCurriculumRecords} />
+      {(data?.records || []).length > 0 ? (
+        <CurriculumTable records={data?.records || []} />
+      ) : null}
 
       {/* Export Modal */}
       {showExport && (

@@ -60,7 +60,7 @@ export const CompetencyAssessment: React.FC<CompetencyAssessmentProps> = ({ data
 
       {/* Benchmark Comparison */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-gray-200/60 rounded-xl">
+        <div className="p-4 bg-gradient-to-br from-blue-50 to-green-50 border border-gray-200/60 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <Award className="text-astu-green" />
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">ASTU Average</p>

@@ -21,7 +21,7 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
   };
 
   const getReadinessColor = (score: number) => {
-    if (score >= 80) return 'text-astu-green bg-emerald-100';
+    if (score >= 80) return 'text-astu-green bg-blue-100';
     if (score >= 60) return 'text-yellow-600 bg-yellow-100';
     return 'text-astu-red bg-red-100';
   };
@@ -52,7 +52,7 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
 
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Graduate Outcome Mapping</p>
-          <p className="text-3xl font-bold text-blue-600 mb-3">{data.graduateOutcomeMapping}%</p>
+          <p className="text-3xl font-bold text-astu-navy mb-3">{data.graduateOutcomeMapping}%</p>
           <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
             <div className="bg-blue-500 h-full rounded-full" style={{ width: `${data.graduateOutcomeMapping}%` }}></div>
           </div>
@@ -77,16 +77,16 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
             </span>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
               <CheckCircle className="h-4 w-4 text-astu-green" />
               <span className="text-sm text-gray-700">Core curriculum aligned with learning outcomes</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
               <CheckCircle className="h-4 w-4 text-astu-green" />
               <span className="text-sm text-gray-700">Assessment methods documented</span>
             </div>
             {data.curriculumAuditStatus === 'partial' && (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <span className="text-sm text-gray-700">Some courses require outcome alignment</span>
               </div>
@@ -102,16 +102,16 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
             </span>
           </div>
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
               <CheckCircle className="h-4 w-4 text-astu-green" />
               <span className="text-sm text-gray-700">Program objectives defined</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
               <CheckCircle className="h-4 w-4 text-astu-green" />
               <span className="text-sm text-gray-700">Graduate attributes mapped</span>
             </div>
             {data.etaReadiness < 80 && (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <span className="text-sm text-gray-700">Additional documentation required</span>
               </div>

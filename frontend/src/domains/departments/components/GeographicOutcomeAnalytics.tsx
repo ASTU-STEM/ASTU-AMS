@@ -41,7 +41,7 @@ export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProp
                   </div>
                 </div>
                 <div className={`w-full h-3 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                  <div className="bg-gradient-to-r from-astu-navy to-blue-600 h-full rounded-full transition-all duration-500" style={{ width: `${geo.percentage}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-navy to-astu-navy h-full rounded-full transition-all duration-500" style={{ width: `${geo.percentage}%` }}></div>
                 </div>
                 <div className="flex items-center gap-1 mt-1">
                   {getTrendIcon(geo.trend)}
@@ -60,7 +60,7 @@ export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProp
           <div className="space-y-3">
             {sortedData.slice(0, 5).map((geo, idx) => (
               <div key={idx} className={`flex items-center justify-between p-3 border rounded-xl hover:shadow-md transition-all ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200/60'}`}>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-astu-navy/10 flex items-center justify-center">
                     <span className="text-sm font-bold text-astu-navy">{idx + 1}</span>
                   </div>
@@ -81,7 +81,7 @@ export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProp
 
       {/* Regional Trends */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+        <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Domestic (Ethiopia)</p>
           <p className="text-2xl font-bold text-astu-green">68%</p>
           <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>of graduates employed locally</p>

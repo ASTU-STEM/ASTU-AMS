@@ -39,7 +39,7 @@ export default function AdminModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-start justify-center bg-slate-950/60 px-4 py-12 backdrop-blur-sm overflow-y-auto animate-[fadeIn_0.2s_ease]"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 px-4 py-4 backdrop-blur-sm overflow-y-auto animate-[fadeIn_0.2s_ease]"
       onMouseDown={(event) => {
         if (closeOnBackdrop && event.target === event.currentTarget) {
           onClose();
@@ -51,8 +51,8 @@ export default function AdminModal({
         @keyframes scaleUp { from { transform: scale(0.95) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         .modal-panel { animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
       `}</style>
-      <div className={["modal-panel w-full overflow-hidden rounded-[12px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.12)]", sizeClasses[size]].join(' ')}>
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <div className={["modal-panel flex flex-col max-h-[calc(100vh-2rem)] w-full overflow-hidden rounded-[12px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.12)]", sizeClasses[size]].join(' ')}>
+        <div className="shrink-0 flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-white z-10">
           <h2 className="text-base font-semibold text-slate-900">{title}</h2>
           <button
             type="button"
@@ -62,8 +62,8 @@ export default function AdminModal({
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-6 py-5 text-sm text-slate-600">{children}</div>
-        {footer && <div className="border-t border-slate-200 px-6 py-4 bg-slate-50/50">{footer}</div>}
+        <div className="flex-1 px-6 py-5 text-sm text-slate-600 overflow-y-auto">{children}</div>
+        {footer && <div className="shrink-0 border-t border-slate-200 px-6 py-4 bg-slate-50/50 z-10">{footer}</div>}
       </div>
     </div>
   );

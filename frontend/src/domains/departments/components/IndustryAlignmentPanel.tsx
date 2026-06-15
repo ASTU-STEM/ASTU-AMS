@@ -33,7 +33,7 @@ export const IndustryAlignmentPanel: React.FC<IndustryAlignmentPanelProps> = ({ 
 
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Curriculum Relevance</p>
-          <p className="text-3xl font-bold text-blue-600 mb-3">{data.curriculumRelevance}%</p>
+          <p className="text-3xl font-bold text-astu-navy mb-3">{data.curriculumRelevance}%</p>
           <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
             <div className="bg-blue-500 h-full rounded-full" style={{ width: `${data.curriculumRelevance}%` }}></div>
           </div>

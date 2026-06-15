@@ -17,14 +17,14 @@ export const SkillGapInsightsPanel: React.FC<SkillGapInsightsPanelProps> = ({ in
       case 'concern':
         return <AlertTriangle className="h-5 w-5 text-astu-red" />;
       default:
-        return <Info className="h-5 w-5 text-blue-600" />;
+        return <Info className="h-5 w-5 text-astu-navy" />;
     }
   };
 
   const getBgColor = (type: SkillGapInsight['type']) => {
     switch (type) {
       case 'success':
-        return 'from-emerald-50 to-green-50 border-emerald-200';
+        return 'from-blue-50 to-green-50 border-emerald-200';
       case 'warning':
         return 'from-yellow-50 to-orange-50 border-yellow-200';
       case 'concern':
@@ -43,7 +43,7 @@ export const SkillGapInsightsPanel: React.FC<SkillGapInsightsPanelProps> = ({ in
       case 'concern':
         return 'text-astu-red';
       default:
-        return 'text-blue-600';
+        return 'text-astu-navy';
     }
   };
 

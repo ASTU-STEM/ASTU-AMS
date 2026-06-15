@@ -84,10 +84,10 @@ function AppContent() {
           }
         />
         <Route
-          path="/department/dashboard"
+          path="/department/*"
           element={
             <ProtectedRoute
-              element={<DepartmentDashboard />}
+              element={<DepartmentRoutes />}
               allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
             />
           }

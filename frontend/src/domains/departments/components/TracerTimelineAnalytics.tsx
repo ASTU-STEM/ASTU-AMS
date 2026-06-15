@@ -27,7 +27,7 @@ export const TracerTimelineAnalytics: React.FC<TracerTimelineAnalyticsProps> = (
                   <span className="text-astu-navy font-bold">{timeline.participationRate}%</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                  <div className="bg-gradient-to-r from-astu-navy to-blue-600 h-full rounded-full transition-all duration-500" style={{ width: `${timeline.participationRate}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-navy to-astu-navy h-full rounded-full transition-all duration-500" style={{ width: `${timeline.participationRate}%` }}></div>
                 </div>
               </div>
 
@@ -37,7 +37,7 @@ export const TracerTimelineAnalytics: React.FC<TracerTimelineAnalyticsProps> = (
                   <span className="text-astu-green font-bold">{timeline.employmentRate}%</span>
                 </div>
                 <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                  <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full transition-all duration-500" style={{ width: `${timeline.employmentRate}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-green to-blue-400 h-full rounded-full transition-all duration-500" style={{ width: `${timeline.employmentRate}%` }}></div>
                 </div>
               </div>
 

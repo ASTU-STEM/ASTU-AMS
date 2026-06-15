@@ -13,7 +13,7 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
   const getStatusColor = (status: AccreditationOverviewData['overallReadinessStatus']) => {
     switch (status) {
       case 'ready':
-        return 'text-astu-green bg-emerald-100';
+        return 'text-astu-green bg-blue-100';
       case 'in-progress':
         return 'text-yellow-600 bg-yellow-100';
       case 'needs-work':
@@ -54,7 +54,7 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
           <p className="text-3xl font-bold text-astu-navy mb-1">{data.overallReadinessStatus}</p>
         </div>
 
-        <div className="p-5 bg-gradient-to-br from-emerald-50 to-green-50 border border-gray-200/60 rounded-xl">
+        <div className="p-5 bg-gradient-to-br from-blue-50 to-green-50 border border-gray-200/60 rounded-xl">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-astu-green/10 rounded-lg">
               <CheckCircle className="text-astu-green h-5 w-5" />

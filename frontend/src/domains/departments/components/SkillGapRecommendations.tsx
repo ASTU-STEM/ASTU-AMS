@@ -49,9 +49,9 @@ export const SkillGapRecommendations: React.FC<SkillGapRecommendationsProps> = (
   const getImpactColor = (impact: SkillGapRecommendation['impactLevel']) => {
     switch (impact) {
       case 'high':
-        return 'text-astu-green bg-emerald-100';
+        return 'text-astu-green bg-blue-100';
       case 'medium':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-astu-navy bg-blue-100';
       case 'low':
         return 'text-gray-600 bg-gray-100';
       default:

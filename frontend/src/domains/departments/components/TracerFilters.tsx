@@ -26,7 +26,7 @@ export const TracerFilters: React.FC<TracerFiltersProps> = ({
           <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Tracer Reports</h2>
           <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Graduate employment tracking and longitudinal studies</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
           {onSaveView && (
             <button
               onClick={onSaveView}

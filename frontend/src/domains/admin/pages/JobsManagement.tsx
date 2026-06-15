@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Bar,
   BarChart,
@@ -34,11 +34,11 @@ import {
   UserCheck,
   Users,
   X,
+  FileText,
 } from 'lucide-react';
-import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
-import AdminStatCard from '../components/AdminStatCard';
+import { adminApi, jobsService } from '../api/adminApi';
 
 type JobType = 'Full-time' | 'Internship' | 'Part-time';
 type JobStatus = 'Open' | 'Closed' | 'Paused' | 'Featured';
@@ -64,49 +64,6 @@ type ApplicationRecord = {
   appliedDate: string;
   status: ApplicationStatus;
 };
-
-const jobRows: JobRecord[] = [
-  { id: 'JOB-001', title: 'Senior Frontend Engineer', employer: 'Safaricom', type: 'Full-time', postedDate: '2026-05-14', deadline: '2026-06-12', applicants: 94, status: 'Open', featured: true },
-  { id: 'JOB-002', title: 'Data Analyst Intern', employer: 'Ethio Telecom', type: 'Internship', postedDate: '2026-05-18', deadline: '2026-06-04', applicants: 67, status: 'Open' },
-  { id: 'JOB-003', title: 'Mechanical Project Officer', employer: 'Ethiopian Airlines', type: 'Full-time', postedDate: '2026-04-28', deadline: '2026-05-30', applicants: 41, status: 'Paused' },
-  { id: 'JOB-004', title: 'Cloud Support Engineer', employer: 'Huawei', type: 'Full-time', postedDate: '2026-05-10', deadline: '2026-06-08', applicants: 88, status: 'Open' },
-  { id: 'JOB-005', title: 'Civil Site Supervisor', employer: 'CBE', type: 'Part-time', postedDate: '2026-05-03', deadline: '2026-05-28', applicants: 35, status: 'Closed' },
-  { id: 'JOB-006', title: 'Machine Learning Intern', employer: 'INSA', type: 'Internship', postedDate: '2026-05-22', deadline: '2026-06-18', applicants: 58, status: 'Open' },
-];
-
-const applicationRows: ApplicationRecord[] = [
-  { id: 'APP-001', applicant: 'Abebe Kebede', jobTitle: 'Senior Frontend Engineer', employer: 'Safaricom', appliedDate: '2026-05-18', status: 'Under Review' },
-  { id: 'APP-002', applicant: 'Helena Tesfaye', jobTitle: 'Data Analyst Intern', employer: 'Ethio Telecom', appliedDate: '2026-05-19', status: 'Shortlisted' },
-  { id: 'APP-003', applicant: 'Kalkidan Tadesse', jobTitle: 'Cloud Support Engineer', employer: 'Huawei', appliedDate: '2026-05-21', status: 'Rejected' },
-  { id: 'APP-004', applicant: 'Yonas Bekele', jobTitle: 'Machine Learning Intern', employer: 'INSA', appliedDate: '2026-05-22', status: 'Hired' },
-  { id: 'APP-005', applicant: 'Ruth Alemu', jobTitle: 'Civil Site Supervisor', employer: 'CBE', appliedDate: '2026-05-23', status: 'Under Review' },
-  { id: 'APP-006', applicant: 'Henok Fikre', jobTitle: 'Senior Frontend Engineer', employer: 'Safaricom', appliedDate: '2026-05-24', status: 'Shortlisted' },
-];
-
-const jobsPostedData = [
-  { month: 'Jan', jobs: 8 },
-  { month: 'Feb', jobs: 12 },
-  { month: 'Mar', jobs: 15 },
-  { month: 'Apr', jobs: 19 },
-  { month: 'May', jobs: 24 },
-  { month: 'Jun', jobs: 28 },
-];
-
-const funnelData = [
-  { name: 'Posted', value: 124 },
-  { name: 'Applied', value: 96 },
-  { name: 'Shortlisted', value: 34 },
-  { name: 'Hired', value: 18 },
-];
-
-const employerPosts = [
-  { name: 'Safaricom', jobs: 18 },
-  { name: 'Ethio Telecom', jobs: 16 },
-  { name: 'INSA', jobs: 12 },
-  { name: 'Huawei', jobs: 10 },
-  { name: 'Ethiopian Airlines', jobs: 8 },
-  { name: 'CBE', jobs: 7 },
-];
 
 const jobStatuses: Array<'All' | JobStatus> = ['All', 'Open', 'Closed', 'Paused', 'Featured'];
 const jobTypes: Array<'All' | JobType> = ['All', 'Full-time', 'Internship', 'Part-time'];
@@ -162,25 +119,26 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h3 className="text-sm font-bold text-slate-900">{title}</h3>
+        {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
       </div>
       {children}
     </section>
   );
 }
 
-function SmallStat({ label, value, icon: Icon }: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }) {
+function SmallStat({ label, value, icon: Icon, color }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; color?: string }) {
+  const iconColor = color || '#003580';
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,51,128,0.15)] hover:scale-[1.02]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">{value}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+          <p className="mt-2 text-xl font-bold text-slate-900">{value}</p>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580]/10 text-[#003580]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow" style={{ background: `linear-gradient(135deg, ${iconColor}15 0%, ${iconColor}25 100%)`, color: iconColor }}>
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -189,6 +147,13 @@ function SmallStat({ label, value, icon: Icon }: { label: string; value: string;
 }
 
 export default function JobsManagement() {
+  const [jobRows, setJobRows] = useState<JobRecord[]>([]);
+  const [applicationRows, setApplicationRows] = useState<ApplicationRecord[]>([]);
+  const [jobsPostedData, setJobsPostedData] = useState<{ month: string; jobs: number }[]>([]);
+  const [funnelData, setFunnelData] = useState<{ name: string; value: number }[]>([]);
+  const [employerPosts, setEmployerPosts] = useState<{ name: string; jobs: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'analytics'>('jobs');
   const [selectedJobStatus, setSelectedJobStatus] = useState<'All' | JobStatus>('All');
   const [selectedEmployer, setSelectedEmployer] = useState('All');
@@ -199,6 +164,90 @@ export default function JobsManagement() {
   const [bulkStatus, setBulkStatus] = useState<ApplicationStatus>('Under Review');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobRecord | null>(null);
+
+  useEffect(() => {
+    async function fetchJobsData() {
+      try {
+        setLoading(true);
+        setError(null);
+        // Call backend admin jobs list using jobsService
+        const response = await jobsService.getJobs();
+        const jobs = response.jobs || [];
+        
+        // Fetch applications for all active jobs in parallel
+        const appsPromises = jobs.map((j) => jobsService.getApplications(j.id).catch(() => []));
+        const appsResults = await Promise.all(appsPromises);
+        const allApplications = appsResults.flat();
+        
+        const transformedJobs: JobRecord[] = jobs.map((job: any) => {
+          let mappedStatus: JobStatus = 'Open';
+          const statusUpper = String(job.status).toUpperCase();
+          if (statusUpper === 'PUBLISHED' || statusUpper === 'OPEN') mappedStatus = 'Open';
+          else if (statusUpper === 'CLOSED') mappedStatus = 'Closed';
+          else if (statusUpper === 'DRAFT' || statusUpper === 'PAUSED') mappedStatus = 'Paused';
+          else if (statusUpper === 'ARCHIVED') mappedStatus = 'Closed';
+          else mappedStatus = 'Open';
+
+          let mappedType: JobType = 'Full-time';
+          const typeUpper = String(job.type || job.employmentType).toUpperCase();
+          if (typeUpper === 'FULL_TIME') mappedType = 'Full-time';
+          else if (typeUpper === 'PART_TIME') mappedType = 'Part-time';
+          else if (typeUpper === 'INTERNSHIP') mappedType = 'Internship';
+          else mappedType = 'Full-time';
+
+          return {
+            id: job.id,
+            title: job.title,
+            employer: job.employer,
+            type: mappedType,
+            postedDate: job.postedAt || job.createdAt || new Date().toISOString(),
+            deadline: job.deadline,
+            applicants: job.applicants || 0,
+            status: mappedStatus,
+            featured: job.featured || false,
+          };
+        });
+
+        const transformedApps: ApplicationRecord[] = allApplications.map((app: any) => {
+          let mappedStatus: ApplicationStatus = 'Under Review';
+          const statusUpper = String(app.status).toUpperCase();
+          if (statusUpper === 'PENDING' || statusUpper === 'REVIEWED' || statusUpper === 'UNDER REVIEW' || statusUpper === 'UNDER_REVIEW') mappedStatus = 'Under Review';
+          else if (statusUpper === 'SHORTLISTED' || statusUpper === 'INTERVIEW_SCHEDULED' || statusUpper === 'OFFERED') mappedStatus = 'Shortlisted';
+          else if (statusUpper === 'HIRED' || statusUpper === 'ACCEPTED') mappedStatus = 'Hired';
+          else if (statusUpper === 'REJECTED' || statusUpper === 'WITHDRAWN') mappedStatus = 'Rejected';
+
+          return {
+            id: app.id,
+            applicant: app.applicantName || app.fullName || 'Alumni',
+            jobTitle: app.jobTitle,
+            employer: jobs.find((j) => j.id === app.jobId)?.employer || 'Employer',
+            appliedDate: app.appliedAt || app.createdAt || new Date().toISOString(),
+            status: mappedStatus,
+          };
+        });
+
+        setJobRows(transformedJobs);
+        setApplicationRows(transformedApps);
+        
+        // Fetch real analytics data
+        const analyticsData = await adminApi.getAnalyticsOverview().catch(() => null);
+        if (analyticsData) {
+          setJobsPostedData(analyticsData.jobsPostedByMonth || []);
+          setFunnelData(analyticsData.applicationFunnel || []);
+          setEmployerPosts(analyticsData.hiringCompanies || []);
+        } else {
+          setJobsPostedData([]);
+          setFunnelData([]);
+          setEmployerPosts([]);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load jobs data');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchJobsData();
+  }, []);
 
   const filteredJobs = useMemo(() => {
     return jobRows.filter((job) => {
@@ -239,20 +288,27 @@ export default function JobsManagement() {
   };
 
   const employers = ['All', ...Array.from(new Set(jobRows.map((job) => job.employer)))];
-  const jobSummaryCards = [
-    { title: 'Active Jobs', value: '47', icon: Briefcase, tone: 'blue' as const, trend: '12 expiring soon' },
-    { title: 'Applications', value: '377', icon: Users, tone: 'green' as const, trend: '+48 this week' },
-    { title: 'Featured Jobs', value: '9', icon: Star, tone: 'gold' as const, trend: 'Pinned to top' },
-    { title: 'Placed Alumni', value: '128', icon: UserCheck, tone: 'purple' as const, trend: '+14 this month' },
-  ];
+  const jobSummaryCards = useMemo(() => {
+    const activeJobs = jobRows.filter((j) => j.status === 'Open').length;
+    const featuredJobs = jobRows.filter((j) => j.featured || j.status === 'Featured').length;
+    const totalApplications = applicationRows.length;
+    const placedAlumni = applicationRows.filter((a) => a.status === 'Hired').length;
+    
+    return [
+      { label: 'Active Jobs', value: String(activeJobs), icon: Briefcase, color: '#003580', trend: `${jobRows.length} total jobs` },
+      { label: 'Applications', value: String(totalApplications), icon: Users, color: '#1D9E75', trend: 'Submitted' },
+      { label: 'Featured Jobs', value: String(featuredJobs), icon: Star, color: '#E8A020', trend: 'Pinned to top' },
+      { label: 'Placed Alumni', value: String(placedAlumni), icon: UserCheck, color: '#7C3AED', trend: 'Hired status' },
+    ];
+  }, [jobRows, applicationRows]);
 
   const statusButton = (label: string, isActive: boolean, onClick: () => void) => (
     <button
       type="button"
       onClick={onClick}
       className={[
-        'rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors',
-        isActive ? 'bg-[#003580] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]' : 'text-slate-600 hover:bg-slate-100',
+        'rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300',
+        isActive ? 'bg-gradient-to-r from-[#003580] to-[#004499] text-white shadow-[0_4px_12px_rgba(0,51,128,0.25)]' : 'text-slate-600 hover:bg-slate-100',
       ].join(' ')}
     >
       {label}
@@ -261,47 +317,65 @@ export default function JobsManagement() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
-        title="Jobs Management"
-        subtitle="Track employer posts, applications, and hiring outcomes."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Jobs Management' }]}
-        actions={
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6"
+        style={{ background: 'linear-gradient(135deg, #001f4d 0%, #003580 50%, #00508a 100%)', boxShadow: '0 8px 30px rgba(0,53,128,0.35)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% -5%, rgba(29,158,117,0.30), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 70% at -5% 70%, rgba(232,160,32,0.10), transparent)' }} />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(29,158,117,0.15)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        <div className="relative flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+                <FileText className="h-5 w-5" style={{ color: '#E8A020' }} />
+              </div>
+              <div>
+                <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>Jobs Management</h1>
+                <p className="mt-0.5 text-xs font-medium" style={{ color: 'rgba(255,255,255,0.78)' }}>
+                  Track employer posts, applications, and hiring outcomes.
+                </p>
+              </div>
+            </div>
+          </div>
           <button
             type="button"
             onClick={openCreateJob}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all hover:opacity-90"
+            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', color: '#ffffff', backdropFilter: 'blur(8px)' }}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             Add Job
           </button>
-        }
-      />
+        </div>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {jobSummaryCards.map((card) => (
-          <AdminStatCard
-            key={card.title}
-            title={card.title}
+          <SmallStat
+            key={card.label}
+            label={card.label}
             value={card.value}
             icon={card.icon}
-            tone={card.tone}
-            trend={card.trend}
+            color={card.color}
           />
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-[10px] border border-slate-200 bg-white p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
         {statusButton('All Jobs', activeTab === 'jobs', () => setActiveTab('jobs'))}
         {statusButton('Applications', activeTab === 'applications', () => setActiveTab('applications'))}
         {statusButton('Analytics', activeTab === 'analytics', () => setActiveTab('analytics'))}
       </div>
 
       {activeTab === 'jobs' && (
-        <div className="space-y-4">
-          <section className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <div className="grid gap-3 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-4">
-                <Search className="h-4 w-4 text-slate-400" />
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="grid gap-4 xl:grid-cols-12">
+              <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-4 hover:border-slate-300 transition-all">
+                <Search className="h-4.5 w-4.5 text-slate-400" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -309,8 +383,8 @@ export default function JobsManagement() {
                   className="w-full bg-transparent outline-none placeholder:text-slate-400"
                 />
               </label>
-              <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-2">
-                <Filter className="h-4 w-4 text-slate-400" />
+              <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-2 hover:border-slate-300 transition-all">
+                <Filter className="h-4.5 w-4.5 text-slate-400" />
                 <select value={selectedJobStatus} onChange={(event) => setSelectedJobStatus(event.target.value as typeof selectedJobStatus)} className="w-full bg-transparent outline-none">
                   {jobStatuses.map((status) => (
                     <option key={status} value={status}>
@@ -319,8 +393,8 @@ export default function JobsManagement() {
                   ))}
                 </select>
               </label>
-              <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-2">
-                <Building2 className="h-4 w-4 text-slate-400" />
+              <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-2 hover:border-slate-300 transition-all">
+                <Building2 className="h-4.5 w-4.5 text-slate-400" />
                 <select value={selectedEmployer} onChange={(event) => setSelectedEmployer(event.target.value)} className="w-full bg-transparent outline-none">
                   {employers.map((employer) => (
                     <option key={employer} value={employer}>
@@ -329,8 +403,8 @@ export default function JobsManagement() {
                   ))}
                 </select>
               </label>
-              <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-2">
-                <Briefcase className="h-4 w-4 text-slate-400" />
+              <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-2 hover:border-slate-300 transition-all">
+                <Briefcase className="h-4.5 w-4.5 text-slate-400" />
                 <select value={selectedJobType} onChange={(event) => setSelectedJobType(event.target.value as typeof selectedJobType)} className="w-full bg-transparent outline-none">
                   {jobTypes.map((type) => (
                     <option key={type} value={type}>
@@ -339,21 +413,21 @@ export default function JobsManagement() {
                   ))}
                 </select>
               </label>
-              <div className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-2">
-                <CalendarDays className="h-4 w-4 text-slate-400" />
+              <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-2">
+                <CalendarDays className="h-4.5 w-4.5 text-slate-400" />
                 <input type="date" className="w-full bg-transparent outline-none" />
               </div>
             </div>
           </section>
 
           <SectionCard title="All Jobs" subtitle="Employer job listings and moderation controls.">
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-gradient-to-r from-slate-50 to-slate-100/50">
                     <tr>
                       {['Job Title', 'Employer', 'Type', 'Posted Date', 'Deadline', 'Applicants', 'Status', 'Actions'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className="px-5 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                           {head}
                         </th>
                       ))}
@@ -361,8 +435,8 @@ export default function JobsManagement() {
                   </thead>
                   <tbody>
                     {filteredJobs.map((job) => (
-                      <tr key={job.id} className="border-t border-slate-100 hover:bg-slate-50/70">
-                        <td className="px-4 py-4">
+                      <tr key={job.id} className="border-t border-slate-100 hover:bg-slate-50/80 transition-all">
+                        <td className="px-5 py-4">
                           <div className="flex items-center gap-2">
                             {job.featured && <Pin className="h-4 w-4 text-[#E8A020]" />}
                             <div>
@@ -371,36 +445,36 @@ export default function JobsManagement() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-slate-600">{job.employer}</td>
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4 text-slate-600">{job.employer}</td>
+                        <td className="px-5 py-4">
                           <AdminBadge variant="default" className={typeClass(job.type)}>
                             {job.type}
                           </AdminBadge>
                         </td>
-                        <td className="px-4 py-4 text-slate-600">{formatDate(job.postedDate)}</td>
-                        <td className="px-4 py-4 text-slate-600">{formatDate(job.deadline)}</td>
-                        <td className="px-4 py-4 text-slate-600">{job.applicants}</td>
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4 text-slate-600">{formatDate(job.postedDate)}</td>
+                        <td className="px-5 py-4 text-slate-600">{formatDate(job.deadline)}</td>
+                        <td className="px-5 py-4 text-slate-600">{job.applicants}</td>
+                        <td className="px-5 py-4">
                           <AdminBadge variant="success" className={statusClass(job.status)}>
                             {job.featured ? 'Featured' : job.status}
                           </AdminBadge>
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4">
                           <div className="flex items-center gap-2">
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
-                              <Eye className="h-4 w-4" />
+                            <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/40 hover:bg-[#003580]/5 hover:text-[#003580]">
+                              <Eye className="h-4.5 w-4.5" />
                             </button>
-                            <button type="button" onClick={() => openEditJob(job)} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
-                              <PencilLine className="h-4 w-4" />
+                            <button type="button" onClick={() => openEditJob(job)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/40 hover:bg-[#003580]/5 hover:text-[#003580]">
+                              <PencilLine className="h-4.5 w-4.5" />
                             </button>
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
-                              <ShieldX className="h-4 w-4" />
+                            <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/40 hover:bg-[#003580]/5 hover:text-[#003580]">
+                              <ShieldX className="h-4.5 w-4.5" />
                             </button>
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
-                              <Trash2 className="h-4 w-4" />
+                            <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/40 hover:bg-[#003580]/5 hover:text-[#003580]">
+                              <Trash2 className="h-4.5 w-4.5" />
                             </button>
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[#E8A020] hover:bg-amber-50">
-                              <Star className="h-4 w-4" />
+                            <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-[#E8A020] shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:border-[#E8A020]/40 hover:bg-amber-50">
+                              <Star className="h-4.5 w-4.5" />
                             </button>
                           </div>
                         </td>
@@ -415,11 +489,11 @@ export default function JobsManagement() {
       )}
 
       {activeTab === 'applications' && (
-        <div className="space-y-4">
-          <section className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <div className="grid gap-3 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-4">
-                <Search className="h-4 w-4 text-slate-400" />
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+            <div className="grid gap-4 xl:grid-cols-12">
+              <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-4 hover:border-slate-300 transition-all">
+                <Search className="h-4.5 w-4.5 text-slate-400" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -427,8 +501,8 @@ export default function JobsManagement() {
                   className="w-full bg-transparent outline-none placeholder:text-slate-400"
                 />
               </label>
-              <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-                <Filter className="h-4 w-4 text-slate-400" />
+              <label className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm xl:col-span-3 hover:border-slate-300 transition-all">
+                <Filter className="h-4.5 w-4.5 text-slate-400" />
                 <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none">
                   <option value="All">All Statuses</option>
                   {['Under Review', 'Shortlisted', 'Rejected', 'Hired'].map((status) => (
@@ -438,15 +512,15 @@ export default function JobsManagement() {
                   ))}
                 </select>
               </label>
-              <div className="xl:col-span-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="xl:col-span-5 flex flex-wrap items-center justify-between gap-4">
                 <div className="text-sm text-slate-500">
                   {selectedApplications.length} selected
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   <select
                     value={bulkStatus}
                     onChange={(event) => setBulkStatus(event.target.value as ApplicationStatus)}
-                    className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none"
+                    className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm outline-none hover:border-slate-300 transition-all"
                   >
                     {['Under Review', 'Shortlisted', 'Rejected', 'Hired'].map((status) => (
                       <option key={status} value={status}>
@@ -454,8 +528,8 @@ export default function JobsManagement() {
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={bulkUpdate} className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white">
-                    <Send className="h-4 w-4" />
+                  <button type="button" onClick={bulkUpdate} className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105" style={{ color: '#ffffff' }}>
+                    <Send className="h-4.5 w-4.5" />
                     Bulk Update
                   </button>
                 </div>
@@ -464,16 +538,16 @@ export default function JobsManagement() {
           </section>
 
           <SectionCard title="Applications" subtitle="Track alumni applications and review outcomes.">
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-gradient-to-r from-slate-50 to-slate-100/50">
                     <tr>
-                      <th className="w-12 px-4 py-3 text-left">
-                        <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-[#003580]" />
+                      <th className="w-12 px-5 py-4 text-left">
+                        <input type="checkbox" className="h-4.5 w-4.5 rounded-lg border-slate-300 text-[#003580]" />
                       </th>
                       {['Applicant (alumni)', 'Job Title', 'Employer', 'Applied Date', 'Status'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className="px-5 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                           {head}
                         </th>
                       ))}
@@ -481,22 +555,22 @@ export default function JobsManagement() {
                   </thead>
                   <tbody>
                     {filteredApplications.map((application) => (
-                      <tr key={application.id} className="border-t border-slate-100 hover:bg-slate-50/70">
-                        <td className="px-4 py-4">
+                      <tr key={application.id} className="border-t border-slate-100 hover:bg-slate-50/80 transition-all">
+                        <td className="px-5 py-4">
                           <input
                             type="checkbox"
                             checked={selectedApplications.includes(application.id)}
                             onChange={() => toggleApplication(application.id)}
-                            className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                            className="h-4.5 w-4.5 rounded-lg border-slate-300 text-[#003580]"
                           />
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4">
                           <div className="font-semibold text-slate-900">{application.applicant}</div>
                         </td>
-                        <td className="px-4 py-4 text-slate-600">{application.jobTitle}</td>
-                        <td className="px-4 py-4 text-slate-600">{application.employer}</td>
-                        <td className="px-4 py-4 text-slate-600">{formatDate(application.appliedDate)}</td>
-                        <td className="px-4 py-4">
+                        <td className="px-5 py-4 text-slate-600">{application.jobTitle}</td>
+                        <td className="px-5 py-4 text-slate-600">{application.employer}</td>
+                        <td className="px-5 py-4 text-slate-600">{formatDate(application.appliedDate)}</td>
+                        <td className="px-5 py-4">
                           <AdminBadge variant="default" className={statusClass(application.status)}>
                             {application.status}
                           </AdminBadge>
@@ -512,8 +586,8 @@ export default function JobsManagement() {
       )}
 
       {activeTab === 'analytics' && (
-        <div className="space-y-4">
-          <section className="grid gap-4 xl:grid-cols-3">
+        <div className="space-y-8">
+          <section className="grid gap-8 xl:grid-cols-3">
             <ChartCard title="Jobs Posted Per Month" subtitle="Monthly posting volume across the last 6 months.">
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -569,24 +643,24 @@ export default function JobsManagement() {
         onClose={() => setModalOpen(false)}
         footer={
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => setModalOpen(false)} className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+            <button type="button" onClick={() => setModalOpen(false)} className="rounded-xl border border-slate-200/80 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
               Cancel
             </button>
-            <button type="button" className="rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110">
+            <button type="button" className="rounded-xl bg-gradient-to-r from-[#003580] to-[#004499] px-5 py-3 text-sm font-semibold shadow-[0_4px_12px_rgba(0,51,128,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,51,128,0.35)] hover:scale-105" style={{ color: '#ffffff' }}>
               Save Job
             </button>
           </div>
         }
       >
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           <Field label="Job Title">
-            <input className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" defaultValue={editingJob?.title ?? ''} />
+            <input className="w-full rounded-xl border border-slate-200/80 px-4 py-3 outline-none focus:border-[#003580] transition-all" defaultValue={editingJob?.title ?? ''} />
           </Field>
           <Field label="Employer">
-            <input className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" defaultValue={editingJob?.employer ?? ''} />
+            <input className="w-full rounded-xl border border-slate-200/80 px-4 py-3 outline-none focus:border-[#003580] transition-all" defaultValue={editingJob?.employer ?? ''} />
           </Field>
           <Field label="Type">
-            <select className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" defaultValue={editingJob?.type ?? 'Full-time'}>
+            <select className="w-full rounded-xl border border-slate-200/80 px-4 py-3 outline-none focus:border-[#003580] transition-all" defaultValue={editingJob?.type ?? 'Full-time'}>
               {jobTypes.filter((type): type is JobType => type !== 'All').map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -595,7 +669,7 @@ export default function JobsManagement() {
             </select>
           </Field>
           <Field label="Deadline">
-            <input type="date" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" defaultValue={editingJob?.deadline ?? ''} />
+            <input type="date" className="w-full rounded-xl border border-slate-200/80 px-4 py-3 outline-none focus:border-[#003580] transition-all" defaultValue={editingJob?.deadline ?? ''} />
           </Field>
         </div>
       </AdminModal>
@@ -613,10 +687,10 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mb-3">
-        <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+      <div className="mb-5">
+        <h4 className="text-base font-bold text-slate-900">{title}</h4>
+        {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -631,7 +705,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="space-y-2">
+    <label className="space-y-2.5">
       <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</span>
       {children}
     </label>

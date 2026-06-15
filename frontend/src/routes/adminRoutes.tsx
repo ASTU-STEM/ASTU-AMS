@@ -14,6 +14,7 @@ import BackupSecurity from '../domains/admin/pages/BackupSecurity';
 import SystemSettings from '../domains/admin/pages/SystemSettings';
 import SuperAdminModules from '../domains/admin/pages/SuperAdminModules';
 import ReportsCenter from '../domains/admin/pages/ReportsCenter';
+import AdminProfile from '../domains/admin/pages/AdminProfile';
 
 export default function AdminRoutes() {
   return (
@@ -34,6 +35,7 @@ export default function AdminRoutes() {
         <Route path="logs" element={<SystemLogs />} />
         <Route path="backup" element={<BackupSecurity />} />
         <Route path="settings" element={<SystemSettings />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Route>
     </Routes>
   );

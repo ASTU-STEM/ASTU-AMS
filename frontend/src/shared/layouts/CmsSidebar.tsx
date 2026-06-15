@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   CalendarDays,
+  ChevronDown,
   GalleryHorizontal,
   Globe,
   Image as ImageIcon,
@@ -12,11 +13,10 @@ import {
   Newspaper,
   PanelLeftClose,
   PanelLeftOpen,
+  Plus,
   Settings,
   ShieldCheck,
   Sparkles,
-  Plus,
-  ChevronDown,
 } from 'lucide-react';
 import type { AdminNavItem } from '../../domains/admin/types/admin.types';
 
@@ -28,195 +28,398 @@ interface CmsSidebarProps {
   onToggleCollapse?: () => void;
 }
 
-interface EnhancedNavItem extends AdminNavItem {
-  badge?: string | number;
-  section?: string;
-  tooltip?: string;
+interface NavChild {
+  label: string;
+  path: string;
+  badge?: number;
+  exact?: boolean;
 }
 
-const navItems: EnhancedNavItem[] = [
-  { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'overview', tooltip: 'CMS overview & stats' },
-  { label: 'All Content', path: '/cms/content', icon: Newspaper, section: 'content', tooltip: 'Pages, posts, announcements' },
-  { label: 'Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content', tooltip: 'Manage homepage content' },
-  { label: 'Community', path: '/cms/community', icon: MessageSquareText, section: 'content', tooltip: 'News, announcements & community' },
-  { label: 'Gallery', path: '/cms/gallery', icon: GalleryHorizontal, section: 'content', tooltip: 'Photo & media gallery' },
-  { label: 'Events & Workshops', path: '/cms/events', icon: CalendarDays, section: 'content', tooltip: 'Manage events & workshops' },
-  { label: 'Approvals', path: '/cms/approvals', icon: ShieldCheck, section: 'workflow', tooltip: 'Pending reviews & approvals', badge: 5 },
-  { label: 'Media Library', path: '/cms/media', icon: ImageIcon, section: 'assets', tooltip: 'All media files' },
-  { label: 'SEO', path: '/cms/seo', icon: Globe, section: 'assets', tooltip: 'SEO management' },
-  { label: 'Templates', path: '/cms/templates', icon: Sparkles, section: 'assets', tooltip: 'Reusable content templates' },
-  { label: 'Settings', path: '/cms/settings', icon: Settings, section: 'settings', tooltip: 'CMS configuration' },
+interface NavGroup {
+  key: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: NavChild[];
+}
+
+interface NavSingle {
+  key: string;
+  label: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  badge?: number;
+}
+
+type NavEntry = ({ type: 'single' } & NavSingle) | ({ type: 'group' } & NavGroup);
+
+const navEntries: NavEntry[] = [
+  {
+    type: 'single',
+    key: 'dashboard',
+    label: 'Dashboard',
+    path: '/cms/dashboard',
+    icon: LayoutDashboard,
+    exact: true,
+  },
+  {
+    type: 'group',
+    key: 'content',
+    label: 'Content',
+    icon: Newspaper,
+    children: [
+      { label: 'All Content', path: '/cms/content' },
+      { label: 'Homepage CMS', path: '/cms/homepage' },
+      { label: 'Community', path: '/cms/community' },
+      { label: 'Gallery', path: '/cms/gallery' },
+      { label: 'Events & Workshops', path: '/cms/events' },
+    ],
+  },
+  {
+    type: 'group',
+    key: 'workflow',
+    label: 'Workflow',
+    icon: ShieldCheck,
+    children: [
+      { label: 'Approvals', path: '/cms/approvals', badge: 5 },
+    ],
+  },
+  {
+    type: 'group',
+    key: 'assets',
+    label: 'Assets',
+    icon: GalleryHorizontal,
+    children: [
+      { label: 'Media Library', path: '/cms/media' },
+      { label: 'SEO', path: '/cms/seo' },
+      { label: 'Templates', path: '/cms/templates' },
+    ],
+  },
+  {
+    type: 'single',
+    key: 'settings',
+    label: 'Settings',
+    path: '/cms/settings',
+    icon: Settings,
+  },
 ];
 
-const sections = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'content', label: 'Content' },
-  { key: 'workflow', label: 'Workflow' },
-  { key: 'assets', label: 'Assets' },
-  { key: 'settings', label: 'System' },
-];
+// Icon map for children
+const childIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'All Content': Newspaper,
+  'Homepage CMS': Layers3,
+  'Community': MessageSquareText,
+  'Gallery': GalleryHorizontal,
+  'Events & Workshops': CalendarDays,
+  'Approvals': ShieldCheck,
+  'Media Library': ImageIcon,
+  'SEO': Globe,
+  'Templates': Sparkles,
+};
 
-export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse }: CmsSidebarProps) {
+export default function CmsSidebar({
+  onLogout,
+  isOpen = false,
+  onNavigate,
+  collapsed = false,
+  onToggleCollapse,
+}: CmsSidebarProps) {
   const location = useLocation();
 
-  const getSectionItems = (sectionKey: string) =>
-    navItems.filter(item => item.section === sectionKey);
+  // Auto-expand groups that contain the active route
+  const getInitialExpanded = () => {
+    const set = new Set<string>();
+    navEntries.forEach((entry) => {
+      if (entry.type === 'group') {
+        const hasActive = entry.children.some((c) =>
+          location.pathname.startsWith(c.path)
+        );
+        if (hasActive) set.add(entry.key);
+      }
+    });
+    return set;
+  };
+
+  const [expanded, setExpanded] = useState<Set<string>>(getInitialExpanded);
+
+  // Re-expand when route changes
+  useEffect(() => {
+    setExpanded(getInitialExpanded());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  const toggle = (key: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
+
+  const isGroupActive = (entry: NavGroup) =>
+    entry.children.some((c) => location.pathname.startsWith(c.path));
 
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-[#0B1A2E] text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 ${
-          collapsed ? 'w-[72px]' : 'w-72'
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white dark:bg-[#0b0f19] border-r border-slate-200 dark:border-slate-800/80 transition-all duration-300 ease-out lg:translate-x-0 ${
+          collapsed ? 'w-[72px]' : 'w-64'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0D1F38] via-[#0B1A2E] to-[#091524] pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_30%,rgba(244,180,0,0.02)_70%,transparent_100%)] pointer-events-none" />
-
-        {/* Logo area */}
-        <div className="relative px-4 pt-5 pb-3">
+        {/* ── Logo ── */}
+        <div className="relative px-5 pt-6 pb-2">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="relative shrink-0">
+            <div className="shrink-0 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#003580]/10 to-[#003580]/5 dark:from-[#F4B400]/20 dark:to-transparent rounded-xl blur-sm" />
               <img
                 src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
                 alt="ASTU"
-                className="h-9 w-9 rounded-lg bg-white/8 object-contain p-0.5 ring-1 ring-white/10"
+                className="relative h-10 w-10 rounded-lg object-contain ring-1 ring-slate-200/50 dark:ring-slate-800"
               />
               {!collapsed && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F4B400] text-[7px] font-bold text-[#0B1A2E] shadow-sm">C</span>
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F4B400] text-[7px] font-bold text-[#0B1A2E] shadow-sm">
+                  C
+                </span>
               )}
             </div>
             {!collapsed && (
-              <div className="flex-1 min-w-0">
+              <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-lg font-bold tracking-tight text-white">ASTU</span>
-                  <span className="rounded-md bg-[#F4B400]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#F4B400] uppercase tracking-wider">CMS</span>
+                  <span className="text-lg font-bold tracking-tight text-[#003580] dark:text-white">
+                    ASTU
+                  </span>
+                  <span className="rounded-md bg-[#F4B400]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#b87800] dark:text-[#F4B400] uppercase tracking-wider">
+                    CMS
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-0.5">Content Manager</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-wide mt-0.5">
+                  Content Manager
+                </p>
               </div>
             )}
           </div>
-
-          {!collapsed && (
-            <button className="mt-4 flex w-full items-center gap-2 rounded-lg bg-[#F4B400] px-4 py-3 text-xs font-bold text-[#0B1A2E] hover:brightness-110 transition-all shadow-sm shadow-[#F4B400]/20">
-              <Plus className="h-5 w-5" />
-              <span>Quick Create</span>
-            </button>
-          )}
+          <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800/80 to-transparent" />
         </div>
 
-        {/* Divider */}
-        <div className="relative mx-4 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+        {/* ── Quick Create ── */}
+        {!collapsed && (
+          <div className="px-4 py-3">
+            <button className="flex w-full items-center gap-2 rounded-xl bg-gradient-to-r from-[#003580] to-[#0a4fa6] px-4 py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-sm shadow-[#003580]/20">
+              <Plus className="h-4 w-4" />
+              <span>Quick Create</span>
+            </button>
+          </div>
+        )}
+        {collapsed && (
+          <div className="px-3 py-3">
+            <button
+              className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#003580] to-[#0a4fa6] p-2.5 text-white hover:brightness-110 transition-all shadow-sm"
+              title="Quick Create"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
-        {/* Navigation */}
-        <nav className="relative flex-1 overflow-y-auto px-3 py-4 scrollbar-thin space-y-2">
-          {sections.map(section => {
-            const items = getSectionItems(section.key);
-            if (items.length === 0) return null;
-            return (
-              <div key={section.key}>
-                {!collapsed && (
-                  <div className="px-3 pb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="h-px flex-1 bg-white/5" />
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        {section.label}
-                      </p>
-                      <span className="h-px flex-1 bg-white/5" />
+        {/* ── Navigation ── */}
+        <nav className="flex-1 overflow-y-auto px-3 py-2 scrollbar-thin">
+          <div className="space-y-1">
+            {navEntries.map((entry) => {
+              if (entry.type === 'single') {
+                const Icon = entry.icon;
+                const isActive = entry.exact
+                  ? location.pathname === entry.path
+                  : location.pathname.startsWith(entry.path);
+
+                return (
+                  <NavLink
+                    key={entry.key}
+                    to={entry.path}
+                    end={entry.exact}
+                    onClick={onNavigate}
+                    title={collapsed ? entry.label : undefined}
+                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold border-l-2 border-transparent transition-all duration-200 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#003580] to-[#0a4fa6] dark:from-blue-600/20 dark:to-[#131b2e]/10 text-white dark:text-blue-400 dark:border-blue-500 shadow-md shadow-blue-500/10'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white'
+                    } ${collapsed ? 'justify-center px-0 w-11 mx-auto' : ''}`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 shrink-0 ${
+                        isActive ? 'text-white dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
+                      }`}
+                    />
+                    {!collapsed && <span className="flex-1">{entry.label}</span>}
+                    {entry.badge && !collapsed && (
+                      <span className="flex items-center justify-center min-w-[18px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-sm">
+                        {entry.badge}
+                      </span>
+                    )}
+                    {entry.badge && collapsed && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-bold text-white ring-2 ring-white dark:ring-[#0b0f19]">
+                        {entry.badge}
+                      </span>
+                    )}
+                    {/* Tooltip for collapsed */}
+                    {collapsed && (
+                      <div className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        {entry.label}
+                      </div>
+                    )}
+                  </NavLink>
+                );
+              }
+
+              // Group entry
+              const Icon = entry.icon;
+              const isOpen_ = expanded.has(entry.key);
+              const groupActive = isGroupActive(entry);
+
+              return (
+                <div key={entry.key}>
+                  <button
+                    type="button"
+                    onClick={() => !collapsed && toggle(entry.key)}
+                    title={collapsed ? entry.label : undefined}
+                    className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      groupActive
+                        ? 'text-[#003580] dark:text-blue-400 bg-[#003580]/6 dark:bg-blue-500/10'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white'
+                    } ${collapsed ? 'justify-center px-0 w-11 mx-auto' : ''}`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 shrink-0 ${
+                        groupActive ? 'text-[#003580] dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
+                      }`}
+                    />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">{entry.label}</span>
+                        {/* Badge aggregate */}
+                        {entry.children.some((c) => c.badge) && (
+                          <span className="flex items-center justify-center min-w-[18px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-sm mr-1">
+                            {entry.children.reduce((sum, c) => sum + (c.badge ?? 0), 0)}
+                          </span>
+                        )}
+                        <ChevronDown
+                          className={`h-3.5 w-3.5 text-slate-400 dark:text-slate-600 transition-transform duration-200 ${
+                            isOpen_ ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </>
+                    )}
+                    {/* Collapsed badge dot */}
+                    {collapsed && entry.children.some((c) => c.badge) && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-bold text-white ring-2 ring-white dark:ring-[#0b0f19]">
+                        {entry.children.reduce((sum, c) => sum + (c.badge ?? 0), 0)}
+                      </span>
+                    )}
+                    {/* Tooltip for collapsed */}
+                    {collapsed && (
+                      <div className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        {entry.label}
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Children list — animated */}
+                  {isOpen_ && !collapsed && (
+                    <div className="mt-1 ml-4 space-y-0.5 border-l-2 border-slate-100 dark:border-slate-800 pl-2">
+                      {entry.children.map((child) => {
+                        const ChildIcon = childIconMap[child.label] ?? Newspaper;
+                        const isChildActive = child.exact
+                          ? location.pathname === child.path
+                          : location.pathname.startsWith(child.path);
+                        return (
+                          <NavLink
+                            key={child.path}
+                            to={child.path}
+                            end={child.exact}
+                            onClick={onNavigate}
+                            className={`group flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 ${
+                              isChildActive
+                                ? 'bg-[#003580] dark:bg-blue-600/20 text-white dark:text-blue-400 shadow-sm'
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            <ChildIcon
+                              className={`h-3.5 w-3.5 shrink-0 ${
+                                isChildActive
+                                  ? 'text-white dark:text-blue-400'
+                                  : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                              }`}
+                            />
+                            <span className="flex-1 truncate">{child.label}</span>
+                            {child.badge && (
+                              <span
+                                className={`flex items-center justify-center min-w-[18px] h-5 px-1.5 rounded-full text-[10px] font-bold shadow-sm ${
+                                  isChildActive
+                                    ? 'bg-white/20 text-white dark:bg-blue-400/20 dark:text-blue-300'
+                                    : 'bg-rose-500 text-white'
+                                }`}
+                              >
+                                {child.badge}
+                              </span>
+                            )}
+                          </NavLink>
+                        );
+                      })}
                     </div>
-                  </div>
-                )}
-                <div className="space-y-0.5">
-                  {items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = item.exact
-                      ? location.pathname === item.path
-                      : location.pathname.startsWith(item.path);
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        end={item.exact}
-                        onClick={onNavigate}
-                        title={collapsed ? item.tooltip || item.label : undefined}
-                        className={`group relative flex items-center rounded-lg text-sm font-medium transition-all duration-150 ${
-                          collapsed ? 'justify-center py-3 px-0 mx-auto w-11' : 'gap-3 py-2.5 px-3'
-                        } ${
-                          isActive
-                            ? 'bg-[rgba(244,180,0,0.1)] text-[#F4B400]'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        {isActive && !collapsed && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#F4B400] shadow-[0_0_8px_rgba(244,180,0,0.4)]" />
-                        )}
-                        <span className="shrink-0 flex items-center justify-center">
-                          <Icon className="h-[20px] w-[20px]" />
-                        </span>
-                        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-                        {item.badge && !collapsed && (
-                          <span className={`flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
-                            isActive ? 'bg-[#F4B400]/20 text-[#F4B400]' : 'bg-rose-500/90 text-white'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                        {item.badge && collapsed && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-bold text-white shadow-lg ring-1 ring-white/20">
-                            {item.badge}
-                          </span>
-                        )}
-                        {collapsed && (
-                          <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                            {item.label}
-                            {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
-                          </div>
-                        )}
-                        {isActive && collapsed && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#F4B400] shadow-[0_0_8px_rgba(244,180,0,0.4)]" />
-                        )}
-                      </NavLink>
-                    );
-                  })}
+                  )}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </nav>
 
-        {/* User area */}
-        <div className="relative border-t border-white/8 px-4 py-4">
+        {/* ── User area ── */}
+        <div className="border-t border-slate-200 dark:border-slate-800/80 px-5 py-4">
           {!collapsed ? (
-            <div className="flex items-center gap-3 rounded-xl bg-white/5 px-3.5 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-sm font-bold text-[#0B1A2E] shrink-0 shadow-sm">
-                CM
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">Content Manager</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                  </span>
-                  <span className="text-[11px] text-slate-400">Online</span>
+            <>
+              <div className="flex items-center gap-3 mb-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-xs font-bold text-[#0B1A2E] shrink-0 shadow-sm">
+                  CM
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate leading-none">
+                    Content Manager
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-400" />
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">Online</span>
+                  </div>
                 </div>
               </div>
-              <button type="button" onClick={onLogout}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 transition-all" title="Logout">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex w-full items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+              >
                 <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </button>
-            </div>
+            </>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-sm font-bold text-[#0B1A2E] shadow-sm" title="Content Manager">
+            <div className="flex flex-col items-center gap-3">
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-xs font-bold text-[#0B1A2E] shadow-sm"
+                title="Content Manager"
+              >
                 CM
               </div>
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-400" />
               </span>
-              <button type="button" onClick={onLogout}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 transition-all" title="Logout">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+                title="Logout"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
@@ -225,12 +428,19 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`mt-2 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all ${
+            className={`mt-3 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-all duration-200 ${
               collapsed ? 'w-full py-2' : 'w-full py-2 gap-2'
             }`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[11px] font-medium">Collapse</span></>}
+            {collapsed ? (
+              <PanelLeftOpen className="h-4 w-4" />
+            ) : (
+              <>
+                <PanelLeftClose className="h-4 w-4" />
+                <span className="text-xs font-semibold">Collapse</span>
+              </>
+            )}
           </button>
         </div>
       </aside>

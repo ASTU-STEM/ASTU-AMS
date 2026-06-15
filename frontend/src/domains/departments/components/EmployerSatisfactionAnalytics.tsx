@@ -43,7 +43,7 @@ export const EmployerSatisfactionAnalytics: React.FC<EmployerSatisfactionAnalyti
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">Good</span>
-                <span className="text-blue-600 font-bold">{metric.breakdown.good}%</span>
+                <span className="text-astu-navy font-bold">{metric.breakdown.good}%</span>
               </div>
               <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${metric.breakdown.good}%` }}></div>
@@ -73,7 +73,7 @@ export const EmployerSatisfactionAnalytics: React.FC<EmployerSatisfactionAnalyti
           <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">Top Performing Areas</h4>
           <div className="space-y-3">
             {sortedData.slice(0, 3).map((metric, idx) => (
-              <div key={idx} className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-gray-200/60 rounded-xl">
+              <div key={idx} className="p-4 bg-gradient-to-br from-blue-50 to-green-50 border border-gray-200/60 rounded-xl">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-bold text-gray-900">{metric.category}</span>
                   <div className="flex items-center gap-1">
@@ -88,7 +88,7 @@ export const EmployerSatisfactionAnalytics: React.FC<EmployerSatisfactionAnalyti
                   <span className="text-astu-green font-bold">{metric.score}/10</span>
                 </div>
                 <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full" style={{ width: `${metric.score * 10}%` }}></div>
+                  <div className="bg-gradient-to-r from-astu-green to-blue-400 h-full rounded-full" style={{ width: `${metric.score * 10}%` }}></div>
                 </div>
               </div>
             ))}
