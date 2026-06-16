@@ -316,7 +316,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
 
           {/* Quick Replies */}
           <div className="px-5 pt-3 pb-1 flex flex-wrap gap-2 border-t border-[var(--border-color)] bg-[var(--bg-card)]">
-            {(quickReplies[activeThread] || quickReplies.recruiter).map(reply => (
+            {(quickReplies[activeThread] || quickReplies.recruiter || []).map(reply => (
               <button
                 key={reply}
                 type="button"
