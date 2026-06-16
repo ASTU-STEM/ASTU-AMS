@@ -4,7 +4,7 @@ import { Survey } from '../../../domain/entities/Survey';
 
 describe('ManageSurveys Use Cases', () => {
   let mockRepo: jest.Mocked<ISurveyRepository>;
-  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', 6, true, false, []);
+  const mockSurvey = new Survey('s1', 'Test', 'Desc', 'SIX_MONTH', 6, null, true, false, []);
 
   beforeEach(() => {
     mockRepo = {

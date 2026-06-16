@@ -62,7 +62,7 @@ export class PrismaSurveyAssignmentRepository implements ISurveyAssignmentReposi
       data: {
         surveyId: data.surveyId,
         alumniId: data.alumniId,
-        status: data.status,
+        status: data.status as any,
         assignedAt: data.assignedAt,
         dueDate: data.dueDate,
         completedAt: data.completedAt,
@@ -82,7 +82,7 @@ export class PrismaSurveyAssignmentRepository implements ISurveyAssignmentReposi
     const assignment = await prisma.surveyAssignment.update({
       where: { id },
       data: {
-        status: data.status,
+        status: data.status as any,
         dueDate: data.dueDate,
         completedAt: data.completedAt,
         sevenDayReminderSent: data.sevenDayReminderSent,

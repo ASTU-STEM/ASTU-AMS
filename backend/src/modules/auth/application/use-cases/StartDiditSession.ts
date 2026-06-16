@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 /**
  * StartDiditSession

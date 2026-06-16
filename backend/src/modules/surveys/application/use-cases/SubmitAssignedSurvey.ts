@@ -107,13 +107,13 @@ export class SubmitAssignedSurvey {
         select: { id: true, email: true },
       });
 
-      const alumniUser = await prisma.user.findUnique({
-        where: { id: alumniId },
-        select: { email: true, firstName: true, lastName: true },
+      const alumniProfile = await prisma.alumniProfile.findUnique({
+        where: { userId: alumniId },
+        select: { fullName: true, email: true },
       });
 
-      const alumniName = alumniUser
-        ? `${alumniUser.firstName ?? ''} ${alumniUser.lastName ?? ''}`.trim()
+      const alumniName = alumniProfile
+        ? alumniProfile.fullName.trim()
         : 'An alumnus';
 
       await Promise.allSettled([
@@ -126,9 +126,9 @@ export class SubmitAssignedSurvey {
           } as any)
         ),
         // Email confirmation to alumni
-        alumniUser?.email
+        alumniProfile?.email
           ? this.emailService.sendGenericNotification(
-              alumniUser.email,
+              alumniProfile.email,
               `Survey Submitted: ${surveyTitle}`,
               `Your response for the survey "<strong>${surveyTitle}</strong>" has been received. Thank you for helping ASTU maintain ABET accreditation standards.`
             )

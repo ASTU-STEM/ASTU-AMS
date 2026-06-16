@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess, sendError } from '../../../core/utils/response.utils';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../../../core/config/db';
 
 import { PrismaGraduateRecordRepository } from '../infrastructure/repositories/PrismaGraduateRecordRepository';
 import { PrismaSyncLogRepository } from '../infrastructure/repositories/PrismaSyncLogRepository';

@@ -3,7 +3,7 @@ import { EmailService } from '../../../../core/services/EmailService';
 import { AuthError } from '../../domain/errors/AuthErrors';
 import crypto from 'crypto';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 export interface ForgotPasswordRequest {
   emailOrPhone: string;

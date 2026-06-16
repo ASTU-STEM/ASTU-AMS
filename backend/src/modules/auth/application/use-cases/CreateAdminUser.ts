@@ -2,7 +2,7 @@ import { IUserRepository } from '../ports/IUserRepository';
 import { PrismaClient, Role } from '@prisma/client';
 import { EmailService } from '../../../../core/services/EmailService';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 export interface CreateAdminUserRequest {
   email: string;

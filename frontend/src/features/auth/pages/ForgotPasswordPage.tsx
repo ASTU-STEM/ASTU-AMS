@@ -14,8 +14,7 @@ const emailSchema = yup.object().shape({
   email: yup
     .string()
     .required('ASTU Email is required')
-    .email('Please enter a valid email address')
-    .matches(/^[^\s@]+@astust\.edu\.et$/, 'Please enter your university email ending with @astust.edu.et'),
+    .email('Please enter a valid email address'),
 });
 
 const phoneSchema = yup.object().shape({
@@ -153,7 +152,7 @@ export default function ForgotPasswordPage() {
                 touched={touched.email}
                 disabled={isLoading}
                 required
-                helpText="Only official university accounts ending with @astust.edu.et can receive reset links here."
+                helpText="Enter the email address registered with your ASTU alumni account."
               />
             ) : (
               <FormField

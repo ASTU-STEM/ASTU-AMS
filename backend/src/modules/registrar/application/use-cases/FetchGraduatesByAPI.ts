@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 export interface GraduateRecord {
   studentId: string;

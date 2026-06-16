@@ -286,4 +286,4 @@ const proxy = new Proxy({}, {
   }
 });
 
-export default proxy as any;
+export default proxy as PrismaClient;

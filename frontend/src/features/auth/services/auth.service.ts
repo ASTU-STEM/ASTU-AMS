@@ -41,7 +41,7 @@ apiClient.interceptors.response.use(
 );
 
 export type ApiResult<T> =
-  | { ok: true; data: T }
+  | { ok: true; data: T; message?: string; errorCode?: string }
   | { ok: false; errorCode: string; message: string };
 
 export const authService = {

@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken } from '../../../../core/utils/jwt.utils';
 import { Role, PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 export class LoginUser {
   constructor(
