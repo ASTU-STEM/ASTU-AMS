@@ -28,8 +28,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ messages, onSendMess
             AB
           </div>
           <div>
-            <h4 className="font-bold text-sm">Abebe Bikila (Alumnus)</h4>
-            <p className={`text-[10px] ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Junior Fullstack Engineer @ Chapa</p>
+            <h4 className="font-bold text-sm">Contact</h4>
           </div>
         </div>
         <span className="flex items-center gap-1 text-[10px] text-green-700 bg-green-100 px-2 py-0.5 rounded-full font-bold">

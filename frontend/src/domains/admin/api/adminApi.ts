@@ -375,6 +375,31 @@ export const adminApi = {
     });
     return response.data;
   },
+
+  // Email Center
+  // Backend endpoint: GET /email/campaigns
+  async getEmailCampaigns() {
+    const response = await adminApiClient.get('/email/campaigns');
+    return response.data;
+  },
+
+  // Backend endpoint: GET /email/stats
+  async getEmailStats() {
+    const response = await adminApiClient.get('/email/stats');
+    return response.data;
+  },
+
+  // Backend endpoint: POST /email/send
+  async sendEmail(payload: { subject: string; body: string; recipients: string[]; scheduleAt?: string }) {
+    const response = await adminApiClient.post('/email/send', payload);
+    return response.data;
+  },
+
+  // Backend endpoint: GET /email/templates
+  async getEmailTemplates() {
+    const response = await adminApiClient.get('/email/templates');
+    return response.data;
+  },
 };
 
 export const departmentsService = adminApi;

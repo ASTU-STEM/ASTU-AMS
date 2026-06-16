@@ -126,104 +126,73 @@ const navSections = [
   { label: "Contact", id: "contact" }
 ];
 
-const communityPosts = [
-  {
-    name: "Abebe Yosef",
-    role: "Software Engineer",
-    text: "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.",
-    image: stateM,
-  },
-  {
-    name: "Bekele Kebede",
-    role: "Employer Partner",
-    text: "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.",
-    image: gc7,
-  },
-  {
-    name: "Helina Sileshi",
-    role: "Mentor & Alumni",
-    text: "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!",
-    image: arcImage,
-  },
-];
+const communityPosts: {
+  name: string;
+  role: string;
+  text: string;
+  image: string;
+}[] = [];
 
-const events = [
-  {
-    title: "ASTU Alumni Carnival 2026",
-    date: "April 25-26, 2026",
-    location: "Main Campus",
-    image:
-      arcImage,
-  },
-  {
-    title: "DAAD Alumni Workshop",
-    date: "March 2026",
-    location: "ASTU Research Center",
-    image:
-      gc7,
-  },
-];
+const events: {
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+}[] = [];
 
-const workshops = [
-  { title: "AI for Engineering Research", date: "June 14, 2026", seats: "120 seats", focus: "Research & Innovation" },
-  { title: "CV Builder and Interview Lab", date: "June 20, 2026", seats: "80 seats", focus: "Career Readiness" },
-  { title: "Startup Finance for Alumni", date: "July 4, 2026", seats: "60 seats", focus: "Entrepreneurship" },
-];
+const workshops: {
+  title: string;
+  date: string;
+  seats: string;
+  focus: string;
+}[] = [];
 
-const featuredAlumni = [
-  { name: "Dr. Ruth Alemu", role: "AI Research Scientist", impact: "Published 18 applied AI papers and mentors ASTU research teams.", image: arcImage },
-  { name: "Yonas Bekele", role: "Founder, GreenGrid Labs", impact: "Built a renewable-energy startup serving industrial campuses.", image: electricLabs },
-  { name: "Kalkidan Tadesse", role: "Cloud Platform Lead", impact: "Leads enterprise cloud migration programs for regional partners.", image: stateM },
-];
+const featuredAlumni: {
+  name: string;
+  role: string;
+  impact: string;
+  image: string;
+}[] = [];
 
-const featuredEmployers = [
-  { name: "Ethio Telecom", area: "Telecom & Cloud", openings: "14 graduate roles" },
-  { name: "Ethiopian Airlines", area: "Aviation Technology", openings: "8 internship tracks" },
-  { name: "INSA", area: "Cybersecurity", openings: "6 research placements" },
-  { name: "Huawei Ethiopia", area: "Network Engineering", openings: "11 certification paths" },
-];
+const featuredEmployers: {
+  name: string;
+  area: string;
+  openings: string;
+}[] = [];
 
-const partners = [
-  { name: "Ethio Telecom" },
-  { name: "INSA" },
-  { name: "Ethiopian Airlines" },
-  { name: "Safaricom" },
-  { name: "Huawei" },
-  { name: "Commercial Bank of Ethiopia" },
-];
+const partners: {
+  name: string;
+}[] = [];
 
-const campusLifeCards = [
-  { title: "Events and Activities", campus: "Main Campus", description: "Career expos, alumni reunions, workshops, chapter meetings, and community programs.", image: gallery2, action: "View Events" },
-  { title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, student services, and employer interview rooms.", image: electricLabs, action: "Explore Facilities" },
-  { title: "ASTU Museums & Gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, campus photography, and public video archives.", image: arcImage, action: "View Gallery" },
-];
+const campusLifeCards: {
+  title: string;
+  campus: string;
+  description: string;
+  image: string;
+  action: string;
+}[] = [];
 
-const announcements = [
-  { title: "ASTU Alumni Association Inspires Graduating Class with Career Tips!", date: "March 7, 2025", type: "Alumni Announcement" },
-  { title: "ASTU hosts a five-day DAAD Alumni workshop", date: "March 7, 2025", type: "Employer Announcement" },
-  { title: "ASTU alumni serve as model United Nations secretariats!", date: "January 7, 2025", type: "Alumni Achievement" },
-  { title: "Tracer Study 2026 response window is open", date: "May 31, 2026", type: "Alumni Announcement" },
-  { title: "Call for employer partners: campus recruitment week", date: "May 28, 2026", type: "Employer Announcement" },
-];
+const announcements: {
+  title: string;
+  date: string;
+  type: string;
+}[] = [];
 
-const campuses = [
-  { name: "Main Campus", description: "Central hub for alumni services, registrar workflows, and institutional engagement.", image: gallery1 },
-  { name: "Engineering Labs", description: "Applied research, workshops, innovation programs, and industry-linked training.", image: electricLabs },
-  { name: "Graduation & Events Hall", description: "Ceremonies, career fairs, alumni awards, and university achievement programs.", image: gc7 },
-  { name: "Research Collaboration Center", description: "Research publications, industry projects, and department KPI evidence.", image: arcImage },
-];
+const campuses: {
+  name: string;
+  description: string;
+  image: string;
+}[] = [];
 
-const faqItems = [
-  { question: "Who can use ASTU-AMS?", answer: "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services." },
-  { question: "How are tracer studies used?", answer: "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence." },
-  { question: "Can employers register events?", answer: "Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports." },
-];
+const faqItems: {
+  question: string;
+  answer: string;
+}[] = [];
 
-const galleryImages = [
-  { src: gallery1, title: "ASTU Main Campus" },
-  { src: gallery2, title: "Innovation and Collaboration" },
-  { src: gallery3, title: "ASTU Alumni Identity" },
-];
+const galleryImages: {
+  src: string;
+  title: string;
+}[] = [];
 
 const impactStats = [
   {

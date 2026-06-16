@@ -15,9 +15,6 @@ import { CurriculumInsights } from '../components/CurriculumInsights';
 import { ExportCenter } from '../components/ExportCenter';
 import { AccreditationReports } from '../components/AccreditationReports';
 
-// Data
-import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerSurveyData, mockCurriculumInsights, mockExportReports } from '../services/mockDepartmentData';
-
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -28,11 +25,7 @@ const DepartmentDashboard = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, text: 'New tracer survey responses received from 2024 graduates.', unread: true, time: '2 hours ago' },
-        { id: 2, text: 'Employer feedback report generated for Computer Science.', unread: true, time: '1 day ago' },
-        { id: 3, text: 'Accreditation evidence audit completed successfully.', unread: false, time: '3 days ago' },
-    ]);
+    const [notifications, setNotifications] = useState<{ id: number; text: string; unread: boolean; time: string }[]>([]);
 
     const handleLogout = () => {
         logout();
@@ -108,19 +101,19 @@ const DepartmentDashboard = () => {
             case 'dashboard':
                 return <DashboardOverview darkMode={darkMode} />;
             case 'employment-analytics':
-                return <EmploymentAnalytics data={mockEmploymentData} darkMode={darkMode} />;
+                return <EmploymentAnalytics data={null} darkMode={darkMode} />;
             case 'skill-gap':
-                return <SkillGapAnalysis data={mockSkillGapData} darkMode={darkMode} />;
+                return <SkillGapAnalysis data={null} darkMode={darkMode} />;
             case 'employer-feedback':
-                return <EmployerFeedback data={mockEmployerFeedback} darkMode={darkMode} />;
+                return <EmployerFeedback data={null} darkMode={darkMode} />;
             case 'tracer-reports':
-                return <TracerReports data={mockTracerSurveyData} darkMode={darkMode} />;
+                return <TracerReports data={null} darkMode={darkMode} />;
             case 'curriculum':
-                return <CurriculumInsights data={mockCurriculumInsights} darkMode={darkMode} />;
+                return <CurriculumInsights data={null} darkMode={darkMode} />;
             case 'accreditation':
                 return <AccreditationReports darkMode={darkMode} />;
             case 'export':
-                return <ExportCenter reports={mockExportReports} darkMode={darkMode} />;
+                return <ExportCenter reports={[]} darkMode={darkMode} />;
             default:
                 return <DashboardOverview darkMode={darkMode} />;
         }

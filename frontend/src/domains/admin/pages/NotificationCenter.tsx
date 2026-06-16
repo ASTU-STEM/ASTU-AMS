@@ -127,13 +127,7 @@ const departments = ['Computer Science', 'Software Engineering', 'Electrical Eng
 const batches = ['2020', '2021', '2022', '2023', '2024'];
 const roles = ['Alumni', 'Employer', 'Department Head', 'Registrar', 'Admin'];
 
-const defaultUsers = [
-  { id: 'usr-001', fullName: 'Abebe Kebede', name: 'Abebe Kebede', email: 'abebe@astu.edu.et', role: 'Alumni', department: 'Software Engineering', batch: '2022' },
-  { id: 'usr-002', fullName: 'Helena Tesfaye', name: 'Helena Tesfaye', email: 'helena@astu.edu.et', role: 'Alumni', department: 'Computer Science', batch: '2023' },
-  { id: 'usr-003', fullName: 'Yonas Bekele', name: 'Yonas Bekele', email: 'yonas@astu.edu.et', role: 'Employer', department: 'Electrical Engineering', batch: '2020' },
-  { id: 'usr-004', fullName: 'Ruth Alemu', name: 'Ruth Alemu', email: 'ruth@astu.edu.et', role: 'Department Head', department: 'Mechanical Engineering', batch: '2021' },
-  { id: 'usr-005', fullName: 'Kalkidan Tadesse', name: 'Kalkidan Tadesse', email: 'kalkidan@astu.edu.et', role: 'Admin', department: 'Civil Engineering', batch: '2024' },
-];
+const defaultUsers = [] as any[];
 
 const specificUsers = defaultUsers.map(u => u.fullName);
 

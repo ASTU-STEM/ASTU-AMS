@@ -759,32 +759,6 @@ function RegistrarPortal() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                    <tr>
-                      <td className="p-4 text-xs font-mono font-bold text-slate-900">
-                        ASTU/1024/18
-                      </td>
-                      <td className="p-4">Abdi Kebede</td>
-                      <td className="p-4">Electrical Engineering</td>
-                      <td className="p-4 font-mono">3.84</td>
-                      <td className="p-4">
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-50 text-emerald-700 border border-emerald-200">
-                          Synced
-                        </span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="p-4 text-xs font-mono font-bold text-slate-900">
-                        ASTU/4592/18
-                      </td>
-                      <td className="p-4">Chala Bekele</td>
-                      <td className="p-4">Computer Science</td>
-                      <td className="p-4 font-mono">3.62</td>
-                      <td className="p-4">
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-50 text-emerald-700 border border-emerald-200">
-                          Synced
-                        </span>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>

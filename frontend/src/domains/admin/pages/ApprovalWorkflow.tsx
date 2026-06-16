@@ -45,16 +45,7 @@ type WorkflowItem = {
   dueDate: string;
 };
 
-const WORKFLOW: WorkflowItem[] = [
-  { id: "w-1", title: "Career Fair 2026 Registration Open", type: "Event", author: "Event Coordinator", submittedAt: "2 hours ago", status: "Pending Review", priority: "High", reviewer: "Content Manager", stage: 1, totalStages: 3, comments: 0, dueDate: "Today, 5 PM" },
-  { id: "w-2", title: "Campus Tour 2026 Photo Album", type: "Gallery", author: "Dept Head", submittedAt: "3 days ago", status: "In Review", priority: "Normal", reviewer: "Sarah Mengistu", stage: 2, totalStages: 3, comments: 3, dueDate: "Tomorrow" },
-  { id: "w-3", title: "Tracer Survey Wave 3 Banner", type: "Page", author: "Content Manager", submittedAt: "5 hours ago", status: "Changes Requested", priority: "Normal", reviewer: "Marketing Lead", stage: 1, totalStages: 2, comments: 7, dueDate: "Jun 12" },
-  { id: "w-4", title: "Alumni Spotlight: Solomon Bekele", type: "Post", author: "Content Manager", submittedAt: "1 day ago", status: "Approved", priority: "High", reviewer: "Editor in Chief", stage: 3, totalStages: 3, comments: 2, dueDate: "—" },
-  { id: "w-5", title: "Research Lab Safety Guidelines", type: "Page", author: "Research Directorate", submittedAt: "4 days ago", status: "Pending Review", priority: "Urgent", reviewer: "Public Relations", stage: 1, totalStages: 2, comments: 0, dueDate: "Today" },
-  { id: "w-6", title: "Partnership Summit Report", type: "Post", author: "Industry Liaison", submittedAt: "6 hours ago", status: "In Review", priority: "Normal", reviewer: "Content Manager", stage: 1, totalStages: 3, comments: 1, dueDate: "Jun 13" },
-  { id: "w-7", title: "Outdated Department Policy", type: "Page", author: "HR Office", submittedAt: "2 weeks ago", status: "Rejected", priority: "Low", reviewer: "Legal", stage: 2, totalStages: 2, comments: 5, dueDate: "—" },
-  { id: "w-8", title: "New Homepage Hero Update", type: "Page", author: "Content Manager", submittedAt: "30 min ago", status: "Pending Review", priority: "Urgent", reviewer: "Marketing Lead", stage: 1, totalStages: 3, comments: 0, dueDate: "Today" },
-];
+const WORKFLOW: WorkflowItem[] = [];
 
 const statusConfig: Record<WorkflowStatus, { badge: string; dot: string }> = {
   "Pending Review": { badge: "border-amber-500/25 bg-amber-500/10 text-amber-400", dot: "bg-amber-400" },

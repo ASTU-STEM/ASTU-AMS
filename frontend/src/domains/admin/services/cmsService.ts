@@ -339,13 +339,7 @@ const MOCK_EVENTS: EventItem[] = [
   { id: 'E-008', title: 'Python Data Science Workshop', kind: 'Workshop', category: 'Technical Training', date: '2026-05-10', rsvps: 88, attendance: 82, status: 'Closed', location: 'CS Lab 102' },
 ];
 
-const MOCK_WORKFLOW_ITEMS: WorkflowItem[] = [
-  { id: 'w-1', title: 'Career Fair 2026 Registration Open', type: 'Event', author: 'Event Coordinator', submittedAt: '2 hours ago', status: 'Pending Review', priority: 'High', reviewer: 'Content Manager', stage: 1, totalStages: 3, comments: 0, dueDate: 'Today, 5 PM' },
-  { id: 'w-2', title: 'Campus Tour 2026 Photo Album', type: 'Gallery', author: 'Dept Head', submittedAt: '3 days ago', status: 'In Review', priority: 'Normal', reviewer: 'Sarah Mengistu', stage: 2, totalStages: 3, comments: 3, dueDate: 'Tomorrow' },
-  { id: 'w-3', title: 'Tracer Survey Wave 3 Banner', type: 'Page', author: 'Content Manager', submittedAt: '5 hours ago', status: 'Changes Requested', priority: 'Normal', reviewer: 'Marketing Lead', stage: 1, totalStages: 2, comments: 7, dueDate: 'Jun 12' },
-  { id: 'w-4', title: 'Alumni Spotlight: Solomon Bekele', type: 'Post', author: 'Content Manager', submittedAt: '1 day ago', status: 'Approved', priority: 'High', reviewer: 'Editor in Chief', stage: 3, totalStages: 3, comments: 2, dueDate: '—' },
-  { id: 'w-5', title: 'Research Lab Safety Guidelines', type: 'Page', author: 'Research Directorate', submittedAt: '4 days ago', status: 'Pending Review', priority: 'Urgent', reviewer: 'Public Relations', stage: 1, totalStages: 2, comments: 0, dueDate: 'Today' },
-];
+const MOCK_WORKFLOW_ITEMS: WorkflowItem[] = [];
 
 const MOCK_GOVERNANCE_ANNOUNCEMENTS: GovernanceAnnouncement[] = [
   { id: 'A-001', title: '2026 Tracer Study Wave Opens', audience: 'Alumni', status: 'Pinned', attachment: 'PDF', owner: 'Alumni Office', updated: '2 hours ago', views: 1240 },
@@ -437,11 +431,7 @@ const MOCK_HOMEPAGE_DATA: HomepageData = {
     { id: 'AN-4', title: 'Tracer Study 2026 response window is open', date: 'May 31, 2026', type: 'Alumni Announcement', active: true },
     { id: 'AN-5', title: 'Call for employer partners: campus recruitment week', date: 'May 28, 2026', type: 'Employer Announcement', active: true },
   ],
-  stories: [
-    { id: 'SS-1', name: 'Abebe Yosef', role: 'Software Engineer', text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.', image: '/src/assets/images/State-M.jpg', active: true },
-    { id: 'SS-2', name: 'Bekele Kebede', role: 'Employer Partner', text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.', image: '/src/assets/images/gc7.jpg', active: true },
-    { id: 'SS-3', name: 'Helina Sileshi', role: 'Mentor & Alumni', text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!', image: '/src/assets/images/arc.jpg', active: true },
-  ],
+  stories: [],
   partners: [
     { id: 'PT-1', name: 'Ethio Telecom', active: true },
     { id: 'PT-2', name: 'INSA', active: true },
@@ -450,11 +440,7 @@ const MOCK_HOMEPAGE_DATA: HomepageData = {
     { id: 'PT-5', name: 'Huawei', active: true },
     { id: 'PT-6', name: 'Commercial Bank of Ethiopia', active: true },
   ],
-  testimonials: [
-    { id: 'TT-1', quote: 'ASTU-AMS gave our department the evidence we needed for skill-gap review.', by: 'Department Head', active: true },
-    { id: 'TT-2', quote: 'The candidate search and feedback tools improved our campus recruitment cycle.', by: 'Employer Partner', active: true },
-    { id: 'TT-3', quote: 'I found mentorship, events, and job matches without leaving the alumni portal.', by: 'ASTU Alumna', active: true },
-  ],
+  testimonials: [],
   faq: [
     { id: 'FQ-1', question: 'Who can use ASTU-AMS?', answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.', active: true },
     { id: 'FQ-2', question: 'How are tracer studies used?', answer: 'Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.', active: true },

@@ -29,11 +29,7 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
 
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'done'>('idle');
   const [activeStep, setActiveStep] = useState<'upload' | 'validate' | 'import'>('upload');
-  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([
-    { id: 3, timestamp: '2026-05-28 14:30', fileName: 'graduates_batch_2024_v2.csv', totalRecords: 124, importedRecords: 118, duplicates: 6, status: 'Partial' },
-    { id: 2, timestamp: '2026-05-15 09:15', fileName: 'cse_graduates_2024.xlsx', totalRecords: 87, importedRecords: 87, duplicates: 0, status: 'Success' },
-    { id: 1, timestamp: '2026-04-30 11:00', fileName: 'ece_batch_2023.csv', totalRecords: 52, importedRecords: 48, duplicates: 4, status: 'Partial' },
-  ]);
+  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,12 +61,7 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
     setIsValidating(true);
 
     setTimeout(() => {
-      const mockRecords = [
-        { studentId: 'UG/19082/14', fullName: 'Solomon Kebede', email: 'solomon.k@astu.edu.et', department: 'Computer Science and Engineering', graduationYear: '2024', cgpa: '3.72' },
-        { studentId: 'UG/12839/14', fullName: 'Abebe Bikila', email: 'abebe.b@gmail.com', department: 'Computer Science and Engineering', graduationYear: '2024', cgpa: '3.78' },
-        { studentId: 'UG/14299/14', fullName: 'Hiwot Tadesse', email: 'hiwot.t@astu.edu.et', department: 'Electrical and Computer Engineering', graduationYear: '2024', cgpa: '3.95' },
-        { studentId: 'UG/18029/14', fullName: 'Mered Girma', email: 'mered.g@astu.edu.et', department: 'Chemical Engineering', graduationYear: '2024', cgpa: '2.40' },
-      ];
+      const mockRecords: any[] = [];
 
       setValidationReport({
         total: 4,

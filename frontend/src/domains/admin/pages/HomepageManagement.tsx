@@ -132,11 +132,7 @@ const initialAnnouncements: Announcement[] = [
   { id: 'AN-5', title: 'Call for employer partners: campus recruitment week', date: 'May 28, 2026', type: 'Employer Announcement', active: true },
 ];
 
-const initialStories: SuccessStory[] = [
-  { id: 'SS-1', name: 'Abebe Yosef', role: 'Software Engineer', text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.', image: '/src/assets/images/State-M.jpg', active: true },
-  { id: 'SS-2', name: 'Bekele Kebede', role: 'Employer Partner', text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.', image: '/src/assets/images/gc7.jpg', active: true },
-  { id: 'SS-3', name: 'Helina Sileshi', role: 'Mentor & Alumni', text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!', image: '/src/assets/images/arc.jpg', active: true },
-];
+const initialStories: SuccessStory[] = [];
 
 const initialPartners: Partner[] = [
   { id: 'PT-1', name: 'Ethio Telecom', active: true },

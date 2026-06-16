@@ -12,11 +12,7 @@ interface ScheduledReport {
 
 export const ReportingTab: React.FC = () => {
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'exports' | 'scheduled' | 'accreditation'>('overview');
-  const [scheduledReports] = useState<ScheduledReport[]>([
-    { id: 1, title: 'Monthly Graduate Tracer Summary', format: 'PDF', schedule: 'Every 1st of month', nextRun: 'Jun 1, 2026', status: 'Active' },
-    { id: 2, title: 'Weekly Verification Audit Log', format: 'Excel', schedule: 'Every Monday', nextRun: 'Jun 8, 2026', status: 'Active' },
-    { id: 3, title: 'Quarterly Accreditation Report', format: 'PDF', schedule: 'Quarterly (Q2)', nextRun: 'Jul 1, 2026', status: 'Paused' },
-  ]);
+  const [scheduledReports] = useState<ScheduledReport[]>([]);
 
   const handleExport = (format: 'PDF' | 'Excel' | 'Stata' | 'CSV', scope: string) => {
     toast.success(`Generating ${format} report: ${scope}`, { duration: 2800 });
@@ -140,11 +136,7 @@ export const ReportingTab: React.FC = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { title: '2024 Graduate Tracer Study Full Report', type: 'PDF', date: 'May 28, 2026', size: '8.4 MB' },
-                { title: 'College of Engineering Performance Dashboard', type: 'Excel', date: 'May 22, 2026', size: '4.1 MB' },
-                { title: 'National Research Dataset – Batch 2023-24', type: 'Stata', date: 'May 15, 2026', size: '12.7 MB' },
-              ].map((report, i) => (
+              {[].map((report: any, i: number) => (
                 <div key={i} onClick={() => handleDownload(report.title)}
                   className="border border-gray-200 hover:border-emerald-400 p-5 rounded-xl transition-all group cursor-pointer hover:shadow-md">
                   <div className="flex justify-between mb-3">
@@ -201,12 +193,7 @@ export const ReportingTab: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {[
-                    { name: 'Graduate Tracer Study 2024', format: 'PDF', by: 'Dr. Abebe Assefa', date: 'May 28, 2026', size: '8.4 MB' },
-                    { name: 'Department Performance Q1', format: 'Excel', by: 'Dr. Abebe Assefa', date: 'May 22, 2026', size: '4.1 MB' },
-                    { name: 'Research Dataset Batch 2023-24', format: 'Stata', by: 'Registrar Admin', date: 'May 15, 2026', size: '12.7 MB' },
-                    { name: 'Alumni Verification Log May', format: 'CSV', by: 'Registrar Admin', date: 'May 10, 2026', size: '2.3 MB' },
-                  ].map((exp, i) => (
+                  {[].map((exp: any, i: number) => (
                     <tr key={i} className="hover:bg-gray-50/50">
                       <td className="py-3 pr-2 font-medium text-gray-800">{exp.name}</td>
                       <td className="py-3 pr-2">

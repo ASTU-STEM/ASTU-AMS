@@ -121,48 +121,9 @@ const upcomingSchedule = [
   },
 ];
 
-const reviewQueue = [
-  {
-    id: "r-1",
-    title: "Campus Tour 2026 Photo Album",
-    type: "gallery",
-    author: "Public Relations",
-    updated: "3 days ago",
-    priority: "Normal" as const,
-  },
-  {
-    id: "r-2",
-    title: "Career Fair 2026 Event Page",
-    type: "event",
-    author: "Career Services",
-    updated: "2 hours ago",
-    priority: "High" as const,
-  },
-  {
-    id: "r-3",
-    title: "Outdated Department Policy",
-    type: "page",
-    author: "HR Office",
-    updated: "1 week ago",
-    priority: "Low" as const,
-  },
-  {
-    id: "r-4",
-    title: "New Homepage Hero Update",
-    type: "page",
-    author: "Marketing Lead",
-    updated: "30 min ago",
-    priority: "Urgent" as const,
-  },
-  {
-    id: "r-5",
-    title: "Alumni Spotlight: Solomon",
-    type: "post",
-    author: "Content Manager",
-    updated: "1 day ago",
-    priority: "High" as const,
-  },
-];
+const reviewQueue: {
+  id: string; title: string; type: string; author: string; updated: string; priority: 'Normal' | 'High' | 'Low' | 'Urgent'
+}[] = [];
 
 const trafficData = [
   { day: "Mon", views: 1240, engagement: 56 },

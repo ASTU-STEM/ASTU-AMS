@@ -19,41 +19,7 @@ interface MessagingTabProps {
 }
 
 export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
-  const [messages, setMessages] = useState<RegistrarMessage[]>([
-    {
-      id: 1,
-      recipient: 'Computer Science Batch of 2025',
-      subject: 'Tracer Survey Launch Alert',
-      text: 'All graduates please check your tracer portal and submit your 6-month career statuses.',
-      timestamp: '10:00 AM',
-      isBroadcast: true,
-      channel: 'Portal + Email',
-      priority: 'High',
-      status: 'Delivered'
-    },
-    {
-      id: 2,
-      recipient: 'Abebe Bikila (Student ID: UG/12839/14)',
-      subject: 'Transcript Verification Approved',
-      text: 'Your transcript document request has been processed and digitally signed by the Registrar Dean.',
-      timestamp: 'Yesterday',
-      isBroadcast: false,
-      channel: 'Portal',
-      priority: 'Normal',
-      status: 'Read'
-    },
-    {
-      id: 3,
-      recipient: 'Department Heads',
-      subject: 'Pending Graduate List Review',
-      text: 'Please review the pending graduate list and confirm correction notes before the SIS sync window closes.',
-      timestamp: 'Mon',
-      isBroadcast: true,
-      channel: 'Email',
-      priority: 'Urgent',
-      status: 'Queued'
-    }
-  ]);
+  const [messages, setMessages] = useState<RegistrarMessage[]>([]);
 
   const [recipient, setRecipient] = useState('');
   const [subject, setSubject] = useState('');

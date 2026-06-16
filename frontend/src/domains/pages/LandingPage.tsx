@@ -127,43 +127,19 @@ const searchItems = [
   { label: "Admin Portal", type: "route", route: "/admin" },
 ];
 
-const communityPosts = [
-  {
-    name: "Abebe Yosef",
-    role: "Software Engineer",
-    text: "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.",
-    image: stateM,
-  },
-  {
-    name: "Bekele Kebede",
-    role: "Employer Partner",
-    text: "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.",
-    image: gc7,
-  },
-  {
-    name: "Helina Sileshi",
-    role: "Mentor & Alumni",
-    text: "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!",
-    image: arcImage,
-  },
-];
+const communityPosts: {
+  name: string;
+  role: string;
+  text: string;
+  image: string;
+}[] = [];
 
-const events = [
-  {
-    title: "ASTU Annual Tech Career Expo",
-    date: "June 30, 2026",
-    location: "Main Campus",
-    image:
-      arcImage,
-  },
-  {
-    title: "Class of 2014 Decade Reunion",
-    date: "July 28, 2026",
-    location: "Networking Hall",
-    image:
-      gc7,
-  },
-];
+const events: {
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+}[] = [];
 
 export default function LandingPage() {
   const navigate = useNavigate();

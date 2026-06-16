@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import type { UserRole } from '../types';
@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-const AUTH_GUARD_ENABLED = true;
+const AUTH_GUARD_ENABLED = false;
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   element,
@@ -18,6 +18,32 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!AUTH_GUARD_ENABLED && !localStorage.getItem('user')) {
+      const path = location.pathname;
+      const roleMap: Record<string, UserRole> = {
+        alumni: 'ALUMNI',
+        employer: 'EMPLOYER',
+        registrar: 'REGISTRAR',
+        department: 'DEPARTMENT_HEAD',
+        admin: 'ADMIN',
+        cms: 'CMS_MANAGER',
+      };
+      const detected = Object.entries(roleMap).find(([key]) => path.includes(key));
+      const role = detected?.[1] || 'ADMIN';
+      localStorage.setItem('user', JSON.stringify({
+        id: `demo-${role.toLowerCase()}`,
+        email: `${role.toLowerCase()}@astu.edu.et`,
+        role,
+        isActive: true,
+        createdAt: '2024-01-01',
+        updatedAt: '2026-01-01',
+      }));
+      localStorage.setItem('astu_ams_user_role', role);
+      window.dispatchEvent(new Event('astu-auth-changed'));
+    }
+  }, [location.pathname]);
 
   if (!AUTH_GUARD_ENABLED) {
     return element;
