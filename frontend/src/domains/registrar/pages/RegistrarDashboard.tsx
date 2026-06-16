@@ -3,6 +3,7 @@ import { useAuth } from '../../../shared/contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Sun, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
+import AiAssistant from '../../../shared/components/AiAssistant';
 
 import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
 import { registrarService } from '../services/registrar.service';
@@ -31,6 +32,7 @@ const RegistrarDashboard = () => {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number; text: string; unread: boolean; time: string }[]>([]);
 
@@ -434,6 +436,12 @@ const RegistrarDashboard = () => {
                   <span className="text-sm font-medium">Help Center</span>
                   <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
                 </button>
+                <button onClick={() => setAiAssistantOpen(true)}
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+                  <span className="text-sm font-medium">AI Assistant</span>
+                  <span className="ml-auto text-[8px] text-emerald-400/80 font-bold px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">NEW</span>
+                </button>
                 <button onClick={handleLogout}
                   className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-left group gap-3">
                   <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
@@ -448,6 +456,11 @@ const RegistrarDashboard = () => {
                   className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
                   <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
                   <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
+                </button>
+                <button onClick={() => setAiAssistantOpen(true)}
+                  className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="AI Assistant">
+                  <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">AI Assistant</div>
                 </button>
                 <button onClick={handleLogout}
                   className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group relative" title="Logout">
@@ -687,7 +700,7 @@ const RegistrarDashboard = () => {
                   </div>
                 )}
 
-                {!dataLoading && (
+                {!dataLoading && (<>
                 <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
                   <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                     <div className="max-w-2xl space-y-2">
@@ -847,8 +860,8 @@ const RegistrarDashboard = () => {
                   <ActivityTimeline activities={[] as ActivityEntry[]} darkMode={darkMode} onViewAll={() => setActiveTab('messages')} />
                 </div>
 
+                </>)}
               </div>
-                )}
             )}
 
             {activeTab === 'records' && (
@@ -938,6 +951,7 @@ const RegistrarDashboard = () => {
     </div>
 
     <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+    <AiAssistant role="registrar" isOpen={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
     </>
   );
 };
