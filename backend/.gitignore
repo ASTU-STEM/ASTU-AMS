@@ -65,3 +65,4 @@ frontend/
 export_db.ts
 count_db.ts
 query.ts
+dist/
