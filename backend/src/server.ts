@@ -4,6 +4,8 @@ import { initPrisma } from './core/config/db';
 import { Logger } from './core/utils/logger.utils';
 import { startTracerStudyCronJobs } from './services/tracer.service';
 import { initCronJobs } from './core/jobs/cron';
+import { createServer } from 'http';
+import { SocketServer } from './infrastructure/websocket/SocketServer';
 
 const PORT = env.PORT || 5000;
 
@@ -21,8 +23,12 @@ async function bootstrap() {
     initCronJobs();
     Logger.info('✅ Tracer study cron jobs started.');
 
-    // 3. Start Server listener
-    app.listen(PORT, () => {
+    // 3. Create HTTP Server and WebSocket Server
+    const httpServer = createServer(app);
+    SocketServer.initialize(httpServer);
+
+    // 4. Start Server listener
+    httpServer.listen(PORT, () => {
       Logger.info(`⚡ ASTU-AMS Server running. Listening on: http://localhost:${PORT}`);
     });
   } catch (err: any) {

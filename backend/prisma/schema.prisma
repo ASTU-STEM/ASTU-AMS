@@ -127,6 +127,7 @@ model AlumniProfile {
   employmentStatus EmploymentStatus @default(UNEMPLOYED)
   salary         Float?
   isVerified     Boolean           @default(false)
+  isCgpaPublic   Boolean           @default(true)
   pendingVerificationCode String?
   verificationCodeExpiresAt DateTime?
   pendingPasswordHash String?
@@ -151,6 +152,7 @@ model AlumniProfile {
   savedJobs      SavedJob[]
   jobViews       JobView[]
   jobRecommendations JobRecommendation[]
+  directMessages DirectMessage[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 }
@@ -189,6 +191,11 @@ model EmployerProfile {
   contactPerson String?
   contactEmail String?
   phone       String?
+  directMessages DirectMessage[]
+  isPremium   Boolean            @default(false)
+  partnerships String[]          @default([])
+  verificationStatus String      @default("NOT_VERIFIED")
+  ndaSigned   Boolean            @default(false)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 }
@@ -612,4 +619,19 @@ model SystemSetting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+model DirectMessage {
+  id           String          @id @default(uuid())
+  employerId   String
+  employer     EmployerProfile @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  alumniId     String
+  alumni       AlumniProfile   @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  sender       String          // "EMPLOYER" or "ALUMNI"
+  text         String
+  isRead       Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+
+  @@index([employerId])
+  @@index([alumniId])
 }

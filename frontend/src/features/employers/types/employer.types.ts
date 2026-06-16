@@ -1,14 +1,24 @@
 export interface CompanyProfile {
   name: string;
-  registrationNumber: string;
+  registrationNumber?: string;
   industry: string;
+  size?: string;
   website: string;
   location: string;
-  hrName: string;
-  hrEmail: string;
-  hrPhone: string;
+  tin?: string;
+  hrName?: string;
+  hrContact?: string;
+  contactPerson?: string;
+  hrEmail?: string;
+  contactEmail?: string;
+  hrPhone?: string;
+  phone?: string;
   logoUrl: string;
   description: string;
+  isPremium?: boolean;
+  partnerships?: string[];
+  verificationStatus?: string;
+  ndaSigned?: boolean;
 }
 
 export interface EmployerJob {
@@ -29,7 +39,7 @@ export interface EmployerJob {
 
 export interface CandidateApplication {
   id: number;
-  jobId: number;
+  jobId?: number;
   jobTitle: string;
   alumnusName: string;
   alumnusEmail: string;
@@ -37,9 +47,11 @@ export interface CandidateApplication {
   department: string;
   graduationYear: string;
   skills: string[];
-  status: 'Pending' | 'Shortlisted' | 'Accepted' | 'Rejected';
+  status: 'Pending' | 'Reviewed' | 'Shortlisted' | 'Interviewed' | 'Hired' | 'Accepted' | 'Rejected';
   appliedDate: string;
-  cvFileName: string;
+  cvFileName?: string;
+  resumeUrl?: string;
+  coverLetter?: string;
 }
 
 export interface GraduateFeedback {

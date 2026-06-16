@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { employerService } from '../services/employer.service';
+import { CandidateApplication } from '../types';
 
 interface TalentSearchTabProps {
   darkMode: boolean;
@@ -10,73 +12,82 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedYear, setSelectedYear] = useState('All');
   const [minCgpa, setMinCgpa] = useState('0.0');
+  
+  const [alumniData, setAlumniData] = useState<CandidateApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Message Modal State
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedAlumniForMessage, setSelectedAlumniForMessage] = useState<CandidateApplication | null>(null);
+  const [messageContent, setMessageContent] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const departments = ['All', 'Computer Science and Engineering', 'Electrical and Computer Engineering', 'Mechanical and Vehicle Engineering'];
   const years = ['All', '2024', '2023', '2022', '2021'];
 
-  // High fidelity alumni database mock
-  const alumniDatabase = [
-    {
-      id: 1,
-      name: 'Abebe Bikila',
-      department: 'Computer Science and Engineering',
-      year: '2024',
-      cgpa: '3.78',
-      skills: ['React', 'TypeScript', 'Node.js', 'Express', 'SQL'],
-      location: 'Addis Ababa',
-      experience: '1 year',
-      avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    {
-      id: 2,
-      name: 'Tigist Kebede',
-      department: 'Electrical and Computer Engineering',
-      year: '2023',
-      cgpa: '3.65',
-      skills: ['Python', 'Django', 'Embedded Systems', 'IoT', 'C++'],
-      location: 'Adama',
-      experience: '2 years',
-      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    {
-      id: 3,
-      name: 'Melkamu Abebe',
-      department: 'Computer Science and Engineering',
-      year: '2024',
-      cgpa: '3.91',
-      skills: ['Go', 'Kubernetes', 'Docker', 'AWS', 'Python'],
-      location: 'Addis Ababa',
-      experience: 'Graduating Student',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80'
-    },
-    {
-      id: 4,
-      name: 'Kalkidan Yosef',
-      department: 'Computer Science and Engineering',
-      year: '2023',
-      cgpa: '3.82',
-      skills: ['React', 'Redux', 'Python', 'Machine Learning'],
-      location: 'Remote',
-      experience: '2 years',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'
+  useEffect(() => {
+    const fetchTalent = async () => {
+      setIsLoading(true);
+      try {
+        const filters = {
+          query: searchQuery,
+          department: selectedDept === 'All' ? '' : selectedDept,
+          graduationYear: selectedYear === 'All' ? '' : selectedYear,
+          minimumCgpa: parseFloat(minCgpa),
+          skills: []
+        };
+        const results = await employerService.searchTalent(filters);
+        setAlumniData(results);
+      } catch (error: any) {
+        toast.error('Failed to load talent data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Simple debounce
+    const timeoutId = setTimeout(() => {
+      fetchTalent();
+    }, 400);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedDept, selectedYear, minCgpa]);
+
+  const handleRequestCv = async (alumni: CandidateApplication) => {
+    try {
+      await employerService.requestCvFromAlumni(alumni.id.toString());
+      toast.success(`CV requested from ${alumni.alumnusName}. An email has been sent.`);
+    } catch (err: any) {
+      toast.error('Failed to request CV. Please try again.');
     }
-  ];
+  };
 
-  const filteredAlumni = alumniDatabase.filter((alumnus) => {
-    const matchesSearch = 
-      alumnus.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      alumnus.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      alumnus.location.toLowerCase().includes(searchQuery.toLowerCase());
+  const handleOpenMessageModal = (alumni: CandidateApplication) => {
+    setSelectedAlumniForMessage(alumni);
+    setMessageContent('');
+    setMessageModalOpen(true);
+  };
 
-    const matchesDept = selectedDept === 'All' || alumnus.department === selectedDept;
-    const matchesYear = selectedYear === 'All' || alumnus.year === selectedYear;
-    const matchesCgpa = parseFloat(alumnus.cgpa) >= parseFloat(minCgpa);
-
-    return matchesSearch && matchesDept && matchesYear && matchesCgpa;
-  });
+  const handleSendMessage = async () => {
+    if (!selectedAlumniForMessage || !messageContent.trim()) {
+      toast.error('Please enter a message.');
+      return;
+    }
+    
+    setIsSendingMessage(true);
+    try {
+      await employerService.sendDirectMessage(selectedAlumniForMessage.id.toString(), messageContent);
+      toast.success(`Message sent successfully to ${selectedAlumniForMessage.alumnusName}.`);
+      setMessageModalOpen(false);
+    } catch (err: any) {
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       
       {/* Search Filter Controls Card */}
       <div className={`p-6 border rounded-3xl shadow-sm transition-all duration-300 ${
@@ -149,67 +160,128 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
       </div>
 
       {/* Grid displaying filtered graduates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredAlumni.map((alum) => (
-          <div
-            key={alum.id}
-            className={`p-6 border rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between ${
-              darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
-            }`}
-          >
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <img 
-                  src={alum.avatarUrl} 
-                  alt={alum.name} 
-                  className="w-16 h-16 rounded-full object-cover border-2 border-astu-navy/20"
-                />
-                <div>
-                  <h4 className="font-bold">{alum.name}</h4>
-                  <p className="text-xs text-astu-navy font-bold">{alum.department}</p>
-                  <p className={`text-[10px] ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                    Class of {alum.year} • CGPA: <span className="font-bold text-astu-green">{alum.cgpa}</span>
-                  </p>
+      {isLoading ? (
+        <div className="flex justify-center p-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003366] border-t-transparent"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {alumniData.map((alum) => (
+            <div
+              key={alum.id}
+              className={`p-6 border rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between ${
+                darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
+              }`}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(alum.alumnusName)}&background=random`}
+                    alt={alum.alumnusName} 
+                    className="w-16 h-16 rounded-full object-cover border-2 border-astu-navy/20"
+                  />
+                  <div>
+                    <h4 className="font-bold">{alum.alumnusName}</h4>
+                    <p className="text-xs text-astu-navy font-bold">{alum.department}</p>
+                    <p className={`text-[10px] ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                      Class of {alum.graduationYear} • CGPA: <span className={`font-bold ${alum.cgpa === 'Hidden (Privacy Setting)' ? 'text-orange-500' : 'text-astu-green'}`}>{alum.cgpa}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {alum.skills && alum.skills.map(s => (
+                    <span key={s} className="px-2 py-0.5 bg-gray-50 border border-gray-150 text-[10px] font-bold text-gray-600 rounded">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-center text-xs pt-2">
+                  <span>Contact: <strong>{alum.alumnusEmail}</strong></span>
+                  <span>Applied Date: <strong>{alum.appliedDate}</strong></span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-2">
-                {alum.skills.map(s => (
-                  <span key={s} className="px-2 py-0.5 bg-gray-50 border border-gray-150 text-[10px] font-bold text-gray-600 rounded">
-                    {s}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex justify-between items-center text-xs pt-2">
-                <span>Location: <strong>{alum.location}</strong></span>
-                <span>Experience: <strong>{alum.experience}</strong></span>
+              <div className="pt-4 mt-4 border-t border-gray-100 flex gap-2">
+                <button
+                  onClick={() => handleOpenMessageModal(alum)}
+                  className="flex-1 py-2 bg-astu-navy text-white rounded-xl text-xs font-bold hover:bg-astu-navy/90 transition-all hover:scale-102"
+                >
+                  Send Message
+                </button>
+                <button
+                  onClick={() => handleRequestCv(alum)}
+                  className="flex-1 py-2 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-50 text-gray-700 transition-colors"
+                >
+                  Request CV
+                </button>
               </div>
             </div>
+          ))}
+          {alumniData.length === 0 && (
+            <div className={`col-span-2 p-12 text-center italic ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+              No graduates matching your search criteria.
+            </div>
+          )}
+        </div>
+      )}
 
-            <div className="pt-4 mt-4 border-t border-gray-100 flex gap-2">
-              <button
-                onClick={() => toast.success(`Simulated recruiter message sent to ${alum.name.split(' ')[0]}!`)}
-                className="flex-1 py-2 bg-astu-navy text-white rounded-xl text-xs font-bold hover:bg-astu-navy/90 transition-all hover:scale-102"
+      {/* Message Modal */}
+      {messageModalOpen && selectedAlumniForMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className={`w-full max-w-md p-6 rounded-3xl shadow-xl ${darkMode ? 'bg-slate-900 text-white' : 'bg-white text-gray-900'}`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Message {selectedAlumniForMessage.alumnusName}</h3>
+              <button 
+                onClick={() => setMessageModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                Send Message
-              </button>
-              <button
-                onClick={() => toast.success(`Mock CV requested from ${alum.name}.`)}
-                className="flex-1 py-2 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-50 text-gray-700 transition-colors"
-              >
-                Request CV
+                <span className="material-symbols-outlined">close</span>
               </button>
             </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold mb-1 opacity-70">Message Content</label>
+                <textarea
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder="Type your direct message here... Start an internal conversation!"
+                  className={`w-full p-3 text-sm rounded-xl border focus:outline-none focus:ring-2 focus:ring-astu-navy/20 min-h-[120px] resize-none ${
+                    darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'
+                  }`}
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setMessageModalOpen(false)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+                    darkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-100'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendMessage}
+                  disabled={isSendingMessage}
+                  className="px-6 py-2 bg-astu-navy text-white rounded-xl text-xs font-bold hover:bg-astu-navy/90 transition-all flex items-center gap-2 disabled:opacity-70"
+                >
+                  {isSendingMessage ? (
+                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[16px]">send</span>
+                  )}
+                  Send Email
+                </button>
+              </div>
+            </div>
           </div>
-        ))}
-        {filteredAlumni.length === 0 && (
-          <div className={`col-span-2 p-12 text-center italic ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-            No graduates matching your search query.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
     </div>
   );
 };
+

@@ -21,6 +21,8 @@ router.get('/dashboard', requireRoles([Role.EMPLOYER, Role.ADMIN, Role.REGISTRAR
 // Talent Search Engine (Employer and Admin)
 router.get('/talent', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.searchTalent));
 router.get('/talent/:alumniId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getAlumnusProfile));
+router.post('/talent/:alumniId/message', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.messageAlumni));
+router.post('/talent/:alumniId/request-cv', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.requestCv));
 
 // Profile
 router.post('/profile', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.createProfile));
@@ -51,6 +53,15 @@ router.delete('/interviews/:interviewId', requireRoles([Role.EMPLOYER, Role.ADMI
 
 // Feedback System
 router.post('/feedback', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.submitFeedback));
+router.post('/feedback/by-name', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.submitFeedbackByName));
 router.get('/feedback', requireRoles([Role.EMPLOYER, Role.ADMIN, Role.REGISTRAR]), asyncHandler(EmployerController.getMyFeedbacks));
+
+// Direct Messaging
+router.get('/messages', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getMessages));
+router.post('/messages', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.sendMessage));
+
+// Logo Upload
+const logoUpload = multer({ dest: 'uploads/logos' });
+router.post('/profile/logo', requireRoles([Role.EMPLOYER, Role.ADMIN]), logoUpload.single('logo'), asyncHandler(EmployerController.uploadLogo));
 
 export default router;

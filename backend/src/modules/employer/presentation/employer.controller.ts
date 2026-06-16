@@ -26,8 +26,12 @@ import { GetEmployerDashboardStats } from '../application/use-cases/GetEmployerD
 import { TalentSearch } from '../application/use-cases/TalentSearch';
 import { JobApplicationNotFoundError, UnauthorizedEmployerActionError } from '../domain/errors/EmployerErrors';
 
+import { EmailService } from '../../../core/services/EmailService';
+import prisma from '../../../core/config/db';
+
 const empRepo = new PrismaEmployerProfileRepository();
 const jobRepo = new PrismaJobRepository();
+const emailService = new EmailService();
 const appRepo = new PrismaJobApplicationRepository();
 const feedbackRepo = new PrismaEmployerFeedbackRepository();
 const interviewRepo = new PrismaInterviewRepository();
@@ -35,7 +39,7 @@ const analyticsRepo = new PrismaDashboardAnalyticsRepository();
 const talentRepo = new PrismaTalentSearchRepository();
 
 export class EmployerController {
-  
+
   // Profile
   static async getProfile(req: Request, res: Response, next: NextFunction) {
     try {
@@ -154,8 +158,8 @@ export class EmployerController {
   // Applications
   static async applyForJob(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user?.userId; 
-      
+      const userId = (req as any).user?.userId;
+
       const file = (req as any).file;
       const resumeUrl = file ? `/uploads/resumes/${file.filename}` : null;
       const coverLetter = req.body.coverLetter;
@@ -188,7 +192,7 @@ export class EmployerController {
       if (!employer) throw new Error('Employer profile not found');
       const app = await appRepo.findById(req.params.applicationId);
       if (!app) throw new JobApplicationNotFoundError();
-      
+
       const job = await jobRepo.findById(app.jobId);
       if (!job || job.employerId !== employer.id) {
         throw new UnauthorizedEmployerActionError('You can only view applications for your own jobs.');
@@ -240,6 +244,47 @@ export class EmployerController {
       const result = await talentRepo.findById(req.params.alumniId);
       if (!result) throw new Error('Alumni profile not found');
       return sendSuccess(res, 'Alumni profile retrieved successfully.', result);
+    } catch (err) { next(err); }
+  }
+
+  static async messageAlumni(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const employer = await empRepo.findByUserId(userId);
+      if (!employer) throw new Error('Employer profile not found');
+
+      const alumni = await talentRepo.findById(req.params.alumniId);
+      if (!alumni || !alumni.email) throw new Error('Alumni profile or email not found');
+
+      const { message } = req.body;
+      if (!message) throw new Error('Message content is required');
+
+      await emailService.sendGenericNotification(
+        alumni.email,
+        `New Message from ${employer.companyName}`,
+        `You have received a new message from ${employer.companyName} via ASTU-AMS:\n\n"${message}"\n\nPlease reply to ${employer.hrContact} at ${employer.contactEmail || (employer as any).user?.email || 'their email'}.`
+      );
+
+      return sendSuccess(res, 'Message sent successfully to alumni.', null);
+    } catch (err) { next(err); }
+  }
+
+  static async requestCv(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const employer = await empRepo.findByUserId(userId);
+      if (!employer) throw new Error('Employer profile not found');
+
+      const alumni = await talentRepo.findById(req.params.alumniId);
+      if (!alumni || !alumni.email) throw new Error('Alumni profile or email not found');
+
+      await emailService.sendGenericNotification(
+        alumni.email,
+        `CV Request from ${employer.companyName}`,
+        `${employer.companyName} is interested in your profile and has requested your CV. Please reach out to ${employer.hrContact} at ${employer.contactEmail || (employer as any).user?.email || 'their email'} to provide your updated CV.`
+      );
+
+      return sendSuccess(res, 'CV request sent successfully to alumni.', null);
     } catch (err) { next(err); }
   }
 
@@ -299,6 +344,146 @@ export class EmployerController {
       const useCase = new GetEmployerFeedback(feedbackRepo, empRepo);
       const result = await useCase.execute(userId);
       return sendSuccess(res, 'Feedbacks retrieved successfully.', result);
+    } catch (err) { next(err); }
+  }
+
+  // ── Direct Messages ──────────────────────────────────────────────────
+
+  static async getMessages(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const employer = await empRepo.findByUserId(userId);
+      if (!employer) throw new Error('Employer profile not found');
+
+      const messages = await prisma.directMessage.findMany({
+        where: { employerId: employer.id },
+        include: {
+          alumni: { select: { id: true, fullName: true, email: true, profilePicture: true, department: { select: { name: true } } } },
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      // Group by alumniId to build conversation threads
+      const conversations: Record<string, any> = {};
+      for (const msg of messages) {
+        if (!conversations[msg.alumniId]) {
+          conversations[msg.alumniId] = {
+            alumniId: msg.alumniId,
+            alumniName: msg.alumni.fullName || 'Alumni',
+            alumniEmail: msg.alumni.email || '',
+            alumniPhoto: msg.alumni.profilePicture || null,
+            department: msg.alumni.department?.name || 'N/A',
+            messages: [],
+          };
+        }
+        conversations[msg.alumniId].messages.push({
+          id: msg.id,
+          sender: msg.sender,
+          text: msg.text,
+          isRead: msg.isRead,
+          createdAt: msg.createdAt,
+        });
+      }
+
+      return sendSuccess(res, 'Messages retrieved.', Object.values(conversations));
+    } catch (err) { next(err); }
+  }
+
+  static async sendMessage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const employer = await empRepo.findByUserId(userId);
+      if (!employer) throw new Error('Employer profile not found');
+
+      const { alumniId, text } = req.body;
+      if (!alumniId || !text) throw new Error('alumniId and text are required');
+
+      const message = await prisma.directMessage.create({
+        data: {
+          employerId: employer.id,
+          alumniId,
+          sender: 'EMPLOYER',
+          text,
+        },
+      });
+
+      // Find the Alumni's user ID so we can emit to their socket room
+      const alumni = await prisma.alumniProfile.findUnique({ where: { id: alumniId } });
+      if (alumni && alumni.userId) {
+        const { SocketServer } = require('../../../infrastructure/websocket/SocketServer');
+        SocketServer.emitToUser(alumni.userId, 'newMessage', message);
+      }
+
+      return sendSuccess(res, 'Message sent.', message, 201);
+    } catch (err) { next(err); }
+  }
+
+  // ── Logo Upload ──────────────────────────────────────────────────────
+
+  static async uploadLogo(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const file = (req as any).file;
+      if (!file) throw new Error('No file uploaded');
+
+      const logoUrl = `/uploads/logos/${file.filename}`;
+      await prisma.employerProfile.update({
+        where: { userId },
+        data: { logoUrl },
+      });
+
+      return sendSuccess(res, 'Logo uploaded successfully.', { logoUrl });
+    } catch (err) { next(err); }
+  }
+
+  // ── Submit Feedback (with alumni name lookup) ───────────────────────
+
+  static async submitFeedbackByName(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const employer = await empRepo.findByUserId(userId);
+      if (!employer) throw new Error('Employer profile not found');
+
+      const { alumnusName, department, technicalSkills, communication, leadership, teamwork, problemSolving, comments } = req.body;
+
+      // Look up alumni by name
+      const alumni = await prisma.alumniProfile.findFirst({
+        where: {
+          fullName: { contains: alumnusName, mode: 'insensitive' },
+        },
+      });
+
+      let alumniId: string;
+      if (alumni) {
+        alumniId = alumni.id;
+      } else {
+        // If no match, try to find the first alumni in the given department
+        const deptAlumni = await prisma.alumniProfile.findFirst({
+          where: { department: { name: { contains: department, mode: 'insensitive' } } },
+        });
+        if (!deptAlumni) throw new Error('Could not find matching alumni for feedback.');
+        alumniId = deptAlumni.id;
+      }
+
+      const feedback = await prisma.employerFeedback.create({
+        data: {
+          employerId: employer.id,
+          alumniId,
+          technicalSkill: technicalSkills,
+          communicationSkill: communication,
+          leadershipSkill: leadership,
+          teamworkSkill: teamwork,
+          problemSolvingSkill: problemSolving,
+          innovationSkill: Math.round((technicalSkills + problemSolving) / 2),
+          feedbackText: comments,
+          overallSatisfaction: Math.round((technicalSkills + communication + leadership + teamwork + problemSolving) / 5),
+        },
+        include: {
+          alumni: { include: { department: true } },
+        },
+      });
+
+      return sendSuccess(res, 'Feedback submitted successfully.', feedback, 201);
     } catch (err) { next(err); }
   }
 }

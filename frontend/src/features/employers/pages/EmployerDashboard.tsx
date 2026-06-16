@@ -14,18 +14,7 @@ import {
 } from '../types/employer.types';
 
 // Services
-import {
-  getCompanyProfile,
-  saveCompanyProfile,
-  getEmployerJobs,
-  saveEmployerJobs,
-  getCandidateApplications,
-  saveCandidateApplications,
-  getGraduateFeedback,
-  saveGraduateFeedback,
-  getEmployerMessages,
-  saveEmployerMessages
-} from '../services/mockEmployerData';
+import { employerService } from '../services/employer.service';
 
 // Tabs Sub-components
 import { CompanyProfileTab } from '../components/CompanyProfileTab';
@@ -60,11 +49,12 @@ const EmployerDashboard = () => {
   ]);
 
   // Core Data States
-  const [profile, setProfile] = useState<CompanyProfile>(getCompanyProfile());
-  const [jobs, setJobs] = useState<EmployerJob[]>(getEmployerJobs());
-  const [applications, setApplications] = useState<CandidateApplication[]>(getCandidateApplications());
-  const [feedbacks, setFeedbacks] = useState<GraduateFeedback[]>(getGraduateFeedback());
-  const [messages, setMessages] = useState<Message[]>(getEmployerMessages());
+  const [profile, setProfile] = useState<CompanyProfile>({ name: '', industry: '', size: '', location: '', website: '', description: '', tin: '', hrContact: '', phone: '', contactEmail: '', contactPerson: '', logoUrl: '', isPremium: false, partnerships: [], verificationStatus: 'NOT_VERIFIED', ndaSigned: false });
+  const [jobs, setJobs] = useState<EmployerJob[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [applications, setApplications] = useState<CandidateApplication[]>([]);
+  const [feedbacks, setFeedbacks] = useState<GraduateFeedback[]>([]);
+  const [messages, setMessages] = useState<Message[]>(employerService.getMessages());
 
   // Count active stats
   const activeJobsCount = jobs.filter(j => j.status === 'Open').length;
@@ -159,79 +149,89 @@ const EmployerDashboard = () => {
   ];
 
   // Callback triggers
-  const handleSaveProfile = (updatedProfile: CompanyProfile) => {
-    setProfile(updatedProfile);
-    saveCompanyProfile(updatedProfile);
+  const handleSaveProfile = async (updatedProfile: CompanyProfile) => {
+    try {
+      await employerService.saveProfile(updatedProfile);
+      setProfile(updatedProfile);
+      toast.success('Profile updated successfully!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    }
   };
 
-  const handlePostJob = (newJobDetails: Omit<EmployerJob, 'id' | 'applicationsCount' | 'shortlistedCount' | 'viewsCount' | 'postedDate'>) => {
-    const nextJobId = jobs.length + 1;
-    const newJob: EmployerJob = {
-      id: nextJobId,
-      ...newJobDetails,
-      postedDate: 'Just now',
-      applicationsCount: 0,
-      shortlistedCount: 0,
-      viewsCount: 1
-    };
-
-    const updatedJobs = [newJob, ...jobs];
-    setJobs(updatedJobs);
-    saveEmployerJobs(updatedJobs);
-
-    setNotifications(prev => [
-      {
-        id: Date.now(),
-        text: `New job created: ${newJobDetails.title}.`,
-        unread: true,
-        time: 'Just now'
-      },
-      ...prev
-    ]);
-  };
-
-   const handleToggleJobStatus = (jobId: number) => {
-     const updatedJobs = jobs.map(j =>
-       j.id === jobId
-         ? { ...j, status: (j.status === 'Open' ? 'Closed' : 'Open') as EmployerJob['status'] }
-         : j
-     );
-     setJobs(updatedJobs);
-     saveEmployerJobs(updatedJobs);
-   };
-
-   const handleUpdateJob = (updatedJob: EmployerJob) => {
-     const updatedJobs = jobs.map(job => 
-       job.id === updatedJob.id ? updatedJob : job
-     );
-     setJobs(updatedJobs);
-     saveEmployerJobs(updatedJobs);
-   };
-
-   const handleDeleteJob = (jobId: number) => {
-     const updatedJobs = jobs.filter(job => job.id !== jobId);
-     setJobs(updatedJobs);
-     saveEmployerJobs(updatedJobs);
-   };
-
-  const handleUpdateApplicationStatus = (appId: number, status: CandidateApplication['status']) => {
-    const updatedApps = applications.map(app =>
-      app.id === appId ? { ...app, status } : app
-    );
-    setApplications(updatedApps);
-    saveCandidateApplications(updatedApps);
-
-    const targetApp = applications.find(a => a.id === appId);
-    if (targetApp) {
+  const handlePostJob = async (newJobDetails: Omit<EmployerJob, 'id' | 'applicationsCount' | 'shortlistedCount' | 'viewsCount' | 'postedDate'>) => {
+    try {
+      const createdJob = await employerService.createJob(newJobDetails);
+      setJobs([createdJob, ...jobs]);
       setNotifications(prev => [
         {
           id: Date.now(),
-          text: `Marked application of ${targetApp.alumnusName} as ${status}.`,
+          text: `New job created: ${newJobDetails.title}.`,
           unread: true,
           time: 'Just now'
         },
         ...prev
       ]);
+      toast.success('New job listing posted successfully!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to create job listing');
+    }
+  };
+
+   const handleToggleJobStatus = async (jobId: number) => {
+     try {
+       const job = jobs.find(j => j.id === jobId);
+       if (!job) return;
+       const updatedJob = await employerService.toggleJobStatus(jobId, job.status);
+       setJobs(jobs.map(j => j.id === jobId ? updatedJob : j));
+       toast.success(`Job ${updatedJob.status === 'Open' ? 'reopened' : 'closed'}.`);
+     } catch (error: any) {
+       toast.error(error.response?.data?.message || error.message || 'Failed to toggle job status');
+     }
+   };
+
+   const handleUpdateJob = async (updatedJob: EmployerJob) => {
+     try {
+       const result = await employerService.updateJob(updatedJob.id, updatedJob);
+       setJobs(jobs.map(job => job.id === updatedJob.id ? result : job));
+       toast.success('Job listing updated successfully!');
+     } catch (error: any) {
+       toast.error(error.response?.data?.message || error.message || 'Failed to update job');
+     }
+   };
+
+   const handleDeleteJob = async (jobId: number) => {
+     try {
+       await employerService.deleteJob(jobId);
+       setJobs(jobs.filter(job => job.id !== jobId));
+       toast.success('Job listing deleted.');
+     } catch (error: any) {
+       toast.error(error.response?.data?.message || error.message || 'Failed to delete job');
+     }
+   };
+
+  const handleUpdateApplicationStatus = async (appId: number, status: CandidateApplication['status']) => {
+    try {
+      await employerService.updateApplicationStatus(appId, status);
+      const updatedApps = applications.map(app =>
+        app.id === appId ? { ...app, status } : app
+      );
+      setApplications(updatedApps);
+      const targetApp = applications.find(a => a.id === appId);
+      if (targetApp) {
+        setNotifications(prev => [
+          {
+            id: Date.now(),
+            text: `Marked application of ${targetApp.alumnusName} as ${status}.`,
+            unread: true,
+            time: 'Just now'
+          },
+          ...prev
+        ]);
+      }
+      toast.success(`Application status updated to ${status}`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update application status');
     }
   };
 
@@ -246,10 +246,8 @@ const EmployerDashboard = () => {
         year: 'numeric'
       })
     };
-
     const updatedFb = [newFb, ...feedbacks];
     setFeedbacks(updatedFb);
-    saveGraduateFeedback(updatedFb);
   };
 
   const handleSendMessage = (text: string) => {
@@ -262,28 +260,9 @@ const EmployerDashboard = () => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       unread: false
     };
-
     const updatedMsg = [...messages, newMsg];
     setMessages(updatedMsg);
-    saveEmployerMessages(updatedMsg);
-
-    // Mock delayed response
-    setTimeout(() => {
-      const automaticResponse: Message = {
-        id: nextMsgId + 1,
-        sender: 'Alumni',
-        senderName: 'Abebe Bikila',
-        text: 'Received! Thank you for the info. Looking forward to our tech discussion.',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        unread: true
-      };
-      setMessages(prev => {
-        const withResponse = [...prev, automaticResponse];
-        saveEmployerMessages(withResponse);
-        return withResponse;
-      });
-      toast.success('New message received from Abebe!');
-    }, 2500);
+    employerService.saveMessages(updatedMsg);
   };
 
   const handleClearAllNotifications = () => {
@@ -306,6 +285,28 @@ const EmployerDashboard = () => {
     document.documentElement.classList.add(darkMode ? 'dark' : 'light');
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
+
+  // Load all data from backend on mount
+  useEffect(() => {
+    // Load profile
+    employerService.getProfile().then(p => setProfile(p)).catch(console.error);
+
+    // Load jobs
+    employerService.getEmployerJobs().then(fetchedJobs => {
+      setJobs(fetchedJobs || []);
+      setJobsLoading(false);
+    }).catch((error: any) => {
+      console.error("Failed to load jobs", error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to load job listings');
+      setJobsLoading(false);
+    });
+
+    // Load applications
+    employerService.getApplications().then(apps => setApplications(apps)).catch(console.error);
+
+    // Load feedbacks
+    employerService.getFeedbacks().then(fbs => setFeedbacks(fbs)).catch(console.error);
+  }, []);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -1065,14 +1066,20 @@ return (
           )}
 
            {activeTab === 'post_job' && (
-             <JobPostingTab
-               jobs={jobs}
-               onPostJob={handlePostJob}
-               onToggleJobStatus={handleToggleJobStatus}
-               onUpdateJob={handleUpdateJob}
-               onDeleteJob={handleDeleteJob}
-               darkMode={darkMode}
-             />
+             jobsLoading ? (
+               <div className="flex h-64 items-center justify-center">
+                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003366] border-t-transparent"></div>
+               </div>
+             ) : (
+               <JobPostingTab
+                 jobs={jobs}
+                 onPostJob={handlePostJob}
+                 onToggleJobStatus={handleToggleJobStatus}
+                 onUpdateJob={handleUpdateJob}
+                 onDeleteJob={handleDeleteJob}
+                 darkMode={darkMode}
+               />
+             )
            )}
 
           {activeTab === 'candidates' && (

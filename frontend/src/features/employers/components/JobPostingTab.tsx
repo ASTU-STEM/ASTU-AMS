@@ -26,7 +26,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
     skillsInput: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const skills = formData.skillsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
@@ -47,12 +47,11 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
         viewsCount: originalJob?.viewsCount || 0,
         postedDate: originalJob?.postedDate || ''
       };
-      onUpdateJob(updatedJob);
-      toast.success('Job listing updated successfully!');
+      await onUpdateJob(updatedJob);
       setIsEditing(false);
       setEditingJobId(null);
     } else {
-      onPostJob({
+      await onPostJob({
         title: formData.title,
         type: formData.type,
         location: formData.location,
@@ -62,7 +61,6 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
         skillsRequired: skills,
         status: 'Open'
       });
-      toast.success('New job listing posted successfully!');
     }
 
     setIsPosting(false);

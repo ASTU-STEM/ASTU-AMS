@@ -12,6 +12,11 @@ export const createEmployerProfileSchema = z.object({
   contactPerson: z.string().optional().nullable(),
   contactEmail: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
+  tin: z.string().optional().nullable(),
+  isPremium: z.boolean().optional(),
+  partnerships: z.array(z.string()).optional(),
+  verificationStatus: z.string().optional(),
+  ndaSigned: z.boolean().optional(),
 });
 
 export const updateEmployerProfileSchema = z.object({
@@ -26,6 +31,11 @@ export const updateEmployerProfileSchema = z.object({
   contactPerson: z.string().optional().nullable(),
   contactEmail: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
+  tin: z.string().optional().nullable(),
+  isPremium: z.boolean().optional(),
+  partnerships: z.array(z.string()).optional(),
+  verificationStatus: z.string().optional(),
+  ndaSigned: z.boolean().optional(),
 });
 
 export const jobSchema = z.object({

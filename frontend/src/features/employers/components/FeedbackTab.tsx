@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { GraduateFeedback } from '../types/employer.types';
+import { employerService } from '../services/employer.service';
 import toast from 'react-hot-toast';
 import { Download, Search, Filter, Star, TrendingUp, Users, Award } from 'lucide-react';
 
 interface FeedbackTabProps {
   feedbacks: GraduateFeedback[];
   onSubmitFeedback: (feedback: Omit<GraduateFeedback, 'id' | 'submittedAt'>) => void;
+  onRefreshFeedbacks?: () => void;
   darkMode: boolean;
 }
 
-export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFeedback, darkMode }) => {
+export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFeedback, onRefreshFeedbacks, darkMode }) => {
   const [formData, setFormData] = useState({
     alumnusName: '',
     department: 'Computer Science and Engineering',
@@ -23,37 +25,46 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.alumnusName.trim() || !formData.comments.trim()) {
       toast.error('Please complete the feedback comments and select graduate names.');
       return;
     }
 
-    onSubmitFeedback({
-      alumnusName: formData.alumnusName,
-      department: formData.department,
-      technicalSkills: formData.technicalSkills,
-      communication: formData.communication,
-      leadership: formData.leadership,
-      teamwork: formData.teamwork,
-      problemSolving: formData.problemSolving,
-      comments: formData.comments
-    });
+    setIsSubmitting(true);
+    try {
+      await employerService.submitFeedback({
+        alumnusName: formData.alumnusName,
+        department: formData.department,
+        technicalSkills: formData.technicalSkills,
+        communication: formData.communication,
+        leadership: formData.leadership,
+        teamwork: formData.teamwork,
+        problemSolving: formData.problemSolving,
+        comments: formData.comments
+      });
 
-    setFormData({
-      alumnusName: '',
-      department: 'Computer Science and Engineering',
-      technicalSkills: 5,
-      communication: 5,
-      leadership: 5,
-      teamwork: 5,
-      problemSolving: 5,
-      comments: ''
-    });
+      setFormData({
+        alumnusName: '',
+        department: 'Computer Science and Engineering',
+        technicalSkills: 5,
+        communication: 5,
+        leadership: 5,
+        teamwork: 5,
+        problemSolving: 5,
+        comments: ''
+      });
 
-    toast.success('Thank you! Graduate feedback submitted to ASTU Academic Board.');
+      toast.success('Thank you! Graduate feedback submitted to ASTU Academic Board.');
+      if (onRefreshFeedbacks) onRefreshFeedbacks();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to submit feedback. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Filter and sort feedbacks
@@ -342,9 +353,14 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
 
             <button
               type="submit"
-              className="w-full py-3 bg-astu-navy text-white rounded-xl text-xs font-extrabold uppercase tracking-wider hover:scale-102 transition-all shadow-md"
+              disabled={isSubmitting}
+              className="w-full py-3 bg-astu-navy text-white rounded-xl text-xs font-extrabold uppercase tracking-wider hover:scale-102 transition-all shadow-md disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              Submit Feedback Audit
+              {isSubmitting ? (
+                <><span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Submitting...</>
+              ) : (
+                'Submit Feedback Audit'
+              )}
             </button>
           </form>
         </div>

@@ -4,6 +4,7 @@ import { IEmployerProfileRepository } from '../ports/IEmployerProfileRepository'
 import { JobNotFoundError, UnauthorizedEmployerActionError, JobApplicationError } from '../../domain/errors/EmployerErrors';
 import prisma from '../../../../core/config/db';
 import { AnalyticsCacheService } from '../../../analytics/infrastructure/services/AnalyticsCacheService';
+import { EmailService } from '../../../../core/services/EmailService';
 
 export class ApplyForJob {
   constructor(
@@ -55,6 +56,18 @@ export class UpdateApplicationStatus {
       throw new UnauthorizedEmployerActionError('You can only update applications for your own jobs.');
     }
 
+    // Retrieve candidate user/alumni info for email
+    const candidateProfile = await prisma.alumniProfile.findUnique({
+      where: { id: application.alumniId },
+      include: { user: true }
+    });
+
+    if (!candidateProfile) {
+      throw new Error('Candidate alumni profile not found.');
+    }
+
+    const emailService = new EmailService();
+
     if (status === 'HIRED') {
       if (application.status === 'HIRED') {
         throw new JobApplicationError('Application is already marked as HIRED.');
@@ -63,16 +76,6 @@ export class UpdateApplicationStatus {
       const now = new Date();
       const jobCreatedAt = (job as any).createdAt ? new Date((job as any).createdAt) : now;
       const timeToHireDays = Math.max(0, (now.getTime() - jobCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
-
-      // Retrieve candidate user/alumni info to get departmentId and userId for notification
-      const candidateProfile = await prisma.alumniProfile.findUnique({
-        where: { id: application.alumniId },
-        include: { user: true }
-      });
-
-      if (!candidateProfile) {
-        throw new Error('Candidate alumni profile not found.');
-      }
 
       let parsedSalary: number | null = null;
       if (job.salary) {
@@ -93,7 +96,7 @@ export class UpdateApplicationStatus {
           },
         });
 
-        // 2. Update AlumniProfile status (employmentStatus) to EMPLOYED, optionally save salary
+        // 2. Update AlumniProfile status
         await tx.alumniProfile.update({
           where: { id: application.alumniId },
           data: {
@@ -116,15 +119,21 @@ export class UpdateApplicationStatus {
         });
       });
 
-      // 4. Send Notification to candidate user
-      if (candidateProfile.userId) {
+      // 4. Send Notification and Email to candidate user
+      if (candidateProfile.user?.email) {
         await prisma.notification.create({
           data: {
-            userId: candidateProfile.userId,
+            userId: candidateProfile.userId as string,
             title: `Hired!`,
             content: `Congratulations! You have been hired by ${employer.companyName} for the role of ${job.title}.`,
           },
         });
+
+        await emailService.sendGenericNotification(
+          candidateProfile.user.email as string,
+          `Application Update: You've been HIRED!`,
+          `Congratulations! Your application for the position of "${job.title}" at ${employer.companyName} has resulted in a hire.`
+        ).catch(err => console.error("Failed to send email", err));
       }
 
       // 5. Clear the analytics cache
@@ -135,7 +144,42 @@ export class UpdateApplicationStatus {
       return updatedApp;
     }
 
+    // For other status updates (e.g., Shortlisted, Rejected, Reviewed)
     const updated = await this.appRepo.updateStatus(applicationId, status);
+
+    if (candidateProfile.user?.email) {
+      const subjectMap: Record<string, string> = {
+        'SHORTLISTED': 'Application Update: You have been Shortlisted!',
+        'REJECTED': 'Application Update regarding your recent submission',
+        'REVIEWED': 'Application Update: Your profile is under review',
+        'INTERVIEW_SCHEDULED': 'Application Update: Interview Scheduled'
+      };
+      
+      const messageMap: Record<string, string> = {
+        'SHORTLISTED': `Great news! Your application for "${job.title}" at ${employer.companyName} has been shortlisted. They will be in touch with you soon.`,
+        'REJECTED': `Thank you for your interest in the "${job.title}" role at ${employer.companyName}. Unfortunately, they have decided to move forward with other candidates at this time.`,
+        'REVIEWED': `Your application for "${job.title}" at ${employer.companyName} has been reviewed by their hiring team.`,
+        'INTERVIEW_SCHEDULED': `Your application for "${job.title}" at ${employer.companyName} has progressed to the interview stage!`
+      };
+
+      const subject = subjectMap[status] || `Application Update: ${status}`;
+      const message = messageMap[status] || `The status of your application for "${job.title}" at ${employer.companyName} has been updated to: ${status}.`;
+
+      await prisma.notification.create({
+        data: {
+          userId: candidateProfile.userId as string,
+          title: `Application ${status}`,
+          content: message,
+        },
+      });
+
+      await emailService.sendGenericNotification(
+        candidateProfile.user.email as string,
+        subject,
+        message
+      ).catch(err => console.error("Failed to send email", err));
+    }
+
     return updated;
   }
 }

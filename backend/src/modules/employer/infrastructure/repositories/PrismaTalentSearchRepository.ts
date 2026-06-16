@@ -52,8 +52,16 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
       }),
     ]);
 
+    // Mask CGPA if privacy setting is false
+    const maskedData = data.map((profile) => {
+      if (!profile.isCgpaPublic) {
+        return { ...profile, cgpa: null };
+      }
+      return profile;
+    });
+
     return {
-      data,
+      data: maskedData,
       total,
       page: Number(page),
       limit: Number(limit),
@@ -61,9 +69,13 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
   }
 
   async findById(alumniId: string): Promise<any | null> {
-    return await prisma.alumniProfile.findUnique({
+    const profile = await prisma.alumniProfile.findUnique({
       where: { id: alumniId },
       include: { department: true, experiences: true, surveyResponses: true },
     });
+    if (profile && !profile.isCgpaPublic) {
+      return { ...profile, cgpa: null };
+    }
+    return profile;
   }
 }
