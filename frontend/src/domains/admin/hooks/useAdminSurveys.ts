@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { adminMockData } from '../api/mockData';
+import { useState, useEffect, useCallback } from 'react';
+import { adminApi } from '../api/adminApi';
 
 export interface AdminSurveyRecord {
   id: string;
@@ -9,26 +9,36 @@ export interface AdminSurveyRecord {
 }
 
 export default function useAdminSurveys() {
-  const data = useMemo<AdminSurveyRecord[]>(
-    () =>
-      adminMockData.surveyManagement.surveys.map((survey) => ({
+  const [data, setData] = useState<AdminSurveyRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSurveys = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const surveys = await adminApi.listSurveys();
+      const mapped = (surveys ?? []).map((survey: any) => ({
         id: survey.id,
-        title: survey.name,
-        completionRate: survey.completion,
+        title: survey.name ?? survey.title ?? '',
+        completionRate: survey.completion ?? 0,
         status:
           survey.status === 'Active'
-            ? 'Open'
+            ? 'Open' as const
             : survey.status === 'Closed'
-              ? 'Closed'
-              : 'Draft',
-      })),
-    []
-  );
+              ? 'Closed' as const
+              : 'Draft' as const,
+      }));
+      setData(mapped);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch surveys');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  return {
-    data,
-    isLoading: false,
-    error: null,
-    refetch: async () => undefined,
-  };
+  useEffect(() => {
+    fetchSurveys();
+  }, [fetchSurveys]);
+
+  return { data, isLoading, error, refetch: fetchSurveys };
 }

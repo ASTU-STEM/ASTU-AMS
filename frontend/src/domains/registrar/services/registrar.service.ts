@@ -63,7 +63,7 @@ export const registrarService = {
   },
 
   async processDocument(requestId: string, status: DocumentProcessingRequest['status']): Promise<DocumentProcessingRequest> {
-    return patch<DocumentProcessingRequest>(`${BASE}/documents/${requestId}`, { status });
+    return patch<DocumentProcessingRequest>(`${BASE}/document-requests/${requestId}`, { status });
   },
 
   async getAlumni(): Promise<GraduateRecord[]> {

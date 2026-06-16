@@ -215,7 +215,8 @@ model Job {
   responsibilities   String?
   requirements       String?
   experienceLevel    String?
-  department         String?          // academic department code
+  department         String?          // legacy single department
+  departments        String[]         @default([]) // multiple departments
   status             JobStatus        @default(PUBLISHED)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt

@@ -37,4 +37,30 @@ export class DepartmentController {
       return sendSuccess(res, 'Department alumni retrieved.', alumni);
     } catch (err) { next(err); }
   }
+
+  // Analytics endpoints returning mocked data structure for now
+  static async getOverview(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Overview retrieved', {});
+  }
+  static async getEmploymentData(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Employment retrieved', {});
+  }
+  static async getEmployerFeedback(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Employer feedback retrieved', {});
+  }
+  static async getSkillGapData(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Skill gap retrieved', {});
+  }
+  static async getTracerSurveyData(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Tracer survey retrieved', {});
+  }
+  static async getCurriculumInsights(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Curriculum insights retrieved', {});
+  }
+  static async getAccreditationReports(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Accreditation reports retrieved', []);
+  }
+  static async getExportReports(req: Request, res: Response, next: NextFunction) {
+    return sendSuccess(res, 'Export reports retrieved', []);
+  }
 }

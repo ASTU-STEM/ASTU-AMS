@@ -4,6 +4,6 @@ export class GetPendingVerifications {
   constructor(private readonly alumniRepo: IRegistrarAlumniRepository) {}
 
   async execute() {
-    return this.alumniRepo.findAll('PENDING');
+    return this.alumniRepo.findAll('INACTIVE');
   }
 }

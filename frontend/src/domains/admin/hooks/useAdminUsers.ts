@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { adminMockData } from '../api/mockData';
+import { useState, useEffect, useCallback } from 'react';
+import { adminApi } from '../api/adminApi';
 
 export interface AdminUserRecord {
   id: string;
@@ -10,27 +10,35 @@ export interface AdminUserRecord {
 }
 
 export default function useAdminUsers() {
-  const data = useMemo<AdminUserRecord[]>(
-    () =>
-      adminMockData.alumniUsers.slice(0, 20).map((user) => ({
+  const [data, setData] = useState<AdminUserRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const users = await adminApi.listUsers();
+      const mapped = (users ?? []).slice(0, 20).map((user: any) => ({
         id: user.id,
-        name: user.name,
+        name: user.alumniProfile?.fullName ?? user.employerProfile?.companyName ?? user.email,
         email: user.email,
         role: user.role,
         status:
-          user.status === 'Active'
-            ? 'Active'
-            : user.status === 'Suspended'
-              ? 'Suspended'
-              : 'Pending',
-      })),
-    []
-  );
+          user.isActive
+            ? 'Active' as const
+            : 'Pending' as const,
+      }));
+      setData(mapped);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch users');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  return {
-    data,
-    isLoading: false,
-    error: null,
-    refetch: async () => undefined,
-  };
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  return { data, isLoading, error, refetch: fetchUsers };
 }

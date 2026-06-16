@@ -15,7 +15,15 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
   const [alumni, setAlumni] = useState<TalentAlumni[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const departments = ['All', 'Computer Science and Engineering', 'Electrical and Computer Engineering', 'Mechanical and Vehicle Engineering'];
+  const [sortBy, setSortBy] = useState<'newest' | 'cgpa' | 'experience'>('newest');
+  const [departmentsList, setDepartmentsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    employerService.getDepartments()
+      .then(res => setDepartmentsList(res))
+      .catch(err => console.error('Failed to load departments:', err));
+  }, []);
+
   const years = ['All', '2024', '2023', '2022', '2021'];
 
   const searchTalent = useCallback(async () => {
@@ -27,6 +35,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
         graduationYear: selectedYear === 'All' ? '' : selectedYear,
         skills: searchQuery ? [searchQuery] : [],
         minimumCgpa: parseFloat(minCgpa) || undefined,
+        sortBy,
       });
       setAlumni(results);
     } catch {
@@ -34,7 +43,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, selectedDept, selectedYear, minCgpa]);
+  }, [searchQuery, selectedDept, selectedYear, minCgpa, sortBy]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -54,7 +63,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
           Verified Talent Directory Search
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="relative md:col-span-1">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
             <input
@@ -77,8 +86,8 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
               }`}
             >
               <option value="All">All Departments</option>
-              {departments.filter(d => d !== 'All').map(d => (
-                <option key={d} value={d}>{d.split(' ')[0]} Engineering</option>
+              {departmentsList.map(d => (
+                <option key={d.code} value={d.code}>{d.name}</option>
               ))}
             </select>
           </div>
@@ -110,6 +119,20 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
               <option value="3.5">CGPA &ge; 3.5 (Distinction)</option>
               <option value="3.75">CGPA &ge; 3.75 (High Honor)</option>
               <option value="3.9">CGPA &ge; 3.90</option>
+            </select>
+          </div>
+
+          <div>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className={`w-full p-2.5 text-xs rounded-xl border focus:outline-none font-semibold ${
+                darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-800'
+              }`}
+            >
+              <option value="newest">Newest First</option>
+              <option value="cgpa">Highest CGPA</option>
+              <option value="experience">Most Experienced</option>
             </select>
           </div>
         </div>

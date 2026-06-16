@@ -1,22 +1,38 @@
+# Dependencies
 node_modules/
+
+# Production
 dist/
 build/
+
+# Testing
 coverage/
+
+# Logs and Misc
 *.log
+*.log.*
+logs/
 .DS_Store
-.env
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-*.swp 
-*.swo
 *.bak
 *.tmp
 *.pid
 *.seed
 *.pid.lock
-*.log
+
+# Data and Backups
+data/
+database_export/
+backup.dump
+*.csv
+*.dat
+*.sql
+*.sqlite
+*.db
+
+# Uploads
+uploads/
+
+# Archives and binaries
 *.gz
 *.zip
 *.tar
@@ -32,26 +48,20 @@ coverage/
 *.msi
 *.deb
 *.rpm
-*.log
-*.csv
-*.dat
-*.sql
-*.sqlite
-*.db
-*.log
-*.log.*
-*.log.gz
-*.log.bz2
-*.log.xz
-*.log.zst
-*.log.lz4
-*.log.lzma
-*.log.lzo
-*.log.zlib
-*.log.brotli
-.env.example
+
+# Env (do not ignore .env.example)
+.env
+
+# Generated documentation/artifacts
 AUTH_SYSTEM_DOCUMENTATION
 AUTH_TESTING_GUIDE
 AUTH_TESTING_GUIDE.md
 AUTH_SYSTEM_DOCUMENTATION.md
+
+# Frontend folder in backend (if accidentally copied)
 frontend/
+
+# Scratch scripts
+export_db.ts
+count_db.ts
+query.ts

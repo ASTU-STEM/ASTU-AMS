@@ -34,6 +34,7 @@ export interface EmployerJob {
   requirements?: string;
   experienceLevel?: string;
   department?: string;
+  departments?: string[];
   status: 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
   applicationsCount?: number;
   shortlistedCount?: number;
@@ -98,6 +99,7 @@ export interface TalentSearchFilters {
   graduationYear: string;
   skills: string[];
   minimumCgpa?: number;
+  sortBy?: 'newest' | 'cgpa' | 'experience';
 }
 
 export interface InterviewSchedule {

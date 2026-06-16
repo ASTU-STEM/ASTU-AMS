@@ -14,15 +14,15 @@ describe('GetPendingVerifications Use Case', () => {
     useCase = new GetPendingVerifications(mockRepo);
   });
 
-  it('should call repository findAll with PENDING status', async () => {
+  it('should call repository findAll with INACTIVE status', async () => {
     const mockPendingAlumni = [
-      { id: '1', studentId: '123', fullName: 'Test', status: 'PENDING' }
+      { id: '1', studentId: '123', fullName: 'Test', status: 'INACTIVE' }
     ];
     mockRepo.findAll.mockResolvedValue(mockPendingAlumni);
 
     const result = await useCase.execute();
 
-    expect(mockRepo.findAll).toHaveBeenCalledWith('PENDING');
+    expect(mockRepo.findAll).toHaveBeenCalledWith('INACTIVE');
     expect(result).toEqual(mockPendingAlumni);
   });
 });

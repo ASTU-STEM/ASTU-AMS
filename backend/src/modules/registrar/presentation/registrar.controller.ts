@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 import { PrismaGraduateRecordRepository } from '../infrastructure/repositories/PrismaGraduateRecordRepository';
 import { PrismaSyncLogRepository } from '../infrastructure/repositories/PrismaSyncLogRepository';
 import { PrismaRegistrarAlumniRepository } from '../infrastructure/repositories/PrismaRegistrarAlumniRepository';
+import { PrismaDashboardRepository } from '../infrastructure/repositories/PrismaDashboardRepository';
 
 import { ImportGraduateData } from '../application/use-cases/ImportGraduateData';
 import { GetGraduateRecord, VerifyStudentId } from '../application/use-cases/GraduateLookups';
@@ -14,6 +15,9 @@ import { GetAllGraduateRecords } from '../application/use-cases/GetAllGraduateRe
 import { GetPendingVerifications } from '../application/use-cases/GetPendingVerifications';
 import { ManageAlumniStatus } from '../application/use-cases/ManageAlumniStatus';
 import { FetchGraduatesByAPI } from '../application/use-cases/FetchGraduatesByAPI';
+import { GetDashboardSummary } from '../application/use-cases/GetDashboardSummary';
+import { CreateGraduateRecord } from '../application/use-cases/CreateGraduateRecord';
+import { UpdateGraduateRecord } from '../application/use-cases/UpdateGraduateRecord';
 
 import { updateAlumniStatusSchema } from './registrar.validation';
 // We will mock CSV parsing here since it's just a controller representation
@@ -23,6 +27,8 @@ import csvParser from 'csv-parser';
 const gradRepo = new PrismaGraduateRecordRepository();
 const syncRepo = new PrismaSyncLogRepository();
 const alumniRepo = new PrismaRegistrarAlumniRepository();
+const dashboardRepo = new PrismaDashboardRepository();
+
 // Real app would have a PrismaAuditLogger injected here
 const loggerMock = {
   log: async (userId: string, action: string, details: string, ipAddress: string) => {
@@ -31,6 +37,16 @@ const loggerMock = {
 };
 
 export class RegistrarController {
+  
+  static async getDashboardSummary(req: Request, res: Response, next: NextFunction) {
+    try {
+      const useCase = new GetDashboardSummary(dashboardRepo);
+      const summary = await useCase.execute();
+      return sendSuccess(res, 'Fetched dashboard summary.', summary);
+    } catch (err: any) {
+      next(err);
+    }
+  }
   
   static async importFile(req: Request, res: Response, next: NextFunction) {
     try {
@@ -122,11 +138,48 @@ export class RegistrarController {
         studentId: alumni.studentId,
         fullName: alumni.fullName,
         email: alumni.email,
-        status: alumni.status,
+        status: alumni.status === 'INACTIVE' ? 'PENDING' : alumni.status === 'ACTIVE' ? 'APPROVED' : 'REJECTED',
         createdAt: alumni.createdAt,
       }));
       
       return sendSuccess(res, 'Fetched pending verifications.', verifications);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async addGraduate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const useCase = new CreateGraduateRecord(gradRepo);
+      const record = await useCase.execute(req.body);
+      return sendSuccess(res, 'Graduate record created.', record, 201);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async updateGraduate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const useCase = new UpdateGraduateRecord(gradRepo);
+      const record = await useCase.execute(req.params.id, req.body);
+      return sendSuccess(res, 'Graduate record updated.', record);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async resolveVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { requestId } = req.params;
+      const { status } = req.body; // 'APPROVED' | 'REJECTED'
+
+      const manageStatus = new ManageAlumniStatus(alumniRepo, loggerMock);
+      const adminId = (req as any).user?.userId || 'unknown-admin';
+      const ipAddress = req.ip || 'unknown-ip';
+      
+      await manageStatus.execute(requestId, status === 'APPROVED' ? 'ACTIVE' : 'SUSPENDED', 'Verification resolved from dashboard', adminId, ipAddress);
+
+      return sendSuccess(res, `Verification ${status.toLowerCase()}.`);
     } catch (err: any) {
       next(err);
     }

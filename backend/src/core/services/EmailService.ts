@@ -26,6 +26,11 @@ export class EmailService {
   }
 
   async sendMail(options: MailOptions) {
+    if (process.env.NODE_ENV === 'test') {
+      console.log(`[TEST MODE] Mock email sent to ${options.to}: ${options.subject}`);
+      return { messageId: 'mock-id' };
+    }
+
     const message = {
       from: options.from || env.SMTP_FROM,
       to: options.to,

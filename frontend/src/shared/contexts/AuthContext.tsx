@@ -78,6 +78,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               localStorage.setItem(config.auth.userStorageKey, JSON.stringify(userData));
               localStorage.setItem(config.auth.roleStorageKey, role);
             }
+          } else {
+            setUser(readStoredUser());
           }
           setIsLoading(false);
         })

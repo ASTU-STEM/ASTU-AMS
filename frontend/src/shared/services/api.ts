@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import config from '../config';
+import type { ApiResponse } from '../types';
 
 const api: AxiosInstance = axios.create({
   baseURL: config.apiUrl,
@@ -50,35 +51,35 @@ api.interceptors.response.use(
 );
 
 export async function get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-  const response = await api.get<T>(url, { params });
-  return response.data;
+  const response = await api.get<ApiResponse<T>>(url, { params });
+  return response.data.data as T;
 }
 
 export async function post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-  const response = await api.post<T>(url, data, config);
-  return response.data;
+  const response = await api.post<ApiResponse<T>>(url, data, config);
+  return response.data.data as T;
 }
 
 export async function put<T>(url: string, data?: unknown): Promise<T> {
-  const response = await api.put<T>(url, data);
-  return response.data;
+  const response = await api.put<ApiResponse<T>>(url, data);
+  return response.data.data as T;
 }
 
 export async function patch<T>(url: string, data?: unknown): Promise<T> {
-  const response = await api.patch<T>(url, data);
-  return response.data;
+  const response = await api.patch<ApiResponse<T>>(url, data);
+  return response.data.data as T;
 }
 
 export async function del<T>(url: string): Promise<T> {
-  const response = await api.delete<T>(url);
-  return response.data;
+  const response = await api.delete<ApiResponse<T>>(url);
+  return response.data.data as T;
 }
 
 export async function upload<T>(url: string, formData: FormData): Promise<T> {
-  const response = await api.post<T>(url, formData, {
+  const response = await api.post<ApiResponse<T>>(url, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-  return response.data;
+  return response.data.data as T;
 }
 
 export async function download(url: string, filename: string): Promise<void> {

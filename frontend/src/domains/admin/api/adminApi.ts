@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { adminMockData } from './mockData';
+// No mock imports
 import config from '../../../shared/config';
+import { get, patch } from '../../../shared/services/api';
 
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 const adminApiClient = axios.create({
   baseURL: config.apiUrl,
@@ -22,57 +23,44 @@ adminApiClient.interceptors.request.use((config) => {
 
 export const adminApi = {
   async getDashboardOverview() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.dashboardOverview);
-    }
     const response = await adminApiClient.get('/admin/overview');
     return response.data;
   },
 
   async listUsers() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.alumniUsers);
+    try {
+      const users = await get<any[]>('/admin/users');
+      return users;
+    } catch {
+      return [];
     }
-    const response = await adminApiClient.get('/admin/users');
-    return response.data;
+  },
+
+  async updateUserStatus(userId: string, isActive: boolean) {
+    return patch<any>(`/admin/users/${userId}/status`, { isActive });
   },
 
   async listSurveys() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.surveyManagement.surveys);
-    }
     const response = await adminApiClient.get('/admin/surveys');
     return response.data;
   },
 
   async listDepartments() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.departments);
-    }
     const response = await adminApiClient.get('/admin/departments');
     return response.data;
   },
 
   async listJobs() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.jobPostings);
-    }
     const response = await adminApiClient.get('/admin/jobs');
     return response.data;
   },
 
   async listLogs() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.systemLogs);
-    }
     const response = await adminApiClient.get('/admin/logs');
     return response.data;
   },
 
   async getAnalyticsOverview() {
-    if (USE_MOCK) {
-      return Promise.resolve(adminMockData.analyticsOverview);
-    }
     const response = await adminApiClient.get('/admin/analytics');
     return response.data;
   },

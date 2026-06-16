@@ -43,6 +43,7 @@ export const jobSchema = z.object({
   requirements: z.string().optional().nullable(),
   experienceLevel: z.string().optional().nullable(),
   department: z.string().optional().nullable(),
+  departments: z.array(z.string()).optional().default([]),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED']).optional(),
 });
 

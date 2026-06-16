@@ -27,7 +27,8 @@ import { formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
 import AdminBadge from '../components/AdminBadge';
-
+import adminApi from '../api/adminApi';
+import toast from 'react-hot-toast';
 type Role = 'Alumni' | 'Employer' | 'Department Head' | 'Registrar' | 'Admin';
 type Status = 'Active' | 'Inactive' | 'Suspended' | 'Pending Verification';
 type SortKey = 'name' | 'studentId' | 'role' | 'department' | 'batch' | 'status' | 'lastLogin';
@@ -275,7 +276,60 @@ function createDefaultForm(): UserFormState {
 }
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<UserRow[]>(() => makeUsers());
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const data = await adminApi.listUsers();
+        const mappedUsers: UserRow[] = data.map((u: any) => {
+          let roleLabel = u.role.charAt(0).toUpperCase() + u.role.slice(1).toLowerCase();
+          if (u.role === 'DEPARTMENT_HEAD') roleLabel = 'Department Head';
+          
+          let name = u.email.split('@')[0];
+          let department = 'System Office';
+          let batch = 'N/A';
+          let phone = 'N/A';
+          let studentId = '';
+          let status: Status = u.isActive ? 'Active' : 'Inactive';
+
+          if (u.employerProfile) {
+            name = u.employerProfile.companyName;
+            phone = u.employerProfile.phone || 'N/A';
+            if (!u.isActive && !u.employerProfile.isVerified) status = 'Pending Verification';
+          } else if (u.alumniProfile) {
+            name = `${u.alumniProfile.firstName} ${u.alumniProfile.lastName}`;
+            department = u.alumniProfile.departmentId || 'System Office';
+            batch = u.alumniProfile.graduationYear?.toString() || 'N/A';
+            phone = u.alumniProfile.phoneNumber || 'N/A';
+            studentId = u.alumniProfile.studentId || '';
+          }
+
+          return {
+            id: u.id,
+            name,
+            email: u.email,
+            studentId,
+            role: roleLabel as Role,
+            department,
+            batch,
+            status,
+            lastLogin: u.updatedAt || new Date().toISOString(),
+            registeredAt: u.createdAt || new Date().toISOString(),
+            phone,
+          };
+        });
+        setUsers(mappedUsers);
+      } catch (error) {
+        toast.error('Failed to load users');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
   const [query, setQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<'All Roles' | Role>('All Roles');
   const [selectedStatus, setSelectedStatus] = useState<'All' | Status>('All');
@@ -348,11 +402,11 @@ export default function UserManagement() {
     return () => window.removeEventListener('click', handleClick);
   }, []);
 
-  const totalUsersLabel = '4,827 users';
-  const activeCount = 4201;
-  const pendingCount = 312;
-  const suspendedCount = 89;
-  const inactiveCount = 225;
+  const totalUsersLabel = `${users.length} users`;
+  const activeCount = users.filter(u => u.status === 'Active').length;
+  const pendingCount = users.filter(u => u.status === 'Pending Verification').length;
+  const suspendedCount = users.filter(u => u.status === 'Suspended').length;
+  const inactiveCount = users.filter(u => u.status === 'Inactive').length;
   const totalPages = Math.max(1, Math.ceil(sortedUsers.length / pageSize));
   const paginatedUsers = sortedUsers.slice((page - 1) * pageSize, page * pageSize);
   const allPageSelected = paginatedUsers.length > 0 && paginatedUsers.every((user) => selectedIds.includes(user.id));
@@ -486,7 +540,7 @@ export default function UserManagement() {
     setEditingUserId(null);
   };
 
-  const bulkAction = (action: 'activate' | 'suspend' | 'delete' | 'export') => {
+  const bulkAction = async (action: 'activate' | 'suspend' | 'delete' | 'export') => {
     const selected = users.filter((user) => selectedIds.includes(user.id));
 
     if (action === 'export') {
@@ -500,25 +554,47 @@ export default function UserManagement() {
       return;
     }
 
-    setUsers((current) =>
-      current.map((user) => {
-        if (!selectedIds.includes(user.id)) return user;
-        return {
-          ...user,
-          status: action === 'activate' ? 'Active' : 'Suspended',
-        };
-      })
-    );
+    try {
+      const isActive = action === 'activate';
+      await Promise.all(selectedIds.map(id => adminApi.updateUserStatus(id, isActive)));
+      
+      setUsers((current) =>
+        current.map((user) => {
+          if (!selectedIds.includes(user.id)) return user;
+          return {
+            ...user,
+            status: isActive ? 'Active' : 'Suspended',
+          };
+        })
+      );
+      toast.success(`Successfully ${isActive ? 'activated' : 'suspended'} ${selectedIds.length} users`);
+    } catch {
+      toast.error(`Failed to ${action} users`);
+    }
     updateSelectedIds([]);
   };
 
   const rowActions = [
     { label: 'View Profile', icon: Eye, onClick: (user: UserRow) => setActiveUser(user) },
     { label: 'Edit', icon: PencilLine, onClick: openEditModal },
-    { label: 'Reset Password', icon: KeyRound, onClick: () => {} },
-    { label: 'Change Role', icon: Shield, onClick: () => {} },
-    { label: 'Suspend', icon: UserRound, onClick: () => {} },
-    { label: 'Delete', icon: Trash2, onClick: () => {} },
+    { label: 'Approve', icon: Check, onClick: async (user: UserRow) => {
+      try {
+        await adminApi.updateUserStatus(user.id, true);
+        setUsers(current => current.map(u => u.id === user.id ? { ...u, status: 'Active' } : u));
+        toast.success(`${user.name} approved successfully`);
+      } catch {
+        toast.error('Failed to approve user');
+      }
+    } },
+    { label: 'Suspend', icon: UserRound, onClick: async (user: UserRow) => {
+      try {
+        await adminApi.updateUserStatus(user.id, false);
+        setUsers(current => current.map(u => u.id === user.id ? { ...u, status: 'Suspended' } : u));
+        toast.success(`${user.name} suspended successfully`);
+      } catch {
+        toast.error('Failed to suspend user');
+      }
+    } },
   ];
 
   const hasActiveFilters = query || selectedRole !== 'All Roles' || selectedStatus !== 'All' || selectedDepartment !== 'All Departments' || dateFrom || dateTo;

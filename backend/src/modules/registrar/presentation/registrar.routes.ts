@@ -21,9 +21,13 @@ router.get('/logs', asyncHandler(RegistrarController.getLogs));
 router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));
 router.post('/fetch-graduates/current-and-previous', asyncHandler(RegistrarController.fetchCurrentAndPreviousGraduates));
 
+router.get('/dashboard', asyncHandler(RegistrarController.getDashboardSummary));
 router.get('/students/:studentId', asyncHandler(RegistrarController.getStudentRecord));
 router.get('/graduates', asyncHandler(RegistrarController.getAllGraduates));
+router.post('/graduates', asyncHandler(RegistrarController.addGraduate));
+router.put('/graduates/:id', asyncHandler(RegistrarController.updateGraduate));
 router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
+router.patch('/verifications/:requestId', asyncHandler(RegistrarController.resolveVerification));
 
 // Document Requests (Manual verification)
 router.get('/document-requests', asyncHandler(RegistrarController.getDocumentRequests));
