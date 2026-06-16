@@ -898,7 +898,7 @@ const RegistrarDashboard = () => {
               </div>
             )}
 
-            {activeTab === 'reporting' && <ReportingTab />}
+            {activeTab === 'reporting' && <ReportingTab darkMode={darkMode} />}
 
             {activeTab === 'messages' && <MessagingTab darkMode={darkMode} />}
           </div>
