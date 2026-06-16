@@ -275,7 +275,12 @@ function createDefaultForm(): UserFormState {
 }
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<UserRow[]>(() => makeUsers());
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [globalStats, setGlobalStats] = useState({ total: 0, active: 0, pending: 0, suspended: 0, inactive: 0 });
+
   const [query, setQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<'All Roles' | Role>('All Roles');
   const [selectedStatus, setSelectedStatus] = useState<'All' | Status>('All');
@@ -294,53 +299,36 @@ export default function UserManagement() {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const matchesQuery =
-        !query ||
-        [user.name, user.email, user.studentId, user.department].join(' ').toLowerCase().includes(query.toLowerCase());
-      const matchesRole = selectedRole === 'All Roles' || user.role === selectedRole;
-      const matchesStatus = selectedStatus === 'All' || user.status === selectedStatus;
-      const matchesDepartment = selectedDepartment === 'All Departments' || user.department === selectedDepartment;
-      const registered = new Date(user.registeredAt).getTime();
-      const matchesFrom = !dateFrom || registered >= new Date(dateFrom).getTime();
-      const matchesTo = !dateTo || registered <= new Date(`${dateTo}T23:59:59`).getTime();
-
-      return matchesQuery && matchesRole && matchesStatus && matchesDepartment && matchesFrom && matchesTo;
+  const fetchUsers = async () => {
+    setLoading(true);
+    const { adminService } = await import('../services/admin.service');
+    const response = await adminService.getUsers({
+      page,
+      limit: pageSize,
+      query: query || undefined,
+      role: selectedRole === 'All Roles' ? undefined : selectedRole,
+      status: selectedStatus === 'All' ? undefined : selectedStatus,
+      department: selectedDepartment === 'All Departments' ? undefined : selectedDepartment,
     });
-  }, [users, query, selectedRole, selectedStatus, selectedDepartment, dateFrom, dateTo]);
-
-  const sortedUsers = useMemo(() => {
-    const copy = [...filteredUsers];
-    copy.sort((left, right) => {
-      const multiplier = sortDirection === 'asc' ? 1 : -1;
-      const leftValue =
-        sortKey === 'lastLogin'
-          ? new Date(left.lastLogin).getTime()
-          : left[sortKey];
-      const rightValue =
-        sortKey === 'lastLogin'
-          ? new Date(right.lastLogin).getTime()
-          : right[sortKey];
-
-      if (typeof leftValue === 'number' && typeof rightValue === 'number') {
-        return (leftValue - rightValue) * multiplier;
+    
+    if (response.ok) {
+      setUsers(response.data.users as UserRow[]);
+      setTotalCount(response.data.totalCount);
+      setTotalPages(response.data.totalPages);
+      if (response.data.stats) {
+        setGlobalStats(response.data.stats);
       }
+    }
+    setLoading(false);
+  };
 
-      return String(leftValue).localeCompare(String(rightValue)) * multiplier;
-    });
-    return copy;
-  }, [filteredUsers, sortKey, sortDirection]);
+  useEffect(() => {
+    fetchUsers();
+  }, [page, query, selectedRole, selectedStatus, selectedDepartment, sortKey, sortDirection]);
 
   useEffect(() => {
     setPage(1);
   }, [query, selectedRole, selectedStatus, selectedDepartment, dateFrom, dateTo]);
-
-  useEffect(() => {
-    if (activeUser && !sortedUsers.some((user) => user.id === activeUser.id)) {
-      setActiveUser(null);
-    }
-  }, [activeUser, sortedUsers]);
 
   useEffect(() => {
     const handleClick = () => setMenuUserId(null);
@@ -348,13 +336,14 @@ export default function UserManagement() {
     return () => window.removeEventListener('click', handleClick);
   }, []);
 
-  const totalUsersLabel = '4,827 users';
-  const activeCount = 4201;
-  const pendingCount = 312;
-  const suspendedCount = 89;
-  const inactiveCount = 225;
-  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / pageSize));
-  const paginatedUsers = sortedUsers.slice((page - 1) * pageSize, page * pageSize);
+  const totalUsersLabel = `${globalStats.total} users`;
+  const activeCount = globalStats.active;
+  const pendingCount = globalStats.pending;
+  const suspendedCount = globalStats.suspended;
+  const inactiveCount = globalStats.inactive;
+
+  const paginatedUsers = users;
+  const filteredUsers = users;
   const allPageSelected = paginatedUsers.length > 0 && paginatedUsers.every((user) => selectedIds.includes(user.id));
 
   const resetFilters = () => {
@@ -393,6 +382,29 @@ export default function UserManagement() {
 
     const pageIds = paginatedUsers.map((user) => user.id);
     updateSelectedIds(Array.from(new Set([...selectedIds, ...pageIds])));
+  };
+
+  const handleExportCsv = async () => {
+    const { adminService } = await import('../services/admin.service');
+    const { default: toast } = await import('react-hot-toast');
+    
+    // Fetch all users matching current filters by setting a huge limit
+    toast.loading('Preparing export...', { id: 'export-toast' });
+    const response = await adminService.getUsers({
+      page: 1,
+      limit: 100000,
+      query: query || undefined,
+      role: selectedRole === 'All Roles' ? undefined : selectedRole,
+      status: selectedStatus === 'All' ? undefined : selectedStatus,
+      department: selectedDepartment === 'All Departments' ? undefined : selectedDepartment,
+    });
+    
+    if (response.ok) {
+      exportCsv(response.data.users as UserRow[]);
+      toast.success('Export downloaded!', { id: 'export-toast' });
+    } else {
+      toast.error('Export failed', { id: 'export-toast' });
+    }
   };
 
   const exportCsv = (rows: UserRow[]) => {
@@ -460,56 +472,109 @@ export default function UserManagement() {
     return Object.keys(errors).length === 0;
   };
 
-  const saveUser = () => {
+  const saveUser = async () => {
     if (!validateForm()) return;
 
-    const password = form.autoGeneratePassword ? generatePassword() : form.password.trim();
-    const nextUser: UserRow = {
-      id: editingUserId ?? `USR-${String(users.length + 1).padStart(3, '0')}`,
-      name: form.name.trim(),
-      email: form.email.trim().toLowerCase(),
-      studentId: form.role === 'Alumni' ? form.studentId.trim() : '',
-      role: form.role,
-      department: form.department,
-      batch: form.role === 'Alumni' ? new Date().getFullYear().toString() : 'N/A',
-      status: form.status,
-      lastLogin: editingUserId ? users.find((item) => item.id === editingUserId)?.lastLogin ?? new Date().toISOString() : new Date().toISOString(),
-      registeredAt: editingUserId ? users.find((item) => item.id === editingUserId)?.registeredAt ?? new Date().toISOString() : new Date().toISOString(),
-      phone: form.phone.trim(),
-      adminNotes: editingUserId ? users.find((item) => item.id === editingUserId)?.adminNotes : `Password set: ${password}`,
-    };
+    const { adminService } = await import('../services/admin.service');
+    const { default: toast } = await import('react-hot-toast');
 
-    setUsers((current) =>
-      editingUserId ? current.map((item) => (item.id === editingUserId ? nextUser : item)) : [nextUser, ...current]
-    );
+    if (editingUserId) {
+      // Determine the appropriate API action based on the selected status
+      let apiAction: 'activate' | 'suspend' | 'verify' | null = null;
+      
+      if (form.status === 'Active') {
+        apiAction = 'activate';
+      } else if (form.status === 'Suspended') {
+        apiAction = 'suspend';
+      } else if (form.status === 'Pending Verification') {
+        // No change needed — user stays pending
+        apiAction = null;
+      } else if (form.status === 'Inactive') {
+        apiAction = 'suspend'; // Map "Inactive" to suspend on the backend
+      }
+
+      if (apiAction) {
+        const result = await adminService.updateUserStatus(editingUserId, apiAction);
+        if (result.ok) {
+          toast.success('User updated successfully');
+        } else {
+          toast.error(result.message || 'Failed to update user');
+          return;
+        }
+      }
+    } else {
+      // For new user creation
+      const password = form.autoGeneratePassword ? generatePassword() : form.password.trim();
+      const result = await adminService.createUser({
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        role: form.role,
+        department: form.department,
+        studentId: form.role === 'Alumni' ? form.studentId.trim() : undefined,
+        phone: form.phone.trim(),
+        password: password
+      });
+      
+      if (result.ok) {
+        toast.success('User created successfully');
+      } else {
+        toast.error(result.message || 'Failed to create user');
+        return;
+      }
+    }
+
     setModalOpen(false);
     setEditingUserId(null);
+    await fetchUsers(); // Refresh from the database
   };
 
-  const bulkAction = (action: 'activate' | 'suspend' | 'delete' | 'export') => {
+  const bulkAction = async (action: 'activate' | 'suspend' | 'delete' | 'export') => {
     const selected = users.filter((user) => selectedIds.includes(user.id));
 
     if (action === 'export') {
-      exportCsv(selected);
+      await handleExportCsv();
       return;
     }
 
+    const { adminService } = await import('../services/admin.service');
+    const { default: toast } = await import('react-hot-toast');
+    
+    setLoading(true);
+    let result;
+    
     if (action === 'delete') {
-      setUsers((current) => current.filter((user) => !selectedIds.includes(user.id)));
-      updateSelectedIds([]);
-      return;
+      // For now we'll do delete sequentially or wait for backend support, wait, delete is single user only in our backend. Let's do it sequentially:
+      for (const id of selectedIds) {
+        await adminService.deleteUser(id);
+      }
+      toast.success('Deleted selected users');
+    } else {
+      const apiAction = action === 'activate' ? 'verify' : 'suspend'; // verify handles both active and verification
+      result = await adminService.bulkUpdateStatus(selectedIds, apiAction);
+      if (result.ok) {
+        toast.success(`Successfully updated ${selectedIds.length} users`);
+      } else {
+        toast.error(result.message || 'Failed to update users');
+      }
     }
-
-    setUsers((current) =>
-      current.map((user) => {
-        if (!selectedIds.includes(user.id)) return user;
-        return {
-          ...user,
-          status: action === 'activate' ? 'Active' : 'Suspended',
-        };
-      })
-    );
+    
     updateSelectedIds([]);
+    await fetchUsers();
+  };
+
+  const handleRowAction = async (user: UserRow, action: string) => {
+    const { adminService } = await import('../services/admin.service');
+    const { default: toast } = await import('react-hot-toast');
+    
+    if (action === 'Suspend') {
+      const result = await adminService.updateUserStatus(user.id, 'suspend');
+      if (result.ok) { toast.success('User suspended'); fetchUsers(); }
+      else toast.error(result.message || 'Error suspending user');
+    } else if (action === 'Delete') {
+      const result = await adminService.deleteUser(user.id);
+      if (result.ok) { toast.success('User deleted'); fetchUsers(); }
+      else toast.error(result.message || 'Error deleting user');
+    }
   };
 
   const rowActions = [
@@ -517,12 +582,12 @@ export default function UserManagement() {
     { label: 'Edit', icon: PencilLine, onClick: openEditModal },
     { label: 'Reset Password', icon: KeyRound, onClick: () => {} },
     { label: 'Change Role', icon: Shield, onClick: () => {} },
-    { label: 'Suspend', icon: UserRound, onClick: () => {} },
-    { label: 'Delete', icon: Trash2, onClick: () => {} },
+    { label: 'Suspend', icon: UserRound, onClick: (user: UserRow) => handleRowAction(user, 'Suspend') },
+    { label: 'Delete', icon: Trash2, onClick: (user: UserRow) => handleRowAction(user, 'Delete') },
   ];
 
   const hasActiveFilters = query || selectedRole !== 'All Roles' || selectedStatus !== 'All' || selectedDepartment !== 'All Departments' || dateFrom || dateTo;
-  const activeFilterCount = [query, selectedRole !== 'All Roles' ? 1 : 0, selectedStatus !== 'All' ? 1 : 0, selectedDepartment !== 'All Departments' ? 1 : 0, dateFrom ? 1 : 0, dateTo ? 1 : 0].reduce((a, b) => a + (typeof b === 'string' ? (b ? 1 : 0) : b), 0);
+  const activeFilterCount = [(query ? 1 : 0), selectedRole !== 'All Roles' ? 1 : 0, selectedStatus !== 'All' ? 1 : 0, selectedDepartment !== 'All Departments' ? 1 : 0, dateFrom ? 1 : 0, dateTo ? 1 : 0].reduce((a, b) => a + b, 0);
   const statsLine = `${totalUsersLabel} — ${activeCount.toLocaleString()} Active · ${pendingCount} Pending · ${suspendedCount} Suspended · ${inactiveCount} Inactive`;
   const summaryCards = [
     {
@@ -588,7 +653,7 @@ export default function UserManagement() {
             </button>
             <button
               type="button"
-              onClick={() => exportCsv(filteredUsers)}
+              onClick={handleExportCsv}
               className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 px-4 py-2.5 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5"
             >
               <Download className="h-4 w-4" />
@@ -729,7 +794,11 @@ export default function UserManagement() {
 
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium text-slate-600">{statsLine}</div>
-        <div className="text-xs text-slate-400">{filteredUsers.length} filtered of {users.length}</div>
+        <div className="text-xs text-slate-500">
+          Showing <span className="font-medium text-slate-700">{(page - 1) * pageSize + 1}</span> to{' '}
+          <span className="font-medium text-slate-700">{Math.min(page * pageSize, totalCount)}</span> of{' '}
+          <span className="font-medium text-slate-700">{totalCount}</span> users
+        </div>
       </div>
 
       {selectedIds.length > 0 && (
@@ -914,7 +983,7 @@ export default function UserManagement() {
 
         <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-slate-500">
-            Showing {paginatedUsers.length} of {sortedUsers.length} filtered users
+            Showing {paginatedUsers.length} of {totalCount} filtered users
           </p>
 
           <div className="flex flex-wrap items-center gap-2">

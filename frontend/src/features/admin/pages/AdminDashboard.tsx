@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   ArrowUpRight,
   Building2,
@@ -46,101 +46,10 @@ import {
 } from 'recharts';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
+import { adminService } from '../services/admin.service';
 
 type TrendTone = 'success' | 'warning';
 type TimeRange = '7d' | '30d' | '90d' | '1y';
-
-const statCards = [
-  {
-    label: 'Total Alumni',
-    value: '4,827',
-    trend: '+124 this year',
-    icon: GraduationCap,
-    accent: '#003580',
-    chip: 'success' as TrendTone,
-  },
-  {
-    label: 'Total Employers',
-    value: '312',
-    trend: '+18 this month',
-    icon: Building2,
-    accent: '#E8A020',
-    chip: 'success' as TrendTone,
-  },
-  {
-    label: 'Survey Completion',
-    value: '68.4%',
-    trend: '+5.2% vs last year',
-    icon: ClipboardCheck,
-    accent: '#1D9E75',
-    chip: 'success' as TrendTone,
-  },
-  {
-    label: 'Active Jobs',
-    value: '47',
-    trend: '12 expiring soon',
-    icon: Briefcase,
-    accent: '#7C3AED',
-    chip: 'warning' as TrendTone,
-  },
-];
-
-const employmentData = [
-  { department: 'SE', value: 92 },
-  { department: 'ME', value: 84 },
-  { department: 'CE', value: 89 },
-  { department: 'EE', value: 77 },
-  { department: 'CHE', value: 95 },
-  { department: 'IE', value: 81 },
-];
-
-const surveyData = [
-  { name: 'Completed', value: 68, color: '#1D9E75' },
-  { name: 'Pending', value: 22, color: '#E8A020' },
-  { name: 'Never Responded', value: 10, color: '#E24B4A' },
-];
-
-const employmentTrendData = [
-  { year: '2020', employed: 61, selfEmployed: 14 },
-  { year: '2021', employed: 65, selfEmployed: 16 },
-  { year: '2022', employed: 70, selfEmployed: 18 },
-  { year: '2023', employed: 74, selfEmployed: 20 },
-  { year: '2024', employed: 79, selfEmployed: 23 },
-];
-
-const hiringCompanies = [
-  { name: 'Ethio Telecom', hires: 34 },
-  { name: 'Safaricom', hires: 29 },
-  { name: 'INSA', hires: 25 },
-  { name: 'Ethiopian Airlines', hires: 21 },
-  { name: 'Huawei', hires: 18 },
-  { name: 'UN Ethiopia', hires: 15 },
-  { name: 'CBE', hires: 12 },
-].sort((a, b) => b.hires - a.hires);
-
-const systemActivities = [
-  { icon: FileSpreadsheet, tone: '#1D9E75', text: 'CSV import completed - 245 records', time: '2 minutes ago' },
-  { icon: UserPlus, tone: '#003580', text: 'New employer registered: Safaricom', time: '17 minutes ago' },
-  { icon: MessageSquareText, tone: '#E8A020', text: 'Survey #3 sent to 2024 batch', time: '41 minutes ago' },
-  { icon: CheckCircle2, tone: '#1D9E75', text: 'Role permissions updated for registrar staff', time: '1 hour ago' },
-  { icon: AlertTriangle, tone: '#E8A020', text: 'Backup queue rescheduled for midnight', time: '3 hours ago' },
-  { icon: ShieldAlert, tone: '#E24B4A', text: 'Suspicious login attempt blocked', time: '5 hours ago' },
-];
-
-const pendingActions = [
-  { label: '142 alumni accounts pending verification', action: 'Verify', tone: '#003580' },
-  { label: '8 document requests awaiting approval', action: 'Review', tone: '#E8A020' },
-  { label: '3 new employer registrations', action: 'Approve', tone: '#1D9E75' },
-  { label: 'Survey Wave 3 due in 5 days', action: 'Manage', tone: '#7C3AED' },
-];
-
-const skillGaps = [
-  { skill: 'Cloud Computing', value: 78 },
-  { skill: 'DevOps', value: 71 },
-  { skill: 'AI/ML', value: 65 },
-  { skill: 'Cyber Security', value: 58 },
-  { skill: 'Data Engineering', value: 52 },
-];
 
 const quickActions = [
   { label: 'Add User', icon: UserPlus, path: '/admin/users', accent: '#003580' },
@@ -149,16 +58,6 @@ const quickActions = [
   { label: 'New Event', icon: Clock3, path: '/admin/events', accent: '#E8A020' },
   { label: 'System Backup', icon: Database, path: '/admin/backup', accent: '#E24B4A' },
   { label: 'Analytics', icon: Activity, path: '/admin/analytics', accent: '#0284C7' },
-];
-
-const weeklyRegistrations = [
-  { day: 'Mon', alumni: 12, employers: 3 },
-  { day: 'Tue', alumni: 8, employers: 5 },
-  { day: 'Wed', alumni: 15, employers: 2 },
-  { day: 'Thu', alumni: 10, employers: 4 },
-  { day: 'Fri', alumni: 6, employers: 1 },
-  { day: 'Sat', alumni: 3, employers: 0 },
-  { day: 'Sun', alumni: 1, employers: 0 },
 ];
 
 const systemHealthMetrics = [
@@ -223,6 +122,20 @@ function StatusDot({ status }: { status: 'healthy' | 'warning' | 'critical' }) {
 
 export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+  const [metrics, setMetrics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      const result = await adminService.getDashboardMetrics();
+      if (result.ok) {
+        setMetrics(result.data);
+      }
+      setLoading(false);
+    };
+    fetchMetrics();
+  }, [timeRange]);
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
   const today = new Intl.DateTimeFormat('en-US', {
@@ -232,9 +145,56 @@ export default function AdminDashboard() {
     year: 'numeric',
   }).format(new Date());
 
-  const weeklyTotal = useMemo(() =>
-    weeklyRegistrations.reduce((sum, d) => sum + d.alumni + d.employers, 0),
-  []);
+  // Derived state from metrics — real data only, no fallbacks to mock
+  const activeStatCards = [
+    {
+      label: 'Total Alumni',
+      value: metrics?.kpis?.totalAlumni?.toString() || '0',
+      trend: 'From database',
+      icon: GraduationCap,
+      accent: '#003580',
+      chip: 'success' as TrendTone,
+    },
+    {
+      label: 'Total Employers',
+      value: metrics?.kpis?.totalEmployers?.toString() || '0',
+      trend: 'From database',
+      icon: Building2,
+      accent: '#E8A020',
+      chip: 'success' as TrendTone,
+    },
+    {
+      label: 'Survey Completion',
+      value: metrics?.kpis?.surveyCompletion || '0%',
+      trend: 'Current rate',
+      icon: ClipboardCheck,
+      accent: '#1D9E75',
+      chip: 'success' as TrendTone,
+    },
+    {
+      label: 'Active Jobs',
+      value: metrics?.kpis?.activeJobs?.toString() || '0',
+      trend: 'Currently posted',
+      icon: Briefcase,
+      accent: '#7C3AED',
+      chip: 'warning' as TrendTone,
+    },
+  ];
+
+  const activeEmploymentData = metrics?.employmentData || [];
+  const activePendingActions = metrics?.pendingActions || [];
+  const activeSystemActivities = (metrics?.systemActivities || []).map((a: any) => ({
+    icon: a.text?.includes('registered') ? UserPlus : a.text?.includes('backup') ? Database : FileSpreadsheet,
+    tone: a.tone || '#003580',
+    text: a.text,
+    time: new Date(a.time).toLocaleString()
+  }));
+  const activeHiringCompanies: { name: string; hires: number }[] = [];
+  const activeSurveyData = [
+    { name: 'Completed', value: parseInt(metrics?.kpis?.surveyCompletion || '0'), color: '#1D9E75' },
+    { name: 'Remaining', value: 100 - parseInt(metrics?.kpis?.surveyCompletion || '0'), color: '#E8A020' },
+  ];
+  const activeSkillGaps: { skill: string; value: number }[] = [];
 
   return (
     <div className="space-y-6">
@@ -317,7 +277,7 @@ export default function AdminDashboard() {
 
       {/* KPI Stats Cards */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {statCards.map((card) => {
+        {activeStatCards.map((card) => {
           const Icon = card.icon;
           const styles = statToneClasses[card.accent];
 
@@ -384,7 +344,7 @@ export default function AdminDashboard() {
           >
             <div className="h-[340px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={employmentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+                <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
                   <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <YAxis
@@ -403,7 +363,7 @@ export default function AdminDashboard() {
                     }}
                   />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                    {employmentData.map((entry, index) => (
+                    {activeEmploymentData.map((entry: any, index: number) => (
                       <Cell key={`cell-${entry.department}`} fill={index === 4 ? '#E8A020' : '#003580'} />
                     ))}
                     <LabelList dataKey="value" position="top" formatter={(value: number) => `${value}%`} fill="#334155" fontSize={12} />
@@ -420,18 +380,18 @@ export default function AdminDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={surveyData}
+                    data={activeSurveyData}
                     dataKey="value"
                     nameKey="name"
                     innerRadius={72}
                     outerRadius={110}
                     paddingAngle={3}
                   >
-                    {surveyData.map((entry) => (
+                    {activeSurveyData.map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                     <Label
-                      value="68%"
+                      value={metrics?.kpis?.surveyCompletion || '0%'}
                       position="center"
                       className="text-2xl font-semibold fill-slate-900"
                     />
@@ -464,62 +424,34 @@ export default function AdminDashboard() {
       {/* Weekly Registrations & Hiring Trends */}
       <section className="grid gap-4 xl:grid-cols-2">
         <ChartCard
-          title={`Weekly Registrations (${weeklyTotal} total)`}
-          subtitle="New alumni and employer registrations over the past 7 days."
+          title="Weekly Registrations"
+          subtitle="Registration data from the system. Charts will populate as data grows."
         >
-          <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyRegistrations} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="day" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 10,
-                    border: '1px solid #E8EDF5',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  }}
-                />
-                <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: 12, color: '#475569' }} />
-                <Bar dataKey="alumni" name="Alumni" radius={[6, 6, 0, 0]} fill="#003580" />
-                <Bar dataKey="employers" name="Employers" radius={[6, 6, 0, 0]} fill="#E8A020" />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="h-[280px] flex items-center justify-center">
+            {activeEmploymentData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
+                  <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #E8EDF5', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} />
+                  <Bar dataKey="value" name="Employment %" radius={[6, 6, 0, 0]} fill="#003580">
+                    <LabelList dataKey="value" position="top" formatter={(v: number) => `${v}%`} fill="#334155" fontSize={12} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-slate-400">No registration data available yet.</p>
+            )}
           </div>
         </ChartCard>
 
         <ChartCard
-          title="Graduate Employment Trends (2020-2024)"
-          subtitle="Employment distribution by career path across recent graduating cohorts."
+          title="Graduate Employment Trends"
+          subtitle="Employment trend data from database. Will auto-populate as data grows."
         >
-          <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={employmentTrendData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="employedFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#003580" stopOpacity={0.22} />
-                    <stop offset="95%" stopColor="#003580" stopOpacity={0.02} />
-                  </linearGradient>
-                  <linearGradient id="selfEmployedFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#E8A020" stopOpacity={0.22} />
-                    <stop offset="95%" stopColor="#E8A020" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="year" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: 10,
-                    border: '1px solid #E8EDF5',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                  }}
-                />
-                <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: 12, color: '#475569' }} />
-                <Line type="monotone" dataKey="employed" name="Employed" stroke="#003580" strokeWidth={3} dot={{ r: 4, fill: '#003580' }} />
-                <Line type="monotone" dataKey="selfEmployed" name="Self-Employed" stroke="#E8A020" strokeWidth={3} dot={{ r: 4, fill: '#E8A020' }} />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="h-[280px] flex items-center justify-center">
+            <p className="text-sm text-slate-400">Trend data will populate as more graduation cohorts are tracked.</p>
           </div>
         </ChartCard>
       </section>
@@ -560,10 +492,10 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-5 space-y-4">
-            {systemActivities.map((entry) => {
+            {activeSystemActivities.map((entry: any, index: number) => {
               const Icon = entry.icon;
               return (
-                <div key={entry.text} className="flex gap-3 group">
+                <div key={index} className="flex gap-3 group">
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-50 group-hover:bg-slate-100 transition-colors">
                     <Icon className="h-4 w-4" style={{ color: entry.tone }} />
                   </div>
@@ -584,9 +516,9 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-5 space-y-3">
-            {pendingActions.map((task) => (
+            {activePendingActions.map((task: any, index: number) => (
               <div
-                key={task.label}
+                key={index}
                 className="group rounded-[10px] border border-slate-200 border-l-4 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                 style={{ borderLeftColor: task.tone }}
               >
@@ -621,7 +553,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-5 space-y-4">
-            {skillGaps.map((item) => (
+            {activeSkillGaps.length > 0 ? activeSkillGaps.map((item) => (
               <div key={item.skill} className="space-y-2">
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="font-medium text-slate-700">{item.skill}</span>
@@ -634,7 +566,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-slate-400 py-4 text-center">Skill gap data will appear as employer feedback is collected.</p>
+            )}
           </div>
 
           <div className="mt-5 border-t border-slate-200 pt-4 flex items-center justify-between text-xs">
@@ -659,7 +593,8 @@ export default function AdminDashboard() {
         >
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={hiringCompanies} layout="vertical" margin={{ top: 12, right: 24, left: 12, bottom: 0 }}>
+              {activeHiringCompanies.length > 0 ? (
+              <BarChart data={activeHiringCompanies} layout="vertical" margin={{ top: 12, right: 24, left: 12, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis
@@ -682,6 +617,9 @@ export default function AdminDashboard() {
                   <LabelList dataKey="hires" position="right" fill="#334155" fontSize={12} />
                 </Bar>
               </BarChart>
+              ) : (
+                <text x="50%" y="50%" textAnchor="middle" fill="#94a3b8" fontSize={14}>Hiring data will appear as employers submit records.</text>
+              )}
             </ResponsiveContainer>
           </div>
         </ChartCard>

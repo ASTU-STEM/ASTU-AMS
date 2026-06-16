@@ -39,10 +39,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminBadge from '../components/AdminBadge';
-
-const getApiBaseUrl = () => {
-  return (import.meta.env as any).REACT_APP_API_URL || 'http://localhost:5000/api';
-};
+import { adminService } from '../services/admin.service';
 
 type AcademicYear = '2024-25' | '2023-24' | 'All Time';
 type DepartmentFilter = 'All' | 'Computer Science' | 'Software Engineering' | 'Electrical Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Chemical Engineering' | 'Information Engineering';
@@ -60,91 +57,7 @@ const departments = [
 const academicYears: AcademicYear[] = ['2024-25', '2023-24', 'All Time'];
 const exportOptions = ['PDF', 'Excel', 'CSV'];
 
-const statCards = [
-  { label: 'Overall Employment Rate', value: '76.8%', change: '+3.4% vs last year', icon: TrendingUp, tone: 'green' as const },
-  { label: 'Average Time to Hire', value: '4.2 months', change: '-0.6 months faster', icon: TimerReset, tone: 'blue' as const },
-  { label: 'Avg Starting Salary', value: 'ETB 18,500/mo', change: '+ETB 1,200 vs last cohort', icon: Building2, tone: 'gold' as const },
-  { label: 'Alumni Response Rate', value: '68.4%', change: '+5.2% from prior cycle', icon: Users, tone: 'red' as const },
-];
 
-const employmentByDepartmentYear = [
-  { department: 'CS', y2022: 68, y2023: 72, y2024: 78 },
-  { department: 'SE', y2022: 65, y2023: 70, y2024: 77 },
-  { department: 'EE', y2022: 60, y2023: 66, y2024: 71 },
-  { department: 'ME', y2022: 58, y2023: 63, y2024: 69 },
-  { department: 'CE', y2022: 55, y2023: 61, y2024: 67 },
-  { department: 'CHE', y2022: 63, y2023: 69, y2024: 74 },
-  { department: 'IE', y2022: 66, y2023: 71, y2024: 76 },
-];
-
-const employmentTable = [
-  { department: 'Computer Science', grads: 862, employed: 671, selfEmployed: 83, unemployed: 108, rate: 87.5, vsLastYear: '+4.1%' },
-  { department: 'Software Engineering', grads: 744, employed: 562, selfEmployed: 91, unemployed: 91, rate: 87.8, vsLastYear: '+3.8%' },
-  { department: 'Electrical Engineering', grads: 681, employed: 491, selfEmployed: 59, unemployed: 131, rate: 80.7, vsLastYear: '+2.6%' },
-  { department: 'Mechanical Engineering', grads: 538, employed: 362, selfEmployed: 63, unemployed: 113, rate: 79.1, vsLastYear: '+1.9%' },
-  { department: 'Civil Engineering', grads: 470, employed: 298, selfEmployed: 54, unemployed: 118, rate: 74.9, vsLastYear: '+1.1%' },
-  { department: 'Chemical Engineering', grads: 324, employed: 238, selfEmployed: 24, unemployed: 62, rate: 80.9, vsLastYear: '+3.3%' },
-  { department: 'Information Engineering', grads: 408, employed: 315, selfEmployed: 41, unemployed: 52, rate: 87.3, vsLastYear: '+4.5%' },
-];
-
-const skillGaps = [
-  { skill: 'Cloud Computing', value: 92 },
-  { skill: 'DevOps', value: 86 },
-  { skill: 'AI/ML', value: 81 },
-  { skill: 'Data Engineering', value: 79 },
-  { skill: 'Cybersecurity', value: 75 },
-  { skill: 'System Design', value: 72 },
-  { skill: 'SQL & Data Modeling', value: 68 },
-  { skill: 'Communication', value: 62 },
-  { skill: 'Leadership', value: 58 },
-  { skill: 'UI/UX', value: 55 },
-];
-
-const heatMapRows = [
-  { department: 'CS', Cloud: 84, DevOps: 76, AI: 88, Data: 79, Cyber: 69, Comms: 42 },
-  { department: 'SE', Cloud: 79, DevOps: 81, AI: 72, Data: 68, Cyber: 74, Comms: 46 },
-  { department: 'EE', Cloud: 61, DevOps: 57, AI: 64, Data: 53, Cyber: 71, Comms: 49 },
-  { department: 'ME', Cloud: 48, DevOps: 45, AI: 41, Data: 39, Cyber: 55, Comms: 44 },
-  { department: 'CE', Cloud: 43, DevOps: 40, AI: 38, Data: 36, Cyber: 49, Comms: 41 },
-  { department: 'CHE', Cloud: 52, DevOps: 50, AI: 46, Data: 44, Cyber: 58, Comms: 45 },
-  { department: 'IE', Cloud: 74, DevOps: 69, AI: 78, Data: 72, Cyber: 66, Comms: 52 },
-];
-
-const competencyData = [
-  { subject: 'Technical', score: 4.4 },
-  { subject: 'Communication', score: 4.1 },
-  { subject: 'Leadership', score: 3.9 },
-  { subject: 'Teamwork', score: 4.3 },
-  { subject: 'Problem Solving', score: 4.5 },
-  { subject: 'Innovation', score: 4.0 },
-];
-
-const employerFeedback = [
-  { company: 'Safaricom', department: 'Software Engineering', score: '4.7/5', note: 'Strong problem solving and delivery speed.' },
-  { company: 'Ethio Telecom', department: 'Computer Science', score: '4.5/5', note: 'Excellent technical foundation, needs stronger DevOps exposure.' },
-  { company: 'INSA', department: 'Information Engineering', score: '4.6/5', note: 'Solid systems thinking and security awareness.' },
-  { company: 'CBE', department: 'Software Engineering', score: '4.3/5', note: 'Good teamwork, communication can improve.' },
-  { company: 'Ethiopian Airlines', department: 'Electrical Engineering', score: '4.4/5', note: 'Reliable output quality and adaptability.' },
-];
-
-const geographicData = [
-  { name: 'Addis Ababa', value: 58, fill: '#003580' },
-  { name: 'Adama', value: 14, fill: '#1D9E75' },
-  { name: 'Dire Dawa', value: 10, fill: '#E8A020' },
-  { name: 'Mekelle', value: 8, fill: '#7C3AED' },
-  { name: 'Nairobi', value: 6, fill: '#E24B4A' },
-  { name: 'Dubai', value: 4, fill: '#5B7FB8' },
-];
-
-const timeToHire = [
-  { batch: '2018', months: 6.8 },
-  { batch: '2019', months: 6.1 },
-  { batch: '2020', months: 5.9 },
-  { batch: '2021', months: 5.2 },
-  { batch: '2022', months: 4.8 },
-  { batch: '2023', months: 4.4 },
-  { batch: '2024', months: 4.0 },
-];
 
 function heatColor(value: number) {
   if (value >= 80) return 'bg-[#E24B4A] text-white';
@@ -200,25 +113,56 @@ export default function AnalyticsOverview() {
   const [exportOpen, setExportOpen] = useState(false);
   const [topEmployers, setTopEmployers] = useState<{ companyName: string, count: number }[]>([]);
 
+  const [reportData, setReportData] = useState<any>(null);
+
   React.useEffect(() => {
-    fetch(`${getApiBaseUrl()}/analytics/employers`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    const fetchAnalytics = async () => {
+      const result = await adminService.getAnalyticsReport();
+      if (result.ok) {
+        setReportData(result.data);
       }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data?.data?.topHiringCompanies) {
-          setTopEmployers(data.data.topHiringCompanies);
-        }
-      })
-      .catch(console.error);
+    };
+    fetchAnalytics();
   }, []);
 
+  const activeStatCards = [
+    { label: 'Overall Employment Rate', value: `${Number(reportData?.overallEmployment?.employmentRate || 0).toFixed(1)}%`, change: 'Current average', icon: TrendingUp, tone: 'green' as const },
+    { label: 'Average Time to Hire', value: `${Number(reportData?.overallEmployment?.timeToHireMonths || 0).toFixed(1)} months`, change: 'Average duration', icon: TimerReset, tone: 'blue' as const },
+    { label: 'Avg Starting Salary', value: `ETB ${Number(reportData?.overallEmployment?.averageSalary || 0).toLocaleString()}/mo`, change: 'Based on tracer data', icon: Building2, tone: 'gold' as const },
+    { label: 'Alumni Survey Response', value: `${Number(reportData?.tracer?.surveyCompletionRate || 0).toFixed(1)}%`, change: 'Overall participation', icon: Users, tone: 'red' as const },
+  ];
+
+  const activeEmploymentTable = reportData?.departmentAnalytics?.departmentMetrics?.map((dept: any) => ({
+    department: dept.departmentName,
+    grads: dept.totalAlumni,
+    employed: dept.statusDistribution?.find((d: any) => d.status === 'EMPLOYED')?.count || 0,
+    selfEmployed: dept.statusDistribution?.find((d: any) => d.status === 'SELF_EMPLOYED')?.count || 0,
+    unemployed: dept.statusDistribution?.find((d: any) => d.status === 'UNEMPLOYED')?.count || 0,
+    rate: dept.employmentRate || 0,
+    vsLastYear: `Score: ${Number(dept.employabilityScore || 0).toFixed(1)}`
+  })) || [];
+
+  const activeSkillGaps = reportData?.curriculum?.missingSkills?.map((s: any) => ({
+    skill: s.skill,
+    value: s.demandCount * 15 // Scale demand count for visualization
+  })).sort((a: any, b: any) => b.value - a.value).slice(0, 10) || [];
+
+  const activeTopEmployers = reportData?.employers?.topHiringCompanies || [];
+  const activeCompetencyData = reportData?.curriculum?.skillGaps?.map((sg: any) => ({ subject: sg.skill, score: sg.gapScore })) || [];
+  const activeEmployerFeedback = reportData?.employers?.employerRankings?.map((er: any) => ({ company: er.companyName, department: 'General', score: `${Number(er.score || 0).toFixed(1)}/10`, note: 'Evaluated from tracer data' })) || [];
+  const activeGeographicData: any[] = []; // Currently no geographic data in backend
+  const activeTimeToHire = reportData?.overallEmployment?.rateByGraduationYear?.map((r: any) => ({ batch: String(r.year), months: 6.0 })) || [];
+  const activeHeatMapRows: any[] = [];
+  const activeEmploymentByDepartmentYear = reportData?.departmentAnalytics?.trendAnalysis?.map((t: any) => {
+    const yearObj: any = { department: String(t.year) };
+    t.departments?.forEach((d: any) => { yearObj[d.code] = d.rate; });
+    return yearObj;
+  }) || [];
+
   const filteredDepartments = useMemo(() => {
-    if (department === 'All') return employmentTable;
-    return employmentTable.filter((row) => row.department === department);
-  }, [department]);
+    if (department === 'All') return activeEmploymentTable;
+    return activeEmploymentTable.filter((row: any) => row.department.includes(department));
+  }, [department, activeEmploymentTable]);
 
   const printDashboard = () => {
     window.print();
@@ -312,7 +256,7 @@ export default function AnalyticsOverview() {
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {statCards.map((stat) => (
+        {activeStatCards.map((stat) => (
           <AdminStatCard key={stat.label} {...stat} />
         ))}
       </section>
@@ -321,7 +265,7 @@ export default function AnalyticsOverview() {
         <SectionCard title="Employment Analytics" subtitle="Employment rate per department per year.">
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={employmentByDepartmentYear} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
+              <BarChart data={activeEmploymentByDepartmentYear} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
                 <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
@@ -333,11 +277,9 @@ export default function AnalyticsOverview() {
                   }}
                 />
                 <Legend />
-                <Bar dataKey="y2022" name="2022" fill="#B8C7E0" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="y2023" name="2023" fill="#5B7FB8" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="y2024" name="2024" fill="#003580" radius={[8, 8, 0, 0]}>
-                  <LabelList dataKey="y2024" position="top" formatter={(value: number) => `${value}%`} fill="#334155" fontSize={11} />
-                </Bar>
+                <Bar dataKey="SWE" name="SWE" fill="#B8C7E0" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="ECE" name="ECE" fill="#5B7FB8" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="CVE" name="CVE" fill="#003580" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -362,7 +304,7 @@ export default function AnalyticsOverview() {
                       <td className="px-4 py-3 text-slate-600">{row.employed}</td>
                       <td className="px-4 py-3 text-slate-600">{row.selfEmployed}</td>
                       <td className="px-4 py-3 text-slate-600">{row.unemployed}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.rate.toFixed(1)}%</td>
+                      <td className="px-4 py-3 text-slate-600">{typeof row.rate === 'number' ? row.rate.toFixed(1) : row.rate}%</td>
                       <td className="px-4 py-3">
                         <AdminBadge variant="success">{row.vsLastYear}</AdminBadge>
                       </td>
@@ -379,7 +321,7 @@ export default function AnalyticsOverview() {
             <ChartCard title="Industry-Reported Skill Gaps" subtitle="Top 10 missing skills reported by employers.">
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={skillGaps} layout="vertical" margin={{ top: 8, right: 20, left: 8, bottom: 0 }}>
+                  <BarChart data={activeSkillGaps} layout="vertical" margin={{ top: 8, right: 20, left: 8, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" horizontal={false} />
                     <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} domain={[0, 100]} />
                     <YAxis type="category" dataKey="skill" width={120} tick={{ fill: '#334155', fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -406,7 +348,7 @@ export default function AnalyticsOverview() {
                     </tr>
                   </thead>
                   <tbody>
-                    {heatMapRows.map((row) => (
+                    {activeHeatMapRows.map((row) => (
                       <tr key={row.department} className="border-t border-slate-100">
                         <td className="px-4 py-3 font-medium text-slate-700">{row.department}</td>
                         {['Cloud', 'DevOps', 'AI', 'Data', 'Cyber', 'Comms'].map((skill) => {
@@ -435,7 +377,7 @@ export default function AnalyticsOverview() {
             <ChartCard title="Competency Radar" subtitle="Average scores across six dimensions.">
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={competencyData}>
+                  <RadarChart data={activeCompetencyData}>
                     <PolarGrid />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#334155', fontSize: 12 }} />
                     <PolarRadiusAxis angle={30} domain={[0, 5]} tick={{ fill: '#64748B', fontSize: 10 }} />
@@ -451,7 +393,7 @@ export default function AnalyticsOverview() {
                 <h4 className="text-sm font-semibold text-slate-900">Latest Employer Feedback</h4>
                 <p className="mt-1 text-xs text-slate-500">Most recent submitted review entries.</p>
                 <div className="mt-4 space-y-3">
-                  {employerFeedback.map((entry) => (
+                  {activeEmployerFeedback.map((entry) => (
                     <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -471,7 +413,7 @@ export default function AnalyticsOverview() {
                   <Building2 className="h-4 w-4" /> Top Companies Hiring ASTU Graduates
                 </h4>
                 <div className="mt-4 space-y-2">
-                  {topEmployers.length > 0 ? topEmployers.map((emp) => (
+                  {activeTopEmployers.length > 0 ? activeTopEmployers.map((emp: any) => (
                     <div key={emp.companyName} className="flex items-center justify-between p-2 rounded-md bg-[#003580]/5 border border-[#003580]/10">
                       <span className="text-sm font-medium text-slate-700">{emp.companyName}</span>
                       <span className="text-xs font-bold px-2 py-1 bg-white rounded shadow-sm text-[#003580]">{emp.count} hires</span>
@@ -511,7 +453,7 @@ export default function AnalyticsOverview() {
                     stroke="#003580"
                     strokeWidth="2"
                   />
-                  {geographicData.map((item, index) => {
+                  {activeGeographicData.map((item, index) => {
                     const coords = [
                       [180, 170],
                       [270, 150],
@@ -539,7 +481,7 @@ export default function AnalyticsOverview() {
               <h4 className="text-sm font-semibold text-slate-900">Top Locations</h4>
               <p className="mt-1 text-xs text-slate-500">Top 5 cities / countries where alumni work.</p>
               <div className="mt-4 space-y-3">
-                {geographicData.slice(0, 5).map((item) => (
+                {activeGeographicData.slice(0, 5).map((item) => (
                   <div key={item.name} className="rounded-[10px] border border-slate-200 p-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -559,7 +501,7 @@ export default function AnalyticsOverview() {
       <SectionCard title="Time-to-Hire Trend" subtitle="Average months to first employment by graduating batch.">
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={timeToHire}>
+            <LineChart data={activeTimeToHire}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
               <XAxis dataKey="batch" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />

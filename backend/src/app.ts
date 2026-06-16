@@ -51,6 +51,7 @@ import eventsRouter from './modules/events/presentation/events.routes';
 import mentorshipRouter from './modules/mentorship/presentation/mentorship.routes';
 import jobboardRouter from './modules/jobboard/presentation/jobboard.routes';
 import supportRouter from './modules/support/presentation/support.routes';
+import adminRouter from './modules/admin/infrastructure/routes/adminRoutes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
@@ -66,6 +67,7 @@ app.use('/api/events', eventsRouter);
 app.use('/api/mentorship', mentorshipRouter);
 app.use('/api/jobs', jobboardRouter);
 app.use('/api/support', supportRouter);
+app.use('/api/admin', adminRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {
