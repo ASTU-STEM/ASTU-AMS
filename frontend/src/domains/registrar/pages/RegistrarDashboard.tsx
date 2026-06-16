@@ -665,23 +665,23 @@ const RegistrarDashboard = () => {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                  <div onClick={() => setActiveTab('verification')} className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                  <div onClick={() => setActiveTab('verification')} className={`rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all border ${darkMode ? 'bg-gradient-to-br from-amber-900/30 to-orange-900/30 border-amber-700/30' : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200/60'}`}>
                     <span className="material-symbols-outlined text-amber-600">gavel</span>
-                    <p className="text-xs font-bold text-amber-800 uppercase tracking-wider mt-2">Verification</p>
-                    <p className="text-lg font-extrabold text-amber-900">{pendingVerificationsCount} pending</p>
-                    <p className="text-xs text-amber-700">Awaiting graduation confirmation</p>
+                    <p className={`text-xs font-bold uppercase tracking-wider mt-2 ${darkMode ? 'text-amber-300' : 'text-amber-800'}`}>Verification</p>
+                    <p className={`text-lg font-extrabold ${darkMode ? 'text-amber-200' : 'text-amber-900'}`}>{pendingVerificationsCount} pending</p>
+                    <p className={`text-xs ${darkMode ? 'text-amber-400/80' : 'text-amber-700'}`}>Awaiting graduation confirmation</p>
                   </div>
-                  <div onClick={() => setActiveTab('documents')} className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                  <div onClick={() => setActiveTab('documents')} className={`rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all border ${darkMode ? 'bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-700/30' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200/60'}`}>
                     <span className="material-symbols-outlined text-blue-600">description</span>
-                    <p className="text-xs font-bold text-blue-800 uppercase tracking-wider mt-2">Documents</p>
-                    <p className="text-lg font-extrabold text-blue-900">{documentRequestsCount} in queue</p>
-                    <p className="text-xs text-blue-700">Transcript & certificate requests</p>
+                    <p className={`text-xs font-bold uppercase tracking-wider mt-2 ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>Documents</p>
+                    <p className={`text-lg font-extrabold ${darkMode ? 'text-blue-200' : 'text-blue-900'}`}>{documentRequestsCount} in queue</p>
+                    <p className={`text-xs ${darkMode ? 'text-blue-400/80' : 'text-blue-700'}`}>Transcript & certificate requests</p>
                   </div>
-                  <div onClick={() => setActiveTab('data_integration')} className="bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                  <div onClick={() => setActiveTab('data_integration')} className={`rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all border ${darkMode ? 'bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-emerald-700/30' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200/60'}`}>
                     <span className="material-symbols-outlined text-emerald-600">cloud_upload</span>
-                    <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider mt-2">Batch Import</p>
-                    <p className="text-lg font-extrabold text-emerald-900">Ready for upload</p>
-                    <p className="text-xs text-emerald-700">Import graduate rosters from SIS</p>
+                    <p className={`text-xs font-bold uppercase tracking-wider mt-2 ${darkMode ? 'text-emerald-300' : 'text-emerald-800'}`}>Batch Import</p>
+                    <p className={`text-lg font-extrabold ${darkMode ? 'text-emerald-200' : 'text-emerald-900'}`}>Ready for upload</p>
+                    <p className={`text-xs ${darkMode ? 'text-emerald-400/80' : 'text-emerald-700'}`}>Import graduate rosters from SIS</p>
                   </div>
                 </div>
               </section>
