@@ -35,80 +35,8 @@ type LogRow = {
   payload: string;
 };
 
-const logs: LogRow[] = [
-  {
-    id: 'LOG-001',
-    timestamp: '2026-05-29T08:12:10Z',
-    userEmail: 'admin@astu.edu.et',
-    role: 'Admin',
-    action: 'System',
-    details: 'Backup job completed successfully for nightly archival.',
-    ipAddress: '154.78.22.14',
-    severity: 'Success',
-    requestId: 'REQ-9A44',
-    payload: '{"job":"backup","status":"success","duration":"4m"}',
-  },
-  {
-    id: 'LOG-002',
-    timestamp: '2026-05-29T08:20:44Z',
-    userEmail: 'registrar@astu.edu.et',
-    role: 'Registrar',
-    action: 'Data Import',
-    details: 'Imported graduate batch file for 2024 alumni cohort.',
-    ipAddress: '154.78.22.18',
-    severity: 'Info',
-    requestId: 'REQ-8B11',
-    payload: '{"file":"graduates_2024.xlsx","rows":245}',
-  },
-  {
-    id: 'LOG-003',
-    timestamp: '2026-05-29T08:35:02Z',
-    userEmail: 'cs.head@astu.edu.et',
-    role: 'Department Head',
-    action: 'User Action',
-    details: 'Updated department analytics access for two staff accounts.',
-    ipAddress: '154.78.22.55',
-    severity: 'Info',
-    requestId: 'REQ-7C55',
-    payload: '{"usersUpdated":2,"permissions":["analytics"]}',
-  },
-  {
-    id: 'LOG-004',
-    timestamp: '2026-05-29T09:02:18Z',
-    userEmail: 'anonymous',
-    role: 'Guest',
-    action: 'Login',
-    details: 'Failed login attempt with invalid password.',
-    ipAddress: '197.190.12.44',
-    severity: 'Warning',
-    requestId: 'REQ-1D02',
-    payload: '{"attempts":5,"locked":false}',
-  },
-  {
-    id: 'LOG-005',
-    timestamp: '2026-05-29T09:08:31Z',
-    userEmail: 'api@astu.edu.et',
-    role: 'System',
-    action: 'API',
-    details: 'GET /admin/users responded with 200 OK.',
-    ipAddress: '10.0.2.15',
-    severity: 'Info',
-    requestId: 'REQ-6F10',
-    payload: '{"status":200,"route":"/admin/users"}',
-  },
-  {
-    id: 'LOG-006',
-    timestamp: '2026-05-29T09:11:47Z',
-    userEmail: 'system@astu.edu.et',
-    role: 'System',
-    action: 'Error',
-    details: 'Survey dispatch worker failed to enqueue batch wave.',
-    ipAddress: '10.0.2.16',
-    severity: 'Error',
-    requestId: 'REQ-5E90',
-    payload: '{"worker":"survey-dispatch","error":"timeout"}',
-  },
-];
+// Logs will be fetched from API
+// ActionType now matches backend or is mapped to it
 
 function actionBadge(action: ActionType) {
   switch (action) {
@@ -161,7 +89,13 @@ function summaryCard({ label, value, icon: Icon, hint }: { label: string; value:
   );
 }
 
+import { adminService } from '../services/admin.service';
+
 export default function SystemLogs() {
+  const [logs, setLogs] = useState<LogRow[]>([]);
+  const [stats, setStats] = useState({ totalToday: 0, errorsToday: 0, failedLogins: 0 });
+  const [loading, setLoading] = useState(true);
+  
   const [actionType, setActionType] = useState<ActionType>('All');
   const [userSearch, setUserSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -199,17 +133,38 @@ export default function SystemLogs() {
     return () => window.clearInterval(interval);
   }, []);
 
-  const filteredLogs = useMemo(() => {
-    return logs.filter((log) => {
-      const matchesAction = actionType === 'All' || log.action === actionType;
-      const matchesUser = !userSearch || [log.userEmail, log.role].join(' ').toLowerCase().includes(userSearch.toLowerCase());
-      const matchesSeverity = severity === 'All' || log.severity === severity;
-      const timestamp = new Date(log.timestamp).getTime();
-      const matchesFrom = !dateFrom || timestamp >= new Date(dateFrom).getTime();
-      const matchesTo = !dateTo || timestamp <= new Date(`${dateTo}T23:59:59`).getTime();
-      return matchesAction && matchesUser && matchesSeverity && matchesFrom && matchesTo;
-    });
+  useEffect(() => {
+    fetchLogs();
+    fetchStats();
   }, [actionType, userSearch, dateFrom, dateTo, severity]);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    const result = await adminService.getLogs({
+      query: userSearch,
+      action: actionType !== 'All' ? actionType : undefined,
+      dateFrom,
+      dateTo,
+    });
+    if (result.ok) {
+      // Backend filtering is applied, but severity might need local filter if backend didn't implement severity filter
+      let fetchedLogs = result.data.logs;
+      if (severity !== 'All') {
+        fetchedLogs = fetchedLogs.filter((log: any) => log.severity === severity);
+      }
+      setLogs(fetchedLogs);
+    }
+    setLoading(false);
+  };
+
+  const fetchStats = async () => {
+    const result = await adminService.getLogStats();
+    if (result.ok) {
+      setStats(result.data);
+    }
+  };
+
+  const filteredLogs = logs;
 
   const exportLogs = (format: 'CSV' | 'JSON') => {
     const payload = format === 'CSV'
@@ -292,10 +247,10 @@ export default function SystemLogs() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: 'Total events today', value: '1,248', icon: History, hint: 'All system events logged in the last 24 hours' },
-          { label: 'Errors today', value: '3', icon: X, hint: 'Critical failures requiring attention' },
-          { label: 'Active sessions', value: '47', icon: Wifi, hint: 'Currently authenticated and active sessions' },
-          { label: 'Failed logins (24h)', value: '12', icon: KeyRound, hint: 'Blocked or invalid authentication attempts' },
+          { label: 'Total events today', value: stats.totalToday.toLocaleString(), icon: History, hint: 'All system events logged in the last 24 hours' },
+          { label: 'Errors today', value: stats.errorsToday.toLocaleString(), icon: X, hint: 'Critical failures requiring attention' },
+          { label: 'Active sessions', value: health.sessions.toString(), icon: Wifi, hint: 'Currently authenticated and active sessions' },
+          { label: 'Failed logins (24h)', value: stats.failedLogins.toLocaleString(), icon: KeyRound, hint: 'Blocked or invalid authentication attempts' },
         ].map((card) => (
           <React.Fragment key={card.label}>{summaryCard(card)}</React.Fragment>
         ))}
@@ -370,35 +325,49 @@ export default function SystemLogs() {
               </tr>
             </thead>
             <tbody>
-              {filteredLogs.map((log) => (
-                <tr
-                  key={log.id}
-                  className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
-                  onClick={() => setSelectedLog(log)}
-                >
-                  <td className="px-4 py-4 text-slate-600" title={format(new Date(log.timestamp), 'PPpp')}>
-                    {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="space-y-1">
-                      <div className="font-semibold text-slate-900">{log.userEmail}</div>
-                      <AdminBadge variant="neutral">{log.role}</AdminBadge>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <AdminBadge variant="default" className={actionBadge(log.action)}>
-                      {log.action}
-                    </AdminBadge>
-                  </td>
-                  <td className="px-4 py-4 text-slate-600">{log.details}</td>
-                  <td className="px-4 py-4 text-slate-600">{log.ipAddress}</td>
-                  <td className="px-4 py-4">
-                    <AdminBadge variant="default" className={severityClass(log.severity)}>
-                      {log.severity}
-                    </AdminBadge>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">
+                    Loading logs...
                   </td>
                 </tr>
-              ))}
+              ) : filteredLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">
+                    No logs found matching your filters.
+                  </td>
+                </tr>
+              ) : (
+                filteredLogs.map((log) => (
+                  <tr
+                    key={log.id}
+                    className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
+                    onClick={() => setSelectedLog(log)}
+                  >
+                    <td className="px-4 py-4 text-slate-600" title={format(new Date(log.timestamp), 'PPpp')}>
+                      {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-slate-900">{log.userEmail}</div>
+                        <AdminBadge variant="neutral">{log.role}</AdminBadge>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <AdminBadge variant="default" className={actionBadge(log.action)}>
+                        {log.action}
+                      </AdminBadge>
+                    </td>
+                    <td className="px-4 py-4 text-slate-600">{log.details}</td>
+                    <td className="px-4 py-4 text-slate-600">{log.ipAddress}</td>
+                    <td className="px-4 py-4">
+                      <AdminBadge variant="default" className={severityClass(log.severity)}>
+                        {log.severity}
+                      </AdminBadge>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

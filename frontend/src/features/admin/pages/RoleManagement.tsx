@@ -15,6 +15,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminStatCard from '../components/AdminStatCard';
+import { adminService } from '../services/admin.service';
 
 type RoleKey = 'ADMIN' | 'ALUMNI' | 'EMPLOYER' | 'DEPARTMENT_HEAD' | 'REGISTRAR';
 
@@ -303,7 +304,20 @@ function Toggle({
 export default function RoleManagement() {
   const [selectedRole, setSelectedRole] = useState<RoleKey>('ADMIN');
   const [draftPermissions, setDraftPermissions] = useState(defaultPermissions);
+  const [roleStats, setRoleStats] = useState<Record<string, number>>({});
   const selected = roleMeta[selectedRole];
+
+  React.useEffect(() => {
+    adminService.getRoleStats().then(res => {
+      if (res.ok) {
+        setRoleStats(res.data as Record<string, number>);
+      }
+    });
+  }, []);
+
+  const totalUsers = useMemo(() => {
+    return Object.values(roleStats).reduce((a, b) => a + b, 0);
+  }, [roleStats]);
 
   const permissionCount = useMemo(() => {
     return permissionSections.reduce((count, section) => {
@@ -313,7 +327,7 @@ export default function RoleManagement() {
 
   const roleSummaryCards = [
     { title: 'Total Roles', value: '5', icon: Users, tone: 'blue' as const, trend: 'Core access groups' },
-    { title: 'Total Users', value: '4,827', icon: Building2, tone: 'green' as const, trend: '+124 this year' },
+    { title: 'Total Users', value: totalUsers.toLocaleString(), icon: Building2, tone: 'green' as const, trend: 'System-wide' },
     { title: 'Permissions Enabled', value: `${permissionCount}`, icon: SlidersHorizontal, tone: 'gold' as const, trend: 'Selected role only' },
     { title: 'Admin Coverage', value: '100%', icon: ShieldCheck, tone: 'purple' as const, trend: 'Full control enabled' },
   ];
@@ -391,7 +405,9 @@ export default function RoleManagement() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="text-sm font-semibold text-slate-900">{meta.name}</h3>
-                        <AdminBadge variant={isActive ? 'default' : 'neutral'}>{meta.users}</AdminBadge>
+                        <AdminBadge variant={isActive ? 'default' : 'neutral'}>
+                          {roleStats[roleKey] || 0} users
+                        </AdminBadge>
                       </div>
                       <p className="mt-1 text-xs leading-5 text-slate-500">{meta.description}</p>
                     </div>

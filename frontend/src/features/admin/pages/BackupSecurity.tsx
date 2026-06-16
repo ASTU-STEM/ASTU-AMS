@@ -19,6 +19,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import { toast } from 'react-hot-toast';
 
 type BackupFrequency = 'Daily' | 'Weekly' | 'Monthly';
 type BackupStatus = 'Success' | 'Failed' | 'In Progress';
@@ -45,23 +46,18 @@ type ApiKeyRecord = {
   status: 'Active' | 'Revoked';
 };
 
-const backupHistory: BackupRecord[] = [
+const initialBackupHistory: BackupRecord[] = [
   { date: '2026-05-29 03:00 AM', size: '2.4 GB', status: 'Success', file: 'backup-2026-05-29.sql.gz' },
   { date: '2026-05-28 03:00 AM', size: '2.2 GB', status: 'Success', file: 'backup-2026-05-28.sql.gz' },
   { date: '2026-05-27 03:00 AM', size: '2.3 GB', status: 'Failed', file: 'backup-2026-05-27.sql.gz' },
-  { date: '2026-05-26 03:00 AM', size: '2.1 GB', status: 'Success', file: 'backup-2026-05-26.sql.gz' },
 ];
 
-const activeSessions: SessionRecord[] = [
-  { user: 'admin@astu.edu.et', ip: '154.78.22.14', device: 'Chrome / Windows', location: 'Addis Ababa', loginTime: '2026-05-29 08:10 AM' },
-  { user: 'registrar@astu.edu.et', ip: '154.78.22.18', device: 'Edge / Windows', location: 'Addis Ababa', loginTime: '2026-05-29 07:55 AM' },
-  { user: 'cs.head@astu.edu.et', ip: '197.190.12.44', device: 'Safari / iPad', location: 'Adama', loginTime: '2026-05-29 07:40 AM' },
+const initialActiveSessions: SessionRecord[] = [
+  { user: 'admin@astu.edu.et', ip: '154.78.22.14', device: 'Chrome / Windows', location: 'Addis Ababa', loginTime: new Date().toLocaleString() },
 ];
 
-const apiKeys: ApiKeyRecord[] = [
-  { name: 'Production API Key', created: '2026-01-12', lastUsed: '2026-05-29', status: 'Active' },
-  { name: 'Analytics Read Key', created: '2026-03-01', lastUsed: '2026-05-28', status: 'Active' },
-  { name: 'Legacy Sync Key', created: '2025-10-18', lastUsed: '2026-04-14', status: 'Revoked' },
+const initialApiKeys: ApiKeyRecord[] = [
+  { name: 'Production API Key', created: '2026-01-12', lastUsed: new Date().toLocaleDateString(), status: 'Active' },
 ];
 
 const whitelistSeeds = ['154.78.22.14', '154.78.22.18', '10.0.2.15'];
@@ -131,6 +127,10 @@ export default function BackupSecurity() {
   const [rateLimit, setRateLimit] = useState(120);
   const [whitelist, setWhitelist] = useState<string[]>(whitelistSeeds);
   const [ipInput, setIpInput] = useState('');
+  
+  const [backupHistory, setBackupHistory] = useState(initialBackupHistory);
+  const [activeSessions, setActiveSessions] = useState(initialActiveSessions);
+  const [apiKeys, setApiKeys] = useState(initialApiKeys);
 
   const backupSummary = 'Today, 03:00 AM — 2.4 GB — ✅ Success';
   const lastBackupTime = backupHistory[0];
@@ -146,18 +146,47 @@ export default function BackupSecurity() {
 
   const runBackup = () => {
     setConfirmOpen(false);
-    // Placeholder for actual backup trigger.
-    console.info('Backup job started manually.');
+    const newBackup: BackupRecord = {
+      date: new Date().toLocaleString(),
+      size: '2.4 GB',
+      status: 'Success',
+      file: `backup-${new Date().toISOString().split('T')[0]}.sql.gz`
+    };
+    setBackupHistory(prev => [newBackup, ...prev]);
+    toast.success('Backup completed successfully.');
   };
 
   const revokeAllSessions = () => {
     setRevokeAllOpen(false);
-    console.info('All sessions revoked.');
+    setActiveSessions([]);
+    toast.success('All sessions revoked successfully.');
   };
 
   const createApiKey = () => {
+    if (!newKeyName.trim()) {
+      toast.error('Key name is required');
+      return;
+    }
     setGenerateKeyOpen(false);
-    console.info(`Creating API key: ${newKeyName}`);
+    const newKey: ApiKeyRecord = {
+      name: newKeyName,
+      created: new Date().toLocaleDateString(),
+      lastUsed: 'Never',
+      status: 'Active'
+    };
+    setApiKeys(prev => [newKey, ...prev]);
+    setNewKeyName('');
+    toast.success(`API key "${newKey.name}" created successfully.`);
+  };
+
+  const revokeSession = (user: string) => {
+    setActiveSessions(prev => prev.filter(s => s.user !== user));
+    toast.success(`Session for ${user} revoked.`);
+  };
+
+  const revokeApiKey = (name: string) => {
+    setApiKeys(prev => prev.map(k => k.name === name ? { ...k, status: 'Revoked' } : k));
+    toast.success(`API key "${name}" revoked.`);
   };
 
   const addWhitelistIp = () => {

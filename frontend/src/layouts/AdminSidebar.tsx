@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
+import { adminService } from '../features/admin/services/admin.service';
 
 interface AdminSidebarProps {
   onLogout: () => void;
@@ -61,8 +62,36 @@ const sections = [
 export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse, onOpenAiAssistant }: AdminSidebarProps) {
   const location = useLocation();
 
+  const [stats, setStats] = React.useState({
+    users: 0,
+    surveys: 0,
+    jobs: 0,
+    notifications: 0,
+  });
+
+  React.useEffect(() => {
+    adminService.getSidebarStats().then(res => {
+      if (res.ok) {
+        setStats({
+          users: res.data.pendingVerifications || 0,
+          surveys: res.data.activeSurveys || 0,
+          jobs: res.data.activeJobs || 0,
+          notifications: res.data.unreadNotifications || 0,
+        });
+      }
+    });
+  }, []);
+
+  const dynamicNavItems = navItems.map(item => {
+    if (item.label === 'User Management') return { ...item, badge: stats.users > 0 ? stats.users.toString() : undefined, tooltip: `${stats.users} pending verifications` };
+    if (item.label === 'Survey Management') return { ...item, badge: stats.surveys > 0 ? stats.surveys.toString() : undefined, tooltip: `${stats.surveys} active surveys` };
+    if (item.label === 'Jobs Management') return { ...item, badge: stats.jobs > 0 ? stats.jobs.toString() : undefined, tooltip: `${stats.jobs} active job posts` };
+    if (item.label === 'Notifications') return { ...item, badge: stats.notifications > 0 ? stats.notifications.toString() : undefined, tooltip: `${stats.notifications} unread notifications` };
+    return item;
+  });
+
   const getSectionItems = (sectionKey: string) =>
-    navItems.filter(item => item.section === sectionKey);
+    dynamicNavItems.filter(item => item.section === sectionKey);
 
   return (
     <>

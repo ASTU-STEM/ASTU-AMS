@@ -39,10 +39,11 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
 import AdminStatCard from '../components/AdminStatCard';
+import { adminService } from '../services/admin.service';
 
-type JobType = 'Full-time' | 'Internship' | 'Part-time';
-type JobStatus = 'Open' | 'Closed' | 'Paused' | 'Featured';
-type ApplicationStatus = 'Under Review' | 'Shortlisted' | 'Rejected' | 'Hired';
+type JobType = 'FULL_TIME' | 'INTERNSHIP' | 'PART_TIME';
+type JobStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
+type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'INTERVIEW_SCHEDULED' | 'OFFERED' | 'HIRED' | 'REJECTED' | 'ACCEPTED' | 'WITHDRAWN';
 
 type JobRecord = {
   id: string;
@@ -65,23 +66,7 @@ type ApplicationRecord = {
   status: ApplicationStatus;
 };
 
-const jobRows: JobRecord[] = [
-  { id: 'JOB-001', title: 'Senior Frontend Engineer', employer: 'Safaricom', type: 'Full-time', postedDate: '2026-05-14', deadline: '2026-06-12', applicants: 94, status: 'Open', featured: true },
-  { id: 'JOB-002', title: 'Data Analyst Intern', employer: 'Ethio Telecom', type: 'Internship', postedDate: '2026-05-18', deadline: '2026-06-04', applicants: 67, status: 'Open' },
-  { id: 'JOB-003', title: 'Mechanical Project Officer', employer: 'Ethiopian Airlines', type: 'Full-time', postedDate: '2026-04-28', deadline: '2026-05-30', applicants: 41, status: 'Paused' },
-  { id: 'JOB-004', title: 'Cloud Support Engineer', employer: 'Huawei', type: 'Full-time', postedDate: '2026-05-10', deadline: '2026-06-08', applicants: 88, status: 'Open' },
-  { id: 'JOB-005', title: 'Civil Site Supervisor', employer: 'CBE', type: 'Part-time', postedDate: '2026-05-03', deadline: '2026-05-28', applicants: 35, status: 'Closed' },
-  { id: 'JOB-006', title: 'Machine Learning Intern', employer: 'INSA', type: 'Internship', postedDate: '2026-05-22', deadline: '2026-06-18', applicants: 58, status: 'Open' },
-];
-
-const applicationRows: ApplicationRecord[] = [
-  { id: 'APP-001', applicant: 'Abebe Kebede', jobTitle: 'Senior Frontend Engineer', employer: 'Safaricom', appliedDate: '2026-05-18', status: 'Under Review' },
-  { id: 'APP-002', applicant: 'Helena Tesfaye', jobTitle: 'Data Analyst Intern', employer: 'Ethio Telecom', appliedDate: '2026-05-19', status: 'Shortlisted' },
-  { id: 'APP-003', applicant: 'Kalkidan Tadesse', jobTitle: 'Cloud Support Engineer', employer: 'Huawei', appliedDate: '2026-05-21', status: 'Rejected' },
-  { id: 'APP-004', applicant: 'Yonas Bekele', jobTitle: 'Machine Learning Intern', employer: 'INSA', appliedDate: '2026-05-22', status: 'Hired' },
-  { id: 'APP-005', applicant: 'Ruth Alemu', jobTitle: 'Civil Site Supervisor', employer: 'CBE', appliedDate: '2026-05-23', status: 'Under Review' },
-  { id: 'APP-006', applicant: 'Henok Fikre', jobTitle: 'Senior Frontend Engineer', employer: 'Safaricom', appliedDate: '2026-05-24', status: 'Shortlisted' },
-];
+const applicationRows: ApplicationRecord[] = [];
 
 const jobsPostedData = [
   { month: 'Jan', jobs: 8 },
@@ -108,8 +93,8 @@ const employerPosts = [
   { name: 'CBE', jobs: 7 },
 ];
 
-const jobStatuses: Array<'All' | JobStatus> = ['All', 'Open', 'Closed', 'Paused', 'Featured'];
-const jobTypes: Array<'All' | JobType> = ['All', 'Full-time', 'Internship', 'Part-time'];
+const jobStatuses: Array<'All' | JobStatus> = ['All', 'DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED'];
+const jobTypes: Array<'All' | JobType> = ['All', 'FULL_TIME', 'INTERNSHIP', 'PART_TIME'];
 
 function formatDate(dateValue: string) {
   return new Date(dateValue).toLocaleDateString(undefined, {
@@ -119,33 +104,36 @@ function formatDate(dateValue: string) {
   });
 }
 
-function statusClass(status: JobStatus | ApplicationStatus) {
+function statusClass(status: JobStatus | ApplicationStatus | string) {
   switch (status) {
-    case 'Open':
-    case 'Hired':
+    case 'PUBLISHED':
+    case 'HIRED':
       return 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15';
-    case 'Closed':
-    case 'Rejected':
+    case 'CLOSED':
+    case 'REJECTED':
       return 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15';
-    case 'Paused':
-    case 'Under Review':
+    case 'ARCHIVED':
+    case 'PENDING':
+    case 'REVIEWED':
       return 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20';
-    case 'Shortlisted':
+    case 'SHORTLISTED':
+    case 'INTERVIEW_SCHEDULED':
+    case 'OFFERED':
+    case 'ACCEPTED':
       return 'bg-[#003580]/10 text-[#003580] border-[#003580]/15';
-    case 'Featured':
-      return 'bg-violet-100 text-violet-700 border-violet-200';
+    case 'DRAFT':
     default:
       return 'bg-slate-100 text-slate-600 border-slate-200';
   }
 }
 
-function typeClass(type: JobType) {
+function typeClass(type: JobType | string) {
   switch (type) {
-    case 'Full-time':
+    case 'FULL_TIME':
       return 'bg-[#003580]/10 text-[#003580] border-[#003580]/15';
-    case 'Internship':
+    case 'INTERNSHIP':
       return 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20';
-    case 'Part-time':
+    case 'PART_TIME':
       return 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15';
     default:
       return 'bg-slate-100 text-slate-600 border-slate-200';
@@ -196,19 +184,44 @@ export default function JobsManagement() {
   const [selectedApplicantStatus, setSelectedApplicantStatus] = useState<'All' | ApplicationStatus>('All');
   const [query, setQuery] = useState('');
   const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
-  const [bulkStatus, setBulkStatus] = useState<ApplicationStatus>('Under Review');
+  const [bulkStatus, setBulkStatus] = useState<ApplicationStatus>('PENDING');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobRecord | null>(null);
 
+  const [jobs, setJobs] = useState<JobRecord[]>([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+
+  React.useEffect(() => {
+    loadJobs();
+  }, [query, selectedJobStatus, selectedJobType]);
+
+  const loadJobs = async () => {
+    const res = await adminService.getJobs({
+      query,
+      status: selectedJobStatus === 'All' ? undefined : selectedJobStatus,
+    });
+    if (res.ok) {
+      setJobs(res.data.jobs);
+      setTotalJobs(res.data.total);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    const res = await adminService.updateJobStatus(id, newStatus);
+    if (res.ok) {
+      loadJobs();
+    } else {
+      alert(res.message);
+    }
+  };
+
   const filteredJobs = useMemo(() => {
-    return jobRows.filter((job) => {
-      const matchesQuery = !query || [job.title, job.employer].join(' ').toLowerCase().includes(query.toLowerCase());
-      const matchesStatus = selectedJobStatus === 'All' || job.status === selectedJobStatus || (selectedJobStatus === 'Featured' && job.featured);
+    return jobs.filter((job) => {
       const matchesEmployer = selectedEmployer === 'All' || job.employer === selectedEmployer;
       const matchesType = selectedJobType === 'All' || job.type === selectedJobType;
-      return matchesQuery && matchesStatus && matchesEmployer && matchesType;
+      return matchesEmployer && matchesType;
     });
-  }, [query, selectedJobStatus, selectedEmployer, selectedJobType]);
+  }, [jobs, selectedEmployer, selectedJobType]);
 
   const filteredApplications = useMemo(() => {
     return applicationRows.filter((application) => {
@@ -238,12 +251,12 @@ export default function JobsManagement() {
     setModalOpen(true);
   };
 
-  const employers = ['All', ...Array.from(new Set(jobRows.map((job) => job.employer)))];
+  const employers = ['All', ...Array.from(new Set(jobs.map((job) => job.employer)))];
   const jobSummaryCards = [
-    { title: 'Active Jobs', value: '47', icon: Briefcase, tone: 'blue' as const, trend: '12 expiring soon' },
-    { title: 'Applications', value: '377', icon: Users, tone: 'green' as const, trend: '+48 this week' },
-    { title: 'Featured Jobs', value: '9', icon: Star, tone: 'gold' as const, trend: 'Pinned to top' },
-    { title: 'Placed Alumni', value: '128', icon: UserCheck, tone: 'purple' as const, trend: '+14 this month' },
+    { title: 'Total Jobs', value: `${totalJobs}`, icon: Briefcase, tone: 'blue' as const, trend: 'All listings' },
+    { title: 'Applications', value: `${jobs.reduce((a, b) => a + (b.applicants || 0), 0)}`, icon: Users, tone: 'green' as const, trend: 'Combined applications' },
+    { title: 'Active Jobs', value: `${jobs.filter(j => j.status === 'PUBLISHED').length}`, icon: Star, tone: 'gold' as const, trend: 'Published jobs' },
+    { title: 'Closed Jobs', value: `${jobs.filter(j => j.status === 'CLOSED').length}`, icon: UserCheck, tone: 'purple' as const, trend: 'Finished hiring' },
   ];
 
   const statusButton = (label: string, isActive: boolean, onClick: () => void) => (
@@ -378,29 +391,28 @@ export default function JobsManagement() {
                           </AdminBadge>
                         </td>
                         <td className="px-4 py-4 text-slate-600">{formatDate(job.postedDate)}</td>
-                        <td className="px-4 py-4 text-slate-600">{formatDate(job.deadline)}</td>
                         <td className="px-4 py-4 text-slate-600">{job.applicants}</td>
                         <td className="px-4 py-4">
                           <AdminBadge variant="success" className={statusClass(job.status)}>
-                            {job.featured ? 'Featured' : job.status}
+                            {job.status}
                           </AdminBadge>
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-2">
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                            <button title="View Details" type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
                               <Eye className="h-4 w-4" />
                             </button>
-                            <button type="button" onClick={() => openEditJob(job)} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
-                              <PencilLine className="h-4 w-4" />
-                            </button>
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
-                              <ShieldX className="h-4 w-4" />
-                            </button>
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                            {job.status === 'PUBLISHED' ? (
+                              <button title="Take Down Job" type="button" onClick={() => handleUpdateStatus(job.id, 'CLOSED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                                <ShieldX className="h-4 w-4" />
+                              </button>
+                            ) : (
+                              <button title="Publish Job" type="button" onClick={() => handleUpdateStatus(job.id, 'PUBLISHED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-green-500 hover:bg-green-50">
+                                <UserCheck className="h-4 w-4" />
+                              </button>
+                            )}
+                            <button title="Delete Job" type="button" onClick={() => handleUpdateStatus(job.id, 'ARCHIVED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-red-500 hover:bg-red-50">
                               <Trash2 className="h-4 w-4" />
-                            </button>
-                            <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[#E8A020] hover:bg-amber-50">
-                              <Star className="h-4 w-4" />
                             </button>
                           </div>
                         </td>
@@ -431,7 +443,7 @@ export default function JobsManagement() {
                 <Filter className="h-4 w-4 text-slate-400" />
                 <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none">
                   <option value="All">All Statuses</option>
-                  {['Under Review', 'Shortlisted', 'Rejected', 'Hired'].map((status) => (
+                  {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((status) => (
                     <option key={status} value={status}>
                       {status}
                     </option>
@@ -448,7 +460,7 @@ export default function JobsManagement() {
                     onChange={(event) => setBulkStatus(event.target.value as ApplicationStatus)}
                     className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none"
                   >
-                    {['Under Review', 'Shortlisted', 'Rejected', 'Hired'].map((status) => (
+                    {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((status) => (
                       <option key={status} value={status}>
                         {status}
                       </option>

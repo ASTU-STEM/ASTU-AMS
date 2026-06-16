@@ -48,52 +48,7 @@ type Template = {
   message: string;
 };
 
-const historyRows: SentNotification[] = [
-  {
-    id: 'NTF-001',
-    dateSent: '2026-05-28T09:15:00Z',
-    type: 'Email',
-    subject: 'Survey reminder: 6-Month Employment Tracer',
-    targetGroup: 'Alumni Only',
-    recipients: 1240,
-    openRate: '74%',
-    status: 'Sent',
-    body: 'Please complete the tracer survey before the deadline.',
-  },
-  {
-    id: 'NTF-002',
-    dateSent: '2026-05-27T15:40:00Z',
-    type: 'Both',
-    subject: 'New job opportunities posted',
-    targetGroup: 'By Department',
-    recipients: 743,
-    openRate: '68%',
-    status: 'Sent',
-    body: 'Several new job listings have been posted for your department.',
-  },
-  {
-    id: 'NTF-003',
-    dateSent: '2026-05-27T08:00:00Z',
-    type: 'In-App',
-    subject: 'Graduation clearance reminder',
-    targetGroup: 'By Batch',
-    recipients: 402,
-    openRate: 'N/A',
-    status: 'Scheduled',
-    body: 'Final clearance items must be completed before graduation.',
-  },
-  {
-    id: 'NTF-004',
-    dateSent: '2026-05-26T10:25:00Z',
-    type: 'Email',
-    subject: 'Welcome to ASTU AMS',
-    targetGroup: 'Specific Users',
-    recipients: 89,
-    openRate: '81%',
-    status: 'Sent',
-    body: 'Welcome to the alumni management system.',
-  },
-];
+// Notifications fetched from API
 
 const templates: Template[] = [
   {
@@ -176,6 +131,9 @@ function SectionCard({
   );
 }
 
+import { adminService } from '../services/admin.service';
+import { toast } from 'react-hot-toast';
+
 export default function NotificationCenter() {
   const [type, setType] = useState<NotificationType>('Both');
   const [target, setTarget] = useState<TargetType>('All Users');
@@ -189,12 +147,62 @@ export default function NotificationCenter() {
   const [detail, setDetail] = useState<SentNotification | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [targetValue, setTargetValue] = useState('All');
+  const [historyRows, setHistoryRows] = useState<SentNotification[]>([]);
+  const [stats, setStats] = useState({ totalSent: 0, openRate: 0 });
+  const [loading, setLoading] = useState(true);
+  
   const notificationSummaryCards = [
-    { title: 'Messages Sent', value: '4,820', icon: Megaphone, tone: 'blue' as const, trend: '+312 today' },
-    { title: 'Open Rate', value: '72%', icon: Eye, tone: 'green' as const, trend: '+6% vs last month' },
-    { title: 'Scheduled Sends', value: '11', icon: CalendarDays, tone: 'gold' as const, trend: 'Next in 2 hours' },
-    { title: 'Templates Ready', value: '5', icon: MessageSquareText, tone: 'purple' as const, trend: 'All approved' },
+    { title: 'Messages Sent', value: stats.totalSent.toLocaleString(), icon: Megaphone, tone: 'blue' as const, trend: 'Lifetime total' },
+    { title: 'Open Rate', value: `${stats.openRate}%`, icon: Eye, tone: 'green' as const, trend: 'Global average' },
+    { title: 'Scheduled Sends', value: '0', icon: CalendarDays, tone: 'gold' as const, trend: 'None active' },
+    { title: 'Templates Ready', value: templates.length.toString(), icon: MessageSquareText, tone: 'purple' as const, trend: 'All approved' },
   ];
+
+  React.useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    const [notifResult, statsResult] = await Promise.all([
+      adminService.getNotifications({ limit: 20 }),
+      adminService.getNotificationStats(),
+    ]);
+
+    if (notifResult.ok) {
+      setHistoryRows(notifResult.data.notifications);
+    }
+    if (statsResult.ok) {
+      setStats(statsResult.data);
+    }
+    setLoading(false);
+  };
+
+  const handleSend = async () => {
+    if (!subject || !message) {
+      toast.error('Subject and message are required.');
+      return;
+    }
+
+    let targetRole = 'All Users';
+    if (target === 'By Role') targetRole = targetValue.toUpperCase();
+    if (target === 'Alumni Only') targetRole = 'ALUMNI';
+
+    const result = await adminService.sendNotification({
+      title: subject,
+      content: message,
+      targetRole: targetRole,
+    });
+
+    if (result.ok) {
+      toast.success(`Successfully sent ${result.data.sent} notification(s).`);
+      setSubject('');
+      setMessage('');
+      fetchData(); // refresh history
+    } else {
+      toast.error(result.message || 'Failed to send notifications');
+    }
+  };
 
   const targetOptions = useMemo(() => {
     switch (target) {
@@ -391,6 +399,7 @@ export default function NotificationCenter() {
               </button>
               <button
                 type="button"
+                onClick={handleSend}
                 className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
               >
                 <Send className="h-4 w-4" />
@@ -414,29 +423,43 @@ export default function NotificationCenter() {
                   </tr>
                 </thead>
                 <tbody>
-                  {notificationList.map((notification) => (
-                    <tr
-                      key={notification.id}
-                      className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
-                      onClick={() => setDetail(notification)}
-                    >
-                      <td className="px-4 py-4 text-slate-600">{new Date(notification.dateSent).toLocaleDateString()}</td>
-                      <td className="px-4 py-4">
-                        <AdminBadge variant="default" className={typeClass(notification.type)}>
-                          {notification.type}
-                        </AdminBadge>
-                      </td>
-                      <td className="px-4 py-4 text-slate-700">{notification.subject}</td>
-                      <td className="px-4 py-4 text-slate-600">{notification.targetGroup}</td>
-                      <td className="px-4 py-4 text-slate-600">{notification.recipients.toLocaleString()}</td>
-                      <td className="px-4 py-4 text-slate-600">{notification.openRate}</td>
-                      <td className="px-4 py-4">
-                        <AdminBadge variant="success" className={statusClass(notification.status)}>
-                          {notification.status}
-                        </AdminBadge>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
+                        Loading notifications...
                       </td>
                     </tr>
-                  ))}
+                  ) : notificationList.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
+                        No notifications found.
+                      </td>
+                    </tr>
+                  ) : (
+                    notificationList.map((notification) => (
+                      <tr
+                        key={notification.id}
+                        className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
+                        onClick={() => setDetail(notification)}
+                      >
+                        <td className="px-4 py-4 text-slate-600">{new Date(notification.dateSent).toLocaleDateString()}</td>
+                        <td className="px-4 py-4">
+                          <AdminBadge variant="default" className={typeClass(notification.type)}>
+                            {notification.type}
+                          </AdminBadge>
+                        </td>
+                        <td className="px-4 py-4 text-slate-700">{notification.subject}</td>
+                        <td className="px-4 py-4 text-slate-600">{notification.targetGroup}</td>
+                        <td className="px-4 py-4 text-slate-600">{notification.recipients.toLocaleString()}</td>
+                        <td className="px-4 py-4 text-slate-600">{notification.openRate}</td>
+                        <td className="px-4 py-4">
+                          <AdminBadge variant="success" className={statusClass(notification.status)}>
+                            {notification.status}
+                          </AdminBadge>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

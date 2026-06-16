@@ -10,10 +10,37 @@ const adminController = new AdminController();
 router.use(authenticateJWT, requireRoles(['ADMIN']));
 
 router.get('/dashboard/metrics', adminController.getDashboardMetrics);
+router.get('/sidebar-stats', adminController.getSidebarStats);
+router.get('/roles/stats', adminController.getRoleStats);
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
 router.put('/users/bulk/status', adminController.bulkUpdateStatus);
 router.put('/users/:id/status', adminController.updateUserStatus);
 router.delete('/users/:id', adminController.deleteUser);
+
+// Department Routes
+router.get('/departments', adminController.getDepartments);
+router.post('/departments', adminController.createDepartment);
+router.put('/departments/:id', adminController.updateDepartment);
+router.delete('/departments/:id', adminController.deleteDepartment);
+
+router.get('/jobs', adminController.getJobs);
+router.put('/jobs/:id/status', adminController.updateJobStatus);
+
+// System Logs
+router.get('/logs', adminController.getLogs);
+router.get('/logs/stats', adminController.getLogStats);
+
+// Notifications
+router.get('/notifications', adminController.getNotifications);
+router.get('/notifications/stats', adminController.getNotificationStats);
+router.post('/notifications/send', adminController.sendNotification);
+
+// Sync Logs (for Settings import history)
+router.get('/sync-logs', adminController.getSyncLogs);
+
+// System Settings
+router.get('/settings', adminController.getSettings);
+router.put('/settings', adminController.updateSettings);
 
 export default router;

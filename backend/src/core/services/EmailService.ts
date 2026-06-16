@@ -58,9 +58,24 @@ export class EmailService {
   }
 
   async sendTemporaryPassword(email: string, temporaryPassword: string, role: string) {
-    const subject = 'ASTU Account Credentials';
-    const text = `Your ${role} account has been created. Your temporary password is: ${temporaryPassword}. Please change your password after first login.`;
-    const html = `<p>Hello,</p><p>Your ${role} account has been created successfully.</p><p>Your temporary password is: <strong>${temporaryPassword}</strong></p><p>Please change your password after first login.</p>`;
+    const subject = 'Welcome to ASTU Management System - Your Account Credentials';
+    const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nAn administrator has successfully created an account for you with the role of ${role}.\n\nYour login credentials are as follows:\nEmail: ${email}\nTemporary Password: ${temporaryPassword}\n\nFor security reasons, please ensure that you change this temporary password immediately after your first login.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #003366;">Welcome to ASTU Management System</h2>
+        <p>Dear User,</p>
+        <p>Welcome to the Adama Science and Technology University (ASTU) Management System.</p>
+        <p>An administrator has successfully created an account for you with the designated role of <strong>${role}</strong>.</p>
+        <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #E8A020; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Email:</strong> ${email}</p>
+          <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> ${temporaryPassword}</p>
+        </div>
+        <p>For security purposes, please ensure that you change this temporary password immediately after logging in for the first time.</p>
+        <p>We are thrilled to have you on board!</p>
+        <br/>
+        <p>Best regards,<br/><strong>ASTU Management System Team</strong></p>
+      </div>
+    `;
     return this.sendMail({ to: email, subject, text, html });
   }
 

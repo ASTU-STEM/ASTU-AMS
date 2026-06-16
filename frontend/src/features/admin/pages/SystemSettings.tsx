@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import {
   Building2,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   CloudUpload,
   Database,
@@ -29,6 +28,7 @@ import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
 import AdminStatCard from '../components/AdminStatCard';
 import { toast } from 'react-hot-toast';
+import { adminService } from '../services/admin.service';
 
 type SettingsTab = 'general' | 'email' | 'integrations' | 'data' | 'appearance';
 
@@ -46,13 +46,6 @@ const tabs: Array<{ key: SettingsTab; label: string; icon: React.ComponentType<{
   { key: 'integrations', label: 'Integrations', icon: Link2 },
   { key: 'data', label: 'Data Import', icon: UploadCloud },
   { key: 'appearance', label: 'Appearance', icon: Palette },
-];
-
-const importHistory: ImportHistoryRow[] = [
-  { filename: 'graduates_2024.xlsx', date: '2026-05-29', records: 245, status: 'Completed', errors: 0 },
-  { filename: 'graduates_2023.csv', date: '2026-05-18', records: 312, status: 'Completed', errors: 1 },
-  { filename: 'graduates_2022.csv', date: '2026-05-08', records: 188, status: 'Processing', errors: 0 },
-  { filename: 'legacy_sync.csv', date: '2026-04-28', records: 94, status: 'Failed', errors: 12 },
 ];
 
 const systemFields = ['Student ID', 'Full Name', 'Email', 'Department', 'Graduation Year', 'CGPA'];
@@ -104,21 +97,91 @@ function StatusBadge({ status }: { status: 'Connected' | 'Disconnected' | 'Activ
   return <AdminBadge variant={color}>{status}</AdminBadge>;
 }
 
+function IntegrationItem({
+  title,
+  description,
+  status,
+  toggleActive,
+  onToggle,
+  onTest,
+}: {
+  title: string;
+  description: string;
+  status: 'Connected' | 'Disconnected' | 'Active' | 'Inactive';
+  toggleActive: boolean;
+  onToggle: () => void;
+  onTest: () => void;
+}) {
+  return (
+    <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
+          <p className="mt-1 text-xs text-slate-500">{description}</p>
+        </div>
+        <StatusBadge status={status} />
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+        >
+          {toggleActive ? <ToggleRight className="h-4 w-4 text-[#1D9E75]" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
+          {toggleActive ? 'Enabled' : 'Disabled'}
+        </button>
+        <button
+          type="button"
+          onClick={onTest}
+          className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+        >
+          Test Connection
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function SystemSettings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [testEmailOpen, setTestEmailOpen] = useState(false);
   const [testConnectionOpen, setTestConnectionOpen] = useState(false);
-  const [importFileName, setImportFileName] = useState('graduates_2024.xlsx');
-  const [logoPreview, setLogoPreview] = useState(defaultLogo);
-  const [primaryColor, setPrimaryColor] = useState('#003580');
-  const [accentColor, setAccentColor] = useState('#E8A020');
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // --- General Settings State ---
+  const [universityName, setUniversityName] = useState('Adama Science and Technology University');
+  const [abbreviation, setAbbreviation] = useState('ASTU');
+  const [website, setWebsite] = useState('https://astu.edu.et');
+  const [contactEmail, setContactEmail] = useState('admin@astu.edu.et');
+  const [address, setAddress] = useState('Adama, Ethiopia');
+  const [academicYear, setAcademicYear] = useState('2024-25');
+  const [language, setLanguage] = useState('English');
+  const [timezone, setTimezone] = useState('Africa/Addis_Ababa');
+  const [dateFormat, setDateFormat] = useState('DD/MM/YYYY');
+
+  // --- Email Config State ---
+  const [smtpHost, setSmtpHost] = useState('smtp.astu.edu.et');
+  const [smtpPort, setSmtpPort] = useState('587');
+  const [smtpUser, setSmtpUser] = useState('mailer@astu.edu.et');
+  const [smtpPassword, setSmtpPassword] = useState('••••••••••');
+  const [fromName, setFromName] = useState('ASTU Alumni Management System');
+  const [fromEmail, setFromEmail] = useState('noreply@astu.edu.et');
   const [smtpPasswordVisible, setSmtpPasswordVisible] = useState(false);
+
+  // --- Integration Toggles ---
   const [regApiToggle, setRegApiToggle] = useState(true);
   const [smsToggle, setSmsToggle] = useState(true);
   const [googleToggle, setGoogleToggle] = useState(false);
   const [linkedinToggle, setLinkedinToggle] = useState(true);
-  const [whitelistInput, setWhitelistInput] = useState('');
-  const [whitelist, setWhitelist] = useState(['154.78.22.14', '154.78.22.18']);
+  const [regApiEndpoint, setRegApiEndpoint] = useState('https://api.astu.edu.et/erp');
+  const [regApiKey, setRegApiKey] = useState('astu_erp_xxxxx');
+  const [smsGatewayUser, setSmsGatewayUser] = useState('astu_sms');
+  const [smsGatewayPass, setSmsGatewayPass] = useState('password');
+  const [googleClientId, setGoogleClientId] = useState('google-client-id.apps.googleusercontent.com');
+
+  // --- Data Import ---
+  const [importFileName] = useState('graduates_2024.xlsx');
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({
     'Student ID': 'student_id',
     'Full Name': 'full_name',
@@ -127,11 +190,174 @@ export default function SystemSettings() {
     'Graduation Year': 'graduation_year',
     CGPA: 'cgpa',
   });
+  const [importHistory, setImportHistory] = useState<ImportHistoryRow[]>([]);
+
+  // --- Appearance ---
+  const [logoPreview, setLogoPreview] = useState(defaultLogo);
+  const [primaryColor, setPrimaryColor] = useState('#003580');
+  const [accentColor, setAccentColor] = useState('#E8A020');
+
+  // Fetch settings and import history on mount
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch saved settings from backend
+        const settingsResult = await adminService.getSettings();
+        if (settingsResult.ok && settingsResult.data) {
+          const s = settingsResult.data;
+          if (s.general) {
+            const g = s.general as any;
+            if (g.universityName) setUniversityName(g.universityName);
+            if (g.abbreviation) setAbbreviation(g.abbreviation);
+            if (g.website) setWebsite(g.website);
+            if (g.contactEmail) setContactEmail(g.contactEmail);
+            if (g.address) setAddress(g.address);
+            if (g.academicYear) setAcademicYear(g.academicYear);
+            if (g.language) setLanguage(g.language);
+            if (g.timezone) setTimezone(g.timezone);
+            if (g.dateFormat) setDateFormat(g.dateFormat);
+          }
+          if (s.email) {
+            const e = s.email as any;
+            if (e.smtpHost) setSmtpHost(e.smtpHost);
+            if (e.smtpPort) setSmtpPort(e.smtpPort);
+            if (e.smtpUser) setSmtpUser(e.smtpUser);
+            if (e.fromName) setFromName(e.fromName);
+            if (e.fromEmail) setFromEmail(e.fromEmail);
+          }
+          if (s.integrations) {
+            const i = s.integrations as any;
+            if (i.regApiToggle !== undefined) setRegApiToggle(i.regApiToggle);
+            if (i.smsToggle !== undefined) setSmsToggle(i.smsToggle);
+            if (i.googleToggle !== undefined) setGoogleToggle(i.googleToggle);
+            if (i.linkedinToggle !== undefined) setLinkedinToggle(i.linkedinToggle);
+            if (i.regApiEndpoint) setRegApiEndpoint(i.regApiEndpoint);
+            if (i.regApiKey) setRegApiKey(i.regApiKey);
+            if (i.smsGatewayUser) setSmsGatewayUser(i.smsGatewayUser);
+            if (i.googleClientId) setGoogleClientId(i.googleClientId);
+          }
+          if (s.appearance) {
+            const a = s.appearance as any;
+            if (a.primaryColor) setPrimaryColor(a.primaryColor);
+            if (a.accentColor) setAccentColor(a.accentColor);
+            if (a.logoUrl) setLogoPreview(a.logoUrl);
+          }
+        }
+
+        // Fetch import history
+        const logsResult = await adminService.getSyncLogs();
+        if (logsResult.ok) {
+          setImportHistory(
+            logsResult.data.map((log: any) => ({
+              filename: 'sync_log_' + log.id + '.csv',
+              date: new Date(log.syncedAt).toLocaleDateString(),
+              records: log.recordsProcessed,
+              status: log.status,
+              errors: log.errorsFound || 0,
+            }))
+          );
+        }
+      } catch (err) {
+        // silently fail - use defaults
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  // --- Save Settings ---
+  const handleSaveSettings = async () => {
+    setSaving(true);
+    const settingsPayload: Record<string, any> = {
+      general: {
+        universityName,
+        abbreviation,
+        website,
+        contactEmail,
+        address,
+        academicYear,
+        language,
+        timezone,
+        dateFormat,
+      },
+      email: {
+        smtpHost,
+        smtpPort,
+        smtpUser,
+        fromName,
+        fromEmail,
+      },
+      integrations: {
+        regApiToggle,
+        smsToggle,
+        googleToggle,
+        linkedinToggle,
+        regApiEndpoint,
+        regApiKey,
+        smsGatewayUser,
+        googleClientId,
+      },
+      appearance: {
+        primaryColor,
+        accentColor,
+        logoUrl: logoPreview,
+      },
+    };
+
+    const result = await adminService.updateSettings(settingsPayload);
+    setSaving(false);
+    if (result.ok) {
+      toast.success('Settings saved successfully!');
+    } else {
+      toast.error(result.message || 'Failed to save settings.');
+    }
+  };
+
+  // --- Dynamic Summary Metrics ---
+  const generalFields = [universityName, abbreviation, website, contactEmail, address, academicYear];
+  const isProfileComplete = generalFields.every((f) => f.trim() !== '');
+
+  const connectedIntegrations = [regApiToggle, smsToggle, googleToggle, linkedinToggle].filter(Boolean).length;
+  const totalIntegrations = 4;
+
+  const totalImportedRecords = importHistory.reduce((sum, row) => sum + row.records, 0);
+  const todayStr = new Date().toLocaleDateString();
+  const addedToday = importHistory
+    .filter((row) => row.date === todayStr)
+    .reduce((sum, row) => sum + row.records, 0);
+
+  const brandAssets = (logoPreview !== defaultLogo ? 1 : 1) + (primaryColor !== '#003580' || accentColor !== '#E8A020' ? 1 : 1);
+
   const settingsSummaryCards = [
-    { title: 'University Profile', value: 'Complete', icon: Building2, tone: 'blue' as const, trend: 'Identity synced' },
-    { title: 'Connected Integrations', value: '3/4', icon: Link2, tone: 'green' as const, trend: '1 pending test' },
-    { title: 'Imported Records', value: '839', icon: Database, tone: 'gold' as const, trend: '245 added today' },
-    { title: 'Brand Assets', value: '2', icon: ImagePlus, tone: 'purple' as const, trend: 'Logo + palette' },
+    {
+      title: 'University Profile',
+      value: isProfileComplete ? 'Complete' : 'Incomplete',
+      icon: Building2,
+      tone: 'blue' as const,
+      trend: isProfileComplete ? 'Identity synced' : 'Fields missing',
+    },
+    {
+      title: 'Connected Integrations',
+      value: `${connectedIntegrations}/${totalIntegrations}`,
+      icon: Link2,
+      tone: 'green' as const,
+      trend: `${totalIntegrations - connectedIntegrations} pending test`,
+    },
+    {
+      title: 'Imported Records',
+      value: loading ? '...' : totalImportedRecords.toLocaleString(),
+      icon: Database,
+      tone: 'gold' as const,
+      trend: addedToday > 0 ? `${addedToday} added today` : 'No imports today',
+    },
+    {
+      title: 'Brand Assets',
+      value: `${brandAssets}`,
+      icon: ImagePlus,
+      tone: 'purple' as const,
+      trend: 'Logo + palette',
+    },
   ];
 
   const resetDefaults = () => {
@@ -151,16 +377,6 @@ export default function SystemSettings() {
     toast.success('Connection test completed successfully.');
   };
 
-  const addWhitelist = () => {
-    if (!whitelistInput.trim()) return;
-    setWhitelist((current) => Array.from(new Set([...current, whitelistInput.trim()])));
-    setWhitelistInput('');
-  };
-
-  const removeWhitelist = (ip: string) => {
-    setWhitelist((current) => current.filter((item) => item !== ip));
-  };
-
   const uploadTemplate = () => {
     toast.success('CSV template downloaded.');
   };
@@ -171,7 +387,20 @@ export default function SystemSettings() {
         title="System Settings"
         subtitle="Tune system-wide preferences and feature flags."
         breadcrumbs={[{ label: 'Admin' }, { label: 'System Settings' }]}
-        actions={<AdminBadge variant="success">Configuration Center</AdminBadge>}
+        actions={
+          <div className="flex items-center gap-2">
+            <AdminBadge variant="success">Configuration Center</AdminBadge>
+            <button
+              type="button"
+              onClick={handleSaveSettings}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Save className="h-4 w-4" />
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        }
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -212,39 +441,50 @@ export default function SystemSettings() {
         <SectionCard title="General Settings" subtitle="University identity and core regional settings.">
           <div className="grid gap-4 md:grid-cols-2">
             <InputLabel label="University name">
-              <input defaultValue="Adama Science and Technology University" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={universityName} onChange={(e) => setUniversityName(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Abbreviation">
-              <input defaultValue="ASTU" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={abbreviation} onChange={(e) => setAbbreviation(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Website">
-              <input defaultValue="https://astu.edu.et" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={website} onChange={(e) => setWebsite(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Contact email">
-              <input defaultValue="admin@astu.edu.et" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Address">
-              <input defaultValue="Adama, Ethiopia" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Academic year format">
-              <input defaultValue="2024-25" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Default language">
-              <select defaultValue="English" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
                 <option>English</option>
                 <option>Amharic</option>
               </select>
             </InputLabel>
             <InputLabel label="Timezone">
-              <input defaultValue="Africa/Addis_Ababa" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Date format">
-              <select defaultValue="DD/MM/YYYY" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
+              <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
                 <option>DD/MM/YYYY</option>
                 <option>MM/DD/YYYY</option>
                 <option>YYYY-MM-DD</option>
               </select>
             </InputLabel>
+          </div>
+          <div className="mt-5 flex justify-end">
+            <button
+              type="button"
+              onClick={handleSaveSettings}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+            >
+              <Save className="h-4 w-4" />
+              {saving ? 'Saving...' : 'Save General Settings'}
+            </button>
           </div>
         </SectionCard>
       )}
@@ -253,19 +493,20 @@ export default function SystemSettings() {
         <SectionCard title="Email Configuration" subtitle="SMTP settings and outbound email identity.">
           <div className="grid gap-4 md:grid-cols-2">
             <InputLabel label="SMTP Host">
-              <input defaultValue="smtp.astu.edu.et" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Port">
-              <input defaultValue="587" type="number" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} type="number" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Username">
-              <input defaultValue="mailer@astu.edu.et" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Password">
               <div className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2.5">
                 <input
                   type={smtpPasswordVisible ? 'text' : 'password'}
-                  defaultValue="••••••••••"
+                  value={smtpPassword}
+                  onChange={(e) => setSmtpPassword(e.target.value)}
                   className="w-full bg-transparent outline-none"
                 />
                 <button type="button" onClick={() => setSmtpPasswordVisible((current) => !current)} className="text-xs font-semibold text-[#003580]">
@@ -274,21 +515,30 @@ export default function SystemSettings() {
               </div>
             </InputLabel>
             <InputLabel label="From name">
-              <input defaultValue="ASTU Alumni Management System" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={fromName} onChange={(e) => setFromName(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="From email">
-              <input defaultValue="noreply@astu.edu.et" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
           </div>
 
-          <div className="mt-5 flex justify-end">
+          <div className="mt-5 flex justify-end gap-3">
             <button
               type="button"
               onClick={() => setTestEmailOpen(true)}
-              className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+              className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 px-4 py-2.5 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5"
             >
               <Send className="h-4 w-4" />
               Send Test Email
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveSettings}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+            >
+              <Save className="h-4 w-4" />
+              {saving ? 'Saving...' : 'Save Email Config'}
             </button>
           </div>
         </SectionCard>
@@ -301,57 +551,68 @@ export default function SystemSettings() {
               <IntegrationItem
                 title="Registrar / ERP API"
                 description="Synchronize student and alumni records."
-                status="Connected"
+                status={regApiToggle ? 'Connected' : 'Disconnected'}
                 toggleActive={regApiToggle}
                 onToggle={() => setRegApiToggle((current) => !current)}
                 onTest={() => setTestConnectionOpen(true)}
               />
               <div className="grid gap-4 md:grid-cols-2">
                 <InputLabel label="API Endpoint">
-                  <input defaultValue="https://api.astu.edu.et/erp" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                  <input value={regApiEndpoint} onChange={(e) => setRegApiEndpoint(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
                 </InputLabel>
                 <InputLabel label="API Key">
-                  <input defaultValue="astu_erp_xxxxx" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                  <input value={regApiKey} onChange={(e) => setRegApiKey(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
                 </InputLabel>
               </div>
 
               <IntegrationItem
                 title="SMS Gateway (Afro Message)"
                 description="Send SMS notifications to alumni and staff."
-                status="Connected"
+                status={smsToggle ? 'Connected' : 'Disconnected'}
                 toggleActive={smsToggle}
                 onToggle={() => setSmsToggle((current) => !current)}
                 onTest={() => setTestConnectionOpen(true)}
               />
               <div className="grid gap-4 md:grid-cols-2">
                 <InputLabel label="Gateway Username">
-                  <input defaultValue="astu_sms" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                  <input value={smsGatewayUser} onChange={(e) => setSmsGatewayUser(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
                 </InputLabel>
                 <InputLabel label="Gateway Password">
-                  <input type="password" defaultValue="password" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                  <input value={smsGatewayPass} onChange={(e) => setSmsGatewayPass(e.target.value)} type="password" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
                 </InputLabel>
               </div>
 
               <IntegrationItem
                 title="Google OAuth"
                 description="Allow Google-based sign-in."
-                status="Inactive"
+                status={googleToggle ? 'Active' : 'Inactive'}
                 toggleActive={googleToggle}
                 onToggle={() => setGoogleToggle((current) => !current)}
                 onTest={() => setTestConnectionOpen(true)}
               />
               <InputLabel label="Client ID">
-                <input defaultValue="google-client-id.apps.googleusercontent.com" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                <input value={googleClientId} onChange={(e) => setGoogleClientId(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
               </InputLabel>
 
               <IntegrationItem
                 title="LinkedIn API"
                 description="Import professional profile and career data."
-                status="Connected"
+                status={linkedinToggle ? 'Connected' : 'Disconnected'}
                 toggleActive={linkedinToggle}
                 onToggle={() => setLinkedinToggle((current) => !current)}
                 onTest={() => setTestConnectionOpen(true)}
               />
+            </div>
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+              >
+                <Save className="h-4 w-4" />
+                {saving ? 'Saving...' : 'Save Integrations'}
+              </button>
             </div>
           </SectionCard>
         </div>
@@ -391,7 +652,7 @@ export default function SystemSettings() {
 
           <SectionCard title="Column Mapping" subtitle="Map system fields to CSV columns before import.">
             <div className="space-y-3">
-              {systemFields.map((field, index) => (
+              {systemFields.map((field) => (
                 <div key={field} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[10px] border border-slate-200 bg-slate-50 p-3">
                   <div className="text-sm font-medium text-slate-700">{field}</div>
                   <ChevronRight className="h-4 w-4 text-slate-400" />
@@ -431,19 +692,33 @@ export default function SystemSettings() {
                       </tr>
                     </thead>
                     <tbody>
-                      {importHistory.map((row) => (
-                        <tr key={row.filename} className="border-t border-slate-100">
-                          <td className="px-4 py-3 text-slate-700">{row.filename}</td>
-                          <td className="px-4 py-3 text-slate-600">{row.date}</td>
-                          <td className="px-4 py-3 text-slate-600">{row.records}</td>
-                          <td className="px-4 py-3">
-                            <AdminBadge variant={row.status === 'Completed' ? 'success' : row.status === 'Failed' ? 'danger' : 'warning'}>
-                              {row.status}
-                            </AdminBadge>
+                      {loading ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
+                            Loading import history...
                           </td>
-                          <td className="px-4 py-3 text-slate-600">{row.errors}</td>
                         </tr>
-                      ))}
+                      ) : importHistory.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
+                            No data imports recorded yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        importHistory.map((row) => (
+                          <tr key={row.filename} className="border-t border-slate-100">
+                            <td className="px-4 py-3 text-slate-700">{row.filename}</td>
+                            <td className="px-4 py-3 text-slate-600">{row.date}</td>
+                            <td className="px-4 py-3 text-slate-600">{row.records}</td>
+                            <td className="px-4 py-3">
+                              <AdminBadge variant={row.status === 'Completed' ? 'success' : row.status === 'Failed' ? 'danger' : 'warning'}>
+                                {row.status}
+                              </AdminBadge>
+                            </td>
+                            <td className="px-4 py-3 text-slate-600">{row.errors}</td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -505,10 +780,20 @@ export default function SystemSettings() {
               <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
                 <h4 className="text-sm font-semibold text-slate-900">Palette Preview</h4>
                 <div className="mt-3 flex gap-3">
-                  <div className="h-14 w-14 rounded-[10px]" style={{ backgroundColor: primaryColor }} />
-                  <div className="h-14 w-14 rounded-[10px]" style={{ backgroundColor: accentColor }} />
+                  <div className="h-14 w-14 rounded-[10px] shadow-inner" style={{ backgroundColor: primaryColor }} />
+                  <div className="h-14 w-14 rounded-[10px] shadow-inner" style={{ backgroundColor: accentColor }} />
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+              >
+                <Save className="h-4 w-4" />
+                {saving ? 'Saving...' : 'Save Appearance'}
+              </button>
             </div>
           </div>
         </SectionCard>
@@ -549,51 +834,6 @@ export default function SystemSettings() {
       >
         <p className="text-sm text-slate-600">This validates the selected integration endpoint and returns the connection status.</p>
       </AdminModal>
-    </div>
-  );
-}
-
-function IntegrationItem({
-  title,
-  description,
-  status,
-  toggleActive,
-  onToggle,
-  onTest,
-}: {
-  title: string;
-  description: string;
-  status: 'Connected' | 'Disconnected' | 'Active' | 'Inactive';
-  toggleActive: boolean;
-  onToggle: () => void;
-  onTest: () => void;
-}) {
-  return (
-    <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-          <p className="mt-1 text-xs text-slate-500">{description}</p>
-        </div>
-        <StatusBadge status={status} />
-      </div>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={onToggle}
-          className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-        >
-          {toggleActive ? <ToggleRight className="h-4 w-4 text-[#1D9E75]" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
-          {toggleActive ? 'Enabled' : 'Disabled'}
-        </button>
-        <button
-          type="button"
-          onClick={onTest}
-          className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
-        >
-          Test Connection
-        </button>
-      </div>
     </div>
   );
 }

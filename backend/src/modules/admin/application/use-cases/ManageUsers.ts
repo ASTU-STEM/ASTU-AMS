@@ -1,7 +1,27 @@
 import prisma from '../../../../core/config/db';
 import { Role, AlumniStatus } from '@prisma/client';
+import { EmailService } from '../../../../core/services/EmailService';
+import bcrypt from 'bcryptjs';
+
+const emailService = new EmailService();
 
 export class ManageUsers {
+  async getRoleStats() {
+    const group = await prisma.user.groupBy({
+      by: ['role'],
+      _count: {
+        id: true,
+      },
+    });
+
+    const stats: Record<string, number> = {};
+    for (const g of group) {
+      stats[g.role] = g._count.id;
+    }
+
+    return stats;
+  }
+
   async getUsers(params: {
     page?: number;
     limit?: number;
@@ -197,12 +217,29 @@ export class ManageUsers {
       case 'Admin': roleEnum = Role.ADMIN; break;
     }
 
+    // Check for existing user by email
+    const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existingUser) {
+      throw new Error(`A user with the email ${data.email} already exists.`);
+    }
+
+    // Check for existing student ID if Alumni
+    if (roleEnum === Role.ALUMNI && data.studentId) {
+      const existingAlumni = await prisma.alumniProfile.findUnique({ where: { studentId: data.studentId } });
+      if (existingAlumni) {
+        throw new Error(`An alumni with the Student ID ${data.studentId} already exists.`);
+      }
+    }
+
+    const tempPassword = data.password ? data.password : 'admin-generated';
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
     const user = await prisma.user.create({
       data: {
         email: data.email,
         role: roleEnum,
         isActive: true, // Auto-activate admin-created users
-        password: data.password ? data.password : 'admin-generated', // Placeholder for actual hash
+        password: hashedPassword,
       }
     });
 
@@ -249,6 +286,13 @@ export class ManageUsers {
           departmentId: dept.id
         }
       });
+    }
+
+    // Send the professional welcome email with credentials
+    try {
+      await emailService.sendTemporaryPassword(data.email, data.password || 'admin-generated', data.role);
+    } catch (error) {
+      console.error('Failed to send welcome email to', data.email, error);
     }
 
     return { success: true, user };

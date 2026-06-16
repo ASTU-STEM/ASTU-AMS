@@ -27,6 +27,7 @@ import {
   Menu
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { adminApiClient } from '../features/admin/api/adminApi';
 
 // Theme Colors
 const COLORS = {
@@ -155,7 +156,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
     }
   }, [isFullScreen]);
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
@@ -196,38 +197,18 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
     setTimeout(() => setTypingStep(2), 400);
     setTimeout(() => setTypingStep(3), 850);
 
-    // Simulated AI response logic
-    setTimeout(() => {
+    // Fetch AI response
+    try {
+      const response = await adminApiClient.post('/ai/chat', { message: trimmed });
+      const { response: aiResponseText, widget: aiWidgetType } = response.data.data || { response: 'Error: No data from server' };
+
       let botMsg: MessageType = {
         id: `msg-${Date.now() + 1}`,
         sender: 'assistant',
-        text: '',
+        text: aiResponseText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        widget: aiWidgetType,
       };
-
-      const query = trimmed.toLowerCase();
-
-      if (query.includes('tracer') || query.includes('employment') || query.includes('cse') || query.includes('department')) {
-        botMsg.text = "I have queried the ASTU Registrar DB & Careers portal. Here is the employment breakdown for Computer Science & Engineering (CSE) graduates vs other engineering fields from the 2025 cohort:";
-        botMsg.widget = 'tracer';
-      } else if (query.includes('survey') || query.includes('response') || query.includes('completion') || query.includes('wave')) {
-        botMsg.text = "Here is the response tracking statistics for 'Alumni Survey Wave 3' (Target: 2025 Graduates):";
-        botMsg.widget = 'survey';
-      } else if (query.includes('report') || query.includes('summary') || query.includes('salary')) {
-        botMsg.text = "Sure, I have generated a consolidated Tracer Study salary and placement report for the engineering departments:";
-        botMsg.widget = 'custom-report';
-      } else if (query.includes('reminder') || query.includes('notify') || query.includes('unregistered')) {
-        botMsg.text = "Survey records indicate 184 registered alumni from Adama Science and Technology University have not completed the active Tracer Survey (Wave 3).";
-        botMsg.widget = 'survey'; // Offers completion visual with reminder action button
-      } else {
-        botMsg.text = `I received your query: "${trimmed}". 
-
-Here are some helpful questions you can ask me:
-- "Compare employment rates by department"
-- "Show response rate for Survey Wave 3"
-- "Generate starting salary report"
-- "Draft text warning/reminder for incomplete survey users"`;
-      }
 
       setSessions((prevSessions) =>
         prevSessions.map((sess) => {
@@ -240,10 +221,29 @@ Here are some helpful questions you can ask me:
           return sess;
         })
       );
-
+    } catch (err) {
+      console.error(err);
+      let errorMsg: MessageType = {
+        id: `msg-${Date.now() + 1}`,
+        sender: 'assistant',
+        text: 'Sorry, I encountered an error communicating with the AI service.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setSessions((prevSessions) =>
+        prevSessions.map((sess) => {
+          if (sess.id === activeSessionId) {
+            return {
+              ...sess,
+              messages: [...sess.messages, errorMsg],
+            };
+          }
+          return sess;
+        })
+      );
+    } finally {
       setIsTyping(false);
       setTypingStep(0);
-    }, 1400);
+    }
   };
 
   const handleQuickAction = (actionText: string) => {

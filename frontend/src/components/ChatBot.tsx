@@ -75,7 +75,7 @@ async function askAssistant(userMessage: string, history: ChatMessage[]) {
     { role: "user", content: userMessage },
   ];
 
-  const response = await fetch(`${apiBaseUrl}/chatbot`, {
+  const response = await fetch(`${apiBaseUrl}/ai/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message: userMessage, messages }),
@@ -83,8 +83,9 @@ async function askAssistant(userMessage: string, history: ChatMessage[]) {
 
   if (!response.ok) throw new Error("Chat API error");
   const data = await response.json();
-  return typeof data.reply === "string" && data.reply.trim()
-    ? data.reply
+  const reply = data.data?.response;
+  return typeof reply === "string" && reply.trim()
+    ? reply
     : getFallback(userMessage);
 }
 
