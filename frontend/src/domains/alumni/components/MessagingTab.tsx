@@ -65,7 +65,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const emojis = ['😊', '👍', '🎉', '🚀', '👋', '🔥', '💡', '📌', '✅', '🌟', '❤️', '💪', '🙏', '🎯', '✨', '🎓'];
 
   const currentMessages = messages[activeThread] || [];
-  const currentMeta = THREAD_META[activeThread] || THREAD_META.recruiter;
+  const currentMeta = THREAD_META[activeThread] || THREAD_META.recruiter || { name: 'Select a thread', role: '', initials: '--', gradient: 'bg-gradient-to-br from-slate-400 to-slate-500', online: false };
 
   const quickReplies: Record<string, string[]> = {};
 
