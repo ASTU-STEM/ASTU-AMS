@@ -12,6 +12,7 @@ interface AlumniMessage {
 
 interface MessagingTabProps {
   darkMode: boolean;
+  userId?: string;
 }
 
 interface Thread {
@@ -27,43 +28,19 @@ interface Thread {
   lastTime: string;
 }
 
-const THREADS: Thread[] = [
-  { id: 'recruiter', label: 'Recruiter', desc: 'Job interview and placement', initials: 'HS', color: 'from-blue-500 to-indigo-600', gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600', online: true, unread: 2, lastMessage: "Let's schedule it for 2:30 PM.", lastTime: '10:15 AM' },
-  { id: 'registrar', label: 'Registrar', desc: 'Transcript & verification', initials: 'RG', color: 'from-emerald-500 to-teal-600', gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600', online: true, unread: 0, lastMessage: 'Your transcript has been approved.', lastTime: 'Yesterday' },
-  { id: 'mentor', label: 'Mentor', desc: 'Career guidance & sessions', initials: 'MN', color: 'from-violet-500 to-purple-600', gradient: 'bg-gradient-to-br from-violet-500 to-purple-600', online: false, unread: 1, lastMessage: 'Great progress on the project!', lastTime: 'Mon' },
-  { id: 'system', label: 'System', desc: 'Notifications & alerts', initials: 'SY', color: 'from-amber-500 to-orange-600', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', online: true, unread: 0, lastMessage: 'Survey reminder sent.', lastTime: 'Mar 15' },
-];
+const THREADS: Thread[] = [];
 
-const INITIAL_MESSAGES: Record<string, AlumniMessage[]> = {
-  recruiter: [
-    { id: 1, sender: 'Recruiter', senderName: 'Hilina Sileshi', text: 'Hello! We reviewed your profile and matches for the Senior Developer opening. Are you available for a brief introductory call tomorrow?', timestamp: '09:30 AM', status: 'read' },
-    { id: 2, sender: 'Alumni', senderName: 'You', text: 'Hi Hilina! Yes, absolutely. I am available anytime after 2:00 PM.', timestamp: '10:05 AM', status: 'read' },
-    { id: 3, sender: 'Recruiter', senderName: 'Hilina Sileshi', text: "Excellent! Let's schedule it for 2:30 PM. I'll send over a calendar invite soon.", timestamp: '10:15 AM', status: 'delivered' },
-  ],
-  registrar: [
-    { id: 4, sender: 'Registrar', senderName: 'ASTU Registrar Office', text: 'Your Official Transcript request (ASTU-DOC-1001) has been approved and is being prepared for dispatch.', timestamp: '2:00 PM', status: 'read' },
-    { id: 5, sender: 'Alumni', senderName: 'You', text: 'Thank you! When can I expect it to be ready for pickup?', timestamp: '2:30 PM', status: 'read' },
-    { id: 6, sender: 'Registrar', senderName: 'ASTU Registrar Office', text: 'The document will be ready within 3 business days. You will receive an email notification once it is dispatched.', timestamp: '3:00 PM', status: 'delivered' },
-  ],
-  mentor: [
-    { id: 7, sender: 'Mentor', senderName: 'Dr. Abebe Kebede', text: 'Hi! I reviewed the project proposal you shared. Great progress! Let me know if you need help with the architecture phase.', timestamp: '11:00 AM', status: 'read' },
-    { id: 8, sender: 'Alumni', senderName: 'You', text: "Thanks Dr. Abebe! I'd love to schedule a session to discuss the database design patterns.", timestamp: '11:30 AM', status: 'delivered' },
-  ],
-  system: [
-    { id: 9, sender: 'System', senderName: 'ASTU AMS', text: `<span class="material-symbols-outlined">assignment</span> Reminder: The 12-Month Tracer Survey is now available. Please complete it before April 30.`, timestamp: 'Mar 15', status: 'read' },
-    { id: 10, sender: 'System', senderName: 'ASTU AMS', text: `<span class="material-symbols-outlined">celebration</span> Congratulations! Your degree verification has been completed and dispatched.`, timestamp: 'Mar 10', status: 'read' },
-  ],
-};
+const INITIAL_MESSAGES: Record<string, AlumniMessage[]> = {};
 
-const THREAD_META: Record<string, { name: string; role: string; initials: string; gradient: string; online: boolean }> = {
-  recruiter: { name: 'Hilina Sileshi', role: 'HR Recruiter · Safir Technologies', initials: 'HS', gradient: 'bg-gradient-to-br from-blue-500 to-indigo-600', online: true },
-  registrar: { name: 'ASTU Registrar Office', role: 'Document Verification', initials: 'RG', gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600', online: true },
-  mentor: { name: 'Dr. Abebe Kebede', role: 'Senior Mentor · CS Department', initials: 'MN', gradient: 'bg-gradient-to-br from-violet-500 to-purple-600', online: false },
-  system: { name: 'ASTU AMS System', role: 'Automated Notifications', initials: 'SY', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', online: true },
-};
+const THREAD_META: Record<string, { name: string; role: string; initials: string; gradient: string; online: boolean }> = {};
 
-export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
-  const [activeThread, setActiveThread] = useState('recruiter');
+import { alumniService } from '../services/alumni.service';
+import { io, Socket } from 'socket.io-client';
+
+export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, userId }) => {
+  const [activeThread, setActiveThread] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [threads, setThreads] = useState<Thread[]>(THREADS);
   const [messages, setMessages] = useState<Record<string, AlumniMessage[]>>(INITIAL_MESSAGES);
   const [typedMessage, setTypedMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -73,6 +50,73 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    alumniService.getMessageThreads().then((realThreads: any[]) => {
+      if (realThreads && realThreads.length > 0) {
+        setThreads(realThreads);
+        setActiveThread(realThreads[0].id);
+        
+        // Add meta for real threads
+        realThreads.forEach(t => {
+          THREAD_META[t.id] = {
+            name: t.label,
+            role: 'Recruiter',
+            initials: t.initials,
+            gradient: t.gradient,
+            online: t.online
+          };
+        });
+      }
+    }).catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    const newSocket = io('http://localhost:5000');
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      newSocket.emit('register', userId);
+    });
+
+    newSocket.on('newMessage', (msg: any) => {
+      const threadId = `recruiter-${msg.employerId}`;
+      const formattedMsg: AlumniMessage = {
+        id: msg.id,
+        sender: msg.sender === 'ALUMNI' ? 'Alumni' : 'Recruiter',
+        senderName: msg.sender === 'ALUMNI' ? 'You' : (THREAD_META[threadId]?.name || 'Recruiter'),
+        text: msg.text,
+        timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: msg.isRead ? 'read' : 'delivered'
+      };
+
+      setMessages(prev => {
+        const threadMsgs = prev[threadId] || [];
+        // Prevent duplicate messages if sender is Alumni and it was already appended optimistically
+        if (threadMsgs.find(m => m.id === formattedMsg.id || (m.text === formattedMsg.text && m.sender === formattedMsg.sender))) {
+          return prev;
+        }
+        return {
+          ...prev,
+          [threadId]: [...threadMsgs, formattedMsg]
+        };
+      });
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (activeThread.startsWith('recruiter-')) {
+      const employerId = activeThread.replace('recruiter-', '');
+      alumniService.getThreadMessages(employerId).then((data: any[]) => {
+        setMessages(prev => ({ ...prev, [activeThread]: data }));
+      }).catch(err => console.error(err));
+    }
+  }, [activeThread]);
 
   const handleFileAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -94,7 +138,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const emojis = ['😊', '👍', '🎉', '🚀', '👋', '🔥', '💡', '📌', '✅', '🌟', '❤️', '💪', '🙏', '🎯', '✨', '🎓'];
 
   const currentMessages = messages[activeThread] || [];
-  const currentMeta = THREAD_META[activeThread] || THREAD_META.recruiter;
+  const currentMeta = THREAD_META[activeThread] || null;
 
   const quickReplies: Record<string, string[]> = {
     recruiter: ['I am available after 2:00 PM.', 'Could we reschedule?', 'Please share the job description.'],
@@ -111,48 +155,71 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
     scrollToBottom();
   }, [currentMessages, isTyping]);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!typedMessage.trim()) return;
 
-    const newMsg: AlumniMessage = {
-      id: Date.now(),
-      sender: 'Alumni',
-      senderName: 'You',
-      text: typedMessage.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'sent',
-    };
-
-    setMessages(prev => ({
-      ...prev,
-      [activeThread]: [...(prev[activeThread] || []), newMsg],
-    }));
-    setTypedMessage('');
-
-    // Simulate typing indicator and auto-reply
-    setTimeout(() => setIsTyping(true), 800);
-    setTimeout(() => {
-      setIsTyping(false);
-      const autoReplies: Record<string, string> = {
-        recruiter: 'Got it! Talk to you then. I will send the calendar invite shortly.',
-        registrar: 'Thank you for reaching out. We will update you on the status soon.',
-        mentor: "That's a great idea! Let me check my schedule and get back to you.",
-        system: 'Acknowledged. Your request has been logged in the system.',
-      };
-      const reply: AlumniMessage = {
-        id: Date.now() + 1,
-        sender: activeThread === 'recruiter' ? 'Recruiter' : activeThread === 'registrar' ? 'Registrar' : activeThread === 'mentor' ? 'Mentor' : 'System',
-        senderName: currentMeta.name,
-        text: autoReplies[activeThread] || 'Received. We will respond shortly.',
+    if (activeThread.startsWith('recruiter-')) {
+      try {
+        const employerId = activeThread.replace('recruiter-', '');
+        const msg: any = await alumniService.sendMessage(employerId, typedMessage.trim());
+        setMessages(prev => {
+          const threadMsgs = prev[activeThread] || [];
+          return {
+            ...prev,
+            [activeThread]: [...threadMsgs, msg],
+          };
+        });
+        setTypedMessage('');
+      } catch (err) {
+        toast.error('Failed to send message');
+      }
+    } else {
+      const newMsg: AlumniMessage = {
+        id: Date.now(),
+        sender: 'Alumni',
+        senderName: 'You',
+        text: typedMessage.trim(),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'delivered',
+        status: 'sent',
       };
-      setMessages(prev => ({
-        ...prev,
-        [activeThread]: [...(prev[activeThread] || []), reply],
-      }));
-    }, 2200);
+
+      setMessages(prev => {
+        const threadMsgs = prev[activeThread] || [];
+        return {
+          ...prev,
+          [activeThread]: [...threadMsgs, newMsg],
+        };
+      });
+      setTypedMessage('');
+
+      // Simulate typing indicator and auto-reply
+      setTimeout(() => setIsTyping(true), 800);
+      setTimeout(() => {
+        setIsTyping(false);
+        const autoReplies: Record<string, string> = {
+          recruiter: 'Got it! Talk to you then. I will send the calendar invite shortly.',
+          registrar: 'Thank you for reaching out. We will update you on the status soon.',
+          mentor: "That's a great idea! Let me check my schedule and get back to you.",
+          system: 'Acknowledged. Your request has been logged in the system.',
+        };
+        const reply: AlumniMessage = {
+          id: Date.now() + 1,
+          sender: activeThread === 'recruiter' ? 'Recruiter' : activeThread === 'registrar' ? 'Registrar' : activeThread === 'mentor' ? 'Mentor' : 'System',
+          senderName: currentMeta.name,
+          text: autoReplies[activeThread] || 'Received. We will respond shortly.',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'delivered',
+        };
+        setMessages(prev => {
+          const threadMsgs = prev[activeThread] || [];
+          return {
+            ...prev,
+            [activeThread]: [...threadMsgs, reply],
+          };
+        });
+      }, 2200);
+    }
   };
 
   const handleThreadSwitch = (threadId: string) => {
@@ -160,11 +227,13 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
     setMobileShowThread(true);
   };
 
-  const totalUnread = THREADS.reduce((sum, t) => sum + t.unread, 0);
+  const totalUnread = threads.reduce((sum, t) => sum + t.unread, 0);
 
   return (
-    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
-      <div className="grid min-h-[600px] grid-cols-1 lg:grid-cols-[300px_1fr]">
+    <>
+      {threads.length > 0 ? (
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+          <div className="grid min-h-[600px] grid-cols-1 lg:grid-cols-[300px_1fr]">
 
         {/* Sidebar: Thread List */}
         <aside className={`border-b lg:border-b-0 lg:border-r border-[var(--border-color)] flex flex-col ${mobileShowThread && activeThread ? 'hidden lg:flex' : 'flex'}`}>
@@ -197,7 +266,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
 
           {/* Thread Items */}
           <div className="flex-1 overflow-y-auto">
-            {THREADS.map(thread => {
+            {threads.map(thread => {
               const isActive = activeThread === thread.id;
               return (
                 <button
@@ -448,7 +517,17 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+        </div>
+        </div>
+      ) : (
+        <div className={`flex h-[calc(100vh-140px)] min-h-[500px] items-center justify-center rounded-[20px] border border-[var(--border-color)] bg-[var(--bg-color)] shadow-sm ${darkMode ? 'shadow-black/20' : ''}`}>
+          <div className="text-center">
+            <span className="material-symbols-outlined text-6xl text-[var(--text-muted)] mb-4 block">chat_bubble_outline</span>
+            <h3 className="text-xl font-semibold text-[var(--text-color)]">No Messages Yet</h3>
+            <p className="mt-2 text-[var(--text-muted)] max-w-md">When recruiters or mentors send you a message, you will see them here.</p>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

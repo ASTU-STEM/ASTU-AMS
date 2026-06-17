@@ -1,26 +1,36 @@
 // @ts-nocheck
 import React, { useState } from 'react';
-import { CareerEvent, JobMatch, SkillPathway, Mentor } from '../types/alumni.types';
+import { CareerEvent, JobMatch, Mentor, CareerMilestone, AlumniProfile, SkillPathway } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 import { CalendarDays, MapPin, Users, TrendingUp, Award, FileText, BarChart3, Target, CheckCircle2, AlertCircle, BookOpen, Briefcase, GraduationCap, Rocket, Lightbulb, Code2, Cloud, Shield, Smartphone, Star, ThumbsUp, ExternalLink } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
-import { getSkillPathways, getJobMatches, getMentors } from '../services/mockAlumniData';
+import { alumniService } from '../services/alumni.service';
 
 interface CareerTabProps {
   events: CareerEvent[];
+  jobs: JobMatch[];
+  mentors: Mentor[];
   onRegisterEvent: (eventId: number) => void;
 }
 
-export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent }) => {
+export const CareerTab: React.FC<CareerTabProps> = ({ events, jobs, mentors, onRegisterEvent }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [showAllJobs, setShowAllJobs] = useState(false);
   const [showAllMentors, setShowAllMentors] = useState(false);
 
-  const featuredJobs = getJobMatches().slice(0, showAllJobs ? undefined : 3);
-  const featuredMentors = getMentors().slice(0, showAllMentors ? undefined : 3);
-
+  const featuredJobs = jobs.slice(0, showAllJobs ? undefined : 3);
+  const featuredMentors = mentors.slice(0, showAllMentors ? undefined : 3);
   const [selectedPathway, setSelectedPathway] = useState<number | null>(null);
-  const skillPathways = getSkillPathways();
+
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'pathways' | 'mentors' | 'events'>('overview');
+  
+  const skillPathways: SkillPathway[] = [
+    { id: 1, title: 'Full-Stack Web Development', description: 'Master React, Node.js, and cloud deployment for modern web apps.', skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS'], duration: '6 months', level: 'intermediate', jobs: ['Full Stack Developer', 'Frontend Engineer', 'Backend Developer'], popularity: 95 },
+    { id: 2, title: 'AI & Machine Learning Engineering', description: 'Build production ML pipelines, LLMs, and computer vision systems.', skills: ['Python', 'PyTorch', 'TensorFlow', 'MLOps', 'AWS SageMaker', 'LangChain'], duration: '8 months', level: 'advanced', jobs: ['ML Engineer', 'Data Scientist', 'AI Specialist'], popularity: 88 },
+    { id: 3, title: 'Cloud & DevOps Engineering', description: 'Master CI/CD, Kubernetes, and cloud infrastructure as code.', skills: ['Docker', 'Kubernetes', 'Terraform', 'AWS', 'Jenkins', 'GitHub Actions'], duration: '5 months', level: 'intermediate', jobs: ['DevOps Engineer', 'Cloud Architect', 'SRE'], popularity: 82 },
+    { id: 4, title: 'Mobile App Development', description: 'Build cross-platform mobile apps with React Native and Flutter.', skills: ['React Native', 'Flutter', 'Dart', 'Firebase', 'App Store Connect'], duration: '4 months', level: 'beginner', jobs: ['Mobile Developer', 'React Native Developer', 'Flutter Developer'], popularity: 78 },
+    { id: 5, title: 'Cybersecurity Fundamentals', description: 'Learn ethical hacking, network security, and compliance frameworks.', skills: ['Python', 'Kali Linux', 'Wireshark', 'Nmap', 'Metasploit', 'ISO 27001'], duration: '6 months', level: 'intermediate', jobs: ['Security Analyst', 'Penetration Tester', 'Security Engineer'], popularity: 75 },
+  ];
 
   const pathwayIcons: Record<string, React.ElementType> = {
     'Full-Stack Web Development': Code2,

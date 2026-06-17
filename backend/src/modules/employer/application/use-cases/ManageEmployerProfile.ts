@@ -19,7 +19,10 @@ export class UpdateEmployerProfile {
   async execute(userId: string, data: any) {
     const profile = await this.repo.findByUserId(userId);
     if (!profile) {
-      throw new EmployerNotFoundError();
+      return await this.repo.create({
+        userId,
+        ...data,
+      });
     }
     const updated = await this.repo.update(userId, data);
     return updated;

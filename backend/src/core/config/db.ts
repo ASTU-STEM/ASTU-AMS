@@ -232,15 +232,136 @@ class FakePrisma {
       writeDevDb(this.store);
       return rec;
     },
+    findMany: async ({ where, orderBy }: any = {}) => {
+      let items = this.store.notifications || [];
+      if (where?.userId) items = items.filter((n: any) => n.userId === where.userId);
+      if (where?.isRead !== undefined) items = items.filter((n: any) => n.isRead === where.isRead);
+      return items;
+    },
+    count: async ({ where }: any = {}) => {
+      let items = this.store.notifications || [];
+      if (where?.userId) items = items.filter((n: any) => n.userId === where.userId);
+      if (where?.isRead !== undefined) items = items.filter((n: any) => n.isRead === where.isRead);
+      return items.length;
+    },
+    update: async ({ where, data }: any) => {
+      return { id: where.id, ...data };
+    },
+    updateMany: async ({ where, data }: any) => {
+      return { count: 0 };
+    },
   };
 
   documentRequest = {
     count: async ({ where }: any = {}) => {
       let docs = this.store.documentRequests || [];
       if (where?.status) docs = docs.filter((d: any) => d.status === where.status);
+      if (where?.alumniId) docs = docs.filter((d: any) => d.alumniId === where.alumniId);
       return docs.length;
     },
+    findMany: async ({ where }: any = {}) => {
+      let docs = this.store.documentRequests || [];
+      if (where?.alumniId) docs = docs.filter((d: any) => d.alumniId === where.alumniId);
+      return docs;
+    },
+    create: async ({ data }: any) => {
+      const rec = { ...data, id: `dev-doc-${Date.now()}`, createdAt: new Date().toISOString(), status: 'PENDING' };
+      if (!this.store.documentRequests) this.store.documentRequests = [];
+      this.store.documentRequests.push(rec);
+      writeDevDb(this.store);
+      return rec;
+    },
   };
+
+  // ─── Models needed by various repositories for fallback ───
+  job = {
+    findMany: async (_args?: any) => [],
+    findUnique: async (_args?: any) => null,
+    count: async (_args?: any) => 0,
+    create: async ({ data }: any) => ({ ...data, id: `dev-job-${Date.now()}`, createdAt: new Date() }),
+    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
+    delete: async (_args?: any) => ({}),
+  };
+
+  event = {
+    findMany: async (_args?: any) => [],
+    findUnique: async (_args?: any) => null,
+    count: async (_args?: any) => 0,
+    create: async ({ data }: any) => ({ ...data, id: `dev-event-${Date.now()}`, createdAt: new Date() }),
+    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
+    delete: async (_args?: any) => ({}),
+  };
+
+  surveyTemplate = {
+    findMany: async (_args?: any) => [],
+    findUnique: async (_args?: any) => null,
+    count: async (_args?: any) => 0,
+    create: async ({ data }: any) => ({ ...data, id: `dev-survey-${Date.now()}`, createdAt: new Date() }),
+    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
+    delete: async (_args?: any) => ({}),
+  };
+
+  mentorshipSession = {
+    count: async (_args?: any) => 0,
+    findMany: async (_args?: any) => [],
+  };
+
+  savedJob = {
+    count: async (_args?: any) => 0,
+    findMany: async (_args?: any) => [],
+    findUnique: async (_args?: any) => null,
+    create: async ({ data }: any) => ({ ...data, id: `dev-saved-${Date.now()}` }),
+    delete: async (_args?: any) => ({}),
+  };
+
+  jobApplication = {
+    count: async (_args?: any) => 0,
+    findMany: async (_args?: any) => [],
+    findUnique: async (_args?: any) => null,
+    create: async ({ data }: any) => ({ ...data, id: `dev-app-${Date.now()}`, createdAt: new Date() }),
+    delete: async (_args?: any) => ({}),
+  };
+
+  jobView = {
+    findUnique: async (_args?: any) => null,
+    create: async ({ data }: any) => ({ ...data, id: `dev-view-${Date.now()}` }),
+    upsert: async ({ create }: any) => ({ ...create, id: `dev-view-${Date.now()}` }),
+  };
+
+  surveyAssignment = {
+    count: async (_args?: any) => 0,
+    findMany: async (_args?: any) => [],
+  };
+
+  eventRegistration = {
+    count: async (_args?: any) => 0,
+    findMany: async (_args?: any) => [],
+  };
+
+  forumPost = {
+    findMany: async (_args?: any) => [],
+    create: async ({ data }: any) => {
+      const rec = { ...data, id: `dev-post-${Date.now()}`, createdAt: new Date(), likesCount: 0, commentsCount: 0, alumni: { fullName: 'Dev User', currentRole: 'Alumni', avatarUrl: null } };
+      return rec;
+    },
+  };
+
+  donationCampaign = {
+    findMany: async (_args?: any) => [],
+    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
+  };
+
+  donationRecord = {
+    create: async ({ data }: any) => ({ ...data, id: `dev-donation-${Date.now()}`, createdAt: new Date() }),
+  };
+
+  directMessage = {
+    create: async ({ data }: any) => ({ ...data, id: `dev-msg-${Date.now()}`, createdAt: new Date() }),
+    findMany: async (_args?: any) => [],
+  };
+
+  // Catch-all: for any model not explicitly defined, return safe no-ops
+  [key: string]: any;
 
   async $transaction(cb: any) {
     if (typeof cb === 'function') return cb(this);
@@ -251,6 +372,71 @@ class FakePrisma {
 // ─── Client Initialization ───
 let client: any = null;
 let initialized = false;
+let fallback: FakePrisma | null = null;
+let usingFallback = false;
+
+function getFallback(): FakePrisma {
+  if (!fallback) {
+    fallback = new FakePrisma();
+    fallback.$connect();
+  }
+  return fallback;
+}
+
+function isConnectionError(err: any): boolean {
+  const code = err?.code;
+  // P1001 = can't reach server, P2024 = connection pool timeout, P1008 = operation timed out
+  return code === 'P1001' || code === 'P2024' || code === 'P1008'
+    || (err?.message && (
+      err.message.includes("Can't reach database server")
+      || err.message.includes('Timed out fetching a new connection')
+      || err.message.includes('connection pool')
+    ));
+}
+
+function switchToFallback() {
+  if (!usingFallback) {
+    Logger.warn('⚠️ Database unreachable at query time. Switching to in-memory FakePrisma for remaining requests.');
+    usingFallback = true;
+    client = getFallback();
+  }
+}
+
+/**
+ * Wraps a Prisma model object so that every method call is try/caught.
+ * If a connection error occurs, we swap the global client to FakePrisma
+ * and retry the same call on the fallback model.
+ */
+function wrapModel(modelName: string, realModel: any): any {
+  return new Proxy(realModel, {
+    get(target: any, methodName: string) {
+      const original = target[methodName];
+      if (typeof original !== 'function') return original;
+
+      return async (...args: any[]) => {
+        try {
+          return await original.apply(target, args);
+        } catch (err: any) {
+          if (isConnectionError(err)) {
+            switchToFallback();
+            // Retry on fallback
+            const fb = getFallback();
+            const fbModel = (fb as any)[modelName];
+            if (fbModel && typeof fbModel[methodName] === 'function') {
+              return fbModel[methodName](...args);
+            }
+            // If fallback doesn't have this model/method, return safe defaults
+            if (methodName === 'findMany') return [];
+            if (methodName === 'count') return 0;
+            if (methodName === 'findUnique' || methodName === 'findFirst') return null;
+            return null;
+          }
+          throw err; // Re-throw non-connection errors
+        }
+      };
+    },
+  });
+}
 
 export const initPrisma = async () => {
   if (initialized && client) return client;
@@ -264,19 +450,32 @@ export const initPrisma = async () => {
     Logger.info('Connected to Postgres via Prisma');
   } catch (e: any) {
     Logger.warn(`Prisma connection failed. Falling back to in-memory dev DB: ${e.message}`);
-    client = new FakePrisma();
-    await client.$connect();
+    client = getFallback();
+    usingFallback = true;
   }
 
   initialized = true;
   return client;
 };
 
-// Proxy that forwards to actual client after initialization
+// Proxy that forwards to actual client after initialization, with auto-fallback
 const proxy = new Proxy({}, {
   get(_, prop: string) {
     if (!client) throw new Error('Prisma client not initialized. Call initPrisma() first.');
+
     const v = (client as any)[prop];
+
+    // For $-methods (like $connect, $disconnect, $transaction), bind directly
+    if (typeof prop === 'string' && prop.startsWith('$')) {
+      return typeof v === 'function' ? v.bind(client) : v;
+    }
+
+    // For model accessors (e.g. prisma.alumniProfile), wrap with fallback logic
+    // Only wrap if we're using the real Prisma client (not already on fallback)
+    if (v && typeof v === 'object' && !usingFallback) {
+      return wrapModel(prop, v);
+    }
+
     return typeof v === 'function' ? v.bind(client) : v;
   },
   set(_, prop: string, value) {

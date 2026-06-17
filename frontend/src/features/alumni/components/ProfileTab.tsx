@@ -9,6 +9,8 @@ interface ProfileTabProps {
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const [formData, setFormData] = useState<AlumniProfile>({ ...profile });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [newSkill, setNewSkill] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [activeSection, setActiveSection] = useState('personal');
@@ -50,45 +52,50 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     toast.success(`Removed skill: ${skillToRemove}`);
   };
 
-  const handleMockResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setIsUploading(true);
-      setTimeout(() => {
-        setFormData((prev) => ({
-          ...prev,
-          resume: {
-            fileName: file.name,
-            fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-            uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          },
-        }));
-        setIsUploading(false);
-        toast.success('Resume uploaded successfully!');
-      }, 1500);
+      setResumeFile(file);
+      setFormData((prev) => ({
+        ...prev,
+        resume: {
+          fileName: file.name,
+          fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+          uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        },
+      }));
+      toast.success('Resume selected for upload!');
     }
   };
 
   const handleRemoveResume = () => {
+    setResumeFile(null);
     setFormData((prev) => ({ ...prev, resume: null }));
     toast.success('Resume removed.');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
-    toast.success('Profile updated successfully!');
+    if (avatarFile || resumeFile) {
+      const data = new FormData();
+      data.append('profileData', JSON.stringify(formData));
+      if (avatarFile) data.append('avatar', avatarFile);
+      if (resumeFile) data.append('resume', resumeFile);
+      onSave(data as any);
+    } else {
+      onSave(formData);
+    }
+    toast.success('Profile saving...');
   };
 
-  const handleAvatarChange = () => {
-    const mockAvatars = [
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
-      'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&h=150&q=80',
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
-    ];
-    setFormData((prev) => ({ ...prev, avatarUrl: mockAvatars[Math.floor(Math.random() * mockAvatars.length)] }));
-    toast.success('Profile photo updated!');
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const tempUrl = URL.createObjectURL(file);
+      setFormData((prev) => ({ ...prev, avatarUrl: tempUrl }));
+      toast.success('Profile photo selected for upload!');
+    }
   };
 
   const getScoreColor = () => {
@@ -125,12 +132,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
         <div className="relative z-10 p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="relative group cursor-pointer" onClick={handleAvatarChange}>
+              <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-upload')?.click()}>
                 <img
-                  src={formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80'}
+                  src={(formData.profilePicture || formData.avatarUrl)?.startsWith('/uploads') ? `http://localhost:5000${formData.profilePicture || formData.avatarUrl}` : (formData.profilePicture || formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80')}
                   alt={formData.fullName}
                   className="w-20 h-20 rounded-2xl border-3 border-white/20 shadow-xl object-cover transition-transform group-hover:scale-105"
                 />
+                <input type="file" id="avatar-upload" className="hidden" accept="image/*" onChange={handleAvatarChange} />
                 <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-white text-lg">📷</span>
                 </div>
@@ -138,7 +146,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               <div>
                 <h2 className="text-xl font-extrabold text-white tracking-tight">{formData.fullName || 'New Alumnus'}</h2>
                 <p className="text-sm text-white/70 font-medium mt-0.5">{formData.currentRole} {formData.company ? `at ${formData.company}` : ''}</p>
-                <p className="text-[10px] text-white/50 font-semibold mt-1">{formData.department} • {formData.batch}</p>
+                <p className="text-[10px] text-white/50 font-semibold mt-1">{typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department} • {formData.batch}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -294,7 +302,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
                   <label className={labelClass}>Department</label>
-                  <select name="department" value={formData.department} onChange={handleInputChange} className={inputClass}>
+                  <select name="department" value={typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department} onChange={handleInputChange} className={inputClass}>
                     <option value="Computer Science and Engineering">Computer Science and Engineering</option>
                     <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
                     <option value="Civil Engineering">Civil Engineering</option>
@@ -816,9 +824,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => toast.success('Mock download started!')} className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
-                        ⬇️ Download
-                      </button>
+                      {formData.resumeUrl && (
+                        <a href={`http://localhost:5000${formData.resumeUrl}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
+                          ⬇️ Download
+                        </a>
+                      )}
+                      {!formData.resumeUrl && (
+                        <button onClick={() => toast.success('Please save the profile first to download!')} className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
+                          ⬇️ Download
+                        </button>
+                      )}
                       <button onClick={handleRemoveResume} className="flex items-center gap-1.5 px-4 py-2 border border-red-200 rounded-xl text-[11px] font-bold text-red-600 hover:bg-red-50 transition-all">
                         🗑️ Remove
                       </button>
@@ -827,7 +842,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 </div>
               ) : (
                 <label className="block border-2 border-dashed border-[var(--border-color)] rounded-xl p-10 text-center hover:border-[#003366]/30 hover:bg-[#003366]/5 transition-all cursor-pointer group">
-                  <input type="file" accept=".pdf,.doc,.docx" onChange={handleMockResumeUpload} className="hidden" disabled={isUploading} />
+                  <input type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" disabled={isUploading} />
                   <div className="space-y-3">
                     <span className="text-4xl block group-hover:scale-110 transition-transform">{isUploading ? '⏳' : '📁'}</span>
                     <div>

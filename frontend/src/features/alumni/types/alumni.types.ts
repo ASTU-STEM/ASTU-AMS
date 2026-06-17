@@ -46,8 +46,10 @@ export interface AlumniProfile {
   salaryRange: string;
   bio: string;
   avatarUrl: string;
+  profilePicture?: string;
   skills: string[];
   resume: ResumeFile | null;
+  resumeUrl?: string;
   linkedInUrl?: string;
   gitHubUrl?: string;
   twitterUrl?: string;

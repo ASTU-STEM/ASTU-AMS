@@ -1106,8 +1106,6 @@ return (
 
           {activeTab === 'chat' && (
             <MessagingTab
-              messages={messages}
-              onSendMessage={handleSendMessage}
               darkMode={darkMode}
             />
           )}

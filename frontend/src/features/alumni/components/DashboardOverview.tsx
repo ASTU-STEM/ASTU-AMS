@@ -3,7 +3,7 @@ import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, Dona
 import toast from 'react-hot-toast';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
-import { getForumPosts, getDonationCampaigns } from '../services/mockAlumniData';
+import { alumniService } from '../services/alumni.service';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -44,6 +44,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [tempRole, setTempRole] = useState(profile.currentRole);
   const [tempCompany, setTempCompany] = useState(profile.company);
   const [tempSalary, setTempSalary] = useState(profile.salaryRange || '30,001 - 60,000 ETB');
+
+  const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
+  const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
+
+  React.useEffect(() => {
+    alumniService.getForumPosts().then(setForumPosts).catch(console.error);
+    alumniService.getDonationCampaigns().then(setDonationCampaigns).catch(console.error);
+  }, []);
 
   // Static/dynamic career milestones
   const milestones: CareerMilestone[] = [
@@ -596,7 +604,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <button onClick={() => onTabChange('messages')} className="text-xs font-bold text-astu-navy hover:underline">View All</button>
         </div>
         <div className="space-y-3">
-          {getForumPosts().slice(0, 3).map((post) => (
+          {forumPosts.slice(0, 3).map((post) => (
             <div key={post.id} className="flex gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-astu-navy/20 transition-all">
               <img src={post.authorAvatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
               <div className="flex-1 min-w-0">
@@ -639,7 +647,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {getDonationCampaigns().slice(0, 3).map((campaign) => {
+          {donationCampaigns.slice(0, 3).map((campaign) => {
             const progress = Math.round((campaign.raised / campaign.goal) * 100);
             return (
               <div key={campaign.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all">

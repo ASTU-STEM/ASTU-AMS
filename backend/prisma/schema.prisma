@@ -134,12 +134,28 @@ model AlumniProfile {
   verificationChannel String?
   pendingVerificationAttempts Int @default(0)
   profilePicture String?
+  // New extended profile fields
+  bio            String?
+  nationality    String?
+  maritalStatus  String?
+  volunteerWork  String?
+  address        String?
+  languages      String[]
+  preferences    Json?             @default("{}")
+
+  // Existing arrays and relations
   skills         String[]          // Array of skills
   resumeUrl      String?
   linkedIn       String?
   gitHub         String?
   portfolio      String?
   telegram       String?
+  twitterUrl     String?
+
+  certifications Certification[]
+  projects       Project[]
+  achievements   Achievement[]
+
   experiences    WorkExperience[]
   applications   JobApplication[]
   surveyResponses SurveyResponse[]
@@ -155,6 +171,52 @@ model AlumniProfile {
   directMessages DirectMessage[]
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+  // New relations for community & giving
+  forumPosts         ForumPost[]
+  forumComments      ForumComment[]
+  forumLikes         ForumLike[]
+  mentorProfile      MentorProfile?
+  mentorshipSessions MentorshipSession[]
+  donations          DonationRecord[]
+  eventRegistrations EventRegistration[]
+}
+
+model Certification {
+  id              String        @id @default(uuid())
+  alumniProfileId String
+  alumniProfile   AlumniProfile @relation(fields: [alumniProfileId], references: [id], onDelete: Cascade)
+  name            String
+  issuer          String
+  issueDate       String?
+  expiryDate      String?
+  credentialUrl   String?
+  description     String?
+  createdAt       DateTime      @default(now())
+}
+
+model Project {
+  id              String        @id @default(uuid())
+  alumniProfileId String
+  alumniProfile   AlumniProfile @relation(fields: [alumniProfileId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  technologies    String[]
+  url             String?
+  role            String?
+  startDate       String?
+  endDate         String?
+  createdAt       DateTime      @default(now())
+}
+
+model Achievement {
+  id              String        @id @default(uuid())
+  alumniProfileId String
+  alumniProfile   AlumniProfile @relation(fields: [alumniProfileId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  date            String?
+  type            String        // 'award', 'publication', 'patent', 'recognition'
+  createdAt       DateTime      @default(now())
 }
 
 model WorkExperience {
@@ -634,4 +696,123 @@ model DirectMessage {
 
   @@index([employerId])
   @@index([alumniId])
+}
+
+// ----------------------------------------------------------------------
+// NEW MODELS FOR ALUMNI DASHBOARD (COMMUNITY, MENTORSHIP, GIVING, EVENTS)
+// ----------------------------------------------------------------------
+
+model CareerEvent {
+  id              String   @id @default(uuid())
+  title           String
+  date            DateTime
+  location        String
+  description     String?
+  registeredCount Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  registrations   EventRegistration[]
+}
+
+model EventRegistration {
+  id          String        @id @default(uuid())
+  eventId     String
+  event       CareerEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  alumniId    String
+  alumni      AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+
+  @@unique([eventId, alumniId])
+}
+
+model MentorProfile {
+  id              String   @id @default(uuid())
+  alumniId        String   @unique
+  alumni          AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  expertise       String[]
+  availability    String   // e.g. 'Available', 'Unavailable'
+  yearsExperience Int      @default(0)
+  status          String   @default("AVAILABLE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  mentorshipSessions MentorshipSession[]
+}
+
+model MentorshipSession {
+  id          String        @id @default(uuid())
+  mentorId    String
+  mentor      MentorProfile @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  menteeId    String
+  mentee      AlumniProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+  date        DateTime
+  time        String
+  topic       String
+  status      String        @default("PENDING") // PENDING, SCHEDULED, COMPLETED, CANCELLED
+  meetLink    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model DonationCampaign {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  category    String     @default("General")
+  goal        Float      @default(0)
+  raised      Float      @default(0)
+  donorCount  Int        @default(0)
+  status      String     @default("ACTIVE")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  donations   DonationRecord[]
+}
+
+model DonationRecord {
+  id          String           @id @default(uuid())
+  campaignId  String
+  campaign    DonationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  alumniId    String
+  alumni      AlumniProfile    @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  amount      Float
+  paymentRef  String?
+  createdAt   DateTime         @default(now())
+}
+
+model ForumPost {
+  id          String         @id @default(uuid())
+  alumniId    String
+  alumni      AlumniProfile  @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  content     String
+  likesCount  Int            @default(0)
+  commentsCount Int          @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  comments    ForumComment[]
+  likes       ForumLike[]
+}
+
+model ForumComment {
+  id          String        @id @default(uuid())
+  postId      String
+  post        ForumPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  alumniId    String
+  alumni      AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  content     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ForumLike {
+  id          String        @id @default(uuid())
+  postId      String
+  post        ForumPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  alumniId    String
+  alumni      AlumniProfile @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+
+  @@unique([postId, alumniId])
 }

@@ -1,235 +1,190 @@
-import {
-  AlumniDashboardSummary,
-  AlumniDocumentRequestInput,
-  AlumniEmploymentUpdate,
-  AlumniJobFilters,
-  AlumniProfile,
-  DocumentRequest,
-  JobMatch,
-  MentorshipSession,
-  TracerSurvey,
-  DonationCampaign,
-  ForumPost,
-  SkillPathway,
-  CareerMilestone
-} from '../types';
-import {
-  calculateCompletion,
-  getAlumniPreferences,
-  getAlumniProfile,
-  getCareerEvents,
-  getDocumentRequests,
-  getJobMatches,
-  getMentors,
-  getTracerSurveys,
-  getDonationCampaigns,
-  getForumPosts,
-  getSkillPathways,
-  saveAlumniPreferences,
-  saveAlumniProfile,
-  saveCareerEvents,
-  saveDocumentRequests,
-  saveJobMatches,
-  saveMentors,
-  saveTracerSurveys,
-  saveDonationCampaigns,
-  saveForumPosts,
-  saveSkillPathways,
-  getMilestones,
-  saveMilestones
-} from './mockAlumniData';
+import axios from 'axios';
 
-const nextId = <T extends { id: number }>(items: T[]) =>
-  items.length === 0 ? 1 : Math.max(...items.map((item) => item.id)) + 1;
+const API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const parseMatch = (match: string) => Number.parseInt(match.replace('%', ''), 10) || 0;
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Generic response unwrapper
+const unwrap = <T>(res: { data: { data: T } }): T => res.data.data;
 
 export const alumniService = {
-  getWorkspace() {
-    return {
-      profile: getAlumniProfile(),
-      jobs: getJobMatches(),
-      surveys: getTracerSurveys(),
-      mentors: getMentors(),
-      events: getCareerEvents(),
-      documents: getDocumentRequests(),
-      preferences: getAlumniPreferences(),
-      donations: getDonationCampaigns(),
-      forum: getForumPosts(),
-      pathways: getSkillPathways(),
-      milestones: getMilestones()
-    };
+  // ─── Profile ──────────────────────────────────────────────────────────────
+  async getProfile() {
+    return unwrap(await apiClient.get('/alumni/me'));
   },
 
-  getDashboardSummary(profile: AlumniProfile = getAlumniProfile()): AlumniDashboardSummary {
-    const jobs = getJobMatches();
-    const surveys = getTracerSurveys();
-    const mentors = getMentors();
-    const documents = getDocumentRequests();
-    const events = getCareerEvents();
-    const messages = getForumPosts();
-
-    return {
-      profileCompletion: calculateCompletion(profile),
-      openJobMatches: jobs.filter((job) => !job.applied).length,
-      savedJobs: jobs.filter((job) => job.saved).length,
-      appliedJobs: jobs.filter((job) => job.applied).length,
-      pendingSurveys: surveys.filter((survey) => survey.status === 'PENDING').length,
-      documentRequests: documents.length,
-      activeMentorships: mentors.filter((mentor) => mentor.status !== 'AVAILABLE').length,
-      unreadMessages: messages.filter((m) => !m.liked).length,
-      upcomingEvents: events.filter((e) => !e.registered).length,
-      networkConnections: mentors.filter((m) => m.status === 'CONNECTED').length + 340
-    };
-  },
-
-  updateEmploymentStatus(update: AlumniEmploymentUpdate): AlumniProfile {
-    const profile = {
-      ...getAlumniProfile(),
-      ...update
-    };
-    saveAlumniProfile(profile);
-    return profile;
-  },
-
-  filterJobs(filters: AlumniJobFilters): JobMatch[] {
-    return getJobMatches().filter((job) => {
-      const query = filters.query.trim().toLowerCase();
-      const matchesQuery = !query || [job.title, job.company, job.location, ...job.requirements]
-        .join(' ')
-        .toLowerCase()
-        .includes(query);
-      const matchesType = filters.type === 'All' || job.type === filters.type;
-      const matchesLocation = !filters.location || job.location.toLowerCase().includes(filters.location.toLowerCase());
-      const matchesScore = !filters.minimumMatch || parseMatch(job.match) >= filters.minimumMatch;
-      const matchesSaved = !filters.savedOnly || job.saved;
-
-      return matchesQuery && matchesType && matchesLocation && matchesScore && matchesSaved;
-    });
-  },
-
-  sortJobs(jobs: JobMatch[], sortBy: 'match' | 'recent' | 'salary' | 'views'): JobMatch[] {
-    const sorted = [...jobs];
-    switch (sortBy) {
-      case 'match': return sorted.sort((a, b) => parseMatch(b.match) - parseMatch(a.match));
-      case 'recent': return sorted.sort((a, b) => (b.applications || 0) - (a.applications || 0));
-      case 'salary': return sorted.sort((a, b) => parseInt(b.salary) - parseInt(a.salary));
-      case 'views': return sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
-      default: return sorted;
+  async updateProfile(data: any | FormData) {
+    if (data instanceof FormData) {
+      return unwrap(await apiClient.put('/alumni/me', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }));
     }
+    return unwrap(await apiClient.put('/alumni/me', data));
   },
 
-  applyToJob(jobId: number): JobMatch[] {
-    const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const jobs = getJobMatches().map((job) =>
-      job.id === jobId ? { ...job, applied: true, applicationStatus: 'Under Review' as const, appliedDate: now } : job
-    );
-    saveJobMatches(jobs);
-    return jobs;
+  async addExperience(data: any) {
+    return unwrap(await apiClient.post('/alumni/experiences', data));
   },
 
-  withdrawApplication(jobId: number): JobMatch[] {
-    const jobs = getJobMatches().map((job) =>
-      job.id === jobId ? { ...job, applied: false, applicationStatus: undefined as any, appliedDate: undefined } : job
-    );
-    saveJobMatches(jobs);
-    return jobs;
+  async updateExperience(id: string, data: any) {
+    return unwrap(await apiClient.put(`/alumni/experiences/${id}`, data));
   },
 
-  requestDocument(input: AlumniDocumentRequestInput): DocumentRequest[] {
-    const documents = getDocumentRequests();
-    const newRequest: DocumentRequest = {
-      id: nextId(documents),
-      type: input.type,
-      requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      status: 'Pending',
-      notes: input.notes
-    };
-    const updatedDocuments = [newRequest, ...documents];
-    saveDocumentRequests(updatedDocuments);
-    return updatedDocuments;
+  async deleteExperience(id: string) {
+    return unwrap(await apiClient.delete(`/alumni/experiences/${id}`));
   },
 
-  completeSurvey(surveyId: number): TracerSurvey[] {
-    const surveys = getTracerSurveys().map((survey) =>
-      survey.id === surveyId
-        ? { ...survey, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() }
-        : survey
-    );
-    saveTracerSurveys(surveys);
-    return surveys;
+  // ─── Jobs Board ───────────────────────────────────────────────────────────
+  async getJobs(params?: { search?: string; type?: string; location?: string; page?: number; limit?: number }) {
+    return unwrap(await apiClient.get('/jobs', { params }));
   },
 
-  scheduleMentorshipSession(mentorId: number, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) {
-    const mentors = getMentors().map((mentor) => {
-      if (mentor.id !== mentorId) return mentor;
-      const sessionId = nextId(mentor.sessions ?? []);
-      return {
-        ...mentor,
-        status: 'CONNECTED' as const,
-        sessions: [
-          ...(mentor.sessions ?? []),
-          {
-            id: sessionId,
-            ...session,
-            status: 'Scheduled' as const,
-            meetLink: `https://meet.google.com/astu-mentor-${mentorId}-${sessionId}`
-          }
-        ]
-      };
-    });
-    saveMentors(mentors);
-    return mentors;
+  async getJobDetail(jobId: string) {
+    return unwrap(await apiClient.get(`/jobs/detail/${jobId}`));
   },
 
-  makeDonation(campaignId: number, amount: number): DonationCampaign[] {
-    const campaigns = getDonationCampaigns().map((c) =>
-      c.id === campaignId ? { ...c, raised: c.raised + amount, donorCount: c.donorCount + 1 } : c
-    );
-    saveDonationCampaigns(campaigns);
-    return campaigns;
+  async applyToJob(jobId: string, data: { coverLetter?: string }, resumeFile?: File) {
+    const formData = new FormData();
+    if (data.coverLetter) formData.append('coverLetter', data.coverLetter);
+    if (resumeFile) formData.append('resume', resumeFile);
+    return unwrap(await apiClient.post(`/jobs/${jobId}/apply`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }));
   },
 
-  toggleForumLike(postId: number): ForumPost[] {
-    const posts = getForumPosts().map((p) =>
-      p.id === postId ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
-    );
-    saveForumPosts(posts);
-    return posts;
+  async withdrawApplication(jobId: string) {
+    return unwrap(await apiClient.delete(`/jobs/${jobId}/application`));
   },
 
-  addForumPost(post: Omit<ForumPost, 'id' | 'timestamp' | 'likes' | 'comments' | 'liked'>): ForumPost[] {
-    const posts = getForumPosts();
-    const newPost: ForumPost = {
-      id: nextId(posts),
-      ...post,
-      timestamp: 'Just now',
-      likes: 0,
-      comments: 0,
-      liked: false
-    };
-    const updatedPosts = [newPost, ...posts];
-    saveForumPosts(updatedPosts);
-    return updatedPosts;
+  async getMyApplications() {
+    return unwrap(await apiClient.get('/jobs/my-applications'));
   },
 
-  addMilestone(milestone: Omit<CareerMilestone, 'id'>): CareerMilestone[] {
-    const milestones = getMilestones();
-    const newMilestone = { id: nextId(milestones), ...milestone };
-    const updated = [newMilestone, ...milestones];
-    saveMilestones(updated);
-    return updated;
+  async saveJob(jobId: string) {
+    return unwrap(await apiClient.post(`/jobs/${jobId}/save`));
   },
 
-  saveProfile: saveAlumniProfile,
-  saveJobs: saveJobMatches,
-  saveSurveys: saveTracerSurveys,
-  saveMentors,
-  saveEvents: saveCareerEvents,
-  saveDocuments: saveDocumentRequests,
-  savePreferences: saveAlumniPreferences,
-  saveMilestones,
-  saveDonations: saveDonationCampaigns,
-  saveForum: saveForumPosts,
-  savePathways: saveSkillPathways
+  async unsaveJob(jobId: string) {
+    return unwrap(await apiClient.delete(`/jobs/${jobId}/save`));
+  },
+
+  async getSavedJobs() {
+    return unwrap(await apiClient.get('/jobs/saved'));
+  },
+
+  async getRecommendedJobs() {
+    return unwrap(await apiClient.get('/jobs/recommended'));
+  },
+
+  // ─── Events / Career ─────────────────────────────────────────────────────
+  async getEvents() {
+    return unwrap(await apiClient.get('/events'));
+  },
+
+  async rsvpEvent(eventId: string, status: string = 'ATTENDING') {
+    return unwrap(await apiClient.post(`/events/${eventId}/rsvp`, { status }));
+  },
+
+  // ─── Mentorship ───────────────────────────────────────────────────────────
+  async getMyMentors() {
+    return unwrap(await apiClient.get('/mentorship/my-mentors'));
+  },
+
+  async getMyMentees() {
+    return unwrap(await apiClient.get('/mentorship/my-mentees'));
+  },
+
+  async requestMentorship(mentorId: string, message?: string) {
+    return unwrap(await apiClient.post('/mentorship/request', { mentorId, message }));
+  },
+
+  async respondMentorship(requestId: string, status: string) {
+    return unwrap(await apiClient.put(`/mentorship/${requestId}/respond`, { status }));
+  },
+
+  async getMentorProfiles() {
+    return unwrap(await apiClient.get('/alumni/mentors'));
+  },
+
+  async scheduleSession(mentorId: string, data: { date: string; time: string; topic: string }) {
+    return unwrap(await apiClient.post('/alumni/mentorship-sessions', { mentorId, ...data }));
+  },
+
+  // ─── Documents ────────────────────────────────────────────────────────────
+  async getMyDocuments() {
+    return unwrap(await apiClient.get('/alumni/document-requests'));
+  },
+
+  async requestDocument(data: { documentType: string; additionalInstructions?: string }) {
+    return unwrap(await apiClient.post('/alumni/document-requests', data));
+  },
+
+  // ─── Forum / Community ────────────────────────────────────────────────────
+  async getForumPosts() {
+    return unwrap(await apiClient.get('/alumni/forum'));
+  },
+
+  async createForumPost(content: string) {
+    return unwrap(await apiClient.post('/alumni/forum', { content }));
+  },
+
+  async toggleForumLike(postId: string) {
+    return unwrap(await apiClient.post(`/alumni/forum/${postId}/like`));
+  },
+
+  async addForumComment(postId: string, content: string) {
+    return unwrap(await apiClient.post(`/alumni/forum/${postId}/comment`, { content }));
+  },
+
+  // ─── Donations / Giving ───────────────────────────────────────────────────
+  async getDonationCampaigns() {
+    return unwrap(await apiClient.get('/alumni/donations'));
+  },
+
+  async makeDonation(campaignId: string, amount: number, paymentRef?: string) {
+    return unwrap(await apiClient.post('/alumni/donations', { campaignId, amount, paymentRef }));
+  },
+
+  // ─── Messages ───────────────────────────────────────────────────────────
+  async getMessageThreads() {
+    return unwrap(await apiClient.get('/alumni/messages'));
+  },
+
+  async getThreadMessages(employerId: string) {
+    return unwrap(await apiClient.get(`/alumni/messages/${employerId}`));
+  },
+
+  async sendMessage(employerId: string, text: string) {
+    return unwrap(await apiClient.post(`/alumni/messages/${employerId}`, { text }));
+  },
+
+  // ─── Dashboard Stats ─────────────────────────────────────────────────────
+  async getDashboardStats() {
+    return unwrap(await apiClient.get('/alumni/dashboard-stats'));
+  },
+
+  // ─── Settings / Preferences ──────────────────────────────────────────────
+  async getPreferences() {
+    return unwrap(await apiClient.get('/alumni/preferences'));
+  },
+
+  async savePreferences(preferences: any) {
+    return unwrap(await apiClient.put('/alumni/preferences', preferences));
+  },
+
+  // ─── Documents ────────────────────────────────────────────────────────────
+  async getDocumentRequests() {
+    return unwrap(await apiClient.get('/alumni/documents'));
+  },
 };

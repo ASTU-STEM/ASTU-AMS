@@ -63,11 +63,16 @@ export const getEventsController = async (req: Request, res: Response, next: Nex
   }
 };
 
+import prisma from '../../../core/config/db';
+
 export const rsvpController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status } = rsvpSchema.parse(req.body);
+    const userId = (req as any).user?.userId;
+    const alumni = await prisma.alumniProfile.findUnique({ where: { userId } });
+    if (!alumni) return res.status(400).json({ success: false, message: 'Alumni profile required' });
     const useCase = new RSVPToEvent(repo);
-    const rsvp = await useCase.execute(req.params.eventId, (req as any).user.alumniProfileId, status);
+    const rsvp = await useCase.execute(req.params.eventId, alumni.id, status);
     res.json({ success: true, data: rsvp });
   } catch (error) {
     next(error);

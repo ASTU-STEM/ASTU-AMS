@@ -9,8 +9,8 @@ import { surveyService } from '../../surveys/services/survey.service';
 import { notificationService } from '../../notifications/services/notification.service';
 
 import {
-  JobMatch,
   AlumniProfile,
+  JobMatch,
   TracerSurvey,
   Mentor,
   CareerEvent,
@@ -19,23 +19,18 @@ import {
   MentorshipSession
 } from '../types/alumni.types';
 
-import {
-  getAlumniProfile,
-  saveAlumniProfile,
-  getJobMatches,
-  saveJobMatches,
-  getTracerSurveys,
-  saveTracerSurveys,
-  getMentors,
-  saveMentors,
-  getCareerEvents,
-  saveCareerEvents,
-  getDocumentRequests,
-  saveDocumentRequests,
-  getAlumniPreferences,
-  saveAlumniPreferences,
-  calculateCompletion
-} from '../services/mockAlumniData';
+import { alumniService } from '../services/alumni.service';
+
+const calculateCompletion = (profile: Partial<AlumniProfile>) => {
+  if (!profile || Object.keys(profile).length === 0) return 0;
+  let score = 0;
+  if (profile.fullName) score += 20;
+  if (profile.currentRole) score += 20;
+  if (profile.skills && profile.skills.length > 0) score += 20;
+  if (profile.bio) score += 20;
+  if (profile.address) score += 20;
+  return score;
+};
 
 import { DashboardOverview } from '../components/DashboardOverview';
 import { ProfileTab } from '../components/ProfileTab';
@@ -58,14 +53,18 @@ const AlumniDashboard = () => {
    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
    const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
-  const [profile, setProfile] = useState<AlumniProfile>(getAlumniProfile());
-  const [jobs, setJobs] = useState<JobMatch[]>(getJobMatches());
+  const [profile, setProfile] = useState<AlumniProfile | null>(null);
+  const [jobs, setJobs] = useState<JobMatch[]>([]);
   const [surveys, setSurveys] = useState<TracerSurvey[]>([]);
   const [realPendingSurveysCount, setRealPendingSurveysCount] = useState<number>(0);
-  const [mentors, setMentors] = useState<Mentor[]>(getMentors());
-  const [events, setEvents] = useState<CareerEvent[]>(getCareerEvents());
-  const [documents, setDocuments] = useState<DocumentRequest[]>(getDocumentRequests());
-  const [preferences, setPreferences] = useState<AlumniPreferences>(getAlumniPreferences());
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [events, setEvents] = useState<CareerEvent[]>([]);
+  const [documents, setDocuments] = useState<DocumentRequest[]>([]);
+  const [forumPosts, setForumPosts] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [preferences, setPreferences] = useState<AlumniPreferences | null>(null);
+  const [statsData, setStatsData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [selectedJobForModal, setSelectedJobForModal] = useState<JobMatch | null>(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -74,10 +73,10 @@ const AlumniDashboard = () => {
   const [donationCampaign, setDonationCampaign] = useState<{ title: string; category: string } | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
 
-  const profileCompletion = calculateCompletion(profile);
+  const profileCompletion = statsData?.profileCompletion || calculateCompletion(profile || {} as any);
   const pendingSurveysCount = realPendingSurveysCount;
-  const matchCount = jobs.filter(j => !j.applied).length;
-  const connectedMentorsCount = mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length + 347;
+  const matchCount = statsData?.openJobMatches || (Array.isArray(jobs) ? jobs.filter(j => !j.applied).length : 0);
+  const connectedMentorsCount = statsData?.activeMentorships || (Array.isArray(mentors) ? mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length : 0) + 347;
 
   const stats = [
     { id: 1, label: 'Profile Status', value: `${profileCompletion}%`, color: 'astu-navy', icon: 'account_circle', bgGradient: 'from-blue-50 to-indigo-50', trend: 'Complete fields to boost', trendIcon: 'trending_up', trendColor: 'astu-green' },
@@ -95,78 +94,152 @@ const AlumniDashboard = () => {
     { title: 'Career Progress', desc: 'Update employment, salary range, startup, research, and tracer outcomes.', tab: 'surveys', icon: 'timeline' },
   ];
 
-  const handleSaveProfile = (updatedProfile: AlumniProfile) => {
-    setProfile(updatedProfile);
-    saveAlumniProfile(updatedProfile);
+  const handleSaveProfile = async (updatedProfile: any | FormData) => {
+    try {
+      const response = await alumniService.updateProfile(updatedProfile);
+      setProfile(response as any);
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      toast.error('Failed to save profile. Please try again.');
+    }
   };
 
   const handleUpdateEmploymentStatus = (role: string, company: string, salary: string) => {
     const updatedProfile = { ...profile, currentRole: role, company, salaryRange: salary };
     setProfile(updatedProfile);
-    saveAlumniProfile(updatedProfile);
   };
 
-  const handleApplyJob = (jobId: number) => {
-    const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, applied: true, applicationStatus: 'Under Review' as const } : j);
-    setJobs(updatedJobs);
-    saveJobMatches(updatedJobs);
-    const appliedJob = jobs.find(j => j.id === jobId);
-    if (appliedJob) {
-      toast.success(`Application sent to ${appliedJob.company}!`);
-      setNotifications(prev => [{ id: Date.now(), text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`, unread: true, time: 'Just now' }, ...prev]);
+  const handleApplyJob = async (jobId: string | number) => {
+    try {
+      await alumniService.applyToJob(String(jobId), {});
+      const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, applied: true, applicationStatus: 'Applied' as const } : j);
+      setJobs(updatedJobs);
+      const appliedJob = jobs.find(j => j.id === jobId);
+      if (appliedJob) {
+        toast.success(`Application sent to ${appliedJob.company}!`);
+        setNotifications(prev => [{ id: Date.now(), text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`, unread: true, time: 'Just now' }, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to submit application:', err);
+      toast.error('Failed to submit application. Please try again later.');
     }
   };
 
-  const handleToggleSaveJob = (jobId: number) => {
-    const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, saved: !j.saved } : j);
-    setJobs(updatedJobs);
-    saveJobMatches(updatedJobs);
+  const handleToggleSaveJob = async (jobId: string | number) => {
+    try {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+
+      if (job.saved) {
+        await alumniService.unsaveJob(String(jobId));
+      } else {
+        await alumniService.saveJob(String(jobId));
+      }
+      const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, saved: !j.saved } : j);
+      setJobs(updatedJobs);
+    } catch (err) {
+      console.error('Failed to toggle save status:', err);
+      toast.error('Failed to update saved job status.');
+    }
   };
 
   const handleCompleteSurvey = (surveyId: number, answers: Record<string, string>) => {
     const updatedSurveys = surveys.map(s => s.id === surveyId ? { ...s, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() } : s);
     setSurveys(updatedSurveys);
-    saveTracerSurveys(updatedSurveys);
     setNotifications(prev => [{ id: Date.now(), text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
   const handleRegisterEvent = (eventId: number) => {
     const updatedEvents = events.map(e => e.id === eventId ? { ...e, registered: true } : e);
     setEvents(updatedEvents);
-    saveCareerEvents(updatedEvents);
     setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleRequestMentorship = (mentorId: number) => {
-    const updatedMentors = mentors.map(m => m.id === mentorId ? { ...m, status: 'REQUEST_PENDING' as const } : m);
-    setMentors(updatedMentors);
-    saveMentors(updatedMentors);
-    setNotifications(prev => [{ id: Date.now(), text: `Requested mentorship connection with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
+  const handleRequestMentorship = async (mentorId: number) => {
+    try {
+      await alumniService.requestMentorship(mentorId.toString());
+      const updatedMentors = mentors.map(m => m.id === mentorId ? { ...m, status: 'REQUEST_PENDING' as const } : m);
+      setMentors(updatedMentors);
+      setNotifications(prev => [{ id: Date.now(), text: `Requested mentorship connection with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
+      toast.success('Mentorship request sent successfully.');
+    } catch (err) {
+      toast.error('Failed to send mentorship request.');
+    }
   };
 
-  const handleScheduleSession = (mentorId: number, sessionDetails: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => {
-    const updatedMentors = mentors.map(m => {
-      if (m.id === mentorId) {
-        const nextSessionId = (m.sessions?.length || 0) + 1;
-        return { ...m, sessions: [...(m.sessions || []), { id: nextSessionId, ...sessionDetails, status: 'Scheduled' as const, meetLink: `https://meet.google.com/astu-mentor-${mentorId}-${nextSessionId}` }] };
-      }
-      return m;
-    });
-    setMentors(updatedMentors);
-    saveMentors(updatedMentors);
-    setNotifications(prev => [{ id: Date.now(), text: `Scheduled mentorship session with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
+  const handleScheduleSession = async (mentorId: number, sessionDetails: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => {
+    try {
+      const session = (await alumniService.scheduleSession(mentorId.toString(), {
+        date: sessionDetails.date,
+        time: sessionDetails.time,
+        topic: sessionDetails.topic
+      })) as any;
+      const updatedMentors = mentors.map(m => {
+        if (m.id === mentorId) {
+          return { ...m, sessions: [...(m.sessions || []), { id: session.id, ...sessionDetails, status: 'Scheduled' as const, meetLink: session.meetLink }] };
+        }
+        return m;
+      });
+      setMentors(updatedMentors);
+      setNotifications(prev => [{ id: Date.now(), text: `Scheduled mentorship session with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
+    } catch (err) {
+      toast.error('Failed to schedule session.');
+    }
   };
 
-  const handleRequestDocument = (type: DocumentRequest['type'], notes?: string) => {
-    const newDoc: DocumentRequest = { id: documents.length + 1, type, requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), status: 'Pending', notes: notes || 'Awaiting registrar verification.' };
-    setDocuments([newDoc, ...documents]);
-    saveDocumentRequests([newDoc, ...documents]);
-    setNotifications(prev => [{ id: Date.now(), text: `Submitted official request for: ${type}.`, unread: true, time: 'Just now' }, ...prev]);
+  const handleRequestDocument = async (type: DocumentRequest['type'], notes?: string) => {
+    try {
+      await alumniService.requestDocument({ documentType: type, additionalInstructions: notes });
+      const newDoc: DocumentRequest = { id: documents.length + 1, type, requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), status: 'Pending', notes: notes || 'Awaiting registrar verification.' };
+      setDocuments([newDoc, ...documents]);
+      setNotifications(prev => [{ id: Date.now(), text: `Submitted official request for: ${type}.`, unread: true, time: 'Just now' }, ...prev]);
+      toast.success('Document request submitted successfully');
+    } catch (err) {
+      toast.error('Failed to submit document request');
+    }
   };
 
-  const handleSavePreferences = (updatedPrefs: AlumniPreferences) => {
-    setPreferences(updatedPrefs);
-    saveAlumniPreferences(updatedPrefs);
+  const handleCreatePost = async (content: string) => {
+    try {
+      const post: any = await alumniService.createForumPost(content);
+      const newPost = { id: post.id, author: profile?.fullName, authorAvatar: profile?.profilePicture, authorRole: 'Alumni', content: post.content, timestamp: 'Just now', likes: 0, comments: 0 };
+      setForumPosts([newPost, ...forumPosts]);
+      toast.success('Post created successfully!');
+    } catch (err) {
+      toast.error('Failed to create post');
+    }
+  };
+
+  const handleToggleLike = async (postId: string) => {
+    try {
+      const res: any = await alumniService.toggleForumLike(postId);
+      const liked = res.liked;
+      setForumPosts(forumPosts.map(p => p.id === postId ? { ...p, likes: p.likes + (liked ? 1 : -1), liked } : p));
+    } catch (err) {
+      toast.error('Failed to update like status');
+    }
+  };
+
+  const handleDonate = async (campaignId: string, amount: number) => {
+    try {
+      await alumniService.makeDonation(campaignId, amount);
+      toast.success('Thank you for your generous donation!');
+      // Refresh campaigns locally
+      const campaignsRes = await alumniService.getDonationCampaigns();
+      if (Array.isArray(campaignsRes)) setCampaigns(campaignsRes);
+    } catch (err) {
+      toast.error('Failed to process donation');
+    }
+  };
+
+  const handleSavePreferences = async (updatedPrefs: AlumniPreferences) => {
+    try {
+      await alumniService.savePreferences(updatedPrefs);
+      setPreferences(updatedPrefs);
+      toast.success('Preferences saved successfully');
+    } catch (err) {
+      toast.error('Failed to save preferences');
+    }
   };
 
   const handleLogout = () => {
@@ -227,6 +300,112 @@ const AlumniDashboard = () => {
   }, []);
 
   useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        const [
+          profileData,
+          stats,
+          jobsRes,
+          savedJobsRes,
+          applicationsRes,
+          eventsData,
+          mentorsData,
+          documentsData,
+          forumData,
+          campaignsData,
+          preferencesData
+        ] = await Promise.all([
+          alumniService.getProfile().catch(() => null),
+          alumniService.getDashboardStats().catch(() => null),
+          alumniService.getJobs().catch(() => ({ data: [] })),
+          alumniService.getSavedJobs().catch(() => ({ data: [] })),
+          alumniService.getMyApplications().catch(() => []),
+          alumniService.getEvents().catch(() => []),
+          alumniService.getMentorProfiles().catch(() => []),
+          alumniService.getMyDocuments().catch(() => []),
+          alumniService.getForumPosts().catch(() => []),
+          alumniService.getDonationCampaigns().catch(() => []),
+          alumniService.getPreferences().catch(() => ({}))
+        ]);
+
+        if (profileData) {
+          setProfile(profileData as any);
+        } else {
+          setProfile({
+            fullName: 'Alumni User',
+            currentRole: '',
+            company: '',
+            cgpa: '0.00',
+            skills: []
+          } as any);
+        }
+        if (stats) setStatsData(stats);
+        
+        // Process Jobs
+        const rawJobs = Array.isArray(jobsRes) ? jobsRes : ((jobsRes as any)?.data || []);
+        const savedJobsList = Array.isArray(savedJobsRes) ? savedJobsRes : ((savedJobsRes as any)?.data || []);
+        const applicationsList = Array.isArray(applicationsRes) ? applicationsRes : ((applicationsRes as any)?.data || []);
+
+        const savedJobIds = new Set(savedJobsList.map((sj: any) => sj.jobId || sj.id));
+        const appMap = new Map();
+        applicationsList.forEach((app: any) => {
+          let st = app.status;
+          if (st === 'PENDING') st = 'Applied';
+          if (st === 'REJECTED') st = 'Rejected';
+          if (st === 'HIRED') st = 'Offered';
+          appMap.set(app.jobId || app.job?.id, st);
+        });
+
+        const mappedJobs: JobMatch[] = rawJobs.map((j: any) => ({
+          id: j.id,
+          title: j.title,
+          company: j.companyName || j.employer?.companyName || 'ASTU Partner',
+          location: j.location || 'Unknown',
+          type: j.employmentType || 'Full-Time',
+          salary: j.salary || (j.salaryMin ? `${j.salaryMin} - ${j.salaryMax}` : 'Negotiable'),
+          postedDate: j.createdAt ? new Date(j.createdAt).toLocaleDateString() : 'Recent',
+          match: '85%',
+          description: j.description || '',
+          skills: j.skillsRequired || [],
+          views: j.views || 0,
+          applications: j.applications || 0,
+          shortlisted: 0,
+          experience: j.experienceRequired ? `${j.experienceRequired} years` : 'Entry Level',
+          saved: savedJobIds.has(j.id),
+          applied: appMap.has(j.id),
+          applicationStatus: appMap.get(j.id) || undefined,
+          requirements: j.requirements || [],
+          benefits: j.benefits || [],
+        }));
+        
+        setJobs(mappedJobs);
+
+        if (eventsData) setEvents(Array.isArray(eventsData) ? eventsData : []);
+        if (mentorsData) setMentors(Array.isArray(mentorsData) ? mentorsData : []);
+        const mappedDocuments = (Array.isArray(documentsData) ? documentsData : []).map((doc: any) => ({
+          id: doc.id,
+          type: doc.documentType || 'Official Transcript',
+          requestDate: doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
+          status: (doc.status === 'COMPLETED' ? 'Approved' : doc.status === 'IN_PROGRESS' ? 'In Progress' : doc.status === 'REJECTED' ? 'Pending' : 'Pending') as any,
+          notes: doc.notes || doc.additionalInstructions || 'Awaiting registrar verification.'
+        }));
+        if (documentsData) setDocuments(mappedDocuments);
+        
+        if (forumData && Array.isArray(forumData)) setForumPosts(forumData);
+        if (campaignsData && Array.isArray(campaignsData)) setCampaigns(campaignsData);
+        if (preferencesData) setPreferences(preferencesData as any);
+        if (campaignsData && Array.isArray(campaignsData)) setCampaigns(campaignsData);
+      } catch (err) {
+        console.error('Failed to load dashboard data', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadDashboardData();
+  }, []);
+
+  useEffect(() => {
     const fetchPendingSurveys = async () => {
       try {
         const data = await surveyService.getMySurveys();
@@ -284,7 +463,7 @@ const AlumniDashboard = () => {
   const menu = (
     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       <div className="px-3 py-3">
-        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile.fullName}</div>
+        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile?.fullName || 'Alumni'}</div>
         <div className="mt-1">
           <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">Alumni</span>
         </div>
@@ -564,10 +743,10 @@ const AlumniDashboard = () => {
                 className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
                 style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#003580] to-[#004d99] text-xs font-semibold text-white shadow-sm">
-                  {profile.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AU'}
+                  {profile?.fullName ? profile.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'AU'}
                 </div>
                 <div className="hidden text-left sm:block">
-                  <div className="text-sm font-medium text-[var(--text-primary)]">{profile.fullName}</div>
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{profile?.fullName || 'Loading...'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">Alumni</div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-slate-400" />
@@ -579,9 +758,15 @@ const AlumniDashboard = () => {
 
         {/* Main Content */}
         <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
-          {activeTab === 'dashboard' && (
-            <DashboardOverview
-              profile={profile}
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
+            </div>
+          ) : (
+            <>
+              {activeTab === 'dashboard' && profile && (
+                <DashboardOverview
+                  profile={profile}
               completion={profileCompletion}
               stats={stats}
               recentJobs={jobs}
@@ -622,13 +807,13 @@ const AlumniDashboard = () => {
           )}
 
           {activeTab === 'profile' && <ProfileTab profile={profile} onSave={handleSaveProfile} />}
-          {activeTab === 'career' && <CareerTab events={events} onRegisterEvent={handleRegisterEvent} />}
+          {activeTab === 'career' && <CareerTab events={events} jobs={jobs} mentors={mentors} onRegisterEvent={handleRegisterEvent} />}
           {activeTab === 'surveys' && <SurveysTab />}
           {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={setSelectedJobForModal} onToggleSaveJob={handleToggleSaveJob} />}
           {activeTab === 'mentorship' && <MentorshipTab mentors={mentors} onRequestMentorship={handleRequestMentorship} onScheduleSession={handleScheduleSession} />}
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
-          {activeTab === 'messages' && <MessagingTab darkMode={darkMode} />}
-          {activeTab === 'settings' && <SettingsTab preferences={preferences} onSavePreferences={handleSavePreferences} />}
+          {activeTab === 'messages' && <MessagingTab darkMode={darkMode} userId={(profile as any)?.userId} />}
+          {activeTab === 'settings' && <SettingsTab preferences={preferences as any} onSavePreferences={handleSavePreferences} />}
           {activeTab === 'forum' && (
             <div className="space-y-6 p-4 md:p-6">
               <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1d9e75)] p-5 text-white md:p-6">
@@ -644,24 +829,27 @@ const AlumniDashboard = () => {
               </section>
               <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Recent Posts</h3>
+                <div className="mb-6 flex gap-3">
+                  <img src={profile?.profilePicture ? `http://localhost:5000${profile.profilePicture}` : "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                  <div className="flex-1 relative">
+                    <input type="text" placeholder="Share something with the community..." className="w-full text-xs p-3 pr-20 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all" onKeyDown={(e) => { if (e.key === 'Enter' && e.currentTarget.value.trim()) { handleCreatePost(e.currentTarget.value); e.currentTarget.value = ''; } }} />
+                    <button onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input.value.trim()) { handleCreatePost(input.value); input.value = ''; } }} className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#003366] text-white text-[10px] font-bold rounded-lg hover:bg-[#002244] transition-colors">Post</button>
+                  </div>
+                </div>
                 <div className="space-y-3">
-                  {[
-                    { author: 'Abebe Bikila', role: 'CS 2018', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=40&h=40&q=80', content: 'I just launched my open-source Telebirr SDK! Check it out on GitHub. #opensource #fintech', likes: 24, comments: 8, time: '2h ago' },
-                    { author: 'Helina Sileshi', role: 'CSE 2014', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=40&h=40&q=80', content: 'Summit Tech is hiring 3 senior React Native developers! Remote-friendly for ASTU alumni.', likes: 56, comments: 15, time: '5h ago' },
-                    { author: 'Dr. Yosef Kebede', role: 'ECE 2010', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=40&h=40&q=80', content: 'Excited to speak at the ASTU Career Expo 2026 about system design at Google scale!', likes: 89, comments: 22, time: '1d ago' },
-                  ].map((post, idx) => (
-                    <div key={idx} className="flex gap-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
-                      <img src={post.avatar} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                  {forumPosts.map((post, idx) => (
+                    <div key={post.id || idx} className="flex gap-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
+                      <img src={post.authorAvatar} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-[var(--text-primary)]">{post.author}</span>
-                          <span className="text-[9px] text-[var(--text-secondary)]">{post.role}</span>
-                          <span className="text-[9px] text-[var(--text-muted)] ml-auto">{post.time}</span>
+                          <span className="text-[9px] text-[var(--text-secondary)]">{post.role || post.authorRole}</span>
+                          <span className="text-[9px] text-[var(--text-muted)] ml-auto">{post.time || new Date(post.timestamp).toLocaleDateString()}</span>
                         </div>
                         <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{post.content}</p>
                         <div className="flex items-center gap-4 mt-2">
-                          <button className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                          <button onClick={() => handleToggleLike(post.id)} className={`flex items-center gap-1 text-[10px] transition-colors ${post.liked ? 'text-[#003366] font-bold' : 'text-[var(--text-muted)] hover:text-[#003366]'}`}>
+                            <svg className="w-3.5 h-3.5" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                             {post.likes}
                           </button>
                           <button className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] hover:text-[#003366] transition-colors">
@@ -690,38 +878,36 @@ const AlumniDashboard = () => {
                 </div>
               </section>
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {[
-                  { title: 'ASTU Scholarship Fund 2026', desc: 'Support underprivileged engineering students with full tuition scholarships.', goal: '5,000,000 ETB', raised: '1,850,000 ETB', progress: 37, category: 'Scholarship', donors: 347 },
-                  { title: 'AI Research Lab Equipment', desc: 'Fund cutting-edge GPU servers for the new AI research laboratory.', goal: '8,000,000 ETB', raised: '3,200,000 ETB', progress: 40, category: 'Research', donors: 156 },
-                  { title: 'Campus Innovation Hub', desc: 'Build a modern co-working makerspace and innovation center for students.', goal: '12,000,000 ETB', raised: '5,400,000 ETB', progress: 45, category: 'Infrastructure', donors: 289 },
-                ].map((campaign, idx) => (
-                  <div key={idx} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
+                {campaigns.map((campaign, idx) => (
+                  <div key={campaign.id || idx} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="px-2 py-0.5 bg-[#003366]/10 text-[#003366] text-[9px] font-bold rounded-full uppercase">{campaign.category}</span>
-                      <span className="text-[10px] text-[var(--text-secondary)]">{campaign.donors} donors</span>
+                      <span className="px-2 py-0.5 bg-[#003366]/10 text-[#003366] text-[9px] font-bold rounded-full uppercase">{campaign.category || 'Fund'}</span>
+                      <span className="text-[10px] text-[var(--text-secondary)]">{campaign.donorCount || 0} donors</span>
                     </div>
                     <h3 className="text-sm font-bold text-[var(--text-primary)]">{campaign.title}</h3>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{campaign.desc}</p>
+                    <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{campaign.description || campaign.desc}</p>
                     <div className="mt-4">
                       <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-bold text-[#003366]">{campaign.raised}</span>
-                        <span className="text-[var(--text-muted)]">of {campaign.goal}</span>
+                        <span className="font-bold text-[#003366]">{campaign.raised} ETB</span>
+                        <span className="text-[var(--text-muted)]">of {campaign.targetAmount || campaign.goal} ETB</span>
                       </div>
                       <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${campaign.progress}%` }}></div>
+                        <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${Math.min(100, Math.round(((campaign.raised || 0) / (campaign.targetAmount || 1)) * 100))}%` }}></div>
                       </div>
                     </div>
                     <button
-                      onClick={() => setDonationCampaign({ title: campaign.title, category: campaign.category })}
+                      onClick={() => handleDonate(campaign.id, 500)} // default amount for demo
                       className="mt-4 w-full py-2.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-bold hover:shadow-lg transition-all"
                     >
-                      Donate Now
+                      Donate 500 ETB Now
                     </button>
                   </div>
                 ))}
               </div>
             </div>
           )}
+          </>
+        )}
         </main>
       </div>
 
