@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   AlumniDashboardSummary,
   AlumniDocumentRequestInput,
@@ -11,105 +12,64 @@ import {
   DonationCampaign,
   ForumPost,
   SkillPathway,
-  CareerMilestone
+  CareerMilestone,
+  Mentor,
+  CareerEvent,
+  AlumniPreferences
 } from '../types';
-import {
-  calculateCompletion,
-  getAlumniPreferences,
-  getAlumniProfile,
-  getCareerEvents,
-  getDocumentRequests,
-  getJobMatches,
-  getMentors,
-  getTracerSurveys,
-  getDonationCampaigns,
-  getForumPosts,
-  getSkillPathways,
-  saveAlumniPreferences,
-  saveAlumniProfile,
-  saveCareerEvents,
-  saveDocumentRequests,
-  saveJobMatches,
-  saveMentors,
-  saveTracerSurveys,
-  saveDonationCampaigns,
-  saveForumPosts,
-  saveSkillPathways,
-  getMilestones,
-  saveMilestones
-} from './mockAlumniData';
 
-const nextId = <T extends { id: number }>(items: T[]) =>
-  items.length === 0 ? 1 : Math.max(...items.map((item) => item.id)) + 1;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
-const parseMatch = (match: string) => Number.parseInt(match.replace('%', ''), 10) || 0;
+const apiClient = axios.create({
+  baseURL: `${API_BASE_URL}/alumni`,
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export interface AlumniWorkspace {
+  profile: AlumniProfile;
+  jobs: JobMatch[];
+  surveys: TracerSurvey[];
+  mentors: Mentor[];
+  events: CareerEvent[];
+  documents: DocumentRequest[];
+  preferences: AlumniPreferences;
+  donations: DonationCampaign[];
+  forum: ForumPost[];
+  pathways: SkillPathway[];
+  milestones: CareerMilestone[];
+}
 
 export const alumniService = {
-  getWorkspace() {
-    return {
-      profile: getAlumniProfile(),
-      jobs: getJobMatches(),
-      surveys: getTracerSurveys(),
-      mentors: getMentors(),
-      events: getCareerEvents(),
-      documents: getDocumentRequests(),
-      preferences: getAlumniPreferences(),
-      donations: getDonationCampaigns(),
-      forum: getForumPosts(),
-      pathways: getSkillPathways(),
-      milestones: getMilestones()
-    };
+  async getWorkspace(): Promise<AlumniWorkspace> {
+    const res = await apiClient.get('/workspace');
+    return res.data.data;
   },
 
-  getDashboardSummary(profile: AlumniProfile = getAlumniProfile()): AlumniDashboardSummary {
-    const jobs = getJobMatches();
-    const surveys = getTracerSurveys();
-    const mentors = getMentors();
-    const documents = getDocumentRequests();
-    const events = getCareerEvents();
-    const messages = getForumPosts();
-
-    return {
-      profileCompletion: calculateCompletion(profile),
-      openJobMatches: jobs.filter((job) => !job.applied).length,
-      savedJobs: jobs.filter((job) => job.saved).length,
-      appliedJobs: jobs.filter((job) => job.applied).length,
-      pendingSurveys: surveys.filter((survey) => survey.status === 'PENDING').length,
-      documentRequests: documents.length,
-      activeMentorships: mentors.filter((mentor) => mentor.status !== 'AVAILABLE').length,
-      unreadMessages: messages.filter((m) => !m.liked).length,
-      upcomingEvents: events.filter((e) => !e.registered).length,
-      networkConnections: mentors.filter((m) => m.status === 'CONNECTED').length + 340
-    };
+  async getDashboardSummary(): Promise<AlumniDashboardSummary> {
+    const res = await apiClient.get('/dashboard-summary');
+    return res.data.data;
   },
 
-  updateEmploymentStatus(update: AlumniEmploymentUpdate): AlumniProfile {
-    const profile = {
-      ...getAlumniProfile(),
-      ...update
-    };
-    saveAlumniProfile(profile);
-    return profile;
+  async updateEmploymentStatus(update: AlumniEmploymentUpdate): Promise<AlumniProfile> {
+    const res = await apiClient.put('/employment-status', update);
+    return res.data.data;
   },
 
-  filterJobs(filters: AlumniJobFilters): JobMatch[] {
-    return getJobMatches().filter((job) => {
-      const query = filters.query.trim().toLowerCase();
-      const matchesQuery = !query || [job.title, job.company, job.location, ...job.requirements]
-        .join(' ')
-        .toLowerCase()
-        .includes(query);
-      const matchesType = filters.type === 'All' || job.type === filters.type;
-      const matchesLocation = !filters.location || job.location.toLowerCase().includes(filters.location.toLowerCase());
-      const matchesScore = !filters.minimumMatch || parseMatch(job.match) >= filters.minimumMatch;
-      const matchesSaved = !filters.savedOnly || job.saved;
-
-      return matchesQuery && matchesType && matchesLocation && matchesScore && matchesSaved;
-    });
+  async filterJobs(filters: AlumniJobFilters): Promise<JobMatch[]> {
+    const res = await apiClient.get('/jobs', { params: filters });
+    return res.data.data;
   },
 
   sortJobs(jobs: JobMatch[], sortBy: 'match' | 'recent' | 'salary' | 'views'): JobMatch[] {
     const sorted = [...jobs];
+    const parseMatch = (match: string) => Number.parseInt(match.replace('%', ''), 10) || 0;
     switch (sortBy) {
       case 'match': return sorted.sort((a, b) => parseMatch(b.match) - parseMatch(a.match));
       case 'recent': return sorted.sort((a, b) => (b.applications || 0) - (a.applications || 0));
@@ -119,117 +79,63 @@ export const alumniService = {
     }
   },
 
-  applyToJob(jobId: number): JobMatch[] {
-    const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const jobs = getJobMatches().map((job) =>
-      job.id === jobId ? { ...job, applied: true, applicationStatus: 'Under Review' as const, appliedDate: now } : job
-    );
-    saveJobMatches(jobs);
-    return jobs;
+  async applyToJob(jobId: string): Promise<JobMatch[]> {
+    const res = await apiClient.post(`/jobs/${jobId}/apply`);
+    return res.data.data;
   },
 
-  withdrawApplication(jobId: number): JobMatch[] {
-    const jobs = getJobMatches().map((job) =>
-      job.id === jobId ? { ...job, applied: false, applicationStatus: undefined as any, appliedDate: undefined } : job
-    );
-    saveJobMatches(jobs);
-    return jobs;
+  async withdrawApplication(jobId: string): Promise<JobMatch[]> {
+    const res = await apiClient.post(`/jobs/${jobId}/withdraw`);
+    return res.data.data;
   },
 
-  requestDocument(input: AlumniDocumentRequestInput): DocumentRequest[] {
-    const documents = getDocumentRequests();
-    const newRequest: DocumentRequest = {
-      id: nextId(documents),
-      type: input.type,
-      requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      status: 'Pending',
-      notes: input.notes
-    };
-    const updatedDocuments = [newRequest, ...documents];
-    saveDocumentRequests(updatedDocuments);
-    return updatedDocuments;
+  async requestDocument(input: AlumniDocumentRequestInput): Promise<DocumentRequest[]> {
+    const res = await apiClient.post('/documents', input);
+    return res.data.data;
   },
 
-  completeSurvey(surveyId: number): TracerSurvey[] {
-    const surveys = getTracerSurveys().map((survey) =>
-      survey.id === surveyId
-        ? { ...survey, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() }
-        : survey
-    );
-    saveTracerSurveys(surveys);
-    return surveys;
+  async completeSurvey(surveyId: string): Promise<TracerSurvey[]> {
+    const res = await apiClient.post(`/surveys/${surveyId}/complete`);
+    return res.data.data;
   },
 
-  scheduleMentorshipSession(mentorId: number, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) {
-    const mentors = getMentors().map((mentor) => {
-      if (mentor.id !== mentorId) return mentor;
-      const sessionId = nextId(mentor.sessions ?? []);
-      return {
-        ...mentor,
-        status: 'CONNECTED' as const,
-        sessions: [
-          ...(mentor.sessions ?? []),
-          {
-            id: sessionId,
-            ...session,
-            status: 'Scheduled' as const,
-            meetLink: `https://meet.google.com/astu-mentor-${mentorId}-${sessionId}`
-          }
-        ]
-      };
-    });
-    saveMentors(mentors);
-    return mentors;
+  async scheduleMentorshipSession(mentorId: string, session: any): Promise<Mentor[]> {
+    const res = await apiClient.post('/mentorship/sessions', { mentorId, ...session });
+    return res.data.data;
   },
 
-  makeDonation(campaignId: number, amount: number): DonationCampaign[] {
-    const campaigns = getDonationCampaigns().map((c) =>
-      c.id === campaignId ? { ...c, raised: c.raised + amount, donorCount: c.donorCount + 1 } : c
-    );
-    saveDonationCampaigns(campaigns);
-    return campaigns;
+  async makeDonation(campaignId: string, amount: number): Promise<DonationCampaign[]> {
+    const res = await apiClient.post('/donations', { campaignId, amount });
+    return res.data.data;
   },
 
-  toggleForumLike(postId: number): ForumPost[] {
-    const posts = getForumPosts().map((p) =>
-      p.id === postId ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p
-    );
-    saveForumPosts(posts);
-    return posts;
+  async toggleForumLike(postId: string): Promise<ForumPost[]> {
+    const res = await apiClient.post(`/forum/posts/${postId}/like`);
+    return res.data.data;
   },
 
-  addForumPost(post: Omit<ForumPost, 'id' | 'timestamp' | 'likes' | 'comments' | 'liked'>): ForumPost[] {
-    const posts = getForumPosts();
-    const newPost: ForumPost = {
-      id: nextId(posts),
-      ...post,
-      timestamp: 'Just now',
-      likes: 0,
-      comments: 0,
-      liked: false
-    };
-    const updatedPosts = [newPost, ...posts];
-    saveForumPosts(updatedPosts);
-    return updatedPosts;
+  async addForumPost(post: Omit<ForumPost, 'id' | 'timestamp' | 'likes' | 'comments' | 'liked'>): Promise<ForumPost[]> {
+    const res = await apiClient.post('/forum/posts', post);
+    return res.data.data;
   },
 
-  addMilestone(milestone: Omit<CareerMilestone, 'id'>): CareerMilestone[] {
-    const milestones = getMilestones();
-    const newMilestone = { id: nextId(milestones), ...milestone };
-    const updated = [newMilestone, ...milestones];
-    saveMilestones(updated);
-    return updated;
+  async addMilestone(milestone: Omit<CareerMilestone, 'id'>): Promise<CareerMilestone[]> {
+    const res = await apiClient.post('/milestones', milestone);
+    return res.data.data;
   },
 
-  saveProfile: saveAlumniProfile,
-  saveJobs: saveJobMatches,
-  saveSurveys: saveTracerSurveys,
-  saveMentors,
-  saveEvents: saveCareerEvents,
-  saveDocuments: saveDocumentRequests,
-  savePreferences: saveAlumniPreferences,
-  saveMilestones,
-  saveDonations: saveDonationCampaigns,
-  saveForum: saveForumPosts,
-  savePathways: saveSkillPathways
+  async saveProfile(profile: AlumniProfile) {
+    return apiClient.put('/me', profile);
+  },
+  
+  saveJobs: () => {},
+  saveSurveys: () => {},
+  saveMentors: () => {},
+  saveEvents: () => {},
+  saveDocuments: () => {},
+  savePreferences: () => {},
+  saveMilestones: () => {},
+  saveDonations: () => {},
+  saveForum: () => {},
+  savePathways: () => {}
 };

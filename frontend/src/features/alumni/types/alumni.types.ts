@@ -5,7 +5,7 @@ export interface ResumeFile {
 }
 
 export interface Certification {
-  id: number;
+  id: string;
   name: string;
   issuer: string;
   issueDate: string;
@@ -15,7 +15,7 @@ export interface Certification {
 }
 
 export interface Project {
-  id: number;
+  id: string;
   title: string;
   description: string;
   technologies: string[];
@@ -26,7 +26,7 @@ export interface Project {
 }
 
 export interface Achievement {
-  id: number;
+  id: string;
   title: string;
   description: string;
   date: string;
@@ -65,7 +65,7 @@ export interface AlumniProfile {
 }
 
 export interface CareerMilestone {
-  id: number;
+  id: string;
   year: string;
   title: string;
   company: string;
@@ -74,7 +74,7 @@ export interface CareerMilestone {
 }
 
 export interface JobMatch {
-  id: number;
+  id: string;
   title: string;
   company: string;
   location: string;
@@ -103,7 +103,7 @@ export interface JobMatch {
 }
 
 export interface TracerSurvey {
-  id: number;
+  id: string;
   title: string;
   description: string;
   deadline: string;
@@ -125,7 +125,7 @@ export interface SurveyQuestion {
 }
 
 export interface Mentor {
-  id: number;
+  id: string;
   name: string;
   role: string;
   company: string;
@@ -139,7 +139,7 @@ export interface Mentor {
 }
 
 export interface MentorshipSession {
-  id: number;
+  id: string;
   date: string;
   time: string;
   topic: string;
@@ -148,7 +148,7 @@ export interface MentorshipSession {
 }
 
 export interface DocumentRequest {
-  id: number;
+  id: string;
   type: 'Official Transcript' | 'Degree Verification' | 'Temporary Certificate' | 'English Medium Certificate';
   requestDate: string;
   status: 'Pending' | 'Approved' | 'In Progress' | 'Dispatched';
@@ -156,7 +156,7 @@ export interface DocumentRequest {
 }
 
 export interface CareerEvent {
-  id: number;
+  id: string;
   title: string;
   date: string;
   location: string;
@@ -188,7 +188,7 @@ export interface AlumniPreferences {
 }
 
 export interface AlumniNotification {
-  id: number;
+  id: string;
   text: string;
   time: string;
   unread: boolean;
@@ -196,7 +196,7 @@ export interface AlumniNotification {
 }
 
 export interface DonationCampaign {
-  id: number;
+  id: string;
   title: string;
   description: string;
   goal: number;
@@ -207,7 +207,7 @@ export interface DonationCampaign {
 }
 
 export interface ForumPost {
-  id: number;
+  id: string;
   author: string;
   authorAvatar: string;
   authorRole: string;
@@ -220,7 +220,7 @@ export interface ForumPost {
 }
 
 export interface SkillPathway {
-  id: number;
+  id: string;
   title: string;
   description: string;
   skills: string[];
@@ -263,7 +263,7 @@ export interface AlumniEmploymentUpdate {
 }
 
 export interface EmployerRating {
-  id: number;
+  id: string;
   companyName: string;
   companyLogo: string;
   reviewerName: string;
@@ -279,7 +279,7 @@ export interface EmployerRating {
 }
 
 export interface EmployerProfile {
-  id: number;
+  id: string;
   companyName: string;
   companyLogo: string;
   industry: string;
@@ -295,7 +295,7 @@ export interface EmployerProfile {
 export interface TelebirrPayment {
   id: string;
   amount: number;
-  campaignId: number;
+  campaignid: string;
   donorName: string;
   phoneNumber: string;
   status: 'pending' | 'success' | 'failed';
@@ -304,8 +304,8 @@ export interface TelebirrPayment {
 }
 
 export interface TracerSchedule {
-  id: number;
-  surveyId: number;
+  id: string;
+  surveyid: string;
   title: string;
   type: string;
   batch: string;

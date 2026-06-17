@@ -5,7 +5,7 @@ import { JobMatch } from '../types/alumni.types';
 interface JobsTabProps {
   jobs: JobMatch[];
   onViewJob: (job: JobMatch) => void;
-  onToggleSaveJob: (jobId: number) => void;
+  onToggleSaveJob: (jobId: string) => void;
 }
 
 export const JobsTab: React.FC<JobsTabProps> = ({
@@ -24,7 +24,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
   const locations = ['All', 'Addis Ababa', 'Remote'];
   const formats = ['All', 'Full-Time', 'Internship', 'Contract', 'Part-Time'];
 
-  const handleToggleSave = (e: React.MouseEvent, id: number, saved: boolean) => {
+  const handleToggleSave = (e: React.MouseEvent, id: string, saved: boolean) => {
     e.stopPropagation();
     onToggleSaveJob(id);
     toast.success(

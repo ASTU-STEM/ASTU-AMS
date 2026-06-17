@@ -3,8 +3,8 @@ import { Mentor, MentorshipSession } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 
 interface MentorReview {
-  id: number;
-  mentorId: number;
+  id: string;
+  mentorId: string;
   author: string;
   rating: number;
   text: string;
@@ -13,8 +13,8 @@ interface MentorReview {
 
 interface MentorshipTabProps {
   mentors: Mentor[];
-  onRequestMentorship: (mentorId: number) => void;
-  onScheduleSession: (mentorId: number, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => void;
+  onRequestMentorship: (mentorId: string) => void;
+  onScheduleSession: (mentorId: string, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => void;
 }
 
 const defaultReviews: MentorReview[] = [

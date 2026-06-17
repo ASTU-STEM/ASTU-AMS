@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 interface AlumniMessage {
-  id: number;
+  id: string;
   sender: 'Alumni' | 'Recruiter' | 'System' | 'Registrar' | 'Mentor';
   senderName: string;
   text: string;

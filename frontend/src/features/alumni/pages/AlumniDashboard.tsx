@@ -37,6 +37,7 @@ import {
   calculateCompletion
 } from '../services/mockAlumniData';
 
+import { alumniService } from '../services/alumni.service';
 import { DashboardOverview } from '../components/DashboardOverview';
 import { ProfileTab } from '../components/ProfileTab';
 import { CareerTab } from '../components/CareerTab';
@@ -106,10 +107,12 @@ const AlumniDashboard = () => {
     saveAlumniProfile(updatedProfile);
   };
 
-  const handleApplyJob = (jobId: number) => {
+  const handleApplyJob = async (jobId: string) => {
+    await alumniService.applyToJob(jobId);
+    
     const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, applied: true, applicationStatus: 'Under Review' as const } : j);
     setJobs(updatedJobs);
-    saveJobMatches(updatedJobs);
+    
     const appliedJob = jobs.find(j => j.id === jobId);
     if (appliedJob) {
       toast.success(`Application sent to ${appliedJob.company}!`);
@@ -117,34 +120,44 @@ const AlumniDashboard = () => {
     }
   };
 
-  const handleToggleSaveJob = (jobId: number) => {
+  const handleToggleSaveJob = async (jobId: string) => {
+    // await alumniService.toggleSaveJob(jobId); // Assuming we add this or just rely on local state
+    
     const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, saved: !j.saved } : j);
     setJobs(updatedJobs);
-    saveJobMatches(updatedJobs);
+    
   };
 
-  const handleCompleteSurvey = (surveyId: number, answers: Record<string, string>) => {
+  const handleCompleteSurvey = async (surveyId: string, answers: Record<string, string>) => {
+    await alumniService.completeSurvey(surveyId);
+    
     const updatedSurveys = surveys.map(s => s.id === surveyId ? { ...s, status: 'COMPLETED' as const, completedAt: new Date().toLocaleDateString() } : s);
     setSurveys(updatedSurveys);
-    saveTracerSurveys(updatedSurveys);
+    
     setNotifications(prev => [{ id: Date.now(), text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleRegisterEvent = (eventId: number) => {
+  const handleRegisterEvent = async (eventId: string) => {
+    // await alumniService.registerEvent(eventId);
+    
     const updatedEvents = events.map(e => e.id === eventId ? { ...e, registered: true } : e);
     setEvents(updatedEvents);
-    saveCareerEvents(updatedEvents);
+    
     setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleRequestMentorship = (mentorId: number) => {
+  const handleRequestMentorship = async (mentorId: string) => {
+    // await alumniService.requestMentorship(mentorId);
+    
     const updatedMentors = mentors.map(m => m.id === mentorId ? { ...m, status: 'REQUEST_PENDING' as const } : m);
     setMentors(updatedMentors);
-    saveMentors(updatedMentors);
+    
     setNotifications(prev => [{ id: Date.now(), text: `Requested mentorship connection with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleScheduleSession = (mentorId: number, sessionDetails: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => {
+  const handleScheduleSession = async (mentorId: string, sessionDetails: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => {
+    await alumniService.scheduleMentorshipSession(mentorId, sessionDetails);
+    
     const updatedMentors = mentors.map(m => {
       if (m.id === mentorId) {
         const nextSessionId = (m.sessions?.length || 0) + 1;
@@ -153,14 +166,16 @@ const AlumniDashboard = () => {
       return m;
     });
     setMentors(updatedMentors);
-    saveMentors(updatedMentors);
+    
     setNotifications(prev => [{ id: Date.now(), text: `Scheduled mentorship session with ${mentors.find(m => m.id === mentorId)?.name}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleRequestDocument = (type: DocumentRequest['type'], notes?: string) => {
+  const handleRequestDocument = async (type: DocumentRequest['type'], notes?: string) => {
+    const res = await alumniService.requestDocument({ type, notes });
+    
     const newDoc: DocumentRequest = { id: documents.length + 1, type, requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), status: 'Pending', notes: notes || 'Awaiting registrar verification.' };
     setDocuments([newDoc, ...documents]);
-    saveDocumentRequests([newDoc, ...documents]);
+    
     setNotifications(prev => [{ id: Date.now(), text: `Submitted official request for: ${type}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
@@ -206,6 +221,19 @@ const AlumniDashboard = () => {
   };
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
+
+  useEffect(() => {
+    alumniService.getWorkspace().then((data) => {
+      setProfile(data.profile);
+      setJobs(data.jobs);
+      // setSurveys handled separately in existing useEffect, or we can merge
+      setMentors(data.mentors);
+      setEvents(data.events);
+      setDocuments(data.documents);
+      setPreferences(data.preferences);
+    }).catch(err => console.error("Failed to load workspace", err));
+  }, []);
+
 
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');

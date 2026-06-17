@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 interface JobDetailsModalProps {
   job: JobMatch | null;
   onClose: () => void;
-  onApply: (jobId: number) => void;
+  onApply: (jobId: string) => void;
 }
 
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, onApply }) => {

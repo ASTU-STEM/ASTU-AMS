@@ -55,3 +55,7 @@ AUTH_TESTING_GUIDE
 AUTH_TESTING_GUIDE.md
 AUTH_SYSTEM_DOCUMENTATION.md
 frontend/
+backup.dump
+export_db.ts
+query.ts
+database_export/

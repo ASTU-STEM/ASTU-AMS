@@ -8,7 +8,7 @@ import { getSkillPathways, getJobMatches, getMentors } from '../services/mockAlu
 
 interface CareerTabProps {
   events: CareerEvent[];
-  onRegisterEvent: (eventId: number) => void;
+  onRegisterEvent: (eventId: string) => void;
 }
 
 export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent }) => {
@@ -36,7 +36,7 @@ export const CareerTab: React.FC<CareerTabProps> = ({ events, onRegisterEvent })
     ? events 
     : events.filter(e => e.category === selectedCategory);
 
-  const handleRegister = (eventId: number, title: string) => {
+  const handleRegister = (eventId: string, title: string) => {
     onRegisterEvent(eventId);
     toast.success(`Successfully registered for: ${title}!`);
   };

@@ -9,7 +9,7 @@ interface DashboardOverviewProps {
   profile: AlumniProfile;
   completion: number;
   stats: Array<{
-    id: number;
+    id: string;
     label: string;
     value: string;
     color: string;
@@ -23,7 +23,7 @@ interface DashboardOverviewProps {
   surveys: TracerSurvey[];
   onTabChange: (tab: string) => void;
   onViewJob: (job: JobMatch) => void;
-  setHoveredCard: (id: number | null) => void;
+  setHoveredCard: (id: string | null) => void;
   hoveredCard: number | null;
   onUpdateEmploymentStatus: (role: string, company: string, salary: string) => void;
 }

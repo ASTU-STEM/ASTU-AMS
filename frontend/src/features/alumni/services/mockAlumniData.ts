@@ -20,18 +20,18 @@ import {
 } from '../types/alumni.types';
 
 const defaultCertifications: Certification[] = [
-  { id: 1, name: 'AWS Certified Cloud Practitioner', issuer: 'Amazon Web Services', issueDate: 'Jan 2025', expiryDate: 'Jan 2028', credentialUrl: 'https://aws.amazon.com/verify', description: 'Foundational cloud knowledge certification.' },
-  { id: 2, name: 'Meta Front-End Developer', issuer: 'Meta (Coursera)', issueDate: 'Mar 2025', credentialUrl: 'https://coursera.org/verify', description: 'Professional certificate in React and frontend development.' },
+  { id: "1", name: 'AWS Certified Cloud Practitioner', issuer: 'Amazon Web Services', issueDate: 'Jan 2025', expiryDate: 'Jan 2028', credentialUrl: 'https://aws.amazon.com/verify', description: 'Foundational cloud knowledge certification.' },
+  { id: "2", name: 'Meta Front-End Developer', issuer: 'Meta (Coursera)', issueDate: 'Mar 2025', credentialUrl: 'https://coursera.org/verify', description: 'Professional certificate in React and frontend development.' },
 ];
 
 const defaultProjects: Project[] = [
-  { id: 1, title: 'Automated Tracer Study System', description: 'Full-stack web application for ASTU to automate graduate tracer studies and generate accreditation reports.', technologies: ['React', 'Node.js', 'PostgreSQL', 'Docker'], url: 'https://github.com/abebe-bikila/tracer-system', startDate: 'Sep 2023', endDate: 'Jun 2024', role: 'Full Stack Developer' },
-  { id: 2, title: 'Telebirr Payment Gateway SDK', description: 'Open-source SDK for integrating Ethio Telecom Telebirr payment API with Node.js applications.', technologies: ['TypeScript', 'Node.js', 'REST API'], url: 'https://github.com/abebe-bikila/telebirr-sdk', startDate: 'Jan 2025', role: 'Maintainer' },
+  { id: "1", title: 'Automated Tracer Study System', description: 'Full-stack web application for ASTU to automate graduate tracer studies and generate accreditation reports.', technologies: ['React', 'Node.js', 'PostgreSQL', 'Docker'], url: 'https://github.com/abebe-bikila/tracer-system', startDate: 'Sep 2023', endDate: 'Jun 2024', role: 'Full Stack Developer' },
+  { id: "2", title: 'Telebirr Payment Gateway SDK', description: 'Open-source SDK for integrating Ethio Telecom Telebirr payment API with Node.js applications.', technologies: ['TypeScript', 'Node.js', 'REST API'], url: 'https://github.com/abebe-bikila/telebirr-sdk', startDate: 'Jan 2025', role: 'Maintainer' },
 ];
 
 const defaultAchievements: Achievement[] = [
-  { id: 1, title: 'Best Graduating Thesis Award', description: 'Awarded for outstanding research on automated tracer study systems.', date: 'Jun 2024', type: 'award' },
-  { id: 2, title: 'Open Source Contributor of the Month', description: 'Recognized for contributions to Ethiopian fintech open source projects.', date: 'Feb 2025', type: 'recognition' },
+  { id: "1", title: 'Best Graduating Thesis Award', description: 'Awarded for outstanding research on automated tracer study systems.', date: 'Jun 2024', type: 'award' },
+  { id: "2", title: 'Open Source Contributor of the Month', description: 'Recognized for contributions to Ethiopian fintech open source projects.', date: 'Feb 2025', type: 'recognition' },
 ];
 
 // Default mock profile with social links, CGPA, and salary range
@@ -73,7 +73,7 @@ const defaultProfile: AlumniProfile = {
 // Default career progression timeline
 const defaultMilestones: CareerMilestone[] = [
   {
-    id: 1,
+    id: "1",
     year: '2025 - Present',
     title: 'Junior Fullstack Engineer',
     company: 'Chapa Financial Technologies',
@@ -81,7 +81,7 @@ const defaultMilestones: CareerMilestone[] = [
     type: 'professional'
   },
   {
-    id: 2,
+    id: "2",
     year: '2024',
     title: 'BSc in Computer Science and Engineering',
     company: 'Adama Science and Technology University',
@@ -89,7 +89,7 @@ const defaultMilestones: CareerMilestone[] = [
     type: 'academic'
   },
   {
-    id: 3,
+    id: "3",
     year: '2023',
     title: 'Software DevOps Intern',
     company: 'Safaricom Telecommunications',
@@ -101,7 +101,7 @@ const defaultMilestones: CareerMilestone[] = [
 // Job listings with Internships and Saved status
 const defaultJobs: JobMatch[] = [
   {
-    id: 1,
+    id: "1",
     title: 'Senior Software Engineer (FinTech)',
     company: 'Ethio Telecom Innovation Lab',
     location: 'Addis Ababa (Hybrid)',
@@ -131,7 +131,7 @@ const defaultJobs: JobMatch[] = [
     skills: ['Node.js', 'Spring Boot', 'Kubernetes', 'Microservices']
   },
   {
-    id: 2,
+    id: "2",
     title: 'Graduate Product Manager Intern',
     company: 'GetirGetyar Tech',
     location: 'Remote',
@@ -159,7 +159,7 @@ const defaultJobs: JobMatch[] = [
     skills: ['Product Management', 'Figma', 'Analytics', 'E-commerce']
   },
   {
-    id: 3,
+    id: "3",
     title: 'Data Scientist / AI Specialist',
     company: 'DataCon Africa',
     location: 'Addis Ababa (On-site)',
@@ -189,7 +189,7 @@ const defaultJobs: JobMatch[] = [
     skills: ['Python', 'Machine Learning', 'PyTorch', 'AWS']
   },
   {
-    id: 4,
+    id: "4",
     title: 'Web Frontend Developer Intern',
     company: 'Chapa Financial Technologies',
     location: 'Addis Ababa',
@@ -221,7 +221,7 @@ const defaultJobs: JobMatch[] = [
 // Automated Tracer Survey Status: 6-Month, 12-Month, 24-Month
 const defaultSurveys: TracerSurvey[] = [
   {
-    id: 1,
+    id: "1",
     title: 'ASTU 6-Month Graduate Tracer Study',
     description: 'Monitors early-stage employment status, transition times from college to career, and entry-level salary distributions.',
     deadline: 'December 30, 2024',
@@ -231,7 +231,7 @@ const defaultSurveys: TracerSurvey[] = [
     questions: []
   },
   {
-    id: 2,
+    id: "2",
     title: 'ASTU 12-Month Longitudinal Career Tracer Study',
     description: 'Monitors intermediate-stage career progression, employment rates, job search durations, and curriculum alignment with daily tasks.',
     deadline: 'March 15, 2026',
@@ -270,7 +270,7 @@ const defaultSurveys: TracerSurvey[] = [
     ]
   },
   {
-    id: 3,
+    id: "3",
     title: 'ASTU 24-Month Industry Curriculum Feedback Tracer',
     description: 'A deep audit measuring long-term technological skill-gaps and industry training relevance for quality audits.',
     deadline: 'September 30, 2026',
@@ -295,7 +295,7 @@ const defaultSurveys: TracerSurvey[] = [
 // Mentors with scheduled sessions mock
 const defaultMentors: Mentor[] = [
   {
-    id: 1,
+    id: "1",
     name: 'Dr. Yosef Kebede',
     role: 'Senior Staff Engineer',
     company: 'Google',
@@ -307,7 +307,7 @@ const defaultMentors: Mentor[] = [
     status: 'AVAILABLE',
     sessions: [
       {
-        id: 1,
+        id: "1",
         date: 'June 5, 2026',
         time: '4:00 PM - 5:00 PM',
         topic: 'Resume Architecture & Google Interview Prep',
@@ -317,7 +317,7 @@ const defaultMentors: Mentor[] = [
     ]
   },
   {
-    id: 2,
+    id: "2",
     name: 'Helina Sileshi',
     role: 'Co-Founder & Chief Architect',
     company: 'Summit Tech Solutions',
@@ -330,7 +330,7 @@ const defaultMentors: Mentor[] = [
     sessions: []
   },
   {
-    id: 3,
+    id: "3",
     name: 'Michael Tilahun',
     role: 'Director of Artificial Intelligence',
     company: 'DataCon Africa',
@@ -347,14 +347,14 @@ const defaultMentors: Mentor[] = [
 // Document Services (Transcripts, Certificates, Verification requests)
 const defaultDocuments: DocumentRequest[] = [
   {
-    id: 1,
+    id: "1",
     type: 'Official Transcript',
     requestDate: 'May 10, 2026',
     status: 'Approved',
     notes: 'Official transcript signed, stamped, and dispatched to Addis Ababa University registrar.'
   },
   {
-    id: 2,
+    id: "2",
     type: 'Degree Verification',
     requestDate: 'May 24, 2026',
     status: 'In Progress',
@@ -379,7 +379,7 @@ const defaultPreferences: AlumniPreferences = {
 
 const defaultEvents: CareerEvent[] = [
   {
-    id: 1,
+    id: "1",
     title: 'ASTU Annual Tech Career Expo 2026',
     date: 'June 30, 2026',
     location: 'ASTU Main Campus, Networking Hall',
@@ -395,7 +395,7 @@ const defaultEvents: CareerEvent[] = [
     type: 'in-person'
   },
   {
-    id: 2,
+    id: "2",
     title: 'Tracer Survey Launch & Alumni Reunion',
     date: 'July 18, 2026',
     location: 'Adama Science and Technology University Main Campus',
@@ -411,7 +411,7 @@ const defaultEvents: CareerEvent[] = [
     type: 'in-person'
   },
   {
-    id: 3,
+    id: "3",
     title: 'Technical Resume & Interview Preparation Workshop',
     date: 'June 15, 2026',
     location: 'Virtual Event (Zoom Link Provided upon Registration)',
@@ -428,7 +428,7 @@ const defaultEvents: CareerEvent[] = [
     virtualLink: 'https://zoom.us/astu-workshop-june15'
   },
   {
-    id: 4,
+    id: "4",
     title: 'AI & Machine Learning Bootcamp',
     date: 'August 5, 2026',
     location: 'ASTU Innovation Hub + Virtual',
@@ -545,23 +545,23 @@ export const saveCareerEvents = (events: CareerEvent[]): void => {
 
 // New mock data
 const defaultDonationCampaigns: DonationCampaign[] = [
-  { id: 1, title: 'ASTU Scholarship Fund 2026', description: 'Support underprivileged engineering students with full tuition scholarships.', goal: 5000000, raised: 1850000, deadline: 'Dec 31, 2026', category: 'scholarship', donorCount: 347 },
-  { id: 2, title: 'AI Research Lab Equipment', description: 'Fund cutting-edge GPU servers for the new AI research laboratory.', goal: 8000000, raised: 3200000, deadline: 'Sep 30, 2026', category: 'research', donorCount: 156 },
-  { id: 3, title: 'Campus Innovation Hub', description: 'Build a modern co-working makerspace and innovation center for students.', goal: 12000000, raised: 5400000, deadline: 'Mar 31, 2027', category: 'infrastructure', donorCount: 289 },
+  { id: "1", title: 'ASTU Scholarship Fund 2026', description: 'Support underprivileged engineering students with full tuition scholarships.', goal: 5000000, raised: 1850000, deadline: 'Dec 31, 2026', category: 'scholarship', donorCount: 347 },
+  { id: "2", title: 'AI Research Lab Equipment', description: 'Fund cutting-edge GPU servers for the new AI research laboratory.', goal: 8000000, raised: 3200000, deadline: 'Sep 30, 2026', category: 'research', donorCount: 156 },
+  { id: "3", title: 'Campus Innovation Hub', description: 'Build a modern co-working makerspace and innovation center for students.', goal: 12000000, raised: 5400000, deadline: 'Mar 31, 2027', category: 'infrastructure', donorCount: 289 },
 ];
 
 const defaultForumPosts: ForumPost[] = [
-  { id: 1, author: 'Abebe Bikila', authorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=64&h=64&q=80', authorRole: 'CS Alumni 2018', content: 'Just launched my open-source Telebirr SDK on GitHub! Check it out if you are building fintech solutions in Ethiopia. #opensource #fintech', timestamp: '2h ago', likes: 24, comments: 8, tags: ['opensource', 'fintech', 'telebirr'], liked: true },
-  { id: 2, author: 'Helina Sileshi', authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=64&h=64&q=80', authorRole: 'CSE Alumni 2014', content: 'Summit Tech is hiring 3 senior React Native developers! Remote-friendly for ASTU alumni. Send me your CVs directly.', timestamp: '5h ago', likes: 56, comments: 15, tags: ['hiring', 'react-native', 'jobs'], liked: false },
-  { id: 3, author: 'Dr. Yosef Kebede', authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64&q=80', authorRole: 'ECE Alumni 2010', content: 'Happy to announce I will be speaking at the ASTU Career Expo 2026 about system design at Google scale. See you all there!', timestamp: '1d ago', likes: 89, comments: 22, tags: ['career-expo', 'google', 'system-design'], liked: true },
+  { id: "1", author: 'Abebe Bikila', authorAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=64&h=64&q=80', authorRole: 'CS Alumni 2018', content: 'Just launched my open-source Telebirr SDK on GitHub! Check it out if you are building fintech solutions in Ethiopia. #opensource #fintech', timestamp: '2h ago', likes: 24, comments: 8, tags: ['opensource', 'fintech', 'telebirr'], liked: true },
+  { id: "2", author: 'Helina Sileshi', authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=64&h=64&q=80', authorRole: 'CSE Alumni 2014', content: 'Summit Tech is hiring 3 senior React Native developers! Remote-friendly for ASTU alumni. Send me your CVs directly.', timestamp: '5h ago', likes: 56, comments: 15, tags: ['hiring', 'react-native', 'jobs'], liked: false },
+  { id: "3", author: 'Dr. Yosef Kebede', authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64&q=80', authorRole: 'ECE Alumni 2010', content: 'Happy to announce I will be speaking at the ASTU Career Expo 2026 about system design at Google scale. See you all there!', timestamp: '1d ago', likes: 89, comments: 22, tags: ['career-expo', 'google', 'system-design'], liked: true },
 ];
 
 const defaultSkillPathways: SkillPathway[] = [
-  { id: 1, title: 'Full-Stack Web Development', description: 'Master React, Node.js, and cloud deployment for modern web apps.', skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS'], duration: '6 months', level: 'intermediate', jobs: ['Full Stack Developer', 'Frontend Engineer', 'Backend Developer'], popularity: 95 },
-  { id: 2, title: 'AI & Machine Learning Engineering', description: 'Build production ML pipelines, LLMs, and computer vision systems.', skills: ['Python', 'PyTorch', 'TensorFlow', 'MLOps', 'AWS SageMaker', 'LangChain'], duration: '8 months', level: 'advanced', jobs: ['ML Engineer', 'Data Scientist', 'AI Specialist'], popularity: 88 },
-  { id: 3, title: 'Cloud & DevOps Engineering', description: 'Master CI/CD, Kubernetes, and cloud infrastructure as code.', skills: ['Docker', 'Kubernetes', 'Terraform', 'AWS', 'Jenkins', 'GitHub Actions'], duration: '5 months', level: 'intermediate', jobs: ['DevOps Engineer', 'Cloud Architect', 'SRE'], popularity: 82 },
-  { id: 4, title: 'Mobile App Development', description: 'Build cross-platform mobile apps with React Native and Flutter.', skills: ['React Native', 'Flutter', 'Dart', 'Firebase', 'App Store Connect'], duration: '4 months', level: 'beginner', jobs: ['Mobile Developer', 'React Native Developer', 'Flutter Developer'], popularity: 78 },
-  { id: 5, title: 'Cybersecurity Fundamentals', description: 'Learn ethical hacking, network security, and compliance frameworks.', skills: ['Python', 'Kali Linux', 'Wireshark', 'Nmap', 'Metasploit', 'ISO 27001'], duration: '6 months', level: 'intermediate', jobs: ['Security Analyst', 'Penetration Tester', 'Security Engineer'], popularity: 75 },
+  { id: "1", title: 'Full-Stack Web Development', description: 'Master React, Node.js, and cloud deployment for modern web apps.', skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS'], duration: '6 months', level: 'intermediate', jobs: ['Full Stack Developer', 'Frontend Engineer', 'Backend Developer'], popularity: 95 },
+  { id: "2", title: 'AI & Machine Learning Engineering', description: 'Build production ML pipelines, LLMs, and computer vision systems.', skills: ['Python', 'PyTorch', 'TensorFlow', 'MLOps', 'AWS SageMaker', 'LangChain'], duration: '8 months', level: 'advanced', jobs: ['ML Engineer', 'Data Scientist', 'AI Specialist'], popularity: 88 },
+  { id: "3", title: 'Cloud & DevOps Engineering', description: 'Master CI/CD, Kubernetes, and cloud infrastructure as code.', skills: ['Docker', 'Kubernetes', 'Terraform', 'AWS', 'Jenkins', 'GitHub Actions'], duration: '5 months', level: 'intermediate', jobs: ['DevOps Engineer', 'Cloud Architect', 'SRE'], popularity: 82 },
+  { id: "4", title: 'Mobile App Development', description: 'Build cross-platform mobile apps with React Native and Flutter.', skills: ['React Native', 'Flutter', 'Dart', 'Firebase', 'App Store Connect'], duration: '4 months', level: 'beginner', jobs: ['Mobile Developer', 'React Native Developer', 'Flutter Developer'], popularity: 78 },
+  { id: "5", title: 'Cybersecurity Fundamentals', description: 'Learn ethical hacking, network security, and compliance frameworks.', skills: ['Python', 'Kali Linux', 'Wireshark', 'Nmap', 'Metasploit', 'ISO 27001'], duration: '6 months', level: 'intermediate', jobs: ['Security Analyst', 'Penetration Tester', 'Security Engineer'], popularity: 75 },
 ];
 
 // Calculate profile completion percentage based on fields filled
