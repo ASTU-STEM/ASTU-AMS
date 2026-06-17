@@ -216,12 +216,12 @@ export default function AdminDashboard() {
       `}</style>
 
       <AdminPageHeader
-        title="Dashboard"
-        subtitle="Operational command center for ASTU alumni administration, reporting, and system governance."
+        title={`${greeting}, System Administrator`}
+        subtitle="Welcome back to the ASTU Alumni Management System control panel."
         breadcrumbs={[{ label: 'Admin' }, { label: 'Dashboard' }]}
         actions={
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5 text-xs">
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 p-0.5 text-xs text-white">
               {(['7d', '30d', '90d', '1y'] as TimeRange[]).map((range) => (
                 <button
                   key={range}
@@ -229,51 +229,44 @@ export default function AdminDashboard() {
                   onClick={() => setTimeRange(range)}
                   className={`rounded-md px-2.5 py-1.5 font-semibold transition-all ${
                     timeRange === range
-                      ? 'bg-[#003580] text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'bg-[#FFCC00] text-slate-900 shadow-sm'
+                      : 'text-slate-200 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {range}
                 </button>
               ))}
             </div>
-            <AdminBadge variant="success">Production Ready</AdminBadge>
+            <AdminBadge variant="success" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">v1.4</AdminBadge>
           </div>
         }
-      />
-
-      {/* Greeting Banner */}
-      <section className="pb-2">
-        <div className="relative overflow-hidden rounded-[20px] border border-slate-200 bg-gradient-to-br from-[#003580]/8 via-[#E8A020]/5 to-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#003580]/3 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-          <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Daily briefing</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-                {greeting}, System Administrator
-              </h2>
-              <div className="mt-2 flex items-center gap-3 text-sm text-slate-500">
-                <span>{today}</span>
-                <span className="w-1 h-1 rounded-full bg-slate-300" />
-                <span>Adama Science and Technology University</span>
-              </div>
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs text-slate-200/90 font-medium">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5">
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFCC00] animate-pulse" />
+              <span>{today}</span>
             </div>
-            <div className="inline-flex items-center gap-2 self-start rounded-full border border-emerald-500/20 bg-emerald-50 px-3.5 py-1.5 text-sm font-semibold text-emerald-700 shadow-sm">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              All Systems Operational
-              <span className="text-emerald-400 text-[10px] font-normal ml-1">v1.4</span>
+            <div className="flex items-center gap-2 text-slate-300/80">
+              <RefreshCw className="w-3.5 h-3.5 text-[#FFCC00]" />
+              <span>Last sync: 2 min ago</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-300/80">
+              <Database className="w-3.5 h-3.5 text-[#FFCC00]" />
+              <span>32.4k records</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-300/80">
+              <Users className="w-3.5 h-3.5 text-[#FFCC00]" />
+              <span>156 active sessions</span>
             </div>
           </div>
-          <div className="relative mt-4 pt-3 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-400">
-            <span className="flex items-center gap-1"><RefreshCw className="w-3 h-3" /> Last sync: 2 min ago</span>
-            <span className="flex items-center gap-1"><Database className="w-3 h-3" /> 32.4k records</span>
-            <span className="flex items-center gap-1"><Users className="w-3 h-3" /> 156 active sessions</span>
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-300 shadow-sm self-start md:self-auto">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            All Systems Operational
           </div>
         </div>
-      </section>
+      </AdminPageHeader>
 
       {/* KPI Stats Cards */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

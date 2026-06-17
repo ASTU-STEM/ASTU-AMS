@@ -188,51 +188,39 @@ export default function SystemLogs() {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 border-b border-[var(--border-color)] pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">System Logs</h1>
-            <span
-              className="inline-flex items-center gap-2 rounded-full border border-[#1D9E75]/20 bg-[#1D9E75]/10 px-2.5 py-1 text-xs font-semibold text-[#1D9E75]"
+      <AdminPageHeader
+        title="System Logs"
+        subtitle="Audit administrative actions and system events in real-time."
+        breadcrumb={[{ label: 'Admin' }, { label: 'System Logs' }]}
+        actions={
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setExportOpen((current) => !current)}
+              className="inline-flex items-center gap-2 rounded-[8px] bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-sm font-semibold text-white transition-all shadow-inner backdrop-blur-sm"
             >
-              <span className="h-2 w-2 rounded-full bg-[#1D9E75]" style={{ animation: 'blink 1.5s ease-in-out infinite' }} />
-              Live
-            </span>
+              <Download className="h-4 w-4 text-[#FFCC00]" />
+              Export Logs
+              <ChevronDown className="h-4 w-4 text-[#FFCC00]" />
+            </button>
+            {exportOpen && (
+              <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                {(['CSV', 'JSON'] as const).map((exportFormat) => (
+                  <button
+                    key={exportFormat}
+                    type="button"
+                    onClick={() => exportLogs(exportFormat)}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5"
+                  >
+                    <Download className="h-4 w-4" />
+                    {exportFormat}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <p className="text-sm text-[var(--text-secondary)]">Audit administrative actions and system events.</p>
-          <div className="flex flex-wrap items-center gap-1 text-[13px] font-medium text-[var(--text-secondary)]">
-            <span>Admin</span>
-            <span>/</span>
-            <span>System Logs</span>
-          </div>
-        </div>
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setExportOpen((current) => !current)}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
-          >
-            <Download className="h-4 w-4" />
-            Export Logs
-            <ChevronDown className="h-4 w-4" />
-          </button>
-          {exportOpen && (
-            <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-              {(['CSV', 'JSON'] as const).map((exportFormat) => (
-                <button
-                  key={exportFormat}
-                  type="button"
-                  onClick={() => exportLogs(exportFormat)}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5"
-                >
-                  <Download className="h-4 w-4" />
-                  {exportFormat}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+        }
+      />
 
       <section className="rounded-[10px] bg-[#0A1628] px-5 py-3 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
