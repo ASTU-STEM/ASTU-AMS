@@ -4,6 +4,8 @@ import { generateAccessToken } from '../../src/core/utils/jwt.utils';
 import prisma, { initPrisma } from '../../src/core/config/db';
 import { Role } from '@prisma/client';
 import { OpenRouterService } from '../../src/modules/ai/infrastructure/services/OpenRouterService';
+import { describe } from 'node:test';
+import { beforeAll,afterAll, jest, it, expect } from '@jest/globals';
 
 jest.mock('../../src/modules/ai/infrastructure/services/OpenRouterService');
 jest.setTimeout(60000);
@@ -28,8 +30,8 @@ describe('AI API Integration Tests', () => {
     });
 
     // Mock OpenRouter responses to prevent actual internet calls
-    const mockGenerateJson = OpenRouterService.generateJson as jest.Mock;
-    const mockGenerateText = OpenRouterService.generateText as jest.Mock;
+    const mockGenerateJson = OpenRouterService.generateJson as jest.Mock<any>;
+    const mockGenerateText = OpenRouterService.generateText as jest.Mock<any>;
 
     mockGenerateJson.mockResolvedValue({ intent: 'employment' });
     mockGenerateText.mockResolvedValue('Mocked response content from AI Agent.');

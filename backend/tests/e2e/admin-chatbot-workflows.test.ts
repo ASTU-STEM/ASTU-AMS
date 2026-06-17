@@ -4,6 +4,10 @@ import { generateAccessToken } from '../../src/core/utils/jwt.utils';
 import prisma, { initPrisma } from '../../src/core/config/db';
 import { Role } from '@prisma/client';
 import { OpenRouterService } from '../../src/modules/ai/infrastructure/services/OpenRouterService';
+import { describe } from 'node:test';
+import { beforeAll,afterAll, jest, it, expect, beforeEach } from '@jest/globals';
+
+
 
 jest.mock('../../src/modules/ai/infrastructure/services/OpenRouterService');
 jest.setTimeout(60000);
@@ -30,8 +34,8 @@ describe('Admin Chatbot E2E Workflows', () => {
   });
 
   it('Workflow 1: Admin asks "What is the employment rate?"', async () => {
-    const mockGenerateJson = OpenRouterService.generateJson as jest.Mock;
-    const mockGenerateText = OpenRouterService.generateText as jest.Mock;
+    const mockGenerateJson = OpenRouterService.generateJson as unknown as jest.MockedFunction<any>;
+    const mockGenerateText = OpenRouterService.generateText as unknown as jest.MockedFunction<any>;
 
     mockGenerateJson.mockResolvedValue({ intent: 'employment' });
     mockGenerateText.mockResolvedValue('Overall graduate employment rate is 80.0%. Software Engineering is highest at 100.0%.');
@@ -49,8 +53,8 @@ describe('Admin Chatbot E2E Workflows', () => {
   });
 
   it('Workflow 2: Admin asks "Compare CS and Software Engineering"', async () => {
-    const mockGenerateJson = OpenRouterService.generateJson as jest.Mock;
-    const mockGenerateText = OpenRouterService.generateText as jest.Mock;
+    const mockGenerateJson = OpenRouterService.generateJson as unknown as jest.MockedFunction<any>;
+    const mockGenerateText = OpenRouterService.generateText as unknown as jest.MockedFunction<any>;
 
     mockGenerateJson.mockResolvedValue({ intent: 'department' });
     mockGenerateText.mockResolvedValue(
@@ -72,8 +76,8 @@ describe('Admin Chatbot E2E Workflows', () => {
   });
 
   it('Workflow 3: Admin asks "Generate accreditation report"', async () => {
-    const mockGenerateJson = OpenRouterService.generateJson as jest.Mock;
-    const mockGenerateText = OpenRouterService.generateText as jest.Mock;
+    const mockGenerateJson = OpenRouterService.generateJson as unknown as jest.MockedFunction<any>;
+    const mockGenerateText = OpenRouterService.generateText as unknown as jest.MockedFunction<any>;
 
     mockGenerateJson.mockResolvedValue({ intent: 'report' });
     mockGenerateText.mockResolvedValue('### ACCREDITATION REPORT\nETA Standards have been fully achieved with 80% employment.');
