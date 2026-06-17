@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlumniPreferences } from '../types/alumni.types';
+import { alumniService } from '../services/alumni.service';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 interface SettingsTabProps {
@@ -9,8 +12,8 @@ interface SettingsTabProps {
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePreferences }) => {
   const [prefs, setPrefs] = useState<AlumniPreferences>({ ...preferences });
-  const [digest, setDigest] = useState('weekly');
-  const [donationEnabled, setDonationEnabled] = useState(false);
+  const [digest, setDigest] = useState((preferences as any)?.digestFrequency || 'weekly');
+  const [donationEnabled, setDonationEnabled] = useState((preferences as any)?.donationEnabled || false);
   const [activeSection, setActiveSection] = useState<string>('notifications');
   const [passwords, setPasswords] = useState({
     currentPassword: '',
@@ -22,15 +25,60 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
     new: false,
     confirm: false
   });
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [securityStatus, setSecurityStatus] = useState<any>(null);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Sync local state when preferences prop changes (e.g., from backend)
+  useEffect(() => {
+    if (preferences) {
+      setPrefs({ ...preferences });
+      setDigest((preferences as any)?.digestFrequency || 'weekly');
+      setDonationEnabled((preferences as any)?.donationEnabled || false);
+    }
+  }, [preferences]);
+
+  // Load security status
+  useEffect(() => {
+    const loadSecurityStatus = async () => {
+      try {
+        const status = await alumniService.getSecurityStatus();
+        setSecurityStatus(status);
+      } catch (err) {
+        console.error('Failed to load security status', err);
+      }
+    };
+    loadSecurityStatus();
+  }, []);
 
   const handleToggleChange = (key: keyof AlumniPreferences) => {
     const updated = {
       ...prefs,
-      [key]: !prefs[key]
+      [key]: !prefs[key],
+      digestFrequency: digest,
+      donationEnabled,
     };
     setPrefs(updated);
     onSavePreferences(updated);
     toast.success('Preference updated successfully!');
+  };
+
+  const handleDigestChange = (option: string) => {
+    setDigest(option);
+    const updated = { ...prefs, digestFrequency: option, donationEnabled } as any;
+    setPrefs(updated);
+    onSavePreferences(updated);
+    toast.success(`Digest frequency set to ${option}.`);
+  };
+
+  const handleDonationToggle = () => {
+    const newVal = !donationEnabled;
+    setDonationEnabled(newVal);
+    const updated = { ...prefs, digestFrequency: digest, donationEnabled: newVal } as any;
+    setPrefs(updated);
+    onSavePreferences(updated);
+    toast.success(newVal ? 'Donation prompts enabled.' : 'Donation prompts paused.');
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,7 +89,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
     }));
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwords.newPassword !== passwords.confirmPassword) {
       toast.error('New password and confirm password do not match.');
@@ -51,8 +99,62 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       toast.error('Password must be at least 6 characters long.');
       return;
     }
-    toast.success('Password changed successfully!');
-    setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setChangingPassword(true);
+    try {
+      await alumniService.changePassword(passwords.currentPassword, passwords.newPassword);
+      toast.success('Password changed successfully!');
+      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to change password.';
+      toast.error(msg);
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleEnable2FA = () => {
+    toast('Two-Factor Authentication is coming soon!', { icon: '🛡️' });
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const data = await alumniService.exportAccountData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `astu_alumni_data_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Account data downloaded successfully.');
+    } catch (err) {
+      toast.error('Failed to export account data.');
+    }
+  };
+
+  const handleViewLoginHistory = () => {
+    if (securityStatus?.loginHistory?.length) {
+      const latest = securityStatus.loginHistory.slice(0, 5);
+      const formatted = latest.map((l: any) => `${new Date(l.createdAt).toLocaleString()} (${l.ipAddress || 'Unknown IP'})`).join('\n');
+      alert(`Recent Login History:\n\n${formatted}`);
+    } else {
+      toast('No recent login history found.', { icon: 'ℹ️' });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('Are you absolutely sure you want to permanently delete your account and all associated data? This action cannot be undone.')) {
+      try {
+        await alumniService.deleteAccount();
+        toast.success('Account deleted successfully.');
+        logout();
+        navigate('/login');
+      } catch (err) {
+        toast.error('Failed to delete account.');
+      }
+    }
   };
 
   const sections = [
@@ -183,10 +285,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <button
                       key={option}
                       type="button"
-                      onClick={() => {
-                        setDigest(option);
-                        toast.success(`Digest frequency set to ${option}.`);
-                      }}
+                      onClick={() => handleDigestChange(option)}
                       className={`rounded-xl border px-4 py-2.5 text-xs font-bold capitalize transition-all duration-200 ${digest === option
                         ? 'border-[#003366] bg-[#003366] text-white shadow-md'
                         : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003366]/30'
@@ -324,10 +423,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       <button
                         key={option}
                         type="button"
-                        onClick={() => {
-                          setDigest(option);
-                          toast.success(`Tracer digest set to ${option}.`);
-                        }}
+                        onClick={() => handleDigestChange(option)}
                         className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-left transition-all duration-200 ${digest === option
                           ? 'border-[#003366] bg-[#003366]/5'
                           : 'border-[var(--border-color)] hover:border-[#003366]/20'
@@ -360,10 +456,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                   </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      setDonationEnabled((value) => !value);
-                      toast.success(!donationEnabled ? 'Donation prompts enabled.' : 'Donation prompts paused.');
-                    }}
+                    onClick={handleDonationToggle}
                     className={`mt-4 w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-300 ${donationEnabled
                       ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                       : 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white shadow-md hover:shadow-lg'
@@ -469,9 +562,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
 
                     <button
                       type="submit"
-                      className="w-full py-3 bg-gradient-to-r from-[#003366] to-[#004d99] hover:from-[#00264d] hover:to-[#003366] text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
+                      disabled={changingPassword}
+                      className="w-full py-3 bg-gradient-to-r from-[#003366] to-[#004d99] hover:from-[#00264d] hover:to-[#003366] text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Update Password
+                      {changingPassword ? 'Updating...' : 'Update Password'}
                     </button>
                   </form>
                 </div>
@@ -491,8 +585,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <div className="space-y-3">
                       {[
                         { label: 'Password', status: 'Strong', color: 'emerald', icon: 'check_circle' },
-                        { label: 'Two-Factor Auth', status: 'Not enabled', color: 'amber', icon: 'warning' },
-                        { label: 'Last Login', status: 'Today, 09:15 AM', color: 'blue', icon: 'schedule' },
+                        { label: 'Two-Factor Auth', status: securityStatus?.twoFactorEnabled ? 'Enabled' : 'Not enabled', color: securityStatus?.twoFactorEnabled ? 'emerald' : 'amber', icon: 'warning' },
+                        { label: 'Last Login', status: securityStatus?.lastLogin ? new Date(securityStatus.lastLogin).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'Unknown', color: 'blue', icon: 'schedule' },
                         { label: 'Session', status: 'Active (1 device)', color: 'emerald', icon: 'monitor' },
                       ].map((item, idx) => (
                         <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-[var(--bg-page)]">
@@ -516,12 +610,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <h4 className="text-xs font-extrabold text-[var(--text-primary)] mb-3">Quick Actions</h4>
                     <div className="space-y-2">
                       {[
-                        { label: 'Enable Two-Factor Authentication', icon: 'lock', color: 'from-blue-500 to-indigo-600' },
-                        { label: 'Download Account Data', icon: 'download', color: 'from-emerald-500 to-teal-600' },
-                        { label: 'View Login History', icon: 'assignment', color: 'from-violet-500 to-purple-600' },
+                        { label: 'Enable Two-Factor Authentication', icon: 'lock', color: 'from-blue-500 to-indigo-600', action: handleEnable2FA },
+                        { label: 'Download Account Data', icon: 'download', color: 'from-emerald-500 to-teal-600', action: handleDownloadData },
+                        { label: 'View Login History', icon: 'assignment', color: 'from-violet-500 to-purple-600', action: handleViewLoginHistory },
                       ].map((action, idx) => (
                         <button
                           key={idx}
+                          type="button"
+                          onClick={action.action}
                           className="w-full flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 hover:shadow-sm transition-all duration-200 text-left group"
                         >
                           <div
@@ -542,7 +638,11 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                   <div className="p-5 rounded-xl border border-red-200 bg-red-50/50">
                     <h4 className="text-xs font-extrabold text-red-700 mb-2">⚠️ Danger Zone</h4>
                     <p className="text-[10px] text-red-600 mb-3">Permanently delete your account and all associated data.</p>
-                    <button className="px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-xs font-bold hover:bg-red-50 transition-all duration-200">
+                    <button 
+                      type="button"
+                      onClick={handleDeleteAccount}
+                      className="px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-xs font-bold hover:bg-red-50 transition-all duration-200"
+                    >
                       Delete Account
                     </button>
                   </div>

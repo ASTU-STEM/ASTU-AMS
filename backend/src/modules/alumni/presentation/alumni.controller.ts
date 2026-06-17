@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../../../core/utils/response.utils';
 import { updateAlumniProfileSchema, addExperienceSchema, documentRequestSchema } from './alumni.validation';
+import bcrypt from 'bcryptjs';
 
 import { PrismaAlumniProfileRepository } from '../infrastructure/repositories/PrismaAlumniProfileRepository';
 import { PrismaWorkExperienceRepository } from '../infrastructure/repositories/PrismaWorkExperienceRepository';
@@ -493,7 +494,7 @@ export class AlumniController {
   }
   static async getPreferences(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).user?.userId;
       if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
       const profile = await prisma.alumniProfile.findUnique({
@@ -507,7 +508,7 @@ export class AlumniController {
 
   static async updatePreferences(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).user?.userId;
       if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
       const profile = await prisma.alumniProfile.update({
@@ -516,6 +517,90 @@ export class AlumniController {
       });
 
       return sendSuccess(res, 'Preferences updated', profile.preferences);
+    } catch (err) { next(err); }
+  }
+
+  static async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Current password and new password are required' });
+      }
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+      }
+
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+      const isValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isValid) {
+        return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+      }
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashed }
+      });
+
+      return sendSuccess(res, 'Password changed successfully', null);
+    } catch (err) { next(err); }
+  }
+
+  // ─── Security & Account ──────────────────────────────────────────────────
+  static async getSecurityStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+      const logs = await prisma.auditLog.findMany({
+        where: { userId, action: { in: ['USER_LOGIN', 'LOGIN'] } },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+      });
+
+      return sendSuccess(res, 'Security status fetched', {
+        lastLogin: logs.length > 0 ? logs[0].createdAt : null,
+        loginHistory: logs,
+        twoFactorEnabled: false // Stubbed for now
+      });
+    } catch (err) { next(err); }
+  }
+
+  static async exportData(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+      const profile = await prisma.alumniProfile.findUnique({
+        where: { userId },
+        include: {
+          experiences: true,
+          certifications: true,
+          projects: true,
+          achievements: true,
+          user: {
+            select: { email: true, role: true, createdAt: true }
+          }
+        }
+      });
+
+      return sendSuccess(res, 'Data exported', profile);
+    } catch (err) { next(err); }
+  }
+
+  static async deleteAccount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+      await prisma.user.delete({ where: { id: userId } });
+
+      return sendSuccess(res, 'Account deleted successfully', null);
     } catch (err) { next(err); }
   }
 }

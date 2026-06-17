@@ -38,6 +38,14 @@ router.post('/mentorship-sessions', asyncHandler(AlumniController.scheduleSessio
 router.get('/preferences', asyncHandler(AlumniController.getPreferences));
 router.put('/preferences', asyncHandler(AlumniController.updatePreferences));
 
+// Change Password
+router.put('/change-password', asyncHandler(AlumniController.changePassword));
+
+// Security & Account
+router.get('/security-status', asyncHandler(AlumniController.getSecurityStatus));
+router.get('/export-data', asyncHandler(AlumniController.exportData));
+router.delete('/account', asyncHandler(AlumniController.deleteAccount));
+
 // Forum
 router.get('/forum', asyncHandler(AlumniController.getForumPosts));
 router.post('/forum', asyncHandler(AlumniController.createForumPost));

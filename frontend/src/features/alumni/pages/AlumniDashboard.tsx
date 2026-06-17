@@ -65,6 +65,7 @@ const AlumniDashboard = () => {
   const [preferences, setPreferences] = useState<AlumniPreferences | null>(null);
   const [statsData, setStatsData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0);
 
   const [selectedJobForModal, setSelectedJobForModal] = useState<JobMatch | null>(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -314,7 +315,8 @@ const AlumniDashboard = () => {
           documentsData,
           forumData,
           campaignsData,
-          preferencesData
+          preferencesData,
+          messageThreadsRes
         ] = await Promise.all([
           alumniService.getProfile().catch(() => null),
           alumniService.getDashboardStats().catch(() => null),
@@ -326,7 +328,8 @@ const AlumniDashboard = () => {
           alumniService.getMyDocuments().catch(() => []),
           alumniService.getForumPosts().catch(() => []),
           alumniService.getDonationCampaigns().catch(() => []),
-          alumniService.getPreferences().catch(() => ({}))
+          alumniService.getPreferences().catch(() => ({})),
+          alumniService.getMessageThreads().catch(() => [])
         ]);
 
         if (profileData) {
@@ -396,6 +399,12 @@ const AlumniDashboard = () => {
         if (campaignsData && Array.isArray(campaignsData)) setCampaigns(campaignsData);
         if (preferencesData) setPreferences(preferencesData as any);
         if (campaignsData && Array.isArray(campaignsData)) setCampaigns(campaignsData);
+
+        // Process message threads for unread count
+        if (messageThreadsRes && Array.isArray(messageThreadsRes)) {
+          const unreadTotal = messageThreadsRes.reduce((acc, thread) => acc + (thread.unreadCount || 0), 0);
+          setUnreadMessagesCount(unreadTotal);
+        }
       } catch (err) {
         console.error('Failed to load dashboard data', err);
       } finally {
@@ -499,7 +508,7 @@ const AlumniDashboard = () => {
 
   const commItems = [
     { id: 'documents', label: 'Documents', icon: 'description', badge: null as string | null },
-    { id: 'messages', label: 'Messages', icon: 'forum', badge: '3' },
+    { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadMessagesCount > 0 ? unreadMessagesCount.toString() : null },
     { id: 'settings', label: 'Settings', icon: 'settings', badge: null },
   ];
 

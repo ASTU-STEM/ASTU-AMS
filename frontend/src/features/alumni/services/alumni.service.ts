@@ -187,4 +187,22 @@ export const alumniService = {
   async getDocumentRequests() {
     return unwrap(await apiClient.get('/alumni/documents'));
   },
+
+  // ─── Change Password ─────────────────────────────────────────────────────
+  async changePassword(currentPassword: string, newPassword: string) {
+    return unwrap(await apiClient.put('/alumni/change-password', { currentPassword, newPassword }));
+  },
+
+  // ─── Security & Account ──────────────────────────────────────────────────
+  async getSecurityStatus() {
+    return unwrap(await apiClient.get('/alumni/security-status'));
+  },
+
+  async exportAccountData() {
+    return unwrap(await apiClient.get('/alumni/export-data'));
+  },
+
+  async deleteAccount() {
+    return unwrap(await apiClient.delete('/alumni/account'));
+  },
 };
