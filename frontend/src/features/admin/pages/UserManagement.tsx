@@ -1103,7 +1103,7 @@ export default function UserManagement() {
       </AdminModal>
 
       {activeUser && (
-        <aside className="admin-card fixed right-0 top-16 z-10 h-[calc(100vh-4rem)] w-[380px] overflow-y-auto border-l border-slate-200 p-5 shadow-[-8px_0_32px_rgba(0,0,0,0.06)] slide-in-right">
+        <aside className="admin-card fixed right-0 top-16 z-10 h-[calc(100vh-4rem)] w-full sm:w-[380px] overflow-y-auto border-l border-slate-200 p-5 shadow-[-8px_0_32px_rgba(0,0,0,0.06)] slide-in-right">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="relative">

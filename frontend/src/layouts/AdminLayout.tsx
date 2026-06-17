@@ -56,6 +56,7 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Logs' }] },
   '/admin/backup': { title: 'Backup & Security', breadcrumb: [{ label: 'Admin' }, { label: 'Backup' }] },
   '/admin/settings': { title: 'Settings', breadcrumb: [{ label: 'Admin' }, { label: 'Settings' }] },
+  '/admin/profile': { title: 'My Profile', breadcrumb: [{ label: 'Admin' }, { label: 'Profile' }] },
 };
 
 export default function AdminLayout() {
@@ -149,17 +150,14 @@ export default function AdminLayout() {
         </div>
       </div>
       <div className="my-1 h-px bg-[var(--border-color)]" />
-      <button
-        type="button"
-        onClick={() => {
-          setMenuOpen(false);
-          toast('Profile panel will be expanded in the next module.');
-        }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      <NavLink
+        to="/admin/profile"
+        onClick={() => setMenuOpen(false)}
+        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
       >
         <User className="h-4 w-4" />
         My Profile
-      </button>
+      </NavLink>
       <NavLink
         to="/admin/settings"
         onClick={() => setMenuOpen(false)}
@@ -217,7 +215,7 @@ export default function AdminLayout() {
         onLogout={handleLogout}
         isOpen={mobileSidebarOpen}
         onNavigate={() => setMobileSidebarOpen(false)}
-        collapsed={sidebarCollapsed}
+        collapsed={sidebarCollapsed && !mobileSidebarOpen}
         onToggleCollapse={toggleSidebarCollapse}
         onOpenAiAssistant={() => setAiAssistantOpen(true)}
       />
