@@ -270,45 +270,19 @@ export default function SurveyManagement() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-[14px]" style={{
-        background: 'linear-gradient(135deg, #0a1628 0%, #0d3b4f 40%, #14705a 80%, #1a8a60 100%)',
-      }}>
-        {/* Decorative circles */}
-        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/5" />
-        <div className="absolute -right-8 top-8 h-40 w-40 rounded-full bg-white/5" />
-        <div className="absolute right-24 -bottom-12 h-48 w-48 rounded-full bg-white/5" />
-
-        <div className="relative px-8 py-8">
-          <span className="mb-3 inline-block rounded-sm text-[11px] font-bold uppercase tracking-[0.25em] text-emerald-400">
-            Tracer Studies
-          </span>
-          <h1 className="mb-2 text-3xl font-bold text-white">Tracer Surveys</h1>
-          <p className="max-w-2xl text-sm leading-relaxed text-slate-300/90">
-            Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month
-            response rates and export accreditation-ready data.
-          </p>
-        </div>
-      </div>
-
-      {/* Survey Management Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#dc2626] text-sm font-bold text-white shadow-md">
-            SM
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">Survey Management</h2>
-            <p className="text-sm text-slate-500">Create, schedule, and monitor graduate tracer surveys for ABET accreditation</p>
-          </div>
-        </div>
-        <button
-          onClick={() => { resetBuilder(); setActiveTab('create'); }}
-          className="inline-flex items-center gap-2 rounded-[8px] bg-[#dc2626] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#b91c1c] transition-colors"
-        >
-          <Plus className="h-4 w-4" /> Create Survey
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Survey Management"
+        subtitle="Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month response rates and export accreditation-ready data."
+        breadcrumb={[{ label: 'Admin' }, { label: 'Surveys' }]}
+        actions={
+          <button
+            onClick={() => { resetBuilder(); setActiveTab('create'); }}
+            className="inline-flex items-center gap-2 rounded-[8px] bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition-all shadow-inner backdrop-blur-sm whitespace-nowrap"
+          >
+            <Plus className="h-4 w-4 text-[#FFCC00]" /> Create Survey
+          </button>
+        }
+      />
 
       {/* Summary Stats */}
       <div className="grid grid-cols-5 gap-4">

@@ -600,6 +600,68 @@ function EmployerPortal() {
 // ==========================================
 // 6. PORTAL 5: ROOT SYSTEM GOVERNANCE
 // ==========================================
+interface AdminPageHeroProps {
+  title: string;
+  description: string;
+  category: string;
+  icon: React.ComponentType<any>;
+}
+
+function AdminPageHero({
+  title,
+  description,
+  category,
+  icon: Icon
+}: AdminPageHeroProps) {
+  return (
+    <div className="p-6 space-y-6">
+      {/* Hero Banner styled like SurveyManagement but with ASTU Blue gradient */}
+      <div className="relative overflow-hidden rounded-[14px] shadow-sm" style={{
+        background: 'linear-gradient(135deg, #001F4D 0%, #003366 50%, #004080 100%)',
+      }}>
+        {/* Decorative circles */}
+        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -right-8 top-8 h-40 w-40 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute right-24 -bottom-12 h-48 w-48 rounded-full bg-white/5 pointer-events-none" />
+        
+        <div className="relative px-8 py-8 flex flex-col md:flex-row md:items-center justify-between gap-6 z-10">
+          <div className="space-y-2 max-w-2xl">
+            <span className="mb-2 inline-block rounded-sm text-[11px] font-bold uppercase tracking-[0.25em] text-[#FFCC00]">
+              {category}
+            </span>
+            <h1 className="mb-2 text-3xl font-bold text-white tracking-tight">{title}</h1>
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-200/90 font-medium">
+              {description}
+            </p>
+          </div>
+          <div className="flex-shrink-0 bg-white/10 border border-white/20 p-4 rounded-xl shadow-inner backdrop-blur-sm hidden sm:flex items-center justify-center">
+            <Icon className="h-8 w-8 text-[#FFCC00]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Decorative inner workspace card */}
+      <div className="bg-white rounded-[14px] border border-slate-200 p-8 shadow-sm text-center py-16 space-y-4">
+        <div className="bg-slate-50 text-[#003366] p-4 rounded-full w-fit mx-auto border border-slate-100 shadow-inner">
+          <Icon className="h-6 w-6 text-[#003366]" />
+        </div>
+        <div className="max-w-md mx-auto space-y-2">
+          <h3 className="text-lg font-bold text-slate-800">{title} Workspace</h3>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            This module is protected under the Root Admin security policies. Use this section to manage administrative data, monitor configurations, and update systems.
+          </p>
+        </div>
+        <div className="pt-2">
+          <button className="bg-[#003366] hover:bg-slate-800 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-md transition-all inline-flex items-center gap-2 hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+            Configure {title}
+            <ArrowRight className="h-3.5 w-3.5 text-[#FFCC00]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminPortal() {
   const navItems = [
     { label: "Dashboard", path: "/admin", icon: BarChart3 },
@@ -645,42 +707,42 @@ function AdminPortal() {
       <Routes>
         <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
         <Route index element={<AdminDashboard />} />
-        <Route path="/cms" element={<div className="p-6"><h2 className="text-lg font-bold">CMS/Page Builder</h2><p className="text-sm text-slate-500">Drag-and-drop page builder for content management.</p></div>} />
-        <Route path="/homepage/sections" element={<div className="p-6"><h2 className="text-lg font-bold">Dynamic Homepage Sections</h2><p className="text-sm text-slate-500">Add, remove, reorder homepage sections.</p></div>} />
-        <Route path="/homepage/theme" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Theme Customization</h2><p className="text-sm text-slate-500">Customize colors, fonts, and styling.</p></div>} />
-        <Route path="/homepage/menu" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Menu Management</h2><p className="text-sm text-slate-500">Configure navigation menu items and order.</p></div>} />
-        <Route path="/homepage/hero" element={<div className="p-6"><h2 className="text-lg font-bold">Hero Slider</h2><p className="text-sm text-slate-500">Configure hero slider images and text.</p></div>} />
-        <Route path="/homepage/banners" element={<div className="p-6"><h2 className="text-lg font-bold">Banners</h2><p className="text-sm text-slate-500">Manage homepage banners and promotions.</p></div>} />
-        <Route path="/homepage/search" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Search Management</h2><p className="text-sm text-slate-500">Configure search parameters and filters.</p></div>} />
-        <Route path="/seo" element={<div className="p-6"><h2 className="text-lg font-bold">SEO Settings</h2><p className="text-sm text-slate-500">Manage meta tags, sitemap, and SEO.</p></div>} />
-        <Route path="/popup" element={<div className="p-6"><h2 className="text-lg font-bold">Popup & Notice Management</h2><p className="text-sm text-slate-500">Create and schedule popup notifications.</p></div>} />
-        <Route path="/contact" element={<div className="p-6"><h2 className="text-lg font-bold">Contact Message Management</h2><p className="text-sm text-slate-500">View and respond to contact inquiries.</p></div>} />
-        <Route path="/faq" element={<div className="p-6"><h2 className="text-lg font-bold">FAQ Management</h2><p className="text-sm text-slate-500">Add, edit, organize FAQ entries.</p></div>} />
-        <Route path="/partners" element={<div className="p-6"><h2 className="text-lg font-bold">Partners & Sponsors</h2><p className="text-sm text-slate-500">Manage partner and sponsor profiles.</p></div>} />
-        <Route path="/advertisement" element={<div className="p-6"><h2 className="text-lg font-bold">Advertisement Banner Management</h2><p className="text-sm text-slate-500">Upload and schedule ad banners.</p></div>} />
-        <Route path="/success-stories/approval" element={<div className="p-6"><h2 className="text-lg font-bold">Success Story Approval</h2><p className="text-sm text-slate-500">Review and approve alumni stories.</p></div>} />
-        <Route path="/assets" element={<div className="p-6"><h2 className="text-lg font-bold">Digital Asset Library</h2><p className="text-sm text-slate-500">Store and organize images, documents.</p></div>} />
-        <Route path="/logs" element={<div className="p-6"><h2 className="text-lg font-bold">Activity Logs & Audit Trail</h2><p className="text-sm text-slate-500">View system activity and user actions.</p></div>} />
-        <Route path="/backup" element={<div className="p-6"><h2 className="text-lg font-bold">Backup & Restore System</h2><p className="text-sm text-slate-500">Schedule backups and restore data.</p></div>} />
-        <Route path="/templates" element={<div className="p-6"><h2 className="text-lg font-bold">Email/SMS Templates</h2><p className="text-sm text-slate-500">Create and manage communication templates.</p></div>} />
-        <Route path="/notifications" element={<div className="p-6"><h2 className="text-lg font-bold">Notification Center</h2><p className="text-sm text-slate-500">Send and track system notifications.</p></div>} />
-        <Route path="/roles" element={<div className="p-6"><h2 className="text-lg font-bold">Role & Permission Management</h2><p className="text-sm text-slate-500">Configure user roles and access levels.</p></div>} />
-        <Route path="/api" element={<div className="p-6"><h2 className="text-lg font-bold">API Management</h2><p className="text-sm text-slate-500">API keys, endpoints, and documentation.</p></div>} />
-        <Route path="/monitoring" element={<div className="p-6"><h2 className="text-lg font-bold">System Monitoring Dashboard</h2><p className="text-sm text-slate-500">Real-time system performance metrics.</p></div>} />
-        <Route path="/security" element={<div className="p-6"><h2 className="text-lg font-bold">Security Center</h2><p className="text-sm text-slate-500">Security policies and threat monitoring.</p></div>} />
-        <Route path="/login-history" element={<div className="p-6"><h2 className="text-lg font-bold">Login History</h2><p className="text-sm text-slate-500">View all user login attempts.</p></div>} />
-        <Route path="/export" element={<div className="p-6"><h2 className="text-lg font-bold">Data Export Center</h2><p className="text-sm text-slate-500">Export accreditation and analytics data.</p></div>} />
-        <Route path="/homepage" element={<div className="p-6"><h2 className="text-lg font-bold">Homepage Management</h2><p className="text-sm text-slate-500">Manage homepage content and settings.</p></div>} />
-        <Route path="/announcements" element={<div className="p-6"><h2 className="text-lg font-bold">News & Announcements</h2><p className="text-sm text-slate-500">Create and manage news posts.</p></div>} />
-        <Route path="/statistics" element={<div className="p-6"><h2 className="text-lg font-bold">Statistics</h2><p className="text-sm text-slate-500">View platform analytics and metrics.</p></div>} />
-        <Route path="/testimonials" element={<div className="p-6"><h2 className="text-lg font-bold">Testimonials</h2><p className="text-sm text-slate-500">Manage testimonials from alumni and employers.</p></div>} />
-        <Route path="/gallery" element={<div className="p-6"><h2 className="text-lg font-bold">Gallery</h2><p className="text-sm text-slate-500">Manage photo gallery and assets.</p></div>} />
-        <Route path="/events" element={<div className="p-6"><h2 className="text-lg font-bold">Events</h2><p className="text-sm text-slate-500">Manage alumni and university events.</p></div>} />
-        <Route path="/workshops" element={<div className="p-6"><h2 className="text-lg font-bold">Workshops</h2><p className="text-sm text-slate-500">Manage workshop listings and recordings.</p></div>} />
-        <Route path="/community" element={<div className="p-6"><h2 className="text-lg font-bold">Community</h2><p className="text-sm text-slate-500">Monitor and moderate community feed.</p></div>} />
-        <Route path="/users" element={<div className="p-6"><h2 className="text-lg font-bold">User Management</h2><p className="text-sm text-slate-500">Manage users, roles, and permissions.</p></div>} />
-        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">System Settings</h2><p className="text-sm text-slate-500">Configure system-wide settings.</p></div>} />
-        <Route path="/reports" element={<div className="p-6"><h2 className="text-lg font-bold">All Reports</h2><p className="text-sm text-slate-500">View and export all accreditation reports.</p></div>} />
+        <Route path="/cms" element={<AdminPageHero title="CMS / Page Builder" description="Drag-and-drop page builder for content management and layout configuration." category="Ecosystem Builder" icon={Edit} />} />
+        <Route path="/homepage/sections" element={<AdminPageHero title="Dynamic Homepage Sections" description="Add, remove, reorder, and structure components of the public landing homepage." category="Content Layout" icon={Layers} />} />
+        <Route path="/homepage/theme" element={<AdminPageHero title="Homepage Theme Customization" description="Configure color variables, typography scales, active gradients, and visual tokens." category="Branding & Styles" icon={Palette} />} />
+        <Route path="/homepage/menu" element={<AdminPageHero title="Homepage Menu Management" description="Manage primary header menus, dropdown lists, footer directories, and navigation mapping." category="Navigation Hierarchy" icon={MenuSquare} />} />
+        <Route path="/homepage/hero" element={<AdminPageHero title="Hero Slider" description="Upload high-resolution slides, control interval timings, overlays, and hero CTA actions." category="Visual Banners" icon={Image} />} />
+        <Route path="/homepage/banners" element={<AdminPageHero title="Banners" description="Position promotional notification banners and announcements on priority panels." category="Content Delivery" icon={Newspaper} />} />
+        <Route path="/homepage/search" element={<AdminPageHero title="Homepage Search Management" description="Refine algorithmic search behavior, indexable fields, and directory parameters." category="Access Optimization" icon={SearchCode} />} />
+        <Route path="/seo" element={<AdminPageHero title="SEO Settings" description="Optimize search visibility, canonical links, robots configurations, and schema tags." category="Site Performance" icon={Globe} />} />
+        <Route path="/popup" element={<AdminPageHero title="Popup & Notice Management" description="Deploy emergency bulletins, scheduled modals, and overlay communications." category="Audience Engagement" icon={MessageCircle} />} />
+        <Route path="/contact" element={<AdminPageHero title="Contact Message Management" description="Review contact submissions, distribute queries to specific departments, and track responses." category="Communications Hub" icon={Mail} />} />
+        <Route path="/faq" element={<AdminPageHero title="FAQ Management" description="Structure frequently asked questions, categorize queries, and manage user guides." category="Support Infrastructure" icon={FileText} />} />
+        <Route path="/partners" element={<AdminPageHero title="Partners & Sponsors" description="Verify sponsorship logos, active links, partnerships tiers, and corporate highlights." category="Relations Directory" icon={Handshake} />} />
+        <Route path="/advertisement" element={<AdminPageHero title="Advertisement Banner Management" description="Review placement slots, dimensions, impression logs, and target click-through paths." category="Marketing & Ads" icon={Share2} />} />
+        <Route path="/success-stories/approval" element={<AdminPageHero title="Success Story Approval" description="Moderate outstanding student spotlight requests, career highlights, and publications." category="Alumni Spotlights" icon={CheckCircle} />} />
+        <Route path="/assets" element={<AdminPageHero title="Digital Asset Library" description="Access uploaded documents, verification proofs, profile pictures, and database files." category="Secure Media Hub" icon={HardDrive} />} />
+        <Route path="/logs" element={<AdminPageHero title="Activity Logs & Audit Trail" description="Review detailed administrative login trials, API calls, and resource mutation events." category="Security & Compliance" icon={Activity} />} />
+        <Route path="/backup" element={<AdminPageHero title="Backup & Restore System" description="Schedule baseline automated backups, review storage status, and perform rollback routines." category="Ecosystem Recovery" icon={Archive} />} />
+        <Route path="/templates" element={<AdminPageHero title="Email / SMS Templates" description="Edit automated transactional templates, system notifications, and layout schemas." category="Branding & Mail" icon={FileCode} />} />
+        <Route path="/notifications" element={<AdminPageHero title="Notification Center" description="Dispatch global broadcast bulletins, customize targeted SMS segments, and review open logs." category="Alerts Center" icon={Bell} />} />
+        <Route path="/roles" element={<AdminPageHero title="Role & Permission Management" description="Govern security groups, define scope bindings, and control RBAC settings." category="Identity Management" icon={Key} />} />
+        <Route path="/api" element={<AdminPageHero title="API Management" description="Review token usage metrics, rate limit metrics, key permissions, and system webhooks." category="System Integration" icon={Zap} />} />
+        <Route path="/monitoring" element={<AdminPageHero title="System Monitoring Dashboard" description="Observe CPU/memory utilization, request success ratios, and endpoint timings in real time." category="Performance Tuning" icon={Monitor} />} />
+        <Route path="/security" element={<AdminPageHero title="Security Center" description="Inspect firewalls, brute force protection layers, and dynamic block tables." category="Platform Security" icon={Shield} />} />
+        <Route path="/login-history" element={<AdminPageHero title="Login History" description="Audit user session details, geographical logs, IP addresses, and status details." category="Identity Logs" icon={LogIn} />} />
+        <Route path="/export" element={<AdminPageHero title="Data Export Center" description="Generate accreditation datasets, aggregate reports, and custom spreadsheet packages." category="Analytics Hub" icon={Download} />} />
+        <Route path="/homepage" element={<AdminPageHero title="Homepage Management" description="Configure landing layout hierarchies, footer widgets, and default settings." category="Ecosystem Builder" icon={Newspaper} />} />
+        <Route path="/announcements" element={<AdminPageHero title="News & Announcements" description="Draft public updates, customize highlights, and map target feeds." category="Communications" icon={Newspaper} />} />
+        <Route path="/statistics" element={<AdminPageHero title="Statistics" description="Review aggregate dashboard metrics, active cohorts, and registry volumes." category="Analytics" icon={BarChart} />} />
+        <Route path="/testimonials" element={<AdminPageHero title="Testimonials" description="Configure verified student testimonials, company highlights, and reviews." category="Alumni Spotlights" icon={Mic} />} />
+        <Route path="/gallery" element={<AdminPageHero title="Gallery" description="Manage campus highlights, graduation albums, and alumni directories." category="Media Hub" icon={GalleryHorizontal} />} />
+        <Route path="/events" element={<AdminPageHero title="Events" description="Schedule professional webinars, graduation events, and company meets." category="Campus Calendars" icon={Calendar} />} />
+        <Route path="/workshops" element={<AdminPageHero title="Workshops" description="Coordinate technical bootcamps, schedule workshops, and publish video resources." category="Visual Media" icon={Video} />} />
+        <Route path="/community" element={<AdminPageHero title="Community" description="Moderate shared feed elements, community tags, and verification logs." category="Moderation" icon={Users} />} />
+        <Route path="/users" element={<AdminPageHero title="User Management" description="Process registrar lists, corporate validations, and update active state flags." category="Identity Hub" icon={UserCog} />} />
+        <Route path="/settings" element={<AdminPageHero title="System Settings" description="Update portal metadata, adjust default timeouts, and govern mail protocols." category="Platform Governance" icon={Settings} />} />
+        <Route path="/reports" element={<AdminPageHero title="All Reports" description="Compile comprehensive tracer data, quality reviews, and curriculum alignments." category="Compliance & Audits" icon={FileBarChart2} />} />
       </Routes>
     </DashboardLayout>
   );

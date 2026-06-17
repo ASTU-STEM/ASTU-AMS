@@ -58,6 +58,7 @@ export interface AdminPageHeaderProps {
   breadcrumbs?: AdminBreadcrumbItem[];
   actions?: ReactNode;
   className?: string;
+  children?: ReactNode;
 }
 
 export interface AdminDataTableProps<T extends Record<string, unknown>> {

@@ -233,20 +233,27 @@ export default function AdminLayout() {
           }}
         >
           <div className="flex min-w-0 items-center gap-3">
+            {/* Desktop Hamburger / Collapse Toggle */}
+            <button
+              type="button"
+              onClick={toggleSidebarCollapse}
+              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)] lg:inline-flex transition-all duration-200 active:scale-95"
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <Menu className={`h-5 w-5 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-90' : 'rotate-0'}`} />
+            </button>
+
+            {/* Mobile Hamburger / Toggle Open Drawer */}
             <button
               type="button"
               onClick={() => setMobileSidebarOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)] lg:hidden transition-all duration-200 active:scale-95"
               aria-label="Open navigation"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="min-w-0 space-y-0.5">
-              <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
-                <span>Admin</span>
-                <span>/</span>
-                <span>{meta.breadcrumb[meta.breadcrumb.length - 1]?.label ?? 'Dashboard'}</span>
-              </div>
+            <div className="min-w-0">
               <h1 className="truncate text-[16px] font-semibold tracking-tight text-[var(--text-primary)]">{meta.title}</h1>
             </div>
           </div>
