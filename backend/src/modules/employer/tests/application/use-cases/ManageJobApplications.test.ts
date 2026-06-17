@@ -5,6 +5,23 @@ import { IEmployerProfileRepository } from '../../../application/ports/IEmployer
 import { JobNotFoundError, UnauthorizedEmployerActionError, JobApplicationError } from '../../../domain/errors/EmployerErrors';
 import { Job, JobApplication, EmployerProfile } from '../../../domain/entities/Employer';
 
+jest.mock('../../../../../core/config/db', () => ({
+  __esModule: true,
+  default: {
+    alumniProfile: { findUnique: jest.fn().mockResolvedValue({ id: 'alumni1', departmentId: 'dept1', user: { email: 'test@example.com' } }) },
+    notification: { create: jest.fn() },
+    hiringEvent: { create: jest.fn() },
+    jobApplication: { update: jest.fn() },
+    $transaction: jest.fn().mockImplementation(async (cb) => {
+      return cb({
+        jobApplication: { update: jest.fn() },
+        alumniProfile: { update: jest.fn() },
+        hiringEvent: { create: jest.fn() }
+      });
+    })
+  }
+}));
+
 describe('ManageJobApplications Use Cases', () => {
   let mockAppRepo: jest.Mocked<IJobApplicationRepository>;
   let mockJobRepo: jest.Mocked<IJobRepository>;
