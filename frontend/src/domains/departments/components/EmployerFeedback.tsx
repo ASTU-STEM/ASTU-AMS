@@ -12,18 +12,6 @@ import { EmployerInsightsPanel } from './EmployerInsightsPanel';
 import { EmployerFeedbackTable } from './EmployerFeedbackTable';
 import { EmployerFeedbackExport } from './EmployerFeedbackExport';
 
-// Mock data
-import {
-  mockEmployerFeedbackKPIMetrics,
-  mockSatisfactionMetrics,
-  mockCompetencyScores,
-  mockIndustryDemandSkills,
-  mockEmployerRecommendations,
-  mockEmployerEngagement,
-  mockEmployerInsights,
-  mockEmployerFeedbackRecords
-} from '../services/mockEmployerFeedbackData';
-
 interface EmployerFeedbackProps {
   data?: any;
   darkMode?: boolean;
@@ -31,15 +19,24 @@ interface EmployerFeedbackProps {
 
 export const EmployerFeedback: React.FC<EmployerFeedbackProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<EmployerFeedbackFilterState>({
-    department: '',
-    graduationBatch: '',
-    industry: '',
-    employer: '',
-    employmentType: '',
-    dateRange: '',
-    ratingRange: ''
+    department: 'Computer Science',
+    graduationBatch: '2024',
+    industry: 'All',
+    employer: 'All',
+    employmentType: 'All',
+    dateRange: 'All',
+    ratingRange: 'All',
   });
-  const [showExport, setShowExport] = useState(false);
+
+  // Use data from props or provide empty defaults
+  const employerFeedbackKPIMetrics = data?.kpiMetrics || [];
+  const satisfactionMetrics = data?.satisfactionMetrics || [];
+  const competencyScores = data?.competencyScores || [];
+  const industryDemandSkills = data?.industryDemandSkills || [];
+  const employerRecommendations = data?.recommendations || [];
+  const employerEngagement = data?.engagement || [];
+  const employerInsights = data?.insights || [];
+  const employerFeedbackRecords = data?.records || [];
 
   const handleFilterChange = (newFilters: EmployerFeedbackFilterState) => {
     setFilters(newFilters);
@@ -50,7 +47,7 @@ export const EmployerFeedback: React.FC<EmployerFeedbackProps> = ({ data, darkMo
   };
 
   const handleExport = () => {
-    setShowExport(true);
+    console.log('Exporting employer feedback data...');
   };
 
   const handleExportOption = (option: EmployerExportOption) => {
@@ -71,7 +68,7 @@ export const EmployerFeedback: React.FC<EmployerFeedbackProps> = ({ data, darkMo
             <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Employer Feedback & Industry Intelligence</h2>
             <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Industry insights and employer evaluations of ASTU graduates</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
             <button
               onClick={handleRefresh}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
@@ -139,35 +136,123 @@ export const EmployerFeedback: React.FC<EmployerFeedbackProps> = ({ data, darkMo
       </div>
 
       {/* KPI Section */}
-      <TracerKPI metrics={mockEmployerFeedbackKPIMetrics} />
+      {employerFeedbackKPIMetrics.length > 0 ? (
+        <TracerKPI metrics={employerFeedbackKPIMetrics} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No KPI metrics available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Employer Satisfaction Analytics */}
-      <EmployerSatisfactionAnalytics data={mockSatisfactionMetrics} />
+      {satisfactionMetrics.length > 0 ? (
+        <EmployerSatisfactionAnalytics data={satisfactionMetrics} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No satisfaction metrics available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Competency Assessment */}
-      <CompetencyAssessment data={mockCompetencyScores} />
+      {competencyScores.length > 0 ? (
+        <CompetencyAssessment data={competencyScores} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No competency scores available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Industry Demand Analytics */}
-      <IndustryDemandAnalytics data={mockIndustryDemandSkills} />
+      {industryDemandSkills.length > 0 ? (
+        <IndustryDemandAnalytics data={industryDemandSkills} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No industry demand data available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Employer Recommendations */}
-      <EmployerRecommendations data={mockEmployerRecommendations} />
+      {employerRecommendations.length > 0 ? (
+        <EmployerRecommendations data={employerRecommendations} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No employer recommendations available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Employer Engagement Analytics */}
-      <EmployerEngagementAnalytics data={mockEmployerEngagement} />
+      {employerEngagement.length > 0 ? (
+        <EmployerEngagementAnalytics data={employerEngagement} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No employer engagement data available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Executive Insights Panel */}
-      <EmployerInsightsPanel insights={mockEmployerInsights} />
+      {employerInsights.length > 0 ? (
+        <EmployerInsightsPanel insights={employerInsights} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No employer insights available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
+      )}
 
       {/* Employer Feedback Table */}
-      <EmployerFeedbackTable records={mockEmployerFeedbackRecords} />
-
-      {/* Export Modal */}
-      {showExport && (
-        <EmployerFeedbackExport
-          onExport={handleExportOption}
-          onClose={() => setShowExport(false)}
-        />
+      {employerFeedbackRecords.length > 0 ? (
+        <EmployerFeedbackTable records={employerFeedbackRecords} />
+      ) : (
+        <div className={`rounded-2xl p-8 border border-dashed ${darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50/50 border-gray-300'}`}>
+          <div className="flex flex-col items-center justify-center text-center py-6">
+            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center mb-4 ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm border border-gray-100'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={darkMode ? 'text-slate-400' : 'text-blue-500'}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </div>
+            <h3 className={`text-base font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No employer feedback records available</h3>
+            <p className={`text-xs max-w-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Metrics and analytics for this section are currently being aggregated. Please check back later.</p>
+          </div>
+        </div>
       )}
     </div>
   );

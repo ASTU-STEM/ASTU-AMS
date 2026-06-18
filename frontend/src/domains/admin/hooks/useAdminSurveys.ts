@@ -11,26 +11,32 @@ export interface AdminSurveyRecord {
 export default function useAdminSurveys() {
   const [data, setData] = useState<AdminSurveyRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchSurveys = useCallback(async () => {
     try {
       setIsLoading(true);
-      const surveys = await adminApi.listSurveys();
-      const mapped = (surveys ?? []).map((survey: any) => ({
+      setError(null);
+
+      const response = await adminApi.listSurveys();
+
+      // Transform API response to match AdminSurveyRecord interface
+      const transformedData = response.map((survey: any) => ({
         id: survey.id,
-        title: survey.name ?? survey.title ?? '',
-        completionRate: survey.completion ?? 0,
+        title: survey.title || survey.name,
+        completionRate: survey.completionRate || survey.completion || 0,
         status:
           survey.status === 'Active'
-            ? 'Open' as const
+            ? 'Open'
             : survey.status === 'Closed'
-              ? 'Closed' as const
-              : 'Draft' as const,
+              ? 'Closed'
+              : 'Draft',
       }));
-      setData(mapped);
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to fetch surveys');
+
+      setData(transformedData);
+    } catch (err) {
+      console.error('Error fetching surveys:', err);
+      setError(err as Error);
     } finally {
       setIsLoading(false);
     }
@@ -40,5 +46,10 @@ export default function useAdminSurveys() {
     fetchSurveys();
   }, [fetchSurveys]);
 
-  return { data, isLoading, error, refetch: fetchSurveys };
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: fetchSurveys,
+  };
 }

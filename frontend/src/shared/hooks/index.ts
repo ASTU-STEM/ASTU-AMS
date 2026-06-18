@@ -109,7 +109,7 @@ export function useAsync<T>(asyncFn: () => Promise<T>, deps: unknown[] = []) {
       });
 
     return () => { isMounted = false; };
-     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   return { data, isLoading, error };

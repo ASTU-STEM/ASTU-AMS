@@ -139,30 +139,11 @@ export const NEXT_STEPS: NextStep[] = [
 ];
 
 export const CHART_DATA = {
-  employmentTrend: [
-    { year: '2020', rate: 72 },
-    { year: '2021', rate: 76 },
-    { year: '2022', rate: 79 },
-    { year: '2023', rate: 83 },
-    { year: '2024', rate: 87 },
-    { year: '2025', rate: 91 },
-  ],
-  skillsDistribution: [
-    { name: 'Software Engineering', value: 340 },
-    { name: 'Data Science', value: 180 },
-    { name: 'DevOps & Cloud', value: 120 },
-    { name: 'Electrical Eng.', value: 95 },
-    { name: 'Civil Eng.', value: 75 },
-  ],
+  employmentTrend: [],
+  skillsDistribution: [],
 };
 
-export const ACTIVITY_ENTRIES = [
-  { type: 'job', title: 'New job match: Senior React Developer', description: 'Chapa Financial Technologies posted a role matching your profile.' },
-  { type: 'survey', title: 'Tracer Survey reminder', description: '12-month tracer survey is due by June 30, 2026.' },
-  { type: 'event', title: 'ASTU Alumni Meetup 2026', description: 'Annual networking event at ASTU Main Campus on July 15.' },
-  { type: 'document', title: 'Transcript request approved', description: 'Your official transcript has been digitally signed.' },
-  { type: 'message', title: 'Message from HR Manager', description: 'Hilina Sileshi sent you a message about the developer opening.' },
-];
+export const ACTIVITY_ENTRIES = [];
 
 export const SALARY_OPTIONS = [
   'Under 15,000 ETB',

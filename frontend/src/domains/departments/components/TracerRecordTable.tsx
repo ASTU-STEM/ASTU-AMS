@@ -78,7 +78,7 @@ export const TracerRecordTable: React.FC<TracerRecordTableProps> = ({ records, d
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Tracer Records</h3>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
             <div className="relative">
               <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`} />
               <input
@@ -154,7 +154,7 @@ export const TracerRecordTable: React.FC<TracerRecordTableProps> = ({ records, d
                 <td className={`px-6 py-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.surveyDate}</td>
                 <td className="px-6 py-4">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    record.employmentStatus === 'employed' ? 'bg-emerald-100 text-emerald-800' :
+                    record.employmentStatus === 'employed' ? 'bg-blue-100 text-blue-900' :
                     record.employmentStatus === 'self-employed' ? 'bg-blue-100 text-blue-800' :
                     record.employmentStatus === 'unemployed' ? 'bg-red-100 text-red-800' :
                     'bg-purple-100 text-purple-800'

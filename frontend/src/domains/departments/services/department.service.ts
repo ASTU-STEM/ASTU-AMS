@@ -1,7 +1,6 @@
 // Department Head Portal Service Layer
 // All data fetching should pass through this layer
 
-import { get, post } from '../../../shared/services/api';
 import {
   DepartmentOverview,
   EmploymentData,
@@ -13,52 +12,105 @@ import {
   DepartmentFilterState,
   ExportReport
 } from '../types/department.types';
-
-const API_BASE = '/department';
+import { adminApi } from '../../admin/api/adminApi';
 
 export const departmentService = {
+  // Overview metrics
   async getOverview(filters?: DepartmentFilterState): Promise<DepartmentOverview> {
-    const response = await post<DepartmentOverview>(`${API_BASE}/overview`, filters);
-    return response;
+    try {
+      const response = await adminApi.getDepartmentOverview(filters);
+      return response || {} as DepartmentOverview;
+    } catch (error) {
+      console.error('Failed to fetch department overview:', error);
+      return {} as DepartmentOverview;
+    }
   },
 
+  // Employment analytics
   async getEmploymentData(filters?: DepartmentFilterState): Promise<EmploymentData> {
-    const response = await post<EmploymentData>(`${API_BASE}/employment`, filters);
-    return response;
+    try {
+      const response = await adminApi.getEmploymentData(filters);
+      return response || {} as EmploymentData;
+    } catch (error) {
+      console.error('Failed to fetch employment data:', error);
+      return {} as EmploymentData;
+    }
   },
 
+  // Employer feedback
   async getEmployerFeedback(filters?: DepartmentFilterState): Promise<EmployerFeedbackData> {
-    const response = await post<EmployerFeedbackData>(`${API_BASE}/employer-feedback`, filters);
-    return response;
+    try {
+      const response = await adminApi.getEmployerFeedback(filters);
+      return response || {} as EmployerFeedbackData;
+    } catch (error) {
+      console.error('Failed to fetch employer feedback:', error);
+      return {} as EmployerFeedbackData;
+    }
   },
 
+  // Skill gap analysis
   async getSkillGapData(filters?: DepartmentFilterState): Promise<SkillGapData> {
-    const response = await post<SkillGapData>(`${API_BASE}/skill-gap`, filters);
-    return response;
+    try {
+      const response = await adminApi.getSkillGapData(filters);
+      return response || {} as SkillGapData;
+    } catch (error) {
+      console.error('Failed to fetch skill gap data:', error);
+      return {} as SkillGapData;
+    }
   },
 
+  // Tracer survey data
   async getTracerSurveyData(filters?: DepartmentFilterState): Promise<TracerSurveyData> {
-    const response = await post<TracerSurveyData>(`${API_BASE}/tracer-surveys`, filters);
-    return response;
+    try {
+      const response = await adminApi.getTracerSurveyData(filters);
+      return response || {} as TracerSurveyData;
+    } catch (error) {
+      console.error('Failed to fetch tracer survey data:', error);
+      return {} as TracerSurveyData;
+    }
   },
 
+  // Curriculum insights
   async getCurriculumInsights(filters?: DepartmentFilterState): Promise<CurriculumInsight> {
-    const response = await post<CurriculumInsight>(`${API_BASE}/curriculum`, filters);
-    return response;
+    try {
+      const response = await adminApi.getCurriculumInsights(filters);
+      return response || {} as CurriculumInsight;
+    } catch (error) {
+      console.error('Failed to fetch curriculum insights:', error);
+      return {} as CurriculumInsight;
+    }
   },
 
+  // Accreditation reports
   async getAccreditationReports(): Promise<AccreditationReport[]> {
-    const response = await get<AccreditationReport[]>(`${API_BASE}/accreditation-reports`);
-    return response;
+    try {
+      const response = await adminApi.getAccreditationReports();
+      return response || [];
+    } catch (error) {
+      console.error('Failed to fetch accreditation reports:', error);
+      return [];
+    }
   },
 
+  // Export reports
   async getExportReports(): Promise<ExportReport[]> {
-    const response = await get<ExportReport[]>(`${API_BASE}/export-reports`);
-    return response;
+    try {
+      const response = await adminApi.getExportReports();
+      return response || [];
+    } catch (error) {
+      console.error('Failed to fetch export reports:', error);
+      return [];
+    }
   },
 
+  // Generate/export report
   async generateReport(reportId: string, format: 'pdf' | 'excel'): Promise<Blob> {
-    const response = await get<Blob>(`${API_BASE}/export/${reportId}?format=${format}`);
-    return response;
+    try {
+      const response = await adminApi.generateReport(reportId, format);
+      return response || new Blob();
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+      return new Blob();
+    }
   }
 };

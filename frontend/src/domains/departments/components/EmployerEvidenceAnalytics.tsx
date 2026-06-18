@@ -11,7 +11,7 @@ export const EmployerEvidenceAnalytics: React.FC<EmployerEvidenceAnalyticsProps>
     { label: 'Employer Response Rate', value: data.employerResponseRate, color: 'astu-green' },
     { label: 'Satisfaction Scores', value: data.satisfactionScores, color: 'astu-navy' },
     { label: 'Competency Ratings', value: data.competencyRatings, color: 'astu-green' },
-    { label: 'Industry Demand Trends', value: data.industryDemandTrends, color: 'blue-600' },
+    { label: 'Industry Demand Trends', value: data.industryDemandTrends, color: 'astu-navy' },
     { label: 'Recommendations Frequency', value: data.recommendationsFrequency, color: 'purple-600' },
     { label: 'Repeat Employer Engagement', value: data.repeatEmployerEngagement, color: 'orange-600' }
   ];

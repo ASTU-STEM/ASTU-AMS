@@ -2,39 +2,40 @@ import { useState, useEffect } from 'react';
 import { adminApi } from '../api/adminApi';
 
 export default function useAdminAnalytics() {
-  const [data, setData] = useState<any>({
-    employmentRate: [],
-    surveyCompletion: [],
-    departmentBreakdown: [],
-    hiringTrend: [],
-    skillGaps: [],
-  });
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchAnalyticsData() {
       try {
         setIsLoading(true);
-        const [overview, analytics] = await Promise.all([
-          adminApi.getDashboardOverview(),
-          adminApi.getAnalyticsOverview(),
-        ]);
-        setData({
-          employmentRate: overview?.employmentRateByDepartment ?? [],
-          surveyCompletion: overview?.surveyCompletion ?? [],
-          departmentBreakdown: analytics?.departmentYearTable ?? [],
-          hiringTrend: analytics?.timeToHireTrend ?? [],
-          skillGaps: analytics?.skillGapTop10 ?? [],
-        });
-      } catch (err: any) {
-        setError(err.message ?? 'Failed to fetch analytics');
+        setError(null);
+
+        const response = await adminApi.getDashboardOverview();
+        if (response && response.success && response.data) {
+          setData(response.data);
+        } else if (response && response.overallEmployment) {
+          // Direct payload fallback
+          setData(response);
+        } else {
+          setData(null);
+        }
+      } catch (err) {
+        console.error('Error fetching analytics data:', err);
+        setError(err as Error);
       } finally {
         setIsLoading(false);
       }
-    };
-    fetchData();
+    }
+
+    fetchAnalyticsData();
   }, []);
 
-  return { data, isLoading, error };
+  return {
+    data,
+    isLoading,
+    error,
+  };
 }
+

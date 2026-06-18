@@ -5,7 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
 import TelebirrDonationModal from '../../../shared/components/TelebirrDonationModal';
-import { AiAssistant } from '../../ai/components/AiAssistant';
+import AiAssistant from '../../../shared/components/AiAssistant';
 import { surveyService } from '../../surveys/services/survey.service';
 import { notificationService } from '../../notifications/services/notification.service';
 
@@ -290,7 +290,7 @@ const AlumniDashboard = () => {
   const menu = (
     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       <div className="px-3 py-3">
-        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile.fullName}</div>
+        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile?.fullName || 'Alumni User'}</div>
         <div className="mt-1">
           <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">Alumni</span>
         </div>
@@ -557,10 +557,10 @@ const AlumniDashboard = () => {
                 className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
                 style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#003580] to-[#004d99] text-xs font-semibold text-white shadow-sm">
-                  {profile.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AU'}
+                  {profile?.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AU'}
                 </div>
                 <div className="hidden text-left sm:block">
-                  <div className="text-sm font-medium text-[var(--text-primary)]">{profile.fullName}</div>
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{profile?.fullName || 'Alumni User'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">Alumni</div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-slate-400" />

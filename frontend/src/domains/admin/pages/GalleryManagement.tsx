@@ -15,58 +15,49 @@ import {
   Upload,
   X,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
-import AdminPageHeader from '../components/AdminPageHeader';
-
-type GalleryStatus = 'Approved' | 'Pending Review' | 'Rejected';
+import { useCmsListSection } from '../hooks/useCmsSection';
+import { CmsSkeleton, CmsError } from '../components/CmsLoadingState';
+import { fetchGalleryItems, approveGalleryItem, rejectGalleryItem, deleteGalleryItem } from '../services/cmsService';
+import type { GalleryMediaItem, GalleryStatus } from '../services/cmsService';
 
 interface Album {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
-  tone: string;
-  bg: string;
-}
-
-interface MediaItem {
-  id: string;
-  title: string;
-  type: 'Photo' | 'Video';
-  album: string;
-  status: GalleryStatus;
-  uploadedBy: string;
-  date: string;
+  color: string;
+  glow: string;
 }
 
 const albums: Album[] = [
-  { name: 'Event Gallery', icon: Image, tone: 'text-[#003580]', bg: 'bg-[#003580]/10' },
-  { name: 'Workshop Gallery', icon: Film, tone: 'text-[#1D9E75]', bg: 'bg-[#1D9E75]/10' },
-  { name: 'Graduation Gallery', icon: GraduationCap, tone: 'text-[#E8A020]', bg: 'bg-[#E8A020]/10' },
-  { name: 'Campus Gallery', icon: ImagePlus, tone: 'text-violet-600', bg: 'bg-violet-500/10' },
-  { name: 'Research Gallery', icon: Microscope, tone: 'text-cyan-700', bg: 'bg-cyan-500/10' },
-];
-
-const initialMedia: MediaItem[] = [
-  { id: 'M-001', title: 'AI Workshop Opening Session', type: 'Video', album: 'Workshop Gallery', status: 'Pending Review', uploadedBy: 'CSE Department', date: '2 days ago' },
-  { id: 'M-002', title: '2026 Graduation Main Stage', type: 'Photo', album: 'Graduation Gallery', status: 'Approved', uploadedBy: 'Registrar Office', date: '1 week ago' },
-  { id: 'M-003', title: 'Research Expo Robotics Booth', type: 'Photo', album: 'Research Gallery', status: 'Approved', uploadedBy: 'Research Directorate', date: '3 days ago' },
-  { id: 'M-004', title: 'Alumni Career Day Panel', type: 'Video', album: 'Event Gallery', status: 'Pending Review', uploadedBy: 'Alumni Office', date: '5 hours ago' },
-  { id: 'M-005', title: 'Campus Library Renovation', type: 'Photo', album: 'Campus Gallery', status: 'Rejected', uploadedBy: 'Public Relations', date: '1 day ago' },
-  { id: 'M-006', title: 'Engineering Fair 2026', type: 'Photo', album: 'Event Gallery', status: 'Approved', uploadedBy: 'Engineering Faculty', date: '2 weeks ago' },
-  { id: 'M-007', title: 'Cloud Computing Workshop', type: 'Video', album: 'Workshop Gallery', status: 'Pending Review', uploadedBy: 'ICT Directorate', date: '30 min ago' },
-  { id: 'M-008', title: 'Campus Aerial Drone Footage', type: 'Video', album: 'Campus Gallery', status: 'Approved', uploadedBy: 'Marketing Team', date: '1 month ago' },
+  { name: 'Event Gallery', icon: Image, color: '#6382ff', glow: 'rgba(99,130,255,0.2)' },
+  { name: 'Workshop Gallery', icon: Film, color: '#34d399', glow: 'rgba(52,211,153,0.2)' },
+  { name: 'Graduation Gallery', icon: GraduationCap, color: '#fbbf24', glow: 'rgba(251,191,36,0.2)' },
+  { name: 'Campus Gallery', icon: ImagePlus, color: '#a78bfa', glow: 'rgba(167,139,250,0.2)' },
+  { name: 'Research Gallery', icon: Microscope, color: '#22d3ee', glow: 'rgba(34,211,238,0.2)' },
 ];
 
 const statusClasses: Record<GalleryStatus, string> = {
-  Approved: 'border-[#1D9E75]/20 bg-[#1D9E75]/10 text-[#1D9E75]',
-  'Pending Review': 'border-[#E8A020]/20 bg-[#E8A020]/10 text-[#B87900]',
-  Rejected: 'border-[#E24B4A]/20 bg-[#E24B4A]/10 text-[#E24B4A]',
+  Approved: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400',
+  'Pending Review': 'border-amber-500/25 bg-amber-500/10 text-amber-400',
+  Rejected: 'border-rose-500/25 bg-rose-500/10 text-rose-400',
 };
 
 export default function GalleryManagement() {
-  const [media, setMedia] = useState<MediaItem[]>(initialMedia);
+  // Integration-ready: uses useCmsListSection with cmsService stubs
+  // To connect to backend, update fetchGalleryItems/approveGalleryItem/rejectGalleryItem/deleteGalleryItem in cmsService.ts
+  const {
+    items: media,
+    isLoading,
+    error,
+    refetch,
+    update: updateMedia,
+    remove: removeMedia,
+  } = useCmsListSection<GalleryMediaItem>(fetchGalleryItems, {
+    deleteFn: deleteGalleryItem,
+  });
+
   const [activeAlbum, setActiveAlbum] = useState('Event Gallery');
   const [search, setSearch] = useState('');
   const [selectedTab, setSelectedTab] = useState<'all' | GalleryStatus>('all');
@@ -76,12 +67,8 @@ export default function GalleryManagement() {
 
   const filteredMedia = useMemo(() => {
     let items = media.filter(m => m.album === activeAlbum);
-    if (selectedTab !== 'all') {
-      items = items.filter(m => m.status === selectedTab);
-    }
-    if (search.trim()) {
-      items = items.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
-    }
+    if (selectedTab !== 'all') items = items.filter(m => m.status === selectedTab);
+    if (search.trim()) items = items.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
     return items;
   }, [media, activeAlbum, selectedTab, search]);
 
@@ -95,31 +82,36 @@ export default function GalleryManagement() {
     };
   }, [media, activeAlbum]);
 
-  const changeStatus = useCallback((id: string, newStatus: GalleryStatus) => {
-    setMedia(prev => prev.map(m => m.id === id ? { ...m, status: newStatus } : m));
+  const changeStatus = useCallback(async (id: string, newStatus: GalleryStatus) => {
     const item = media.find(m => m.id === id);
+    updateMedia(id, { status: newStatus });
+    // TODO: wire to approveGalleryItem / rejectGalleryItem in cmsService.ts
+    if (newStatus === 'Approved') await approveGalleryItem(id);
+    else if (newStatus === 'Rejected') await rejectGalleryItem(id);
     toast.success(`"${item?.title}" → ${newStatus}`);
-  }, [media]);
+  }, [media, updateMedia]);
 
-  const deleteMedia = useCallback((id: string) => {
+  const handleDelete = useCallback((id: string) => {
     const item = media.find(m => m.id === id);
-    setMedia(prev => prev.filter(m => m.id !== id));
-    toast.success(`"${item?.title}" deleted`);
-  }, [media]);
+    removeMedia(id, item?.title);
+  }, [media, removeMedia]);
 
   const createAlbum = useCallback(() => {
     if (!newAlbumName.trim()) { toast.error('Album name is required'); return; }
     toast.success(`Album "${newAlbumName.trim()}" created`);
-    setNewAlbumName('');
-    setShowCreateAlbum(false);
+    // TODO: Replace with: await adminApi.createAlbum({ name: newAlbumName }) → POST /api/cms/gallery/albums
+    setNewAlbumName(''); setShowCreateAlbum(false);
   }, [newAlbumName]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
+    e.preventDefault(); setDragging(false);
     const files = Array.from(e.dataTransfer.files);
     toast.success(`${files.length} file(s) uploaded to ${activeAlbum}`);
+    // TODO: Replace with: await adminApi.uploadMedia(files, activeAlbum) → POST /api/cms/gallery/upload
   }, [activeAlbum]);
+
+  if (isLoading) return <CmsSkeleton rows={6} />;
+  if (error) return <CmsError message={error} onRetry={refetch} />;
 
   const tabs = [
     { key: 'all' as const, label: 'All', count: albumStats.total },
@@ -128,23 +120,65 @@ export default function GalleryManagement() {
     { key: 'Rejected' as const, label: 'Rejected', count: albumStats.rejected },
   ];
 
+  const activeAlbumData = albums.find(a => a.name === activeAlbum);
+
   return (
     <div className="space-y-6">
       <style>{`
-        @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-up { animation: fade-up 0.35s ease-out both; }
+        @keyframes gm-fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .gm-fade-up { animation: gm-fade-up 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+        .gm-hover { transition: all 0.2s cubic-bezier(0.16,1,0.3,1); }
+        .gm-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,53,128,0.12); }
+        .dark .gm-hover:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+        .gm-input { background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; border-radius: 10px; padding: 10px 14px; font-size: 13px; outline: none; transition: border-color 0.2s; width: 100%; }
+        .dark .gm-input { background: rgba(30,35,55,0.7); border: 1px solid rgba(255,255,255,0.08); color: #e2e8f0; }
+        .gm-input:focus { border-color: #003580; box-shadow: 0 0 0 3px rgba(0,53,128,0.1); }
+        .dark .gm-input:focus { border-color: rgba(99,130,255,0.5); box-shadow: 0 0 0 3px rgba(99,130,255,0.1); }
+        .gm-input::placeholder { color: #94a3b8; }
+        .dark .gm-input::placeholder { color: rgba(148,163,184,0.5); }
       `}</style>
 
-      <AdminPageHeader
-        title="Gallery Management"
-        subtitle="Upload photos and videos, create albums, organize galleries, and approve submitted media."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Gallery' }]}
-        actions={<AdminBadge variant="warning">Approval Workflow Enabled</AdminBadge>}
-      />
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-8"
+        style={{ background: 'linear-gradient(135deg, #001f4d 0%, #003580 50%, #00508a 100%)', boxShadow: '0 12px 48px rgba(0,53,128,0.40)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% -5%, rgba(29,158,117,0.30), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 70% at -5% 70%, rgba(232,160,32,0.12), transparent)' }} />
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(29,158,117,0.18)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
+                style={{ color: '#ffffff', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+                <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#E8A020' }} />
+                Approval Workflow Enabled
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight"
+              style={{ color: '#ffffff', textShadow: '0 2px 12px rgba(0,0,0,0.35)' }}>Gallery Management</h1>
+            <p className="mt-2 text-sm leading-relaxed font-medium"
+              style={{ color: 'rgba(255,255,255,0.80)' }}>Upload photos and videos, create albums, and approve submitted media.</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => setShowCreateAlbum(!showCreateAlbum)}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-90"
+              style={{ color: '#ffffff', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
+              <FolderPlus className="h-4 w-4" /> New Album
+            </button>
+            <button onClick={() => toast.success('Upload dialog opened')}
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all hover:scale-105"
+              style={{ background: '#E8A020', color: '#003580', boxShadow: '0 4px 20px rgba(232,160,32,0.35)' }}>
+              <Upload className="h-4 w-4" /> Upload Media
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Album Grid */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {albums.map((album) => {
+      <section className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+        {albums.map((album, i) => {
           const Icon = album.icon;
           const active = activeAlbum === album.name;
           const count = media.filter(m => m.album === album.name).length;
@@ -154,135 +188,145 @@ export default function GalleryManagement() {
               key={album.name}
               type="button"
               onClick={() => setActiveAlbum(album.name)}
-              className={`fade-up rounded-[12px] border p-4 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${active ? 'border-[#003580] bg-[#003580]/5 ring-1 ring-[#003580]/15' : 'border-slate-200 bg-white'}`}
+              className={`gm-fade-up gm-hover rounded-2xl border p-4 text-left transition-all duration-200 ${
+                active
+                  ? 'shadow-lg ring-2 ring-offset-1'
+                  : 'border-slate-200 dark:border-white/7 bg-white dark:bg-[#1a1f35]/80 hover:border-slate-300 dark:hover:border-white/14'
+              }`}
+              style={{
+                animationDelay: `${i * 0.05}s`,
+                borderColor: active ? album.color + '50' : undefined,
+                background: active ? `linear-gradient(135deg, ${album.color}12 0%, ${album.color}06 100%)` : undefined,
+                boxShadow: active ? `0 8px 30px ${album.color}25` : undefined,
+              }}
             >
-              <div className="flex items-start justify-between">
-                <span className={`inline-flex h-10 w-10 items-center justify-center rounded-[10px] ${album.bg} ${album.tone}`}>
-                  <Icon className="h-5 w-5" />
-                </span>
+              <div className="flex items-start justify-between mb-3">
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-xl"
+                    style={{ backgroundColor: album.color + '18', border: `1.5px solid ${album.color}30` }}
+                  >
+                    <span style={{ color: album.color }}><Icon className="h-5 w-5" /></span>
+                  </div>
                 {pending > 0 && (
-                  <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200">
-                    {pending} pending
+                  <span className="rounded-full bg-amber-100 dark:bg-amber-500/15 border border-amber-300 dark:border-amber-500/25 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                    {pending}
                   </span>
                 )}
               </div>
-              <h3 className="mt-3 text-sm font-semibold text-slate-900">{album.name}</h3>
-              <p className="mt-1 text-xs text-slate-500">{count} media files</p>
+              <h3 className="text-xs font-bold text-slate-800 dark:text-white/90 leading-tight">{album.name}</h3>
+              <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-500">{count} files</p>
             </button>
           );
         })}
         <button onClick={() => setShowCreateAlbum(!showCreateAlbum)}
-          className="fade-up rounded-[12px] border border-dashed border-slate-300 bg-slate-50/50 p-4 text-left transition-all hover:border-[#003580]/30 hover:bg-[#003580]/5 hover:shadow-sm flex flex-col items-center justify-center min-h-[100px]">
-          <Plus className="h-6 w-6 text-slate-400" />
-          <span className="mt-2 text-xs font-semibold text-slate-500">New Album</span>
+          className="gm-fade-up gm-hover rounded-2xl border border-dashed border-slate-300 dark:border-white/15 bg-slate-50 dark:bg-white/3 p-4 text-center transition-all hover:border-[#003580]/40 dark:hover:border-white/25 hover:bg-[#003580]/4 dark:hover:bg-white/6 flex flex-col items-center justify-center min-h-[100px]"
+          style={{ animationDelay: `${albums.length * 0.05}s` }}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#003580]/10 dark:bg-white/8">
+            <Plus className="h-4 w-4 text-[#003580] dark:text-slate-400" />
+          </div>
+          <span className="mt-2 text-[10px] font-semibold text-[#003580]/70 dark:text-slate-500">New Album</span>
         </button>
       </section>
 
       {showCreateAlbum && (
-        <div className="fade-up rounded-[10px] border border-blue-200 bg-blue-50/50 p-4 flex items-center gap-3">
-          <input value={newAlbumName} onChange={e => setNewAlbumName(e.target.value)} placeholder="Album name" className="flex-1 rounded-[8px] border border-blue-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#003580]" />
-          <button onClick={createAlbum} className="rounded-[8px] bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all">Create</button>
-          <button onClick={() => setShowCreateAlbum(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
+        <div className="gm-fade-up flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-500/8 p-4 backdrop-blur-sm">
+          <input value={newAlbumName} onChange={e => setNewAlbumName(e.target.value)} placeholder="Album name" className="gm-input flex-1" />
+          <button onClick={createAlbum} className="rounded-xl bg-[#003580] px-4 py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all shadow-lg shadow-[#003580]/30 shrink-0">Create</button>
+          <button onClick={() => setShowCreateAlbum(false)} className="text-slate-500 hover:text-slate-300 transition-all shrink-0"><X className="h-4 w-4" /></button>
         </div>
       )}
 
-      <section className="grid gap-4 xl:grid-cols-[360px_1fr]">
-        {/* Upload Panel */}
+      <section className="grid gap-4 xl:grid-cols-[320px_1fr]">
+        {/* Upload + Stats Panel */}
         <div className="space-y-4">
           <div
             onDragOver={e => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
-            className={`rounded-[12px] border-2 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all ${
-              dragging ? 'border-[#003580] bg-[#003580]/5' : 'border-slate-200'
-            }`}
+            className={`rounded-2xl border p-5 transition-all ${dragging ? 'border-blue-500/50 bg-blue-500/8 shadow-[0_0_30px_rgba(99,130,255,0.15)]' : 'border-white/8 bg-[#1a1f35]/80'} backdrop-blur-sm`}
           >
-            <h2 className="text-sm font-semibold text-slate-900">Upload to {activeAlbum}</h2>
-            <p className="mt-1 text-xs text-slate-500">Accepts images and videos for approval.</p>
-            <label className={`mt-4 flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-[10px] border-2 border-dashed p-6 text-center transition-all ${
-              dragging ? 'border-[#003580] bg-[#003580]/10' : 'border-slate-300 bg-slate-50 hover:border-[#003580]/40 hover:bg-[#003580]/5'
+            <h2 className="text-sm font-bold text-white mb-1">Upload to {activeAlbum}</h2>
+            <p className="text-[11px] text-slate-500 mb-4">Accepts images and videos for approval.</p>
+            <label className={`flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
+              dragging ? 'border-blue-400/60 bg-blue-500/12' : 'border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/6'
             }`}>
-              <Upload className={`h-8 w-8 ${dragging ? 'text-[#003580]' : 'text-slate-400'}`} />
-              <span className="mt-3 text-sm font-semibold text-slate-900">{dragging ? 'Drop files here' : 'Drop files or browse'}</span>
-              <span className="mt-1 text-xs text-slate-500">Photos, videos, posters, thumbnails</span>
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl mb-3 ${dragging ? 'bg-blue-500/20' : 'bg-white/8'}`}>
+                <Upload className={`h-6 w-6 ${dragging ? 'text-blue-400' : 'text-slate-500'}`} />
+              </div>
+              <span className="text-sm font-semibold text-white/80">{dragging ? 'Drop files here' : 'Drop files or browse'}</span>
+              <span className="mt-1 text-[11px] text-slate-500">Photos, videos, posters, thumbnails</span>
               <input type="file" accept="image/*,video/*" multiple className="sr-only" onChange={e => {
                 if (e.target.files?.length) toast.success(`${e.target.files.length} file(s) uploaded to ${activeAlbum}`);
               }} />
             </label>
           </div>
 
-          <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <div className="flex items-center gap-2">
-              <FolderPlus className="h-5 w-5 text-[#003580]" />
-              <h2 className="text-sm font-semibold text-slate-900">Album Quick Stats</h2>
+          <div className="rounded-2xl border border-white/8 bg-[#1a1f35]/80 p-5 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: activeAlbumData?.glow, color: activeAlbumData?.color }}>
+                <FolderPlus className="h-4 w-4" />
+              </div>
+              <h2 className="text-sm font-bold text-white">Album Quick Stats</h2>
             </div>
-            <div className="mt-4 space-y-3">
+            <div className="space-y-2">
               {[
-                { label: 'Total Media', value: albumStats.total, color: 'text-[#003580]' },
-                { label: 'Approved', value: albumStats.approved, color: 'text-[#1D9E75]' },
-                { label: 'Pending Review', value: albumStats.pending, color: 'text-[#E8A020]' },
-                { label: 'Rejected', value: albumStats.rejected, color: 'text-[#E24B4A]' },
+                { label: 'Total Media', value: albumStats.total, color: '#6382ff' },
+                { label: 'Approved', value: albumStats.approved, color: '#34d399' },
+                { label: 'Pending Review', value: albumStats.pending, color: '#fbbf24' },
+                { label: 'Rejected', value: albumStats.rejected, color: '#f87171' },
               ].map(stat => (
-                <div key={stat.label} className="flex items-center justify-between rounded-[8px] bg-slate-50 px-3 py-2.5">
-                  <span className="text-xs font-medium text-slate-600">{stat.label}</span>
-                  <span className={`text-sm font-bold ${stat.color}`}>{stat.value}</span>
+                <div key={stat.label} className="flex items-center justify-between rounded-xl bg-white/4 px-3 py-2.5 border border-white/5">
+                  <span className="text-xs text-slate-400 font-medium">{stat.label}</span>
+                  <span className="text-sm font-bold" style={{ color: stat.color }}>{stat.value}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Media Review */}
-        <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Media Review Panel */}
+        <div className="rounded-2xl border border-white/8 bg-[#1a1f35]/80 p-5 backdrop-blur-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">{activeAlbum} — Media Review</h2>
-              <p className="mt-1 text-xs text-slate-500">Approve, reject, or delete gallery assets.</p>
+              <h2 className="text-sm font-bold text-white">{activeAlbum} — Media Review</h2>
+              <p className="mt-0.5 text-[11px] text-slate-500">Approve, reject, or delete gallery assets.</p>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search media..." className="w-40 rounded-[8px] border border-slate-200 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[#003580]" />
-              </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search media..." className="gm-input pl-9 w-44" />
             </div>
           </div>
 
           {/* Status Tabs */}
-          <div className="mt-4 flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 mb-4">
             {tabs.map(tab => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setSelectedTab(tab.key)}
-                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-all ${
-                  selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-bold transition-all ${
+                  selectedTab === tab.key ? 'bg-[#003580] text-white shadow-md shadow-[#003580]/30' : 'bg-white/6 text-slate-400 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 {tab.label}
-                <span className={`px-1 py-0.5 rounded text-[9px] ${
-                  selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
-                }`}>{tab.count}</span>
+                <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-white/8 text-slate-500'}`}>{tab.count}</span>
               </button>
             ))}
           </div>
 
-          <div className="mt-4 space-y-2">
-            {filteredMedia.map((item) => (
-              <div key={item.id} className="flex flex-col gap-2 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-slate-200 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            {filteredMedia.map((item, i) => (
+              <div key={item.id}
+                className="gm-hover flex flex-col gap-2 rounded-xl border border-white/6 bg-white/3 p-4 sm:flex-row sm:items-center sm:justify-between"
+                style={{ animationDelay: `${i * 0.03}s` }}>
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] ${
-                    item.type === 'Video' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
-                  }`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${item.type === 'Video' ? 'bg-violet-500/15 text-violet-400' : 'bg-blue-500/15 text-blue-400'}`}>
                     {item.type === 'Video' ? <Film className="h-5 w-5" /> : <Image className="h-5 w-5" />}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-900 truncate">{item.title}</h3>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                      <span>{item.type}</span>
-                      <span>·</span>
-                      <span>{item.uploadedBy}</span>
-                      <span>·</span>
-                      <span>{item.date}</span>
+                    <h3 className="text-sm font-semibold text-white/90 truncate">{item.title}</h3>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                      <span>{item.type}</span><span>·</span><span>{item.uploadedBy}</span><span>·</span><span>{item.date}</span>
                     </div>
                   </div>
                 </div>
@@ -297,25 +341,25 @@ export default function GalleryManagement() {
                     {item.status === 'Pending Review' && (
                       <>
                         <button onClick={() => changeStatus(item.id, 'Approved')}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-emerald-200 bg-emerald-50 text-emerald-500 hover:bg-emerald-100 transition-all" title="Approve">
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all" title="Approve">
                           <CheckCircle2 className="h-3.5 w-3.5" />
                         </button>
                         <button onClick={() => changeStatus(item.id, 'Rejected')}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-100 transition-all" title="Reject">
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-rose-500/25 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all" title="Reject">
                           <XCircle className="h-3.5 w-3.5" />
                         </button>
                       </>
                     )}
                     <button onClick={() => toast.success(`Previewing "${item.title}"`)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 transition-all" title="Preview">
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/8 bg-white/4 text-slate-400 hover:bg-white/10 hover:text-white transition-all" title="Preview">
                       <Eye className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={() => toast.success(`Editing "${item.title}"`)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit">
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/8 bg-white/4 text-slate-400 hover:bg-blue-500/20 hover:text-blue-400 transition-all" title="Edit">
                       <Edit3 className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => deleteMedia(item.id)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-100 bg-rose-50 text-rose-400 hover:bg-rose-100 transition-all" title="Delete">
+                    <button onClick={() => handleDelete(item.id)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-rose-500/20 bg-rose-500/8 text-rose-400 hover:bg-rose-500/20 transition-all" title="Delete">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -323,9 +367,11 @@ export default function GalleryManagement() {
               </div>
             ))}
             {filteredMedia.length === 0 && (
-              <div className="py-8 text-center">
-                <ImagePlus className="mx-auto h-8 w-8 text-slate-300" />
-                <p className="mt-2 text-sm text-slate-500">No {selectedTab !== 'all' ? selectedTab.toLowerCase() : ''} media in this album.</p>
+              <div className="py-16 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5">
+                  <ImagePlus className="h-8 w-8 text-slate-600" />
+                </div>
+                <p className="mt-3 text-sm text-slate-500">No {selectedTab !== 'all' ? selectedTab.toLowerCase() : ''} media in this album.</p>
               </div>
             )}
           </div>

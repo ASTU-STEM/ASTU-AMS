@@ -49,7 +49,7 @@ export const CertificationTrainingAnalytics: React.FC<CertificationTrainingAnaly
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Lab Gap</span>
-                <span className="text-blue-600 font-bold">{cert.labToolingGap}%</span>
+                <span className="text-astu-navy font-bold">{cert.labToolingGap}%</span>
               </div>
               <div className="w-full h-1.5 rounded-full overflow-hidden">
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${cert.labToolingGap}%` }}></div>
@@ -65,8 +65,8 @@ export const CertificationTrainingAnalytics: React.FC<CertificationTrainingAnaly
           <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Highest Demand Certifications</h4>
           <div className="space-y-3">
             {sortedByDemand.slice(0, 3).map((cert, idx) => (
-              <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
-                <div className="flex items-center gap-3">
+              <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-astu-green/10 flex items-center justify-center">
                     <Award className="h-4 w-4 text-astu-green" />
                   </div>
@@ -90,7 +90,7 @@ export const CertificationTrainingAnalytics: React.FC<CertificationTrainingAnaly
           <div className="space-y-3">
             {recommended.slice(0, 3).map((cert, idx) => (
               <div key={idx} className={`p-4 border rounded-xl flex items-center justify-between ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-gray-200/60'}`}>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
                   <div className="w-8 h-8 rounded-full bg-astu-navy/10 flex items-center justify-center">
                     <CheckCircle className="h-4 w-4 text-astu-navy" />
                   </div>

@@ -108,7 +108,7 @@ export const DepartmentOverview: React.FC<DepartmentOverviewProps> = ({ stats, o
                 <span className="text-astu-green font-bold">89%</span>
               </div>
               <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-astu-green to-emerald-400 h-full rounded-full" style={{ width: '89%' }}></div>
+                <div className="bg-gradient-to-r from-astu-green to-blue-400 h-full rounded-full" style={{ width: '89%' }}></div>
               </div>
             </div>
           </div>

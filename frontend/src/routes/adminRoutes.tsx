@@ -14,6 +14,8 @@ import BackupSecurity from '../domains/admin/pages/BackupSecurity';
 import SystemSettings from '../domains/admin/pages/SystemSettings';
 import SuperAdminModules from '../domains/admin/pages/SuperAdminModules';
 import ReportsCenter from '../domains/admin/pages/ReportsCenter';
+import EmailCenter from '../domains/admin/pages/EmailCenter';
+import AdminProfile from '../domains/admin/pages/AdminProfile';
 
 export default function AdminRoutes() {
   return (
@@ -23,6 +25,7 @@ export default function AdminRoutes() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="modules" element={<SuperAdminModules />} />
         <Route path="reports" element={<ReportsCenter />} />
+        <Route path="email" element={<EmailCenter />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="roles" element={<RoleManagement />} />
         <Route path="analytics" element={<AnalyticsOverview />} />
@@ -34,6 +37,7 @@ export default function AdminRoutes() {
         <Route path="logs" element={<SystemLogs />} />
         <Route path="backup" element={<BackupSecurity />} />
         <Route path="settings" element={<SystemSettings />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Route>
     </Routes>
   );

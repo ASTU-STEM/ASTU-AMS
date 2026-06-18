@@ -1,13 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
+import authReducer from './slices/authSlice';
+import uiReducer from './slices/uiSlice';
 
-/**
- * Minimal Redux store.
- * Add feature slices here as they are developed (e.g. authSlice, uiSlice).
- */
 export const store = configureStore({
   reducer: {
-    // Placeholder reducer so the store is valid
-    _placeholder: (state: null = null) => state,
+    auth: authReducer,
+    ui: uiReducer,
   },
 });
 

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EmployerJob } from '../types/employer.types';
 import toast from 'react-hot-toast';
-import { employerService } from '../services/employer.service';
 
 interface JobPostingTabProps {
   jobs: EmployerJob[];
@@ -25,17 +24,8 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
     experienceRequired: 1,
     description: '',
     deadline: '',
-    skillsInput: '',
-    departments: [] as string[]
+    skillsInput: ''
   });
-
-  const [departmentsList, setDepartmentsList] = useState<any[]>([]);
-
-  useEffect(() => {
-    employerService.getDepartments()
-      .then(res => setDepartmentsList(res))
-      .catch(err => console.error('Failed to load departments:', err));
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +43,6 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
         description: formData.description,
         deadline: formData.deadline,
         skillsRequired: skills,
-        departments: formData.departments,
         status: originalJob?.status || 'PUBLISHED',
         createdAt: originalJob?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -76,14 +65,13 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
         description: formData.description,
         deadline: formData.deadline,
         skillsRequired: skills,
-        departments: formData.departments,
         status: 'PUBLISHED'
       });
       toast.success('New job listing posted successfully!');
     }
 
     setIsPosting(false);
-    setFormData({ title: '', employmentType: 'Full-Time', location: '', salary: '30,001 - 60,000 ETB/mo', experienceRequired: 1, description: '', deadline: '', skillsInput: '', departments: [] });
+    setFormData({ title: '', employmentType: 'Full-Time', location: '', salary: '30,001 - 60,000 ETB/mo', experienceRequired: 1, description: '', deadline: '', skillsInput: '' });
   };
 
   const populateFormForEdit = (job: EmployerJob) => {
@@ -98,8 +86,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
       experienceRequired: job.experienceRequired,
       description: job.description,
       deadline: job.deadline,
-      skillsInput: job.skillsRequired.join(', '),
-      departments: job.departments || []
+      skillsInput: job.skillsRequired.join(', ')
     });
   };
 
@@ -244,30 +231,6 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
             </div>
 
             <div className="space-y-1.5">
-              <label className={labelClass}>Department Requirements (Optional)</label>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl max-h-32 overflow-y-auto">
-                {departmentsList.map(dept => (
-                  <label key={dept.id} className="flex items-center gap-2 text-xs text-[var(--text-primary)] cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={formData.departments.includes(dept.code)}
-                      onChange={(e) => {
-                        const code = dept.code;
-                        if (e.target.checked) {
-                          setFormData(prev => ({ ...prev, departments: [...prev.departments, code] }));
-                        } else {
-                          setFormData(prev => ({ ...prev, departments: prev.departments.filter(d => d !== code) }));
-                        }
-                      }}
-                      className="rounded border-[var(--border-color)] text-[#003366] focus:ring-[#003366]"
-                    />
-                    {dept.name}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
               <label className={labelClass}>Job Description & Responsibilities</label>
               <textarea value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))} className={`${inputClass} h-28 resize-none`} placeholder="Describe candidate expectations, duties, and project frameworks..." required />
             </div>
@@ -275,7 +238,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => { setIsPosting(false); setIsEditing(false); setEditingJobId(null); setFormData({ title: '', employmentType: 'Full-Time', location: '', salary: '30,001 - 60,000 ETB/mo', experienceRequired: 1, description: '', deadline: '', skillsInput: '', departments: [] }); }}
+                onClick={() => { setIsPosting(false); setIsEditing(false); setEditingJobId(null); setFormData({ title: '', employmentType: 'Full-Time', location: '', salary: '30,001 - 60,000 ETB/mo', experienceRequired: 1, description: '', deadline: '', skillsInput: '' }); }}
                 className="flex-1 py-3 border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all"
               >
                 Cancel

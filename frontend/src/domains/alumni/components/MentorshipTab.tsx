@@ -17,12 +17,7 @@ interface MentorshipTabProps {
   onScheduleSession: (mentorId: string, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => void;
 }
 
-const defaultReviews: MentorReview[] = [
-  { id: 1, mentorId: '1', author: 'Tigist W.', rating: 5, text: 'Dr. Yosef provided incredible guidance on my system design interview prep. His Google-level insights were invaluable!', date: 'May 2026' },
-  { id: 2, mentorId: '1', author: 'Dawit M.', rating: 5, text: 'Best mentor I have had. He helped me restructure my resume and I got 3 interview calls within a week.', date: 'Apr 2026' },
-  { id: 3, mentorId: '2', author: 'Meron A.', rating: 4, text: 'Helina shared amazing startup insights. Very practical advice on building fintech products in Ethiopia.', date: 'May 2026' },
-  { id: 4, mentorId: '3', author: 'Samuel H.', rating: 5, text: 'Michael helped me transition from mechanical engineering to AI/ML. His mentorship was life-changing!', date: 'Mar 2026' },
-];
+const defaultReviews: MentorReview[] = [];
 
 export const MentorshipTab: React.FC<MentorshipTabProps> = ({
   mentors,
@@ -44,24 +39,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
     topic: ''
   });
 
-  const [studentRequests, setStudentRequests] = useState([
-    {
-      id: 1,
-      name: 'Melkamu Abebe',
-      department: 'Computer Science and Engineering',
-      year: '4th Year Student',
-      message: 'Hello! I am preparing my graduation project on secure escrow payments. I saw you work at Chapa and would highly appreciate your architectural guidance on API workflows.',
-      status: 'PENDING'
-    },
-    {
-      id: 2,
-      name: 'Tigist Kebede',
-      department: 'Electrical and Computer Engineering',
-      year: '5th Year Student',
-      message: 'Hi Abebe, I am highly interested in switching to backend systems engineering. I would love to learn more about the daily operations of Node.js servers in FinTech products.',
-      status: 'PENDING'
-    }
-  ]);
+  const [studentRequests, setStudentRequests] = useState<{ id: number; name: string; department: string; year: string; message: string; status: string }[]>([]);
 
   const filteredMentors = mentors.filter((m) => {
     const query = searchQuery.toLowerCase();

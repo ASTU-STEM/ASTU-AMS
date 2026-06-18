@@ -1,30 +1,49 @@
 import { get } from '../../../shared/services/api';
+import type {
+  AnalyticsSummary,
+  EmploymentTrend,
+  DepartmentStat,
+  SkillGap,
+  EmployerFeedbackMetric,
+  SalaryDistribution,
+  TopEmployer,
+  TracerMetric,
+} from '../types';
+
+const BASE = '/analytics';
 
 export const analyticsService = {
-  async getDashboardOverview() {
-    return get('/analytics/dashboard');
+  async getSummary(): Promise<AnalyticsSummary> {
+    return get<AnalyticsSummary>(`${BASE}/summary`);
   },
-  async getEmploymentAnalytics() {
-    return get('/analytics/employment');
+
+  async getEmploymentTrends(): Promise<EmploymentTrend[]> {
+    return get<EmploymentTrend[]>(`${BASE}/employment-trends`);
   },
-  async getEmployerAnalytics() {
-    return get('/analytics/employers');
+
+  async getDepartmentStats(): Promise<DepartmentStat[]> {
+    return get<DepartmentStat[]>(`${BASE}/department-stats`);
   },
-  async getDepartmentAnalytics() {
-    return get('/analytics/departments');
+
+  async getSkillGaps(): Promise<SkillGap[]> {
+    return get<SkillGap[]>(`${BASE}/skill-gaps`);
   },
-  async getSkillAnalytics() {
-    return get('/analytics/skills');
+
+  async getEmployerFeedback(): Promise<EmployerFeedbackMetric[]> {
+    return get<EmployerFeedbackMetric[]>(`${BASE}/employer-feedback`);
   },
-  async getTracerAnalytics() {
-    return get('/analytics/tracer');
+
+  async getSalaryDistributions(): Promise<SalaryDistribution[]> {
+    return get<SalaryDistribution[]>(`${BASE}/salary-distributions`);
   },
-  async getInsights() {
-    return get('/analytics/insights');
+
+  async getTopEmployers(): Promise<TopEmployer[]> {
+    return get<TopEmployer[]>(`${BASE}/top-employers`);
   },
-  async getRecommendations() {
-    return get('/analytics/recommendations');
-  }
+
+  async getTracerMetrics(): Promise<TracerMetric[]> {
+    return get<TracerMetric[]>(`${BASE}/tracer-metrics`);
+  },
 };
 
 export default analyticsService;

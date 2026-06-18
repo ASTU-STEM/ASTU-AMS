@@ -26,6 +26,22 @@ interface OtpFormData {
 export default function VerifyOtpPage() {
   const navigate = useNavigate();
   const { registrationDetails, maskedEmail, clearRegistration } = useRegistration();
+  // If no email (user indicated no ASTU email), skip OTP UI and show alternative verification options
+  if (!registrationDetails?.email) {
+    return (
+      <AuthLayout title="Verify Your Identity" subtitle="Select a verification method" showLogo={true}>
+        <div className="space-y-4 p-4">
+          <PrimaryButton type="button" onClick={() => navigate('/verify-national-id')} variant="outline" className="w-full">
+            Verify with National ID
+          </PrimaryButton>
+          <PrimaryButton type="button" onClick={() => navigate('/verify-manual')} variant="outline" className="w-full">
+            Manual verification
+          </PrimaryButton>
+          <SupportLink lastErrorCode="NO_EMAIL" label="Need assistance? Contact support" />
+        </div>
+      </AuthLayout>
+    );
+  }
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<'INVALID' | 'EXPIRED' | 'LOCKOUT' | null>(null);
@@ -50,23 +66,6 @@ export default function VerifyOtpPage() {
     const interval = setInterval(checkTimer, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  // If no email (user indicated no ASTU email), skip OTP UI and show alternative verification options
-  if (!registrationDetails?.email) {
-    return (
-      <AuthLayout title="Verify Your Identity" subtitle="Select a verification method" showLogo={true}>
-        <div className="space-y-4 p-4">
-          <PrimaryButton type="button" onClick={() => navigate('/verify-national-id')} variant="outline" className="w-full">
-            Verify with National ID
-          </PrimaryButton>
-          <PrimaryButton type="button" onClick={() => navigate('/verify-manual')} variant="outline" className="w-full">
-            Manual verification
-          </PrimaryButton>
-          <SupportLink lastErrorCode="NO_EMAIL" label="Need assistance? Contact support" />
-        </div>
-      </AuthLayout>
-    );
-  }
 
   const handleOtpSubmit = async (values: OtpFormData) => {
     setIsLoading(true);

@@ -15,10 +15,6 @@ export const employerService = {
     return get<CompanyProfile>('/api/employer/profile');
   },
 
-  async getDepartments(): Promise<any[]> {
-    return get<any[]>('/api/departments');
-  },
-
   async createProfile(data: Partial<CompanyProfile>): Promise<CompanyProfile> {
     return post<CompanyProfile>('/api/employer/profile', data);
   },

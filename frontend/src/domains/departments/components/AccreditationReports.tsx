@@ -13,19 +13,6 @@ import { AccreditationEvidenceTable } from './AccreditationEvidenceTable';
 import { AccreditationInsightsPanel } from './AccreditationInsightsPanel';
 import { AccreditationExport } from './AccreditationExport';
 
-// Mock data
-import {
-  mockAccreditationKPIMetrics,
-  mockAccreditationOverview,
-  mockTracerEvidence,
-  mockEmployerEvidence,
-  mockSkillGapEvidence,
-  mockCurriculumEvidence,
-  mockComplianceStatus,
-  mockAccreditationInsights,
-  mockAccreditationEvidenceRecords
-} from '../services/mockAccreditationData';
-
 interface AccreditationReportsProps {
   data?: any;
   darkMode?: boolean;
@@ -33,14 +20,24 @@ interface AccreditationReportsProps {
 
 export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<AccreditationFilterState>({
-    department: '',
-    academicYear: '',
-    graduationBatch: '',
-    accreditationCycle: '',
-    reportType: '',
-    dateRange: ''
+    department: 'Computer Science',
+    academicYear: '2024',
+    graduationBatch: '2024',
+    accreditationCycle: 'All',
+    reportType: 'All',
+    dateRange: 'All',
   });
-  const [showExport, setShowExport] = useState(false);
+
+  // Use data from props or provide empty defaults
+  const accreditationKPIMetrics = data?.kpiMetrics || [];
+  const accreditationOverview = data?.overview || {};
+  const tracerEvidence = data?.tracerEvidence || [];
+  const employerEvidence = data?.employerEvidence || [];
+  const skillGapEvidence = data?.skillGapEvidence || [];
+  const curriculumEvidence = data?.curriculumEvidence || [];
+  const complianceStatus = data?.complianceStatus || [];
+  const accreditationInsights = data?.insights || [];
+  const accreditationEvidenceRecords = data?.records || [];
 
   const handleFilterChange = (newFilters: AccreditationFilterState) => {
     setFilters(newFilters);
@@ -51,7 +48,7 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
   };
 
   const handleExport = () => {
-    setShowExport(true);
+    console.log('Exporting accreditation reports...');
   };
 
   const handleExportOption = (option: AccreditationExportOption) => {
@@ -76,7 +73,7 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
             <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Accreditation Reports & Executive Reporting Center</h2>
             <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Generate accreditation-ready evidence from tracer, employer, skill, and curriculum analytics</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
             <button
               onClick={handleRefresh}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
@@ -171,33 +168,25 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
       </div>
 
       {/* KPI Section */}
-      <TracerKPI metrics={mockAccreditationKPIMetrics} darkMode={darkMode} />
+      <TracerKPI metrics={accreditationKPIMetrics} darkMode={darkMode} />
 
       {/* Accreditation Overview */}
-      <AccreditationOverview data={mockAccreditationOverview} />
+      <AccreditationOverview data={accreditationOverview} />
 
       {/* Evidence Analytics Sections */}
-      <TracerEvidenceAnalytics data={mockTracerEvidence} />
-      <EmployerEvidenceAnalytics data={mockEmployerEvidence} />
-      <SkillGapEvidenceAnalytics data={mockSkillGapEvidence} />
-      <CurriculumEvidenceAnalytics data={mockCurriculumEvidence} />
+      <TracerEvidenceAnalytics data={tracerEvidence} />
+      <EmployerEvidenceAnalytics data={employerEvidence} />
+      <SkillGapEvidenceAnalytics data={skillGapEvidence} />
+      <CurriculumEvidenceAnalytics data={curriculumEvidence} />
 
       {/* Compliance Status Panel */}
-      <ComplianceStatusPanel data={mockComplianceStatus} />
+      <ComplianceStatusPanel data={complianceStatus} />
 
       {/* Executive Insights Panel */}
-      <AccreditationInsightsPanel insights={mockAccreditationInsights} />
+      <AccreditationInsightsPanel insights={accreditationInsights} />
 
       {/* Accreditation Evidence Table */}
-      <AccreditationEvidenceTable records={mockAccreditationEvidenceRecords} />
-
-      {/* Export Modal */}
-      {showExport && (
-        <AccreditationExport
-          onExport={handleExportOption}
-          onClose={() => setShowExport(false)}
-        />
-      )}
+      <AccreditationEvidenceTable records={accreditationEvidenceRecords} />
     </div>
   );
 };

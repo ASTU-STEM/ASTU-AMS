@@ -15,12 +15,12 @@ const apiClient = axios.create({
 
 // Request Interceptor - Add Authorization Token
 apiClient.interceptors.request.use(
-  (configData) => {
-    const token = localStorage.getItem(config.auth.storageKey);
+  (config) => {
+    const token = localStorage.getItem('authToken');
     if (token) {
-      configData.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return configData;
+    return config;
   },
   (error) => Promise.reject(error)
 );
@@ -31,10 +31,10 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       // Token expired or unauthorized
-      localStorage.removeItem(config.auth.storageKey);
-      localStorage.removeItem(config.auth.refreshStorageKey);
-      localStorage.removeItem(config.auth.userStorageKey);
-      localStorage.removeItem(config.auth.roleStorageKey);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('astu_ams_user_role');
       window.dispatchEvent(new Event('astu-auth-changed'));
     }
     return Promise.reject(error);
@@ -53,13 +53,13 @@ export const authService = {
       const { data } = response;
 
       if (data.success && data.data?.token) {
-        localStorage.setItem(config.auth.storageKey, data.data.token);
+        localStorage.setItem('authToken', data.data.token);
         if (data.data.refreshToken) {
-          localStorage.setItem(config.auth.refreshStorageKey, data.data.refreshToken);
+          localStorage.setItem('refreshToken', data.data.refreshToken);
         }
         if (data.data.user) {
-          localStorage.setItem(config.auth.userStorageKey, JSON.stringify(data.data.user));
-          localStorage.setItem(config.auth.roleStorageKey, data.data.user.role);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+          localStorage.setItem('astu_ams_user_role', data.data.user.role);
         }
         window.dispatchEvent(new Event('astu-auth-changed'));
         return { ok: true, data: data.data };
@@ -137,10 +137,10 @@ export const authService = {
       console.warn('Logout API call failed, proceeding with local cleanup:', error);
     } finally {
       // Always clear local data
-      localStorage.removeItem(config.auth.storageKey);
-      localStorage.removeItem(config.auth.refreshStorageKey);
-      localStorage.removeItem(config.auth.userStorageKey);
-      localStorage.removeItem(config.auth.roleStorageKey);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('astu_ams_user_role');
       window.dispatchEvent(new Event('astu-auth-changed'));
     }
   },
@@ -148,7 +148,7 @@ export const authService = {
   // ==================== REFRESH TOKEN ====================
   async refreshToken(): Promise<ApiResult<AuthResponse['data']>> {
     try {
-      const refreshToken = localStorage.getItem(config.auth.refreshStorageKey);
+      const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
         return { ok: false, errorCode: 'NO_REFRESH_TOKEN', message: 'No refresh token available' };
       }
@@ -157,18 +157,18 @@ export const authService = {
       const { data } = response;
 
       if (data.success && data.data?.token) {
-        localStorage.setItem(config.auth.storageKey, data.data.token);
+        localStorage.setItem('authToken', data.data.token);
         if (data.data.refreshToken) {
-          localStorage.setItem(config.auth.refreshStorageKey, data.data.refreshToken);
+          localStorage.setItem('refreshToken', data.data.refreshToken);
         }
         return { ok: true, data: data.data };
       }
       return { ok: false, errorCode: 'REFRESH_FAILED', message: 'Failed to refresh token' };
     } catch (error) {
-      localStorage.removeItem(config.auth.storageKey);
-      localStorage.removeItem(config.auth.refreshStorageKey);
-      localStorage.removeItem(config.auth.userStorageKey);
-      localStorage.removeItem(config.auth.roleStorageKey);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('astu_ams_user_role');
       window.dispatchEvent(new Event('astu-auth-changed'));
       return { ok: false, errorCode: 'REFRESH_ERROR', message: 'Session expired. Please login again.' };
     }

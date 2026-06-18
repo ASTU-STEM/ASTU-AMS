@@ -50,7 +50,7 @@ export function AppSidebar({
             {!collapsed && (
               <div className="overflow-hidden">
                 <h1 className="truncate text-base font-extrabold tracking-tight text-white whitespace-nowrap">{title}</h1>
-                <p className="truncate text-[9px] uppercase tracking-[0.2em] text-emerald-400 font-extrabold whitespace-nowrap">{subtitle}</p>
+                <p className="truncate text-[9px] uppercase tracking-[0.2em] text-blue-400 font-extrabold whitespace-nowrap">{subtitle}</p>
               </div>
             )}
           </div>
@@ -74,7 +74,7 @@ export function AppSidebar({
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all ${isActive
-                      ? 'bg-emerald-400/20 text-emerald-400'
+                      ? 'bg-blue-400/20 text-blue-400'
                       : 'text-white/40 group-hover:text-white/70'
                     }`}
                 >
@@ -91,7 +91,7 @@ export function AppSidebar({
                   </span>
                 )}
                 {isActive && !item.badge && !collapsed && (
-                  <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                  <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
                 )}
               </button>
             );

@@ -1,26 +1,17 @@
-import { get, put, post } from '../../../shared/services/api';
+import { get, put } from '../../../shared/services/api';
+
+const BASE = '/notifications';
 
 export const notificationService = {
   async getMyNotifications(): Promise<any[]> {
-    return get<any[]>('/notifications');
-  },
-
-  async markAsRead(notificationId: string): Promise<void> {
-    return put<void>(`/notifications/${notificationId}/read`);
+    return get<any[]>(`${BASE}`);
   },
 
   async markAllAsRead(): Promise<void> {
-    return put<void>('/notifications/read-all');
+    await put(`${BASE}/read-all`);
   },
 
-  async sendNotification(payload: {
-    userId: string;
-    title: string;
-    content: string;
-    type?: string;
-  }): Promise<any> {
-    return post<any>('/notifications', payload);
+  async markAsRead(id: string): Promise<void> {
+    await put(`${BASE}/${id}/read`);
   },
 };
-
-export default notificationService;

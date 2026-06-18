@@ -4,6 +4,7 @@ import { useAuth } from '../../../shared/contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { HelpCircle, LogOut, Menu, ChevronDown, FileText, BarChart3, Settings } from 'lucide-react';
 import HelpCenter from '../../../shared/components/HelpCenter';
+import AiAssistant from '../../../shared/components/AiAssistant';
 
 // Components
 import { DashboardOverview } from '../components/DashboardOverview';
@@ -15,9 +16,6 @@ import { CurriculumInsights } from '../components/CurriculumInsights';
 import { ExportCenter } from '../components/ExportCenter';
 import { AccreditationReports } from '../components/AccreditationReports';
 
-// Data
-import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerSurveyData, mockCurriculumInsights, mockExportReports } from '../services/mockDepartmentData';
-
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -27,12 +25,9 @@ const DepartmentDashboard = () => {
     const [darkMode, setDarkMode] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
+    const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, text: 'New tracer survey responses received from 2024 graduates.', unread: true, time: '2 hours ago' },
-        { id: 2, text: 'Employer feedback report generated for Computer Science.', unread: true, time: '1 day ago' },
-        { id: 3, text: 'Accreditation evidence audit completed successfully.', unread: false, time: '3 days ago' },
-    ]);
+    const [notifications, setNotifications] = useState<{ id: number; text: string; unread: boolean; time: string }[]>([]);
 
     const handleLogout = () => {
         logout();
@@ -108,19 +103,19 @@ const DepartmentDashboard = () => {
             case 'dashboard':
                 return <DashboardOverview darkMode={darkMode} />;
             case 'employment-analytics':
-                return <EmploymentAnalytics data={mockEmploymentData} darkMode={darkMode} />;
+                return <EmploymentAnalytics data={null} darkMode={darkMode} />;
             case 'skill-gap':
-                return <SkillGapAnalysis data={mockSkillGapData} darkMode={darkMode} />;
+                return <SkillGapAnalysis data={null} darkMode={darkMode} />;
             case 'employer-feedback':
-                return <EmployerFeedback data={mockEmployerFeedback} darkMode={darkMode} />;
+                return <EmployerFeedback data={null} darkMode={darkMode} />;
             case 'tracer-reports':
-                return <TracerReports data={mockTracerSurveyData} darkMode={darkMode} />;
+                return <TracerReports data={null} darkMode={darkMode} />;
             case 'curriculum':
-                return <CurriculumInsights data={mockCurriculumInsights} darkMode={darkMode} />;
+                return <CurriculumInsights data={null} darkMode={darkMode} />;
             case 'accreditation':
                 return <AccreditationReports darkMode={darkMode} />;
             case 'export':
-                return <ExportCenter reports={mockExportReports} darkMode={darkMode} />;
+                return <ExportCenter reports={[]} darkMode={darkMode} />;
             default:
                 return <DashboardOverview darkMode={darkMode} />;
         }
@@ -254,6 +249,12 @@ const DepartmentDashboard = () => {
                                 <span className="text-sm font-medium">Help Center</span>
                                 <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
                             </button>
+                            <button onClick={() => setAiAssistantOpen(true)}
+                                className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group gap-3">
+                                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+                                <span className="text-sm font-medium">AI Assistant</span>
+                                <span className="ml-auto text-[8px] text-emerald-400/80 font-bold px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">NEW</span>
+                            </button>
                             <button onClick={handleLogout}
                                 className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 text-left group gap-3">
                                 <span className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-500/20 material-symbols-outlined text-rose-400/70 group-hover:text-rose-400">logout</span>
@@ -268,6 +269,11 @@ const DepartmentDashboard = () => {
                                 className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
                                 <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
                                 <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
+                            </button>
+                            <button onClick={() => setAiAssistantOpen(true)}
+                                className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 group relative" title="AI Assistant">
+                                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">smart_toy</span>
+                                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">AI Assistant</div>
                             </button>
                             <button onClick={handleLogout}
                                 className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-rose-400/70 hover:text-rose-400 hover:bg-rose-500/10 transition-all duration-200 group relative" title="Logout">
@@ -434,6 +440,7 @@ const DepartmentDashboard = () => {
         </div>
 
         <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+        <AiAssistant role="department" isOpen={aiAssistantOpen} onClose={() => setAiAssistantOpen(false)} />
         </>
     );
 };

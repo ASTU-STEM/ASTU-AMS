@@ -15,6 +15,7 @@ import FooterManagement from '../domains/admin/pages/FooterManagement';
 import LatestNewsManagement from '../domains/admin/pages/LatestNewsManagement';
 import FaqManagement from '../domains/admin/pages/FaqManagement';
 import CmsSettings from '../domains/admin/pages/CmsSettings';
+import CmsProfile from '../domains/admin/pages/CmsProfile';
 
 export default function CmsRoutes() {
   return (
@@ -34,6 +35,7 @@ export default function CmsRoutes() {
         <Route path="seo" element={<SEOManagement />} />
         <Route path="templates" element={<ContentTemplates />} />
         <Route path="approvals" element={<ApprovalWorkflow />} />
+        <Route path="profile" element={<CmsProfile />} />
         <Route path="settings" element={<CmsSettings />} />
       </Route>
     </Routes>

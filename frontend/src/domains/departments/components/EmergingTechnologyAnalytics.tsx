@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Activity, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
 import { EmergingTechnology } from '../types/skillGap.types';
 
 interface EmergingTechnologyAnalyticsProps {
@@ -20,7 +20,7 @@ export const EmergingTechnologyAnalytics: React.FC<EmergingTechnologyAnalyticsPr
   return (
     <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
       <div className="flex items-center gap-3 mb-6">
-        <Zap className="text-2xl text-astu-navy" />
+        <Activity className="text-2xl text-astu-navy" />
         <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Emerging Technology Analytics</h3>
       </div>
 
@@ -39,7 +39,7 @@ export const EmergingTechnologyAnalytics: React.FC<EmergingTechnologyAnalyticsPr
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Adoption</span>
-                <span className="text-blue-600 font-bold">{tech.adoptionPotential}%</span>
+                <span className="text-astu-navy font-bold">{tech.adoptionPotential}%</span>
               </div>
               <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: `${tech.adoptionPotential}%` }}></div>
@@ -60,7 +60,7 @@ export const EmergingTechnologyAnalytics: React.FC<EmergingTechnologyAnalyticsPr
           <h4 className={`text-sm font-semibold uppercase tracking-wider mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Fastest Growing Technologies</h4>
           <div className="space-y-3">
             {sortedByGrowth.slice(0, 3).map((tech, idx) => (
-              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
+              <div key={idx} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-green-50 border-gray-200/60'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{tech.technology}</span>
                   <div className="flex items-center gap-1">

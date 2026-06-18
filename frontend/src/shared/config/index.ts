@@ -1,5 +1,5 @@
 const config = {
-  apiUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  apiUrl: import.meta.env.VITE_API_URL || '/api',
   appName: 'ASTU Alumni Management System',
   appShortName: 'ASTU-AMS',
   version: '1.0.0',
@@ -21,7 +21,6 @@ const config = {
     storageKey: 'authToken',
     refreshStorageKey: 'refreshToken',
     userStorageKey: 'user',
-    roleStorageKey: 'astu_ams_user_role',
   },
   debounceDelay: 300,
   toastDuration: 4000,

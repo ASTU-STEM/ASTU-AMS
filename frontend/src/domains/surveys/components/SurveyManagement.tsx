@@ -929,7 +929,7 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
           </div>
         );
 
-      case "scale": {
+      case "scale":
         const min = question.scaleMin || 1;
         const max = question.scaleMax || 10;
         const scaleItems = [];
@@ -975,7 +975,6 @@ function QuestionPreview({ question }: { question: SurveyQuestion }) {
             </div>
           </div>
         );
-      }
 
       case "date":
         return (

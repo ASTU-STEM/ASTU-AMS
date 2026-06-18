@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Zap, BarChart3, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, Activity, BarChart3, ArrowUpRight } from "lucide-react";
 import { IndustryDemandSkill } from '../types/employerFeedback.types';
 
 interface IndustryDemandAnalyticsProps {
@@ -12,7 +12,7 @@ export const IndustryDemandAnalytics: React.FC<IndustryDemandAnalyticsProps> = (
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60">
       <div className="flex items-center gap-3 mb-6">
-        <Zap className="text-2xl text-astu-navy" />
+        <Activity className="text-2xl text-astu-navy" />
         <h3 className="text-xl font-bold text-gray-900">Industry Demand Analytics</h3>
       </div>
 
@@ -57,7 +57,7 @@ export const IndustryDemandAnalytics: React.FC<IndustryDemandAnalyticsProps> = (
 
       {/* Demand Trend Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-50 border border-gray-200/60 rounded-xl">
+        <div className="p-4 bg-gradient-to-br from-blue-50 to-green-50 border border-gray-200/60 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="text-astu-green" />
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Highest Demand</p>
@@ -75,7 +75,7 @@ export const IndustryDemandAnalytics: React.FC<IndustryDemandAnalyticsProps> = (
         </div>
         <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border border-gray-200/60 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="text-purple-600" />
+            <Activity className="text-purple-600" />
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Skills</p>
           </div>
           <p className="text-2xl font-bold text-purple-600">8</p>

@@ -14,19 +14,6 @@ import { TracerInsightsPanel } from './TracerInsightsPanel';
 import { TracerRecordTable } from './TracerRecordTable';
 import { TracerExport } from './TracerExport';
 
-// Mock data
-import {
-  mockTracerKPIMetrics,
-  mockTracerTimelineData,
-  mockSurveyCompletionData,
-  mockEmploymentOutcomeData,
-  mockCareerAlignmentData,
-  mockSatisfactionData,
-  mockGeographicData,
-  mockTracerInsights,
-  mockTracerRecords
-} from '../services/mockTracerData';
-
 interface TracerReportsProps {
   data?: any;
   darkMode?: boolean;
@@ -34,13 +21,23 @@ interface TracerReportsProps {
 
 export const TracerReports: React.FC<TracerReportsProps> = ({ data, darkMode = false }) => {
   const [filters, setFilters] = useState<TracerFilterState>({
-    department: '',
+    department: 'Computer Science',
     tracerPeriod: 'all',
-    graduationBatch: '',
-    academicYear: '',
-    employmentStatus: ''
+    graduationBatch: '2024',
+    academicYear: '2024',
+    employmentStatus: 'All',
   });
-  const [showExport, setShowExport] = useState(false);
+
+  // Use data from props or provide empty defaults
+  const tracerKPIMetrics = data?.kpiMetrics || [];
+  const tracerTimelineData = data?.timelineData || [];
+  const surveyCompletionData = data?.completionData || [];
+  const employmentOutcomeData = data?.outcomeData || [];
+  const careerAlignmentData = data?.alignmentData || [];
+  const satisfactionData = data?.satisfactionData || [];
+  const geographicData = data?.geographicData || [];
+  const tracerInsights = data?.insights || [];
+  const tracerRecords = data?.records || [];
 
   const handleFilterChange = (newFilters: TracerFilterState) => {
     setFilters(newFilters);
@@ -51,7 +48,7 @@ export const TracerReports: React.FC<TracerReportsProps> = ({ data, darkMode = f
   };
 
   const handleExport = () => {
-    setShowExport(true);
+    console.log('Exporting tracer reports...');
   };
 
   const handleExportOption = (option: TracerExportOption) => {
@@ -76,40 +73,31 @@ export const TracerReports: React.FC<TracerReportsProps> = ({ data, darkMode = f
       />
 
       {/* KPI Cards */}
-      <TracerKPI metrics={mockTracerKPIMetrics} darkMode={darkMode} />
+      <TracerKPI metrics={tracerKPIMetrics} darkMode={darkMode} />
 
       {/* Timeline Analytics */}
-      <TracerTimelineAnalytics data={mockTracerTimelineData} darkMode={darkMode} />
+      <TracerTimelineAnalytics data={tracerTimelineData} darkMode={darkMode} />
 
       {/* Survey Completion Analytics */}
-      <SurveyCompletionAnalytics data={mockSurveyCompletionData} darkMode={darkMode} />
+      <SurveyCompletionAnalytics data={surveyCompletionData} darkMode={darkMode} />
 
       {/* Employment Outcome Analytics */}
-      <EmploymentOutcomeAnalytics data={mockEmploymentOutcomeData} darkMode={darkMode} />
+      <EmploymentOutcomeAnalytics data={employmentOutcomeData} darkMode={darkMode} />
 
       {/* Career Alignment Analytics */}
-      <CareerAlignmentAnalytics data={mockCareerAlignmentData} darkMode={darkMode} />
+      <CareerAlignmentAnalytics data={careerAlignmentData} darkMode={darkMode} />
 
       {/* Graduate Satisfaction Analytics */}
-      <GraduateSatisfactionAnalytics data={mockSatisfactionData} darkMode={darkMode} />
+      <GraduateSatisfactionAnalytics data={satisfactionData} darkMode={darkMode} />
 
       {/* Geographic Outcome Analytics */}
-      <GeographicOutcomeAnalytics data={mockGeographicData} darkMode={darkMode} />
+      <GeographicOutcomeAnalytics data={geographicData} darkMode={darkMode} />
 
       {/* Tracer Insights Panel */}
-      <TracerInsightsPanel insights={mockTracerInsights} darkMode={darkMode} />
+      <TracerInsightsPanel insights={tracerInsights} darkMode={darkMode} />
 
       {/* Tracer Record Table */}
-      <TracerRecordTable records={mockTracerRecords} darkMode={darkMode} />
-
-      {/* Export Modal */}
-      {showExport && (
-        <TracerExport
-          onExport={handleExportOption}
-          onClose={() => setShowExport(false)}
-          darkMode={darkMode}
-        />
-      )}
+      <TracerRecordTable records={tracerRecords} darkMode={darkMode} />
     </div>
   );
 };
