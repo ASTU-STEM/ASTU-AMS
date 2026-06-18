@@ -26,6 +26,7 @@ import { VerificationTab } from '../components/VerificationTab';
 import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
+import { DataIssuesTab } from '../components/DataIssuesTab';
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
@@ -427,6 +428,7 @@ useEffect(() => {
                 { id: 'records', label: 'Alumni Records', icon: 'people', badge: totalGraduatesCount > 0 ? totalGraduatesCount.toLocaleString() : null, tooltip: `${graduates.length} active records` },
                 { id: 'data_integration', label: 'Batch Scaffolding', icon: 'cloud_upload', badge: null, tooltip: 'Excel/CSV import & batch processing' },
                 { id: 'verification', label: 'Verifications', icon: 'verified_user', badge: pendingVerificationsCount > 0 ? pendingVerificationsCount : null, tooltip: `${pendingVerificationsCount} pending approvals` },
+                { id: 'data_issues', label: 'Data Issues', icon: 'report_problem', badge: null, tooltip: 'Registration data correction requests' },
                 { id: 'documents', label: 'Document Queue', icon: 'description', badge: documentRequestsCount > 0 ? documentRequestsCount : null, tooltip: `${documentRequestsCount} documents awaiting action` },
                 { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', badge: null, tooltip: 'Survey response tracking & analytics' },
                 { id: 'reporting', label: 'Reports & Export', icon: 'analytics', badge: null, tooltip: 'Accreditation reports & data export' },
@@ -1108,6 +1110,10 @@ useEffect(() => {
                 verifications={filteredVerifications}
                 onVerify={handleVerifyRequestAction}
               />
+            )}
+
+            {activeTab === 'data_issues' && (
+              <DataIssuesTab />
             )}
 
             {activeTab === 'documents' && (

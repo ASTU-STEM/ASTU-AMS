@@ -33,4 +33,8 @@ router.put('/alumni/:alumniId/status', asyncHandler(RegistrarController.updateAl
 router.post('/alumni/:alumniId/approve', asyncHandler(RegistrarController.approveAlumni));
 router.post('/alumni/:alumniId/suspend', asyncHandler(RegistrarController.suspendAlumni));
 
+// Registration Issues (Data Correction Requests)
+router.get('/registration-issues', asyncHandler(RegistrarController.getRegistrationIssues));
+router.put('/registration-issues/:id/resolve', asyncHandler(RegistrarController.resolveRegistrationIssue));
+
 export default router;

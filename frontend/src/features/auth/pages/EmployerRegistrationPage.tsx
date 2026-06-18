@@ -120,7 +120,7 @@ export default function EmployerRegistrationPage() {
           </div>
 
           <AuthButton
-            onClick={() => navigate('/employers')}
+            onClick={() => navigate('/login')}
             variant="outline"
           >
             Go to Employer Login

@@ -71,7 +71,7 @@ export default function VerifyOtpPage() {
     setIsLoading(true);
     setErrorMsg(null);
     setErrorType(null);
-    
+
     try {
       const result = await authService.verifyOtp(registrationDetails?.studentId || '', values.otp);
       if (result.ok) {
@@ -82,7 +82,7 @@ export default function VerifyOtpPage() {
         setErrorMsg(result.message);
         const code = result.errorCode as 'INVALID' | 'EXPIRED' | 'LOCKOUT';
         setErrorType(code || 'INVALID');
-        
+
         if (code === 'LOCKOUT') {
           toast.error('Too many failed attempts. Account temporarily locked.');
         }
@@ -100,7 +100,7 @@ export default function VerifyOtpPage() {
     setIsLoading(true);
     setErrorMsg(null);
     setErrorType(null);
-    
+
     try {
       const result = await authService.resendOtp(registrationDetails.email);
       if (result.ok) {
@@ -150,25 +150,25 @@ export default function VerifyOtpPage() {
 
             {/* Error alerts with appropriate messages and icons */}
             {errorMsg && (
-              <InlineAlert 
+              <InlineAlert
                 type={errorType === 'LOCKOUT' ? 'error' : errorType === 'EXPIRED' ? 'warning' : 'error'}
                 title={
-                  errorType === 'LOCKOUT' 
-                    ? 'Lockout Warning' 
-                    : errorType === 'EXPIRED' 
-                    ? 'Code Expired' 
-                    : 'Invalid Code'
+                  errorType === 'LOCKOUT'
+                    ? 'Lockout Warning'
+                    : errorType === 'EXPIRED'
+                      ? 'Code Expired'
+                      : 'Invalid Code'
                 }
                 message={
                   errorType === 'LOCKOUT'
                     ? 'Too many failed attempts. Your registration is locked. Please contact support or retry in 15 minutes.'
                     : errorType === 'EXPIRED'
-                    ? 'The verification code has expired. Please request a new code below.'
-                    : 'The OTP code is incorrect. Please check and try again.'
+                      ? 'The verification code has expired. Please request a new code below.'
+                      : 'The OTP code is incorrect. Please check and try again.'
                 }
                 action={
                   errorType === 'LOCKOUT' ? (
-                    <SupportLink 
+                    <SupportLink
                       lastErrorCode="LOCKOUT"
                       label="Get Help / Request Unlock"
                       className="text-red-900 font-bold"
@@ -180,7 +180,7 @@ export default function VerifyOtpPage() {
 
             {/* Modern 6-digit OTP Box */}
             <div className="py-2">
-              <OtpInput 
+              <OtpInput
                 value={values.otp}
                 onChange={(otpVal) => setFieldValue('otp', otpVal)}
                 disabled={isLoading || errorType === 'LOCKOUT'}
@@ -208,40 +208,11 @@ export default function VerifyOtpPage() {
               Verify OTP
             </PrimaryButton>
 
-            {/* Visual fallback links with visual styling and secondary actions */}
-            <div className="pt-2 border-t border-outline-variant space-y-4">
-              <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => navigate('/verify-national-id')}
-                  className="w-full text-left text-sm font-semibold text-astu-navy hover:underline flex justify-between items-center"
-                >
-                  <span>Verify with National ID</span>
-                  <span className="text-xs font-normal text-on-surface-variant">Ethiopia only</span>
-                </button>
-                <p className="text-[11px] text-on-surface-variant pl-0 leading-normal">
-                  If you don't have access to your university email (requires didit.me verification).
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <button
-                  type="button"
-                  onClick={() => navigate('/verify-manual')}
-                  className="w-full text-left text-sm font-semibold text-astu-navy hover:underline flex justify-between items-center"
-                >
-                  <span>Manual verification</span>
-                  <span className="text-xs font-normal text-on-surface-variant">International / fallback</span>
-                </button>
-                <p className="text-[11px] text-on-surface-variant pl-0 leading-normal">
-                  If you're outside Ethiopia or do not have a National ID (requires document uploads).
-                </p>
-              </div>
-            </div>
+            {/* No fallback links here; must verify by OTP */}
 
             {/* Back Navigation & Support */}
             <div className="pt-2 flex flex-col items-center gap-3">
-              <SupportLink 
+              <SupportLink
                 lastErrorCode={errorType || 'OTP_PAGE'}
                 label="Need assistance? Contact support"
               />

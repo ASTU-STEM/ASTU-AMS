@@ -207,4 +207,30 @@ export class RegistrarController {
       next(err);
     }
   }
+
+  // Registration Issues (Data Correction Requests)
+  static async getRegistrationIssues(req: Request, res: Response, next: NextFunction) {
+    try {
+      const issues = await prisma.registrationIssue.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+      return sendSuccess(res, 'Fetched registration issues.', issues);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async resolveRegistrationIssue(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body; // "RESOLVED" or "REJECTED"
+      const issue = await prisma.registrationIssue.update({
+        where: { id },
+        data: { status: status || 'RESOLVED' },
+      });
+      return sendSuccess(res, `Registration issue marked as ${issue.status}.`, issue);
+    } catch (err: any) {
+      next(err);
+    }
+  }
 }

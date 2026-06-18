@@ -57,7 +57,7 @@ const alumniRegistrationSchema = yup.object().shape({
       otherwise: (schema) => schema
         .required('ASTU email is required')
         .email('Please enter a valid email address')
-        .matches(/^[^\s@]+@astust\.edu\.et$/, 'Email must end with @astust.edu.et')
+        .matches(/^[^\s@]+@astu(st)?\.edu\.et$/, 'Email must end with @astu.edu.et or @astust.edu.et')
     }),
     
   yearOfGraduation: yup
@@ -156,6 +156,21 @@ export default function AlumniRegistrationPage() {
       });
 
       if (response.ok) {
+        // Check if the backend is redirecting us to the contact-registrar page
+        if (response.data.redirect === 'contact-registrar') {
+          toast.error(response.data.email || 'Your data could not be verified. Please submit a data correction request.');
+          navigate('/contact-registrar', {
+            state: {
+              fullName: `${values.firstName} ${values.middleName} ${values.lastName}`,
+              studentId: values.idNumber,
+              graduationYear: values.yearOfGraduation,
+              contactEmail: values.email,
+              phoneNumber: values.phone,
+            }
+          });
+          return;
+        }
+
         const matchedEmail = response.data.email;
 
         setRegistrationDetails({
@@ -446,7 +461,7 @@ export default function AlumniRegistrationPage() {
                       name="email"
                       label="ASTU University Email *"
                       type="email"
-                      placeholder="yourname@astust.edu.et"
+                      placeholder="yourname@astu.edu.et"
                       value={values.email}
                       onChange={handleChange}
                       onBlur={handleBlur}
@@ -454,7 +469,7 @@ export default function AlumniRegistrationPage() {
                       touched={touched.email}
                       disabled={isLoading}
                       required
-                      helpText="Institutional email addresses must end with @astust.edu.et"
+                      helpText="Institutional email addresses must end with @astu.edu.et or @astust.edu.et"
                       autoComplete="email"
                     />
                   )}

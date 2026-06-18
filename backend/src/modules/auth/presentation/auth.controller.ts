@@ -17,6 +17,7 @@ import { StartDiditSession } from '../application/use-cases/StartDiditSession';
 import { GetDiditStatus } from '../application/use-cases/GetDiditStatus';
 import { SubmitManualVerification } from '../application/use-cases/SubmitManualVerification';
 import { VerifyDiditSession } from '../application/use-cases/VerifyDiditSession';
+import { SubmitRegistrationIssue } from '../application/use-cases/SubmitRegistrationIssue';
 import { DiditService } from '../infrastructure/services/DiditService';
 import { EmailService } from '../../../core/services/EmailService';
 import { loginSchema, activateAlumniSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
@@ -121,6 +122,28 @@ export class AuthController {
       const useCase = new VerifyAlumniNationalId(userRepository);
       const result = await useCase.execute(parsedData, diditSvc);
       return sendSuccess(res, 'National ID verified and account activated.', result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Submit Registration Issue
+  static async submitRegistrationIssue(req: Request, res: Response, next: NextFunction) {
+    try {
+      const identificationUrl = req.files && (req.files as any)['identificationDocument']
+        ? (req.files as any)['identificationDocument'][0].path.replace(/\\/g, '/')
+        : null;
+
+      if (!identificationUrl) {
+        throw new Error('Identification document is required.');
+      }
+
+      const useCase = new SubmitRegistrationIssue(emailService);
+      const result = await useCase.execute({
+        ...req.body,
+        identificationUrl
+      });
+      return sendSuccess(res, 'Registration issue submitted successfully. We will notify you once verified.', result, 201);
     } catch (err) {
       next(err);
     }

@@ -18,6 +18,7 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
@@ -46,6 +47,7 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
 
         {/* Verification routes protected by VerificationRouteGuard */}
         <Route element={<VerificationRouteGuard />}>

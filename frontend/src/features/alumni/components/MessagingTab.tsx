@@ -28,17 +28,35 @@ interface Thread {
   lastTime: string;
 }
 
-const THREADS: Thread[] = [];
+const THREADS: Thread[] = [
+  { id: 'admin-1', label: 'System Admin', desc: 'Platform Updates', initials: 'SA', color: 'bg-red-500', gradient: 'from-red-400 to-rose-500', online: true, unread: 1, lastMessage: 'Welcome to the new ASTU Alumni Portal!', lastTime: '10:00 AM' },
+  { id: 'registrar-1', label: 'Office of Registrar', desc: 'Document Services', initials: 'OR', color: 'bg-blue-500', gradient: 'from-blue-400 to-indigo-500', online: true, unread: 0, lastMessage: 'Your transcript request is being processed.', lastTime: 'Yesterday' },
+  { id: 'mentor-1', label: 'Dr. Abebe Bekele', desc: 'Mentor', initials: 'AB', color: 'bg-purple-500', gradient: 'from-purple-400 to-fuchsia-500', online: false, unread: 0, lastMessage: 'Let\'s schedule our next session for Friday.', lastTime: '2 days ago' },
+];
 
-const INITIAL_MESSAGES: Record<string, AlumniMessage[]> = {};
+const INITIAL_MESSAGES: Record<string, AlumniMessage[]> = {
+  'admin-1': [
+    { id: 1, sender: 'System', senderName: 'System Admin', text: 'Welcome to the new ASTU Alumni Portal!', timestamp: '10:00 AM', status: 'delivered' }
+  ],
+  'registrar-1': [
+    { id: 1, sender: 'Registrar', senderName: 'Office of Registrar', text: 'Your transcript request is being processed.', timestamp: 'Yesterday', status: 'read' }
+  ],
+  'mentor-1': [
+    { id: 1, sender: 'Mentor', senderName: 'Dr. Abebe Bekele', text: 'Great progress on your CV. Let\'s schedule our next session for Friday.', timestamp: '2 days ago', status: 'read' }
+  ]
+};
 
-const THREAD_META: Record<string, { name: string; role: string; initials: string; gradient: string; online: boolean }> = {};
+const THREAD_META: Record<string, { name: string; role: string; initials: string; gradient: string; online: boolean }> = {
+  'admin-1': { name: 'System Admin', role: 'Platform Support', initials: 'SA', gradient: 'from-red-400 to-rose-500', online: true },
+  'registrar-1': { name: 'Office of Registrar', role: 'Document Services', initials: 'OR', gradient: 'from-blue-400 to-indigo-500', online: true },
+  'mentor-1': { name: 'Dr. Abebe Bekele', role: 'Mentor', initials: 'AB', gradient: 'from-purple-400 to-fuchsia-500', online: false },
+};
 
 import { alumniService } from '../services/alumni.service';
 import { io, Socket } from 'socket.io-client';
 
 export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, userId }) => {
-  const [activeThread, setActiveThread] = useState('');
+  const [activeThread, setActiveThread] = useState(THREADS[0]?.id || '');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [threads, setThreads] = useState<Thread[]>(THREADS);
   const [messages, setMessages] = useState<Record<string, AlumniMessage[]>>(INITIAL_MESSAGES);
@@ -54,8 +72,18 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, userId }) 
   useEffect(() => {
     alumniService.getMessageThreads().then((realThreads: any[]) => {
       if (realThreads && realThreads.length > 0) {
-        setThreads(realThreads);
-        setActiveThread(realThreads[0].id);
+        setThreads(prev => {
+          // Merge real threads, keeping existing mock threads if they don't overlap by ID
+          const newThreads = [...prev];
+          realThreads.forEach(rt => {
+            if (!newThreads.find(t => t.id === rt.id)) {
+              newThreads.push(rt);
+            }
+          });
+          return newThreads;
+        });
+        
+        if (!activeThread) setActiveThread(realThreads[0].id);
         
         // Add meta for real threads
         realThreads.forEach(t => {

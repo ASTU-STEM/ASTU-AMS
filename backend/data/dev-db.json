@@ -18,6 +18,14 @@
       "ipAddress": "::1",
       "id": "dev-log-1779994894046",
       "createdAt": "2026-05-28T19:01:34.046Z"
+    },
+    {
+      "userId": "c6c3be93-3171-4970-b983-75e1128c408e",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1781737222442",
+      "createdAt": "2026-06-17T23:00:22.443Z"
     }
   ]
 }

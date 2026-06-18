@@ -82,14 +82,15 @@ export const authService = {
   },
 
   // ==================== SIGNUP ====================
-  async signup(data: SignupData): Promise<ApiResult<{ success: boolean; email?: string }>> {
+  async signup(data: SignupData): Promise<ApiResult<{ success: boolean; email?: string; redirect?: string }>> {
     try {
-      const response = await apiClient.post<{ success: boolean; message: string; data?: { email?: string; studentId?: string; verificationCodeSent?: boolean } }>('/auth/register', data);
+      const response = await apiClient.post<{ success: boolean; message: string; data?: { email?: string; studentId?: string; verificationCodeSent?: boolean; redirect?: string } }>('/auth/register', data);
       return { 
         ok: true, 
         data: { 
           success: response.data.success, 
-          email: response.data.data?.email 
+          email: response.data.data?.email,
+          redirect: response.data.data?.redirect
         } 
       };
     } catch (error) {
@@ -101,6 +102,27 @@ export const authService = {
         errorCode = resData.errorCode || errorCode;
       }
       return { ok: false, errorCode, message };
+    }
+  },
+
+  // ==================== REGISTRATION ISSUE ====================
+  async submitRegistrationIssue(formData: FormData): Promise<ApiResult<{ success: boolean }>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/register/issue', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.data.success) {
+        return { ok: true, data: { success: true } };
+      }
+      return { ok: false, errorCode: 'SUBMIT_ISSUE_FAILED', message: response.data.message || 'Submission failed.' };
+    } catch (error) {
+      let message = 'An unexpected error occurred while submitting.';
+      if (axios.isAxiosError(error) && error.response?.data) {
+        message = (error.response.data as any).message || message;
+      }
+      return { ok: false, errorCode: 'SUBMIT_ISSUE_ERROR', message };
     }
   },
 
