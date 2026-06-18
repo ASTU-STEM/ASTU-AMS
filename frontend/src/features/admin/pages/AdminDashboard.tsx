@@ -47,6 +47,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import { adminService } from '../services/admin.service';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type TrendTone = 'success' | 'warning';
 type TimeRange = '7d' | '30d' | '90d' | '1y';
@@ -121,6 +122,7 @@ function StatusDot({ status }: { status: 'healthy' | 'warning' | 'critical' }) {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -216,7 +218,7 @@ export default function AdminDashboard() {
       `}</style>
 
       <AdminPageHeader
-        title={`${greeting}, System Administrator`}
+        title={`${greeting}, ${user ? user.firstName : 'System Administrator'}`}
         subtitle="Welcome back to the ASTU Alumni Management System control panel."
         breadcrumbs={[{ label: 'Admin' }, { label: 'Dashboard' }]}
         actions={

@@ -83,6 +83,7 @@ model User {
   alumniProfile         AlumniProfile?
   employerProfile       EmployerProfile?
   departmentHeadProfile DepartmentHeadProfile?
+  adminProfile          AdminProfile?
   notifications         Notification[]
   auditLogs        AuditLog[]
   tracerNotifications TracerNotification[]
@@ -103,6 +104,20 @@ model DepartmentHeadProfile {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   departmentId String     @unique
   department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model AdminProfile {
+  id           String     @id @default(uuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName    String
+  lastName     String
+  phone        String?
+  department   String?
+  employeeId   String?
+  bio          String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }

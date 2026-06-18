@@ -69,6 +69,30 @@ export default function AdminLayout() {
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const location = useLocation();
 
+  // Sync real admin profile name into AuthContext once on layout mount
+  useEffect(() => {
+    import('../features/admin/services/admin.service').then(({ adminService }) => {
+      adminService.getAdminProfile().then((result) => {
+        if (result.ok && result.data) {
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            try {
+              const parsed = JSON.parse(storedUser);
+              if (parsed.firstName !== result.data.firstName || parsed.lastName !== result.data.lastName) {
+                parsed.firstName = result.data.firstName;
+                parsed.lastName = result.data.lastName;
+                localStorage.setItem('user', JSON.stringify(parsed));
+                window.dispatchEvent(new Event('astu-auth-changed'));
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+      });
+    });
+  }, []);
+
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed((prev) => {
       const next = !prev;
@@ -142,7 +166,7 @@ export default function AdminLayout() {
   const menu = (
     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       <div className="px-3 py-3">
-        <div className="text-sm font-semibold text-[var(--text-primary)]">System Administrator</div>
+        <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
         <div className="mt-2">
           <AdminBadge variant="danger" className="bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15">
             Super Admin
@@ -325,7 +349,7 @@ export default function AdminLayout() {
                 style={{ borderColor: 'var(--border-color)' }}
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
-                  SA
+                  {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'SA'}
                 </div>
                 <div className="hidden text-left sm:block">
                   <div className="text-sm font-medium text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>

@@ -21,6 +21,7 @@ import {
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import { adminService } from '../features/admin/services/admin.service';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AdminSidebarProps {
   onLogout: () => void;
@@ -61,6 +62,7 @@ const sections = [
 
 export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse, onOpenAiAssistant }: AdminSidebarProps) {
   const location = useLocation();
+  const { user } = useAuth();
 
   const [stats, setStats] = React.useState({
     users: 0,
@@ -216,10 +218,10 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
 
               <div className="flex items-center gap-3 rounded-[10px] bg-white/5 px-3 py-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30 shrink-0">
-                  SA
+                  {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'SA'}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">System Administrator</p>
+                  <p className="truncate text-sm font-semibold text-white">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
                   <div className="mt-1 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     <AdminBadge variant="neutral" className="border-white/10 bg-white/10 text-slate-200 text-[10px]">
@@ -251,8 +253,8 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                 </div>
               </button>
 
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30" title="System Administrator">
-                SA
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30" title={user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}>
+                {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'SA'}
               </div>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Online" />
               <button type="button" onClick={onLogout}

@@ -9,6 +9,10 @@ const adminController = new AdminController();
 // Only ADMIN role can access these routes
 router.use(authenticateJWT, requireRoles(['ADMIN']));
 
+router.get('/profile', adminController.getProfile);
+router.put('/profile', adminController.updateProfile);
+router.put('/profile/security', adminController.updateSecurity);
+
 router.get('/dashboard/metrics', adminController.getDashboardMetrics);
 router.get('/sidebar-stats', adminController.getSidebarStats);
 router.get('/roles/stats', adminController.getRoleStats);

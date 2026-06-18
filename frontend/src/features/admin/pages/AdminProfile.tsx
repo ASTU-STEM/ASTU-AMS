@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, Shield, KeyRound, Mail, Phone, Building2, 
   BadgeCheck, Clock, CheckCircle2, ShieldCheck, 
@@ -8,6 +8,7 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../contexts/AuthContext';
+import { adminService } from '../services/admin.service';
 
 type TabType = 'personal' | 'security' | 'permissions';
 
@@ -25,6 +26,45 @@ export default function AdminProfile() {
     employeeId: 'EMP-ASTU-001',
     bio: 'Overseeing the overall digital infrastructure, alumni tracking system, and API integrations for Adama Science and Technology University.',
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const result = await adminService.getAdminProfile();
+      if (result.ok && result.data) {
+        const fetchedFirst = result.data.firstName || 'System';
+        const fetchedLast = result.data.lastName || 'Administrator';
+        setPersonalForm({
+          firstName: fetchedFirst,
+          lastName: fetchedLast,
+          email: result.data.email || user?.email || 'admin@astu.edu.et',
+          phone: result.data.phone || '+251 911 234 567',
+          department: result.data.department || 'ICT Directorate',
+          employeeId: result.data.employeeId || 'EMP-ASTU-001',
+          bio: result.data.bio || 'Overseeing the overall digital infrastructure, alumni tracking system, and API integrations for Adama Science and Technology University.',
+        });
+
+        // Sync real name into localStorage so AuthContext reflects the real profile name
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const parsed = JSON.parse(storedUser);
+            if (parsed.firstName !== fetchedFirst || parsed.lastName !== fetchedLast) {
+              parsed.firstName = fetchedFirst;
+              parsed.lastName = fetchedLast;
+              localStorage.setItem('user', JSON.stringify(parsed));
+              window.dispatchEvent(new Event('astu-auth-changed'));
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+      setIsLoading(false);
+    };
+    fetchProfile();
+  }, []);
 
   // Security Form State
   const [securityForm, setSecurityForm] = useState({
@@ -43,12 +83,32 @@ export default function AdminProfile() {
     { name: 'Branding & Configuration', desc: 'Configure system settings, active color tokens, and metadata.' },
   ];
 
-  const handleSavePersonal = (e: React.FormEvent) => {
+  const handleSavePersonal = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Profile information updated successfully!');
+    setIsSaving(true);
+    const result = await adminService.updateAdminProfile(personalForm);
+    setIsSaving(false);
+    
+    if (result.ok) {
+      toast.success('Profile information updated successfully!');
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          parsed.firstName = personalForm.firstName;
+          parsed.lastName = personalForm.lastName;
+          localStorage.setItem('user', JSON.stringify(parsed));
+          window.dispatchEvent(new Event('astu-auth-changed'));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    } else {
+      toast.error(result.message || 'Failed to update profile');
+    }
   };
 
-  const handleUpdatePassword = (e: React.FormEvent) => {
+  const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!securityForm.currentPassword || !securityForm.newPassword || !securityForm.confirmPassword) {
       toast.error('All fields are required.');
@@ -58,8 +118,20 @@ export default function AdminProfile() {
       toast.error('New passwords do not match.');
       return;
     }
-    toast.success('Security password updated successfully!');
-    setSecurityForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    
+    setIsSaving(true);
+    const result = await adminService.updateAdminSecurity({
+      currentPassword: securityForm.currentPassword,
+      newPassword: securityForm.newPassword
+    });
+    setIsSaving(false);
+    
+    if (result.ok) {
+      toast.success('Security password updated successfully!');
+      setSecurityForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } else {
+      toast.error(result.message || 'Failed to update password');
+    }
   };
 
   return (
@@ -246,9 +318,10 @@ export default function AdminProfile() {
                   <div className="pt-2 flex justify-end">
                     <button 
                       type="submit"
-                      className="rounded-[8px] bg-[#003366] hover:bg-[#002244] text-white px-5 py-2.5 text-sm font-semibold transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                      disabled={isSaving || isLoading}
+                      className="rounded-[8px] bg-[#003366] hover:bg-[#002244] text-white px-5 py-2.5 text-sm font-semibold transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)] disabled:opacity-50"
                     >
-                      Save Changes
+                      {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                   </div>
                 </form>
@@ -301,9 +374,10 @@ export default function AdminProfile() {
                   <div className="pt-2 flex justify-end">
                     <button 
                       type="submit"
-                      className="rounded-[8px] bg-[#003366] hover:bg-[#002244] text-white px-5 py-2.5 text-sm font-semibold transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                      disabled={isSaving || isLoading}
+                      className="rounded-[8px] bg-[#003366] hover:bg-[#002244] text-white px-5 py-2.5 text-sm font-semibold transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)] disabled:opacity-50"
                     >
-                      Update Password
+                      {isSaving ? 'Updating...' : 'Update Password'}
                     </button>
                   </div>
                 </form>

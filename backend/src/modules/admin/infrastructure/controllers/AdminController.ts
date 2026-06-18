@@ -7,6 +7,7 @@ import { ManageLogs } from '../../application/use-cases/ManageLogs';
 import { ManageNotifications } from '../../application/use-cases/ManageNotifications';
 import { ManageSettings } from '../../application/use-cases/ManageSettings';
 import { GetSidebarStats } from '../../application/use-cases/GetSidebarStats';
+import { ManageAdminProfile } from '../../application/use-cases/ManageAdminProfile';
 import prisma from '../../../../core/config/db';
 
 const manageUsersUseCase = new ManageUsers();
@@ -19,6 +20,36 @@ const manageSettingsUseCase = new ManageSettings();
 const getSidebarStatsUseCase = new GetSidebarStats();
 
 export class AdminController {
+  async getProfile(req: Request, res: Response) {
+    try {
+      const adminUserId = (req as any).user?.userId;
+      const result = await ManageAdminProfile.getProfile(adminUserId);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateProfile(req: Request, res: Response) {
+    try {
+      const adminUserId = (req as any).user?.userId;
+      const result = await ManageAdminProfile.updateProfile(adminUserId, req.body);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateSecurity(req: Request, res: Response) {
+    try {
+      const adminUserId = (req as any).user?.userId;
+      const result = await ManageAdminProfile.updateSecurity(adminUserId, req.body);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
   async getSidebarStats(req: Request, res: Response) {
     try {
       const adminUserId = (req as any).user?.id; // Assuming auth middleware sets this
