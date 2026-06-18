@@ -1,11 +1,11 @@
-export type UserRole = 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPARTMENT_HEAD' | 'ADMIN' | 'CMS_MANAGER';
+export type UserRole = 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPARTMENT_HEAD' | 'ADMIN' | 'SUPER_ADMIN' | 'CMS_MANAGER';
 
 export interface User {
   id: string;
   email: string;
   role: UserRole;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

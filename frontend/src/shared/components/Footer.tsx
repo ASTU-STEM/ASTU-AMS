@@ -1,46 +1,49 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Facebook, Linkedin, Send, Mail, Phone, MapPin, Globe } from "lucide-react";
 
-const footerSections = [
-  {
-    title: "Portal Services",
-    links: [
-      { label: "Alumni", href: "/info/alumni-portal" },
-      { label: "Employer", href: "/info/employer-portal" },
-      { label: "Registrar", href: "/info/registrar-portal" },
-      { label: "Department", href: "/info/department-portal" },
-    ],
-  },
-  {
-    title: "About ASTU",
-    links: [
-      { label: "University Overview", href: "/" },
-      { label: "Stakeholder Portals", id: "stakeholders", scroll: true },
-      { label: "Impact & Accreditation", id: "impact", scroll: true },
-      { label: "Research Highlights", id: "research", scroll: true },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Events", id: "events", scroll: true },
-      { label: "Workshops", id: "workshops", scroll: true },
-      { label: "Career Opportunities", id: "career-opportunities", scroll: true },
-      { label: "FAQ", id: "faq", scroll: true },
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { label: "Contact Us", id: "contact", scroll: true },
-      { label: "Photo Gallery", id: "gallery", scroll: true },
-      { label: "Community Feed", id: "community", scroll: true },
-      { label: "Join Alumni", href: "/register" },
-    ],
-  },
-];
-
 export default function Footer() {
+  const { t } = useTranslation();
+
+  const footerSections = [
+    {
+      title: t("footer.portalServices"),
+      links: [
+        { label: t("footer.alumni"), href: "/info/alumni-portal" },
+        { label: t("footer.employer"), href: "/info/employer-portal" },
+        { label: t("footer.registrar"), href: "/info/registrar-portal" },
+        { label: t("footer.department"), href: "/info/department-portal" },
+      ],
+    },
+    {
+      title: t("footer.aboutAstu"),
+      links: [
+        { label: t("footer.universityOverview"), href: "/" },
+        { label: t("footer.stakeholderPortals"), id: "stakeholders", scroll: true },
+        { label: t("footer.impactAccreditation"), id: "impact", scroll: true },
+        { label: t("footer.researchHighlights"), id: "research", scroll: true },
+      ],
+    },
+    {
+      title: t("footer.resources"),
+      links: [
+        { label: t("nav.events"), id: "events", scroll: true },
+        { label: t("nav.workshops"), id: "workshops", scroll: true },
+        { label: t("nav.careerOpportunities"), id: "career-opportunities", scroll: true },
+        { label: t("home.faq"), id: "faq", scroll: true },
+      ],
+    },
+    {
+      title: t("footer.connect"),
+      links: [
+        { label: t("footer.contactUs"), id: "contact", scroll: true },
+        { label: t("footer.photoGallery"), id: "gallery", scroll: true },
+        { label: t("footer.communityFeed"), id: "community", scroll: true },
+        { label: t("footer.joinAlumni"), href: "/register" },
+      ],
+    },
+  ];
+
   const handleNavClick = (item: { href?: string; id?: string; scroll?: boolean }) => {
     if (item.href) {
       window.location.href = item.href;
@@ -59,26 +62,26 @@ export default function Footer() {
       <div className="mx-auto max-w-[1440px] px-4 md:px-8">
         <div className="grid gap-8 py-12 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <h4 className="text-lg font-bold text-white">ASTU-AMS</h4>
+            <h4 className="text-lg font-bold text-white">{t("app.name")}</h4>
             <p className="mt-2 text-sm text-slate-400">
-              Adama Science and Technology University Alumni Management System - Connecting excellence to industry.
+              {t("app.taglineFooter")}
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-astu-green" />
-                <span>Adama Science and Technology University, Adama, Ethiopia</span>
+                <span>{t("footer.address")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 text-astu-green" />
-                <span>P.O. Box: 1888 Adama, Ethiopia</span>
+                <span>{t("footer.poBox")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-astu-green" />
-                <span>+251-221-110000</span>
+                <span>{t("footer.phone")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-astu-green" />
-                <span>irccd@astu.edu.et</span>
+                <span>{t("footer.email")}</span>
               </div>
             </div>
           </div>
@@ -102,7 +105,7 @@ export default function Footer() {
         </div>
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700 py-6 md:flex-row">
           <p className="text-sm text-slate-400">
-            &copy; 2026 Adama Science and Technology University. All rights reserved.
+            {t("footer.copyright")}
           </p>
           <div className="flex items-center gap-4">
             <a href="https://web.facebook.com/adamaastu/" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Facebook">
@@ -117,7 +120,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-slate-800 py-3 text-center text-[11px] text-slate-500">
-          Designed by <a href="https://www.astu.edu.et" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">ASTU-BADA</a>
+          {t("footer.designedBy")} <a href="https://www.astu.edu.et" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">ASTU-BADA</a>
         </div>
       </div>
     </footer>

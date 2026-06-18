@@ -787,7 +787,7 @@ a {
 }
 
 .animate-scroll {
-  animation: scroll-loop 30s linear infinite;
+  animation: scroll-loop 60s linear infinite;
   width: fit-content;
 }
 

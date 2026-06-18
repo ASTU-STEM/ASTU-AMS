@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { AppSidebar, SidebarNavItem } from './AppSidebar';
 import HelpCenter from '../components/HelpCenter';
 import toast from 'react-hot-toast';
@@ -192,6 +193,8 @@ export function DashboardShell({
             </label>
 
             {headerChildren}
+
+            <LanguageSwitcher variant="minimal" />
 
             {/* Dark Mode Toggle */}
             <button

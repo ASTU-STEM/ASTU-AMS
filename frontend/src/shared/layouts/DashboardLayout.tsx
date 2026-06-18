@@ -9,6 +9,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { GraduationCap, ShieldCheck, LogOut, Menu, Bell, Database, Building2, BarChart3, ArrowRight, User, FileText, Briefcase, Users, MapPin, ShoppingBag, Activity, Award, FileCheck, Ticket, Heart, Globe, TrendingUp, Settings, FileBarChart2, Edit, Layers, Palette, MenuSquare, Image, Newspaper, SearchCode, MessageCircle, Mail, Handshake, Share2, CheckCircle, HardDrive, Archive, FileCode, Key, Monitor, Shield, LogIn, Download, Mic, GalleryHorizontal, Video, Calendar, UserCog, BarChart, AlertCircle, Upload, RefreshCw, ThumbsUp, BarChart2, BookOpen, Plus } from "lucide-react";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import AlumniDashboard from "../../domains/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "../../domains/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "../../domains/registrar/pages/RegistrarDashboard";
@@ -208,6 +209,7 @@ export function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher variant="minimal" />
             <button className="p-2 text-slate-400 hover:text-[#003366] dark:hover:text-blue-400 bg-slate-50 dark:bg-slate-800 rounded-xl relative shadow-sm transition-all hover:scale-105 active:scale-95 border border-slate-200/40 dark:border-slate-700/40 group">
               <Bell className="h-4.5 w-4.5 transition-transform group-hover:rotate-12" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-[#111827]"></span>

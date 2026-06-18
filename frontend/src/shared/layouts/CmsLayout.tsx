@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Plus, Search, Sun, User, UserCircle2, Sparkles, Command, Clock } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -277,6 +278,7 @@ export default function CmsLayout() {
                 <Plus className="h-4 w-4" /> Create
               </button>
 
+              <LanguageSwitcher variant="minimal" />
               {/* Theme toggle */}
               <button type="button" onClick={toggleTheme}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">

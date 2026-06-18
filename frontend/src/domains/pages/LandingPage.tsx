@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -32,69 +33,7 @@ import electricLabs from "../../assets/images/electriclabs.jpeg";
 
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
-const stakeholders = [
-  {
-    title: "Alumni",
-    icon: Users,
-    points: [
-      "Create and maintain your professional profile.",
-      "Access verified job listings and internship opportunities.",
-      "Complete tracer surveys to guide curriculum development.",
-      "Mentor current students and connect with peers.",
-    ],
-    cta: "Access Alumni Portal",
-    route: "/alumni",
-    tint: "text-astu-navy bg-astu-navy/10",
-  },
-  {
-    title: "Employers",
-    icon: Briefcase,
-    points: [
-      "Post employment opportunities for ASTU graduates.",
-      "Search alumni by expertise, skills, and department.",
-      "Provide feedback to enhance curriculum relevance.",
-    ],
-    cta: "Partner With ASTU",
-    route: "/employer",
-    tint: "text-astu-red bg-astu-red/10",
-  },
-  {
-    title: "Departments",
-    icon: LineChart,
-    points: [
-      "Monitor graduate employment outcomes and metrics.",
-      "Identify skill gaps through employer analytics.",
-      "Generate accreditation-ready reports.",
-    ],
-    cta: "View Department Analytics",
-    route: "/department",
-    tint: "text-astu-green bg-astu-green/10",
-  },
-  {
-    title: "Registrar",
-    icon: FileCheck2,
-    points: [
-      "Validate alumni credentials against SIS records.",
-      "Process transcript and certificate requests.",
-      "Send tracer study reminders and audit notifications.",
-    ],
-    cta: "Open Registrar Portal",
-    route: "/registrar",
-    tint: "text-[#B87900] bg-[#E8A020]/15",
-  },
-  {
-    title: "Administrator",
-    icon: LockKeyhole,
-    points: [
-      "Manage users, roles, and department records.",
-      "Monitor system logs, backups, and security protocols.",
-      "Oversee institutional analytics and accreditation reports.",
-    ],
-    cta: "Admin Console",
-    route: "/admin",
-    tint: "text-violet-700 bg-violet-100",
-  },
-];
+
 
 const navSections = [
   { label: "Home", id: "home" },
@@ -108,24 +47,7 @@ const navSections = [
   { label: "Contact", id: "contact" },
 ];
 
-const searchItems = [
-  { label: "Go to Stakeholders section", type: "section", id: "stakeholders" },
-  { label: "Go to Impact section", type: "section", id: "impact" },
-  { label: "Go to Gallery section", type: "section", id: "gallery" },
-  { label: "Go to Community section", type: "section", id: "community" },
-  { label: "Go to Events section", type: "section", id: "events" },
-  { label: "Go to News section", type: "section", id: "news" },
-  {
-    label: "Go to Success Stories section",
-    type: "section",
-    id: "success-stories",
-  },
-  { label: "Alumni Portal", type: "route", route: "/alumni" },
-  { label: "Employer Portal", type: "route", route: "/employer" },
-  { label: "Registrar Portal", type: "route", route: "/registrar" },
-  { label: "Department Portal", type: "route", route: "/department" },
-  { label: "Admin Portal", type: "route", route: "/admin" },
-];
+
 
 const communityPosts: {
   name: string;
@@ -143,6 +65,91 @@ const events: {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const stakeholders = [
+    {
+      title: t("home.alumniTitle"),
+      icon: Users,
+      points: [
+        t("home.alumniPoint1"),
+        t("home.alumniPoint2"),
+        t("home.alumniPoint3"),
+        t("home.alumniPoint4"),
+      ],
+      cta: t("home.alumniCta"),
+      route: "/alumni",
+      tint: "text-astu-navy bg-astu-navy/10",
+    },
+    {
+      title: t("home.employersTitle"),
+      icon: Briefcase,
+      points: [
+        t("home.employersPoint1"),
+        t("home.employersPoint2"),
+        t("home.employersPoint3"),
+      ],
+      cta: t("home.employersCta"),
+      route: "/employer",
+      tint: "text-astu-red bg-astu-red/10",
+    },
+    {
+      title: t("home.departmentsTitle"),
+      icon: LineChart,
+      points: [
+        t("home.departmentsPoint1"),
+        t("home.departmentsPoint2"),
+        t("home.departmentsPoint3"),
+      ],
+      cta: t("home.departmentsCta"),
+      route: "/department",
+      tint: "text-astu-green bg-astu-green/10",
+    },
+    {
+      title: t("home.registrarTitle"),
+      icon: FileCheck2,
+      points: [
+        t("home.registrarPoint1"),
+        t("home.registrarPoint2"),
+        t("home.registrarPoint3"),
+      ],
+      cta: t("home.registrarCta"),
+      route: "/registrar",
+      tint: "text-[#B87900] bg-[#E8A020]/15",
+    },
+    {
+      title: t("home.administratorTitle"),
+      icon: LockKeyhole,
+      points: [
+        t("home.administratorPoint1"),
+        t("home.administratorPoint2"),
+        t("home.administratorPoint3"),
+      ],
+      cta: t("home.administratorCta"),
+      route: "/admin",
+      tint: "text-violet-700 bg-violet-100",
+    },
+  ];
+
+  const searchItems = [
+    { label: t("landing.goToStakeholders"), type: "section", id: "stakeholders" },
+    { label: t("landing.goToImpact"), type: "section", id: "impact" },
+    { label: t("landing.goToGallery"), type: "section", id: "gallery" },
+    { label: t("landing.goToCommunity"), type: "section", id: "community" },
+    { label: t("landing.goToEvents"), type: "section", id: "events" },
+    { label: t("landing.goToNews"), type: "section", id: "news" },
+    {
+      label: t("landing.goToSuccessStories"),
+      type: "section",
+      id: "success-stories",
+    },
+    { label: t("landing.alumniPortal"), type: "route", route: "/alumni" },
+    { label: t("landing.employerPortal"), type: "route", route: "/employer" },
+    { label: t("landing.registrarPortal"), type: "route", route: "/registrar" },
+    { label: t("landing.departmentPortal"), type: "route", route: "/department" },
+    { label: t("landing.adminPortal"), type: "route", route: "/admin" },
+  ];
+
   const searchWrapRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -256,10 +263,10 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="text-sm font-bold leading-none text-astu-navy">
-                ASTU-AMS
+                {t("app.name")}
               </p>
               <p className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
-                Alumni Ecosystem
+                {t("landing.alumniEcosystem")}
               </p>
             </div>
           </Link>
@@ -278,7 +285,7 @@ export default function LandingPage() {
               onFocus={() => setIsSearchOpen(true)}
               onKeyDown={handleSearchKeyDown}
               className="w-full rounded-md border border-outline-variant bg-surface-container-low py-2 pl-9 pr-3 text-sm focus:border-astu-navy focus:outline-none"
-              placeholder="Search sections or portals..."
+              placeholder={t("landing.searchPlaceholder")}
               type="text"
             />
 
@@ -308,7 +315,7 @@ export default function LandingPage() {
                 }`}
                 onClick={() => goToSection(item.id)}
               >
-                {item.label}
+                {t(`landing.${item.id}`)}
               </button>
             ))}
           </nav>
@@ -351,7 +358,7 @@ export default function LandingPage() {
                   onClick={() => goToSection(item.id)}
                   className="block w-full rounded-md border border-outline-variant px-3 py-2 text-left text-sm font-semibold text-astu-navy"
                 >
-                  {item.label}
+                  {t(`landing.${item.id}`)}
                 </button>
               ))}
             </div>
@@ -360,13 +367,13 @@ export default function LandingPage() {
                 onClick={() => navigate("/alumni/dashboard")}
                 className="rounded-md bg-astu-navy px-3 py-2 text-sm font-semibold text-white"
               >
-                Alumni Portal
+                {t("landing.alumniPortal")}
               </button>
               <button
                 onClick={() => navigate("/employer/dashboard")}
                 className="rounded-md border border-outline-variant px-3 py-2 text-sm font-semibold"
               >
-                Employer Portal
+                {t("landing.employerPortal")}
               </button>
             </div>
           </div>
@@ -388,28 +395,23 @@ export default function LandingPage() {
           <div className="relative z-10 mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28 lg:py-32">
             <div className="max-w-3xl reveal">
               <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-                Connecting ASTU&apos;s
-                <br />
-                Excellence to the{" "}
-                <span className="text-astu-green">Global Industry</span>
+                {t("landing.heroTitle")}
               </h1>
               <p className="mt-5 max-w-2xl text-sm leading-relaxed text-slate-100 md:text-base">
-                A unified gateway for alumni, employers, and departments to
-                foster professional growth, talent acquisition, and academic
-                innovation at Adama Science and Technology University.
+                {t("landing.heroDesc")}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <button
                   className="inline-flex items-center gap-2 rounded-md bg-astu-red px-6 py-3 text-sm font-semibold text-white hover:brightness-110"
                   onClick={() => navigate("/alumni/dashboard")}
                 >
-                  Alumni Portal Login
+                  {t("landing.alumniPortalLogin")}
                 </button>
                 <button
                   className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20"
                   onClick={() => navigate("/employer/dashboard")}
                 >
-                  Employer Partnership
+                  {t("home.employerPartnership")}
                   <Handshake className="h-4 w-4" />
                 </button>
               </div>
@@ -425,7 +427,7 @@ export default function LandingPage() {
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">24,000+</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
-                Global ASTU Alumni
+                {t("landing.globalAstuAlumni")}
               </p>
             </article>
             <article className="flex flex-col items-center gap-3 border-b border-outline-variant p-8 text-center md:border-b-0 md:border-r">
@@ -434,7 +436,7 @@ export default function LandingPage() {
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">500+</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
-                Partner Organizations
+                {t("home.partnerOrganizations")}
               </p>
             </article>
             <article className="flex flex-col items-center gap-3 p-8 text-center">
@@ -443,7 +445,7 @@ export default function LandingPage() {
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">87%</h2>
               <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">
-                Employment Rate
+                {t("home.employmentRate")}
               </p>
             </article>
           </div>
@@ -455,11 +457,10 @@ export default function LandingPage() {
         >
           <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
-              Stakeholder Portals
+              {t("landing.stakeholderPortals")}
             </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Dedicated interfaces for alumni, employers, departments,
-              registrar, and administrators.
+              {t("landing.stakeholderDesc")}
             </p>
           </div>
 
@@ -504,27 +505,25 @@ export default function LandingPage() {
         >
           <article className="reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">
-              Industry-Campus Bridge
+              {t("home.industryCampusBridge")}
             </p>
             <h3 className="mt-2 text-3xl font-bold text-astu-navy">
-              Nurturing Innovation in Modern Laboratories
+              {t("home.nurturingInnovation")}
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">
-              ASTU combines rigorous engineering education with practical lab
-              training. Through ASTU-AMS, graduate outcomes and employer
-              feedback feed directly into curriculum updates.
+              {t("home.impactDesc")}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div>
                 <p className="text-3xl font-bold text-astu-navy">12+</p>
                 <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">
-                  Research Centers
+                  {t("home.researchCenters")}
                 </p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-astu-navy">80+</p>
                 <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">
-                  Industry Partners
+                  {t("home.industryPartners")}
                 </p>
               </div>
             </div>
@@ -532,7 +531,7 @@ export default function LandingPage() {
               className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
               onClick={() => navigate("/department")}
             >
-              Explore Campus Life
+              {t("home.exploreCampusLife")}
             </button>
           </article>
 
@@ -552,11 +551,10 @@ export default function LandingPage() {
         >
           <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
-              Community Feed
+              {t("landing.communityFeed")}
             </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay connected with alumni stories, employer announcements, and
-              career opportunities.
+              {t("landing.communityDesc")}
             </p>
           </div>
 
@@ -565,17 +563,17 @@ export default function LandingPage() {
               <div className="reveal rounded-xl border border-outline-variant bg-white p-4">
                 <div className="mb-3 flex items-center gap-2 rounded-md bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant">
                   <BookOpen className="h-4 w-4" />
-                  Share an update with the ASTU community...
+                  {t("landing.shareUpdate")}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">
-                    Media
+                    {t("landing.media")}
                   </button>
                   <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">
-                    Event
+                    {t("landing.event")}
                   </button>
                   <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs font-medium hover:bg-surface-container-low">
-                    Article
+                    {t("landing.article")}
                   </button>
                 </div>
               </div>
@@ -610,19 +608,19 @@ export default function LandingPage() {
                   <p className="text-sm text-on-surface-variant">{post.text}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">
-                      Like
+                      {t("landing.like")}
                     </button>
                     <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">
-                      Comment
+                      {t("landing.comment")}
                     </button>
                     <button className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low">
-                      Share
+                      {t("landing.share")}
                     </button>
                     <button
                       className="rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low"
                       onClick={() => navigate("/alumni/dashboard")}
                     >
-                      View Profile
+                      {t("landing.viewProfile")}
                     </button>
                   </div>
                 </article>
@@ -632,7 +630,7 @@ export default function LandingPage() {
             <aside className="space-y-4 lg:col-span-1">
               <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
                 <h4 className="text-sm font-semibold text-astu-navy">
-                  Recommended Connections
+                  {t("landing.recommendedConnections")}
                 </h4>
                 <div className="mt-3 space-y-3 text-sm">
                   <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
@@ -646,7 +644,7 @@ export default function LandingPage() {
 
               <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
                 <h4 className="text-sm font-semibold text-astu-navy">
-                  ASTU Trending Topics
+                  {t("landing.trendingTopics")}
                 </h4>
                 <ul className="mt-3 space-y-2 text-sm text-on-surface-variant">
                   <li>#EngineeringCareers</li>
@@ -657,7 +655,7 @@ export default function LandingPage() {
                   className="mt-4 rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low"
                   onClick={() => navigate("/department")}
                 >
-                  View Insights
+                  {t("landing.viewInsights")}
                 </button>
               </article>
             </aside>
@@ -668,31 +666,29 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-2 md:px-8">
             <article className="reveal text-white">
               <p className="inline-flex rounded-full bg-astu-red px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]">
-                Quality Assurance
+                {t("home.qualityAssurance")}
               </p>
               <h3 className="mt-4 text-3xl font-bold">
-                Data-Driven Accreditation & Excellence
+                {t("home.dataDrivenAccreditation")}
               </h3>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-200">
-                ASTU-AMS provides verified tracer data, employment analytics,
-                and employer feedback required by accreditation agencies and
-                university management.
+                {t("home.accreditationDesc")}
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/20 bg-white/5 p-4">
                   <Globe className="mb-2 h-5 w-5 text-astu-green" />
                   <h4 className="text-sm font-semibold">
-                    Global Accreditation
+                    {t("home.globalAccreditation")}
                   </h4>
                   <p className="mt-1 text-xs text-slate-300">
-                    Build transparent, audited institutional reports.
+                    {t("home.globalAccreditationDesc")}
                   </p>
                 </div>
                 <div className="rounded-lg border border-white/20 bg-white/5 p-4">
                   <Handshake className="mb-2 h-5 w-5 text-astu-green" />
-                  <h4 className="text-sm font-semibold">Market Alignment</h4>
+                  <h4 className="text-sm font-semibold">{t("home.marketAlignment")}</h4>
                   <p className="mt-1 text-xs text-slate-300">
-                    Align curriculum with industry expectations.
+                    {t("home.marketAlignmentDesc")}
                   </p>
                 </div>
               </div>
@@ -700,7 +696,7 @@ export default function LandingPage() {
                 className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
                 onClick={() => navigate("/department")}
               >
-                Participate in Impact Study
+                {t("landing.participateInImpactStudy")}
               </button>
             </article>
 
@@ -728,17 +724,17 @@ export default function LandingPage() {
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">
-                Upcoming Alumni Events
+                {t("home.upcomingAlumniEvents")}
               </h3>
               <p className="mt-2 text-sm text-on-surface-variant">
-                Networking, learning, and professional growth opportunities.
+                {t("home.eventsDesc")}
               </p>
             </div>
             <button
               className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low"
               onClick={() => navigate("/alumni/dashboard")}
             >
-              See All Events
+              {t("home.seeAllEvents")}
             </button>
           </div>
 
@@ -756,7 +752,7 @@ export default function LandingPage() {
                 />
                 <div className="p-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-astu-red">
-                    Career Development
+                    {t("home.careerDevelopment")}
                   </p>
                   <h4 className="mt-2 text-lg font-semibold text-astu-navy">
                     {event.title}
@@ -773,10 +769,10 @@ export default function LandingPage() {
                       className="rounded-md bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110"
                       onClick={() => navigate("/alumni")}
                     >
-                      Register
+                      {t("home.register")}
                     </button>
                     <button className="rounded-md border border-outline-variant px-4 py-2 text-xs font-semibold hover:bg-surface-container-low">
-                      Learn More
+                      {t("home.learnMore")}
                     </button>
                   </div>
                 </div>
@@ -791,25 +787,24 @@ export default function LandingPage() {
         >
           <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
-              Latest News
+              {t("home.latestNews")}
             </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay updated with the latest ASTU announcements and university
-              news.
+              {t("home.newsDesc")}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
             {[
-              "New Engineering Lab Opened",
-              "Research Grant Results",
-              "Career Expo 2026",
+              t("landing.newEngineeringLab"),
+              t("landing.researchGrantResults"),
+              t("landing.careerExpo2026"),
             ].map((news, i) => (
               <article
                 key={i}
                 className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm"
               >
                 <p className="text-xs font-semibold uppercase tracking-wider text-astu-red">
-                  Announcement
+                  {t("home.announcement")}
                 </p>
                 <h4 className="mt-2 font-semibold text-astu-navy">{news}</h4>
                 <p className="mt-2 text-xs text-on-surface-variant">
@@ -819,7 +814,7 @@ export default function LandingPage() {
                   className="mt-3 text-xs text-astu-navy hover:underline"
                   onClick={() => navigate("/alumni")}
                 >
-                  Read More
+                  {t("home.readMore")}
                 </button>
               </article>
             ))}
@@ -832,10 +827,10 @@ export default function LandingPage() {
         >
           <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
-              Alumni Success Stories
+              {t("home.alumniSuccessStories")}
             </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Inspiring journeys of ASTU graduates making global impact.
+              {t("home.successStoriesDesc")}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
@@ -860,7 +855,7 @@ export default function LandingPage() {
                     className="mt-3 text-xs text-astu-navy hover:underline"
                     onClick={() => navigate("/alumni")}
                   >
-                    Read Story
+                    {t("home.readStory")}
                   </button>
                 </div>
               </article>
@@ -874,16 +869,16 @@ export default function LandingPage() {
         >
           <div className="mb-10 text-center reveal">
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">
-              Contact Us
+              {t("home.contactUs")}
             </h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Connect with the ASTU Alumni Relations Office.
+              {t("home.contactDesc")}
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
             <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
               <MapPin className="h-8 w-8 mx-auto text-astu-navy mb-3" />
-              <h4 className="font-semibold text-astu-navy">Address</h4>
+              <h4 className="font-semibold text-astu-navy">{t("home.address")}</h4>
               <p className="text-xs text-on-surface-variant mt-1">
                 Adama, Oromia, Ethiopia
               </p>
@@ -892,7 +887,7 @@ export default function LandingPage() {
               <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">
                 phone
               </span>
-              <h4 className="font-semibold text-astu-navy">Phone</h4>
+              <h4 className="font-semibold text-astu-navy">{t("home.phone")}</h4>
               <p className="text-xs text-on-surface-variant mt-1">
                 +251-221-110000
               </p>
@@ -901,7 +896,7 @@ export default function LandingPage() {
               <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">
                 mail
               </span>
-              <h4 className="font-semibold text-astu-navy">Email</h4>
+              <h4 className="font-semibold text-astu-navy">{t("home.email")}</h4>
               <p className="text-xs text-on-surface-variant mt-1">
                 alumni.office@astu.edu.et
               </p>
@@ -913,10 +908,9 @@ export default function LandingPage() {
       <footer className="border-t border-outline-variant bg-surface py-10">
         <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-4 md:px-8">
           <div>
-            <h5 className="text-sm font-bold text-astu-navy">ASTU-AMS</h5>
+            <h5 className="text-sm font-bold text-astu-navy">{t("app.name")}</h5>
             <p className="mt-2 text-xs text-on-surface-variant">
-              The ASTU Alumni Management System connects graduates, employers,
-              and departments in one platform.
+              {t("footer.designedFor")}
             </p>
             <div className="mt-4 flex gap-2">
               <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">
@@ -933,7 +927,7 @@ export default function LandingPage() {
 
           <div>
             <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">
-              Resources
+              {t("footer.resources")}
             </h6>
             <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
               <li>
@@ -941,7 +935,7 @@ export default function LandingPage() {
                   className="hover:text-astu-navy"
                   onClick={() => navigate("/alumni")}
                 >
-                  Career Portal
+                  {t("landing.careerPortal")}
                 </button>
               </li>
               <li>
@@ -949,7 +943,7 @@ export default function LandingPage() {
                   className="hover:text-astu-navy"
                   onClick={() => navigate("/alumni")}
                 >
-                  Tracer Survey
+                  {t("landing.tracerSurvey")}
                 </button>
               </li>
               <li>
@@ -957,7 +951,7 @@ export default function LandingPage() {
                   className="hover:text-astu-navy"
                   onClick={() => navigate("/alumni")}
                 >
-                  Mentorship
+                  {t("landing.mentorship")}
                 </button>
               </li>
             </ul>
@@ -965,28 +959,28 @@ export default function LandingPage() {
 
           <div>
             <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">
-              University
+              {t("landing.university")}
             </h6>
             <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
               <li>
                 <button className="hover:text-astu-navy">
-                  Official Website
+                  {t("landing.officialWebsite")}
                 </button>
               </li>
               <li>
                 <button className="hover:text-astu-navy">
-                  Research Centers
+                  {t("home.researchCenters")}
                 </button>
               </li>
               <li>
-                <button className="hover:text-astu-navy">Accreditation</button>
+                <button className="hover:text-astu-navy">{t("landing.accreditation")}</button>
               </li>
             </ul>
           </div>
 
           <div>
             <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">
-              Support
+              {t("landing.support")}
             </h6>
             <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
               <li>
@@ -994,7 +988,7 @@ export default function LandingPage() {
                   className="hover:text-astu-navy"
                   onClick={() => navigate("/registrar/dashboard")}
                 >
-                  Help Center
+                  {t("dashboard.helpCenter")}
                 </button>
               </li>
               <li>
@@ -1002,7 +996,7 @@ export default function LandingPage() {
                   className="hover:text-astu-navy"
                   onClick={() => navigate("/admin/dashboard")}
                 >
-                  Privacy Policy
+                  {t("landing.privacyPolicy")}
                 </button>
               </li>
               <li>
@@ -1010,7 +1004,7 @@ export default function LandingPage() {
                   className="hover:text-astu-navy"
                   onClick={() => navigate("/registrar/dashboard")}
                 >
-                  Contact Us
+                  {t("home.contactUs")}
                 </button>
               </li>
             </ul>
@@ -1019,9 +1013,9 @@ export default function LandingPage() {
 
         <div className="mx-auto mt-8 flex max-w-[1440px] flex-col justify-between gap-2 border-t border-outline-variant px-4 pt-5 text-xs text-on-surface-variant md:flex-row md:px-8">
           <p>
-            © 2026 Adama Science and Technology University. All rights reserved.
+            {t("footer.copyright")}
           </p>
-          <p>Designed for ASTU ICT and Tracer Study Coordination.</p>
+          <p>{t("landing.designedFor")}</p>
         </div>
       </footer>
     </div>

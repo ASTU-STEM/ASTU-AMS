@@ -13,7 +13,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-
+const MOCK_USERS: Record<string, User> = {
+  ALUMNI: { id: 'alum-001', email: 'abebe@astu.edu.et', firstName: 'Abebe', lastName: 'Bikila', role: 'ALUMNI', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  EMPLOYER: { id: 'emp-001', email: 'tigist@safir.com', firstName: 'Tigist', lastName: 'Haile', role: 'EMPLOYER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  REGISTRAR: { id: 'reg-001', email: 'registrar@astu.edu.et', firstName: 'Abebe', lastName: 'Assefa', role: 'REGISTRAR', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  DEPARTMENT_HEAD: { id: 'dept-001', email: 'cs.head@astu.edu.et', firstName: 'Meseret', lastName: 'Alemu', role: 'DEPARTMENT_HEAD', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  ADMIN: { id: 'adm-001', email: 'admin@astu.edu.et', firstName: 'System', lastName: 'Administrator', role: 'ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  CMS_MANAGER: { id: 'cms-mgr-001', email: 'cms@astu.edu.et', firstName: 'Content', lastName: 'Manager', role: 'CMS_MANAGER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+};
 
 const normalizeRole = (role?: string | null): UserRole | null => {
   switch (role?.toUpperCase()) {
@@ -23,6 +30,7 @@ const normalizeRole = (role?: string | null): UserRole | null => {
     case 'DEPARTMENT':
     case 'DEPARTMENT_HEAD': return 'DEPARTMENT_HEAD';
     case 'ADMIN': return 'ADMIN';
+    case 'SUPER_ADMIN': return 'SUPER_ADMIN';
     case 'ALUMNI_OFFICE':
     case 'CMS_MANAGER': return 'CMS_MANAGER';
     default: return null;
@@ -36,9 +44,12 @@ const readStoredUser = (): User | null => {
       const parsed = JSON.parse(storedUser);
       const role = normalizeRole(parsed.role);
       if (role) {
+        const mock = MOCK_USERS[role];
         return {
-          id: String(parsed.id ?? ''),
-          email: String(parsed.email ?? ''),
+          id: String(parsed.id ?? mock?.id ?? ''),
+          email: String(parsed.email ?? mock?.email ?? ''),
+          firstName: String(parsed.firstName ?? parsed.fullName?.split(' ')[0] ?? parsed.name ?? mock?.firstName ?? ''),
+          lastName: String(parsed.lastName ?? parsed.fullName?.split(' ').slice(1).join(' ') ?? mock?.lastName ?? ''),
           role,
           isActive: true,
           createdAt: parsed.createdAt ?? '2024-01-01',
@@ -49,7 +60,8 @@ const readStoredUser = (): User | null => {
       console.warn('Failed to restore stored auth user');
     }
   }
-  return null;
+  const savedRole = normalizeRole(localStorage.getItem('astu_ams_user_role'));
+  return savedRole ? MOCK_USERS[savedRole] ?? null : null;
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -57,37 +69,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      authService.getCurrentUser()
-        .then(result => {
-          if (result.ok && result.data?.user) {
-            const apiUser = result.data.user;
-            const role = normalizeRole(apiUser.role);
-            if (role) {
-              const userData: User = {
-                id: apiUser.id,
-                email: apiUser.email,
-                role,
-                isActive: true,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              };
-              setUser(userData);
-              localStorage.setItem('user', JSON.stringify(userData));
-              localStorage.setItem('astu_ams_user_role', role);
-            }
-          }
-          setIsLoading(false);
-        })
-        .catch(() => {
-          setUser(readStoredUser());
-          setIsLoading(false);
-        });
-    } else {
-      setUser(readStoredUser());
-      setIsLoading(false);
-    }
+    setUser(readStoredUser());
+    setIsLoading(false);
 
     const syncStoredUser = () => {
       setUser(readStoredUser());
@@ -106,17 +89,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const email = `${role.toLowerCase()}@astu.edu.et`;
       const result = await authService.login({ emailOrStudentId: email, password: 'Password@123' });
-      if (result.ok) return;
+      if (result.ok) {
+        return;
+      }
     } catch {}
 
-    const userData: User = {
-      id: `${role.toLowerCase()}-001`,
-      email: `${role.toLowerCase()}@astu.edu.et`,
-      role,
-      isActive: true,
-      createdAt: '2024-01-01',
-      updatedAt: '2026-01-01',
-    };
+    const mockUser = MOCK_USERS[role];
+    if (!mockUser) return;
+    const userData = name ? { ...mockUser, firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') || '' } : mockUser;
     localStorage.setItem('astu_ams_user_role', role);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('authToken', 'mock-jwt-token-' + Date.now());
@@ -127,9 +107,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = useCallback(async () => {
     try {
       await authService.logout();
-    } catch (e) {
-      console.error('Logout error', e);
+    } catch {
+      // Logout API failed, proceed with local cleanup
     } finally {
+      localStorage.removeItem('astu_ams_user_role');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('astu-auth-changed'));
       setUser(null);
     }
   }, []);

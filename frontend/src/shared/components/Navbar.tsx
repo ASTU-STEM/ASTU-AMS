@@ -11,8 +11,10 @@ import { MdCampaign, MdDashboardCustomize } from "react-icons/md";
 import { FaInfoCircle, FaUsers } from "react-icons/fa";
 import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import authService from "../../domains/auth/services/auth.service";
 import AnnouncementPanel from "./AnnouncementPanel";
+import LanguageSwitcher from "./LanguageSwitcher";
 import astuLogo from "../../assets/logos/astu-icon.jpeg";
 
 interface MegaMenuItem {
@@ -27,40 +29,7 @@ interface MegaMenu {
   items: MegaMenuItem[];
 }
 
-const megaMenus: MegaMenu[] = [
-  {
-    label: "About",
-    icon: FaInfoCircle,
-    items: [
-      { label: "About ASTU", sectionId: "impact", description: "Mission, vision & history" },
-      { label: "Campuses", sectionId: "campuses", description: "Our campuses & facilities" },
-      { label: "Campus Life", sectionId: "campus-life", description: "Student activities & culture" },
-      { label: "Research", sectionId: "research", description: "Innovation & discoveries" },
-      { label: "Success Stories", sectionId: "success-stories", description: "Alumni achievements" },
-    ],
-  },
-  {
-    label: "Services",
-    icon: MdDashboardCustomize,
-    items: [
-      { label: "Stakeholders", sectionId: "stakeholders", description: "Partners & collaborators" },
-      { label: "Career Opportunities", sectionId: "career-opportunities", description: "Jobs & internships" },
-      { label: "Testimonials", sectionId: "testimonials", description: "What alumni say" },
-    ],
-  },
-  {
-    label: "Media",
-    icon: MdCampaign,
-    items: [
-      { label: "Events", sectionId: "events", description: "Upcoming gatherings" },
-      { label: "Workshops", sectionId: "workshops", description: "Skill-building sessions" },
-      { label: "News", sectionId: "news", description: "Latest updates" },
-      { label: "Announcements", sectionId: "announcements", description: "Official notices" },
-      { label: "Gallery", sectionId: "gallery", description: "Photo moments" },
-      { label: "Video Gallery", sectionId: "video-gallery", description: "Video highlights" },
-    ],
-  },
-];
+
 
 interface SimpleNavItem {
   label: string;
@@ -69,18 +38,7 @@ interface SimpleNavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-const simpleItems: SimpleNavItem[] = [
-  { label: "Home", sectionId: "home", icon: HiHome },
-  { label: "Partners", route: "/partners", icon: FaUsers },
-];
 
-const searchItems = [
-  ...megaMenus.flatMap((m) => m.items),
-  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId })),
-].map((item) => ({
-  label: item.label,
-  sectionId: item.sectionId,
-}));
 
 function scrollToSection(sectionId: string) {
   const el = document.getElementById(sectionId);
@@ -93,6 +51,7 @@ function scrollToSection(sectionId: string) {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const searchWrapRef = useRef<HTMLDivElement>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,6 +61,54 @@ export default function Navbar() {
   const [isAnnouncementOpen, setIsAnnouncementOpen] = useState(false);
   const [openMega, setOpenMega] = useState<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const megaMenus = useMemo(() => [
+    {
+      label: t("nav.about"),
+      icon: FaInfoCircle,
+      items: [
+        { label: t("nav.aboutAstu"), sectionId: "impact", description: t("nav.aboutAstuDesc") },
+        { label: t("nav.campuses"), sectionId: "campuses", description: t("nav.campusesDesc") },
+        { label: t("nav.campusLife"), sectionId: "campus-life", description: t("nav.campusLifeDesc") },
+        { label: t("nav.research"), sectionId: "research", description: t("nav.researchDesc") },
+        { label: t("nav.successStories"), sectionId: "success-stories", description: t("nav.successStoriesDesc") },
+      ],
+    },
+    {
+      label: t("nav.services"),
+      icon: MdDashboardCustomize,
+      items: [
+        { label: t("nav.stakeholders"), sectionId: "stakeholders", description: t("nav.stakeholdersDesc") },
+        { label: t("nav.careerOpportunities"), sectionId: "career-opportunities", description: t("nav.careerOpportunitiesDesc") },
+        { label: t("nav.testimonials"), sectionId: "testimonials", description: t("nav.testimonialsDesc") },
+      ],
+    },
+    {
+      label: t("nav.media"),
+      icon: MdCampaign,
+      items: [
+        { label: t("nav.events"), sectionId: "events", description: t("nav.eventsDesc") },
+        { label: t("nav.workshops"), sectionId: "workshops", description: t("nav.workshopsDesc") },
+        { label: t("nav.news"), sectionId: "news", description: t("nav.newsDesc") },
+        { label: t("nav.announcements_title"), sectionId: "announcements", description: t("nav.announcementsDesc") },
+        { label: t("nav.gallery"), sectionId: "gallery", description: t("nav.galleryDesc") },
+        { label: t("nav.videoGallery"), sectionId: "video-gallery", description: t("nav.videoGalleryDesc") },
+      ],
+    },
+  ], [t]);
+
+  const simpleItems = useMemo<SimpleNavItem[]>(() => [
+    { label: t("nav.home"), sectionId: "home", icon: HiHome },
+    { label: t("nav.partners"), route: "/partners", icon: FaUsers },
+  ], [t]);
+
+  const searchItems = useMemo(() => [
+    ...megaMenus.flatMap((m) => m.items),
+    ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId })),
+  ].map((item) => ({
+    label: item.label,
+    sectionId: item.sectionId,
+  })), [megaMenus, simpleItems]);
 
   useEffect(() => {
     const checkUserSession = () => {
@@ -124,7 +131,7 @@ export default function Navbar() {
         item.label.toLowerCase().includes(searchQuery.toLowerCase())
       )
       .slice(0, 6);
-  }, [searchQuery]);
+  }, [searchQuery, searchItems]);
 
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
@@ -153,7 +160,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     await authService.logout();
     setUser(null);
-    toast.success("Successfully signed out!");
+    toast.success(t("dashboard.signedOut"));
     navigate("/");
   };
 
@@ -207,18 +214,20 @@ export default function Navbar() {
             <span>+251-221-110000</span>
           </div>
           <div className="flex items-center gap-3 text-xs">
+            <LanguageSwitcher variant="minimal" align="left" />
+            <span className="text-white/20">|</span>
             <Link
               to="/login"
               className="text-white/80 hover:text-white transition-colors"
             >
-              Login
+              {t("nav.login")}
             </Link>
             <span className="text-white/20">|</span>
             <Link
               to="/register"
               className="text-white/80 hover:text-white transition-colors"
             >
-              Register
+              {t("nav.register")}
             </Link>
           </div>
         </div>
@@ -237,7 +246,7 @@ export default function Navbar() {
                 ASTU-AMS
               </p>
               <p className="text-[10px] uppercase tracking-[0.22em] text-[#1D9E75] font-semibold">
-                Alumni Management System
+                {t("app.tagline")}
               </p>
             </div>
           </div>
@@ -328,7 +337,7 @@ export default function Navbar() {
               onKeyDown={handleSearchKeyDown}
               onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
               className="w-48 rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm focus:w-64 focus:border-[#003580] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#003580] transition-all placeholder:text-slate-400"
-              placeholder="Search..."
+              placeholder={t("nav.search")}
               type="text"
             />
             {isSearchOpen && filteredSearch.length > 0 && (
@@ -352,7 +361,7 @@ export default function Navbar() {
             aria-label="announcements"
             className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-[#003580] transition-colors"
             onClick={() => setIsAnnouncementOpen(true)}
-            title="Announcements"
+            title={t("nav.announcements")}
           >
             <Bell className="h-5 w-5" />
           </button>
@@ -361,7 +370,7 @@ export default function Navbar() {
             to="/register"
             className="hidden sm:inline-flex rounded-lg bg-[#003580] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#004499]"
           >
-            Join Network
+            {t("nav.joinNetwork")}
           </Link>
 
           <button
@@ -389,19 +398,19 @@ export default function Navbar() {
                   onClick={() => setIsMobileNavOpen(false)}
                   className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-[#003580] text-center hover:bg-slate-50 transition-colors"
                 >
-                  Login
+                  {t("nav.login")}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setIsMobileNavOpen(false)}
                   className="rounded-lg bg-[#003580] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#004499] transition-colors"
                 >
-                  Join Network
+                  {t("nav.joinNetwork")}
                 </Link>
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Logged in</span>
+                <span className="text-xs text-slate-500">{t("nav.loggedIn")}</span>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
@@ -409,7 +418,7 @@ export default function Navbar() {
                   }}
                   className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  Sign Out
+                  {t("nav.signOut")}
                 </button>
               </div>
             )}
@@ -423,7 +432,7 @@ export default function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-base focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580] transition-all placeholder:text-slate-400"
-                placeholder="Search..."
+                placeholder={t("nav.search")}
                 type="text"
               />
             </div>

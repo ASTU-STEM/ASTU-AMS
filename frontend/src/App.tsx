@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { store } from "./shared/store";
+import "./shared/i18n/i18n";
 
 import HomePage from "./domains/pages/HomePage";
 import PartnersPage from "./domains/pages/PartnersPage";

@@ -1,5 +1,5 @@
 const config = {
-  apiUrl: import.meta.env.VITE_API_URL || '/api',
+  apiUrl: import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   appName: 'ASTU Alumni Management System',
   appShortName: 'ASTU-AMS',
   version: '1.0.0',

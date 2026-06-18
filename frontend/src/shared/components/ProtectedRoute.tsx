@@ -35,6 +35,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       localStorage.setItem('user', JSON.stringify({
         id: `demo-${role.toLowerCase()}`,
         email: `${role.toLowerCase()}@astu.edu.et`,
+        firstName: role.charAt(0) + role.slice(1).toLowerCase(),
+        lastName: 'User',
         role,
         isActive: true,
         createdAt: '2024-01-01',

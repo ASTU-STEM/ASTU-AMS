@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -242,6 +243,8 @@ export default function DepartmentLayout() {
                 className="w-full bg-transparent border-none outline-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white ml-2"
               />
             </div>
+
+            <LanguageSwitcher variant="minimal" />
 
             <button
               type="button"

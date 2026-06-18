@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   ArrowRight,
@@ -45,70 +46,6 @@ import gc7 from "../../assets/images/gc7.jpg";
 import electricLabs from "../../assets/images/electriclabs.jpeg";
 
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
-
-const stakeholders = [
-  {
-    title: "Alumni",
-    icon: Users,
-    points: [
-      "Create and maintain your professional profile.",
-      "Access verified job listings and internship opportunities.",
-      "Complete tracer surveys to guide curriculum development.",
-      "Mentor current students and connect with peers.",
-    ],
-    cta: "Access Alumni Portal",
-    route: "/info/alumni-portal",
-    tint: "text-astu-navy bg-astu-navy/10",
-  },
-  {
-    title: "Employers",
-    icon: Briefcase,
-    points: [
-      "Post employment opportunities for ASTU graduates.",
-      "Search alumni by expertise, skills, and department.",
-      "Provide feedback to enhance curriculum relevance.",
-    ],
-    cta: "Partner With ASTU",
-    route: "/info/employer-portal",
-    tint: "text-astu-red bg-astu-red/10",
-  },
-  {
-    title: "Departments",
-    icon: LineChart,
-    points: [
-      "Monitor graduate employment outcomes and metrics.",
-      "Identify skill gaps through employer analytics.",
-      "Generate accreditation-ready reports.",
-    ],
-    cta: "View Department Analytics",
-    route: "/info/department-portal",
-    tint: "text-astu-green bg-astu-green/10",
-  },
-  {
-    title: "Registrar",
-    icon: FileCheck2,
-    points: [
-      "Validate alumni credentials against SIS records.",
-      "Process transcript and certificate requests.",
-      "Send tracer study reminders and audit notifications.",
-    ],
-    cta: "Open Registrar Portal",
-    route: "/info/registrar-portal",
-    tint: "text-[#B87900] bg-[#E8A020]/15",
-  },
-  {
-    title: "Administrator",
-    icon: LockKeyhole,
-    points: [
-      "Manage users, roles, and department records.",
-      "Monitor system logs, backups, and security protocols.",
-      "Oversee institutional analytics and accreditation reports.",
-    ],
-    cta: "Admin Console",
-    route: "/admin",
-    tint: "text-violet-700 bg-violet-100",
-  },
-];
 
 const navSections = [
   { label: "Home", id: "home" },
@@ -162,7 +99,45 @@ const featuredEmployers: {
 
 const partners: {
   name: string;
-}[] = [];
+}[] = [
+  { name: "Ethio Telecom" },
+  { name: "INSA" },
+  { name: "Ethiopian Airlines" },
+  { name: "Safaricom" },
+  { name: "Huawei" },
+  { name: "Commercial Bank of Ethiopia" },
+  { name: "Ministry of Transport and Logistics" },
+  { name: "Ethiopian Aviation University" },
+  { name: "Ethiopian Conformity Assessment Enterprise (ECAE)" },
+  { name: "Oromia Industrial Parks Development Corporation" },
+  { name: "Adama Industrial Park" },
+  { name: "Industrial Project Service (IPS)" },
+  { name: "AMG Steel Factory" },
+  { name: "ETG Designers and Consultants Share Company" },
+  { name: "Sky Win Aeronautics Industry" },
+  { name: "Ethiopian Civil Service University" },
+  { name: "Ethiopian Police University" },
+  { name: "Addis Ababa Science and Technology University" },
+  { name: "Addis Ababa University" },
+  { name: "Jimma University" },
+  { name: "Adigrat University" },
+  { name: "Debre Berhan University" },
+  { name: "Mada Walabu University" },
+  { name: "Ambo University" },
+  { name: "Wollega University" },
+  { name: "Hawassa University" },
+  { name: "Hubei University of Technology (China)" },
+  { name: "JinkoSolar Holding Co. (China)" },
+  { name: "China-Africa Innovation Cooperation Alliance" },
+  { name: "HTW Berlin (Germany)" },
+  { name: "IHE Delft (Netherlands)" },
+  { name: "Makerere University (Uganda)" },
+  { name: "University of Juba (South Sudan)" },
+  { name: "Meru University of Science and Technology (Kenya)" },
+  { name: "Lake Chad Basin Commission (Chad)" },
+  { name: "ATREE (India)" },
+  { name: "FRENASAP (Costa Rica)" },
+];
 
 const campusLifeCards: {
   title: string;
@@ -194,35 +169,11 @@ const galleryImages: {
   title: string;
 }[] = [];
 
-const impactStats = [
-  {
-    title: "Alumni Members",
-    value: "1,238+",
-    detail: "Registered in the alumni network",
-    icon: Users,
-    action: "View Network",
-    target: "/register",
-  },
-  {
-    title: "Fields of Study",
-    value: "5",
-    detail: "Engineering, Science, Tech & more",
-    icon: BookOpen,
-    action: "Explore Programs",
-    target: "/info/overview",
-  },
-  {
-    title: "Partner Employers",
-    value: "500+",
-    detail: "Hiring, internships, and feedback",
-    icon: Building2,
-    action: "Meet Partners",
-    target: "/info/featured-employers",
-  },
-];
+
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [activeSection, setActiveSection] = useState("home");
   const [user, setUser] = useState<any>(null);
@@ -231,24 +182,115 @@ export default function HomePage() {
 
   const slides = useMemo(() => [
     {
-      image: gallery1, // real astu-building.jpg
-      tagline: "Quality Assurance & Accreditation",
-      title: "Connecting ASTU's Excellence to the Global Industry",
-      description: "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.",
+      image: gallery1,
+      tagline: t("home.slide1Tagline"),
+      title: t("home.slide1Title"),
+      description: t("home.slide1Desc"),
     },
     {
-      image: gallery2, // real campus-2.jpeg
-      tagline: "Enterprise Networking & Placement",
-      title: "Empowering ASTU Graduates in Modern Workspaces",
-      description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
+      image: gallery2,
+      tagline: t("home.slide2Tagline"),
+      title: t("home.slide2Title"),
+      description: t("home.slide2Desc"),
     },
     {
-      image: gc7, // third beautiful campus photo
-      tagline: "Academic Innovation & Tracer Feedback",
-      title: "Coordinating Strategic Tracer Studies & Skill Gaps",
-      description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.",
+      image: gc7,
+      tagline: t("home.slide3Tagline"),
+      title: t("home.slide3Title"),
+      description: t("home.slide3Desc"),
     }
-  ], []);
+  ], [t]);
+
+  const stakeholders = useMemo(() => [
+    {
+      title: t("home.alumniTitle"),
+      icon: Users,
+      points: [
+        t("home.alumniPoint1"),
+        t("home.alumniPoint2"),
+        t("home.alumniPoint3"),
+        t("home.alumniPoint4"),
+      ],
+      cta: t("home.alumniCta"),
+      route: "/info/alumni-portal",
+      tint: "text-astu-navy bg-astu-navy/10",
+    },
+    {
+      title: t("home.employersTitle"),
+      icon: Briefcase,
+      points: [
+        t("home.employerPoint1"),
+        t("home.employerPoint2"),
+        t("home.employerPoint3"),
+      ],
+      cta: t("home.employerCta"),
+      route: "/info/employer-portal",
+      tint: "text-astu-red bg-astu-red/10",
+    },
+    {
+      title: t("home.departmentsTitle"),
+      icon: LineChart,
+      points: [
+        t("home.deptPoint1"),
+        t("home.deptPoint2"),
+        t("home.deptPoint3"),
+      ],
+      cta: t("home.deptCta"),
+      route: "/info/department-portal",
+      tint: "text-astu-green bg-astu-green/10",
+    },
+    {
+      title: t("home.registrarTitle"),
+      icon: FileCheck2,
+      points: [
+        t("home.registrarPoint1"),
+        t("home.registrarPoint2"),
+        t("home.registrarPoint3"),
+      ],
+      cta: t("home.registrarCta"),
+      route: "/info/registrar-portal",
+      tint: "text-[#B87900] bg-[#E8A020]/15",
+    },
+    {
+      title: t("home.adminTitle"),
+      icon: LockKeyhole,
+      points: [
+        t("home.adminPoint1"),
+        t("home.adminPoint2"),
+        t("home.adminPoint3"),
+      ],
+      cta: t("home.adminCta"),
+      route: "/admin",
+      tint: "text-violet-700 bg-violet-100",
+    },
+  ], [t]);
+
+  const impactStats = [
+    {
+      title: t("home.alumniMembers"),
+      value: "1,238+",
+      detail: t("home.registeredAlumni"),
+      icon: Users,
+      action: t("home.viewNetwork"),
+      target: "/register",
+    },
+    {
+      title: t("home.fieldsOfStudy"),
+      value: "5",
+      detail: t("home.fieldsOfStudyDetail"),
+      icon: BookOpen,
+      action: t("home.explorePrograms"),
+      target: "/info/overview",
+    },
+    {
+      title: t("home.partnerEmployers"),
+      value: "500+",
+      detail: t("home.hiringInternshipsFeedback"),
+      icon: Building2,
+      action: t("home.meetPartners"),
+      target: "/info/featured-employers",
+    },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -410,13 +452,13 @@ export default function HomePage() {
                   className="inline-flex items-center gap-2 rounded-md bg-astu-red px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-lg hover:shadow-xl hover:shadow-astu-red/20 hover:scale-105 btn-magnetic"
                   onClick={() => navigate("/info/alumni-portal")}
                 >
-                  Alumni Portal
+                  {t("home.alumniPortal")}
                 </button>
                 <button
                   className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 btn-magnetic backdrop-blur-sm"
                   onClick={() => navigate("/info/employer-portal")}
                 >
-                  Employer Partnership
+                  {t("home.employerPartnership")}
                   <Handshake className="h-4 w-4" />
                 </button>
               </div>
@@ -472,62 +514,61 @@ export default function HomePage() {
                 <Users className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">1,238+</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Registered Alumni Members</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{t("home.registeredAlumniMembers")}</p>
             </article>
             <article className="flex flex-col items-center gap-3 border-b border-white/20 p-8 text-center md:border-b-0 md:border-r card-hover">
               <div className="rounded-full bg-astu-red/10 p-3 text-astu-red">
                 <Building2 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">500+</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Partner Organizations</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{t("home.partnerOrganizations")}</p>
             </article>
             <article className="flex flex-col items-center gap-3 p-8 text-center card-hover">
               <div className="rounded-full bg-astu-green/10 p-3 text-astu-green">
                 <LineChart className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">87%</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Employment Rate</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{t("home.employmentRate")}</p>
             </article>
             <article className="flex flex-col items-center gap-3 border-t border-white/20 p-8 text-center md:border-l md:border-t-0 card-hover">
               <div className="rounded-full bg-[#E8A020]/15 p-3 text-[#B87900]">
                 <FileCheck2 className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">6K+</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Digital Requests</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{t("home.digitalRequests")}</p>
             </article>
             <article className="flex flex-col items-center gap-3 border-t border-white/20 p-8 text-center md:border-l md:border-t-0 card-hover">
               <div className="rounded-full bg-violet-100 p-3 text-violet-700">
                 <MessageSquareText className="h-5 w-5" />
               </div>
               <h2 className="text-2xl font-bold text-astu-navy">24/7</h2>
-              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Engagement Hub</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{t("home.engagementHub")}</p>
             </article>
           </div>
         </section>
 
         <section id="impact" className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
           <article className="reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Industry-Campus Bridge</p>
-            <h3 className="mt-2 text-3xl font-bold animate-gradient-text">Nurturing Innovation in Modern Laboratories</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{t("home.industryCampusBridge")}</p>
+            <h3 className="mt-2 text-3xl font-bold animate-gradient-text">{t("home.nurturingInnovation")}</h3>
             <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">
-              ASTU combines rigorous engineering education with practical lab training. Through ASTU-AMS,
-              graduate outcomes and employer feedback feed directly into curriculum updates.
+              {t("home.impactDesc")}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div>
                 <p className="text-3xl font-bold text-astu-navy">12+</p>
-                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">Research Centers</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">{t("home.researchCenters")}</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-astu-navy">80+</p>
-                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">Industry Partners</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">{t("home.industryPartners")}</p>
               </div>
             </div>
             <button
               className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 hover:scale-105 transition-all btn-magnetic shadow-lg hover:shadow-xl"
               onClick={() => navigate("/info/campus-life")}
             >
-              Explore Campus Life
+              {t("home.exploreCampusLife")}
             </button>
           </article>
 
@@ -543,10 +584,10 @@ export default function HomePage() {
 
         <section id="stakeholders" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Portal Access</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Choose Your Portal</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{t("home.portalAccess")}</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">{t("home.chooseYourPortal")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Role-based access for alumni, employers, departments, registrar, and administrators.
+              {t("home.portalDesc")}
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -606,10 +647,10 @@ export default function HomePage() {
 
         <section id="campus-life" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Explore Life At ASTU</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Campus Life, Facilities, Events, and Galleries</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{t("home.exploreLifeAtAstu")}</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">{t("home.campusLifeTitle")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.
+              {t("home.campusLifeDesc")}
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
@@ -632,11 +673,11 @@ export default function HomePage() {
         <section id="campuses" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Campuses</p>
-              <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Explore ASTU Spaces</h3>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{t("nav.campuses")}</p>
+              <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">{t("home.campusesTitle")}</h3>
             </div>
             <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low">
-              View all
+              {t("home.viewAll")}
             </button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -646,7 +687,7 @@ export default function HomePage() {
                 <div className="p-4">
                   <h4 className="text-sm font-semibold text-astu-navy">{campus.name}</h4>
                   <p className="mt-2 text-xs leading-relaxed text-on-surface-variant">{campus.description}</p>
-                  <button className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic">Explore</button>
+                  <button className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic">{t("home.explore")}</button>
                 </div>
               </article>
             ))}
@@ -655,9 +696,9 @@ export default function HomePage() {
 
         <section id="gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">ASTU Gallery</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">{t("home.astuGallery")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Visual highlights from ASTU campus life, innovation spaces, and alumni identity.
+              {t("home.galleryDesc")}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -675,18 +716,18 @@ export default function HomePage() {
         <section id="video-gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">Video Gallery</h3>
-              <p className="mt-2 text-sm text-on-surface-variant">Livestreams, workshop recordings, graduation moments, and research showcases.</p>
+              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">{t("home.videoGalleryTitle")}</h3>
+              <p className="mt-2 text-sm text-on-surface-variant">{t("home.videoGalleryDesc")}</p>
             </div>
             <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low">
-              View Media Library
+              {t("home.viewMediaLibrary")}
             </button>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { title: "Career Expo Highlights", image: stateM },
-              { title: "Research & Innovation Forum", image: arcImage },
-              { title: "Graduation Ceremony Replay", image: gc7 },
+              { title: t("home.careerExpoHighlights"), image: stateM },
+              { title: t("home.researchInnovationForum"), image: arcImage },
+              { title: t("home.graduationCeremony"), image: gc7 },
             ].map((video, idx) => (
               <article key={video.title} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <div className="relative">
@@ -715,30 +756,29 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-2 md:px-8 relative z-10">
             <article className="reveal text-white">
               <p className="inline-flex rounded-full bg-astu-red px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]">
-                Quality Assurance
+                {t("home.qualityAssurance")}
               </p>
-              <h3 className="mt-4 text-3xl font-bold">Data-Driven Accreditation & Excellence</h3>
+              <h3 className="mt-4 text-3xl font-bold">{t("home.dataDrivenAccreditation")}</h3>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-200">
-                ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required
-                by accreditation agencies and university management.
+                {t("home.accreditationDesc")}
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-white/20 bg-white/5 p-4">
                   <Globe className="mb-2 h-5 w-5 text-astu-green" />
-                  <h4 className="text-sm font-semibold">Global Accreditation</h4>
-                  <p className="mt-1 text-xs text-slate-300">Build transparent, audited institutional reports.</p>
+                  <h4 className="text-sm font-semibold">{t("home.globalAccreditation")}</h4>
+                  <p className="mt-1 text-xs text-slate-300">{t("home.globalAccreditationDesc")}</p>
                 </div>
                 <div className="rounded-lg border border-white/20 bg-white/5 p-4">
                   <Handshake className="mb-2 h-5 w-5 text-astu-green" />
-                  <h4 className="text-sm font-semibold">Market Alignment</h4>
-                  <p className="mt-1 text-xs text-slate-300">Align curriculum with industry expectations.</p>
+                  <h4 className="text-sm font-semibold">{t("home.marketAlignment")}</h4>
+                  <p className="mt-1 text-xs text-slate-300">{t("home.marketAlignmentDesc")}</p>
                 </div>
               </div>
               <button
                 className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
                 onClick={() => navigate("/info/impact-numbers")}
               >
-                View Impact Numbers
+                {t("home.viewImpactNumbers")}
               </button>
             </article>
 
@@ -762,14 +802,14 @@ export default function HomePage() {
         <section id="events" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">Upcoming Alumni Events</h3>
-              <p className="mt-2 text-sm text-on-surface-variant">Networking, learning, and professional growth opportunities.</p>
+              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">{t("home.upcomingAlumniEvents")}</h3>
+              <p className="mt-2 text-sm text-on-surface-variant">{t("home.eventsDesc")}</p>
             </div>
             <button
               className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low"
               onClick={() => navigate("/login")}
             >
-              See All Events
+              {t("home.seeAllEvents")}
             </button>
           </div>
 
@@ -783,7 +823,7 @@ export default function HomePage() {
                   onError={handleImageError}
                 />
                 <div className="p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-astu-red">Career Development</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-astu-red">{t("home.careerDevelopment")}</p>
                   <h4 className="mt-2 text-lg font-semibold text-astu-navy">{event.title}</h4>
                   <div className="mt-3 flex flex-col gap-2 text-xs text-on-surface-variant sm:flex-row sm:flex-wrap sm:gap-4">
                     <p className="inline-flex items-center gap-1">
@@ -797,10 +837,10 @@ export default function HomePage() {
                       className="rounded-md bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110"
                       onClick={() => navigate("/login")}
                     >
-                      Register
+                      {t("home.register")}
                     </button>
                     <button className="rounded-md border border-outline-variant px-4 py-2 text-xs font-semibold hover:bg-surface-container-low">
-                      Learn More
+                      {t("home.learnMore")}
                     </button>
                   </div>
                 </div>
@@ -811,9 +851,9 @@ export default function HomePage() {
 
         <section id="workshops" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Upcoming Workshops</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">{t("home.upcomingWorkshops")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Practical training with RSVP tracking, approval workflows, QR attendance, certificates, and feedback forms.
+              {t("home.workshopsDesc")}
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -826,7 +866,7 @@ export default function HomePage() {
                   <p>{workshop.seats}</p>
                 </div>
                 <button className="mt-5 rounded-md bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110" onClick={() => navigate("/login")}>
-                  Register for Workshop
+                  {t("home.registerForWorkshop")}
                 </button>
               </article>
             ))}
@@ -835,23 +875,23 @@ export default function HomePage() {
 
         <section id="news" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-slate-50/30">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Latest News</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">{t("home.latestNews")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay updated with ASTU announcements and university news.
+              {t("home.newsDesc")}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { title: "New Engineering Lab Inaugurated", date: "May 28, 2026" },
-              { title: "ASTU Research Grant Winners", date: "May 25, 2026" },
-              { title: "Annual Career Expo Announced", date: "May 20, 2026" }
+              { title: t("home.newEngineeringLab"), date: "May 28, 2026" },
+              { title: t("home.researchGrantResults"), date: "May 25, 2026" },
+              { title: t("home.careerExpo"), date: "May 20, 2026" }
             ].map((news, idx) => (
               <article key={idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                <p className="text-xs text-astu-red font-semibold uppercase tracking-wider">Announcement</p>
+                <p className="text-xs text-astu-red font-semibold uppercase tracking-wider">{t("home.announcement")}</p>
                 <h4 className="mt-1 text-base font-semibold text-astu-navy">{news.title}</h4>
                 <p className="mt-2 text-xs text-on-surface-variant">{news.date}</p>
                 <button className="mt-3 text-xs font-medium text-astu-navy hover:underline" onClick={() => navigate("/login")}>
-                  Read More
+                  {t("home.readMore")}
                 </button>
               </article>
             ))}
@@ -867,12 +907,12 @@ export default function HomePage() {
                     <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-7 w-7" />
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Announcements</p>
-                    <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Official Notices</h3>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{t("nav.announcements_title")}</p>
+                    <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">{t("home.officialNotices")}</h3>
                   </div>
                 </div>
                 <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low">
-                  View all
+                  {t("home.viewAll")}
                 </button>
               </div>
               <div className="divide-y divide-outline-variant">
@@ -890,21 +930,21 @@ export default function HomePage() {
 
             <aside className="reveal rounded-xl border border-outline-variant bg-astu-navy p-5 text-white shadow-sm">
               <FileText className="h-7 w-7 text-astu-green" />
-              <h4 className="mt-4 text-xl font-bold">Subscribe to official updates</h4>
+              <h4 className="mt-4 text-xl font-bold">{t("home.subscribeUpdates")}</h4>
               <p className="mt-2 text-sm leading-relaxed text-white/75">
-                Receive announcements, events, workshops, partner calls, tracer survey reminders, and campus notices.
+                {t("home.subscribeDesc")}
               </p>
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
-                  toast.success("Subscribed to ASTU-AMS announcements.");
+                  toast.success(t("home.subscribedSuccess"));
                   (event.currentTarget as HTMLFormElement).reset();
                 }}
                 className="mt-5 space-y-3"
               >
-                <input type="email" required placeholder="Enter your email" className="w-full rounded-md border border-white/20 bg-white/10 px-3 py-3 text-sm text-white outline-none placeholder:text-white/55 focus:border-astu-green" />
+                <input type="email" required placeholder={t("home.enterEmail")} className="w-full rounded-md border border-white/20 bg-white/10 px-3 py-3 text-sm text-white outline-none placeholder:text-white/55 focus:border-astu-green" />
                 <button className="w-full rounded-md bg-astu-green px-4 py-3 text-sm font-bold text-white hover:brightness-110">
-                  Subscribe
+                  {t("home.subscribe")}
                 </button>
               </form>
             </aside>
@@ -913,9 +953,9 @@ export default function HomePage() {
 
         <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Alumni Success Stories</h3>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">{t("home.alumniSuccessStories")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Inspiring journeys of ASTU graduates making impact globally.
+              {t("home.successStoriesDesc")}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -928,7 +968,7 @@ export default function HomePage() {
                 <p className="text-xs text-on-surface-variant">{story.role}</p>
                 <p className="mt-2 text-sm text-on-surface-variant line-clamp-2">{story.text}</p>
                 <button className="mt-3 text-xs font-medium text-astu-navy hover:underline" onClick={() => navigate("/login")}>
-                  Read Story
+                  {t("home.readStory")}
                 </button>
               </article>
             ))}
@@ -941,16 +981,16 @@ export default function HomePage() {
           <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <article className="reveal rounded-xl bg-astu-navy p-6 text-white">
               <Trophy className="h-8 w-8 text-astu-green" />
-              <h3 className="mt-4 text-2xl font-bold md:text-3xl">Research, Innovation & University Achievements</h3>
+              <h3 className="mt-4 text-2xl font-bold md:text-3xl">{t("home.researchInnovation")}</h3>
               <p className="mt-4 text-sm leading-relaxed text-slate-200">
-                ASTU-AMS connects graduate research publications, startup showcases, employer collaborations, and department KPI evidence into one institutional analytics layer.
+                {t("home.researchDesc")}
               </p>
             </article>
             <div className="grid gap-4 sm:grid-cols-3">
               {[
-                { label: "Research Publications", value: "1,240", icon: BookOpen },
-                { label: "Startup Showcases", value: "38", icon: Star },
-                { label: "Industry Projects", value: "72", icon: Handshake },
+                { label: t("home.researchPublications"), value: "1,240", icon: BookOpen },
+                { label: t("home.startupShowcases"), value: "38", icon: Star },
+                { label: t("home.industryProjects"), value: "72", icon: Handshake },
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
@@ -967,8 +1007,8 @@ export default function HomePage() {
 
         <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-8">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Partner Companies</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
+            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">{t("home.partnerCompanies")}</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">{t("home.partnersDesc")}</p>
           </div>
           <div className="relative">
             <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
@@ -997,9 +1037,9 @@ export default function HomePage() {
         <section id="testimonials" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { quote: "ASTU-AMS gave our department the evidence we needed for skill-gap review.", by: "Department Head" },
-              { quote: "The candidate search and feedback tools improved our campus recruitment cycle.", by: "Employer Partner" },
-              { quote: "I found mentorship, events, and job matches without leaving the alumni portal.", by: "ASTU Alumna" },
+              { quote: t("home.testimonial1"), by: t("home.testimonial1By") },
+              { quote: t("home.testimonial2"), by: t("home.testimonial2By") },
+              { quote: t("home.testimonial3"), by: t("home.testimonial3By") },
             ].map((item, idx) => (
               <article key={item.by} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
                 <Quote className="h-6 w-6 text-astu-red" />
@@ -1012,10 +1052,10 @@ export default function HomePage() {
 
         <section id="faq" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">FAQ</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Frequently Asked Questions</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{t("home.faq")}</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">{t("home.faqTitle")}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Common questions about ASTU-AMS, tracer studies, and alumni services.
+              {t("home.faqDesc")}
             </p>
           </div>
           <div className="mx-auto max-w-3xl space-y-3">
@@ -1037,8 +1077,8 @@ export default function HomePage() {
           <div className="reveal rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)]">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">Career Opportunities</p>
-                <h3 className="mt-2 text-2xl font-bold text-astu-navy">Jobs, internships, AI matching, and candidate shortlisting</h3>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">{t("nav.careerOpportunities")}</p>
+                <h3 className="mt-2 text-2xl font-bold text-astu-navy">{t("home.jobsInternshipsAiMatching")}</h3>
                 <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">Employers can post bulk jobs, manage talent pools, shortlist candidates, schedule interviews, and join job fairs.</p>
               </div>
               <button className="inline-flex items-center justify-center gap-2 rounded-md bg-astu-red px-5 py-3 text-sm font-semibold text-white hover:brightness-110" onClick={() => navigate("/employers")}>
