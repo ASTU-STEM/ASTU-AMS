@@ -56,7 +56,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
       <div className="flex min-h-[calc(100vh-4rem)]">
         {/* Left Side - Branding & Features (Desktop) */}
         <div 
-          className="hidden lg:flex lg:w-1/2 flex-col justify-center p-12 text-white relative overflow-hidden"
+          className="hidden lg:flex lg:w-1/2 flex-col justify-start pt-24 px-12 pb-12 text-white relative overflow-hidden"
           style={{
             backgroundImage: 'url(/images/astuget.jpg)',
             backgroundSize: 'cover',
