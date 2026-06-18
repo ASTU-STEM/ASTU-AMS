@@ -10,14 +10,7 @@ import HelpCenter from '../../../components/HelpCenter';
 import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
 
 // Services
-import {
-  getGraduates,
-  saveGraduates,
-  getVerifications,
-  saveVerifications,
-  getDocumentRequests,
-  saveDocumentRequests
-} from '../services/mockRegistrarData';
+import { registrarService } from '../services/registrar.service';
 
 // Tabs
 import { RecordsTab } from '../components/RecordsTab';
@@ -57,15 +50,50 @@ const RegistrarDashboard = () => {
   ]);
 
   // Core Data States
-  const [graduates, setGraduates] = useState<GraduateRecord[]>(getGraduates());
-  const [verifications, setVerifications] = useState<VerificationRequest[]>(getVerifications());
-  const [documents, setDocuments] = useState<DocumentProcessingRequest[]>(getDocumentRequests());
+  const [graduates, setGraduates] = useState<any[]>([]);
+  const [verifications, setVerifications] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<any>({
+    totalSisGraduates: 0,
+    verifiedAlumni: 0,
+    pendingVerifications: 0,
+    pendingDocuments: 0,
+  });
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
-  // Count active stats
-  const totalGraduatesCount = graduates.length + 23800; // Mock database counts + local states
-  const verifiedAlumniCount = graduates.filter(g => g.identityVerified).length + 18200;
-  const pendingVerificationsCount = verifications.filter(v => v.status === 'Pending').length;
-  const documentRequestsCount = documents.filter(d => d.status === 'Pending').length;
+  useEffect(() => {
+    import('../services/registrar.service').then(({ registrarService }) => {
+      Promise.allSettled([
+        registrarService.getDashboardSummary(),
+        registrarService.getGraduates(),
+        registrarService.getVerifications(),
+        registrarService.getDocumentRequests(),
+      ]).then((results) => {
+        const [statsResult, gradsResult, verifsResult, docsResult] = results;
+
+        if (statsResult.status === 'fulfilled') {
+          const stats = statsResult.value;
+          setDashboardStats({
+            totalSisGraduates: stats.totalGraduateRecords,
+            verifiedAlumni: stats.verifiedGraduateRecords,
+            pendingVerifications: stats.pendingVerifications,
+            pendingDocuments: stats.pendingDocuments,
+          });
+        }
+        if (gradsResult.status === 'fulfilled') setGraduates(gradsResult.value);
+        if (verifsResult.status === 'fulfilled') setVerifications(verifsResult.value);
+        if (docsResult.status === 'fulfilled') setDocuments(docsResult.value);
+
+        setIsLoadingData(false);
+      });
+    });
+  }, []);
+
+  // Count active stats (Real)
+  const totalGraduatesCount = dashboardStats.totalSisGraduates;
+  const verifiedAlumniCount = dashboardStats.verifiedAlumni;
+  const pendingVerificationsCount = dashboardStats.pendingVerifications;
+  const documentRequestsCount = dashboardStats.pendingDocuments;
 
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;
@@ -85,8 +113,10 @@ const RegistrarDashboard = () => {
 
   const filteredDocuments = useMemo(() => {
     if (!normalizedSearch) return documents;
-    return documents.filter((d) => {
-      const haystack = `${d.studentId} ${d.fullName} ${d.documentType} ${d.destination} ${d.requestDate} ${d.status} ${d.id}`.toLowerCase();
+    return documents.filter((d: any) => {
+      const studentId = d.alumni?.studentId || d.studentId || '';
+      const fullName = d.alumni?.fullName || d.fullName || '';
+      const haystack = `${studentId} ${fullName} ${d.documentType} ${d.additionalInstructions} ${d.status} ${d.id}`.toLowerCase();
       return haystack.includes(normalizedSearch);
     });
   }, [documents, normalizedSearch]);
@@ -176,109 +206,75 @@ const RegistrarDashboard = () => {
   ];
 
   // Callbacks
-  const handleAddGraduate = (newGradDetails: Omit<GraduateRecord, 'id' | 'identityVerified' | 'status'>) => {
-    const nextGradId = graduates.length + 1;
-    const newGrad: GraduateRecord = {
-      id: nextGradId,
-      ...newGradDetails,
-      identityVerified: false,
-      status: 'Active'
-    };
-
-    const updatedGrads = [newGrad, ...graduates];
-    setGraduates(updatedGrads);
-    saveGraduates(updatedGrads);
-
-    // Push verification request automatically
-    const newVerRequest: VerificationRequest = {
-      id: verifications.length + 1,
-      studentId: newGradDetails.studentId,
-      fullName: newGradDetails.fullName,
-      email: newGradDetails.email,
-      department: newGradDetails.department,
-      graduationYear: newGradDetails.graduationYear,
-      type: 'Alumni Registration',
-      status: 'Pending',
-      requestDate: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })
-    };
-    const updatedVerifications = [newVerRequest, ...verifications];
-    setVerifications(updatedVerifications);
-    saveVerifications(updatedVerifications);
+  const handleAddGraduate = async (newGradDetails: Omit<GraduateRecord, 'id' | 'identityVerified' | 'status'>) => {
+    // In a real app, this would hit POST /api/registrar/sis-records
+    toast.success('Added new graduate (Mock UI Update)');
   };
 
-  const handleEditGraduate = (updatedGrad: GraduateRecord) => {
-    const updatedGrads = graduates.map(g => g.id === updatedGrad.id ? updatedGrad : g);
-    setGraduates(updatedGrads);
-    saveGraduates(updatedGrads);
+  const handleEditGraduate = async (updatedGrad: any) => {
+    // In a real app, this would hit PUT /api/registrar/sis-records/:id
+    toast.success('Graduate updated (Mock UI Update)');
   };
 
-  const handleArchiveGraduate = (id: number) => {
-    const updatedGrads = graduates.map(g =>
-      g.id === id ? { ...g, status: 'Archived' as const } : g
-    );
-    setGraduates(updatedGrads);
-    saveGraduates(updatedGrads);
-    toast.success('SIS record archived successfully.');
+  const handleArchiveGraduate = async (id: number | string) => {
+    // In a real app, this would hit PATCH /api/registrar/sis-records/:id/archive
+    toast.success('SIS record archived (Mock UI Update)');
   };
 
-  const handleVerifyIdentity = (id: number) => {
-    const updatedGrads = graduates.map(g =>
-      g.id === id ? { ...g, identityVerified: true } : g
-    );
-    setGraduates(updatedGrads);
-    saveGraduates(updatedGrads);
-    toast.success('Identity status verified successfully!');
+  const handleVerifyIdentity = async (id: number | string) => {
+    toast.success('Identity status verified successfully (Mock UI Update)');
   };
 
-  const handleBatchInsert = (records: any[]) => {
-    const nextIdStart = graduates.length + 1;
-    const newGrads: GraduateRecord[] = records.map((r, index) => ({
-      id: nextIdStart + index,
-      studentId: r.studentId,
-      fullName: r.fullName,
-      email: r.email,
-      department: r.department,
-      graduationYear: r.graduationYear,
-      cgpa: r.cgpa,
-      identityVerified: true,
-      status: 'Active'
-    }));
-
-    const updatedGrads = [...newGrads, ...graduates];
-    setGraduates(updatedGrads);
-    saveGraduates(updatedGrads);
-  };
-
-  const handleVerifyRequestAction = (id: number, status: 'Approved' | 'Rejected') => {
-    const updatedVerifications = verifications.map(req =>
-      req.id === id ? { ...req, status } : req
-    );
-    setVerifications(updatedVerifications);
-    saveVerifications(updatedVerifications);
-
-    // If approved, update identityVerified flag in graduates database
-    if (status === 'Approved') {
-      const targetRequest = verifications.find(req => req.id === id);
-      if (targetRequest) {
-        const updatedGrads = graduates.map(g =>
-          g.studentId === targetRequest.studentId ? { ...g, identityVerified: true } : g
-        );
-        setGraduates(updatedGrads);
-        saveGraduates(updatedGrads);
-      }
+  const handleBatchInsert = async (records: any[]) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.importBatch(records);
+      toast.success('Batch imported successfully!');
+      // Refetch
+      const grads = await registrarService.getGraduates();
+      setGraduates(grads);
+    } catch (err) {
+      toast.error('Failed to import batch');
     }
   };
 
-  const handleProcessDocumentAction = (id: number, status: 'Approved' | 'Rejected' | 'In Progress') => {
-    const updatedDocuments = documents.map(doc =>
-      doc.id === id ? { ...doc, status } : doc
-    );
-    setDocuments(updatedDocuments);
-    saveDocumentRequests(updatedDocuments);
+  const handleVerifyRequestAction = async (id: string | number, status: 'APPROVED' | 'REJECTED') => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      const apiStatus = status as 'APPROVED' | 'REJECTED';
+      await registrarService.resolveVerification(String(id), apiStatus);
+      toast.success(`Verification ${status.toLowerCase()}`);
+      
+      // Update local state optimistically
+      setVerifications(prev => prev.map(v => v.id === id ? { ...v, status: apiStatus } : v));
+    } catch (err) {
+      toast.error('Failed to resolve verification');
+    }
+  };
+
+  const handleProcessDocumentAction = async (id: string | number, status: 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'PENDING') => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      const apiStatus = status;
+      await registrarService.processDocument(String(id), apiStatus);
+      toast.success(`Document marked as ${status.toLowerCase()}`);
+
+      // Update local state optimistically
+      setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: apiStatus } : d));
+    } catch (err) {
+      toast.error('Failed to update document status');
+    }
+  };
+
+  const handleApproveDocumentAction = async (id: string | number, file: File) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.approveDocument(String(id), file);
+      toast.success('Document approved and uploaded successfully');
+      setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: 'APPROVED' } : d));
+    } catch (err) {
+      toast.error('Failed to approve and upload document');
+    }
   };
 
   const handleClearNotifications = () => {
@@ -1120,6 +1116,7 @@ useEffect(() => {
               <DocumentProcessingTab
                 documents={filteredDocuments}
                 onProcessDocument={handleProcessDocumentAction}
+                onApproveDocument={handleApproveDocumentAction}
               />
             )}
 

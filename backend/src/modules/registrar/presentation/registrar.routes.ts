@@ -36,5 +36,21 @@ router.post('/alumni/:alumniId/suspend', asyncHandler(RegistrarController.suspen
 // Registration Issues (Data Correction Requests)
 router.get('/registration-issues', asyncHandler(RegistrarController.getRegistrationIssues));
 router.put('/registration-issues/:id/resolve', asyncHandler(RegistrarController.resolveRegistrationIssue));
+router.post('/registration-issues/:id/create-account', asyncHandler(RegistrarController.createAccountFromIssue));
+
+// SIS Records & Batch Import
+router.get('/sis-records', asyncHandler(RegistrarController.getSisRecords));
+router.post('/batch-import', asyncHandler(RegistrarController.batchImport));
+
+// Dashboard Stats
+router.get('/dashboard-stats', asyncHandler(RegistrarController.getDashboardStats));
+
+// Verifications
+router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
+router.patch('/verifications/:id/status', asyncHandler(RegistrarController.updateVerificationStatus));
+
+// Document Status Update
+router.patch('/document-requests/:id/status', asyncHandler(RegistrarController.updateDocumentStatus));
+router.post('/document-requests/:id/approve', upload.single('document'), asyncHandler(RegistrarController.approveDocumentRequest));
 
 export default router;

@@ -61,6 +61,13 @@ enum InterviewStatus {
 
 enum DocumentRequestStatus {
   PENDING
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+}
+
+enum VerificationRequestStatus {
+  PENDING
   APPROVED
   REJECTED
 }
@@ -176,6 +183,7 @@ model AlumniProfile {
   surveyResponses SurveyResponse[]
   surveyAssignments SurveyAssignment[]
   documentRequests DocumentRequest[]
+  verificationRequests VerificationRequest[]
   employerFeedback EmployerFeedback[]
   eventRsvps     EventRSVP[]
   mentorRequests MentorshipRequest[] @relation("MentorRequests")
@@ -497,8 +505,22 @@ model DocumentRequest {
   fileUrls               String[]              @default([])
   notes                  String?
   contactEmail           String?
+  issuedDocumentUrl      String?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
+}
+
+model VerificationRequest {
+  id           String                    @id @default(uuid())
+  alumniId     String
+  alumni       AlumniProfile             @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  type         String                    // "ALUMNI_REGISTRATION" | "GRADUATION_STATUS"
+  status       VerificationRequestStatus @default(PENDING)
+  notes        String?
+  documentUrl  String?
+  requestDate  DateTime                  @default(now())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
 }
 
 model RegistrarSyncLog {

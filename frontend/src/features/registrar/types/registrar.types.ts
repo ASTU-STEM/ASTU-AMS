@@ -11,25 +11,38 @@ export interface GraduateRecord {
 }
 
 export interface VerificationRequest {
-  id: number;
+  id: string; // The backend uses UUID strings for verification requests
   studentId: string;
   fullName: string;
   email: string;
   department: string;
   graduationYear: string;
-  type: 'Alumni Registration' | 'Graduation Status';
-  status: 'Pending' | 'Approved' | 'Rejected';
+  type: string;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'PENDING' | 'APPROVED' | 'REJECTED';
   requestDate: string;
+  notes?: string;
+  documentUrl?: string;
 }
 
 export interface DocumentProcessingRequest {
-  id: number;
-  studentId: string;
-  fullName: string;
-  documentType: 'Official Transcript' | 'Degree Verification' | 'Medium of Instruction Certificate';
-  destination: string;
-  status: 'Pending' | 'Approved' | 'Rejected' | 'In Progress';
-  requestDate: string;
+  id: string;
+  alumniId: string;
+  documentType: string;
+  status: string;
+  additionalInstructions?: string;
+  fileUrls?: string[];
+  notes?: string;
+  contactEmail?: string;
+  issuedDocumentUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+  alumni: {
+    studentId: string;
+    fullName: string;
+    graduationYear?: number;
+    email?: string;
+    phone?: string;
+  };
 }
 
 export interface RegistrarDashboardSummary {
