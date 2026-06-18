@@ -129,7 +129,7 @@ const sections: HelpSection[] = [
       },
       {
         question: "Can I host an alumni event?",
-        answer: `Absolutely! Contact the Alumni Relations office through the Help Center or email alumni.office@astu.edu.et with your proposal. Events can be virtual, on-campus, or regional meetups.`,
+        answer: `Absolutely! Contact the Alumni Relations office through the Help Center or email irccd@astu.edu.et with your proposal. Events can be virtual, on-campus, or regional meetups.`,
       },
       {
         question: "Are there virtual networking opportunities?",
@@ -183,15 +183,15 @@ export default function HelpCenter({
 
   const filteredSections = searchQuery.trim()
     ? sections
-        .map((s) => ({
-          ...s,
-          faqs: s.faqs.filter(
-            (f) =>
-              f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              f.answer.toLowerCase().includes(searchQuery.toLowerCase())
-          ),
-        }))
-        .filter((s) => s.faqs.length > 0)
+      .map((s) => ({
+        ...s,
+        faqs: s.faqs.filter(
+          (f) =>
+            f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            f.answer.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+      }))
+      .filter((s) => s.faqs.length > 0)
     : sections;
 
   return (
@@ -308,9 +308,8 @@ export default function HelpCenter({
                         </span>
                       </span>
                       <HiChevronDown
-                        className={`h-4 w-4 text-on-surface-variant transition-transform duration-200 ${
-                          isSectionOpen ? "rotate-180" : ""
-                        }`}
+                        className={`h-4 w-4 text-on-surface-variant transition-transform duration-200 ${isSectionOpen ? "rotate-180" : ""
+                          }`}
                       />
                     </button>
                     {isSectionOpen && (
@@ -343,13 +342,13 @@ export default function HelpCenter({
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <a
-                href="mailto:alumni.office@astu.edu.et"
+                href="mailto:irccd@astu.edu.et"
                 className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20 transition-colors"
               >
                 <MdEmail className="h-5 w-5 text-white/70" />
                 <div>
                   <p className="text-sm font-bold">Email Support</p>
-                  <p className="text-xs text-white/60">alumni.office@astu.edu.et</p>
+                  <p className="text-xs text-white/60">irccd@astu.edu.et</p>
                 </div>
               </a>
               <a

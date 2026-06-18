@@ -152,7 +152,7 @@ export default function EmployersPage() {
             <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
               <Mail className="h-8 w-8 mx-auto text-astu-navy mb-3" />
               <h4 className="font-semibold text-astu-navy">Email</h4>
-              <p className="mt-1 text-xs text-on-surface-variant">alumni.office@astu.edu.et</p>
+              <p className="mt-1 text-xs text-on-surface-variant">irccd@astu.edu.et</p>
             </div>
           </div>
         </section>

@@ -198,10 +198,10 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
           <div className="flex items-center gap-4 text-[13px] text-white/80">
             <a
-              href="mailto:alumni.office@astu.edu.et"
+              href="mailto:irccd@astu.edu.et"
               className="hover:text-white transition-colors font-medium"
             >
-              alumni.office@astu.edu.et
+              irccd@astu.edu.et
             </a>
             <span className="text-white/20">|</span>
             <span className="font-medium">+251-221-110000</span>
@@ -271,18 +271,16 @@ export default function Navbar() {
                 onMouseLeave={handleMegaLeave}
               >
                 <button
-                  className={`relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide transition-colors duration-200 ${
-                    isOpen
+                  className={`relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide transition-colors duration-200 ${isOpen
                       ? "text-astu-navy"
                       : "text-on-surface-variant hover:text-astu-navy"
-                  }`}
+                    }`}
                 >
                   <Icon className="h-4 w-4" />
                   {menu.label}
                   <HiChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -477,9 +475,8 @@ export default function Navbar() {
                       {menu.label}
                     </span>
                     <HiChevronDown
-                      className={`h-4 w-4 text-on-surface-variant transition-transform ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 text-on-surface-variant transition-transform ${isOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                   {isOpen && (

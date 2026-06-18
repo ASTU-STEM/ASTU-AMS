@@ -270,14 +270,14 @@ export default function HomePage() {
     {
       image: gallery2, // real campus-2.jpeg
       tagline: "Enterprise Networking & Placement",
-      title: "Empowering ASTU Graduates in Modern Workspaces",
+      title: "Empowering ASTU Graduates Through Innovation, Skills, and Modern Workplace Opportunities",
       description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
     },
     {
       image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80", // third beautiful campus photo
       tagline: "Academic Innovation & Tracer Feedback",
-      title: "Coordinating Strategic Tracer Studies & Skill Gaps",
-      description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.",
+      title: "Coordinating Strategic Tracer Studies to Identify Workforce Trends and Skill Gaps",
+      description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, supporting data-driven curriculum improvements, strengthening industry collaboration, enhancing graduate employability, and contributing to successful university accreditation and continuous quality assurance outcomes.",
     }
   ], []);
 
@@ -422,10 +422,10 @@ export default function HomePage() {
                 {slides[currentSlide].tagline}
               </span>
               <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
-                {slides[currentSlide].title.split(" to the ")[0]}
-                <br />
                 {slides[currentSlide].title.includes(" to the ") ? (
                   <>
+                    {slides[currentSlide].title.split(" to the ")[0]}
+                    <br />
                     to the <span className="text-astu-green">{slides[currentSlide].title.split(" to the ")[1]}</span>
                   </>
                 ) : (
@@ -1212,11 +1212,11 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-astu-green" />
-                  <span>+251-221-110000</span>
+                  <span>+251-</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-astu-green" />
-                  <a href="mailto:alumni.office@astu.edu.et" className="hover:text-white transition-colors">alumni.office@astu.edu.et</a>
+                  <a href="mailto:irccd@astu.edu.et" className="hover:text-white transition-colors">irccd@astu.edu.et</a>
                 </li>
               </ul>
             </div>

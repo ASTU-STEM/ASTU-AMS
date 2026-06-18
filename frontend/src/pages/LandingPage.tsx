@@ -307,11 +307,10 @@ export default function LandingPage() {
             {navSections.map((item) => (
               <button
                 key={item.id}
-                className={`text-xs font-semibold transition-colors ${
-                  activeSection === item.id
-                    ? "text-astu-navy"
-                    : "text-on-surface-variant hover:text-astu-navy"
-                }`}
+                className={`text-xs font-semibold transition-colors ${activeSection === item.id
+                  ? "text-astu-navy"
+                  : "text-on-surface-variant hover:text-astu-navy"
+                  }`}
                 onClick={() => goToSection(item.id)}
               >
                 {item.label}
@@ -451,7 +450,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {stakeholders.map((item) => {
               const Icon = item.icon;
               return (
@@ -469,7 +468,7 @@ export default function LandingPage() {
                         <span>{point}</span>
                       </li>
                     ))}
-</ul>
+                  </ul>
                   <button
                     className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy hover:text-astu-red"
                     onClick={() => navigate(item.route)}
@@ -523,7 +522,7 @@ export default function LandingPage() {
             <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Community Feed</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
               Stay connected with alumni stories, employer announcements, and career opportunities.
-</p>
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -756,12 +755,12 @@ export default function LandingPage() {
             <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
               <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">phone</span>
               <h4 className="font-semibold text-astu-navy">Phone</h4>
-              <p className="text-xs text-on-surface-variant mt-1">+251-221-110000</p>
+              <p className="text-xs text-on-surface-variant mt-1">+251-000-0000</p>
             </div>
             <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
               <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">mail</span>
               <h4 className="font-semibold text-astu-navy">Email</h4>
-              <p className="text-xs text-on-surface-variant mt-1">alumni.office@astu.edu.et</p>
+              <p className="text-xs text-on-surface-variant mt-1">irccd@astu.edu.et</p>
             </div>
           </div>
         </section>
