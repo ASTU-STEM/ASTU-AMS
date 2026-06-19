@@ -1,21 +1,20 @@
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import CmsLayout from '../shared/layouts/CmsLayout';
-import CmsDashboard from '../domains/admin/pages/CmsDashboard';
-import HomepageManagement from '../domains/admin/pages/HomepageManagement';
-import ContentGovernance from '../domains/admin/pages/ContentGovernance';
-import GalleryManagement from '../domains/admin/pages/GalleryManagement';
-import EventWorkshopManagement from '../domains/admin/pages/EventWorkshopManagement';
-import ContentList from '../domains/admin/pages/ContentList';
-import MediaLibrary from '../domains/admin/pages/MediaLibrary';
-import SEOManagement from '../domains/admin/pages/SEOManagement';
-import ContentTemplates from '../domains/admin/pages/ContentTemplates';
-import ApprovalWorkflow from '../domains/admin/pages/ApprovalWorkflow';
-import FooterManagement from '../domains/admin/pages/FooterManagement';
-import LatestNewsManagement from '../domains/admin/pages/LatestNewsManagement';
-import FaqManagement from '../domains/admin/pages/FaqManagement';
-import CmsSettings from '../domains/admin/pages/CmsSettings';
-import CmsProfile from '../domains/admin/pages/CmsProfile';
+import CmsLayout from '../layouts/CmsLayout';
+import CmsDashboard from '../features/admin/pages/CmsDashboard';
+import HomepageManagement from '../features/admin/pages/HomepageManagement';
+import ContentGovernance from '../features/admin/pages/ContentGovernance';
+import GalleryManagement from '../features/admin/pages/GalleryManagement';
+import EventWorkshopManagement from '../features/admin/pages/EventWorkshopManagement';
+import ContentList from '../features/admin/pages/ContentList';
+import MediaLibrary from '../features/admin/pages/MediaLibrary';
+import SEOManagement from '../features/admin/pages/SEOManagement';
+import ContentTemplates from '../features/admin/pages/ContentTemplates';
+import ApprovalWorkflow from '../features/admin/pages/ApprovalWorkflow';
+import FooterManagement from '../features/admin/pages/FooterManagement';
+import LatestNewsManagement from '../features/admin/pages/LatestNewsManagement';
+import FaqManagement from '../features/admin/pages/FaqManagement';
+import CmsSettings from '../features/admin/pages/CmsSettings';
 
 export default function CmsRoutes() {
   return (
@@ -35,7 +34,6 @@ export default function CmsRoutes() {
         <Route path="seo" element={<SEOManagement />} />
         <Route path="templates" element={<ContentTemplates />} />
         <Route path="approvals" element={<ApprovalWorkflow />} />
-        <Route path="profile" element={<CmsProfile />} />
         <Route path="settings" element={<CmsSettings />} />
       </Route>
     </Routes>

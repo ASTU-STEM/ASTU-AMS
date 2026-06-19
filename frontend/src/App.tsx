@@ -2,33 +2,34 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
-import { store } from "./shared/store";
+import { store } from "./store";
 
-import HomePage from "./domains/pages/HomePage";
-import PartnersPage from "./domains/pages/PartnersPage";
-import EmployersPage from "./domains/pages/EmployersPage";
-import PublicInfoPage from "./domains/pages/PublicInfoPage";
-import LoginPage from "./domains/auth/pages/LoginPage";
-import AlumniRegistrationPage from "./domains/auth/pages/AlumniRegistrationPage";
-import AlumniActivationPage from "./domains/auth/pages/AlumniActivationPage";
-import NationalIdVerificationPage from "./domains/auth/pages/NationalIdVerificationPage";
-import VerifyNationalIdCallbackPage from "./domains/auth/pages/VerifyNationalIdCallbackPage";
-import EmployerRegistrationPage from "./domains/auth/pages/EmployerRegistrationPage";
-import VerifyOtpPage from "./domains/auth/pages/VerifyOtpPage";
-import VerifyManualPage from "./domains/auth/pages/VerifyManualPage";
-import ForgotPasswordPage from "./domains/auth/pages/ForgotPasswordPage";
-import ResetPasswordPage from "./domains/auth/pages/ResetPasswordPage";
-import SupportPage from "./domains/support/pages/SupportPage";
-import AlumniDashboard from "./domains/alumni/pages/AlumniDashboard";
-import EmployerDashboard from "./domains/employers/pages/EmployerDashboard";
-import RegistrarDashboard from "./domains/registrar/pages/RegistrarDashboard";
-import DepartmentRoutes from "./routes/departmentRoutes";
-import NotFoundPage from "./domains/pages/NotFoundPage";
-import ProtectedRoute from "./shared/components/ProtectedRoute";
+import HomePage from "./pages/HomePage";
+import PartnersPage from "./pages/PartnersPage";
+import EmployersPage from "./pages/EmployersPage";
+import PublicInfoPage from "./pages/PublicInfoPage";
+import LoginPage from "./features/auth/pages/LoginPage";
+import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
+import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
+import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
+import VerifyNationalIdCallbackPage from "./features/auth/pages/VerifyNationalIdCallbackPage";
+import EmployerRegistrationPage from "./features/auth/pages/EmployerRegistrationPage";
+import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
+import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
+import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
+import SupportPage from "./features/support/pages/SupportPage";
+import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
+import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
+import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
+import DepartmentDashboard from "./features/departments/pages/DepartmentDashboard";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
 import CmsRoutes from "./routes/cmsRoutes";
-import { RegistrationProvider } from "./domains/auth/contexts/RegistrationContext";
-import VerificationRouteGuard from "./domains/auth/components/VerificationRouteGuard";
+import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
+import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
 
 function AppContent() {
   return (
@@ -46,6 +47,7 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
 
         {/* Verification routes protected by VerificationRouteGuard */}
         <Route element={<VerificationRouteGuard />}>
@@ -84,10 +86,10 @@ function AppContent() {
           }
         />
         <Route
-          path="/department/*"
+          path="/department/dashboard"
           element={
             <ProtectedRoute
-              element={<DepartmentRoutes />}
+              element={<DepartmentDashboard />}
               allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
             />
           }

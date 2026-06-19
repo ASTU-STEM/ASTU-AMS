@@ -1,1 +1,0 @@
-export { jobsService } from './jobs.service';
