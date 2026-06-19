@@ -84,7 +84,7 @@ export class EmployerController {
     try {
       const userId = (req as any).user?.userId;
       const data = jobSchema.parse(req.body);
-      const useCase = new CreateJob(jobRepo, empRepo);
+      const useCase = new CreateJob(jobRepo, empRepo, talentRepo);
       const result = await useCase.execute(userId, data);
       return sendSuccess(res, 'Job created successfully.', result, 201);
     } catch (err) { next(err); }
@@ -407,11 +407,20 @@ export class EmployerController {
         },
       });
 
-      // Find the Alumni's user ID so we can emit to their socket room
+      // Find the Alumni's user ID so we can emit to their socket room and create a Notification
       const alumni = await prisma.alumniProfile.findUnique({ where: { id: alumniId } });
       if (alumni && alumni.userId) {
         const { SocketServer } = require('../../../infrastructure/websocket/SocketServer');
         SocketServer.emitToUser(alumni.userId, 'newMessage', message);
+        
+        // Create persistent notification
+        await prisma.notification.create({
+          data: {
+            userId: alumni.userId,
+            title: `New Message from ${employer.companyName}`,
+            content: `You have received a new message regarding your profile.`,
+          }
+        });
       }
 
       return sendSuccess(res, 'Message sent.', message, 201);

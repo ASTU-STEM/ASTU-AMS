@@ -3,12 +3,15 @@ import { IEmployerProfileRepository } from '../ports/IEmployerProfileRepository'
 import { EmployerNotFoundError, JobNotFoundError, UnauthorizedEmployerActionError } from '../../domain/errors/EmployerErrors';
 import { NotificationDispatcher } from '../../../notifications/application/services/NotificationDispatcher';
 
+import { ITalentSearchRepository } from '../ports/ITalentSearchRepository';
+
 const dispatcher = new NotificationDispatcher();
 
 export class CreateJob {
   constructor(
     private readonly jobRepo: IJobRepository,
-    private readonly empRepo: IEmployerProfileRepository
+    private readonly empRepo: IEmployerProfileRepository,
+    private readonly talentRepo?: ITalentSearchRepository
   ) {}
 
   async execute(userId: string, data: any) {
@@ -27,7 +30,16 @@ export class CreateJob {
       await dispatcher.broadcastJobAlert(job.title, employer.companyName, job.id);
     }
 
-    return job;
+    let recommendations: any[] = [];
+    if (this.talentRepo && data.skillsRequired && data.skillsRequired.length > 0) {
+      const searchResult = await this.talentRepo.search({
+        skills: data.skillsRequired,
+        limit: 5
+      });
+      recommendations = searchResult.data || [];
+    }
+
+    return { ...job, recommendations };
   }
 }
 

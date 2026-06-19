@@ -173,8 +173,10 @@ const EmployerDashboard = () => {
         ...prev
       ]);
       toast.success('New job listing posted successfully!');
+      return createdJob;
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Failed to create job listing');
+      throw error;
     }
   };
 

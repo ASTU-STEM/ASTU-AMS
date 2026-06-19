@@ -35,6 +35,7 @@ export interface EmployerJob {
   applicationsCount: number;
   shortlistedCount: number;
   viewsCount: number;
+  recommendations?: CandidateApplication[];
 }
 
 export interface CandidateApplication {

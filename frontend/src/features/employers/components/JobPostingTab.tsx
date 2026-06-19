@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { EmployerJob } from '../types/employer.types';
+import { CandidateApplication, EmployerJob } from '../types/employer.types';
+import { employerService } from '../services/employer.service';
 import toast from 'react-hot-toast';
 
 interface JobPostingTabProps {
   jobs: EmployerJob[];
-  onPostJob: (job: Omit<EmployerJob, 'id' | 'applicationsCount' | 'shortlistedCount' | 'viewsCount' | 'postedDate'>) => void;
+  onPostJob: (job: Omit<EmployerJob, 'id' | 'applicationsCount' | 'shortlistedCount' | 'viewsCount' | 'postedDate'>) => Promise<EmployerJob | void> | void;
   onToggleJobStatus: (jobId: number) => void;
   onUpdateJob: (job: EmployerJob) => void;
   onDeleteJob: (jobId: number) => void;
@@ -25,6 +26,13 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
     description: '',
     skillsInput: ''
   });
+
+  // AI Recommendation Modals state
+  const [showRecommendationModal, setShowRecommendationModal] = useState(false);
+  const [recommendedAlumni, setRecommendedAlumni] = useState<CandidateApplication[]>([]);
+  const [selectedAlumni, setSelectedAlumni] = useState<CandidateApplication | null>(null);
+  const [messageText, setMessageText] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +59,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
       setIsEditing(false);
       setEditingJobId(null);
     } else {
-      await onPostJob({
+      const createdJob = await onPostJob({
         title: formData.title,
         type: formData.type,
         location: formData.location,
@@ -61,10 +69,31 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
         skillsRequired: skills,
         status: 'Open'
       });
+      
+      // If job creation returned recommendations, display them
+      if (createdJob && createdJob.recommendations && createdJob.recommendations.length > 0) {
+        setRecommendedAlumni(createdJob.recommendations);
+        setShowRecommendationModal(true);
+      }
     }
 
     setIsPosting(false);
     setFormData({ title: '', type: 'Full-Time', location: '', salaryRange: '30,001 - 60,000 ETB/mo', experienceRequired: '1-3 years', description: '', skillsInput: '' });
+  };
+
+  const handleSendMessage = async () => {
+    if (!selectedAlumni || !messageText.trim()) return;
+    setIsSendingMessage(true);
+    try {
+      await employerService.sendDirectMessage(selectedAlumni.id.toString(), messageText);
+      toast.success(`Message sent to ${selectedAlumni.alumnusName}`);
+      setMessageText('');
+      setSelectedAlumni(null); // Go back to recommendation list
+    } catch (err: any) {
+      toast.error('Failed to send message');
+    } finally {
+      setIsSendingMessage(false);
+    }
   };
 
   const populateFormForEdit = (job: EmployerJob) => {
@@ -378,6 +407,107 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
           </div>
         )}
       </div>
+
+      {/* Recommendation Modal */}
+      {showRecommendationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-thin">
+            <button onClick={() => {setShowRecommendationModal(false); setSelectedAlumni(null);}} className="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-page)] rounded-full p-1 border border-[var(--border-color)] transition-all">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            
+            {!selectedAlumni ? (
+              <>
+                <div className="mb-6 pr-6">
+                  <h3 className="text-xl font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#E24B4A]">psychology</span>
+                    AI Candidate Recommendations
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">We found {recommendedAlumni.length} alumni whose skills match your new job posting.</p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {recommendedAlumni.map(alumni => (
+                    <div key={alumni.id} onClick={() => setSelectedAlumni(alumni)} className="bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl p-4 cursor-pointer hover:border-[#003366] hover:shadow-md transition-all group">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#003366] to-[#004d99] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                             {alumni.alumnusName.charAt(0).toUpperCase()}
+                           </div>
+                           <div>
+                             <h4 className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[#003366]">{alumni.alumnusName}</h4>
+                             <p className="text-xs text-[var(--text-secondary)]">{alumni.department}</p>
+                           </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {alumni.skills.slice(0, 3).map((skill, idx) => (
+                          <span key={idx} className="px-2 py-0.5 bg-white/50 dark:bg-black/20 border border-[var(--border-color)] rounded-md text-[9px] font-bold text-[var(--text-secondary)]">
+                            {skill}
+                          </span>
+                        ))}
+                        {alumni.skills.length > 3 && <span className="px-2 py-0.5 text-[9px] font-bold text-[var(--text-muted)]">+{alumni.skills.length - 3}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-6 flex items-center gap-3 border-b border-[var(--border-color)] pb-4">
+                  <button onClick={() => setSelectedAlumni(null)} className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[#003366] transition-all">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+                  <div>
+                    <h3 className="text-lg font-extrabold text-[var(--text-primary)]">Contact {selectedAlumni.alumnusName}</h3>
+                    <p className="text-xs text-[var(--text-secondary)]">Direct Message / Interview Invite</p>
+                  </div>
+                </div>
+                
+                <div className="bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl p-5 mb-5 flex items-start gap-4 shadow-sm">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#003366] to-[#004d99] flex items-center justify-center text-white font-bold text-2xl shadow-md shrink-0">
+                    {selectedAlumni.alumnusName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-[var(--text-primary)]">{selectedAlumni.alumnusName}</h4>
+                    <p className="text-sm text-[var(--text-secondary)]">{selectedAlumni.department} • Class of {selectedAlumni.graduationYear}</p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {selectedAlumni.skills.map((skill, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded text-[10px] font-bold text-[var(--text-primary)]">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">Message</label>
+                  <textarea
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    className="w-full text-sm p-4 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] min-h-[120px] resize-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                    placeholder={`Hi ${selectedAlumni.alumnusName},\n\nWe saw your impressive profile and think you'd be a great fit for our new opening...`}
+                  ></textarea>
+                  
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button onClick={() => setSelectedAlumni(null)} className="px-5 py-2.5 rounded-xl border border-[var(--border-color)] text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all">
+                      Back
+                    </button>
+                    <button onClick={handleSendMessage} disabled={isSendingMessage || !messageText.trim()} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#003366] to-[#004d99] hover:from-[#00264d] hover:to-[#003366] text-white text-sm font-bold shadow-md transition-all disabled:opacity-50 flex items-center gap-2">
+                      {isSendingMessage ? 'Sending...' : (
+                        <>
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                          Send Message
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

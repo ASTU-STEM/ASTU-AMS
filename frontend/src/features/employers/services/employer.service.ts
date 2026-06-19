@@ -53,6 +53,20 @@ function mapBackendJobToFrontend(data: any): EmployerJob {
     applicationsCount: data.applications?.length || data._count?.applications || 0,
     shortlistedCount: 0,
     viewsCount: data.views || 0,
+    recommendations: data.recommendations ? data.recommendations.map((a: any) => ({
+      id: a.id,
+      alumnusName: a.fullName || 'Alumni',
+      alumnusEmail: a.email || 'No Contact Info',
+      jobTitle: 'Recommended',
+      department: a.department?.name || 'N/A',
+      graduationYear: a.graduationYear?.toString() || 'N/A',
+      cgpa: a.cgpa === null ? 'Hidden (Privacy Setting)' : a.cgpa?.toString() || 'N/A',
+      skills: a.skills || [],
+      status: 'Pending',
+      appliedDate: 'N/A',
+      resumeUrl: a.resumeUrl || null,
+      coverLetter: '',
+    })) : undefined
   };
 }
 
