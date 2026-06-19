@@ -302,14 +302,14 @@ export const employerService = {
       const response = await apiClient.get('/employer/feedback');
       return (response.data.data || []).map((f: any) => ({
         id: f.id,
-        graduateName: f.alumni?.user?.email?.split('@')[0] || 'Graduate',
-        role: f.role || 'Employee',
+        alumnusName: f.alumni?.user?.firstName ? `${f.alumni.user.firstName} ${f.alumni.user.lastName}` : (f.alumni?.user?.email?.split('@')[0] || f.alumni?.fullName || 'Graduate'),
         department: f.alumni?.department?.name || 'N/A',
-        performanceRating: Math.round(
-          ((f.technicalSkill || 0) + (f.communicationSkill || 0) + (f.leadershipSkill || 0) +
-            (f.teamworkSkill || 0) + (f.problemSolvingSkill || 0) + (f.innovationSkill || 0)) / 6
-        ),
-        feedbackText: f.feedbackText || '',
+        technicalSkills: f.technicalSkill || 0,
+        communication: f.communicationSkill || 0,
+        leadership: f.leadershipSkill || 0,
+        teamwork: f.teamworkSkill || 0,
+        problemSolving: f.problemSolvingSkill || 0,
+        comments: f.feedbackText || '',
         submittedAt: f.createdAt ? new Date(f.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
       }));
     } catch (err: any) {

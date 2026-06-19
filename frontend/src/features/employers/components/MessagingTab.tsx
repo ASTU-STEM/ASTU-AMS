@@ -98,11 +98,11 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const unreadCount = (convo: Conversation) => convo.messages.filter(m => !m.isRead && m.sender !== 'EMPLOYER').length;
 
   return (
-    <div className={`flex rounded-3xl border shadow-sm overflow-hidden h-[600px] ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
+    <div className={`flex flex-col md:flex-row rounded-3xl border shadow-sm overflow-hidden h-[calc(100vh-160px)] md:h-[600px] ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
       }`}>
 
       {/* Conversation sidebar */}
-      <div className={`w-80 border-r flex flex-col ${darkMode ? 'border-slate-800' : 'border-gray-200/60'}`}>
+      <div className={`w-full md:w-80 border-b md:border-b-0 md:border-r flex flex-col ${activeConvo ? 'hidden md:flex' : 'flex'} ${darkMode ? 'border-slate-800' : 'border-gray-200/60'}`}>
         <div className="p-4 border-b border-gray-150">
           <h3 className="text-sm font-bold flex items-center gap-2">
             <span className="material-symbols-outlined text-astu-navy">forum</span>
@@ -166,12 +166,19 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
       </div>
 
       {/* Chat pane */}
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col ${!activeConvo ? 'hidden md:flex' : 'flex'}`}>
         {activeConvo ? (
           <>
             {/* Chat header */}
             <div className="p-4 border-b border-gray-150 flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setActiveConvo(null)} 
+                  className="md:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Back to conversations"
+                >
+                  <span className="material-symbols-outlined">arrow_back</span>
+                </button>
                 <div className="w-10 h-10 rounded-full bg-astu-navy/15 flex items-center justify-center text-astu-navy font-bold">
                   {getInitials(activeConvo.alumniName)}
                 </div>

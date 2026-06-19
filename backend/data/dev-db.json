@@ -26,6 +26,22 @@
       "ipAddress": "::1",
       "id": "dev-log-1781737222442",
       "createdAt": "2026-06-17T23:00:22.443Z"
+    },
+    {
+      "userId": "b71585e1-090e-4258-a953-2f8fa1d3c9db",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1781858314542",
+      "createdAt": "2026-06-19T08:38:34.543Z"
+    },
+    {
+      "userId": "b71585e1-090e-4258-a953-2f8fa1d3c9db",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1781859132525",
+      "createdAt": "2026-06-19T08:52:12.525Z"
     }
   ]
 }
