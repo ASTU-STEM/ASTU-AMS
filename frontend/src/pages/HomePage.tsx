@@ -29,6 +29,8 @@ import {
   UserRoundCheck,
   Phone,
   Mail,
+  CircleUserRound,
+  Search,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -46,67 +48,42 @@ import electricLabs from "../assets/images/electriclabs.jpeg";
 
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
-const stakeholders = [
+const howItWorksSteps = [
   {
-    title: "Alumni",
-    icon: Users,
-    points: [
-      "Create and maintain your professional profile.",
-      "Access verified job listings and internship opportunities.",
-      "Complete tracer surveys to guide curriculum development.",
-      "Mentor current students and connect with peers.",
-    ],
-    cta: "Access Alumni Portal",
-    route: "/info/alumni-portal",
-    tint: "text-astu-navy bg-astu-navy/10",
+    step: 1,
+    icon: CircleUserRound,
+    title: "Create Your Profile",
+    description:
+      "Sign up and build your professional profile. Add your graduation details, skills, work experience, and career interests to get started.",
+    color: "from-astu-navy to-[#1a4f8a]",
+    iconBg: "bg-astu-navy/10 text-astu-navy",
   },
   {
-    title: "Employers",
-    icon: Briefcase,
-    points: [
-      "Post employment opportunities for ASTU graduates.",
-      "Search alumni by expertise, skills, and department.",
-      "Provide feedback to enhance curriculum relevance.",
-    ],
-    cta: "Partner With ASTU",
-    route: "/info/employer-portal",
-    tint: "text-astu-red bg-astu-red/10",
+    step: 2,
+    icon: Search,
+    title: "Discover Opportunities",
+    description:
+      "Browse verified job listings, internship postings, and mentorship programs tailored to your expertise and career goals.",
+    color: "from-astu-red to-[#c0392b]",
+    iconBg: "bg-astu-red/10 text-astu-red",
   },
   {
-    title: "Departments",
+    step: 3,
+    icon: Handshake,
+    title: "Connect & Collaborate",
+    description:
+      "Network with fellow alumni, engage with employers, and participate in community events that advance your professional journey.",
+    color: "from-astu-green to-[#1e8449]",
+    iconBg: "bg-astu-green/10 text-astu-green",
+  },
+  {
+    step: 4,
     icon: LineChart,
-    points: [
-      "Monitor graduate employment outcomes and metrics.",
-      "Identify skill gaps through employer analytics.",
-      "Generate accreditation-ready reports.",
-    ],
-    cta: "View Department Analytics",
-    route: "/info/department-portal",
-    tint: "text-astu-green bg-astu-green/10",
-  },
-  {
-    title: "Registrar",
-    icon: FileCheck2,
-    points: [
-      "Validate alumni credentials against SIS records.",
-      "Process transcript and certificate requests.",
-      "Send tracer study reminders and audit notifications.",
-    ],
-    cta: "Open Registrar Portal",
-    route: "/info/registrar-portal",
-    tint: "text-[#B87900] bg-[#E8A020]/15",
-  },
-  {
-    title: "Administrator",
-    icon: LockKeyhole,
-    points: [
-      "Manage users, roles, and department records.",
-      "Monitor system logs, backups, and security protocols.",
-      "Oversee institutional analytics and accreditation reports.",
-    ],
-    cta: "Admin Console",
-    route: "/admin",
-    tint: "text-violet-700 bg-violet-100",
+    title: "Grow & Give Back",
+    description:
+      "Complete tracer surveys, mentor current students, and contribute to curriculum development that shapes the next generation.",
+    color: "from-violet-600 to-violet-800",
+    iconBg: "bg-violet-100 text-violet-700",
   },
 ];
 
@@ -536,6 +513,68 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section id="how-it-works" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+          <div className="mb-12 text-center reveal">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Get Started</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">How ASTU-AMS Works</h3>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-on-surface-variant">
+              From registration to real impact — here's how our platform empowers alumni,
+              employers, and the university community in four simple steps.
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Connector line for desktop */}
+            <div className="absolute left-0 right-0 top-[60px] hidden h-0.5 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green lg:block" />
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {howItWorksSteps.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <article
+                    key={item.step}
+                    className={`reveal reveal-delay-${item.step} group relative rounded-2xl border border-outline-variant bg-white p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_24px_rgba(0,51,102,0.12)]`}
+                  >
+                    {/* Step number badge */}
+                    <div className="mb-5 flex items-center gap-3">
+                      <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-lg font-bold text-white shadow-md transition-transform duration-300 group-hover:scale-110`}
+                      >
+                        {item.step}
+                      </div>
+                      <div className={`rounded-lg p-2.5 ${item.iconBg} transition-colors`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    </div>
+
+                    <h4 className="mb-2 text-lg font-bold text-astu-navy">
+                      {item.title}
+                    </h4>
+                    <p className="text-sm leading-relaxed text-on-surface-variant">
+                      {item.description}
+                    </p>
+
+                    {/* Decorative bottom accent */}
+                    <div
+                      className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-gradient-to-r ${item.color} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+                    />
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-10 flex justify-center reveal">
+            <button
+              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy px-7 py-3 text-sm font-bold text-white shadow-md transition-all hover:brightness-110 hover:shadow-lg hover:scale-105"
+              onClick={() => navigate("/login")}
+            >
+              Get Started Today
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </section>
+
         <section id="impact" className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
           <article className="reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Industry-Campus Bridge</p>
@@ -572,68 +611,7 @@ export default function HomePage() {
           </article>
         </section>
 
-        <section id="stakeholders" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Portal Access</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Choose Your Portal</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Role-based access for alumni, employers, departments, registrar, and administrators.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {stakeholders.slice(0, 3).map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <article key={item.title} className={`reveal reveal-delay-${idx + 1} rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                  <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${item.tint}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h4 className="text-lg font-bold text-astu-navy">{item.title}</h4>
-                  <ul className="mt-3 space-y-2">
-                    {item.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2 text-sm text-on-surface-variant">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-astu-green" />
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => navigate(item.route)}
-                    className="mt-5 w-full rounded-lg bg-astu-navy px-4 py-2.5 text-sm font-bold text-white hover:bg-astu-navy/90 transition-all hover:scale-105"
-                  >
-                    {item.cta}
-                  </button>
-                </article>
-              );
-            })}
-            {stakeholders.slice(3).map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <article key={item.title} className={`reveal reveal-delay-${idx + 4} rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                  <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${item.tint}`}>
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h4 className="text-lg font-bold text-astu-navy">{item.title}</h4>
-                  <ul className="mt-3 space-y-2">
-                    {item.points.map((point) => (
-                      <li key={point} className="flex items-start gap-2 text-sm text-on-surface-variant">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-astu-green" />
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => navigate(item.route)}
-                    className="mt-5 w-full rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-all hover:scale-105"
-                    style={{ backgroundColor: item.tint.includes('violet') ? '#7c3aed' : item.tint.includes('[#B87900]') ? '#B87900' : '#1e3a5f' }}
-                  >
-                    {item.cta}
-                  </button>
-                </article>
-              );
-            })}
-          </div>
-        </section>
+
 
         <section id="campus-life" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
