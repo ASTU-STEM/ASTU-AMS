@@ -43,7 +43,7 @@ export class EmailService {
     const subject = 'ASTU Alumni Verification Code';
     const text = `Your verification code for student ID ${studentId} is ${code}. It expires in 15 minutes.`;
     const html = `<p>Hello,</p><p>Your verification code for student ID <strong>${studentId}</strong> is <strong>${code}</strong>.</p><p>This code expires in 15 minutes.</p><p>If you did not request this code, please ignore this email.</p>`;
-    
+
     // Log for local testing
     console.log(`\n================================`);
     console.log(`[DEV TEST] OTP Code for ${email}: ${code}`);
@@ -115,5 +115,23 @@ export class EmailService {
   async sendGenericNotification(email: string, subject: string, message: string) {
     const html = `<p>Hello,</p><p>${message}</p><p>Login to ASTU AMS for more details.</p>`;
     return this.sendMail({ to: email, subject, text: message, html });
+  }
+
+  async sendAccountActivatedEmail(email: string, role: string) {
+    const subject = 'Your ASTU Management System Account is Now Active';
+    const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nYour account has been verified and activated by an administrator. You can now log in and access your ${role} dashboard.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #003366;">Account Activated</h2>
+        <p>Dear User,</p>
+        <p>Welcome to the Adama Science and Technology University (ASTU) Management System.</p>
+        <p>We are pleased to inform you that your account has been verified and activated by an administrator.</p>
+        <p>You can now log in and access your <strong>${role}</strong> dashboard.</p>
+        <p>We are thrilled to have you on board!</p>
+        <br/>
+        <p>Best regards,<br/><strong>ASTU Management System Team</strong></p>
+      </div>
+    `;
+    return this.sendMail({ to: email, subject, text, html });
   }
 }

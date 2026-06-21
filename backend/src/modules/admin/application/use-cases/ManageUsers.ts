@@ -323,6 +323,23 @@ export class ManageUsers {
           data: { isVerified: true }
         });
       }
+
+      // Map role to display role
+      let displayRole = 'User';
+      switch (user.role) {
+        case Role.ALUMNI: displayRole = 'Alumni'; break;
+        case Role.EMPLOYER: displayRole = 'Employer'; break;
+        case Role.DEPARTMENT_HEAD: displayRole = 'Department Head'; break;
+        case Role.REGISTRAR: displayRole = 'Registrar'; break;
+        case Role.ALUMNI_OFFICE: displayRole = 'CMS Manager'; break;
+        case Role.ADMIN: displayRole = 'Admin'; break;
+      }
+
+      try {
+        await emailService.sendAccountActivatedEmail(user.email, displayRole);
+      } catch (error) {
+        console.error('Failed to send account activation email to', user.email, error);
+      }
     } else if (action === 'suspend') {
       await prisma.user.update({
         where: { id },
