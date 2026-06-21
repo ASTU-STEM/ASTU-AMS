@@ -101,7 +101,8 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, userId }) 
 
   useEffect(() => {
     if (!userId) return;
-    const newSocket = io('http://localhost:5000');
+    const socketUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const newSocket = io(socketUrl);
     setSocket(newSocket);
 
     newSocket.on('connect', () => {

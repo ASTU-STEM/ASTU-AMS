@@ -839,7 +839,7 @@ const AlumniDashboard = () => {
               <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Recent Posts</h3>
                 <div className="mb-6 flex gap-3">
-                  <img src={profile?.profilePicture ? `http://localhost:5000${profile.profilePicture}` : "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                  <img src={profile?.profilePicture ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${profile.profilePicture}` : "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                   <div className="flex-1 relative">
                     <input type="text" placeholder="Share something with the community..." className="w-full text-xs p-3 pr-20 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all" onKeyDown={(e) => { if (e.key === 'Enter' && e.currentTarget.value.trim()) { handleCreatePost(e.currentTarget.value); e.currentTarget.value = ''; } }} />
                     <button onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input.value.trim()) { handleCreatePost(input.value); input.value = ''; } }} className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#003366] text-white text-[10px] font-bold rounded-lg hover:bg-[#002244] transition-colors">Post</button>

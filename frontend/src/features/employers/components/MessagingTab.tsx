@@ -39,7 +39,8 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
       try {
         const currentUser = JSON.parse(userStr);
         if (currentUser && currentUser.id) {
-          const socket = io('http://localhost:5000');
+          const socketUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+          const socket = io(socketUrl);
           socket.emit('register', currentUser.id);
 
           socket.on('newMessage', (msg) => {

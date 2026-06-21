@@ -8,6 +8,7 @@ interface ProfileTabProps {
 }
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
+  const UPLOAD_BASE = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
   const [formData, setFormData] = useState<AlumniProfile>({ ...profile });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -134,7 +135,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="flex items-center gap-5">
               <div className="relative group cursor-pointer" onClick={() => document.getElementById('avatar-upload')?.click()}>
                 <img
-                  src={(formData.profilePicture || formData.avatarUrl)?.startsWith('/uploads') ? `http://localhost:5000${formData.profilePicture || formData.avatarUrl}` : (formData.profilePicture || formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80')}
+                  src={(formData.profilePicture || formData.avatarUrl)?.startsWith('/uploads') ? `${UPLOAD_BASE}${formData.profilePicture || formData.avatarUrl}` : (formData.profilePicture || formData.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80')}
                   alt={formData.fullName}
                   className="w-20 h-20 rounded-2xl border-3 border-white/20 shadow-xl object-cover transition-transform group-hover:scale-105"
                 />
@@ -825,7 +826,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     </div>
                     <div className="flex gap-2">
                       {formData.resumeUrl && (
-                        <a href={`http://localhost:5000${formData.resumeUrl}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
+                        <a href={`${UPLOAD_BASE}${formData.resumeUrl}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
                           ⬇️ Download
                         </a>
                       )}

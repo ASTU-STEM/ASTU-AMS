@@ -9,11 +9,12 @@ interface ApplicationsTabProps {
 }
 
 export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, onUpdateStatus, darkMode }) => {
+  const UPLOAD_BASE = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
   const [selectedApp, setSelectedApp] = useState<CandidateApplication | null>(null);
   
   const handleDownloadCV = (alumnusName: string, fileName?: string, cvUrl?: string) => {
     if (cvUrl) {
-      window.open(cvUrl.startsWith('http') ? cvUrl : `http://localhost:5000${cvUrl}`, '_blank');
+      window.open(cvUrl.startsWith('http') ? cvUrl : `${UPLOAD_BASE}${cvUrl}`, '_blank');
       toast.success(`Opening CV for ${alumnusName}`);
     } else {
       toast.success(`Simulated CV Download: "${fileName || 'resume.pdf'}" saved for ${alumnusName}.`);
