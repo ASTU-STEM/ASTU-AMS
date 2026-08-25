@@ -33,10 +33,8 @@ function writeDevDb(store: any) {
 
 // ─── Fake Prisma for dev fallback ───
 class FakePrisma {
-  private store: any;
-
-  constructor() {
-    this.store = readDevDb();
+  private get store() {
+    return readDevDb();
   }
 
   async $connect() {

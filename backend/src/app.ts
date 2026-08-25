@@ -15,7 +15,11 @@ app.use(helmet({
 
 // 2. CORS Policy Configuration
 app.use(cors({
-  origin: '*', // In production, replace with specific frontend URL (e.g. env.FRONTEND_URL)
+  origin: [
+    process.env.FRONTEND_URL || 'https://astualumni.getastuye.com',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ],
   credentials: true,
 }));
 

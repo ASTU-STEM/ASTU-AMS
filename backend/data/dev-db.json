@@ -1,47 +1,74 @@
 {
   "users": [
     {
-      "email": "alumni@example.com",
-      "password": "$2a$10$QekauzC3KOOu7Z9UGBHd4.dxnCWfKh77j/U..GqnmJZH3.zK3yelq",
+      "id": "dev-user-insa",
+      "email": "insa@gmail.com",
+      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
       "role": "ALUMNI",
-      "isActive": false,
-      "id": "dev-1779994894043-352"
+      "isActive": true
+    },
+    {
+      "id": "dev-user-admin",
+      "email": "admin@astu.edu.et",
+      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "role": "ADMIN",
+      "isActive": true
+    },
+    {
+      "id": "dev-user-alumni",
+      "email": "alumni@example.com",
+      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "role": "ALUMNI",
+      "isActive": true
+    },
+    {
+      "id": "dev-user-employer",
+      "email": "safaricom@mail.com",
+      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "role": "EMPLOYER",
+      "isActive": true
+    },
+    {
+      "id": "dev-user-registrar",
+      "email": "registrar@astu.edu.et",
+      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "role": "REGISTRAR",
+      "isActive": true
     }
   ],
-  "alumniProfiles": [],
-  "employerProfiles": [],
-  "auditLogs": [
+  "alumniProfiles": [
     {
-      "userId": "dev-1779994894043-352",
-      "action": "REGISTER_ALUMNI",
-      "details": "Alumni account created and pending admin approval",
-      "ipAddress": "::1",
-      "id": "dev-log-1779994894046",
-      "createdAt": "2026-05-28T19:01:34.046Z"
+      "id": "dev-profile-insa",
+      "userId": "dev-user-insa",
+      "studentId": "ASTU/SWE/001/20",
+      "fullName": "Insa User",
+      "email": "insa@gmail.com",
+      "status": "ACTIVE",
+      "isVerified": true
     },
     {
-      "userId": "c6c3be93-3171-4970-b983-75e1128c408e",
-      "action": "LOGOUT",
-      "details": "User logged out",
-      "ipAddress": "::1",
-      "id": "dev-log-1781737222442",
-      "createdAt": "2026-06-17T23:00:22.443Z"
-    },
-    {
-      "userId": "b71585e1-090e-4258-a953-2f8fa1d3c9db",
-      "action": "LOGOUT",
-      "details": "User logged out",
-      "ipAddress": "::1",
-      "id": "dev-log-1781858314542",
-      "createdAt": "2026-06-19T08:38:34.543Z"
-    },
-    {
-      "userId": "b71585e1-090e-4258-a953-2f8fa1d3c9db",
-      "action": "LOGOUT",
-      "details": "User logged out",
-      "ipAddress": "::1",
-      "id": "dev-log-1781859132525",
-      "createdAt": "2026-06-19T08:52:12.525Z"
+      "id": "dev-profile-alumni",
+      "userId": "dev-user-alumni",
+      "studentId": "ASTU/SWE/002/20",
+      "fullName": "Alumni Example",
+      "email": "alumni@example.com",
+      "status": "ACTIVE",
+      "isVerified": true
     }
-  ]
+  ],
+  "employerProfiles": [
+    {
+      "id": "dev-employer-profile",
+      "userId": "dev-user-employer",
+      "companyName": "Safaricom Ethiopia",
+      "industry": "Telecommunications",
+      "isVerified": true
+    }
+  ],
+  "departments": [],
+  "registrarStudents": [],
+  "registrarSyncLogs": [],
+  "auditLogs": [],
+  "notifications": [],
+  "documentRequests": []
 }
