@@ -132,15 +132,17 @@ export default function AnalyticsOverview() {
     { label: 'Alumni Survey Response', value: `${Number(reportData?.tracer?.surveyCompletionRate || 0).toFixed(1)}%`, change: 'Overall participation', icon: Users, tone: 'red' as const },
   ];
 
-  const activeEmploymentTable = reportData?.departmentAnalytics?.departmentMetrics?.map((dept: any) => ({
-    department: dept.departmentName,
-    grads: dept.totalAlumni,
-    employed: dept.statusDistribution?.find((d: any) => d.status === 'EMPLOYED')?.count || 0,
-    selfEmployed: dept.statusDistribution?.find((d: any) => d.status === 'SELF_EMPLOYED')?.count || 0,
-    unemployed: dept.statusDistribution?.find((d: any) => d.status === 'UNEMPLOYED')?.count || 0,
-    rate: dept.employmentRate || 0,
-    vsLastYear: `Score: ${Number(dept.employabilityScore || 0).toFixed(1)}`
-  })) || [];
+  const activeEmploymentTable = useMemo(() => (
+    reportData?.departmentAnalytics?.departmentMetrics?.map((dept: any) => ({
+      department: dept.departmentName,
+      grads: dept.totalAlumni,
+      employed: dept.statusDistribution?.find((d: any) => d.status === 'EMPLOYED')?.count || 0,
+      selfEmployed: dept.statusDistribution?.find((d: any) => d.status === 'SELF_EMPLOYED')?.count || 0,
+      unemployed: dept.statusDistribution?.find((d: any) => d.status === 'UNEMPLOYED')?.count || 0,
+      rate: dept.employmentRate || 0,
+      vsLastYear: `Score: ${Number(dept.employabilityScore || 0).toFixed(1)}`
+    })) || []
+  ), [reportData]);
 
   const activeSkillGaps = reportData?.curriculum?.missingSkills?.map((s: any) => ({
     skill: s.skill,

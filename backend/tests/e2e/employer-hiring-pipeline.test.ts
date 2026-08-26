@@ -78,6 +78,7 @@ describe('Employer Recruitment Pipeline E2E Workflows', () => {
         skills: ['CAD', 'SolidWorks', 'MATLAB'],
       },
     });
+    await prisma.employerProfile.deleteMany({ where: { userId: 'e2e-employer-user' } }).catch(() => {});
     testAlumniId = alumniProfile.id;
   });
 

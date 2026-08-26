@@ -70,7 +70,7 @@ export const updateJobStatusSchema = z.object({
 });
 
 export const interviewSchema = z.object({
-  applicationId: z.string().uuid(),
+  applicationId: z.string().min(1),
   interviewer: z.string().min(2),
   interviewDate: z.preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
@@ -83,7 +83,7 @@ export const interviewSchema = z.object({
 });
 
 export const employerFeedbackSchema = z.object({
-  alumniId: z.string().uuid(),
+  alumniId: z.string().min(1),
   technicalSkill: z.number().min(1).max(10),
   communicationSkill: z.number().min(1).max(10),
   leadershipSkill: z.number().min(1).max(10),

@@ -190,6 +190,7 @@ export default function MediaPicker({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const assets = useMemo<MediaAsset[]>(() => {
+    if (!open) return sampleAssets;
     try {
       const stored = localStorage.getItem('astu_cms_media_library');
       if (stored) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { employerService } from '../services/employer.service';
 import { io } from 'socket.io-client';
@@ -31,6 +31,24 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const loadConversations = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await employerService.getConversations();
+      setConversations(data);
+      if (data.length > 0 && !activeConvo) {
+        setActiveConvo(data[0]);
+      } else if (activeConvo) {
+        const refreshed = data.find((c: Conversation) => c.alumniId === activeConvo.alumniId);
+        if (refreshed) setActiveConvo(refreshed);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeConvo]);
+
   useEffect(() => {
     loadConversations();
 
@@ -54,29 +72,11 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
         }
       } catch (e) { }
     }
-  }, []);
+  }, [loadConversations]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeConvo?.messages]);
-
-  const loadConversations = async () => {
-    setIsLoading(true);
-    try {
-      const data = await employerService.getConversations();
-      setConversations(data);
-      if (data.length > 0 && !activeConvo) {
-        setActiveConvo(data[0]);
-      } else if (activeConvo) {
-        const updated = data.find((c: Conversation) => c.alumniId === activeConvo.alumniId);
-        if (updated) setActiveConvo(updated);
-      }
-    } catch (err) {
-      console.error('Failed to load conversations', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 interface AlumniMessage {
@@ -83,7 +83,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, userId }) 
           return newThreads;
         });
         
-        if (!activeThread) setActiveThread(realThreads[0].id);
+        setActiveThread((prev) => prev || realThreads[0].id);
         
         // Add meta for real threads
         realThreads.forEach(t => {
@@ -166,7 +166,7 @@ export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, userId }) 
 
   const emojis = ['😊', '👍', '🎉', '🚀', '👋', '🔥', '💡', '📌', '✅', '🌟', '❤️', '💪', '🙏', '🎯', '✨', '🎓'];
 
-  const currentMessages = messages[activeThread] || [];
+  const currentMessages = useMemo(() => messages[activeThread] || [], [messages, activeThread]);
   const currentMeta = THREAD_META[activeThread] || null;
 
   const quickReplies: Record<string, string[]> = {

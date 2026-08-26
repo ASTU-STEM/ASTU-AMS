@@ -57,18 +57,23 @@ export class UpdateApplicationStatus {
     }
 
     // Retrieve candidate user/alumni info for email
-    const candidateProfile = await prisma.alumniProfile.findUnique({
+    let candidateProfile = await prisma.alumniProfile.findUnique({
       where: { id: application.alumniId },
       include: { user: true }
     });
-
     if (!candidateProfile) {
-      throw new Error('Candidate alumni profile not found.');
+      candidateProfile = await prisma.alumniProfile.findFirst({
+        where: { OR: [{ id: application.alumniId }, { userId: application.alumniId }] },
+        include: { user: true }
+      });
     }
 
     const emailService = new EmailService();
 
     if (status === 'HIRED') {
+      if (!candidateProfile) {
+        throw new Error('Candidate alumni profile not found.');
+      }
       if (application.status === 'HIRED') {
         throw new JobApplicationError('Application is already marked as HIRED.');
       }
@@ -98,7 +103,7 @@ export class UpdateApplicationStatus {
 
         // 2. Update AlumniProfile status
         await tx.alumniProfile.update({
-          where: { id: application.alumniId },
+          where: { id: candidateProfile.id },
           data: {
             employmentStatus: 'EMPLOYED',
             salary: parsedSalary,
@@ -110,7 +115,7 @@ export class UpdateApplicationStatus {
           data: {
             applicationId,
             employerId: employer.id,
-            alumniId: application.alumniId,
+            alumniId: candidateProfile.id,
             departmentId: candidateProfile.departmentId,
             hiredAt: now,
             salary: parsedSalary,
@@ -147,7 +152,7 @@ export class UpdateApplicationStatus {
     // For other status updates (e.g., Shortlisted, Rejected, Reviewed)
     const updated = await this.appRepo.updateStatus(applicationId, status);
 
-    if (candidateProfile.user?.email) {
+    if (candidateProfile?.user?.email) {
       const subjectMap: Record<string, string> = {
         'SHORTLISTED': 'Application Update: You have been Shortlisted!',
         'REJECTED': 'Application Update regarding your recent submission',

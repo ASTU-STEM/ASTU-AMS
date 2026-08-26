@@ -328,7 +328,7 @@ const EmployerDashboard = () => {
         if (flatMsgs.length > 0) setMessages(flatMsgs);
       }
     }).catch(console.error);
-  }, []);
+  }, [profile.name]);
 
   useEffect(() => {
     setMenuOpen(false);

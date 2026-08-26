@@ -74,6 +74,9 @@ describe('Employer Portal API & Hiring Workflow Integration Tests', () => {
       },
     });
     testEmployerId = employerProfile.id;
+    await prisma.jobApplication.deleteMany({ where: { job: { employerId: employerProfile.id } } }).catch(() => {});
+    await prisma.job.deleteMany({ where: { employerId: employerProfile.id } }).catch(() => {});
+    await prisma.notification.deleteMany({ where: { userId: 'test-alumni-user-uuid' } }).catch(() => {});
 
     // 2. User & Alumni Profile
     await prisma.user.upsert({
