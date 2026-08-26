@@ -108,7 +108,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<CmsRoutes />}
-              allowedRoles={["ADMIN", "CMS_MANAGER"]}
+              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE"]}
             />
           }
         />

@@ -1,6 +1,13 @@
 {
   "users": [
     {
+      "id": "dev-user-cms",
+      "email": "alumnioffice@astu.edu.et",
+      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "role": "ALUMNI_OFFICE",
+      "isActive": true
+    },
+    {
       "id": "dev-user-insa",
       "email": "insa@gmail.com",
       "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",

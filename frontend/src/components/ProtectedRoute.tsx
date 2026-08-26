@@ -49,6 +49,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       DEPARTMENT_HEAD: '/department/dashboard',
       ADMIN: '/admin/dashboard',
       CMS_MANAGER: '/cms/dashboard',
+      ALUMNI_OFFICE: '/cms/dashboard',
     };
     return <Navigate to={dashboardMap[user.role] || '/'} replace />;
   }

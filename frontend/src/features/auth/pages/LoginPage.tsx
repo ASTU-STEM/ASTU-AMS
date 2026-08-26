@@ -20,6 +20,7 @@ const roleRoutes: Record<string, string> = {
   DEPARTMENT_HEAD: '/department/dashboard',
   ADMIN: '/admin/dashboard',
   CMS_MANAGER: '/cms/dashboard',
+  ALUMNI_OFFICE: '/cms/dashboard',
 };
 
 export default function LoginPage() {
