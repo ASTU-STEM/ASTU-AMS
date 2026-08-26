@@ -56,6 +56,7 @@ import mentorshipRouter from './modules/mentorship/presentation/mentorship.route
 import jobboardRouter from './modules/jobboard/presentation/jobboard.routes';
 import supportRouter from './modules/support/presentation/support.routes';
 import adminRouter from './modules/admin/infrastructure/routes/adminRoutes';
+import contentRouter from './modules/content/presentation/content.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
@@ -68,6 +69,7 @@ app.use('/api/documents', documentsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/events', eventsRouter);
+app.use('/api/content', contentRouter);
 app.use('/api/mentorship', mentorshipRouter);
 app.use('/api/jobs', jobboardRouter);
 app.use('/api/support', supportRouter);

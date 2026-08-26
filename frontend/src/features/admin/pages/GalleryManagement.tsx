@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CheckCircle2,
   Edit3,
@@ -20,6 +20,8 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import ImageUploader from '../components/ImageUploader';
+import homepageCmsService from '../services/homepageCms.service';
 
 type GalleryStatus = 'Approved' | 'Pending Review' | 'Rejected';
 
@@ -38,7 +40,10 @@ interface MediaItem {
   status: GalleryStatus;
   uploadedBy: string;
   date: string;
+  src?: string;
 }
+
+const GALLERY_STORAGE_KEY = 'astu_ams_cms_gallery_items';
 
 const albums: Album[] = [
   { name: 'Event Gallery', icon: Image, tone: 'text-[#003580]', bg: 'bg-[#003580]/10' },
@@ -66,60 +71,115 @@ const statusClasses: Record<GalleryStatus, string> = {
 };
 
 export default function GalleryManagement() {
-  const [media, setMedia] = useState<MediaItem[]>(initialMedia);
+  const [media, setMedia] = useState<MediaItem[]>(() => {
+    try {
+      const stored = localStorage.getItem(GALLERY_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch { }
+    return initialMedia;
+  });
+
   const [activeAlbum, setActiveAlbum] = useState('Event Gallery');
   const [search, setSearch] = useState('');
   const [selectedTab, setSelectedTab] = useState<'all' | GalleryStatus>('all');
   const [showCreateAlbum, setShowCreateAlbum] = useState(false);
   const [newAlbumName, setNewAlbumName] = useState('');
-  const [dragging, setDragging] = useState(false);
+  const [uploadedSrc, setUploadedSrc] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(media));
+
+    const approvedGallery = media
+      .filter((m) => m.status === 'Approved')
+      .map((m) => ({
+        id: m.id,
+        title: m.title,
+        src: m.src || (m.type === 'Video' ? 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80' : '/images/astu-building.jpg'),
+        album: m.album,
+        active: true,
+      }));
+
+    const cmsSettings = homepageCmsService.getSettings();
+    if (cmsSettings) {
+      homepageCmsService.saveSettings({ ...cmsSettings, gallery: approvedGallery });
+    }
+
+    window.dispatchEvent(new Event('astu-cms-gallery-changed'));
+    window.dispatchEvent(new Event('astu-cms-homepage-updated'));
+  }, [media]);
+
+  const handleUploadNewMedia = (dataUrl: string) => {
+    if (!dataUrl) return;
+    const mediaTitle = prompt(`Enter title for new ${activeAlbum} item:`, `${activeAlbum} Showcase`);
+    if (!mediaTitle) return;
+
+    const newItem: MediaItem = {
+      id: `M-${Date.now().toString().slice(-4)}`,
+      title: mediaTitle.trim(),
+      type: dataUrl.startsWith('data:video') ? 'Video' : 'Photo',
+      album: activeAlbum,
+      status: 'Approved',
+      uploadedBy: 'Content Manager',
+      date: 'Just now',
+      src: dataUrl,
+    };
+
+    setMedia((prev) => [newItem, ...prev]);
+    setUploadedSrc('');
+    toast.success(`"${newItem.title}" uploaded to ${activeAlbum} & live on site!`);
+  };
 
   const filteredMedia = useMemo(() => {
-    let items = media.filter(m => m.album === activeAlbum);
+    let items = media.filter((m) => m.album === activeAlbum);
     if (selectedTab !== 'all') {
-      items = items.filter(m => m.status === selectedTab);
+      items = items.filter((m) => m.status === selectedTab);
     }
     if (search.trim()) {
-      items = items.filter(m => m.title.toLowerCase().includes(search.toLowerCase()));
+      items = items.filter((m) => m.title.toLowerCase().includes(search.toLowerCase()));
     }
     return items;
   }, [media, activeAlbum, selectedTab, search]);
 
   const albumStats = useMemo(() => {
-    const items = media.filter(m => m.album === activeAlbum);
+    const items = media.filter((m) => m.album === activeAlbum);
     return {
       total: items.length,
-      approved: items.filter(m => m.status === 'Approved').length,
-      pending: items.filter(m => m.status === 'Pending Review').length,
-      rejected: items.filter(m => m.status === 'Rejected').length,
+      approved: items.filter((m) => m.status === 'Approved').length,
+      pending: items.filter((m) => m.status === 'Pending Review').length,
+      rejected: items.filter((m) => m.status === 'Rejected').length,
     };
   }, [media, activeAlbum]);
 
-  const changeStatus = useCallback((id: string, newStatus: GalleryStatus) => {
-    setMedia(prev => prev.map(m => m.id === id ? { ...m, status: newStatus } : m));
-    const item = media.find(m => m.id === id);
-    toast.success(`"${item?.title}" → ${newStatus}`);
-  }, [media]);
+  const changeStatus = useCallback(
+    (id: string, newStatus: GalleryStatus) => {
+      setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, status: newStatus } : m)));
+      const item = media.find((m) => m.id === id);
+      toast.success(`"${item?.title}" → ${newStatus}`);
+    },
+    [media]
+  );
 
-  const deleteMedia = useCallback((id: string) => {
-    const item = media.find(m => m.id === id);
-    setMedia(prev => prev.filter(m => m.id !== id));
-    toast.success(`"${item?.title}" deleted`);
-  }, [media]);
+  const deleteMedia = useCallback(
+    (id: string) => {
+      const item = media.find((m) => m.id === id);
+      setMedia((prev) => prev.filter((m) => m.id !== id));
+      toast.success(`"${item?.title}" deleted`);
+    },
+    [media]
+  );
 
   const createAlbum = useCallback(() => {
-    if (!newAlbumName.trim()) { toast.error('Album name is required'); return; }
+    if (!newAlbumName.trim()) {
+      toast.error('Album name is required');
+      return;
+    }
     toast.success(`Album "${newAlbumName.trim()}" created`);
     setNewAlbumName('');
     setShowCreateAlbum(false);
   }, [newAlbumName]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragging(false);
-    const files = Array.from(e.dataTransfer.files);
-    toast.success(`${files.length} file(s) uploaded to ${activeAlbum}`);
-  }, [activeAlbum]);
 
   const tabs = [
     { key: 'all' as const, label: 'All', count: albumStats.total },
@@ -189,26 +249,14 @@ export default function GalleryManagement() {
       <section className="grid gap-4 xl:grid-cols-[360px_1fr]">
         {/* Upload Panel */}
         <div className="space-y-4">
-          <div
-            onDragOver={e => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            className={`rounded-[12px] border-2 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all ${
-              dragging ? 'border-[#003580] bg-[#003580]/5' : 'border-slate-200'
-            }`}
-          >
+          <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <h2 className="text-sm font-semibold text-slate-900">Upload to {activeAlbum}</h2>
-            <p className="mt-1 text-xs text-slate-500">Accepts images and videos for approval.</p>
-            <label className={`mt-4 flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-[10px] border-2 border-dashed p-6 text-center transition-all ${
-              dragging ? 'border-[#003580] bg-[#003580]/10' : 'border-slate-300 bg-slate-50 hover:border-[#003580]/40 hover:bg-[#003580]/5'
-            }`}>
-              <Upload className={`h-8 w-8 ${dragging ? 'text-[#003580]' : 'text-slate-400'}`} />
-              <span className="mt-3 text-sm font-semibold text-slate-900">{dragging ? 'Drop files here' : 'Drop files or browse'}</span>
-              <span className="mt-1 text-xs text-slate-500">Photos, videos, posters, thumbnails</span>
-              <input type="file" accept="image/*,video/*" multiple className="sr-only" onChange={e => {
-                if (e.target.files?.length) toast.success(`${e.target.files.length} file(s) uploaded to ${activeAlbum}`);
-              }} />
-            </label>
+            <p className="mt-1 text-xs text-slate-500 mb-4">Accepts images and video files. Uploaded media updates the public gallery instantly.</p>
+            <ImageUploader
+              label={`Choose or Drag File for ${activeAlbum}`}
+              value={uploadedSrc}
+              onChange={handleUploadNewMedia}
+            />
           </div>
 
           <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -254,14 +302,12 @@ export default function GalleryManagement() {
                 key={tab.key}
                 type="button"
                 onClick={() => setSelectedTab(tab.key)}
-                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-all ${
-                  selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-all ${selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
               >
                 {tab.label}
-                <span className={`px-1 py-0.5 rounded text-[9px] ${
-                  selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
-                }`}>{tab.count}</span>
+                <span className={`px-1 py-0.5 rounded text-[9px] ${selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+                  }`}>{tab.count}</span>
               </button>
             ))}
           </div>
@@ -270,10 +316,15 @@ export default function GalleryManagement() {
             {filteredMedia.map((item) => (
               <div key={item.id} className="flex flex-col gap-2 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-slate-200 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] ${
-                    item.type === 'Video' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
-                  }`}>
-                    {item.type === 'Video' ? <Film className="h-5 w-5" /> : <Image className="h-5 w-5" />}
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] overflow-hidden ${item.type === 'Video' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
+                    }`}>
+                    {item.src ? (
+                      <img src={item.src} alt="" className="h-full w-full object-cover" />
+                    ) : item.type === 'Video' ? (
+                      <Film className="h-5 w-5" />
+                    ) : (
+                      <Image className="h-5 w-5" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-slate-900 truncate">{item.title}</h3>
@@ -306,8 +357,8 @@ export default function GalleryManagement() {
                         </button>
                       </>
                     )}
-                    <button onClick={() => toast.success(`Previewing "${item.title}"`)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 transition-all" title="Preview">
+                    <button onClick={() => window.open('/gallery', '_blank')}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-[#003580]/10 hover:text-[#003580] transition-all" title="Open Full Public Gallery">
                       <Eye className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={() => toast.success(`Editing "${item.title}"`)}

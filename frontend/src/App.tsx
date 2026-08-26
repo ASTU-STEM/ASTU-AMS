@@ -8,6 +8,11 @@ import HomePage from "./pages/HomePage";
 import PartnersPage from "./pages/PartnersPage";
 import EmployersPage from "./pages/EmployersPage";
 import PublicInfoPage from "./pages/PublicInfoPage";
+import AnnouncementListPage from "./pages/AnnouncementListPage";
+import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
+import PublicGalleryPage from "./pages/PublicGalleryPage";
+import StoryDetailPage from "./pages/StoryDetailPage";
+import EventDetailPage from "./pages/EventDetailPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
@@ -39,6 +44,11 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/partners" element={<PartnersPage />} />
         <Route path="/info/:slug" element={<PublicInfoPage />} />
+        <Route path="/announcements" element={<AnnouncementListPage />} />
+        <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+        <Route path="/gallery" element={<PublicGalleryPage />} />
+        <Route path="/stories/:id" element={<StoryDetailPage />} />
+        <Route path="/events/:id" element={<EventDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />

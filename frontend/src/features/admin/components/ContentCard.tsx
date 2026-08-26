@@ -26,9 +26,11 @@ export type ContentCardItem = {
   type: ContentType;
   status: ContentStatus;
   excerpt?: string;
+  image?: string;
   author?: string;
-  updatedAt: string;
+  updatedAt?: string;
   scheduledFor?: string;
+  scheduledIso?: string;
   publishedAt?: string;
   views?: number;
   tags?: string[];
@@ -73,6 +75,7 @@ export type ContentCardProps = {
   onDelete?: (id: string) => void;
   onTogglePin?: (id: string) => void;
   onToggleFeature?: (id: string) => void;
+  onMore?: (id: string) => void;
   onClick?: (id: string) => void;
   compact?: boolean;
 };
@@ -88,6 +91,7 @@ export default function ContentCard({
   onDelete,
   onTogglePin,
   onToggleFeature,
+  onMore,
   onClick,
   compact = false,
 }: ContentCardProps) {
@@ -233,8 +237,8 @@ export default function ContentCard({
             <Trash2 className="h-5 w-5" />
           </button>
         )}
-        <button type="button" onClick={() => undefined}
-          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-500 transition-all" title="More">
+        <button type="button" onClick={() => (onMore ? onMore(item.id) : onPreview?.(item.id))}
+          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all" title="More Options">
           <MoreHorizontal className="h-5 w-5" />
         </button>
       </div>

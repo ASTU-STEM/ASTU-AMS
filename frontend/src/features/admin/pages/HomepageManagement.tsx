@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BarChart3,
   BookOpen,
@@ -49,6 +49,8 @@ import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import ImageUploader from '../components/ImageUploader';
+import homepageCmsService, { HomepageCmsConfig } from '../services/homepageCms.service';
 
 /* ─── Types ─── */
 interface HeroSlide {
@@ -58,7 +60,7 @@ interface ImpactStat {
   id: string; label: string; value: string; suffix: string; detail: string; icon: string; active: boolean;
 }
 interface StakeholderPortal {
-  id: string; title: string; icon: string; points: string[]; cta: string; route: string; active: boolean;
+  id: string; title: string; icon: string; points: string[]; cta: string; route: string; active: boolean; description?: string;
 }
 interface CampusLifeCard {
   id: string; title: string; campus: string; description: string; image: string; action: string; active: boolean;
@@ -325,11 +327,112 @@ export default function HomepageManagement() {
     return heroSlides.length + impactStats.length + portals.length + campusLife.length + campuses.length + gallery.length + videos.length + events.length + workshops.length + newsItems.length + announcements.length + stories.length + partners.length + testimonials.length + faq.length;
   }, [heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq]);
 
+  const isLoaded = useRef(false);
+
+  useEffect(() => {
+    const config = homepageCmsService.getSettings();
+    if (config) {
+      if (config.welcomeMessage) setWelcomeMessage(config.welcomeMessage);
+      if (config.heroSlides) setHeroSlides(config.heroSlides);
+      if (config.impactStats) setImpactStats(config.impactStats);
+      if (config.portals) setPortals(config.portals);
+      if (config.campusLife) setCampusLife(config.campusLife);
+      if (config.campuses) setCampuses(config.campuses);
+      if (config.gallery) setGallery(config.gallery);
+      if (config.videos) setVideos(config.videos);
+      if (config.events) setEvents(config.events);
+      if (config.workshops) setWorkshops(config.workshops);
+      if (config.newsItems) setNewsItems(config.newsItems);
+      if (config.announcements) setAnnouncements(config.announcements);
+      if (config.stories) setStories(config.stories);
+      if (config.partners) setPartners(config.partners);
+      if (config.testimonials) setTestimonials(config.testimonials);
+      if (config.faq) setFaq(config.faq);
+    }
+    setTimeout(() => {
+      isLoaded.current = true;
+    }, 100);
+  }, []);
+
+  const saveAllConfig = useCallback((showToast = true) => {
+    const config: HomepageCmsConfig = {
+      welcomeMessage,
+      heroSlides,
+      impactStats,
+      portals,
+      campusLife,
+      campuses,
+      gallery,
+      videos,
+      events,
+      workshops,
+      newsItems,
+      announcements,
+      stories,
+      partners,
+      testimonials,
+      faq,
+      tracerSpotlight,
+      employerFeedback,
+      mentorshipStats,
+    };
+    homepageCmsService.saveSettings(config);
+    if (showToast) {
+      toast.success('Homepage CMS published live to backend database & landing page!');
+    }
+  }, [
+    welcomeMessage,
+    heroSlides,
+    impactStats,
+    portals,
+    campusLife,
+    campuses,
+    gallery,
+    videos,
+    events,
+    workshops,
+    newsItems,
+    announcements,
+    stories,
+    partners,
+    testimonials,
+    faq,
+    tracerSpotlight,
+    employerFeedback,
+    mentorshipStats,
+  ]);
+
+  useEffect(() => {
+    if (!isLoaded.current) return;
+    saveAllConfig(false);
+  }, [
+    welcomeMessage,
+    heroSlides,
+    impactStats,
+    portals,
+    campusLife,
+    campuses,
+    gallery,
+    videos,
+    events,
+    workshops,
+    newsItems,
+    announcements,
+    stories,
+    partners,
+    testimonials,
+    faq,
+    tracerSpotlight,
+    employerFeedback,
+    mentorshipStats,
+    saveAllConfig,
+  ]);
+
   const saveWelcome = useCallback(() => {
     setWelcomeSaved(true);
-    toast.success('Welcome message saved');
+    saveAllConfig(true);
     setTimeout(() => setWelcomeSaved(false), 2000);
-  }, []);
+  }, [saveAllConfig]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -367,7 +470,7 @@ export default function HomepageManagement() {
             />
             <AdminModal open={modal.open} title={modal.editing ? 'Edit Slide' : 'New Slide'} onClose={modal.close} size="lg">
               <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="https://..." /></div>
+                <ImageUploader label="Upload Slide Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
                 <div><label className="text-xs font-semibold text-slate-500">Tagline</label><input value={form.tagline} onChange={e => setForm(p => ({ ...p, tagline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Quality Assurance & Accreditation" /></div>
                 <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Slide title" /></div>
                 <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
@@ -435,10 +538,19 @@ export default function HomepageManagement() {
         const modal = useModalState<StakeholderPortal>();
         const [form, setForm] = useState({ title: '', icon: 'Users', points: ['', '', ''], cta: '', route: '' });
         const openAdd = useCallback(() => { setForm({ title: '', icon: 'Users', points: ['', '', ''], cta: '', route: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: StakeholderPortal) => { setForm({ title: item.title, icon: item.icon, points: [...item.points], cta: item.cta, route: item.route }); modal.openFor(item); }, [modal]);
+        const openEdit = useCallback((item: StakeholderPortal) => {
+          setForm({
+            title: item.title || '',
+            icon: item.icon || 'Users',
+            points: Array.isArray(item.points) ? [...item.points] : (item.description ? [item.description] : []),
+            cta: item.cta || '',
+            route: item.route || '',
+          });
+          modal.openFor(item);
+        }, [modal]);
         const save = useCallback(() => {
           if (!form.title.trim()) { toast.error('Title is required'); return; }
-          const filtered = form.points.filter(p => p.trim());
+          const filtered = (form.points || []).filter(p => p.trim());
           if (modal.editing) { setPortals(prev => prev.map(p => p.id === modal.editing!.id ? { ...p, ...form, points: filtered } : p)); toast.success('Portal updated'); }
           else { setPortals(prev => [...prev, { id: `SP-${Date.now()}`, ...form, points: filtered, active: true }]); toast.success('Portal created'); }
           modal.close();
@@ -454,7 +566,7 @@ export default function HomepageManagement() {
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{portal.title}</p>
-                      <p className="text-xs text-slate-400">{portal.cta} · {portal.points.length} features</p>
+                      <p className="text-xs text-slate-400">{portal.cta || 'Portal'} · {(portal.points || []).length} features</p>
                     </div>
                     <button onClick={() => openEdit(portal)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
                   </div>
@@ -471,7 +583,7 @@ export default function HomepageManagement() {
                   <div><label className="text-xs font-semibold text-slate-500">CTA Button</label><input value={form.cta} onChange={e => setForm(p => ({ ...p, cta: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
                   <div><label className="text-xs font-semibold text-slate-500">Route</label><input value={form.route} onChange={e => setForm(p => ({ ...p, route: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
                 </div>
-                <div><label className="text-xs font-semibold text-slate-500">Feature Points (one per line)</label><textarea value={form.points.join('\n')} onChange={e => setForm(p => ({ ...p, points: e.target.value.split('\n') }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+                <div><label className="text-xs font-semibold text-slate-500">Feature Points (one per line)</label><textarea value={(form.points || []).join('\n')} onChange={e => setForm(p => ({ ...p, points: e.target.value.split('\n') }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -512,10 +624,8 @@ export default function HomepageManagement() {
                   <div><label className="text-xs font-semibold text-slate-500">Campus Label</label><input value={form.campus} onChange={e => setForm(p => ({ ...p, campus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
                 </div>
                 <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Action Text</label><input value={form.action} onChange={e => setForm(p => ({ ...p, action: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                </div>
+                <ImageUploader label="Upload Card Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+                <div><label className="text-xs font-semibold text-slate-500">Action Text</label><input value={form.action} onChange={e => setForm(p => ({ ...p, action: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -553,7 +663,7 @@ export default function HomepageManagement() {
               <div className="space-y-4 p-1">
                 <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
                 <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                <ImageUploader label="Upload Campus Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -590,7 +700,7 @@ export default function HomepageManagement() {
             <AdminModal open={modal.open} title={modal.editing ? 'Edit Image' : 'Add Image'} onClose={modal.close} size="md">
               <div className="space-y-4 p-1">
                 <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.src} onChange={e => setForm(p => ({ ...p, src: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                <ImageUploader label="Upload Photo" value={form.src} onChange={url => setForm(p => ({ ...p, src: url }))} />
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -627,7 +737,7 @@ export default function HomepageManagement() {
             <AdminModal open={modal.open} title={modal.editing ? 'Edit Video' : 'Add Video'} onClose={modal.close} size="md">
               <div className="space-y-4 p-1">
                 <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Thumbnail URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                <ImageUploader label="Upload Thumbnail Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -668,7 +778,7 @@ export default function HomepageManagement() {
                   <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="April 25-26, 2026" /></div>
                   <div><label className="text-xs font-semibold text-slate-500">Location</label><input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
                 </div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                <ImageUploader label="Upload Event Banner Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -827,7 +937,7 @@ export default function HomepageManagement() {
                   <div><label className="text-xs font-semibold text-slate-500">Role</label><input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
                 </div>
                 <div><label className="text-xs font-semibold text-slate-500">Story Text</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                <ImageUploader label="Upload Photo / Headshot" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
                 <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
@@ -1104,7 +1214,7 @@ export default function HomepageManagement() {
         actions={
           <div className="flex items-center gap-2">
             <AdminBadge variant="info">{totalActive} active items</AdminBadge>
-            <button onClick={() => { toast.success('Homepage changes published to live site'); }}
+            <button onClick={() => saveAllConfig(true)}
               className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all shadow-sm">
               <Save className="h-3.5 w-3.5" /> Publish All
             </button>

@@ -17,10 +17,11 @@ export const createEventController = async (req: Request, res: Response, next: N
   try {
     const validatedData = createEventSchema.parse(req.body);
     const useCase = new CreateEvent(repo);
+    const parsedDate = isNaN(new Date(validatedData.date).getTime()) ? new Date() : new Date(validatedData.date);
     const event = await useCase.execute({
       ...validatedData,
-      date: new Date(validatedData.date),
-      createdBy: (req as any).user.userId
+      date: parsedDate,
+      createdBy: (req as any).user?.userId || 'system'
     });
     res.status(201).json({ success: true, data: event });
   } catch (error) {

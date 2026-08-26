@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   BarChart3,
@@ -21,6 +22,11 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import ImageUploader from '../components/ImageUploader';
+import contentService from '../services/content.service';
+
+const GOVERNANCE_ANNOUNCEMENTS_KEY = 'astu_ams_governance_announcements';
+const GOVERNANCE_COMMUNITY_KEY = 'astu_ams_governance_community';
 
 type ContentStatus = 'Published' | 'Scheduled' | 'Pinned' | 'Draft' | 'Needs Review';
 type Audience = 'Public' | 'Internal' | 'Emergency' | 'Department' | 'Alumni' | 'Employer';
@@ -84,16 +90,85 @@ const audienceClasses: Record<Audience, string> = {
   Employer: 'bg-amber-100 text-amber-700',
 };
 
+function mapCmsToAnnouncement(item: any): Announcement {
+  const audienceTag = item.tags?.find((t: string) => ['public', 'internal', 'emergency', 'department', 'alumni', 'employer'].includes(t.toLowerCase()));
+  const audience: Audience = audienceTag
+    ? (audienceTag.charAt(0).toUpperCase() + audienceTag.slice(1).toLowerCase() as Audience)
+    : 'Public';
+
+  let status: ContentStatus = (item.status as ContentStatus) || 'Published';
+  if (item.pinned) status = 'Pinned';
+
+  return {
+    id: item.id,
+    title: item.title,
+    audience,
+    status,
+    attachment: item.image ? 'Image' : 'None',
+    owner: item.author || 'Content Manager',
+    updated: item.publishedAt || item.updatedAt || 'Recently',
+    views: item.views || 0,
+  };
+}
+
 export default function ContentGovernance() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
-  const [community, setCommunity] = useState<CommunityPost[]>(initialCommunity);
+  const navigate = useNavigate();
+
+  const loadAnnouncements = useCallback((): Announcement[] => {
+    const cmsItems = contentService.getItems();
+    const announcementsFromCms = cmsItems
+      .filter((i) => i.type === 'announcement' || i.tags?.includes('announcement') || i.tags?.includes('notice'))
+      .map(mapCmsToAnnouncement);
+
+    if (announcementsFromCms.length > 0) {
+      return announcementsFromCms;
+    }
+    return initialAnnouncements;
+  }, []);
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>(loadAnnouncements);
+
+  const [community, setCommunity] = useState<CommunityPost[]>(() => {
+    try {
+      const stored = localStorage.getItem(GOVERNANCE_COMMUNITY_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return initialCommunity;
+  });
+
   const [audience, setAudience] = useState<Audience>('Public');
   const [headline, setHeadline] = useState('');
   const [body, setBody] = useState('');
+  const [image, setImage] = useState('');
   const [search, setSearch] = useState('');
   const [selectedTab, setSelectedTab] = useState<'announcements' | 'community'>('announcements');
   const [showEditor, setShowEditor] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Sync with API on mount & subscribe to content change events
+  useEffect(() => {
+    contentService.fetchItemsFromApi().then(() => {
+      setAnnouncements(loadAnnouncements());
+    });
+
+    const handleSync = () => {
+      setAnnouncements(loadAnnouncements());
+    };
+    window.addEventListener('astu-cms-content-changed', handleSync);
+    return () => window.removeEventListener('astu-cms-content-changed', handleSync);
+  }, [loadAnnouncements]);
+
+  useEffect(() => {
+    localStorage.setItem(GOVERNANCE_ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
+  }, [announcements]);
+
+  useEffect(() => {
+    localStorage.setItem(GOVERNANCE_COMMUNITY_KEY, JSON.stringify(community));
+    window.dispatchEvent(new Event('astu-cms-community-changed'));
+  }, [community]);
 
   const filteredAnnouncements = useMemo(() => {
     let items = announcements;
@@ -125,49 +200,96 @@ export default function ContentGovernance() {
   const publish = useCallback(() => {
     if (!headline.trim()) { toast.error('Headline is required'); return; }
     const newItem: Announcement = {
-      id: `A-${String(announcements.length + 1).padStart(3, '0')}`,
+      id: `A-${String(Date.now()).slice(-4)}`,
       title: headline.trim(),
       audience,
       status: 'Published',
-      attachment: body.trim() ? 'Text' : 'None',
+      attachment: image ? 'Image' : (body.trim() ? 'Text' : 'None'),
       owner: 'Content Manager',
       updated: 'Just now',
       views: 0,
     };
     setAnnouncements(prev => [newItem, ...prev]);
+
+    contentService.addItem({
+      title: headline.trim(),
+      type: 'announcement',
+      status: 'Published',
+      excerpt: body.trim() || 'Official ASTU Announcement',
+      author: 'Content Manager',
+      updatedAt: 'Just now',
+      publishedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      tags: [audience.toLowerCase(), 'announcement'],
+      pinned: false,
+      featured: true,
+      image: image || undefined,
+    });
+
     setHeadline('');
     setBody('');
+    setImage('');
     setShowEditor(false);
-    toast.success(`"${newItem.title}" published to ${audience}`);
-  }, [headline, body, audience, announcements.length]);
+    toast.success(`"${newItem.title}" published live to landing page & notices!`);
+  }, [headline, body, audience, image]);
 
   const schedule = useCallback(() => {
     if (!headline.trim()) { toast.error('Headline is required'); return; }
     const newItem: Announcement = {
-      id: `A-${String(announcements.length + 1).padStart(3, '0')}`,
+      id: `A-${String(Date.now()).slice(-4)}`,
       title: headline.trim(),
       audience,
       status: 'Scheduled',
-      attachment: body.trim() ? 'Text' : 'None',
+      attachment: image ? 'Image' : (body.trim() ? 'Text' : 'None'),
       owner: 'Content Manager',
       updated: 'Just now',
       views: 0,
     };
     setAnnouncements(prev => [newItem, ...prev]);
+
+    contentService.addItem({
+      title: headline.trim(),
+      type: 'announcement',
+      status: 'Scheduled',
+      excerpt: body.trim() || 'Scheduled ASTU Announcement',
+      author: 'Content Manager',
+      updatedAt: 'Just now',
+      scheduledFor: 'Tomorrow 9:00 AM',
+      scheduledIso: new Date(Date.now() + 86400000).toISOString(),
+      tags: [audience.toLowerCase(), 'announcement'],
+      image: image || undefined,
+    });
+
     setHeadline('');
     setBody('');
+    setImage('');
     setShowEditor(false);
     toast.success(`"${newItem.title}" scheduled`);
-  }, [headline, body, audience, announcements.length]);
+  }, [headline, body, audience, image]);
 
   const changeStatus = useCallback((id: string, newStatus: ContentStatus) => {
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, status: newStatus, updated: 'Just now' } : a));
+    const target = announcements.find(a => a.id === id);
+    if (target) {
+      const matchInCms = contentService.getItems().find(i => i.title === target.title || i.id === id);
+      if (matchInCms) {
+        contentService.updateItem(matchInCms.id, {
+          status: newStatus === 'Pinned' ? 'Published' : (newStatus as any),
+          pinned: newStatus === 'Pinned',
+        });
+      }
+    }
     toast.success(`Status updated to ${newStatus}`);
-  }, []);
+  }, [announcements]);
 
   const deleteAnnouncement = useCallback((id: string) => {
     const item = announcements.find(a => a.id === id);
     setAnnouncements(prev => prev.filter(a => a.id !== id));
+    if (item) {
+      const matchInCms = contentService.getItems().find(i => i.title === item.title || i.id === id);
+      if (matchInCms) {
+        contentService.deleteItem(matchInCms.id);
+      }
+    }
     toast.success(`"${item?.title}" deleted`);
   }, [announcements]);
 
@@ -294,6 +416,7 @@ export default function ContentGovernance() {
                   <span className="inline-flex items-center gap-2"><FileText className="h-4 w-4" /> Attach PDF notice</span>
                   <input type="file" accept="application/pdf" className="sr-only" onChange={() => toast.success('PDF attached')} />
                 </label>
+                <ImageUploader label="Upload Announcement Featured Image" value={image} onChange={setImage} />
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={schedule}
                     className="inline-flex items-center justify-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
@@ -349,8 +472,8 @@ export default function ContentGovernance() {
                       {row.status}
                     </span>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => toast.success(`Previewing "${row.title}"`)}
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 transition-all" title="Preview"><Eye className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => navigate(`/announcements/${row.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 hover:text-[#003580] transition-all" title="View Full Notice Page"><Eye className="h-3.5 w-3.5" /></button>
                       <button onClick={() => { setHeadline(row.title); setAudience(row.audience); setShowEditor(true); setEditingId(row.id); }}
                         className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit"><Edit3 className="h-3.5 w-3.5" /></button>
                       {row.status !== 'Pinned' && (
