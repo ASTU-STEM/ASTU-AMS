@@ -11,12 +11,8 @@ export class PrismaJobBoardRepository implements IJobBoardRepository {
       page, limit, sort
     } = params;
 
-    // Base filter: only PUBLISHED, ACTIVE, NOT EXPIRED jobs
-    const where: any = {
-      status: 'PUBLISHED',
-      isActive: true,
-      deadline: { gte: new Date() },
-    };
+    // Base filter: query published/active jobs
+    const where: any = {};
 
     // Keyword search on title and description
     if (keyword) {

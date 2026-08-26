@@ -294,11 +294,50 @@ class FakePrisma {
       let jobs = store.jobs || [];
       if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
       if (where?.status) jobs = jobs.filter((j: any) => j.status === where.status);
-      return jobs;
+      return jobs.map((j: any) => {
+        const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerId) || {
+          id: j.employerId || 'dev-employer-insa',
+          companyName: 'INSA Corporation',
+          industry: 'Cybersecurity & Defense Tech',
+          location: 'Addis Ababa, Ethiopia',
+          logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+          website: 'https://insa.gov.et'
+        };
+        return {
+          ...j,
+          isActive: j.isActive ?? true,
+          status: j.status || 'PUBLISHED',
+          deadline: j.deadline || '2030-12-31T23:59:59.000Z',
+          employer: emp,
+          _count: {
+            applications: (store.jobApplications || []).filter((a: any) => a.jobId === j.id).length
+          }
+        };
+      });
     },
     findUnique: async ({ where }: any = {}) => {
       const store = readDevDb();
-      return (store.jobs || []).find((j: any) => j.id === where?.id) || null;
+      const j = (store.jobs || []).find((item: any) => item.id === where?.id);
+      if (!j) return null;
+      const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerId) || {
+        id: j.employerId || 'dev-employer-insa',
+        companyName: 'INSA Corporation',
+        industry: 'Cybersecurity & Defense Tech',
+        location: 'Addis Ababa, Ethiopia',
+        logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+        website: 'https://insa.gov.et'
+      };
+      return {
+        ...j,
+        isActive: j.isActive ?? true,
+        status: j.status || 'PUBLISHED',
+        deadline: j.deadline || '2030-12-31T23:59:59.000Z',
+        employer: emp,
+        _count: {
+          applications: (store.jobApplications || []).filter((a: any) => a.jobId === j.id).length,
+          views: j.views || 0
+        }
+      };
     },
     count: async ({ where }: any = {}) => {
       const store = readDevDb();

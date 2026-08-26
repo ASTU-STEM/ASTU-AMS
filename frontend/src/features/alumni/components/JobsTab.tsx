@@ -47,7 +47,10 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       selectedLocation === 'All' ||
       job.location.toLowerCase().includes(selectedLocation.toLowerCase());
 
-    const matchesFormat = selectedFormat === 'All' || job.type === selectedFormat;
+    const matchesFormat =
+      selectedFormat === 'All' ||
+      job.type.toLowerCase().replace(/[^a-z]/g, '').includes(selectedFormat.toLowerCase().replace(/[^a-z]/g, '')) ||
+      selectedFormat.toLowerCase().replace(/[^a-z]/g, '').includes(job.type.toLowerCase().replace(/[^a-z]/g, ''));
 
     return matchesSearch && matchesLocation && matchesFormat;
   });

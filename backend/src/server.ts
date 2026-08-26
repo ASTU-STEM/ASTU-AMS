@@ -13,7 +13,7 @@ async function bootstrap() {
   try {
     Logger.info(' Bootstrapping ASTU-AMS API Server...');
 
-    // 1. Validate Database Connection (with resilient fallback dev DB models)
+    // 1. Validate Database Connection (with resilient fallback dev DB models active and live job board repository)
     Logger.info('📡 Initializing database client...');
     await initPrisma();
     Logger.info('✅ Database client initialized.');
