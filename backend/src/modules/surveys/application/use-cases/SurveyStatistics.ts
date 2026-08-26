@@ -3,8 +3,12 @@ import { ISurveyAssignmentRepository } from '../ports/ISurveyAssignmentRepositor
 export class GetSurveyStatistics {
   constructor(private readonly assignmentRepo: ISurveyAssignmentRepository) {}
 
-  async execute() {
-    const assignments = await this.assignmentRepo.findAll();
+  async execute(batchYear?: number) {
+    let assignments = await this.assignmentRepo.findAll();
+    if (batchYear) {
+      assignments = assignments.filter((a: any) => a.alumni?.graduationYear === batchYear);
+    }
+
     const total = assignments.length;
     const statusCounts = assignments.reduce((acc, assignment) => {
       acc[assignment.status] = (acc[assignment.status] || 0) + 1;
@@ -18,6 +22,8 @@ export class GetSurveyStatistics {
       totalAssignments: total,
       statusCounts,
       responseRate,
+      batchYear: batchYear || null,
+      batchLabel: batchYear ? `${batchYear} GC` : 'All Batches',
     };
   }
 }
@@ -25,14 +31,20 @@ export class GetSurveyStatistics {
 export class GetCompletionReport {
   constructor(private readonly assignmentRepo: ISurveyAssignmentRepository) {}
 
-  async execute() {
-    const assignments = await this.assignmentRepo.findAll();
-    const report = assignments.reduce((acc, assignment) => {
+  async execute(batchYear?: number) {
+    let assignments = await this.assignmentRepo.findAll();
+    if (batchYear) {
+      assignments = assignments.filter((a: any) => a.alumni?.graduationYear === batchYear);
+    }
+
+    const report = assignments.reduce((acc, assignment: any) => {
       const key = assignment.survey?.id ?? 'unknown';
       const entry = acc[key] ?? {
         surveyId: assignment.survey?.id ?? 'unknown',
         surveyTitle: assignment.survey?.title ?? 'Unknown Survey',
         milestoneMonths: assignment.survey?.milestoneMonths ?? null,
+        batchYear: batchYear || null,
+        batchLabel: batchYear ? `${batchYear} GC` : 'All Batches',
         totalAssigned: 0,
         completed: 0,
         overdue: 0,
@@ -48,7 +60,7 @@ export class GetCompletionReport {
       return acc;
     }, {} as Record<string, any>);
 
-    return Object.values(report).map((item) => ({
+    return Object.values(report).map((item: any) => ({
       ...item,
       completionRate: item.totalAssigned > 0 ? Number(((item.completed / item.totalAssigned) * 100).toFixed(2)) : 0,
     }));

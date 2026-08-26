@@ -2113,15 +2113,25 @@ export default function SurveyManagement() {
   const handleSchedule = async () => {
     if (!selectedId || !scheduleDate) return;
     try {
+      const scheduledDateObj = new Date(scheduleDate);
+      const isNowOrPast = scheduledDateObj <= new Date();
+
       await surveyService.updateSurvey(String(selectedId), {
-        scheduledAt: new Date(scheduleDate).toISOString(),
+        scheduledAt: scheduledDateObj.toISOString(),
         isActive: true,
       });
+
+      if (isNowOrPast) {
+        await surveyService.activateSurvey(String(selectedId)).catch(() => {});
+        showToast('Survey scheduled for NOW and activated!');
+      } else {
+        showToast(`Survey scheduled for ${scheduledDateObj.toLocaleString()}!`);
+      }
+
       await loadSurveys();
       setShowSchedule(false);
       setScheduleDate('');
       setSelectedId(null);
-      showToast('Survey scheduled and activated!');
     } catch (e: any) {
       showToast(e.message ?? 'Failed to schedule survey', 'error');
     }
@@ -3535,13 +3545,40 @@ export default function SurveyManagement() {
                 send notifications to graduates.
               </p>
             </div>
-            <FormField label="Scheduled Launch Date" required>
-              <input
-                type="date"
-                style={inputStyle}
-                value={scheduleDate}
-                onChange={(e) => setScheduleDate(e.target.value)}
-              />
+            <FormField label="Scheduled Launch Date & Time" required>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <input
+                  type="datetime-local"
+                  style={{ ...inputStyle, flex: 1 }}
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    setScheduleDate(`${year}-${month}-${day}T${hours}:${minutes}`);
+                  }}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: "1px solid #BFDBFE",
+                    background: "#EFF6FF",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#1E40AF",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  ⚡ Set to Now
+                </button>
+              </div>
             </FormField>
             <div style={{ display: "flex", gap: 10 }}>
               <button

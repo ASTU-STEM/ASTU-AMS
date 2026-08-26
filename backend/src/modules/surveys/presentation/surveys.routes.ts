@@ -23,6 +23,7 @@ router.put('/templates/:templateId', requireRoles([Role.ADMIN, Role.REGISTRAR]),
 router.delete('/templates/:templateId', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.archiveSurveyTemplate));
 router.post('/templates/:templateId/clone', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.cloneSurveyTemplate));
 router.post('/templates/:templateId/activate', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.activateSurveyTemplate));
+router.post('/templates/:templateId/send-instantly', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.sendSurveyInstantly));
 router.post('/templates/:templateId/deactivate', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.deactivateSurveyTemplate));
 router.get('/templates/:templateId/analysis', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getSurveyAnalysis));
 router.get('/templates/:templateId/responses', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getResponsesBySurvey));
@@ -35,6 +36,7 @@ router.get('/responses/:responseId', requireRoles([Role.ADMIN, Role.REGISTRAR, R
 router.get('/statistics', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getStatistics));
 router.get('/completion-report', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getCompletionReport));
 router.get('/company-hiring-stats', requireRoles([Role.ADMIN, Role.REGISTRAR, Role.DEPARTMENT_HEAD]), asyncHandler(SurveysController.getCompanyHiringStats));
+router.post('/test-engine', requireRoles([Role.ADMIN, Role.REGISTRAR]), asyncHandler(SurveysController.testEngineExecution));
 
 // Legacy survey submission / backward compatibility
 router.post('/:surveyId/responses', requireRoles([Role.ALUMNI]), asyncHandler(SurveysController.submitResponse));

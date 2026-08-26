@@ -23,7 +23,7 @@ export class PrismaSurveyResponseRepository implements ISurveyResponseRepository
 
   async findDraftByAssignment(assignmentId: string): Promise<SurveyResponse | null> {
     const response = await prisma.surveyResponse.findFirst({
-      where: { assignmentId, isDraft: true },
+      where: { assignmentId },
       include: { answers: true }
     });
     if (!response) return null;
@@ -35,6 +35,8 @@ export class PrismaSurveyResponseRepository implements ISurveyResponseRepository
       where: { surveyId, isDraft: false },
       include: {
         answers: { include: { question: true } },
+        alumni: { include: { department: true, user: true } },
+        survey: true,
       },
       orderBy: { submittedAt: 'desc' }
     });

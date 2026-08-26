@@ -104,8 +104,9 @@ export const surveyService = {
     return handleResponse(res);
   },
 
-  async getSurveyStats(): Promise<any> {
-    const res = await fetch(`${getApiBaseUrl()}/surveys/statistics`, { headers: getHeaders() });
+  async getSurveyStats(batch?: string | number): Promise<any> {
+    const query = batch && batch !== 'ALL' ? `?batch=${batch}` : '';
+    const res = await fetch(`${getApiBaseUrl()}/surveys/statistics${query}`, { headers: getHeaders() });
     return handleResponse(res);
   },
 
@@ -114,8 +115,9 @@ export const surveyService = {
     return handleResponse(res);
   },
 
-  async getCompletionReport(): Promise<any[]> {
-    const res = await fetch(`${getApiBaseUrl()}/surveys/completion-report`, { headers: getHeaders() });
+  async getCompletionReport(batch?: string | number): Promise<any[]> {
+    const query = batch && batch !== 'ALL' ? `?batch=${batch}` : '';
+    const res = await fetch(`${getApiBaseUrl()}/surveys/completion-report${query}`, { headers: getHeaders() });
     return handleResponse(res);
   },
 

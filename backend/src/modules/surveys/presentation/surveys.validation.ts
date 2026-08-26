@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const questionSchema = z.object({
-  questionText: z.string().min(5),
+  questionText: z.string().min(1, 'Question text is required.'),
   questionType: z.enum(['TEXT', 'TEXTAREA', 'SELECT', 'RADIO', 'CHECKBOX', 'RATING', 'NUMBER', 'DATE']),
   required: z.boolean().optional(),
   placeholder: z.string().optional(),
@@ -12,15 +12,16 @@ const questionSchema = z.object({
 });
 
 export const createSurveyTemplateSchema = z.object({
-  title: z.string().min(5),
-  description: z.string().min(10),
+  title: z.string().min(1, 'Survey title is required.'),
+  description: z.string().optional().or(z.literal('')),
   type: z.enum(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH', 'CUSTOM']),
   milestoneMonths: z.number().int().positive().optional(),
   scheduledAt: z.string().datetime().nullable().optional().or(z.string().date().nullable().optional()),
   isActive: z.boolean().optional(),
+  sendInstantly: z.boolean().optional(),
   questions: z.array(questionSchema).optional(),
   sections: z.array(z.object({
-    title: z.string().min(3),
+    title: z.string().min(1, 'Section title is required.'),
     description: z.string().optional(),
     order: z.number().int().nonnegative(),
     questions: z.array(questionSchema).min(1)
@@ -30,15 +31,15 @@ export const createSurveyTemplateSchema = z.object({
 });
 
 export const updateSurveyTemplateSchema = z.object({
-  title: z.string().min(5).optional(),
-  description: z.string().min(10).optional(),
+  title: z.string().min(1).optional(),
+  description: z.string().optional().or(z.literal('')),
   type: z.enum(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH', 'CUSTOM']).optional(),
   milestoneMonths: z.number().int().positive().optional(),
   scheduledAt: z.string().datetime().nullable().optional().or(z.string().date().nullable().optional()),
   isActive: z.boolean().optional(),
   questions: z.array(questionSchema).optional(),
   sections: z.array(z.object({
-    title: z.string().min(3),
+    title: z.string().min(1).optional(),
     description: z.string().optional(),
     order: z.number().int().nonnegative(),
     questions: z.array(questionSchema).min(1)
@@ -48,12 +49,12 @@ export const updateSurveyTemplateSchema = z.object({
 });
 
 export const answeredQuestionSchema = z.object({
-  questionId: z.string().uuid(),
+  questionId: z.string().min(1),
   answerText: z.string().min(1)
 });
 
 export const submitSurveySchema = z.object({
-  assignmentId: z.string().uuid(),
+  assignmentId: z.string().optional(),
   answers: z.array(answeredQuestionSchema).min(1, 'You must provide at least one answer.')
 });
 

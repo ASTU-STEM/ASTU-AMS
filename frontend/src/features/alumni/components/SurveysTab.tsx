@@ -372,28 +372,50 @@ export const SurveysTab = () => {
           </div>
 
           <form onSubmit={handleSubmitSurvey} className="p-5 space-y-6">
-            {/* Render section-based questions */}
-            {activeAssignment.survey?.sections?.map((section: any, sIdx: number) => (
-              <div key={section.id || sIdx} className="space-y-4">
-                <div className="border-b border-gray-200 pb-2">
-                  <h4 className="text-lg font-bold text-[#003366]">{section.title}</h4>
-                  {section.description && <p className="text-sm text-gray-500">{section.description}</p>}
-                </div>
-                {section.questions.map((q: any, idx: number) => (
-                  <QuestionField key={q.id} q={q} idx={idx} answers={answers} onChange={handleAnswerChange} />
-                ))}
-              </div>
-            ))}
+            {(() => {
+              const sectionQuestions = (activeAssignment.survey?.sections || []).flatMap((sec: any) => sec.questions || []);
+              const directQuestions = activeAssignment.survey?.questions || [];
+              
+              const allQuestionsMap = new Map();
+              [...directQuestions, ...sectionQuestions].forEach((q: any) => {
+                if (q && q.questionText) {
+                  allQuestionsMap.set(q.id || q.questionText, q);
+                }
+              });
+              const allQuestions = Array.from(allQuestionsMap.values());
 
-            {/* Render flat questions (non-sectioned surveys) */}
-            {(!activeAssignment.survey?.sections || activeAssignment.survey.sections.length === 0) &&
-              activeAssignment.survey?.questions?.length > 0 && (
+              if (allQuestions.length === 0) {
+                return (
+                  <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-gray-200">
+                    No questions available for this survey template.
+                  </div>
+                );
+              }
+
+              const hasSectionQuestions = (activeAssignment.survey?.sections || []).some((s: any) => (s.questions?.length || 0) > 0);
+              
+              if (hasSectionQuestions) {
+                return activeAssignment.survey.sections.map((section: any, sIdx: number) => (
+                  <div key={section.id || sIdx} className="space-y-4">
+                    <div className="border-b border-gray-200 pb-2">
+                      <h4 className="text-lg font-bold text-[#003366]">{section.title}</h4>
+                      {section.description && <p className="text-sm text-gray-500">{section.description}</p>}
+                    </div>
+                    {(section.questions || []).map((q: any, idx: number) => (
+                      <QuestionField key={q.id || idx} q={q} idx={idx} answers={answers} onChange={handleAnswerChange} />
+                    ))}
+                  </div>
+                ));
+              }
+
+              return (
                 <div className="space-y-4">
-                  {activeAssignment.survey.questions.map((q: any, idx: number) => (
-                    <QuestionField key={q.id} q={q} idx={idx} answers={answers} onChange={handleAnswerChange} />
+                  {allQuestions.map((q: any, idx: number) => (
+                    <QuestionField key={q.id || idx} q={q} idx={idx} answers={answers} onChange={handleAnswerChange} />
                   ))}
                 </div>
-              )}
+              );
+            })()}
 
 
             <div className="flex gap-3 pt-4 border-t border-gray-100">

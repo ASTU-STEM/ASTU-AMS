@@ -519,7 +519,9 @@ class FakePrisma {
       if (where?.jobId) apps = apps.filter((a: any) => a.jobId === where.jobId);
       if (where?.alumniId) apps = apps.filter((a: any) => a.alumniId === where.alumniId);
       if (where?.job?.employerId) {
-        const empJobIds = new Set((store.jobs || []).filter((j: any) => j.employerId === where.job.employerId).map((j: any) => j.id));
+        const empProf = (store.employerProfiles || []).find((e: any) => e.id === where.job.employerId || e.userId === where.job.employerId);
+        const empIds = new Set([where.job.employerId, empProf?.id, empProf?.userId].filter(Boolean));
+        const empJobIds = new Set((store.jobs || []).filter((j: any) => empIds.has(j.employerId)).map((j: any) => j.id));
         apps = apps.filter((a: any) => empJobIds.has(a.jobId));
       }
       if (where?.status) apps = apps.filter((a: any) => a.status === where.status);
@@ -531,7 +533,9 @@ class FakePrisma {
         if (where?.jobId) {
           store.jobApplications = store.jobApplications.filter((a: any) => a.jobId !== where.jobId);
         } else if (where?.job?.employerId) {
-          const empJobIds = new Set((store.jobs || []).filter((j: any) => j.employerId === where.job.employerId).map((j: any) => j.id));
+          const empProf = (store.employerProfiles || []).find((e: any) => e.id === where.job.employerId || e.userId === where.job.employerId);
+          const empIds = new Set([where.job.employerId, empProf?.id, empProf?.userId].filter(Boolean));
+          const empJobIds = new Set((store.jobs || []).filter((j: any) => empIds.has(j.employerId)).map((j: any) => j.id));
           store.jobApplications = store.jobApplications.filter((a: any) => !empJobIds.has(a.jobId));
         } else {
           store.jobApplications = [];
@@ -546,23 +550,40 @@ class FakePrisma {
       if (where?.jobId) apps = apps.filter((a: any) => a.jobId === where.jobId);
       if (where?.alumniId) apps = apps.filter((a: any) => a.alumniId === where.alumniId);
       if (where?.job?.employerId) {
-        const empJobIds = new Set((store.jobs || []).filter((j: any) => j.employerId === where.job.employerId).map((j: any) => j.id));
+        const empProf = (store.employerProfiles || []).find((e: any) => e.id === where.job.employerId || e.userId === where.job.employerId);
+        const empIds = new Set([where.job.employerId, empProf?.id, empProf?.userId].filter(Boolean));
+        const empJobIds = new Set((store.jobs || []).filter((j: any) => empIds.has(j.employerId)).map((j: any) => j.id));
         apps = apps.filter((a: any) => empJobIds.has(a.jobId));
       }
       return apps.map((a: any) => {
         const job = (store.jobs || []).find((j: any) => j.id === a.jobId);
+        const emp = (store.employerProfiles || []).find((e: any) => e.id === job?.employerId || e.userId === job?.employerId);
         const alumni = (store.alumniProfiles || []).find((al: any) => al.id === a.alumniId || al.userId === a.alumniId);
         const user = (store.users || []).find((u: any) => u.id === alumni?.userId || u.id === a.alumniId);
         return {
           ...a,
-          job: job ? { ...job, employer: { companyName: 'INSA' } } : null,
+          job: job ? { ...job, employer: emp || { id: job.employerId || 'dev-employer-1', companyName: 'Safaricom Ethiopia' } } : null,
           alumni: alumni ? { ...alumni, user: user || { email: alumni?.email || 'alumni@astu.edu.et' } } : null,
         };
       });
     },
-    findUnique: async ({ where }: any = {}) => {
+    findUnique: async ({ where, include }: any = {}) => {
       const store = readDevDb();
-      return (store.jobApplications || []).find((a: any) => a.id === where?.id) || null;
+      const app = (store.jobApplications || []).find((a: any) => a.id === where?.id) || null;
+      if (!app) return null;
+      if (include) {
+        const job = (store.jobs || []).find((j: any) => j.id === app.jobId);
+        const emp = (store.employerProfiles || []).find((e: any) => e.id === job?.employerId || e.userId === job?.employerId);
+        const alumni = (store.alumniProfiles || []).find((al: any) => al.id === app.alumniId || al.userId === app.alumniId);
+        const user = (store.users || []).find((u: any) => u.id === alumni?.userId || u.id === app.alumniId);
+        const empObject = emp || { id: job?.employerId || 'dev-employer-1', companyName: 'Safaricom Ethiopia' };
+        return {
+          ...app,
+          job: job ? { ...job, employer: empObject } : null,
+          alumni: alumni ? { ...alumni, user: user || { email: alumni?.email || 'alumni@astu.edu.et' } } : null,
+        };
+      }
+      return app;
     },
     create: async ({ data }: any) => {
       const store = readDevDb();
@@ -700,6 +721,16 @@ const createSafeModel = (name: string) => {
       const rec = { id, ...data };
       store.push(rec);
       return rec;
+    },
+    createMany: async ({ data }: any = {}) => {
+      const items = Array.isArray(data) ? data : [data];
+      const created = items.map((item: any) => {
+        const id = item?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        const rec = { id, ...item };
+        store.push(rec);
+        return rec;
+      });
+      return { count: created.length };
     },
     update: async ({ where, data }: any) => {
       let item = store.find((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
@@ -880,7 +911,11 @@ export const initPrisma = async () => {
         Logger.error(`❌ Fixed Neon URL attempt failed: ${err2.message}`);
       }
     }
-    throw e;
+    Logger.warn('⚠️ Could not reach remote Neon database. Falling back to local dev JSON database.');
+    client = getFallback();
+    usingFallback = true;
+    initialized = true;
+    return client;
   }
 
   initialized = true;

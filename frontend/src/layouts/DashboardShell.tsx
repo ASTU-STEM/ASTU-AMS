@@ -246,7 +246,17 @@ export function DashboardShell({
                       notifications.map((n) => (
                         <div
                           key={n.id}
-                          className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5"
+                          onClick={() => {
+                            setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, unread: false } : x));
+                            setNotificationOpen(false);
+                            const lower = n.text.toLowerCase();
+                            if (lower.includes('job')) onTabChange('jobs');
+                            else if (lower.includes('survey')) onTabChange('surveys');
+                            else if (lower.includes('mentor')) onTabChange('mentorship');
+                            else if (lower.includes('document')) onTabChange('documents');
+                            else onTabChange('jobs');
+                          }}
+                          className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
                         >
                           <span
                             className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'
@@ -257,9 +267,11 @@ export function DashboardShell({
                             <p className="text-xs text-[var(--text-secondary)]">{n.time}</p>
                           </div>
                           <button
-                            onClick={() =>
-                              setNotifications((prev) => prev.filter((x) => x.id !== n.id))
-                            }
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNotifications((prev) => prev.filter((x) => x.id !== n.id));
+                            }}
                             className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                           >
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -277,6 +289,10 @@ export function DashboardShell({
                   <div className="border-t border-[var(--border-color)] px-4 py-3">
                     <button
                       type="button"
+                      onClick={() => {
+                        setNotificationOpen(false);
+                        onTabChange('jobs');
+                      }}
                       className="text-sm font-semibold text-[#003580] hover:underline"
                     >
                       View all →
