@@ -226,14 +226,12 @@ export default function Navbar() {
 
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 md:px-6">
         <Link to="/" className="flex items-center gap-3 py-3 group">
-          <div className="flex items-center gap-2">
-            <div className="rounded-lg border border-outline-variant bg-white p-0.5 shadow-sm overflow-hidden">
-              <img
-                src={astuLogo}
-                alt="ASTU"
-                className="h-9 w-9 rounded-md object-cover"
-              />
-            </div>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/images/astu-seal-logo.png"
+              alt="ASTU Logo"
+              className="h-10 w-10 object-contain scale-110 shrink-0"
+            />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-astu-navy leading-tight">
                 ASTU-AMS

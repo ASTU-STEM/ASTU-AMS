@@ -216,8 +216,8 @@ export const SurveysTab = () => {
           <div className="flex items-start gap-4">
             <img
               alt="ASTU Logo"
-              className="h-14 w-14 object-contain rounded-xl bg-white/10 p-1.5 border border-white/20 shadow-md flex-shrink-0"
-              src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+              className="h-14 w-14 object-contain scale-110 shrink-0"
+              src="/images/astu-seal-logo.png"
             />
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">

@@ -1479,8 +1479,8 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <img
                   alt="ASTU Official Emblem"
-                  className="h-12 w-12 object-contain rounded-xl bg-white/10 p-1.5 border border-white/10 shadow-md"
-                  src={astuLogo}
+                  className="h-12 w-12 object-contain scale-110 shrink-0"
+                  src="/images/astu-seal-logo.png"
                 />
                 <div>
                   <h5 className="text-lg font-black text-white tracking-wider uppercase">ASTU-AMS</h5>

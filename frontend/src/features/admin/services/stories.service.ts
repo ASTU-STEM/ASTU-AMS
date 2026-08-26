@@ -77,19 +77,22 @@ export const storiesService = {
     );
 
     if (storyCmsItems.length > 0) {
-      return storyCmsItems.map((item) => ({
-        id: item.id,
-        name: item.author || item.title,
-        role: item.tags?.[1] || 'ASTU Graduate',
-        company: 'ASTU Alumni Partner',
-        graduationYear: 'Verified Graduate',
-        department: 'Engineering & Science',
-        text: item.excerpt || item.title,
-        fullStory: item.excerpt || item.title,
-        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
-        featured: item.featured,
-        publishedAt: item.publishedAt || item.updatedAt,
-      }));
+      return storyCmsItems.map((item, idx) => {
+        const fallback = initialStories[idx % initialStories.length];
+        return {
+          id: item.id || fallback.id,
+          name: item.author || fallback.name,
+          role: fallback.role || item.tags?.[1] || 'ASTU Graduate',
+          company: fallback.company || 'ASTU Alumni Partner',
+          graduationYear: fallback.graduationYear || 'Verified Graduate',
+          department: fallback.department || 'Engineering & Science',
+          text: fallback.text || item.excerpt || item.title,
+          fullStory: fallback.fullStory || item.excerpt || item.title,
+          image: fallback.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+          featured: item.featured ?? fallback.featured,
+          publishedAt: item.publishedAt || item.updatedAt || fallback.publishedAt,
+        };
+      });
     }
 
     return initialStories;
@@ -100,10 +103,31 @@ export const storiesService = {
     const needle = decodeURIComponent(idOrSlug).toLowerCase();
     const slugified = needle.replace(/[^a-z0-9]+/g, '-');
 
-    return (
+    // 1. Try exact ID or slug match in current stories list
+    let found =
       stories.find((s) => s.id.toLowerCase() === needle) ||
       stories.find((s) => s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugified) ||
-      stories.find((s) => s.name.toLowerCase().includes(needle)) ||
+      stories.find((s) => s.name.toLowerCase().includes(needle));
+
+    if (found) return found;
+
+    // 2. Try normalized ID match (e.g. SS-3 vs S-003 or SS-1 vs S-001)
+    const numMatch = needle.match(/\d+/);
+    if (numMatch) {
+      const num = parseInt(numMatch[0], 10);
+      const targetId = `s-00${num}`;
+      found =
+        initialStories.find((s) => s.id.toLowerCase() === targetId) ||
+        initialStories[num - 1] ||
+        null;
+    }
+
+    if (found) return found;
+
+    // 3. Fallback to initialStories by slug or name
+    return (
+      initialStories.find((s) => s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugified) ||
+      initialStories.find((s) => s.name.toLowerCase().includes(needle)) ||
       null
     );
   },

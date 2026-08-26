@@ -111,7 +111,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0">
               <img
-                src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                src="/images/astu-seal-logo.png"
                 alt="ASTU Logo"
                 className="h-10 w-10 rounded-xl bg-white/5 object-contain p-0.5 ring-1 ring-white/10 transition-all duration-300 group-hover/logo:ring-[#E8A020]/40"
               />

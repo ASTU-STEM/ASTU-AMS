@@ -75,9 +75,9 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0 flex items-center justify-center h-10 w-10 ">
                 <img
-                  src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                  src="/images/astu-seal-logo.png"
                   alt="ASTU Logo"
-                  className="h-full w-full object-cover scale-110"
+                  className="h-full w-full object-contain scale-110"
                 />
               </div>
               {!collapsed && (
