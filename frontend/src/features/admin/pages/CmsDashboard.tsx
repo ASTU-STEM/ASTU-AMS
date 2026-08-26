@@ -263,86 +263,115 @@ export default function CmsDashboard() {
 
       {/* Greeting Banner */}
       <section className="card-anim">
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-[#003366] via-[#002a55] to-[#003366]/90 p-8 shadow-sm">
-          <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-[#F4B400]/8 blur-3xl -translate-y-1/2 translate-x-1/3" />
-          <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/80 backdrop-blur-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live Content Briefing
-                </span>
-              </div>
-              <h2 className="text-[32px] font-bold tracking-tight text-white md:text-[40px]">
-                {greeting}, Content Manager
+        <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#002855] via-[#003366] to-[#004b87] p-8 text-white shadow-sm">
+          <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-white/5 blur-2xl pointer-events-none" />
+          <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-emerald-300 backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                ASTU CONTENT ENGINE
+              </span>
+              <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Welcome back, Content Administrator
               </h2>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-white/70">
-                <span>{today}</span>
-                <span className="h-1 w-1 rounded-full bg-white/30" />
-                <span>ASTU Content Management System</span>
-              </div>
+              <p className="max-w-2xl text-xs text-white/80 leading-relaxed sm:text-sm">
+                Your live content repository has collected <span className="font-semibold text-emerald-300">{stats.total} content items</span> across pages, announcements, events, and media. Keep public sections updated.
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={() => navigate('/cms/content')}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#F4B400] px-5 py-3 text-sm font-bold text-[#0B1A2E] shadow-sm hover:brightness-110 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#F4B400] px-5 py-2.5 text-xs font-bold text-[#0B1A2E] shadow-sm hover:brightness-110 transition-all cursor-pointer"
               >
-                <Plus className="h-5 w-5" /> Create Content
+                <Plus className="h-4 w-4" /> Create Content
               </button>
               <button
                 onClick={() => window.open('/', '_blank')}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/8 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm hover:bg-white/15 transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/20 transition-all cursor-pointer"
               >
-                <Eye className="h-5 w-5" /> View Site
+                <Eye className="h-4 w-4" /> View Live Site
               </button>
             </div>
-          </div>
-          <div className="relative mt-6 grid grid-cols-2 sm:grid-cols-5 gap-3 border-t border-white/10 pt-6">
-            {[
-              { icon: Globe, label: 'Published', value: stats.published, color: 'text-emerald-400' },
-              { icon: FileText, label: 'Drafts', value: stats.draft, color: 'text-slate-300' },
-              { icon: Clock, label: 'Scheduled', value: stats.scheduled, color: 'text-blue-400' },
-              { icon: AlertTriangle, label: 'Review', value: stats.needsReview, color: 'text-amber-400' },
-              { icon: TrendingUp, label: 'Total Views', value: stats.totalViews.toLocaleString(), color: 'text-[#F4B400]' },
-            ].map(({ icon: Icon, label, value, color }) => (
-              <div key={label} className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3 backdrop-blur-sm">
-                <Icon className={`h-6 w-6 ${color}`} />
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{label}</p>
-                  <p className="text-xl font-bold text-white">{value}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Dynamic Stats Grid */}
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Total Content', value: stats.total, icon: Layers3, trend: `${stats.total} total items`, color: '#003366' },
-          { label: 'Live Pages', value: stats.published, icon: Globe, trend: `${stats.published} live on site`, color: '#16A34A' },
-          { label: 'In Pipeline', value: stats.draft + stats.scheduled, icon: Clock, trend: `${stats.draft} draft / ${stats.scheduled} scheduled`, color: '#F4B400' },
-          { label: 'Awaiting Review', value: stats.needsReview, icon: AlertTriangle, trend: stats.needsReview > 0 ? `${stats.needsReview} pending review` : 'All clear', color: stats.needsReview > 0 ? '#EF4444' : '#16A34A' },
-        ].map((card) => {
-          const Icon = card.icon;
-          return (
-            <div key={card.label} className="card-anim rounded-xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: `${card.color}12`, color: card.color }}>
-                  <Icon className="h-6 w-6" />
+      {/* CMS Command Center (Inspired by Employer Command Center) */}
+      <section className="card-anim rounded-2xl border border-slate-200/80 bg-white p-7 shadow-xs">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900">CMS Command Center</h3>
+            <p className="text-xs text-slate-500 mt-0.5">One clear snapshot for content publishing, review queues, and section health.</p>
+          </div>
+          <button
+            onClick={() => navigate('/cms/content')}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#003366] px-4 py-2 text-xs font-semibold text-white hover:bg-[#002855] transition-all cursor-pointer shadow-xs"
+          >
+            Open Content List <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100/70 text-emerald-700">
+                  <Globe className="h-4 w-4" />
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold" style={{ borderColor: `${card.color}25`, color: card.color, backgroundColor: `${card.color}10` }}>
-                  {card.trend}
-                </span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">PUBLISHED PAGES</span>
               </div>
-              <div className="mt-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">{card.label}</p>
-                <p className="mt-1 text-[32px] font-bold tracking-tight text-slate-900">{card.value}</p>
-              </div>
+              <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">LIVE</span>
             </div>
-          );
-        })}
+            <p className="mt-3 text-3xl font-extrabold text-slate-900">{stats.published}</p>
+            <p className="mt-1 text-[11px] text-slate-400">{stats.published} pages active on ASTU portal</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100/70 text-rose-700">
+                  <AlertTriangle className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">PENDING REVIEWS</span>
+              </div>
+              {stats.needsReview > 0 ? (
+                <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700">ACTION</span>
+              ) : (
+                <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">CLEAR</span>
+              )}
+            </div>
+            <p className="mt-3 text-3xl font-extrabold text-slate-900">{stats.needsReview}</p>
+            <p className="mt-1 text-[11px] text-slate-400">{stats.needsReview > 0 ? 'Requires admin review' : 'Zero items pending approval'}</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/70 text-blue-700">
+                  <GalleryHorizontal className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">MEDIA FILES</span>
+              </div>
+              <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">ASSETS</span>
+            </div>
+            <p className="mt-3 text-3xl font-extrabold text-slate-900">{dbGalleryCount}</p>
+            <p className="mt-1 text-[11px] text-slate-400">Total uploaded media assets</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100/70 text-amber-700">
+                  <Layers3 className="h-4 w-4" />
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">ACTIVE MODULES</span>
+              </div>
+              <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">HEALTHY</span>
+            </div>
+            <p className="mt-3 text-3xl font-extrabold text-slate-900">{moduleHealth.length}</p>
+            <p className="mt-1 text-[11px] text-slate-400">All 5 homepage sections configured</p>
+          </div>
+        </div>
       </section>
 
       {/* Quick Actions */}

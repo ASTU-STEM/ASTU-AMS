@@ -86,37 +86,54 @@ class FakePrisma {
   };
 
   alumniProfile = {
-    findUnique: async ({ where, include }: any) => {
-      let profile = null;
-      if (where.userId) profile = this.store.alumniProfiles.find((a: any) => a.userId === where.userId) || null;
-      if (where.studentId) profile = this.store.alumniProfiles.find((a: any) => a.studentId === where.studentId) || null;
-      if (where.id) profile = this.store.alumniProfiles.find((a: any) => a.id === where.id) || null;
-      return profile;
+    findUnique: async ({ where }: any) => {
+      const store = readDevDb();
+      if (where?.userId) return (store.alumniProfiles || []).find((a: any) => a.userId === where.userId) || null;
+      if (where?.studentId) return (store.alumniProfiles || []).find((a: any) => a.studentId === where.studentId) || null;
+      if (where?.id) return (store.alumniProfiles || []).find((a: any) => a.id === where.id) || null;
+      return null;
     },
-    findMany: async ({ where, skip, take, include }: any = {}) => {
-      let profiles = [...this.store.alumniProfiles];
+    findMany: async ({ where, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let profiles = [...(store.alumniProfiles || [])];
       if (where?.departmentId) profiles = profiles.filter((a: any) => a.departmentId === where.departmentId);
+      if (where?.graduationYear) profiles = profiles.filter((a: any) => Number(a.graduationYear) === Number(where.graduationYear));
+      if (where?.cgpa?.gte) profiles = profiles.filter((a: any) => Number(a.cgpa) >= Number(where.cgpa.gte));
+      if (where?.OR && Array.isArray(where.OR)) {
+        const query = where.OR[0]?.fullName?.contains?.toLowerCase() || '';
+        if (query) {
+          profiles = profiles.filter((a: any) =>
+            (a.fullName || '').toLowerCase().includes(query) ||
+            (a.email || '').toLowerCase().includes(query) ||
+            (a.skills || []).some((s: string) => s.toLowerCase().includes(query))
+          );
+        }
+      }
       if (skip) profiles = profiles.slice(skip);
       if (take) profiles = profiles.slice(0, take);
       return profiles;
     },
     count: async ({ where }: any = {}) => {
-      let profiles = this.store.alumniProfiles;
+      const store = readDevDb();
+      let profiles = store.alumniProfiles || [];
       if (where?.departmentId) profiles = profiles.filter((a: any) => a.departmentId === where.departmentId);
       return profiles.length;
     },
     create: async ({ data }: any) => {
+      const store = readDevDb();
       const rec = { ...data, id: `dev-alumni-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      this.store.alumniProfiles.push(rec);
-      writeDevDb(this.store);
+      if (!store.alumniProfiles) store.alumniProfiles = [];
+      store.alumniProfiles.push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.alumniProfiles.findIndex((a: any) => a.id === where.id || a.userId === where.userId || a.studentId === where.studentId);
+      const store = readDevDb();
+      const idx = (store.alumniProfiles || []).findIndex((a: any) => a.id === where.id || a.userId === where.userId || a.studentId === where.studentId);
       if (idx === -1) throw new Error('Alumni profile not found');
-      this.store.alumniProfiles[idx] = { ...this.store.alumniProfiles[idx], ...data, updatedAt: new Date().toISOString() };
-      writeDevDb(this.store);
-      return this.store.alumniProfiles[idx];
+      store.alumniProfiles[idx] = { ...store.alumniProfiles[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.alumniProfiles[idx];
     },
   };
 
@@ -271,52 +288,102 @@ class FakePrisma {
     },
   };
 
-  // ─── Models needed by various repositories for fallback ───
   job = {
-    findMany: async (_args?: any) => [],
-    findUnique: async (_args?: any) => null,
-    count: async (_args?: any) => 0,
-    create: async ({ data }: any) => ({ ...data, id: `dev-job-${Date.now()}`, createdAt: new Date() }),
-    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
-    delete: async (_args?: any) => ({}),
-  };
-
-  event = {
-    findMany: async (_args?: any) => [],
-    findUnique: async (_args?: any) => null,
-    count: async (_args?: any) => 0,
-    create: async ({ data }: any) => ({ ...data, id: `dev-event-${Date.now()}`, createdAt: new Date() }),
-    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
-    delete: async (_args?: any) => ({}),
-  };
-
-  surveyTemplate = {
-    findMany: async (_args?: any) => [],
-    findUnique: async (_args?: any) => null,
-    count: async (_args?: any) => 0,
-    create: async ({ data }: any) => ({ ...data, id: `dev-survey-${Date.now()}`, createdAt: new Date() }),
-    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
-    delete: async (_args?: any) => ({}),
-  };
-
-  mentorshipSession = {
-    count: async (_args?: any) => 0,
-    findMany: async (_args?: any) => [],
-  };
-
-  savedJob = {
-    count: async (_args?: any) => 0,
-    findMany: async (_args?: any) => [],
-    findUnique: async (_args?: any) => null,
-    create: async ({ data }: any) => ({ ...data, id: `dev-saved-${Date.now()}` }),
-    delete: async (_args?: any) => ({}),
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let jobs = store.jobs || [];
+      if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
+      if (where?.status) jobs = jobs.filter((j: any) => j.status === where.status);
+      return jobs;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.jobs || []).find((j: any) => j.id === where?.id) || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let jobs = store.jobs || [];
+      if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
+      return jobs.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: `job-${Date.now()}`, createdAt: new Date().toISOString(), views: 0 };
+      if (!store.jobs) store.jobs = [];
+      store.jobs.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const idx = (store.jobs || []).findIndex((j: any) => j.id === where.id);
+      if (idx !== -1) {
+        store.jobs[idx] = { ...store.jobs[idx], ...data, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return store.jobs[idx];
+      }
+      return { id: where.id, ...data };
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.jobs) {
+        store.jobs = store.jobs.filter((j: any) => j.id !== where.id);
+        writeDevDb(store);
+      }
+      return {};
+    },
   };
 
   jobApplication = {
-    count: async (_args?: any) => 0,
-    findMany: async (_args?: any) => [],
-    findUnique: async (_args?: any) => null,
-    create: async ({ data }: any) => ({ ...data, id: `dev-app-${Date.now()}`, createdAt: new Date() }),
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let apps = store.jobApplications || [];
+      if (where?.jobId) apps = apps.filter((a: any) => a.jobId === where.jobId);
+      if (where?.alumniId) apps = apps.filter((a: any) => a.alumniId === where.alumniId);
+      return apps.length;
+    },
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let apps = store.jobApplications || [];
+      if (where?.jobId) apps = apps.filter((a: any) => a.jobId === where.jobId);
+      if (where?.alumniId) apps = apps.filter((a: any) => a.alumniId === where.alumniId);
+      if (where?.job?.employerId) {
+        const empJobIds = new Set((store.jobs || []).filter((j: any) => j.employerId === where.job.employerId).map((j: any) => j.id));
+        apps = apps.filter((a: any) => empJobIds.has(a.jobId));
+      }
+      return apps.map((a: any) => {
+        const job = (store.jobs || []).find((j: any) => j.id === a.jobId);
+        const alumni = (store.alumniProfiles || []).find((al: any) => al.id === a.alumniId || al.userId === a.alumniId);
+        const user = (store.users || []).find((u: any) => u.id === alumni?.userId || u.id === a.alumniId);
+        return {
+          ...a,
+          job: job ? { ...job, employer: { companyName: 'INSA' } } : null,
+          alumni: alumni ? { ...alumni, user: user || { email: alumni?.email || 'alumni@astu.edu.et' } } : null,
+        };
+      });
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.jobApplications || []).find((a: any) => a.id === where?.id) || null;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: `app-${Date.now()}`, createdAt: new Date().toISOString() };
+      if (!store.jobApplications) store.jobApplications = [];
+      store.jobApplications.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const idx = (store.jobApplications || []).findIndex((a: any) => a.id === where.id);
+      if (idx !== -1) {
+        store.jobApplications[idx] = { ...store.jobApplications[idx], ...data, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return store.jobApplications[idx];
+      }
+      return { id: where.id, ...data };
+    },
     delete: async (_args?: any) => ({}),
   };
 
@@ -344,18 +411,50 @@ class FakePrisma {
     },
   };
 
-  donationCampaign = {
-    findMany: async (_args?: any) => [],
-    update: async ({ where, data }: any) => ({ id: where.id, ...data }),
-  };
-
-  donationRecord = {
-    create: async ({ data }: any) => ({ ...data, id: `dev-donation-${Date.now()}`, createdAt: new Date() }),
+  employerFeedback = {
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let fbs = store.employerFeedbacks || [];
+      if (where?.employerId) fbs = fbs.filter((f: any) => f.employerId === where.employerId);
+      return fbs.map((f: any) => {
+        const alumni = (store.alumniProfiles || []).find((al: any) => al.id === f.alumniId);
+        return {
+          ...f,
+          alumni: alumni ? { ...alumni, user: { firstName: alumni.fullName?.split(' ')[0], lastName: alumni.fullName?.split(' ')[1] } } : null,
+        };
+      });
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: `fb-${Date.now()}`, createdAt: new Date().toISOString() };
+      if (!store.employerFeedbacks) store.employerFeedbacks = [];
+      store.employerFeedbacks.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
   };
 
   directMessage = {
-    create: async ({ data }: any) => ({ ...data, id: `dev-msg-${Date.now()}`, createdAt: new Date() }),
-    findMany: async (_args?: any) => [],
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let msgs = store.directMessages || [];
+      if (where?.employerId) msgs = msgs.filter((m: any) => m.employerId === where.employerId);
+      return msgs.map((m: any) => {
+        const alumni = (store.alumniProfiles || []).find((al: any) => al.id === m.alumniId);
+        return {
+          ...m,
+          alumni: alumni || { fullName: 'ASTU Alumni', email: 'alumni@astu.edu.et' },
+        };
+      });
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: `msg-${Date.now()}`, isRead: false, createdAt: new Date().toISOString() };
+      if (!store.directMessages) store.directMessages = [];
+      store.directMessages.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
   };
 
   // Catch-all: for any model not explicitly defined, return safe no-ops
@@ -370,13 +469,41 @@ class FakePrisma {
 // ─── Client Initialization ───
 let client: any = null;
 let initialized = false;
-let fallback: FakePrisma | null = null;
+let fallback: any = null;
 let usingFallback = false;
+
+const createSafeModel = (name: string) => ({
+  findMany: async () => [],
+  findUnique: async () => null,
+  findFirst: async () => null,
+  count: async () => 0,
+  create: async ({ data }: any) => ({ ...data, id: `dev-${name}-${Date.now()}` }),
+  update: async ({ where, data }: any) => ({ id: where?.id, ...data }),
+  delete: async () => ({}),
+  upsert: async ({ create }: any) => ({ ...create, id: `dev-${name}-${Date.now()}` }),
+  updateMany: async () => ({ count: 0 }),
+  deleteMany: async () => ({ count: 0 }),
+});
 
 function getFallback(): FakePrisma {
   if (!fallback) {
-    fallback = new FakePrisma();
-    fallback.$connect();
+    const instance = new FakePrisma();
+    instance.$connect();
+    fallback = new Proxy(instance, {
+      get(target: any, prop: string) {
+        if (prop in target && target[prop] !== undefined) {
+          return target[prop];
+        }
+        if (typeof prop === 'string' && prop.startsWith('$')) {
+          return () => Promise.resolve();
+        }
+        if (typeof prop === 'string' && !prop.startsWith('_')) {
+          target[prop] = createSafeModel(prop);
+          return target[prop];
+        }
+        return target[prop];
+      },
+    }) as any;
   }
   return fallback;
 }
@@ -445,11 +572,31 @@ export const initPrisma = async () => {
     });
     await real.$connect();
     client = real;
-    Logger.info('Connected to Postgres via Prisma');
+    usingFallback = false;
+    Logger.info('✅ Connected to Neon Postgres database via Prisma.');
   } catch (e: any) {
-    Logger.warn(`Prisma connection failed. Falling back to in-memory dev DB: ${e.message}`);
-    client = getFallback();
-    usingFallback = true;
+    Logger.error(`❌ Neon PostgreSQL connection failed: ${e.message}`, e);
+    // Try alternate Neon connection strings if ssl/pooler params fail
+    const rawUrl = process.env.DATABASE_URL || '';
+    if (rawUrl.includes('.c-7.')) {
+      const fixedUrl = rawUrl.replace('.c-7.', '.');
+      try {
+        Logger.info(`Retrying connection with fixed Neon host: ${fixedUrl}`);
+        const realFixed = new PrismaClient({
+          datasources: { db: { url: fixedUrl } },
+          log: ['error', 'warn'],
+        });
+        await realFixed.$connect();
+        client = realFixed;
+        usingFallback = false;
+        Logger.info('✅ Connected to Neon Postgres database via fixed URL.');
+        initialized = true;
+        return client;
+      } catch (err2: any) {
+        Logger.error(`❌ Fixed Neon URL attempt failed: ${err2.message}`);
+      }
+    }
+    throw e;
   }
 
   initialized = true;

@@ -3,55 +3,255 @@
     {
       "id": "dev-user-cms",
       "email": "alumnioffice@astu.edu.et",
-      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "password": "$2a$10$hKiAPNsnkTCSPZy7PMmLneqxa8XybqueksyBzLtVFN8imv/hYxKJi",
       "role": "ALUMNI_OFFICE",
       "isActive": true
     },
     {
       "id": "dev-user-insa",
       "email": "insa@gmail.com",
-      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
-      "role": "ALUMNI",
+      "password": "$2a$10$hKiAPNsnkTCSPZy7PMmLneqxa8XybqueksyBzLtVFN8imv/hYxKJi",
+      "role": "EMPLOYER",
       "isActive": true
     },
     {
       "id": "dev-user-admin",
       "email": "admin@astu.edu.et",
-      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "password": "$2a$10$hKiAPNsnkTCSPZy7PMmLneqxa8XybqueksyBzLtVFN8imv/hYxKJi",
       "role": "ADMIN",
       "isActive": true
     },
     {
       "id": "dev-user-alumni",
       "email": "alumni@example.com",
-      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "password": "$2a$10$hKiAPNsnkTCSPZy7PMmLneqxa8XybqueksyBzLtVFN8imv/hYxKJi",
       "role": "ALUMNI",
       "isActive": true
     },
     {
       "id": "dev-user-employer",
       "email": "safaricom@mail.com",
-      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "password": "$2a$10$hKiAPNsnkTCSPZy7PMmLneqxa8XybqueksyBzLtVFN8imv/hYxKJi",
       "role": "EMPLOYER",
       "isActive": true
     },
     {
       "id": "dev-user-registrar",
       "email": "registrar@astu.edu.et",
-      "password": "$2a$10$Xv5WyJ7SSedpU/r78snfB.ubojZV6P12cE5cPRZMAYBRwE26mXuhG",
+      "password": "$2a$10$hKiAPNsnkTCSPZy7PMmLneqxa8XybqueksyBzLtVFN8imv/hYxKJi",
       "role": "REGISTRAR",
       "isActive": true
     }
   ],
   "alumniProfiles": [
     {
-      "id": "dev-profile-insa",
-      "userId": "dev-user-insa",
-      "studentId": "ASTU/SWE/001/20",
-      "fullName": "Insa User",
-      "email": "insa@gmail.com",
+      "id": "dev-profile-abebe",
+      "userId": "dev-user-abebe",
+      "studentId": "ASTU/SWE/014/19",
+      "fullName": "Abebe Bikila",
+      "email": "abebe.bikila@astu.edu.et",
+      "graduationYear": 2023,
+      "cgpa": 3.92,
+      "isCgpaPublic": true,
+      "skills": [
+        "React",
+        "Node.js",
+        "TypeScript",
+        "Python",
+        "PostgreSQL",
+        "AWS"
+      ],
       "status": "ACTIVE",
-      "isVerified": true
+      "isVerified": true,
+      "department": {
+        "id": "dept-swe",
+        "name": "Software Engineering",
+        "code": "SWE"
+      },
+      "departmentId": "dept-swe",
+      "currentCompany": "Ethio Telecom",
+      "jobTitle": "Senior Fullstack Engineer",
+      "employmentStatus": "EMPLOYED",
+      "location": "Addis Ababa, Ethiopia"
+    },
+    {
+      "id": "dev-profile-tigist",
+      "userId": "dev-user-tigist",
+      "studentId": "ASTU/CSE/088/18",
+      "fullName": "Tigist Worku",
+      "email": "tigist.worku@astu.edu.et",
+      "graduationYear": 2022,
+      "cgpa": 3.88,
+      "isCgpaPublic": true,
+      "skills": [
+        "Cybersecurity",
+        "Network Defense",
+        "Penetration Testing",
+        "Linux",
+        "Python",
+        "Cryptography"
+      ],
+      "status": "ACTIVE",
+      "isVerified": true,
+      "department": {
+        "id": "dept-cse",
+        "name": "Computer Science & Engineering",
+        "code": "CSE"
+      },
+      "departmentId": "dept-cse",
+      "currentCompany": "Information Network Security Administration (INSA)",
+      "jobTitle": "Security Operations Specialist",
+      "employmentStatus": "EMPLOYED",
+      "location": "Addis Ababa, Ethiopia"
+    },
+    {
+      "id": "dev-profile-hawwi",
+      "userId": "dev-user-hawwi",
+      "studentId": "ASTU/SWE/105/20",
+      "fullName": "Hawwi Tesfaye",
+      "email": "hawwi.tesfaye@astu.edu.et",
+      "graduationYear": 2024,
+      "cgpa": 3.95,
+      "isCgpaPublic": true,
+      "skills": [
+        "PyTorch",
+        "TensorFlow",
+        "Python",
+        "Computer Vision",
+        "Docker",
+        "Machine Learning"
+      ],
+      "status": "ACTIVE",
+      "isVerified": true,
+      "department": {
+        "id": "dept-swe",
+        "name": "Software Engineering",
+        "code": "SWE"
+      },
+      "departmentId": "dept-swe",
+      "currentCompany": "ASTU AI Research Lab",
+      "jobTitle": "AI/ML Research Engineer",
+      "employmentStatus": "EMPLOYED",
+      "location": "Adama, Ethiopia"
+    },
+    {
+      "id": "dev-profile-marta",
+      "userId": "dev-user-marta",
+      "studentId": "ASTU/CSE/042/19",
+      "fullName": "Marta Alemu",
+      "email": "marta.alemu@astu.edu.et",
+      "graduationYear": 2023,
+      "cgpa": 3.8,
+      "isCgpaPublic": true,
+      "skills": [
+        "Kubernetes",
+        "Docker",
+        "CI/CD",
+        "AWS",
+        "Terraform",
+        "GitOps"
+      ],
+      "status": "ACTIVE",
+      "isVerified": true,
+      "department": {
+        "id": "dept-cse",
+        "name": "Computer Science & Engineering",
+        "code": "CSE"
+      },
+      "departmentId": "dept-cse",
+      "currentCompany": "Safaricom Ethiopia",
+      "jobTitle": "Cloud & DevSecOps Engineer",
+      "employmentStatus": "EMPLOYED",
+      "location": "Addis Ababa, Ethiopia"
+    },
+    {
+      "id": "dev-profile-dawit",
+      "userId": "dev-user-dawit",
+      "studentId": "ASTU/ECE/033/19",
+      "fullName": "Dawit Kebede",
+      "email": "dawit.kebede@astu.edu.et",
+      "graduationYear": 2023,
+      "cgpa": 3.75,
+      "isCgpaPublic": true,
+      "skills": [
+        "C++",
+        "Embedded C",
+        "IoT",
+        "FPGA",
+        "Python",
+        "RTOS"
+      ],
+      "status": "ACTIVE",
+      "isVerified": true,
+      "department": {
+        "id": "dept-[#ece]",
+        "name": "Electrical & Computer Engineering",
+        "code": "ECE"
+      },
+      "departmentId": "dept-ece",
+      "currentCompany": "Commercial Bank of Ethiopia",
+      "jobTitle": "Embedded Systems Specialist",
+      "employmentStatus": "EMPLOYED",
+      "location": "Addis Ababa, Ethiopia"
+    },
+    {
+      "id": "dev-profile-bethlehem",
+      "userId": "dev-user-bethlehem",
+      "studentId": "ASTU/SWE/210/20",
+      "fullName": "Bethlehem Tadesse",
+      "email": "bethlehem.tadesse@astu.edu.et",
+      "graduationYear": 2024,
+      "cgpa": 3.9,
+      "isCgpaPublic": true,
+      "skills": [
+        "Go",
+        "Node.js",
+        "PostgreSQL",
+        "Microservices",
+        "Redis",
+        "gRPC"
+      ],
+      "status": "ACTIVE",
+      "isVerified": true,
+      "department": {
+        "id": "dept-swe",
+        "name": "Software Engineering",
+        "code": "SWE"
+      },
+      "departmentId": "dept-swe",
+      "currentCompany": "Chapa Financial Technologies",
+      "jobTitle": "Backend Software Engineer",
+      "employmentStatus": "EMPLOYED",
+      "location": "Addis Ababa, Ethiopia"
+    },
+    {
+      "id": "dev-profile-yonas",
+      "userId": "dev-user-yonas",
+      "studentId": "ASTU/MECH/019/18",
+      "fullName": "Yonas Haile",
+      "email": "yonas.haile@astu.edu.et",
+      "graduationYear": 2022,
+      "cgpa": 3.7,
+      "isCgpaPublic": true,
+      "skills": [
+        "SolidWorks",
+        "Robotics",
+        "Mechatronics",
+        "Python",
+        "Control Systems"
+      ],
+      "status": "ACTIVE",
+      "isVerified": true,
+      "department": {
+        "id": "dept-mech",
+        "name": "Mechanical Engineering",
+        "code": "MECH"
+      },
+      "departmentId": "dept-mech",
+      "currentCompany": "MetEC Robotics",
+      "jobTitle": "Mechatronics Systems Engineer",
+      "employmentStatus": "EMPLOYED",
+      "location": "Adama, Ethiopia"
     },
     {
       "id": "dev-profile-alumni",
@@ -59,8 +259,22 @@
       "studentId": "ASTU/SWE/002/20",
       "fullName": "Alumni Example",
       "email": "alumni@example.com",
+      "graduationYear": 2023,
+      "cgpa": 3.75,
+      "isCgpaPublic": true,
+      "skills": [
+        "React",
+        "Node.js",
+        "SQL"
+      ],
       "status": "ACTIVE",
-      "isVerified": true
+      "isVerified": true,
+      "department": {
+        "id": "dept-swe",
+        "name": "Software Engineering",
+        "code": "SWE"
+      },
+      "departmentId": "dept-swe"
     }
   ],
   "employerProfiles": [
@@ -70,6 +284,13 @@
       "companyName": "Safaricom Ethiopia",
       "industry": "Telecommunications",
       "isVerified": true
+    },
+    {
+      "id": "dev-employer-insa",
+      "userId": "dev-user-insa",
+      "companyName": "Information Network Security Administration (INSA)",
+      "industry": "Cybersecurity & Information Technology",
+      "isVerified": true
     }
   ],
   "departments": [],
@@ -77,5 +298,139 @@
   "registrarSyncLogs": [],
   "auditLogs": [],
   "notifications": [],
-  "documentRequests": []
+  "documentRequests": [],
+  "jobs": [
+    {
+      "id": "job-insa-001",
+      "employerId": "dev-employer-insa",
+      "title": "Cybersecurity Operations Specialist",
+      "description": "Lead threat detection, vulnerability analysis, and incident response operations for high-security networks.",
+      "location": "Addis Ababa, Ethiopia",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 3,
+      "skillsRequired": [
+        "Cybersecurity",
+        "Network Security",
+        "Incident Response",
+        "Linux"
+      ],
+      "salary": "35,000 - 45,000 ETB / month",
+      "status": "PUBLISHED",
+      "createdAt": "2026-08-20T10:00:00.000Z",
+      "updatedAt": "2026-08-20T10:00:00.000Z",
+      "views": 240
+    },
+    {
+      "id": "job-insa-002",
+      "employerId": "dev-employer-insa",
+      "title": "Senior Cryptography & Software Engineer",
+      "description": "Design and implement secure encryption protocols and software modules for national communications infrastructure.",
+      "location": "Addis Ababa, Ethiopia",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 5,
+      "skillsRequired": [
+        "Python",
+        "C++",
+        "Cryptography",
+        "Reverse Engineering"
+      ],
+      "salary": "45,000 - 60,000 ETB / month",
+      "status": "PUBLISHED",
+      "createdAt": "2026-08-22T14:30:00.000Z",
+      "updatedAt": "2026-08-22T14:30:00.000Z",
+      "views": 185
+    },
+    {
+      "id": "job-insa-003",
+      "employerId": "dev-employer-insa",
+      "title": "Cloud & DevSecOps Intern",
+      "description": "Gain hands-on experience in automated secure deployment pipelines, containerization, and cloud infrastructure.",
+      "location": "Adama / Addis Ababa",
+      "employmentType": "INTERNSHIP",
+      "experienceRequired": 0,
+      "skillsRequired": [
+        "Docker",
+        "Kubernetes",
+        "Git",
+        "Python"
+      ],
+      "salary": "12,000 ETB / month stipend",
+      "status": "PUBLISHED",
+      "createdAt": "2026-08-24T09:15:00.000Z",
+      "updatedAt": "2026-08-24T09:15:00.000Z",
+      "views": 310
+    }
+  ],
+  "jobApplications": [
+    {
+      "id": "app-insa-001",
+      "jobId": "job-insa-001",
+      "alumniId": "dev-profile-alumni",
+      "status": "SHORTLISTED",
+      "resumeUrl": "/uploads/resumes/sample-resume.pdf",
+      "coverLetter": "Extremely interested in joining INSA security team.",
+      "createdAt": "2026-08-23T11:00:00.000Z",
+      "updatedAt": "2026-08-24T10:00:00.000Z"
+    },
+    {
+      "id": "app-insa-002",
+      "jobId": "job-insa-002",
+      "alumniId": "dev-profile-alumni",
+      "status": "PENDING",
+      "resumeUrl": "/uploads/resumes/sample-resume.pdf",
+      "coverLetter": "Strong background in systems programming.",
+      "createdAt": "2026-08-25T08:20:00.000Z",
+      "updatedAt": "2026-08-25T08:20:00.000Z"
+    }
+  ],
+  "employerFeedbacks": [
+    {
+      "id": "fb-insa-001",
+      "employerId": "dev-employer-insa",
+      "alumniId": "dev-profile-abebe",
+      "technicalSkill": 5,
+      "communicationSkill": 4,
+      "leadershipSkill": 4,
+      "teamworkSkill": 5,
+      "problemSolvingSkill": 5,
+      "innovationSkill": 5,
+      "overallSatisfaction": 5,
+      "feedbackText": "Abebe Bikila demonstrated outstanding system engineering and secure architecture capabilities during his project deployment.",
+      "createdAt": "2026-08-21T14:00:00.000Z"
+    },
+    {
+      "id": "fb-insa-002",
+      "employerId": "dev-employer-insa",
+      "alumniId": "dev-profile-tigist",
+      "technicalSkill": 5,
+      "communicationSkill": 5,
+      "leadershipSkill": 5,
+      "teamworkSkill": 5,
+      "problemSolvingSkill": 5,
+      "innovationSkill": 5,
+      "overallSatisfaction": 5,
+      "feedbackText": "Tigist Worku led our incident response simulation flawlessly and showed deep mastery of network security protocols.",
+      "createdAt": "2026-08-24T09:30:00.000Z"
+    }
+  ],
+  "directMessages": [
+    {
+      "id": "msg-insa-001",
+      "employerId": "dev-employer-insa",
+      "alumniId": "dev-profile-tigist",
+      "sender": "EMPLOYER",
+      "text": "Hello Tigist, we reviewed your cybersecurity credentials and would like to invite you for an interview for Senior Vulnerability Lead.",
+      "isRead": true,
+      "createdAt": "2026-08-25T10:00:00.000Z"
+    },
+    {
+      "id": "msg-insa-002",
+      "employerId": "dev-employer-insa",
+      "alumniId": "dev-profile-tigist",
+      "sender": "ALUMNI",
+      "text": "Thank you INSA Recruitment! I am available this Thursday morning for the interview session.",
+      "isRead": true,
+      "createdAt": "2026-08-25T10:30:00.000Z"
+    }
+  ]
 }

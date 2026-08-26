@@ -220,64 +220,76 @@ export default function CmsLayout() {
       />
 
       <div className={`min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-72'}`}>
-        {/* Glassmorphism Header */}
-        <header className="sticky top-0 z-20 bg-[var(--bg-navbar)]/80 backdrop-blur-xl border-b border-[var(--border-color)]/60">
+        {/* Clean White Top Header */}
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-            {/* Left: mobile hamburger + breadcrumb + status */}
-            <div className="flex min-w-0 items-center gap-3 flex-1">
-              <button type="button" onClick={() => setMobileSidebarOpen(true)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-page)] lg:hidden" aria-label="Open navigation">
+            {/* Left: mobile hamburger + page title */}
+            <div className="flex min-w-0 items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(true)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
+                aria-label="Open navigation"
+              >
                 <Menu className="h-5 w-5" />
               </button>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-muted)]">
-                  <a href="/cms/dashboard" className="hover:text-[#003580] transition-colors">CMS</a>
-                  <span>/</span>
-                  <span className="text-[var(--text-secondary)]">{meta.breadcrumb[meta.breadcrumb.length - 1]?.label ?? 'Dashboard'}</span>
-                  <span className="hidden sm:inline-flex items-center gap-1 ml-2 text-[11px] text-[var(--text-muted)] bg-[var(--bg-card)] rounded-full px-2.5 py-0.5">
-                    <Clock className="h-3 w-3" />
-                    {headerTime.date} · {headerTime.time}
-                  </span>
-                </div>
-                <h1 className="truncate text-lg font-bold tracking-tight text-[var(--text-primary)]">{meta.title}</h1>
+
+              <div className="flex items-center gap-3">
+                <h1 className="text-lg font-bold tracking-tight text-slate-900">{meta.title}</h1>
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100/80 rounded-full px-2.5 py-0.5">
+                  <Clock className="h-3 w-3" />
+                  {headerTime.date} · {headerTime.time}
+                </span>
               </div>
+            </div>
+
+            {/* Center: Search input */}
+            <div className="relative hidden md:block" ref={searchRef}>
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="flex h-9 w-[340px] items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 text-xs text-slate-400 hover:border-slate-300 hover:bg-white transition-all focus:outline-none"
+              >
+                <Search className="h-3.5 w-3.5 text-slate-400" />
+                <span>Search pages, media, announcements...</span>
+                <span className="ml-auto flex items-center gap-0.5 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-400 shadow-xs">
+                  <Command className="h-3 w-3" />K
+                </span>
+              </button>
+              {searchOpen && (
+                <div className="absolute right-0 top-11 z-50 w-[420px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+                  <div className="flex items-center gap-2.5 border-b border-slate-100 px-4 py-3">
+                    <Search className="h-4 w-4 text-slate-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search pages, posts, media..."
+                      className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="p-2">
+                    {filteredSuggestions.map((s, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          navigate(s.path);
+                          setSearchOpen(false);
+                          setSearchQuery('');
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-all"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-slate-400" />
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right: actions */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Search */}
-              <div className="relative hidden md:block" ref={searchRef}>
-                <button onClick={() => setSearchOpen(true)}
-                  className="flex h-10 w-[320px] items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 px-3.5 text-sm text-[var(--text-muted)] hover:border-slate-300 dark:hover:border-slate-600 hover:bg-[var(--bg-card)] transition-all focus:outline-none">
-                  <Search className="h-4 w-4" />
-                  <span>Search content...</span>
-                  <span className="ml-auto flex items-center gap-0.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)] shadow-sm">
-                    <Command className="h-3 w-3" />K
-                  </span>
-                </button>
-                {searchOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-[420px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg shadow-slate-200/50 dark:shadow-black/30">
-                    <div className="flex items-center gap-2.5 border-b border-[var(--border-color)] px-4 py-3">
-                      <Search className="h-4 w-4 text-[var(--text-muted)]" />
-                      <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                        placeholder="Search pages, posts, media..."
-                        className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]" autoFocus />
-                    </div>
-                    <div className="p-2">
-                      {filteredSuggestions.map((s, idx) => (
-                        <button key={idx} onClick={() => { navigate(s.path); setSearchOpen(false); setSearchQuery(''); }}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all">
-                          <Sparkles className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="border-t border-[var(--border-color)] px-4 py-2.5">
-                      <p className="text-[11px] text-[var(--text-muted)]">Press <kbd className="rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] px-1.5 py-0.5 text-[10px] font-medium">Esc</kbd> to close</p>
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* Quick Create */}
               <button type="button" onClick={() => navigate('/cms/content')}

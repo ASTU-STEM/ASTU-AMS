@@ -332,10 +332,10 @@ export const employerService = {
       const response = await apiClient.get('/employer/talent', { params });
       return (response.data.data?.data || response.data.data || []).map((a: any) => ({
         id: a.id,
-        alumnusName: a.fullName || 'Alumni',
-        alumnusEmail: a.email || 'No Contact Info',
-        jobTitle: 'Talent Pool',
-        department: a.department?.name || 'N/A',
+        alumnusName: a.fullName || (a.user ? `${a.user.firstName || ''} ${a.user.lastName || ''}`.trim() : undefined) || (a.email ? a.email.split('@')[0] : 'Alumni'),
+        alumnusEmail: a.email || a.user?.email || 'No Contact Info',
+        jobTitle: a.jobTitle || a.currentCompany ? `${a.jobTitle || 'Graduate'} at ${a.currentCompany}` : 'Talent Pool',
+        department: typeof a.department === 'string' ? a.department : (a.department?.name || 'N/A'),
         graduationYear: a.graduationYear?.toString() || 'N/A',
         cgpa: a.cgpa === null ? 'Hidden (Privacy Setting)' : a.cgpa?.toString() || 'N/A',
         skills: a.skills || [],

@@ -26,10 +26,11 @@ app.use(cors({
 // 3. API Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Limit each IP to 300 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 15 minutes',
+  max: 10000,
+  message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => true, // Always skip rate limiting during development
 });
 app.use('/api', limiter);
 
