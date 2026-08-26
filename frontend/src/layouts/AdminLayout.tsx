@@ -362,7 +362,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="h-[calc(100dvh-4rem)] overflow-y-auto bg-[var(--bg-page)] p-4 sm:p-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

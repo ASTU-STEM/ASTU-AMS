@@ -3003,21 +3003,14 @@ export default function SurveyManagement() {
                 }}
               >
                 <FormField label="Survey Type" required>
-                  <select
-                    style={{ ...inputStyle, cursor: "pointer" }}
-                    value={newSurvey.type}
-                    onChange={(e) =>
-                      setNewSurvey((s) => ({
-                        ...s,
-                        type: e.target.value as SurveyType,
-                      }))
-                    }
-                  >
-                    <option value="6-Month">6-Month Tracer</option>
-                    <option value="12-Month">12-Month Tracer</option>
-                    <option value="24-Month">24-Month Tracer</option>
-                    <option value="Custom">Custom Survey</option>
-                  </select>
+                  <input
+                    style={{ ...inputStyle, background: "#F3F4F6", cursor: "not-allowed", fontWeight: 600, color: "#374151" }}
+                    disabled
+                    value="Custom Survey (Ad-hoc Assignment)"
+                  />
+                  <span style={{ fontSize: 10, color: "#6B7280", marginTop: 4, display: "block" }}>
+                    💡 Fixed milestone templates (6, 12, 18, 24-Month) are pre-configured system defaults. All new surveys created by Admins and Registrars are Custom Surveys.
+                  </span>
                 </FormField>
                 <FormField label="Deadline" required>
                   <input

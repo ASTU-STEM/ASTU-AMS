@@ -98,52 +98,45 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-gradient-to-b from-[#003366] via-[#002a55] to-[#001a3a] text-slate-200 transition-all duration-300 lg:translate-x-0 ${collapsed ? 'w-20' : 'w-64'} ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/80 text-slate-800 shadow-xs transition-all duration-300 lg:translate-x-0 ${
+          collapsed ? 'w-20' : 'w-64'
+        } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(232,160,32,0.03)_60%,transparent_100%)] pointer-events-none" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-[#E8A020]/20 sidebar-particle" />
-          <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#E8A020]/15 sidebar-particle" />
-          <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-[#E8A020]/10 sidebar-particle" />
-        </div>
-
-        <div className="relative px-4 pt-5">
+        {/* Sidebar Logo Header */}
+        <div className="relative px-4 py-4 border-b border-slate-100">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="group/logo relative shrink-0">
+            <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
               <img
                 src="/images/astu-seal-logo.png"
                 alt="ASTU Logo"
-                className="h-10 w-10 rounded-xl bg-white/5 object-contain p-0.5 ring-1 ring-white/10 transition-all duration-300 group-hover/logo:ring-[#E8A020]/40"
+                className="h-full w-full object-contain scale-110"
               />
-              {!collapsed && (
-                <div className="absolute -top-1 -right-1 px-1 py-0.5 bg-[#E8A020]/20 text-[#E8A020] text-[7px] font-extrabold rounded border border-[#E8A020]/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Beta</div>
-              )}
             </div>
             {!collapsed && (
               <div>
-                <div className="font-semibold tracking-[0.08em] text-[#E8A020] text-[20px] leading-none">ASTU</div>
-                <p className="mt-1 text-[11px] text-slate-300">Management System</p>
+                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">ASTU Admin</div>
+                <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Management System</p>
               </div>
             )}
           </div>
-          <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-[#E8A020]/50 to-transparent" />
         </div>
 
-        <nav className="relative flex-1 overflow-y-auto px-2 py-5 scrollbar-thin">
+        {/* Navigation Items */}
+        <nav className="relative flex-1 overflow-y-auto px-3 py-4 scrollbar-thin space-y-4">
           {sections.map(section => {
             const items = getSectionItems(section.key);
             if (items.length === 0) return null;
             return (
-              <div key={section.key} className="mb-4">
+              <div key={section.key}>
                 {!collapsed && (
-                  <div className="flex items-center justify-between px-3 mb-1.5">
-                    <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">{section.label}</p>
-                    <span className="text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/5">
-                      {items.length}
+                  <div className="flex items-center justify-between px-3 mb-2">
+                    <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">{section.label}</p>
+                    <span className="text-[8px] text-slate-500 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">
+                      {items.length} items
                     </span>
                   </div>
                 )}
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   {items.map((item) => {
                     const Icon = item.icon;
                     const isActive = item.exact
@@ -156,34 +149,36 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                         end={item.exact}
                         onClick={onNavigate}
                         title={collapsed ? item.tooltip || item.label : undefined}
-                        className={`group relative flex items-center rounded-[10px] text-[13px] font-medium transition-all duration-200 ${
-                          collapsed ? 'justify-center py-3 px-0 mx-1' : 'gap-3 py-2.5 px-4'
+                        className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
+                          collapsed ? 'justify-center' : 'gap-2.5'
                         } ${
                           isActive
-                            ? 'bg-[rgba(232,160,32,0.12)] text-[#E8A020] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] ring-1 ring-[#E8A020]/20'
-                            : 'text-[#8FA3BF] hover:bg-white/5 hover:text-white'
+                            ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
+                            : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
                         }`}
                       >
-                        <span className="shrink-0">
+                        <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                          isActive ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
+                        }`}>
                           <Icon className="h-4.5 w-4.5" />
                         </span>
-                        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                        {!collapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
                         {item.badge && !collapsed && (
-                          <span className={`flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg ${
+                          <span className={`flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold shadow-xs ${
                             isActive
-                              ? 'bg-[#E8A020]/20 text-[#E8A020] ring-1 ring-[#E8A020]/30'
-                              : 'bg-white/10 text-white/70'
+                              ? 'bg-rose-500 text-white'
+                              : 'bg-rose-100 text-rose-700'
                           }`}>
                             {item.badge}
                           </span>
                         )}
                         {item.badge && collapsed && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg ring-1 ring-white/20">
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
                             {item.badge}
                           </span>
                         )}
                         {isActive && !item.badge && !collapsed && (
-                          <span className="w-1 h-1 rounded-full bg-[#E8A020] animate-pulse" />
+                          <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
                         )}
                         {collapsed && (
                           <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
@@ -200,65 +195,59 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           })}
         </nav>
 
-        <div className="relative border-t border-white/10 px-4 py-4">
+        {/* Footer */}
+        <div className="relative border-t border-slate-100 p-3 space-y-2">
           {!collapsed ? (
             <>
               {/* AI Copilot Launch Button */}
               <button
                 type="button"
                 onClick={onOpenAiAssistant}
-                className="mb-4 flex w-full items-center gap-3 rounded-[12px] bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/10 border border-[#E8A020]/30 hover:border-[#E8A020]/50 px-4 py-3 text-sm font-medium text-slate-200 transition-all hover:from-amber-500/20 hover:to-orange-500/20 shadow-[0_0_12px_rgba(232,160,32,0.08)] group"
+                className="flex w-full items-center gap-3 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/40 px-3.5 py-2.5 text-sm font-medium text-amber-900 transition-all hover:bg-amber-500/15 shadow-2xs group"
               >
-                <Sparkles className="h-4.5 w-4.5 text-[#E8A020] animate-pulse shrink-0" />
+                <Sparkles className="h-4.5 w-4.5 text-amber-600 animate-pulse shrink-0" />
                 <div className="text-left flex-1 min-w-0">
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-[#E8A020]">ASTU AI Copilot</div>
-                  <div className="text-[9px] text-slate-400 truncate">Tracer &amp; Analytics Assistant</div>
+                  <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700">ASTU AI Copilot</div>
+                  <div className="text-[9px] text-amber-600/80 truncate">Tracer &amp; Analytics Assistant</div>
                 </div>
               </button>
 
-              <div className="flex items-center gap-3 rounded-[10px] bg-white/5 px-3 py-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30 shrink-0">
+              <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-200/60 p-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white shrink-0">
                   {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'SA'}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
-                  <div className="mt-1 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <AdminBadge variant="neutral" className="border-white/10 bg-white/10 text-slate-200 text-[10px]">
-                      Root Admin
-                    </AdminBadge>
+                  <p className="truncate text-xs font-bold text-slate-900">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
+                  <div className="mt-0.5 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Root Admin</span>
                   </div>
                 </div>
               </div>
 
               <button type="button" onClick={onLogout}
-                className="mt-3 flex w-full items-center gap-2 rounded-[8px] border border-white/10 px-4 py-3 text-sm font-medium text-slate-200 transition-all hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20">
+                className="flex w-full items-center gap-2.5 rounded-xl border border-rose-100 bg-rose-50/50 px-3 py-2 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700">
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
-                <span className="ml-auto text-[8px] text-white/10 font-medium">Alt+L</span>
+                <span className="ml-auto text-[8px] text-rose-400 font-medium">Alt+L</span>
               </button>
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              {/* AI Copilot Launch Button Collapsed */}
               <button
                 type="button"
                 onClick={onOpenAiAssistant}
-                className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-[#E8A020]/30 hover:border-[#E8A020]/50 text-slate-200 transition-all group relative shrink-0 shadow-[0_0_10px_rgba(232,160,32,0.1)]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 border border-amber-200 text-amber-700 hover:bg-amber-200 transition-all group relative shrink-0 shadow-xs"
                 title="ASTU AI Copilot"
               >
-                <Sparkles className="h-4.5 w-4.5 text-[#E8A020] animate-pulse" />
-                <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                  ASTU AI Copilot
-                </div>
+                <Sparkles className="h-4.5 w-4.5 text-amber-600 animate-pulse" />
               </button>
 
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580] text-sm font-semibold text-white ring-2 ring-[#E8A020]/30" title={user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white" title={user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}>
                 {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'SA'}
               </div>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Online" />
               <button type="button" onClick={onLogout}
-                className="flex items-center justify-center w-9 h-9 rounded-[8px] border border-white/10 text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all"
+                className="flex items-center justify-center w-8 h-8 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all"
                 title="Logout">
                 <LogOut className="h-4 w-4" />
               </button>
@@ -268,10 +257,10 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`mt-2 flex items-center justify-center rounded-[8px] text-white/40 hover:text-white hover:bg-white/5 transition-all ${collapsed ? 'w-full py-1.5' : 'w-full py-2 gap-2'}`}
+            className={`flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all ${collapsed ? 'w-full py-1.5' : 'w-full py-2 gap-2'}`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[10px] font-medium">Collapse</span></>}
+            {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[10px] font-bold uppercase tracking-wider">Collapse</span></>}
           </button>
         </div>
       </aside>
