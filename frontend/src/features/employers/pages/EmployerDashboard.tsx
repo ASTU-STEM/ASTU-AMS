@@ -478,7 +478,6 @@ const EmployerDashboard = () => {
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-2 mb-2">
                 <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">Recruiting</p>
-                <span className="text-[8px] text-emerald-600 dark:text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-400/5 rounded border border-emerald-200 dark:border-emerald-400/10">5 items</span>
               </div>
             )}
             <div className="space-y-0.5">

@@ -177,7 +177,6 @@ const DepartmentDashboard = () => {
                     {!sidebarCollapsed && (
                         <div className="flex items-center justify-between px-3 mb-2">
                             <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Analytics</p>
-                            <span className="text-[8px] text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-400/5 rounded border border-emerald-400/10">5 items</span>
                         </div>
                     )}
                     <div className="space-y-0.5">
@@ -208,7 +207,6 @@ const DepartmentDashboard = () => {
                     {!sidebarCollapsed && (
                         <div className="flex items-center justify-between px-3 mt-5 mb-2">
                             <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Reports</p>
-                            <span className="text-[8px] text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-400/5 rounded border border-emerald-400/10">4 items</span>
                         </div>
                     )}
                     <div className="space-y-0.5">

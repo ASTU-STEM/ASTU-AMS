@@ -11,5 +11,5 @@ export const createEventSchema = z.object({
 export const updateEventSchema = createEventSchema.partial();
 
 export const rsvpSchema = z.object({
-  status: z.enum(['GOING', 'NOT_GOING'])
+  status: z.enum(['GOING', 'NOT_GOING', 'ATTENDING', 'CONFIRMED'])
 });

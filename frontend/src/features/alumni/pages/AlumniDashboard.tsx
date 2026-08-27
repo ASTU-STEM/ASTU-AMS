@@ -120,9 +120,10 @@ const AlumniDashboard = () => {
         toast.success(`Application sent to ${appliedJob.company}!`);
         setNotifications(prev => [{ id: Date.now(), text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`, unread: true, time: 'Just now' }, ...prev]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to submit application:', err);
-      toast.error('Failed to submit application. Please try again later.');
+      const msg = err?.response?.data?.message || err?.message || 'Failed to submit application. Please try again later.';
+      toast.error(msg);
     }
   };
 
@@ -150,10 +151,31 @@ const AlumniDashboard = () => {
     setNotifications(prev => [{ id: Date.now(), text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleRegisterEvent = (eventId: number) => {
-    const updatedEvents = events.map(e => e.id === eventId ? { ...e, registered: true } : e);
-    setEvents(updatedEvents);
-    setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
+  const handleRegisterEvent = async (eventId: number | string) => {
+    try {
+      const strId = String(eventId);
+      await alumniService.rsvpEvent(strId, 'ATTENDING').catch(err => {
+        console.warn('API RSVP sync warning:', err);
+      });
+
+      // Save to localStorage persistence
+      try {
+        const saved = localStorage.getItem('astu_registered_event_ids');
+        const list = saved ? JSON.parse(saved) : [];
+        if (!list.includes(strId)) list.push(strId);
+        localStorage.setItem('astu_registered_event_ids', JSON.stringify(list));
+      } catch (_) {}
+
+      const updatedEvents = events.map(e => String(e.id) === strId ? { ...e, registered: true } : e);
+      setEvents(updatedEvents);
+      const targetEvent = events.find(e => String(e.id) === strId);
+      if (targetEvent) {
+        setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${targetEvent.title}.`, unread: true, time: 'Just now' }, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to register for event:', err);
+      toast.error('Failed to complete event registration.');
+    }
   };
 
   const handleRequestMentorship = async (mentorId: number) => {
@@ -393,7 +415,20 @@ const AlumniDashboard = () => {
         
         setJobs(mappedJobs);
 
-        if (eventsData) setEvents(Array.isArray(eventsData) ? eventsData : []);
+        let savedRegisteredEventIds = new Set<string>();
+        try {
+          const saved = localStorage.getItem('astu_registered_event_ids');
+          if (saved) JSON.parse(saved).forEach((id: string) => savedRegisteredEventIds.add(String(id)));
+        } catch (_) {}
+
+        if (eventsData && Array.isArray(eventsData)) {
+          const mappedEvents = eventsData.map((ev: any) => ({
+            ...ev,
+            registered: Boolean(ev.registered || savedRegisteredEventIds.has(String(ev.id)))
+          }));
+          setEvents(mappedEvents);
+        }
+
         if (mentorsData) setMentors(Array.isArray(mentorsData) ? mentorsData : []);
         const mappedDocuments = (Array.isArray(documentsData) ? documentsData : []).map((doc: any) => ({
           id: doc.id,
@@ -596,7 +631,6 @@ const AlumniDashboard = () => {
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-3 mb-2">
                 <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Recruiting & Career</p>
-                <span className="text-[8px] text-emerald-700 font-extrabold px-1.5 py-0.5 bg-emerald-50 rounded border border-emerald-200/60">5 items</span>
               </div>
             )}
             <div className="space-y-1">
@@ -637,7 +671,6 @@ const AlumniDashboard = () => {
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-3 mb-2 pt-1">
                 <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Community</p>
-                <span className="text-[8px] text-slate-500 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">4 items</span>
               </div>
             )}
             <div className="space-y-1">
@@ -673,7 +706,6 @@ const AlumniDashboard = () => {
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-3 mb-2 pt-1">
                 <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Services</p>
-                <span className="text-[8px] text-slate-500 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">3 items</span>
               </div>
             )}
             <div className="space-y-1">
@@ -922,7 +954,19 @@ const AlumniDashboard = () => {
           )}
 
           {activeTab === 'profile' && <ProfileTab profile={profile} onSave={handleSaveProfile} />}
-          {activeTab === 'career' && <CareerTab events={events} jobs={jobs} mentors={mentors} onRegisterEvent={handleRegisterEvent} />}
+          {activeTab === 'career' && (
+            <CareerTab
+              events={events}
+              jobs={jobs}
+              mentors={mentors}
+              profile={profile}
+              statsData={statsData}
+              onRegisterEvent={handleRegisterEvent}
+              onApplyJob={handleApplyJob}
+              onViewJob={setSelectedJobForModal}
+              onRequestMentorship={handleRequestMentorship}
+            />
+          )}
           {activeTab === 'surveys' && <SurveysTab />}
           {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={setSelectedJobForModal} onToggleSaveJob={handleToggleSaveJob} />}
           {activeTab === 'mentorship' && <MentorshipTab mentors={mentors} onRequestMentorship={handleRequestMentorship} onScheduleSession={handleScheduleSession} />}
