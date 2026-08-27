@@ -93,7 +93,7 @@ describe('Tracer Study Engine E2E Workflows', () => {
       .send({
         title: 'ASTU 6-Month Graduate Tracer Study',
         description: 'Mandatory accreditation survey for 2024 graduates.',
-        type: SurveyType.SIX_MONTH,
+        type: SurveyType.CUSTOM,
         milestoneMonths: 6,
         sendInstantly: true,
         sections: [

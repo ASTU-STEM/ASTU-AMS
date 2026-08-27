@@ -18,7 +18,7 @@
       ],
       "id": "dev-alumni-1787763781926",
       "createdAt": "2026-08-26T17:03:01.926Z",
-      "updatedAt": "2026-08-26T17:58:53.992Z",
+      "updatedAt": "2026-08-27T05:22:35.244Z",
       "employmentStatus": "EMPLOYED",
       "salary": 18000
     },
@@ -39,7 +39,7 @@
       ],
       "id": "dev-alumni-1787763782058",
       "createdAt": "2026-08-26T17:03:02.058Z",
-      "updatedAt": "2026-08-26T17:58:47.371Z",
+      "updatedAt": "2026-08-27T05:22:28.072Z",
       "employmentStatus": "EMPLOYED",
       "salary": 25000
     },
@@ -59,7 +59,7 @@
       ],
       "id": "dev-alumni-1787765356770",
       "createdAt": "2026-08-26T17:29:16.770Z",
-      "updatedAt": "2026-08-26T17:59:00.260Z"
+      "updatedAt": "2026-08-27T05:22:15.481Z"
     }
   ],
   "employerProfiles": [
@@ -74,7 +74,7 @@
       "companySize": "11-50",
       "id": "dev-employer-1787763781981",
       "createdAt": "2026-08-26T17:03:01.981Z",
-      "updatedAt": "2026-08-26T17:58:45.299Z"
+      "updatedAt": "2026-08-27T05:22:25.531Z"
     }
   ],
   "departments": [],
@@ -211,30 +211,6 @@
       "createdAt": "2026-08-26T17:58:04.508Z"
     },
     {
-      "userId": "test-alumni-user-uuid",
-      "title": "Application SHORTLISTED",
-      "content": "Great news! Your application for \"Fullstack Engineer\" at Google East Africa has been shortlisted. They will be in touch with you soon.",
-      "id": "dev-notif-1787767125443",
-      "createdAt": "2026-08-26T17:58:45.443Z",
-      "isRead": false
-    },
-    {
-      "userId": "test-alumni-user-uuid",
-      "title": "Interview Scheduled",
-      "content": "An interview has been scheduled for the position of Fullstack Engineer on 8/27/2026, 8:58:47 PM.",
-      "id": "dev-notif-1787767127349",
-      "createdAt": "2026-08-26T17:58:47.349Z",
-      "isRead": false
-    },
-    {
-      "userId": "test-alumni-user-uuid",
-      "title": "Hired!",
-      "content": "Congratulations! You have been hired by Google East Africa for the role of Fullstack Engineer.",
-      "id": "dev-notif-1787767127395",
-      "createdAt": "2026-08-26T17:58:47.395Z",
-      "isRead": false
-    },
-    {
       "userId": "e2e-alumni-user",
       "title": "Interview Scheduled",
       "content": "An interview has been scheduled for the position of Mechanical Design Associate on 8/27/2026, 8:58:53 PM.",
@@ -259,24 +235,103 @@
       "createdAt": "2026-08-26T17:59:00.292Z"
     },
     {
-      "userId": "test-alumni-user-uuid",
-      "title": "🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
-      "content": "A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-09-16.",
-      "isRead": false,
-      "id": "dev-notif-1787767140317",
-      "createdAt": "2026-08-26T17:59:00.317Z"
-    },
-    {
       "userId": "tracer-alumni-user",
       "title": "🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
       "content": "A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-09-16.",
       "isRead": false,
       "id": "dev-notif-1787767140335",
       "createdAt": "2026-08-26T17:59:00.335Z"
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Application SHORTLISTED",
+      "content": "Great news! Your application for \"Fullstack Engineer\" at Google East Africa has been shortlisted. They will be in touch with you soon.",
+      "id": "dev-notif-1787808145763",
+      "createdAt": "2026-08-27T05:22:25.763Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Fullstack Engineer on 8/28/2026, 8:22:27 AM.",
+      "id": "dev-notif-1787808148015",
+      "createdAt": "2026-08-27T05:22:28.015Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Hired!",
+      "content": "Congratulations! You have been hired by Google East Africa for the role of Fullstack Engineer.",
+      "id": "dev-notif-1787808148133",
+      "createdAt": "2026-08-27T05:22:28.133Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 8/28/2026, 8:22:35 AM.",
+      "id": "dev-notif-1787808155188",
+      "createdAt": "2026-08-27T05:22:35.188Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the role of Mechanical Design Associate.",
+      "id": "dev-notif-1787808155304",
+      "createdAt": "2026-08-27T05:22:35.304Z",
+      "isRead": false
     }
   ],
   "documentRequests": [],
   "jobs": [
+    {
+      "employerId": "dev-employer-1787808155062",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-01T05:22:35.068Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1787808155096",
+      "createdAt": "2026-08-27T05:22:35.096Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-09-06T05:22:25.629Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1787808145656",
+      "createdAt": "2026-08-27T05:22:25.656Z",
+      "views": 0
+    },
     {
       "employerId": "dev-employer-1787767133905",
       "title": "Mechanical Design Associate",
@@ -587,6 +642,27 @@
   "jobApplications": [],
   "hiringEvents": [],
   "employerFeedbacks": [
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1787808150252",
+      "createdAt": "2026-08-27T05:22:30.252Z"
+    },
     {
       "employerId": "dev-employer-1787763781981",
       "alumniId": "dev-alumni-1787763782058",
