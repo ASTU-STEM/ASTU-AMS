@@ -3,6 +3,45 @@ import { AlumniProfile } from '../../domain/entities/Alumni';
 import prisma from '../../../../core/config/db';
 
 export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
+  private async enrichProfileData(data: any): Promise<AlumniProfile> {
+    if (!data) return null as any;
+
+    const prefs = (data.preferences as any) || {};
+    const currentExp = Array.isArray(data.experiences)
+      ? (data.experiences.find((e: any) => e.isCurrent) || data.experiences[0])
+      : null;
+
+    // Check for active hired job application
+    const hiredApp = await prisma.jobApplication.findFirst({
+      where: {
+        alumniId: data.id,
+        status: 'HIRED',
+      },
+      include: {
+        job: {
+          include: {
+            employer: true
+          }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    }).catch(() => null);
+
+    const isHired = data.employmentStatus === 'EMPLOYED' || data.employmentStatus === 'FULL_TIME' || Boolean(hiredApp) || Boolean(prefs.company) || Boolean(currentExp?.companyName);
+
+    const resolvedCompany = prefs.company || hiredApp?.job?.employer?.companyName || currentExp?.companyName || (isHired ? 'ASTU Corporate Partner' : 'ASTU Alumnus');
+    const resolvedRole = prefs.currentRole || hiredApp?.job?.title || currentExp?.position || (isHired ? 'Hired Graduate' : 'Not Employed');
+    const resolvedSalary = hiredApp?.job?.salary || currentExp?.salaryRange || (data.salary ? `${data.salary} ETB` : (isHired ? 'Competitive Salary' : 'Seeking Opportunities'));
+
+    return {
+      ...data,
+      company: resolvedCompany,
+      currentRole: resolvedRole,
+      salaryRange: resolvedSalary,
+      employmentStatus: isHired ? 'EMPLOYED' : data.employmentStatus,
+    } as any as AlumniProfile;
+  }
+
   async findByUserId(userId: string): Promise<AlumniProfile | null> {
     const data = await prisma.alumniProfile.findUnique({
       where: { userId },
@@ -15,12 +54,7 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
     });
 
     if (!data) return null;
-
-    return {
-      ...data,
-      // Pass raw data back, since the entity has exactly these fields
-      // In strict DDD, we map exactly, but for this project we'll pass the whole object
-    } as any as AlumniProfile;
+    return this.enrichProfileData(data);
   }
 
   async update(userId: string, updateData: any): Promise<AlumniProfile> {
@@ -28,7 +62,7 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
     const {
       certifications, projects, achievements,
       // Non-schema fields sent by frontend that must be stripped
-      department, experiences, resume, email, studentId, batch, cgpa,
+      department, experiences, resume, studentId, batch, cgpa,
       avatarUrl, linkedInUrl, gitHubUrl, twitterUrl, portfolioUrl,
       id, userId: _uid, createdAt, updatedAt,
       // Keep the rest as potential scalar updates
@@ -40,7 +74,7 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
 
     // Allowed scalar fields on AlumniProfile
     const ALLOWED_SCALARS = new Set([
-      'fullName', 'phone', 'profilePicture', 'bio', 'nationality',
+      'fullName', 'email', 'phone', 'profilePicture', 'bio', 'nationality',
       'maritalStatus', 'volunteerWork', 'address', 'languages', 'skills',
       'resumeUrl', 'linkedIn', 'gitHub', 'portfolio', 'telegram',
       'twitterUrl', 'employmentStatus', 'salary', 'gender',
@@ -61,6 +95,14 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
     if (portfolioUrl !== undefined) dataToUpdate.portfolio = portfolioUrl;
     if (twitterUrl !== undefined)   dataToUpdate.twitterUrl = twitterUrl;
     if (updateData.resumeUrl !== undefined) dataToUpdate.resumeUrl = updateData.resumeUrl;
+
+    // Also update primary User account email if changed
+    if (updateData.email) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { email: updateData.email }
+      }).catch((err: any) => console.error('Note: User email update failed or email unchanged', err?.message));
+    }
 
     // Handle nested relation writes
     if (certifications && Array.isArray(certifications)) {
@@ -113,6 +155,6 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
         projects: true,
       },
     });
-    return updated as any as AlumniProfile;
+    return this.enrichProfileData(updated);
   }
 }

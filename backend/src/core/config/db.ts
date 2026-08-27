@@ -851,6 +851,17 @@ function wrapModel(modelName: string, realModel: any): any {
           return await original.apply(target, args);
         } catch (err: any) {
           if (isConnectionError(err)) {
+            // Attempt 1-second auto-reconnect retry to handle Neon Postgres cold start
+            try {
+              await new Promise(r => setTimeout(r, 1000));
+              if (client && typeof (client as any).$connect === 'function') {
+                await (client as any).$connect();
+              }
+              return await original.apply(target, args);
+            } catch (retryErr) {
+              Logger.warn(`⚠️ Reconnect retry failed for ${modelName}.${methodName}: ${(retryErr as any)?.message}`);
+            }
+
             switchToFallback();
             // Retry on fallback
             const fb = getFallback();

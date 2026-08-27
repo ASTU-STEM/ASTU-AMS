@@ -61,7 +61,7 @@ export class ApplyToJob {
       jobId,
       alumniId: alumni.id,
       status: 'PENDING',
-      resumeUrl: data.resumeUrl || null,
+      resumeUrl: data.resumeUrl || (alumni as any).resumeUrl || null,
       coverLetter: data.coverLetter || null,
     });
 

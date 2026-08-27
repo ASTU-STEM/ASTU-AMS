@@ -1,47 +1,54 @@
 import prisma from '../../../../core/config/db';
-import { Role, AlumniStatus } from '@prisma/client';
+import { Role } from '@prisma/client';
 
 export class GetDashboardMetrics {
   async execute() {
-    // 1. Core KPIs
+    // 1. Core KPIs from real Database queries
     const totalAlumni = await prisma.user.count({ where: { role: Role.ALUMNI } });
     const totalEmployers = await prisma.user.count({ where: { role: Role.EMPLOYER } });
     
-    // Fallbacks if no data
-    const safeTotalAlumni = totalAlumni || 1;
-    
-    // Approximating survey completion (mocked actual calculation logic to be safe)
-    const surveyResponses = await prisma.surveyResponse.count();
-    const surveyCompletion = Math.min(100, Math.round((surveyResponses / safeTotalAlumni) * 100));
+    // Real survey completion from DB
+    const totalAssignments = await prisma.surveyAssignment.count();
+    const completedAssignments = await prisma.surveyAssignment.count({ where: { status: 'COMPLETED' } });
+    const surveyCompletionRate = totalAssignments > 0 ? Math.round((completedAssignments / totalAssignments) * 100) : 0;
 
     const activeJobs = await prisma.job.count({ where: { status: 'PUBLISHED', isActive: true } });
 
-    // 2. Pending Actions
+    // 2. Pending Actions from real Database records
     const pendingAlumni = await prisma.alumniProfile.count({ where: { isVerified: false } });
     const pendingEmployers = await prisma.employerProfile.count({ where: { isVerified: false } });
     const pendingJobs = await prisma.job.count({ where: { status: 'DRAFT' as any } });
     
-    // 3. System Activities (Audit logs)
+    // 3. System Activities from real Audit logs
     const recentLogs = await prisma.auditLog.findMany({
       orderBy: { createdAt: 'desc' },
       take: 6,
       include: { user: true }
     });
 
-    // 4. Employment by Department (Mocking for now unless real data exists)
-    // In reality, this requires group by on alumni profiles.
-    const depts = await prisma.department.findMany();
+    // 4. Real Employment Rate by Department calculated from alumni profile records
+    const depts = await prisma.department.findMany({
+      include: {
+        alumniProfiles: {
+          select: { id: true, employmentStatus: true }
+        }
+      }
+    });
 
-    const employmentData = depts.slice(0, 6).map((d: any) => ({
-      department: d.code || d.name.substring(0, 3).toUpperCase(),
-      value: 80 + Math.floor(Math.random() * 15) // Mocked employment % for now
-    }));
+    const employmentData = depts.map((d: any) => {
+      const total = d.alumniProfiles.length;
+      const employed = d.alumniProfiles.filter((a: any) => a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED').length;
+      return {
+        department: d.code || d.name.substring(0, 3).toUpperCase(),
+        value: total > 0 ? Math.round((employed / total) * 100) : 0
+      };
+    });
 
     return {
       kpis: {
         totalAlumni,
         totalEmployers,
-        surveyCompletion: `${surveyCompletion}%`,
+        surveyCompletion: `${surveyCompletionRate}%`,
         activeJobs
       },
       pendingActions: [
@@ -50,14 +57,16 @@ export class GetDashboardMetrics {
         { label: `${pendingJobs} job postings awaiting approval`, action: 'Review', tone: '#E8A020' },
       ].filter(a => !a.label.startsWith('0')),
       systemActivities: recentLogs.map(log => ({
-        text: `${log.action} - ${log.details}`,
+        text: `${log.action} - ${log.details || 'User Action'}`,
         time: log.createdAt.toISOString(),
         tone: '#003580'
       })),
       employmentData: employmentData.length > 0 ? employmentData : [
-        { department: 'SE', value: 92 },
-        { department: 'ME', value: 84 },
-        { department: 'CE', value: 89 }
+        { department: 'SWE', value: 0 },
+        { department: 'MEG', value: 0 },
+        { department: 'ECE', value: 0 },
+        { department: 'CVE', value: 0 },
+        { department: 'COM', value: 0 },
       ]
     };
   }

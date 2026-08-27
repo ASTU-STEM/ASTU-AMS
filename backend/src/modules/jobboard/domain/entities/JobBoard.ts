@@ -68,7 +68,11 @@ export class JobWithEmployer {
     public readonly companyLocation: string,
     public readonly companyLogoUrl: string | null,
     public readonly companyWebsite: string | null,
-    public readonly employerId: string
+    public readonly employerId: string,
+    // Live database metrics
+    public readonly viewsCount: number = 0,
+    public readonly applicationsCount: number = 0,
+    public readonly shortlistedCount: number = 0
   ) {}
 }
 
@@ -99,10 +103,11 @@ export class JobDetailView extends JobWithEmployer {
     companyWebsite: string | null,
     employerId: string,
     // Additional detail fields
-    public readonly applicationCount: number,
-    public readonly viewCount: number,
-    public readonly companyDescription: string | null,
-    public readonly companySize: string | null
+    applicationCount: number,
+    viewCount: number,
+    shortlistedCount: number = 0,
+    public readonly companyDescription: string | null = null,
+    public readonly companySize: string | null = null
   ) {
     super(
       id, title, description, location, employmentType,
@@ -110,7 +115,7 @@ export class JobDetailView extends JobWithEmployer {
       salaryMin, salaryMax, isActive, status, department,
       experienceLevel, responsibilities, requirements, createdAt,
       companyName, companyIndustry, companyLocation, companyLogoUrl,
-      companyWebsite, employerId
+      companyWebsite, employerId, viewCount, applicationCount, shortlistedCount
     );
   }
 }

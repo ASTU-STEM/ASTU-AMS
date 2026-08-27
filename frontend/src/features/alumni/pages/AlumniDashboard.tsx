@@ -110,10 +110,15 @@ const AlumniDashboard = () => {
     setProfile(updatedProfile);
   };
 
-  const handleApplyJob = async (jobId: string | number) => {
+  const handleApplyJob = async (jobId: string | number, coverLetter?: string) => {
     try {
-      await alumniService.applyToJob(String(jobId), {});
-      const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, applied: true, applicationStatus: 'Applied' as const } : j);
+      await alumniService.applyToJob(String(jobId), { coverLetter });
+      const updatedJobs = jobs.map(j => j.id === jobId ? {
+        ...j,
+        applied: true,
+        applicationStatus: 'Applied' as const,
+        applications: j.applications + 1
+      } : j);
       setJobs(updatedJobs);
       const appliedJob = jobs.find(j => j.id === jobId);
       if (appliedJob) {
@@ -125,6 +130,27 @@ const AlumniDashboard = () => {
       const msg = err?.response?.data?.message || err?.message || 'Failed to submit application. Please try again later.';
       toast.error(msg);
     }
+  };
+
+  const handleViewJob = async (job: JobMatch) => {
+    setSelectedJobForModal(job);
+    if (!job.id || typeof job.id === 'number' || String(job.id).length < 10) return;
+    try {
+      const detail: any = await alumniService.getJobDetail(String(job.id));
+      if (detail) {
+        setJobs(prevJobs => prevJobs.map(j => {
+          if (String(j.id) === String(job.id)) {
+            return {
+              ...j,
+              views: detail.viewsCount ?? detail.viewCount ?? (j.views + 1),
+              applications: detail.applicationsCount ?? detail.applicationCount ?? j.applications,
+              shortlisted: detail.shortlistedCount ?? j.shortlisted
+            };
+          }
+          return j;
+        }));
+      }
+    } catch (_) {}
   };
 
   const handleToggleSaveJob = async (jobId: string | number) => {
@@ -243,15 +269,21 @@ const AlumniDashboard = () => {
     }
   };
 
-  const handleDonate = async (campaignId: string, amount: number) => {
+  const handleDonate = (campaignId: string, amount: number = 500) => {
+    const targetCampaign = campaigns.find(c => c.id === campaignId) || {
+      id: campaignId,
+      title: 'ASTU Fund',
+      category: 'Scholarship'
+    };
+    setDonationCampaign({ ...targetCampaign, defaultAmount: amount });
+  };
+
+  const handleRefreshCampaigns = async () => {
     try {
-      await alumniService.makeDonation(campaignId, amount);
-      toast.success('Thank you for your generous donation!');
-      // Refresh campaigns locally
       const campaignsRes = await alumniService.getDonationCampaigns();
       if (Array.isArray(campaignsRes)) setCampaigns(campaignsRes);
     } catch (err) {
-      toast.error('Failed to process donation');
+      console.error('Failed to refresh campaigns', err);
     }
   };
 
@@ -401,9 +433,9 @@ const AlumniDashboard = () => {
             match: '92%',
             description: j.description || '',
             skills: Array.isArray(j.skillsRequired) ? j.skillsRequired : (j.skills || []),
-            views: j.views || 0,
-            applications: j._count?.applications || j.applications || 0,
-            shortlisted: 0,
+            views: j.viewsCount ?? j.viewCount ?? j._count?.views ?? j.views ?? 0,
+            applications: j.applicationsCount ?? j.applicationCount ?? j._count?.applications ?? j.applications ?? 0,
+            shortlisted: j.shortlistedCount ?? j.shortlisted ?? 0,
             experience: j.experienceRequired ? `${j.experienceRequired} yrs` : 'Entry Level',
             saved: savedJobIds.has(j.id),
             applied: appMap.has(j.id),
@@ -963,12 +995,12 @@ const AlumniDashboard = () => {
               statsData={statsData}
               onRegisterEvent={handleRegisterEvent}
               onApplyJob={handleApplyJob}
-              onViewJob={setSelectedJobForModal}
+              onViewJob={handleViewJob}
               onRequestMentorship={handleRequestMentorship}
             />
           )}
           {activeTab === 'surveys' && <SurveysTab />}
-          {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={setSelectedJobForModal} onToggleSaveJob={handleToggleSaveJob} />}
+          {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={handleViewJob} onToggleSaveJob={handleToggleSaveJob} />}
           {activeTab === 'mentorship' && <MentorshipTab mentors={mentors} onRequestMentorship={handleRequestMentorship} onScheduleSession={handleScheduleSession} />}
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
           {activeTab === 'messages' && <MessagingTab darkMode={darkMode} userId={(profile as any)?.userId} />}
@@ -1077,6 +1109,7 @@ const AlumniDashboard = () => {
         isOpen={!!donationCampaign}
         onClose={() => setDonationCampaign(null)}
         campaign={donationCampaign}
+        onSuccess={handleRefreshCampaigns}
       />
     </div>
   );

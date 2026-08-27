@@ -58,7 +58,9 @@ router.get('/feedback', requireRoles([Role.EMPLOYER, Role.ADMIN, Role.REGISTRAR]
 
 // Direct Messaging
 router.get('/messages', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getMessages));
-router.post('/messages', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.sendMessage));
+router.get('/messages/:alumniId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.getMessagesWithAlumni));
+router.post('/messages', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.sendMessageToAlumni));
+router.post('/messages/:alumniId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.sendMessageToAlumni));
 
 // Logo Upload
 const logoUpload = multer({ dest: 'uploads/logos' });

@@ -35,13 +35,14 @@ import {
   TrendingUp,
   Users,
   FileCheck,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminBadge from '../components/AdminBadge';
 import { adminService } from '../services/admin.service';
 
-type AcademicYear = '2024-25' | '2023-24' | 'All Time';
 type DepartmentFilter = 'All' | 'Computer Science' | 'Software Engineering' | 'Electrical Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Chemical Engineering' | 'Information Engineering';
 
 const departments = [
@@ -54,10 +55,18 @@ const departments = [
   'Information Engineering',
 ] as const;
 
-const academicYears: AcademicYear[] = ['2024-25', '2023-24', 'All Time'];
+const generateAcademicYears = (): string[] => {
+  const years: string[] = ['All Time'];
+  const currentYear = new Date().getFullYear();
+  for (let y = currentYear + 1; y >= 2000; y--) {
+    const nextYY = String(y + 1).slice(-2);
+    years.push(`${y}-${nextYY}`);
+  }
+  return years;
+};
+
+const academicYears = generateAcademicYears();
 const exportOptions = ['PDF', 'Excel', 'CSV'];
-
-
 
 function heatColor(value: number) {
   if (value >= 80) return 'bg-[#E24B4A] text-white';
@@ -108,22 +117,31 @@ function ChartCard({
 }
 
 export default function AnalyticsOverview() {
-  const [academicYear, setAcademicYear] = useState<AcademicYear>('2024-25');
+  const [academicYear, setAcademicYear] = useState<string>('2024-25');
   const [department, setDepartment] = useState<DepartmentFilter>('All');
   const [exportOpen, setExportOpen] = useState(false);
-  const [topEmployers, setTopEmployers] = useState<{ companyName: string, count: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [reportData, setReportData] = useState<any>(null);
 
   React.useEffect(() => {
     const fetchAnalytics = async () => {
-      const result = await adminService.getAnalyticsReport();
+      setIsLoading(true);
+      const result = await adminService.getAnalyticsReport({ academicYear, department });
       if (result.ok) {
         setReportData(result.data);
       }
+      setIsLoading(false);
     };
     fetchAnalytics();
-  }, []);
+  }, [academicYear, department]);
+
+  const hasBatchData = useMemo(() => {
+    if (!reportData) return true;
+    if (academicYear === 'All Time') return true;
+    const totalAlumni = reportData?.overallEmployment?.totalAlumni || 0;
+    return totalAlumni > 0;
+  }, [reportData, academicYear]);
 
   const activeStatCards = [
     { label: 'Overall Employment Rate', value: `${Number(reportData?.overallEmployment?.employmentRate || 0).toFixed(1)}%`, change: 'Current average', icon: TrendingUp, tone: 'green' as const },
@@ -192,8 +210,8 @@ export default function AnalyticsOverview() {
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Academic Year</span>
             <select
               value={academicYear}
-              onChange={(event) => setAcademicYear(event.target.value as AcademicYear)}
-              className="bg-transparent text-sm font-medium text-slate-700 outline-none"
+              onChange={(event) => setAcademicYear(event.target.value)}
+              className="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
             >
               {academicYears.map((year) => (
                 <option key={year} value={year}>
@@ -209,7 +227,7 @@ export default function AnalyticsOverview() {
             <select
               value={department}
               onChange={(event) => setDepartment(event.target.value as DepartmentFilter)}
-              className="bg-transparent text-sm font-medium text-slate-700 outline-none"
+              className="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
             >
               <option value="All">All</option>
               {departments.map((item) => (
@@ -221,41 +239,67 @@ export default function AnalyticsOverview() {
           </label>
         </div>
 
-        <div className="relative ml-auto flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setExportOpen((current) => !current)}
-            className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 px-4 py-2.5 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5"
-          >
-            <Download className="h-4 w-4" />
-            Export Report
-            <ChevronDown className="h-4 w-4" />
-          </button>
-          {exportOpen && (
-            <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-[10px] border border-slate-200 bg-white p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-              {exportOptions.map((format) => (
-                <button
-                  key={format}
-                  type="button"
-                  onClick={() => exportFormat(format)}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-slate-600 hover:bg-slate-50"
-                >
-                  <Share2 className="h-4 w-4" />
-                  {format}
-                </button>
-              ))}
+          {isLoading && (
+            <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md">
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Fetching Batch Data...
             </div>
           )}
+
+          <div className="relative flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setExportOpen((current) => !current)}
+              className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 px-4 py-2.5 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5"
+            >
+              <Download className="h-4 w-4" />
+              Export Report
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            {exportOpen && (
+              <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-[10px] border border-slate-200 bg-white p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+                {exportOptions.map((format) => (
+                  <button
+                    key={format}
+                    type="button"
+                    onClick={() => exportFormat(format)}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-slate-600 hover:bg-slate-50"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    {format}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={printDashboard}
+              className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+            >
+              <Printer className="h-4 w-4" />
+              Print Dashboard
+            </button>
+          </div>
+        </div>
+
+      {!hasBatchData && (
+        <div className="bg-amber-50/90 border border-amber-200 rounded-[12px] p-8 text-center space-y-3 shadow-sm">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+            <AlertCircle className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-bold text-amber-900">
+            No Analysis is worked for this batch ({academicYear})
+          </h3>
+          <p className="text-xs text-amber-700 max-w-md mx-auto leading-relaxed">
+            No alumni graduation records or tracer survey responses have been registered for batch {academicYear} in PostgreSQL yet.
+          </p>
           <button
-            type="button"
-            onClick={printDashboard}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+            onClick={() => setAcademicYear('All Time')}
+            className="px-4 py-2 bg-amber-800 text-white rounded-lg text-xs font-semibold hover:bg-amber-900 transition-all shadow-sm inline-flex items-center gap-1.5"
           >
-            <Printer className="h-4 w-4" />
-            Print Dashboard
+            <RefreshCw className="h-3.5 w-3.5" /> Reset Filter to All Time
           </button>
         </div>
-      </div>
+      )}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {activeStatCards.map((stat) => (

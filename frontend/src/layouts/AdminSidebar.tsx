@@ -7,8 +7,10 @@ import {
   ClipboardList,
   FileBarChart,
   GraduationCap,
+  Heart,
   LayoutDashboard,
   LogOut,
+  MessageSquareText,
   PanelLeftClose,
   PanelLeftOpen,
   ScrollText,
@@ -40,6 +42,7 @@ interface EnhancedNavItem extends AdminNavItem {
 
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard, exact: true, section: 'main', tooltip: 'Operational command center' },
+  { label: 'Messages', path: '/admin/messages', icon: MessageSquareText, section: 'main', tooltip: 'ASTU_AMS direct messaging hub' },
   { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield, section: 'system', tooltip: 'Advanced system modules' },
   { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart, section: 'system', tooltip: 'Generate & export reports' },
   { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', badge: '142', tooltip: '142 pending verifications' },
@@ -48,6 +51,7 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Survey Management', path: '/admin/surveys', icon: ClipboardList, section: 'system', badge: '3', tooltip: '3 active surveys' },
   { label: 'Jobs Management', path: '/admin/jobs', icon: Briefcase, section: 'system', badge: '47', tooltip: '47 active job posts' },
   { label: 'Departments', path: '/admin/departments', icon: GraduationCap, section: 'system', tooltip: 'Manage departments' },
+  { label: 'Donations & Giving', path: '/admin/donations', icon: Heart, section: 'system', tooltip: 'Fundraising causes & Chapa donors' },
   { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'settings', badge: '5', tooltip: '5 unread notifications' },
   { label: 'System Logs', path: '/admin/logs', icon: ScrollText, section: 'settings', tooltip: 'Audit trail & system logs' },
   { label: 'Backup & Security', path: '/admin/backup', icon: Shield, section: 'settings', tooltip: 'Backup & security settings' },
@@ -129,11 +133,8 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
             return (
               <div key={section.key}>
                 {!collapsed && (
-                  <div className="flex items-center justify-between px-3 mb-2">
+                  <div className="px-3 mb-2">
                     <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">{section.label}</p>
-                    <span className="text-[8px] text-slate-500 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">
-                      {items.length} items
-                    </span>
                   </div>
                 )}
                 <div className="space-y-1">

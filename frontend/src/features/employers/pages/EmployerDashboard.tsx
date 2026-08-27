@@ -49,6 +49,8 @@ const EmployerDashboard = () => {
   ]);
 
   // Core Data States
+  const [activeChatTarget, setActiveChatTarget] = useState<any>(null);
+  const [realUnreadMessages, setRealUnreadMessages] = useState<number>(0);
   const [profile, setProfile] = useState<CompanyProfile>({ name: '', industry: '', size: '', location: '', website: '', description: '', tin: '', hrContact: '', phone: '', contactEmail: '', contactPerson: '', logoUrl: '', isPremium: false, partnerships: [], verificationStatus: 'NOT_VERIFIED', ndaSigned: false });
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -529,7 +531,7 @@ const EmployerDashboard = () => {
             <div className="space-y-0.5">
               {[
                 { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbacks.length > 0 ? feedbacks.length : null, tooltip: `${feedbacks.length} feedback submissions` },
-                { id: 'chat', label: 'Messages', icon: 'forum', badge: messages.filter(m => m.unread).length > 0 ? messages.filter(m => m.unread).length : null, tooltip: `${messages.filter(m => m.unread).length} unread messages` },
+                { id: 'chat', label: 'Messages', icon: 'forum', badge: realUnreadMessages > 0 ? realUnreadMessages : null, tooltip: `${realUnreadMessages} unread messages` },
                 { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
                 { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
               ].map((item) => (
@@ -1095,6 +1097,20 @@ const EmployerDashboard = () => {
               <ApplicationsTab
                 applications={applications}
                 onUpdateStatus={handleUpdateApplicationStatus}
+                onMessageCandidate={(app) => {
+                  setActiveChatTarget({
+                    id: app.userId || app.alumniId,
+                    userId: app.userId || app.alumniId,
+                    name: app.alumnusName,
+                    email: app.alumnusEmail,
+                    avatar: app.alumnusAvatar,
+                    role: 'ALUMNI',
+                    roleLabel: 'Alumni Candidate',
+                    department: app.department
+                  });
+                  setActiveTab('messages');
+                  toast.success(`Opening conversation with ${app.alumnusName}...`);
+                }}
                 darkMode={darkMode}
               />
             )}
@@ -1102,6 +1118,17 @@ const EmployerDashboard = () => {
             {activeTab === 'search_talent' && (
               <TalentSearchTab
                 darkMode={darkMode}
+                onSelectChatTarget={(target) => {
+                  setActiveChatTarget({
+                    id: target.userId || target.alumniId,
+                    userId: target.userId || target.alumniId,
+                    name: target.name,
+                    role: 'ALUMNI',
+                    roleLabel: 'Alumni Candidate'
+                  });
+                  setActiveTab('messages');
+                  toast.success(`Opening ASTU_AMS Hub chat with ${target.name}...`);
+                }}
               />
             )}
 
@@ -1113,9 +1140,10 @@ const EmployerDashboard = () => {
               />
             )}
 
-            {activeTab === 'chat' && (
+            {(activeTab === 'chat' || activeTab === 'messages') && (
               <MessagingTab
                 darkMode={darkMode}
+                initialTarget={activeChatTarget}
               />
             )}
 

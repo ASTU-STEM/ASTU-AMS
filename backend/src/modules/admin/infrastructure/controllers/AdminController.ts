@@ -308,4 +308,115 @@ export class AdminController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+
+  // --- Donations & Campaign Management ---
+  async getDonationCampaigns(req: Request, res: Response) {
+    try {
+      let campaigns = await prisma.donationCampaign.findMany({
+        orderBy: { createdAt: 'asc' },
+      });
+      if (campaigns.length === 0) {
+        await prisma.donationCampaign.createMany({
+          data: [
+            {
+              title: 'ASTU Scholarship Fund 2026',
+              category: 'SCHOLARSHIP',
+              description: 'Support underprivileged engineering students with full tuition scholarships.',
+              goal: 5000000,
+              raised: 1851000,
+              donorCount: 349,
+              status: 'ACTIVE',
+            },
+            {
+              title: 'AI Research Lab Equipment',
+              category: 'RESEARCH',
+              description: 'Fund cutting-edge GPU servers for the new AI research laboratory.',
+              goal: 8000000,
+              raised: 3201000,
+              donorCount: 158,
+              status: 'ACTIVE',
+            },
+            {
+              title: 'Campus Innovation Hub',
+              category: 'INFRASTRUCTURE',
+              description: 'Build a modern co-working makerspace and innovation center for students.',
+              goal: 12000000,
+              raised: 5401000,
+              donorCount: 291,
+              status: 'ACTIVE',
+            },
+          ],
+        });
+        campaigns = await prisma.donationCampaign.findMany({ orderBy: { createdAt: 'asc' } });
+      }
+      res.json({ success: true, data: campaigns });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async createDonationCampaign(req: Request, res: Response) {
+    try {
+      const { title, description, targetAmount, goal, category } = req.body;
+      const campaign = await prisma.donationCampaign.create({
+        data: {
+          title,
+          description: description || '',
+          goal: Number(targetAmount || goal || 1000000),
+          category: category || 'Fund',
+          raised: 0,
+          donorCount: 0,
+          status: 'ACTIVE',
+        },
+      });
+      res.status(201).json({ success: true, data: campaign });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateDonationCampaign(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { title, description, targetAmount, goal, category, status } = req.body;
+      const campaign = await prisma.donationCampaign.update({
+        where: { id },
+        data: {
+          ...(title && { title }),
+          ...(description !== undefined && { description }),
+          ...((targetAmount || goal) && { goal: Number(targetAmount || goal) }),
+          ...(category && { category }),
+          ...(status && { status }),
+        },
+      });
+      res.json({ success: true, data: campaign });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async deleteDonationCampaign(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      await prisma.donationCampaign.delete({ where: { id } });
+      res.json({ success: true, message: 'Donation campaign deleted successfully' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getDonorsList(req: Request, res: Response) {
+    try {
+      const donations = await prisma.donationRecord.findMany({
+        include: {
+          campaign: true,
+          alumni: { select: { fullName: true, email: true, phone: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      res.json({ success: true, data: donations });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
 }

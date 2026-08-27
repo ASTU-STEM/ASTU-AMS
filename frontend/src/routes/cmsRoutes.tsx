@@ -15,6 +15,7 @@ import FooterManagement from '../features/admin/pages/FooterManagement';
 import LatestNewsManagement from '../features/admin/pages/LatestNewsManagement';
 import FaqManagement from '../features/admin/pages/FaqManagement';
 import CmsSettings from '../features/admin/pages/CmsSettings';
+import CmsChatPage from '../features/admin/pages/CmsChatPage';
 
 export default function CmsRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function CmsRoutes() {
       <Route element={<CmsLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<CmsDashboard />} />
+        <Route path="messages" element={<CmsChatPage />} />
         <Route path="homepage" element={<HomepageManagement />} />
         <Route path="content" element={<ContentList />} />
         <Route path="community" element={<ContentGovernance />} />

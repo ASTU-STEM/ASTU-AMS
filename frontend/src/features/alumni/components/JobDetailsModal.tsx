@@ -1,15 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { JobMatch } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 
 interface JobDetailsModalProps {
   job: JobMatch | null;
   onClose: () => void;
-  onApply: (jobId: number) => void;
+  onApply: (jobId: any, coverLetter?: string) => void;
 }
 
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, onApply }) => {
+  const [coverLetter, setCoverLetter] = useState('');
+
   if (!job) return null;
+
+  const handleUseSavedCoverLetter = () => {
+    const saved = localStorage.getItem('astu_saved_cover_letter');
+    if (saved && saved.trim()) {
+      setCoverLetter(saved);
+      toast.success('Loaded saved cover letter template!');
+    } else {
+      toast.error('No saved cover letter template found. Save one under your Profile or Settings!');
+    }
+  };
 
   // Similar jobs calculation
   const similarJobs: { title: string; company: string; match: string }[] = [
@@ -161,6 +173,31 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
             </div>
           </div>
 
+          {/* Cover Letter Input for Unapplied Jobs */}
+          {!job.applied && (
+            <div className="p-4 rounded-2xl border border-[#003366]/20 bg-[#003366]/5 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-extrabold text-[#003366] uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base">description</span>
+                  Cover Letter / Application Note
+                </label>
+                <button
+                  type="button"
+                  onClick={handleUseSavedCoverLetter}
+                  className="px-3 py-1 bg-white border border-[#003366]/30 text-[#003366] text-[10px] font-extrabold rounded-lg hover:bg-[#003366] hover:text-white transition-all shadow-xs flex items-center gap-1"
+                >
+                  📝 Use Saved
+                </button>
+              </div>
+              <textarea
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                placeholder="Write a short cover letter or click 'Use Saved' to load your saved template..."
+                className="w-full text-xs p-3.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all h-28 resize-none"
+              />
+            </div>
+          )}
+
           {/* Similar Jobs */}
           <div className="space-y-3">
             <h4 className="font-bold text-gray-900">Similar Positions</h4>
@@ -188,7 +225,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
           </button>
           <button 
             onClick={() => {
-              onApply(job.id);
+              onApply(job.id, coverLetter);
               onClose();
             }}
             className={`flex-1 px-6 py-3 rounded-xl text-sm font-semibold transition-all shadow-md text-white ${
@@ -198,7 +235,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
             }`}
             disabled={job.applied}
           >
-            {job.applied ? 'Application Submitted' : 'Apply For Job'}
+            {job.applied ? 'Application Submitted' : 'Submit Application'}
           </button>
         </div>
       </div>

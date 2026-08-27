@@ -44,6 +44,7 @@ class AdminRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/admin/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Admin' }, { label: 'Dashboard' }] },
+  '/admin/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
   '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
   '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },

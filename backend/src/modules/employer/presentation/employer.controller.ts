@@ -352,13 +352,16 @@ export class EmployerController {
   static async getMessages(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.userId;
-      const employer = await empRepo.findByUserId(userId);
+      let employer = await empRepo.findByUserId(userId);
+      if (!employer) {
+        employer = await prisma.employerProfile.findFirst({ where: { OR: [{ id: userId }, { userId }] } });
+      }
       if (!employer) throw new Error('Employer profile not found');
 
       const messages = await prisma.directMessage.findMany({
         where: { employerId: employer.id },
         include: {
-          alumni: { select: { id: true, fullName: true, email: true, profilePicture: true, department: { select: { name: true } } } },
+          alumni: { select: { id: true, fullName: true, email: true, profilePicture: true, department: { select: { name: true } }, user: { select: { email: true } } } },
         },
         orderBy: { createdAt: 'asc' },
       });
@@ -366,17 +369,18 @@ export class EmployerController {
       // Group by alumniId to build conversation threads
       const conversations: Record<string, any> = {};
       for (const msg of messages) {
-        if (!conversations[msg.alumniId]) {
-          conversations[msg.alumniId] = {
-            alumniId: msg.alumniId,
-            alumniName: msg.alumni.fullName || 'Alumni',
-            alumniEmail: msg.alumni.email || '',
-            alumniPhoto: msg.alumni.profilePicture || null,
-            department: msg.alumni.department?.name || 'N/A',
+        const key = msg.alumniId || msg.receiverId || msg.senderId || 'unknown';
+        if (!conversations[key]) {
+          conversations[key] = {
+            alumniId: key,
+            alumniName: msg.alumni?.fullName || (msg.alumni?.user?.email ? msg.alumni.user.email.split('@')[0] : 'Alumni Candidate'),
+            alumniEmail: msg.alumni?.email || msg.alumni?.user?.email || '',
+            alumniPhoto: msg.alumni?.profilePicture || null,
+            department: msg.alumni?.department?.name || 'Graduate Candidate',
             messages: [],
           };
         }
-        conversations[msg.alumniId].messages.push({
+        conversations[key].messages.push({
           id: msg.id,
           sender: msg.sender,
           text: msg.text,
@@ -385,42 +389,94 @@ export class EmployerController {
         });
       }
 
+      // Also include applicants who haven't messaged yet so employer can initiate
+      const applications = await prisma.jobApplication.findMany({
+        where: { job: { employerId: employer.id } },
+        include: { alumni: { select: { id: true, fullName: true, email: true, profilePicture: true, department: { select: { name: true } }, user: { select: { email: true } } } } },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      for (const app of applications) {
+        if (app.alumni && !conversations[app.alumniId]) {
+          conversations[app.alumniId] = {
+            alumniId: app.alumniId,
+            alumniName: app.alumni.fullName || 'Alumni Candidate',
+            alumniEmail: app.alumni.email || app.alumni.user?.email || '',
+            alumniPhoto: app.alumni.profilePicture || null,
+            department: app.alumni.department?.name || 'Applicant Candidate',
+            messages: [],
+          };
+        }
+      }
+
       return sendSuccess(res, 'Messages retrieved.', Object.values(conversations));
     } catch (err) { next(err); }
   }
 
-  static async sendMessage(req: Request, res: Response, next: NextFunction) {
+  static async getMessagesWithAlumni(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.userId;
-      const employer = await empRepo.findByUserId(userId);
+      let employer = await empRepo.findByUserId(userId);
+      if (!employer) {
+        employer = await prisma.employerProfile.findFirst({ where: { OR: [{ id: userId }, { userId }] } });
+      }
       if (!employer) throw new Error('Employer profile not found');
 
-      const { alumniId, text } = req.body;
-      if (!alumniId || !text) throw new Error('alumniId and text are required');
+      const alumniId = req.params.alumniId;
+      const messages = await prisma.directMessage.findMany({
+        where: { employerId: employer.id, alumniId },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      await prisma.directMessage.updateMany({
+        where: { employerId: employer.id, alumniId, sender: 'ALUMNI', isRead: false },
+        data: { isRead: true }
+      });
+
+      return sendSuccess(res, 'Direct messages retrieved successfully.', messages);
+    } catch (err) { next(err); }
+  }
+
+  static async sendMessageToAlumni(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      let employer = await empRepo.findByUserId(userId);
+      if (!employer) {
+        employer = await prisma.employerProfile.findFirst({ where: { OR: [{ id: userId }, { userId }] } });
+      }
+      if (!employer) throw new Error('Employer profile not found');
+
+      const alumniId = req.params.alumniId || req.body.alumniId;
+      const text = req.body.text || req.body.message;
+      if (!alumniId) throw new Error('alumniId is required');
+      if (!text || !text.trim()) throw new Error('text is required');
+
+      let alumni = await prisma.alumniProfile.findUnique({ where: { id: alumniId } });
+      if (!alumni) {
+        alumni = await prisma.alumniProfile.findFirst({ where: { OR: [{ id: alumniId }, { userId: alumniId }] } });
+      }
+      if (!alumni) throw new Error('Alumni not found');
 
       const message = await prisma.directMessage.create({
         data: {
           employerId: employer.id,
-          alumniId,
+          alumniId: alumni.id,
           sender: 'EMPLOYER',
-          text,
+          text: text.trim(),
         },
       });
 
-      // Find the Alumni's user ID so we can emit to their socket room and create a Notification
-      const alumni = await prisma.alumniProfile.findUnique({ where: { id: alumniId } });
-      if (alumni && alumni.userId) {
+      if (alumni.userId) {
         const { SocketServer } = require('../../../infrastructure/websocket/SocketServer');
         SocketServer.emitToUser(alumni.userId, 'newMessage', message);
-        
-        // Create persistent notification
+
         await prisma.notification.create({
           data: {
             userId: alumni.userId,
             title: `New Message from ${employer.companyName}`,
-            content: `You have received a new message regarding your profile.`,
+            content: text.trim().substring(0, 100),
           }
-        });
+        }).catch(() => null);
       }
 
       return sendSuccess(res, 'Message sent.', message, 201);

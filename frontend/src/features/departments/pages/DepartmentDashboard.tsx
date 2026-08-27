@@ -14,6 +14,7 @@ import { TracerReports } from '../components/TracerReports';
 import { CurriculumInsights } from '../components/CurriculumInsights';
 import { ExportCenter } from '../components/ExportCenter';
 import { AccreditationReports } from '../components/AccreditationReports';
+import { TelegramChat } from '../../../components/TelegramChat';
 
 // Data
 import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerSurveyData, mockCurriculumInsights, mockExportReports } from '../services/mockDepartmentData';
@@ -121,6 +122,20 @@ const DepartmentDashboard = () => {
                 return <AccreditationReports darkMode={darkMode} />;
             case 'export':
                 return <ExportCenter reports={mockExportReports} darkMode={darkMode} />;
+            case 'messages':
+                return (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">ASTU_AMS Hub & Direct Messages</h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                    Real-time direct messaging center for Department Chairs with Alumni Candidates, Corporate Recruiters, Registrar, and Admins.
+                                </p>
+                            </div>
+                        </div>
+                        <TelegramChat darkMode={darkMode} />
+                    </div>
+                );
             default:
                 return <DashboardOverview darkMode={darkMode} />;
         }
@@ -176,12 +191,13 @@ const DepartmentDashboard = () => {
                 <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin">
                     {!sidebarCollapsed && (
                         <div className="flex items-center justify-between px-3 mb-2">
-                            <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Analytics</p>
+                            <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Analytics & Messaging</p>
                         </div>
                     )}
                     <div className="space-y-0.5">
                         {[
                             { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & key metrics' },
+                            { id: 'messages', label: 'Messages', icon: 'chat', badge: null, tooltip: 'ASTU_AMS direct messaging hub' },
                             { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Analytics, curriculum, KPIs & partnerships' },
                             { id: 'employment-analytics', label: 'Employment Analytics', icon: 'trending_up', badge: null, tooltip: 'Graduate employment outcomes & trends' },
                             { id: 'skill-gap', label: 'Skill Gap Reports', icon: 'school', badge: null, tooltip: 'Skill gap analysis from employer data' },

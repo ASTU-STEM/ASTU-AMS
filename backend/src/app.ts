@@ -34,9 +34,9 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// 4. Request Body Parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// 4. Request Body Parsers (Support large file attachments up to 50mb)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // 5. Static Files Route for Uploads (CVs, profile images)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -58,6 +58,7 @@ import jobboardRouter from './modules/jobboard/presentation/jobboard.routes';
 import supportRouter from './modules/support/presentation/support.routes';
 import adminRouter from './modules/admin/infrastructure/routes/adminRoutes';
 import contentRouter from './modules/content/presentation/content.routes';
+import chatRouter from './modules/chat/presentation/chat.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
@@ -75,6 +76,7 @@ app.use('/api/mentorship', mentorshipRouter);
 app.use('/api/jobs', jobboardRouter);
 app.use('/api/support', supportRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/chat', chatRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {

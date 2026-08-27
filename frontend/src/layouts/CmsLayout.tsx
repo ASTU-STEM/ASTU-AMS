@@ -40,6 +40,7 @@ class CmsRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/cms/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'CMS' }, { label: 'Dashboard' }] },
+  '/cms/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'CMS' }, { label: 'Messages' }] },
   '/cms/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'CMS' }, { label: 'Homepage' }] },
   '/cms/content': { title: 'All Content', breadcrumb: [{ label: 'CMS' }, { label: 'Content' }] },
   '/cms/community': { title: 'News & Community', breadcrumb: [{ label: 'CMS' }, { label: 'Community' }] },

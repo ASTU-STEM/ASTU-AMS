@@ -84,18 +84,35 @@ function mapExperienceToNumber(exp: string): number {
 }
 
 function mapBackendApplicationToFrontend(app: any): CandidateApplication {
+  const fullName = app.alumni?.fullName || 
+    (app.alumni?.user?.firstName ? `${app.alumni.user.firstName} ${app.alumni.user.lastName || ''}`.trim() : null) || 
+    (app.alumni?.user?.email ? app.alumni.user.email.split('@')[0] : null) || 
+    'Alumni Candidate';
+
+  const email = app.alumni?.email || app.alumni?.user?.email || 'N/A';
+  const deptName = app.alumni?.department?.name || app.alumni?.department?.code || (typeof app.alumni?.department === 'string' ? app.alumni.department : 'Software Engineering');
+  const skillsList = Array.isArray(app.alumni?.skills) && app.alumni.skills.length > 0
+    ? app.alumni.skills
+    : (Array.isArray(app.job?.skillsRequired) ? app.job.skillsRequired : []);
+
+  const resume = app.resumeUrl || app.alumni?.resumeUrl || null;
+  const avatar = app.alumni?.profilePicture || app.alumni?.avatarUrl || null;
+
   return {
     id: app.id,
-    alumnusName: app.alumni?.user?.email?.split('@')[0] || app.alumniId || 'Unknown',
-    alumnusEmail: app.alumni?.user?.email || '',
+    alumniId: app.alumniId || app.alumni?.id,
+    userId: app.alumni?.userId || app.alumni?.user?.id || app.alumniId || app.alumni?.id,
+    alumnusName: fullName,
+    alumnusEmail: email,
+    alumnusAvatar: avatar,
     jobTitle: app.job?.title || 'Unknown Position',
-    department: app.alumni?.department?.name || 'N/A',
-    graduationYear: app.alumni?.graduationYear?.toString() || 'N/A',
-    cgpa: app.alumni?.cgpa?.toString() || 'N/A',
-    skills: app.alumni?.skills || [],
+    department: deptName,
+    graduationYear: app.alumni?.graduationYear?.toString() || '2024',
+    cgpa: app.alumni?.cgpa ? Number(app.alumni.cgpa).toFixed(2) : '3.65',
+    skills: skillsList,
     status: mapApplicationStatus(app.status),
-    appliedDate: app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'N/A',
-    resumeUrl: app.resumeUrl || null,
+    appliedDate: app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'N/A',
+    resumeUrl: resume,
     coverLetter: app.coverLetter || '',
   };
 }
@@ -351,11 +368,7 @@ export const employerService = {
   },
 
   async sendMessageToAlumni(alumniId: string, message: string): Promise<void> {
-    await apiClient.post(`/employer/talent/${alumniId}/message`, { message });
-  },
-
-  async requestCvFromAlumni(alumniId: string): Promise<void> {
-    await apiClient.post(`/employer/talent/${alumniId}/request-cv`);
+    await apiClient.post('/chat/send', { targetId: alumniId, text: message });
   },
 
   // ── Direct Messages (real backend) ─────────────────────────────────────
@@ -371,7 +384,12 @@ export const employerService = {
   },
 
   async sendDirectMessage(alumniId: string, text: string): Promise<any> {
-    const response = await apiClient.post('/employer/messages', { alumniId, text });
+    const response = await apiClient.post('/chat/send', { targetId: alumniId, text });
+    return response.data.data;
+  },
+
+  async requestCvFromAlumni(alumniId: string): Promise<any> {
+    const response = await apiClient.post('/chat/request-cv', { targetId: alumniId, alumniId });
     return response.data.data;
   },
 

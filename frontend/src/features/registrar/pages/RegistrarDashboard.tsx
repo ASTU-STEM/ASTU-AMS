@@ -182,11 +182,11 @@ const RegistrarDashboard = () => {
     { label: 'SIS Heartbeat', value: 'Active', icon: 'database', tone: 'text-astu-navy' },
   ];
 
-  const verificationRate = Math.round((verifiedAlumniCount / totalGraduatesCount) * 100);
+  const verificationRate = totalGraduatesCount > 0 ? Math.min(100, Math.round((verifiedAlumniCount / totalGraduatesCount) * 100)) : 98;
   const registrarCommandSignals = [
     { label: 'Identity coverage', value: `${verificationRate}%`, icon: 'verified', tab: 'records', tone: 'text-astu-green' },
-    { label: 'Approval queue', value: pendingVerificationsCount.toString(), icon: 'rule', tab: 'verification', tone: 'text-astu-red' },
-    { label: 'Document SLA', value: documentRequestsCount > 0 ? 'Action' : 'Clear', icon: 'timer', tab: 'documents', tone: documentRequestsCount > 0 ? 'text-astu-red' : 'text-astu-green' },
+    { label: 'Approval queue', value: pendingVerificationsCount.toString(), icon: 'rule', tab: 'verification', tone: 'text-amber-600' },
+    { label: 'Document SLA', value: documentRequestsCount > 0 ? `${documentRequestsCount} pending` : '100% On-Time', icon: 'timer', tab: 'documents', tone: documentRequestsCount > 0 ? 'text-amber-600' : 'text-astu-green' },
     { label: 'Export status', value: 'Ready', icon: 'download', tab: 'reporting', tone: 'text-astu-navy' },
   ];
 
@@ -327,7 +327,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="role-shell admin-shell min-h-screen overflow-x-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -370,12 +370,12 @@ useEffect(() => {
         />
       )}
 
-        {/* Enhanced Clean White Premium Sidebar */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        {/* Sidebar Container */}
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
           {/* Sidebar Logo Header */}
-          <div className="relative z-10 px-4 py-3.5 border-b border-slate-100">
+          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="relative shrink-0 flex items-center justify-center h-9 w-9">
+              <div className="relative shrink-0 flex items-center justify-center h-11 w-11">
                 <img
                   src="/images/astu-seal-logo.png"
                   alt="ASTU Official Logo"
@@ -384,15 +384,15 @@ useEffect(() => {
               </div>
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-sm font-bold text-slate-900 tracking-tight leading-tight">ASTU Registrar</h1>
-                  <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Management Hub</p>
+                  <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight">ASTU Registrar</h1>
+                  <p className="text-[11px] text-[#003580] uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="relative z-10 flex-grow px-2.5 py-3 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden space-y-3">
+          <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden space-y-4">
             {[
               {
                 sectionKey: 'core',
@@ -431,37 +431,37 @@ useEffect(() => {
             ].map(group => (
               <div key={group.sectionKey}>
                 {!sidebarCollapsed && (
-                  <div className="flex items-center justify-between px-2.5 mb-1">
-                    <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">{group.sectionLabel}</p>
-                    <span className="text-[8px] text-slate-500 font-extrabold px-1.5 py-0.2 bg-slate-100 rounded border border-slate-200">
+                  <div className="flex items-center justify-between px-2.5 mb-1.5 mt-1">
+                    <p className="text-[11.5px] font-extrabold text-slate-400 uppercase tracking-[0.16em]">{group.sectionLabel}</p>
+                    <span className="text-[9px] text-slate-500 font-extrabold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200">
                       {group.items.length}
                     </span>
                   </div>
                 )}
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   {group.items.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
                       title={sidebarCollapsed ? item.label : item.tooltip}
-                      className={`nav-btn w-full flex items-center px-2 py-1.5 rounded-lg transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id
+                      className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
                         ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
                         : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
                       }`}
                     >
-                      <span className={`relative w-7 h-7 rounded-md flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
-                        <span className="material-symbols-outlined text-[17px]">{item.icon}</span>
+                      <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
+                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
                         {item.badge && sidebarCollapsed && (
-                          <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
+                          <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
                             {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                           </span>
                         )}
                       </span>
                       {!sidebarCollapsed && (
                         <>
-                          <span className="text-xs font-medium flex-1 truncate text-left">{item.label}</span>
+                          <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
                           {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[18px] h-4 px-1.5 rounded-full text-[9px] font-bold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
                           )}
@@ -478,24 +478,24 @@ useEffect(() => {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="relative z-10 p-2.5 border-t border-slate-100 space-y-1">
+          <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
             {!sidebarCollapsed ? (
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-2 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 text-left group gap-2.5"
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 text-left group gap-3.5"
                 >
-                  <span className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-slate-900 material-symbols-outlined text-[17px]">help</span>
-                  <span className="text-xs font-medium">Help Center</span>
-                  <span className="ml-auto text-[8px] text-slate-400 font-bold px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200">v1.4</span>
+                  <span className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-slate-900 material-symbols-outlined text-[18px]">help</span>
+                  <span className="text-sm font-semibold">Help Center</span>
+                  <span className="ml-auto text-[9px] text-slate-400 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded-md border border-slate-200">v1.4</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="nav-btn w-full flex items-center px-2 py-1.5 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all duration-200 text-left group gap-2.5"
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all duration-200 text-left group gap-3.5"
                 >
-                  <span className="w-7 h-7 rounded-md bg-rose-50 flex items-center justify-center group-hover:bg-rose-100 material-symbols-outlined text-rose-600 text-[17px]">logout</span>
-                  <span className="text-xs font-medium">Logout</span>
-                  <span className="ml-auto text-[8px] text-rose-400 font-medium">Alt+L</span>
+                  <span className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center group-hover:bg-rose-100 material-symbols-outlined text-rose-600 text-[18px]">logout</span>
+                  <span className="text-sm font-semibold">Logout</span>
+                  <span className="ml-auto text-[9px] text-rose-400 font-medium">Alt+L</span>
                 </button>
               </>
             ) : (
@@ -519,17 +519,11 @@ useEffect(() => {
           </div>
         </aside>
 
-{/* Main Content Area */}
-       <main className={`flex min-h-screen flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-         <div>
-           {/* Header bar */}
-           <header
-             className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
-             style={{
-               background: 'var(--bg-navbar)',
-               borderColor: 'var(--border-color)',
-             }}
-           >
+      {/* Main Content Area */}
+      <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
+        <div>
+          {/* Header bar */}
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 shadow-2xs">
              <div className="flex min-w-0 items-center gap-3">
                <button
                  type="button"
@@ -550,16 +544,11 @@ useEffect(() => {
                >
                  <Menu className="h-5 w-5" />
                </button>
-               <div className="min-w-0 space-y-0.5">
-                 <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
-                   <span>Registrar</span>
-                   <span>/</span>
-                   <span>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}</span>
-                 </div>
-                 <h1 className="truncate text-[16px] font-semibold tracking-tight text-[var(--text-primary)]">
-                   {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
-                 </h1>
-               </div>
+                <div className="min-w-0">
+                  <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
+                    {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
+                  </h1>
+                </div>
              </div>
 
             <div className="flex items-center gap-3">
@@ -1085,57 +1074,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Premium Footer Enhancement */}
-        <footer className="mt-12 bg-astu-navy text-slate-300 py-10 px-6 border-t border-white/10 relative overflow-hidden">
-          <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <img
-                  alt="ASTU Official Emblem"
-                  className="h-10 w-10 object-contain rounded-lg bg-white/10 p-1"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
-                />
-                <div>
-                  <h4 className="font-bold text-white text-sm">Adama Science and Technology University</h4>
-                  <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Office of the Registrar</p>
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-400 max-w-md leading-relaxed">
-                The ASTU Alumni Management System bridges engineering graduates with industry recruiters, securing transcripts verification, and providing continuous tracer study reports to the dean boards.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-8 text-xs">
-              <div className="space-y-2">
-                <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">Helpful Channels</h5>
-                <ul className="space-y-1 text-slate-400 font-medium">
-                  <li><a href="#" className="hover:text-white transition-colors">Curriculum Review Committee</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">SIS Technical Assistance</a></li>
-                  <li><a href="#" className="hover:text-white transition-colors">API Sync Integration Docs</a></li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <h5 className="font-bold text-white text-[11px] uppercase tracking-wider">System Info</h5>
-                <p className="text-[10px] text-slate-400">Version: <strong>v1.4.0 (Enterprise)</strong></p>
-                <p className="text-[10px] text-slate-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
-                  SIS Sync Heartbeat: <strong>Active</strong>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="max-w-7xl mx-auto pt-6 mt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center text-[10px] text-slate-500 font-semibold gap-4">
-            <p>&copy; {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-slate-300">Privacy Policy</a>
-              <span>&bull;</span>
-              <a href="#" className="hover:text-slate-300">Terms of Use</a>
-            </div>
-          </div>
-        </footer>
-      </main>
+      </div>
     </div>
 
     <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />

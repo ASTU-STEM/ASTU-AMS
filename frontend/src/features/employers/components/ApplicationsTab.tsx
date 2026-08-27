@@ -5,10 +5,11 @@ import toast from 'react-hot-toast';
 interface ApplicationsTabProps {
   applications: CandidateApplication[];
   onUpdateStatus: (applicationId: number, status: CandidateApplication['status']) => void;
+  onMessageCandidate?: (app: CandidateApplication) => void;
   darkMode: boolean;
 }
 
-export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, onUpdateStatus, darkMode }) => {
+export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, onUpdateStatus, onMessageCandidate, darkMode }) => {
   const UPLOAD_BASE = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
   const [selectedApp, setSelectedApp] = useState<CandidateApplication | null>(null);
   
@@ -65,8 +66,17 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
             {applications.map((app) => (
               <tr key={app.id} className="hover:bg-gray-50/5 hover:transition-colors group">
                 <td className="py-4 pr-2">
-                  <p className="font-bold">{app.alumnusName}</p>
-                  <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{app.alumnusEmail}</p>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={app.alumnusAvatar ? (app.alumnusAvatar.startsWith('http') ? app.alumnusAvatar : `${UPLOAD_BASE}${app.alumnusAvatar}`) : "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80"}
+                      alt={app.alumnusName}
+                      className="w-10 h-10 rounded-xl object-cover border border-gray-200 shadow-xs"
+                    />
+                    <div>
+                      <p className="font-bold">{app.alumnusName}</p>
+                      <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{app.alumnusEmail}</p>
+                    </div>
+                  </div>
                 </td>
                 <td className="py-4 pr-2">
                   <p className="font-semibold">{app.jobTitle}</p>
@@ -85,6 +95,12 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
                 </td>
                 <td className="py-4 text-right">
                   <div className="flex gap-2 justify-end items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => onMessageCandidate?.(app)}
+                      className="px-3 py-1.5 bg-[#003366]/10 text-[#003366] rounded-lg text-xs font-bold hover:bg-[#003366] hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      💬 Message
+                    </button>
                     <button
                       onClick={() => setSelectedApp(app)}
                       className="px-3 py-1.5 bg-[#003366]/5 border border-[#003366]/20 text-[#003366] rounded-lg text-xs font-extrabold hover:bg-[#003366] hover:text-white transition-colors"
@@ -111,11 +127,18 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
             darkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white'
           }`}>
             <div className="flex justify-between items-center p-6 border-b border-gray-150/50">
-              <div>
-                <h3 className="text-2xl font-extrabold text-[#003366]">{selectedApp.alumnusName}</h3>
-                <p className={`text-sm mt-1 font-medium ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                  Applying for <span className="text-[#1a5c3a] font-bold">{selectedApp.jobTitle}</span>
-                </p>
+              <div className="flex items-center gap-4">
+                <img
+                  src={selectedApp.alumnusAvatar ? (selectedApp.alumnusAvatar.startsWith('http') ? selectedApp.alumnusAvatar : `${UPLOAD_BASE}${selectedApp.alumnusAvatar}`) : "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80"}
+                  alt={selectedApp.alumnusName}
+                  className="w-14 h-14 rounded-2xl object-cover border border-gray-200 shadow-md"
+                />
+                <div>
+                  <h3 className="text-2xl font-extrabold text-[#003366]">{selectedApp.alumnusName}</h3>
+                  <p className={`text-sm mt-0.5 font-medium ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                    Applying for <span className="text-[#1a5c3a] font-bold">{selectedApp.jobTitle}</span>
+                  </p>
+                </div>
               </div>
               <button onClick={() => setSelectedApp(null)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
                 <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -129,13 +152,13 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
                   <div>
                     <h4 className={`text-xs font-bold uppercase tracking-wider mb-3 ${darkMode ? 'text-slate-500' : 'text-gray-400'}`}>Candidate Profile</h4>
                     <div className={`p-4 rounded-xl border space-y-3 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-100'}`}>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Email</span>
                         <span className="text-sm font-semibold">{selectedApp.alumnusEmail}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Department</span>
-                        <span className="text-sm font-semibold">{selectedApp.department}</span>
+                      <div className="flex justify-between items-center gap-4">
+                        <span className={`text-sm shrink-0 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Department</span>
+                        <span className="text-sm font-semibold text-right leading-tight">{selectedApp.department}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Graduation Year</span>
@@ -206,6 +229,16 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
                 </span>
               </div>
               <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (onMessageCandidate) onMessageCandidate(selectedApp);
+                    setSelectedApp(null);
+                  }}
+                  className="px-4 py-2 bg-[#003366] text-white rounded-xl text-sm font-bold hover:bg-[#002244] transition-colors flex items-center gap-1.5 shadow-sm"
+                >
+                  💬 Message Candidate
+                </button>
+
                 <select 
                   className={`text-sm rounded-xl border px-3 py-2 font-semibold cursor-pointer outline-none ${
                     darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-800'

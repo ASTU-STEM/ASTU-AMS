@@ -721,16 +721,25 @@ model SystemSetting {
 }
 
 model DirectMessage {
-  id           String          @id @default(uuid())
-  employerId   String
-  employer     EmployerProfile @relation(fields: [employerId], references: [id], onDelete: Cascade)
-  alumniId     String
-  alumni       AlumniProfile   @relation(fields: [alumniId], references: [id], onDelete: Cascade)
-  sender       String          // "EMPLOYER" or "ALUMNI"
+  id           String           @id @default(uuid())
+  senderId     String           @default("")
+  receiverId   String           @default("")
+  employerId   String?
+  employer     EmployerProfile? @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  alumniId     String?
+  alumni       AlumniProfile?   @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  sender       String           // "EMPLOYER", "ALUMNI", "ADMIN", "REGISTRAR", "DEPARTMENT_HEAD"
+  receiverRole String?
   text         String
-  isRead       Boolean         @default(false)
-  createdAt    DateTime        @default(now())
+  fileUrl      String?
+  fileType     String?
+  isRead       Boolean          @default(false)
+  deletedBy    String[]         @default([])
+  isDeleted    Boolean          @default(false)
+  createdAt    DateTime         @default(now())
 
+  @@index([senderId])
+  @@index([receiverId])
   @@index([employerId])
   @@index([alumniId])
 }

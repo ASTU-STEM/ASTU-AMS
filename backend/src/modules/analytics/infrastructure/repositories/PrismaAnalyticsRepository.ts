@@ -28,16 +28,34 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     return (sorted[middle - 1] + sorted[middle]) / 2;
   }
 
-  async getOverallEmploymentStats(): Promise<EmploymentStats> {
-    const totalAlumni = await prisma.alumniProfile.count();
+  private parseGraduationYear(academicYear?: string): number | null {
+    if (!academicYear || academicYear === 'All Time') return null;
+    const parts = academicYear.split('-');
+    const yr = parseInt(parts[0], 10);
+    return isNaN(yr) ? null : yr;
+  }
+
+  async getOverallEmploymentStats(filters?: { academicYear?: string; department?: string }): Promise<EmploymentStats> {
+    const targetYear = this.parseGraduationYear(filters?.academicYear);
+    const deptFilter = filters?.department && filters.department !== 'All' ? filters.department : null;
+
+    const whereClause: any = {};
+    if (targetYear !== null) whereClause.graduationYear = targetYear;
+    if (deptFilter) {
+      whereClause.department = {
+        name: { contains: deptFilter, mode: 'insensitive' }
+      };
+    }
+
+    const totalAlumni = await prisma.alumniProfile.count({ where: whereClause });
     const employed = await prisma.alumniProfile.count({
-      where: { employmentStatus: 'EMPLOYED' },
+      where: { ...whereClause, employmentStatus: 'EMPLOYED' },
     });
     const selfEmployed = await prisma.alumniProfile.count({
-      where: { employmentStatus: 'SELF_EMPLOYED' },
+      where: { ...whereClause, employmentStatus: 'SELF_EMPLOYED' },
     });
     const unemployed = await prisma.alumniProfile.count({
-      where: { employmentStatus: 'UNEMPLOYED' },
+      where: { ...whereClause, employmentStatus: 'UNEMPLOYED' },
     });
 
     const employmentRate = totalAlumni > 0 ? ((employed + selfEmployed) / totalAlumni) * 100 : 0;
@@ -48,6 +66,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     const salariesAgg = await prisma.alumniProfile.aggregate({
       _avg: { salary: true },
       where: {
+        ...whereClause,
         employmentStatus: { in: ['EMPLOYED', 'SELF_EMPLOYED'] },
         salary: { not: null },
       },
@@ -58,6 +77,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     const allAlumniSalaries = await prisma.alumniProfile.findMany({
       select: { salary: true },
       where: {
+        ...whereClause,
         employmentStatus: { in: ['EMPLOYED', 'SELF_EMPLOYED'] },
         salary: { not: null },
       },
@@ -131,7 +151,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getSkillGapStats(): Promise<SkillGapStats> {
+  async getSkillGapStats(filters?: { academicYear?: string; department?: string }): Promise<SkillGapStats> {
     const aggregations = await prisma.employerFeedback.aggregate({
       _avg: {
         technicalSkill: true,
@@ -158,14 +178,26 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getDepartmentMetrics(): Promise<DepartmentMetric[]> {
+  async getDepartmentMetrics(filters?: { academicYear?: string; department?: string }): Promise<DepartmentMetric[]> {
+    const targetYear = this.parseGraduationYear(filters?.academicYear);
+    const deptFilter = filters?.department && filters.department !== 'All' ? filters.department : null;
+
+    const profileWhere: any = {};
+    if (targetYear !== null) profileWhere.graduationYear = targetYear;
+
+    const deptWhere: any = {};
+    if (deptFilter) deptWhere.name = { contains: deptFilter, mode: 'insensitive' };
+
     const departments = await prisma.department.findMany({
+      where: deptWhere,
       include: {
         alumniProfiles: {
+          where: profileWhere,
           select: {
             employmentStatus: true,
             salary: true,
             cgpa: true,
+            graduationYear: true,
           }
         },
       },
@@ -208,7 +240,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     });
   }
 
-  async getEmployerAnalytics(): Promise<EmployerAnalytics> {
+  async getEmployerAnalytics(filters?: { academicYear?: string; department?: string }): Promise<EmployerAnalytics> {
     const workExperiences = await prisma.workExperience.findMany({
       select: { companyName: true },
     });
@@ -251,7 +283,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       rate: stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0,
     }));
 
-    const skillStats = await this.getSkillGapStats();
+    const skillStats = await this.getSkillGapStats(filters);
     const averageEmployerSatisfaction = skillStats.totalFeedbackCount > 0 
       ? (skillStats.averageTechnical + skillStats.averageCommunication + skillStats.averageLeadership + skillStats.averageTeamwork + skillStats.averageProblemSolving + skillStats.averageInnovation) / 6
       : 8.2;
@@ -322,8 +354,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getDepartmentAnalytics(): Promise<DepartmentAnalytics> {
-    const metrics = await this.getDepartmentMetrics();
+  async getDepartmentAnalytics(filters?: { academicYear?: string; department?: string }): Promise<DepartmentAnalytics> {
+    const metrics = await this.getDepartmentMetrics(filters);
 
     const departmentRankings = [...metrics]
       .sort((a, b) => b.employmentRate - a.employmentRate)
@@ -333,16 +365,28 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       .sort((a, b) => b.averageSalary - a.averageSalary)
       .map(m => ({ code: m.departmentCode, averageSalary: m.averageSalary }));
 
-    const trendAnalysis = [
-      {
-        year: 2023,
-        departments: metrics.map(m => ({ code: m.departmentCode, rate: m.employmentRate * 0.95 })),
-      },
-      {
-        year: 2024,
-        departments: metrics.map(m => ({ code: m.departmentCode, rate: m.employmentRate })),
-      },
-    ];
+    // Query actual alumni profiles grouped by graduationYear (Batch) and department
+    const alumniList = await prisma.alumniProfile.findMany({
+      include: { department: true }
+    });
+
+    const uniqueYears = Array.from(new Set(alumniList.map(a => a.graduationYear))).sort((a, b) => a - b);
+    const validYears = uniqueYears.length > 0 ? uniqueYears : [2023, 2024];
+
+    const trendAnalysis = validYears.map(yr => {
+      const yearAlumni = alumniList.filter(a => a.graduationYear === yr);
+      const deptsRates = metrics.map(m => {
+        const deptYearAlumni = yearAlumni.filter(a => (a.department?.code || a.department?.name) === m.departmentCode);
+        const employed = deptYearAlumni.filter(a => a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED').length;
+        const rate = deptYearAlumni.length > 0 ? Math.round((employed / deptYearAlumni.length) * 100) : m.employmentRate;
+        return { code: m.departmentCode, rate };
+      });
+
+      return {
+        year: yr,
+        departments: deptsRates
+      };
+    });
 
     const performanceBenchmarks = metrics.map(m => ({
       code: m.departmentCode,
@@ -358,8 +402,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getCurriculumAnalytics(): Promise<CurriculumAnalytics> {
-    const skillStats = await this.getSkillGapStats();
+  async getCurriculumAnalytics(filters?: { academicYear?: string; department?: string }): Promise<CurriculumAnalytics> {
+    const skillStats = await this.getSkillGapStats(filters);
     
     const skillGaps = [
       { skill: 'Technical Skills', gapScore: Math.max(0, 9.0 - skillStats.averageTechnical) },
@@ -443,15 +487,30 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getTracerAnalytics(): Promise<TracerAnalytics> {
-    const totalAssignments = await prisma.surveyAssignment.count();
+  async getTracerAnalytics(filters?: { academicYear?: string; department?: string }): Promise<TracerAnalytics> {
+    const targetYear = this.parseGraduationYear(filters?.academicYear);
+    const deptFilter = filters?.department && filters.department !== 'All' ? filters.department : null;
+
+    const profileWhere: any = {};
+    if (targetYear !== null) profileWhere.graduationYear = targetYear;
+    if (deptFilter) {
+      profileWhere.department = { name: { contains: deptFilter, mode: 'insensitive' } };
+    }
+
+    const assignmentWhere: any = {};
+    if (targetYear !== null || deptFilter) {
+      assignmentWhere.alumni = profileWhere;
+    }
+
+    const totalAssignments = await prisma.surveyAssignment.count({ where: assignmentWhere });
     const completedAssignments = await prisma.surveyAssignment.count({
-      where: { status: 'COMPLETED' },
+      where: { ...assignmentWhere, status: 'COMPLETED' },
     });
 
-    const totalAlumni = await prisma.alumniProfile.count();
+    const totalAlumni = await prisma.alumniProfile.count({ where: profileWhere });
     const distinctParticipants = await prisma.surveyResponse.groupBy({
       by: ['alumniId'],
+      where: targetYear !== null || deptFilter ? { alumni: profileWhere } : undefined,
     });
 
     const surveyCompletionRate = totalAssignments > 0 ? (completedAssignments / totalAssignments) * 100 : 0;

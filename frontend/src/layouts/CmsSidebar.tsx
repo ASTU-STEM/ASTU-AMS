@@ -37,6 +37,7 @@ interface EnhancedNavItem extends AdminNavItem {
 
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'overview', tooltip: 'CMS overview & stats' },
+  { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'overview', tooltip: 'ASTU_AMS direct messaging hub' },
   { label: 'All Content', path: '/cms/content', icon: Newspaper, section: 'content', tooltip: 'Pages, posts, announcements' },
   { label: 'Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content', tooltip: 'Manage homepage content' },
   { label: 'Community', path: '/cms/community', icon: MessageSquareText, section: 'content', tooltip: 'News, announcements & community' },

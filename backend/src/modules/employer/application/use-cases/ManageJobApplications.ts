@@ -101,16 +101,39 @@ export class UpdateApplicationStatus {
           },
         });
 
-        // 2. Update AlumniProfile status
+        // 2. Prepare preferences update for candidate placement box
+        const existingPrefs = (candidateProfile.preferences as any) || {};
+        const updatedPrefs = {
+          ...existingPrefs,
+          company: employer.companyName,
+          currentRole: job.title,
+        };
+
+        // 3. Update AlumniProfile status to EMPLOYED and set company/role in preferences
         await tx.alumniProfile.update({
           where: { id: candidateProfile.id },
           data: {
             employmentStatus: 'EMPLOYED',
             salary: parsedSalary,
+            preferences: updatedPrefs,
           },
         });
 
-        // 3. Create HiringEvent
+        // 4. Create WorkExperience record for alumni
+        await tx.workExperience.create({
+          data: {
+            alumniId: candidateProfile.id,
+            companyName: employer.companyName,
+            position: job.title,
+            industry: employer.industry || 'Technology',
+            salaryRange: job.salary || (parsedSalary ? `${parsedSalary} ETB` : 'Competitive'),
+            location: job.location || employer.location || 'Adama',
+            isCurrent: true,
+            startDate: now,
+          },
+        });
+
+        // 5. Create HiringEvent for database analytics & tracking
         await tx.hiringEvent.create({
           data: {
             applicationId,
@@ -124,24 +147,52 @@ export class UpdateApplicationStatus {
         });
       });
 
-      // 4. Send Notification and Email to candidate user
-      if (candidateProfile.user?.email) {
+      // 6. Send In-App Notification and Email to candidate
+      if (candidateProfile.userId) {
         await prisma.notification.create({
           data: {
             userId: candidateProfile.userId as string,
-            title: `Hired!`,
-            content: `Congratulations! You have been hired by ${employer.companyName} for the role of ${job.title}.`,
+            title: `🎉 Congratulations! You are Hired!`,
+            content: `Congratulations! You have been hired by ${employer.companyName} for the position of "${job.title}". Your profile placement has been updated to Employed at ${employer.companyName}.`,
           },
-        });
-
-        await emailService.sendGenericNotification(
-          candidateProfile.user.email as string,
-          `Application Update: You've been HIRED!`,
-          `Congratulations! Your application for the position of "${job.title}" at ${employer.companyName} has resulted in a hire.`
-        ).catch(err => console.error("Failed to send email", err));
+        }).catch(err => console.error("Failed to create in-app notification", err));
       }
 
-      // 5. Clear the analytics cache
+      if (candidateProfile.user?.email || candidateProfile.email) {
+        const candidateEmail = (candidateProfile.user?.email || candidateProfile.email) as string;
+        const candidateName = candidateProfile.fullName || 'Alumni Candidate';
+
+        await emailService.sendGenericNotification(
+          candidateEmail,
+          `🎉 Congratulations! You have been HIRED at ${employer.companyName}!`,
+          `Dear ${candidateName},\n\nWe are thrilled to inform you that your application for "${job.title}" at ${employer.companyName} has resulted in a HIRE!\n\nYour ASTU Alumni profile placement status has been updated to Employed at ${employer.companyName}.\n\nBest regards,\nASTU Career & Placement Center`
+        ).catch(err => console.error("Failed to send candidate email", err));
+
+        // Simulated SMS notification
+        console.log(`[SMS Dispatch] Sent to candidate ${candidateProfile.phone || candidateName}: "Congratulations! You're hired at ${employer.companyName} for ${job.title}!"`);
+      }
+
+      // 7. Send Email to ASTU Admin users notifying about the new hiring event
+      try {
+        const admins = await prisma.user.findMany({
+          where: { role: 'ADMIN' },
+          select: { email: true }
+        });
+        const adminEmails = admins.map((a: any) => a.email).filter(Boolean);
+        if (adminEmails.length === 0) adminEmails.push('admin@astu.edu.et');
+
+        for (const adminEmail of adminEmails) {
+          await emailService.sendGenericNotification(
+            adminEmail,
+            `ASTU Placement Alert: ${candidateProfile.fullName} Hired by ${employer.companyName}`,
+            `ASTU Alumni Placement System Notification:\n\nAlumnus Candidate: ${candidateProfile.fullName}\nEmployer: ${employer.companyName}\nPosition: ${job.title}\nDate: ${now.toLocaleDateString()}\n\nThis placement event has been recorded in the database for accreditation & department tracer analytics.`
+          ).catch(err => console.error("Failed to notify admin email", err));
+        }
+      } catch (adminErr) {
+        console.error("Failed to process admin notification email", adminErr);
+      }
+
+      // 8. Clear the analytics cache
       await AnalyticsCacheService.clearAll();
 
       const updatedApp = await this.appRepo.findById(applicationId);

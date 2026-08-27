@@ -96,7 +96,10 @@ export class PrismaJobBoardRepository implements IJobBoardRepository {
             },
           },
           _count: {
-            select: { applications: true },
+            select: { applications: true, views: true },
+          },
+          applications: {
+            select: { status: true },
           },
         },
       }),
@@ -104,15 +107,24 @@ export class PrismaJobBoardRepository implements IJobBoardRepository {
 
     const totalPages = Math.ceil(total / limit);
 
-    const data = jobs.map((job: any) => new JobWithEmployer(
-      job.id, job.title, job.description, job.location,
-      job.employmentType, job.experienceRequired, job.skillsRequired,
-      job.deadline, job.salary, job.salaryMin, job.salaryMax,
-      job.isActive, job.status, job.department, job.experienceLevel,
-      job.responsibilities, job.requirements, job.createdAt,
-      job.employer.companyName, job.employer.industry, job.employer.location,
-      job.employer.logoUrl, job.employer.website, job.employer.id
-    ));
+    const data = jobs.map((job: any) => {
+      const viewsCount = job._count?.views || 0;
+      const applicationsCount = job._count?.applications || 0;
+      const shortlistedCount = Array.isArray(job.applications)
+        ? job.applications.filter((a: any) => a.status === 'SHORTLISTED' || a.status === 'ACCEPTED').length
+        : 0;
+
+      return new JobWithEmployer(
+        job.id, job.title, job.description, job.location,
+        job.employmentType, job.experienceRequired, job.skillsRequired,
+        job.deadline, job.salary, job.salaryMin, job.salaryMax,
+        job.isActive, job.status, job.department, job.experienceLevel,
+        job.responsibilities, job.requirements, job.createdAt,
+        job.employer.companyName, job.employer.industry, job.employer.location,
+        job.employer.logoUrl, job.employer.website, job.employer.id,
+        viewsCount, applicationsCount, shortlistedCount
+      );
+    });
 
     return { data, total, page, limit, totalPages };
   }
@@ -139,11 +151,17 @@ export class PrismaJobBoardRepository implements IJobBoardRepository {
             views: true,
           },
         },
+        applications: {
+          select: { status: true },
+        },
       },
     });
 
     if (!job) return null;
-    if (job.status !== 'PUBLISHED' || !job.isActive) return null;
+
+    const shortlistedCount = Array.isArray(job.applications)
+      ? job.applications.filter((a: any) => a.status === 'SHORTLISTED' || a.status === 'ACCEPTED').length
+      : 0;
 
     return new JobDetailView(
       job.id, job.title, job.description, job.location,
@@ -151,10 +169,10 @@ export class PrismaJobBoardRepository implements IJobBoardRepository {
       job.deadline, job.salary, job.salaryMin, job.salaryMax,
       job.isActive, job.status, job.department, job.experienceLevel,
       job.responsibilities, job.requirements, job.createdAt,
-      job.employer.companyName, job.employer.industry, job.employer.location,
-      job.employer.logoUrl, job.employer.website, job.employer.id,
-      job._count.applications, job._count.views,
-      job.employer.description, job.employer.companySize
+      job.employer?.companyName || 'ASTU Corporate Partner', job.employer?.industry || 'Technology', job.employer?.location || 'Adama',
+      job.employer?.logoUrl || null, job.employer?.website || null, job.employerId || '',
+      job._count.applications, job._count.views, shortlistedCount,
+      job.employer?.description || null, job.employer?.companySize || null
     );
   }
 

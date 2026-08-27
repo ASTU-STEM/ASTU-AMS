@@ -23,9 +23,11 @@ router.delete('/experiences/:id', asyncHandler(AlumniController.deleteExperience
 // Files
 router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
 
-// Documents
+// Documents & Chapa Payment
 router.post('/document-requests', asyncHandler(AlumniController.requestDocument));
 router.get('/document-requests', asyncHandler(AlumniController.getMyDocuments));
+router.post('/chapa/initialize-document-payment', asyncHandler(AlumniController.initializeChapaDocumentPayment));
+router.post('/chapa/verify-document-payment', asyncHandler(AlumniController.verifyChapaDocumentPayment));
 
 // Dashboard
 router.get('/dashboard-stats', asyncHandler(AlumniController.getDashboardStats));
@@ -52,9 +54,11 @@ router.post('/forum', asyncHandler(AlumniController.createForumPost));
 router.post('/forum/:id/like', asyncHandler(AlumniController.toggleForumLike));
 router.post('/forum/:id/comment', asyncHandler(AlumniController.addForumComment));
 
-// Donations
+// Donations & Chapa Payment
 router.get('/donations', asyncHandler(AlumniController.getDonations));
 router.post('/donations', asyncHandler(AlumniController.makeDonation));
+router.post('/chapa/initialize-donation-payment', asyncHandler(AlumniController.initializeChapaDonationPayment));
+router.post('/chapa/verify-donation-payment', asyncHandler(AlumniController.verifyChapaDonationPayment));
 
 // Messages
 router.get('/messages', asyncHandler(AlumniController.getMessageThreads));

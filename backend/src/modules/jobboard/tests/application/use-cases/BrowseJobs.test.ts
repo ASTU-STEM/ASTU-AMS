@@ -22,7 +22,7 @@ describe('BrowseJobs Use Cases', () => {
     '50000-80000', 50000, 80000, true, 'PUBLISHED', 'SWE', 'MID',
     'Build and maintain apps', 'BSc in CS', new Date(),
     'Tech Corp', 'IT', 'Addis Ababa', null, 'https://techcorp.com', 'emp1',
-    15, 120, 'A leading tech company', '50-200'
+    15, 120, 3, 'A leading tech company', '50-200'
   );
 
   const mockPaginated: PaginatedResult<JobWithEmployer> = {

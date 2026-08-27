@@ -134,4 +134,37 @@ export class EmailService {
     `;
     return this.sendMail({ to: email, subject, text, html });
   }
+
+  async sendDirectMessageNotification(toEmail: string, recipientName: string, senderName: string, messageSnippet: string) {
+    const subject = `New Message from ${senderName} on ASTU Alumni Portal`;
+    const text = `Hello ${recipientName},\n\n${senderName} has sent you a message on ASTU Alumni Portal:\n\n"${messageSnippet}"\n\nPlease log in to your portal to view and reply.\n\nBest regards,\nASTU Alumni Portal Team`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
+        <div style="background-color: #003366; padding: 20px; text-align: center; color: #ffffff;">
+          <h2 style="margin: 0; font-size: 20px;">ASTU Alumni Messenger</h2>
+        </div>
+        <div style="padding: 24px; color: #333333;">
+          <p style="font-size: 15px;">Hello <strong>${recipientName}</strong>,</p>
+          <p style="font-size: 14px;"><strong>${senderName}</strong> is messaged u login and reply on the ASTU Alumni Portal.</p>
+          <div style="background-color: #f5f7fa; border-left: 4px solid #003366; padding: 14px; margin: 18px 0; font-style: italic; border-radius: 4px;">
+            "${messageSnippet}"
+          </div>
+          <div style="text-align: center; margin-top: 24px;">
+            <a href="http://localhost:5173" style="background-color: #003366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block;">Log in & Reply</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    console.log(`\n================================`);
+    console.log(`[EMAIL DISPATCH] Alert sent to ${toEmail} from ${senderName}: "${messageSnippet}"`);
+    console.log(`================================\n`);
+
+    try {
+      return await this.sendMail({ to: toEmail, subject, text, html });
+    } catch (e) {
+      console.warn('Email send warning (SMTP fallback active):', e);
+      return null;
+    }
+  }
 }

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlumniProfile, Certification, Project, Achievement } from '../types/alumni.types';
+import { alumniService } from '../services/alumni.service';
 import toast from 'react-hot-toast';
 
 interface ProfileTabProps {
@@ -20,10 +21,28 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const [newTechnology, setNewTechnology] = useState('');
   const [showCertForm, setShowCertForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [savedCoverLetter, setSavedCoverLetter] = useState(() => localStorage.getItem('astu_saved_cover_letter') || profile.bio || '');
+
+  useEffect(() => {
+    if (profile) {
+      const resumeObj = profile.resumeUrl ? {
+        fileName: profile.resumeUrl.split('/').pop() || 'Professional_Resume.pdf',
+        fileSize: '0.5 MB',
+        uploadedAt: 'Uploaded'
+      } : (profile as any).resume || null;
+
+      setFormData(prev => ({
+        ...prev,
+        ...profile,
+        resume: resumeObj
+      }));
+    }
+  }, [profile]);
+
   const profileScore = Math.min(100, 
     30 + 
     formData.skills.length * 3 + 
-    (formData.resume ? 10 : 0) + 
+    (formData.resume || formData.resumeUrl ? 10 : 0) + 
     (formData.linkedInUrl ? 5 : 0) + 
     (formData.gitHubUrl ? 5 : 0) + 
     (formData.portfolioUrl ? 5 : 0) +
@@ -53,26 +72,54 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     toast.success(`Removed skill: ${skillToRemove}`);
   };
 
-  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setResumeFile(file);
+    if (!file) return;
+
+    setResumeFile(file);
+    setIsUploading(true);
+    try {
+      const data = new FormData();
+      data.append('resume', file);
+      data.append('profileData', JSON.stringify(formData));
+      
+      const updatedProfile: any = await alumniService.updateProfile(data);
+      const newResumeUrl = updatedProfile?.resumeUrl || `/uploads/resumes/${file.name}`;
+      
+      const newResumeObj = {
+        fileName: file.name,
+        fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      };
+
       setFormData((prev) => ({
         ...prev,
-        resume: {
-          fileName: file.name,
-          fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        },
+        resumeUrl: newResumeUrl,
+        resume: newResumeObj,
       }));
-      toast.success('Resume selected for upload!');
+      toast.success('Resume uploaded and saved to profile!');
+      if (onSave) onSave({ ...formData, resumeUrl: newResumeUrl, resume: newResumeObj } as any);
+    } catch (err) {
+      console.error('Failed to upload resume', err);
+      toast.error('Failed to upload resume. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const handleRemoveResume = () => {
-    setResumeFile(null);
-    setFormData((prev) => ({ ...prev, resume: null }));
-    toast.success('Resume removed.');
+  const handleRemoveResume = async () => {
+    setIsUploading(true);
+    try {
+      await alumniService.updateProfile({ resumeUrl: null });
+      setResumeFile(null);
+      setFormData((prev) => ({ ...prev, resumeUrl: undefined, resume: null }));
+      toast.success('Resume removed successfully!');
+      if (onSave) onSave({ ...formData, resumeUrl: undefined, resume: null } as any);
+    } catch (err) {
+      toast.error('Failed to remove resume.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -173,7 +220,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
         {[
           { icon: 'verified', label: 'Identity', value: 'Verified', color: 'emerald' },
           { icon: 'analytics', label: 'Completeness', value: `${profileScore}%`, color: 'blue' },
-          { icon: 'work', label: 'Resume', value: formData.resume ? 'Uploaded' : 'Missing', color: formData.resume ? 'emerald' : 'amber' },
+          { icon: 'work', label: 'Resume', value: (formData.resume || formData.resumeUrl) ? 'Uploaded' : 'Missing', color: (formData.resume || formData.resumeUrl) ? 'emerald' : 'amber' },
           { icon: 'link', label: 'LinkedIn', value: formData.linkedInUrl ? 'Connected' : 'Not set', color: formData.linkedInUrl ? 'emerald' : 'amber' },
         ].map((stat, idx) => (
           <div key={idx} className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-3.5 shadow-sm hover:shadow-md transition-all duration-200">
@@ -812,7 +859,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Professional Resume / CV</h3>
                 <p className="text-[11px] text-[var(--text-secondary)] mt-1">Upload your resume to make it visible to partner employers.</p>
               </div>
-              {formData.resume ? (
+              {formData.resume || formData.resumeUrl ? (
                 <div className="p-5 rounded-xl border border-emerald-200 bg-emerald-50/30">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
@@ -820,20 +867,24 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                         <span className="text-2xl">📄</span>
                       </div>
                       <div>
-                        <h5 className="text-sm font-extrabold text-[var(--text-primary)]">{formData.resume.fileName}</h5>
-                        <p className="text-[10px] text-[var(--text-secondary)]">Size: {formData.resume.fileSize} • Uploaded {formData.resume.uploadedAt}</p>
+                        <h5 className="text-sm font-extrabold text-[var(--text-primary)]">
+                          {formData.resume?.fileName || (formData.resumeUrl ? formData.resumeUrl.split('/').pop() : 'Professional_Resume.pdf')}
+                        </h5>
+                        <p className="text-[10px] text-[var(--text-secondary)]">
+                          Size: {formData.resume?.fileSize || 'Verified File'} • Uploaded {formData.resume?.uploadedAt || 'Uploaded'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       {formData.resumeUrl && (
-                        <a href={`${UPLOAD_BASE}${formData.resumeUrl}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
+                        <a
+                          href={formData.resumeUrl.startsWith('http') ? formData.resumeUrl : `${UPLOAD_BASE}${formData.resumeUrl}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all shadow-xs"
+                        >
                           ⬇️ Download
                         </a>
-                      )}
-                      {!formData.resumeUrl && (
-                        <button onClick={() => toast.success('Please save the profile first to download!')} className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all">
-                          ⬇️ Download
-                        </button>
                       )}
                       <button onClick={handleRemoveResume} className="flex items-center gap-1.5 px-4 py-2 border border-red-200 rounded-xl text-[11px] font-bold text-red-600 hover:bg-red-50 transition-all">
                         🗑️ Remove
@@ -853,6 +904,35 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   </div>
                 </label>
               )}
+
+              {/* Default Cover Letter Template */}
+              <div className="pt-6 border-t border-[var(--border-color)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">Default Cover Letter Template</h4>
+                    <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Write a reusable cover letter to auto-fill when applying to jobs.</p>
+                  </div>
+                </div>
+                <textarea
+                  value={savedCoverLetter}
+                  onChange={(e) => setSavedCoverLetter(e.target.value)}
+                  placeholder="Dear Hiring Manager,&#10;&#10;I am writing to express my strong interest in the open position at your organization..."
+                  className="w-full text-xs p-3.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all h-32 resize-none"
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.setItem('astu_saved_cover_letter', savedCoverLetter);
+                      onSave({ ...formData, bio: savedCoverLetter } as any);
+                      toast.success('Default cover letter template saved!');
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white text-xs font-bold rounded-xl hover:shadow-md transition-all flex items-center gap-1.5"
+                  >
+                    💾 Save Cover Letter Template
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

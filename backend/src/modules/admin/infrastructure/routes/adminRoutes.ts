@@ -47,4 +47,11 @@ router.get('/sync-logs', adminController.getSyncLogs);
 router.get('/settings', adminController.getSettings);
 router.put('/settings', adminController.updateSettings);
 
+// Donations & Campaign Management
+router.get('/donations/campaigns', adminController.getDonationCampaigns);
+router.post('/donations/campaigns', adminController.createDonationCampaign);
+router.put('/donations/campaigns/:id', adminController.updateDonationCampaign);
+router.delete('/donations/campaigns/:id', adminController.deleteDonationCampaign);
+router.get('/donations/donors', adminController.getDonorsList);
+
 export default router;
