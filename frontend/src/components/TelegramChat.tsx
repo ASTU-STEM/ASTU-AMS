@@ -165,6 +165,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
       }, 1000);
     }
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCall?.isCalling]);
 
   const formatCallDuration = (sec: number) => {
@@ -261,6 +262,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         apiClient.post('/chat/read', { partnerId: targetId }).catch(() => null);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeThread?.userId, activeThread?.partnerId]);
 
   // Handle initial target candidate selection from ApplicationsTab
@@ -302,6 +304,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         return [newThread, ...prev];
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetKey]);
 
   // 2. Load contacts directory for "+ New Chat"
@@ -342,6 +345,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         }
       } catch (e) { }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
