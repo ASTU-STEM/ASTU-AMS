@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   Sparkles,
   Plus,
-  ChevronDown,
+  ChevronRight,
+  HelpCircle,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 
@@ -36,12 +37,13 @@ interface EnhancedNavItem extends AdminNavItem {
 
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'overview', tooltip: 'CMS overview & stats' },
+  { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'overview', tooltip: 'ASTU_AMS direct messaging hub' },
   { label: 'All Content', path: '/cms/content', icon: Newspaper, section: 'content', tooltip: 'Pages, posts, announcements' },
   { label: 'Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content', tooltip: 'Manage homepage content' },
   { label: 'Community', path: '/cms/community', icon: MessageSquareText, section: 'content', tooltip: 'News, announcements & community' },
   { label: 'Gallery', path: '/cms/gallery', icon: GalleryHorizontal, section: 'content', tooltip: 'Photo & media gallery' },
   { label: 'Events & Workshops', path: '/cms/events', icon: CalendarDays, section: 'content', tooltip: 'Manage events & workshops' },
-  { label: 'Approvals', path: '/cms/approvals', icon: ShieldCheck, section: 'workflow', tooltip: 'Pending reviews & approvals', badge: 5 },
+  { label: 'Approvals', path: '/cms/approvals', icon: ShieldCheck, section: 'workflow', tooltip: 'Pending reviews & approvals', badge: 1 },
   { label: 'Media Library', path: '/cms/media', icon: ImageIcon, section: 'assets', tooltip: 'All media files' },
   { label: 'SEO', path: '/cms/seo', icon: Globe, section: 'assets', tooltip: 'SEO management' },
   { label: 'Templates', path: '/cms/templates', icon: Sparkles, section: 'assets', tooltip: 'Reusable content templates' },
@@ -49,7 +51,7 @@ const navItems: EnhancedNavItem[] = [
 ];
 
 const sections = [
-  { key: 'overview', label: 'Overview' },
+  { key: 'overview', label: 'Dashboard' },
   { key: 'content', label: 'Content' },
   { key: 'workflow', label: 'Workflow' },
   { key: 'assets', label: 'Assets' },
@@ -65,65 +67,60 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-[#0B1A2E] text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 ${
-          collapsed ? 'w-[72px]' : 'w-72'
-        } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white text-slate-800 border-r border-slate-200/80 shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 ${collapsed ? 'w-[76px]' : 'w-72'
+          } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0D1F38] via-[#0B1A2E] to-[#091524] pointer-events-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,transparent_30%,rgba(244,180,0,0.02)_70%,transparent_100%)] pointer-events-none" />
-
-        {/* Logo area */}
-        <div className="relative px-4 pt-5 pb-3">
-          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="relative shrink-0">
-              <img
-                src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
-                alt="ASTU"
-                className="h-9 w-9 rounded-lg bg-white/8 object-contain p-0.5 ring-1 ring-white/10"
-              />
+        {/* Logo Header */}
+        <div className="relative px-5 pt-6 pb-4 border-b border-slate-100">
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 ">
+                <img
+                  src="/images/astu-seal-logo.png"
+                  alt="ASTU Logo"
+                  className="h-full w-full object-contain scale-110"
+                />
+              </div>
               {!collapsed && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#F4B400] text-[7px] font-bold text-[#0B1A2E] shadow-sm">C</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base font-bold text-slate-900 tracking-tight">ASTU CMS</span>
+                  </div>
+                  <p className="text-[11px] font-medium text-slate-400 truncate">Content Engine</p>
+                </div>
               )}
             </div>
+
             {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-lg font-bold tracking-tight text-white">ASTU</span>
-                  <span className="rounded-md bg-[#F4B400]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#F4B400] uppercase tracking-wider">CMS</span>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-0.5">Content Manager</p>
-              </div>
+              <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                PRO
+              </span>
             )}
           </div>
 
           {!collapsed && (
-            <button className="mt-4 flex w-full items-center gap-2 rounded-lg bg-[#F4B400] px-4 py-3 text-xs font-bold text-[#0B1A2E] hover:brightness-110 transition-all shadow-sm shadow-[#F4B400]/20">
-              <Plus className="h-5 w-5" />
-              <span>Quick Create</span>
-            </button>
+            <NavLink
+              to="/cms/content"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#003366] px-4 py-2.5 text-xs font-semibold text-white hover:bg-[#002855] transition-all shadow-sm shadow-[#003366]/15 group"
+            >
+              <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
+              <span>Create Content</span>
+            </NavLink>
           )}
         </div>
 
-        {/* Divider */}
-        <div className="relative mx-4 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-
-        {/* Navigation */}
-        <nav className="relative flex-1 overflow-y-auto px-3 py-4 scrollbar-thin space-y-2">
+        {/* Navigation Section List */}
+        <nav className="flex-1 overflow-y-auto px-3.5 py-4 scrollbar-thin space-y-4">
           {sections.map(section => {
             const items = getSectionItems(section.key);
             if (items.length === 0) return null;
             return (
-              <div key={section.key}>
+              <div key={section.key} className="space-y-1">
                 {!collapsed && (
-                  <div className="px-3 pb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="h-px flex-1 bg-white/5" />
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        {section.label}
-                      </p>
-                      <span className="h-px flex-1 bg-white/5" />
-                    </div>
+                  <div className="px-3 py-1 flex items-center justify-between">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {section.label}
+                    </p>
                   </div>
                 )}
                 <div className="space-y-0.5">
@@ -139,41 +136,36 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
                         end={item.exact}
                         onClick={onNavigate}
                         title={collapsed ? item.tooltip || item.label : undefined}
-                        className={`group relative flex items-center rounded-lg text-sm font-medium transition-all duration-150 ${
-                          collapsed ? 'justify-center py-3 px-0 mx-auto w-11' : 'gap-3 py-2.5 px-3'
-                        } ${
-                          isActive
-                            ? 'bg-[rgba(244,180,0,0.1)] text-[#F4B400]'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                        }`}
+                        className={`group relative flex items-center rounded-xl text-sm font-medium transition-all duration-150 ${collapsed ? 'justify-center py-2.5 px-0 mx-auto w-11' : 'gap-3 py-2.5 px-3'
+                          } ${isActive
+                            ? 'bg-sky-50/90 text-[#003366] font-semibold border-r-2 border-[#003366]'
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                          }`}
                       >
-                        {isActive && !collapsed && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#F4B400] shadow-[0_0_8px_rgba(244,180,0,0.4)]" />
-                        )}
-                        <span className="shrink-0 flex items-center justify-center">
-                          <Icon className="h-[20px] w-[20px]" />
+                        <span className={`shrink-0 flex items-center justify-center transition-colors ${isActive ? 'text-[#003366]' : 'text-slate-400 group-hover:text-slate-600'
+                          }`}>
+                          <Icon className="h-4.5 w-4.5" />
                         </span>
                         {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+
                         {item.badge && !collapsed && (
-                          <span className={`flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full text-[10px] font-bold ${
-                            isActive ? 'bg-[#F4B400]/20 text-[#F4B400]' : 'bg-rose-500/90 text-white'
-                          }`}>
+                          <span className={`flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#003366] text-white' : 'bg-rose-100 text-rose-700'
+                            }`}>
                             {item.badge}
                           </span>
                         )}
+
                         {item.badge && collapsed && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-bold text-white shadow-lg ring-1 ring-white/20">
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-bold text-white shadow-sm ring-1 ring-white">
                             {item.badge}
                           </span>
                         )}
+
                         {collapsed && (
-                          <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                          <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
                             {item.label}
                             {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
                           </div>
-                        )}
-                        {isActive && collapsed && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-[#F4B400] shadow-[0_0_8px_rgba(244,180,0,0.4)]" />
                         )}
                       </NavLink>
                     );
@@ -184,39 +176,39 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
           })}
         </nav>
 
-        {/* User area */}
-        <div className="relative border-t border-white/8 px-4 py-4">
+        {/* Footer / User Profile Area */}
+        <div className="border-t border-slate-100 p-3.5 bg-slate-50/50">
           {!collapsed ? (
-            <div className="flex items-center gap-3 rounded-xl bg-white/5 px-3.5 py-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-sm font-bold text-[#0B1A2E] shrink-0 shadow-sm">
-                CM
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-white">Content Manager</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                  </span>
-                  <span className="text-[11px] text-slate-400">Online</span>
+            <div className="flex items-center justify-between rounded-xl bg-white p-2.5 border border-slate-200/80 shadow-xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003366] text-xs font-bold text-white shrink-0">
+                  CM
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold text-slate-800">Content Manager</p>
+                  <p className="text-[10px] text-slate-400 truncate">CMS Admin</p>
                 </div>
               </div>
-              <button type="button" onClick={onLogout}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 transition-all" title="Logout">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                title="Logout"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-sm font-bold text-[#0B1A2E] shadow-sm" title="Content Manager">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003366] text-xs font-bold text-white shadow-xs" title="Content Manager">
                 CM
               </div>
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-              </span>
-              <button type="button" onClick={onLogout}
-                className="flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:bg-rose-500/10 hover:text-rose-400 transition-all" title="Logout">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                title="Logout"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
@@ -225,9 +217,7 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`mt-2 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-all ${
-              collapsed ? 'w-full py-2' : 'w-full py-2 gap-2'
-            }`}
+            className="mt-2 flex w-full items-center justify-center rounded-lg py-1.5 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors gap-1.5"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[11px] font-medium">Collapse</span></>}

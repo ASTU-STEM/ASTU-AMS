@@ -12,6 +12,11 @@ export const createEmployerProfileSchema = z.object({
   contactPerson: z.string().optional().nullable(),
   contactEmail: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
+  tin: z.string().optional().nullable(),
+  isPremium: z.boolean().optional(),
+  partnerships: z.array(z.string()).optional(),
+  verificationStatus: z.string().optional(),
+  ndaSigned: z.boolean().optional(),
 });
 
 export const updateEmployerProfileSchema = z.object({
@@ -26,6 +31,11 @@ export const updateEmployerProfileSchema = z.object({
   contactPerson: z.string().optional().nullable(),
   contactEmail: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
+  tin: z.string().optional().nullable(),
+  isPremium: z.boolean().optional(),
+  partnerships: z.array(z.string()).optional(),
+  verificationStatus: z.string().optional(),
+  ndaSigned: z.boolean().optional(),
 });
 
 export const jobSchema = z.object({
@@ -43,7 +53,6 @@ export const jobSchema = z.object({
   requirements: z.string().optional().nullable(),
   experienceLevel: z.string().optional().nullable(),
   department: z.string().optional().nullable(),
-  departments: z.array(z.string()).optional().default([]),
   status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED']).optional(),
 });
 
@@ -61,7 +70,7 @@ export const updateJobStatusSchema = z.object({
 });
 
 export const interviewSchema = z.object({
-  applicationId: z.string().uuid(),
+  applicationId: z.string().min(1),
   interviewer: z.string().min(2),
   interviewDate: z.preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
@@ -74,7 +83,7 @@ export const interviewSchema = z.object({
 });
 
 export const employerFeedbackSchema = z.object({
-  alumniId: z.string().uuid(),
+  alumniId: z.string().min(1),
   technicalSkill: z.number().min(1).max(10),
   communicationSkill: z.number().min(1).max(10),
   leadershipSkill: z.number().min(1).max(10),

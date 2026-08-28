@@ -5,9 +5,10 @@ import { CandidateApplication } from '../types';
 
 interface TalentSearchTabProps {
   darkMode: boolean;
+  onSelectChatTarget?: (target: { userId?: string; alumniId?: string; name: string }) => void;
 }
 
-export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) => {
+export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSelectChatTarget }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
   const [selectedYear, setSelectedYear] = useState('All');
@@ -56,16 +57,24 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode }) =>
   const handleRequestCv = async (alumni: CandidateApplication) => {
     try {
       await employerService.requestCvFromAlumni(alumni.id.toString());
-      toast.success(`CV requested from ${alumni.alumnusName}. An email has been sent.`);
+      toast.success(`CV Request & Email Notice sent to ${alumni.alumnusName}!`);
     } catch (err: any) {
       toast.error('Failed to request CV. Please try again.');
     }
   };
 
   const handleOpenMessageModal = (alumni: CandidateApplication) => {
-    setSelectedAlumniForMessage(alumni);
-    setMessageContent('');
-    setMessageModalOpen(true);
+    if (onSelectChatTarget) {
+      onSelectChatTarget({
+        alumniId: alumni.id.toString(),
+        userId: (alumni as any).userId || alumni.id.toString(),
+        name: alumni.alumnusName
+      });
+    } else {
+      setSelectedAlumniForMessage(alumni);
+      setMessageContent('');
+      setMessageModalOpen(true);
+    }
   };
 
   const handleSendMessage = async () => {

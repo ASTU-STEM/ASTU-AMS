@@ -49,6 +49,8 @@ const EmployerDashboard = () => {
   ]);
 
   // Core Data States
+  const [activeChatTarget, setActiveChatTarget] = useState<any>(null);
+  const [realUnreadMessages, setRealUnreadMessages] = useState<number>(0);
   const [profile, setProfile] = useState<CompanyProfile>({ name: '', industry: '', size: '', location: '', website: '', description: '', tin: '', hrContact: '', phone: '', contactEmail: '', contactPerson: '', logoUrl: '', isPremium: false, partnerships: [], verificationStatus: 'NOT_VERIFIED', ndaSigned: false });
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -308,7 +310,27 @@ const EmployerDashboard = () => {
 
     // Load feedbacks
     employerService.getFeedbacks().then(fbs => setFeedbacks(fbs)).catch(console.error);
-  }, []);
+
+    // Load direct messages
+    employerService.getConversations().then(convs => {
+      if (convs && convs.length > 0) {
+        const flatMsgs: Message[] = [];
+        convs.forEach((c: any) => {
+          (c.messages || []).forEach((m: any, idx: number) => {
+            flatMsgs.push({
+              id: m.id || idx,
+              sender: m.sender === 'EMPLOYER' ? 'Employer' : 'Alumni',
+              senderName: m.sender === 'EMPLOYER' ? profile.name : c.alumniName,
+              text: m.text,
+              timestamp: m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
+              unread: !m.isRead
+            });
+          });
+        });
+        if (flatMsgs.length > 0) setMessages(flatMsgs);
+      }
+    }).catch(console.error);
+  }, [profile.name]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -439,14 +461,12 @@ const EmployerDashboard = () => {
           <div className="relative z-10 px-4 py-4 border-b border-gray-100 dark:border-white/10">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative group/logo">
-                <div className="w-11 h-11 rounded-xl bg-gray-50 dark:bg-white/10 backdrop-blur-sm flex items-center justify-center border border-gray-200 dark:border-white/10 shadow-lg transition-all duration-300 group-hover/logo:border-emerald-400/50 group-hover/logo:shadow-emerald-400/20">
-                  <img alt="ASTU Logo" className="h-8 w-8 object-contain rounded-md"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" />
+                <div className="w-11 h-11 flex items-center justify-center">
+                  <img alt="ASTU Logo" className="h-10 w-10 object-contain scale-110"
+                    src="/images/astu-seal-logo.png" />
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-[#003366] shadow-lg animate-pulse" />
-                {!sidebarCollapsed && (
-                  <div className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 text-[7px] font-extrabold rounded border border-emerald-500/30 uppercase tracking-wider opacity-0 group-hover/logo:opacity-100 transition-opacity">Live</div>
-                )}
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 " />
+
               </div>
               {!sidebarCollapsed && <div>
                 <h1 className="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">ASTU Employer</h1>
@@ -460,7 +480,6 @@ const EmployerDashboard = () => {
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-2 mb-2">
                 <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">Recruiting</p>
-                <span className="text-[8px] text-emerald-600 dark:text-emerald-400/50 font-bold px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-400/5 rounded border border-emerald-200 dark:border-emerald-400/10">5 items</span>
               </div>
             )}
             <div className="space-y-0.5">
@@ -512,7 +531,7 @@ const EmployerDashboard = () => {
             <div className="space-y-0.5">
               {[
                 { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbacks.length > 0 ? feedbacks.length : null, tooltip: `${feedbacks.length} feedback submissions` },
-                { id: 'chat', label: 'Messages', icon: 'forum', badge: messages.filter(m => m.unread).length > 0 ? messages.filter(m => m.unread).length : null, tooltip: `${messages.filter(m => m.unread).length} unread messages` },
+                { id: 'chat', label: 'Messages', icon: 'forum', badge: realUnreadMessages > 0 ? realUnreadMessages : null, tooltip: `${realUnreadMessages} unread messages` },
                 { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
                 { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
               ].map((item) => (
@@ -1078,6 +1097,20 @@ const EmployerDashboard = () => {
               <ApplicationsTab
                 applications={applications}
                 onUpdateStatus={handleUpdateApplicationStatus}
+                onMessageCandidate={(app) => {
+                  setActiveChatTarget({
+                    id: app.userId || app.alumniId,
+                    userId: app.userId || app.alumniId,
+                    name: app.alumnusName,
+                    email: app.alumnusEmail,
+                    avatar: app.alumnusAvatar,
+                    role: 'ALUMNI',
+                    roleLabel: 'Alumni Candidate',
+                    department: app.department
+                  });
+                  setActiveTab('messages');
+                  toast.success(`Opening conversation with ${app.alumnusName}...`);
+                }}
                 darkMode={darkMode}
               />
             )}
@@ -1085,6 +1118,17 @@ const EmployerDashboard = () => {
             {activeTab === 'search_talent' && (
               <TalentSearchTab
                 darkMode={darkMode}
+                onSelectChatTarget={(target) => {
+                  setActiveChatTarget({
+                    id: target.userId || target.alumniId,
+                    userId: target.userId || target.alumniId,
+                    name: target.name,
+                    role: 'ALUMNI',
+                    roleLabel: 'Alumni Candidate'
+                  });
+                  setActiveTab('messages');
+                  toast.success(`Opening ASTU_AMS Hub chat with ${target.name}...`);
+                }}
               />
             )}
 
@@ -1096,9 +1140,10 @@ const EmployerDashboard = () => {
               />
             )}
 
-            {activeTab === 'chat' && (
+            {(activeTab === 'chat' || activeTab === 'messages') && (
               <MessagingTab
                 darkMode={darkMode}
+                initialTarget={activeChatTarget}
               />
             )}
 

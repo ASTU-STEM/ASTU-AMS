@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   ArrowDownUp,
   Building2,
@@ -299,7 +299,7 @@ export default function UserManagement() {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [searchFocused, setSearchFocused] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     const { adminService } = await import('../services/admin.service');
     const response = await adminService.getUsers({
@@ -320,11 +320,11 @@ export default function UserManagement() {
       }
     }
     setLoading(false);
-  };
+  }, [page, query, selectedRole, selectedStatus, selectedDepartment]);
 
   useEffect(() => {
     fetchUsers();
-  }, [page, query, selectedRole, selectedStatus, selectedDepartment, sortKey, sortDirection]);
+  }, [fetchUsers]);
 
   useEffect(() => {
     setPage(1);

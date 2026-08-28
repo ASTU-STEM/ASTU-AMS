@@ -1,16 +1,18 @@
-import { IAnalyticsRepository } from '../ports/IAnalyticsRepository';
+import { IAnalyticsRepository, AnalyticsFilterParams } from '../ports/IAnalyticsRepository';
 import { AnalyticsReport } from '../../domain/entities/Analytics';
 import { AnalyticsCacheService } from '../../infrastructure/services/AnalyticsCacheService';
 
 export class GetAnalyticsReport {
   constructor(private readonly repo: IAnalyticsRepository) {}
 
-  async execute(): Promise<AnalyticsReport> {
-    const cacheKey = 'analytics:dashboard';
+  async execute(filters?: AnalyticsFilterParams): Promise<AnalyticsReport> {
+    const yearKey = filters?.academicYear || 'all';
+    const deptKey = filters?.department || 'all';
+    const cacheKey = `analytics:dashboard:${yearKey}:${deptKey}`;
+
     const cached = await AnalyticsCacheService.get<any>(cacheKey);
     
     if (cached) {
-      // Reconstruct classes from JSON representation
       return cached as AnalyticsReport;
     }
 
@@ -23,13 +25,13 @@ export class GetAnalyticsReport {
       curriculum,
       tracer,
     ] = await Promise.all([
-      this.repo.getOverallEmploymentStats(),
-      this.repo.getSkillGapStats(),
-      this.repo.getDepartmentMetrics(),
-      this.repo.getEmployerAnalytics(),
-      this.repo.getDepartmentAnalytics(),
-      this.repo.getCurriculumAnalytics(),
-      this.repo.getTracerAnalytics(),
+      this.repo.getOverallEmploymentStats(filters),
+      this.repo.getSkillGapStats(filters),
+      this.repo.getDepartmentMetrics(filters),
+      this.repo.getEmployerAnalytics(filters),
+      this.repo.getDepartmentAnalytics(filters),
+      this.repo.getCurriculumAnalytics(filters),
+      this.repo.getTracerAnalytics(filters),
     ]);
 
     const report = new AnalyticsReport(
@@ -42,7 +44,7 @@ export class GetAnalyticsReport {
       tracer
     );
 
-    await AnalyticsCacheService.set(cacheKey, report, 600); // 10 minutes TTL
+    await AnalyticsCacheService.set(cacheKey, report, 60); // 1 minute TTL for dynamic filters
 
     return report;
   }

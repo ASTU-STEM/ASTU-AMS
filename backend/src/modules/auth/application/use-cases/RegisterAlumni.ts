@@ -2,7 +2,7 @@ import { IUserRepository } from '../ports/IUserRepository';
 import { PrismaClient } from '@prisma/client';
 import { EmailService } from '../../../../core/services/EmailService';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 export interface RegisterAlumniRequest {
   firstName: string;
@@ -23,7 +23,7 @@ export interface RegisterAlumniRequest {
 }
 
 export class RegisterAlumni {
-  constructor(private userRepo: IUserRepository, private emailService: EmailService) {}
+  constructor(private userRepo: IUserRepository, private emailService: EmailService) { }
 
   async execute(req: RegisterAlumniRequest) {
     const profile = await prisma.alumniProfile.findUnique({
@@ -32,7 +32,11 @@ export class RegisterAlumni {
     });
 
     if (!profile) {
-      throw new Error('Student ID not found in alumni records. Ask registrar to import graduate data.');
+      return { 
+        success: false, 
+        redirect: 'contact-registrar', 
+        message: 'Student ID not found in alumni records. Please submit a data correction request.' 
+      } as any;
     }
 
     if (profile.status === 'ACTIVE' && profile.userId) {
@@ -44,20 +48,29 @@ export class RegisterAlumni {
 
     // Check if the name matches approximately, allow some leeway for Middle name abbreviations etc, or just direct match.
     // We'll just do a simple contains check for now to avoid strict false negatives.
-    if (!normalizedProfileName.includes(req.firstName.trim().toLowerCase()) || !normalizedProfileName.includes(req.lastName.trim().toLowerCase())) {
-      throw new Error('The provided name does not match the alumni record.');
+    if (!normalizedProfileName.includes(req.firstName.trim().toLowerCase()) || !normalizedProfileName.includes(req.middleName.trim().toLowerCase())) {
+      return { 
+        success: false, 
+        redirect: 'contact-registrar', 
+        message: 'The provided name does not match the alumni record. Please submit a data correction request.' 
+      } as any;
     }
 
     if (!req.hasNoAstuEmail && profile.email && req.email && req.email.toLowerCase() !== profile.email.toLowerCase()) {
-      throw new Error('Provided email does not match the ASTU email on record. If you do not have access to it, select the corresponding option.');
+      return { 
+        success: false, 
+        redirect: 'contact-registrar', 
+        message: 'Provided email does not match the ASTU email on record. Please submit a data correction request.' 
+      } as any;
     }
 
-    // If the student has no email on record, or they explicitly selected hasNoAstuEmail,
-    // we bypass email verification and they will be routed to Didit/Manual.
+    // If the student has no email on record, but provided one, we use it as target
+    const targetEmail = profile.email || req.email;
+
     let verificationCode: string | null = null;
     let expiresAt: Date | null = null;
 
-    if (!req.hasNoAstuEmail && profile.email) {
+    if (!req.hasNoAstuEmail && targetEmail) {
       verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
       expiresAt = new Date(Date.now() + 15 * 60 * 1000);
     }
@@ -76,6 +89,7 @@ export class RegisterAlumni {
         status: 'INACTIVE',
         phone: req.phone || profile.phone,
         gender: req.gender || profile.gender,
+        email: targetEmail, // Update the email in DB
         experiences: {
           create: {
             companyName: req.workPlace,
@@ -88,15 +102,15 @@ export class RegisterAlumni {
       },
     });
 
-    if (verificationCode && profile.email) {
-      await this.emailService.sendVerificationCode(profile.email, verificationCode, req.studentId);
+    if (verificationCode && targetEmail) {
+      await this.emailService.sendVerificationCode(targetEmail, verificationCode, req.studentId);
     }
 
     return {
       studentId: req.studentId,
-      email: req.hasNoAstuEmail ? null : profile.email,
+      email: req.hasNoAstuEmail ? null : targetEmail,
       verificationCodeSent: !!verificationCode,
-      message: verificationCode 
+      message: verificationCode
         ? 'Verification code sent to registered student email. Valid for 15 minutes.'
         : 'Registration successful. Proceed to National ID or Manual verification.',
     };

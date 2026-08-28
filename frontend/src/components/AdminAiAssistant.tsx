@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   X,
   Send,
@@ -119,7 +119,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
 
   // Active messages selector
   const activeSession = sessions.find((s) => s.id === activeSessionId) || sessions[0];
-  const activeMessages = activeSession ? activeSession.messages : [];
+  const activeMessages = useMemo(() => (activeSession ? activeSession.messages : []), [activeSession]);
 
   // Sync sessions to localStorage
   useEffect(() => {

@@ -263,13 +263,15 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background text-on-surface">
       <header className="sticky top-0 z-50 border-b border-outline-variant bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-3 px-4 md:px-8">
-          <Link to="/" className="flex min-w-fit items-center gap-2">
-            <div className="rounded-full border border-outline-variant p-1.5">
-              <GraduationCap className="h-4 w-4 text-astu-red" />
-            </div>
+          <Link to="/" className="flex min-w-fit items-center gap-2.5">
+            <img
+              src="/images/astu-seal-logo.png"
+              alt="ASTU Seal Logo"
+              className="h-10 w-10 object-contain scale-110 shrink-0"
+            />
             <div>
-              <p className="text-sm font-bold leading-none text-astu-navy">ASTU-AMS</p>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">Alumni Ecosystem</p>
+              <p className="text-sm font-bold leading-none text-astu-navy">ASTU AMS</p>
+              <p className="text-[10px] text-on-surface-variant">Alumni Management</p>
             </div>
           </Link>
 
@@ -768,9 +770,12 @@ export default function LandingPage() {
 
       <footer className="border-t border-outline-variant bg-surface py-10">
         <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-4 md:px-8">
-          <div>
-            <h5 className="text-sm font-bold text-astu-navy">ASTU-AMS</h5>
-            <p className="mt-2 text-xs text-on-surface-variant">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2.5">
+              <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-8 w-8 object-contain scale-110" />
+              <h5 className="text-sm font-bold text-astu-navy">ASTU-AMS</h5>
+            </div>
+            <p className="mt-1 text-xs text-on-surface-variant">
               The ASTU Alumni Management System connects graduates, employers, and departments in one platform.
             </p>
             <div className="mt-4 flex gap-2">

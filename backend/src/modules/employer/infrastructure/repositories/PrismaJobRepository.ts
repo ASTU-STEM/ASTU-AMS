@@ -18,13 +18,10 @@ export class PrismaJobRepository implements IJobRepository {
   }
 
   async search(criteria: any): Promise<Job[]> {
-    const { department, departments, employmentType, location, experienceLevel, skills } = criteria;
+    const { department, employmentType, location, experienceLevel, skills } = criteria;
     const whereClause: any = { status: 'PUBLISHED' };
 
     if (department) whereClause.department = department;
-    if (departments && Array.isArray(departments) && departments.length > 0) {
-      whereClause.departments = { hasSome: departments };
-    }
     if (employmentType) whereClause.employmentType = employmentType;
     if (location) whereClause.location = { contains: location, mode: 'insensitive' };
     if (experienceLevel) whereClause.experienceLevel = experienceLevel;

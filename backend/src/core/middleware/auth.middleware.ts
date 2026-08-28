@@ -17,3 +17,17 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     return sendError(res, 'Invalid or expired token', error.message, 401);
   }
 };
+
+export const optionalAuthenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const decoded = verifyAccessToken(token);
+      (req as any).user = decoded;
+    }
+  } catch {
+    // Ignore invalid tokens for optional auth
+  }
+  next();
+};

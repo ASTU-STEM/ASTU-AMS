@@ -1,7 +1,7 @@
 import { PrismaClient, SupportTicketStatus, Role } from '@prisma/client';
 import { PrismaNotificationRepository } from '../../../notifications/infrastructure/repositories/PrismaNotificationRepository';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 const notificationRepo = new PrismaNotificationRepository();
 
 interface SubmitSupportTicketDTO {

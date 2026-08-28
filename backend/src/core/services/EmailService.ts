@@ -26,11 +26,6 @@ export class EmailService {
   }
 
   async sendMail(options: MailOptions) {
-    if (process.env.NODE_ENV === 'test') {
-      console.log(`[TEST MODE] Mock email sent to ${options.to}: ${options.subject}`);
-      return { messageId: 'mock-id' };
-    }
-
     const message = {
       from: options.from || env.SMTP_FROM,
       to: options.to,
@@ -48,7 +43,7 @@ export class EmailService {
     const subject = 'ASTU Alumni Verification Code';
     const text = `Your verification code for student ID ${studentId} is ${code}. It expires in 15 minutes.`;
     const html = `<p>Hello,</p><p>Your verification code for student ID <strong>${studentId}</strong> is <strong>${code}</strong>.</p><p>This code expires in 15 minutes.</p><p>If you did not request this code, please ignore this email.</p>`;
-    
+
     // Log for local testing
     console.log(`\n================================`);
     console.log(`[DEV TEST] OTP Code for ${email}: ${code}`);
@@ -63,9 +58,24 @@ export class EmailService {
   }
 
   async sendTemporaryPassword(email: string, temporaryPassword: string, role: string) {
-    const subject = 'ASTU Account Credentials';
-    const text = `Your ${role} account has been created. Your temporary password is: ${temporaryPassword}. Please change your password after first login.`;
-    const html = `<p>Hello,</p><p>Your ${role} account has been created successfully.</p><p>Your temporary password is: <strong>${temporaryPassword}</strong></p><p>Please change your password after first login.</p>`;
+    const subject = 'Welcome to ASTU Management System - Your Account Credentials';
+    const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nAn administrator has successfully created an account for you with the role of ${role}.\n\nYour login credentials are as follows:\nEmail: ${email}\nTemporary Password: ${temporaryPassword}\n\nFor security reasons, please ensure that you change this temporary password immediately after your first login.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #003366;">Welcome to ASTU Management System</h2>
+        <p>Dear User,</p>
+        <p>Welcome to the Adama Science and Technology University (ASTU) Management System.</p>
+        <p>An administrator has successfully created an account for you with the designated role of <strong>${role}</strong>.</p>
+        <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #E8A020; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Email:</strong> ${email}</p>
+          <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> ${temporaryPassword}</p>
+        </div>
+        <p>For security purposes, please ensure that you change this temporary password immediately after logging in for the first time.</p>
+        <p>We are thrilled to have you on board!</p>
+        <br/>
+        <p>Best regards,<br/><strong>ASTU Management System Team</strong></p>
+      </div>
+    `;
     return this.sendMail({ to: email, subject, text, html });
   }
 
@@ -105,5 +115,56 @@ export class EmailService {
   async sendGenericNotification(email: string, subject: string, message: string) {
     const html = `<p>Hello,</p><p>${message}</p><p>Login to ASTU AMS for more details.</p>`;
     return this.sendMail({ to: email, subject, text: message, html });
+  }
+
+  async sendAccountActivatedEmail(email: string, role: string) {
+    const subject = 'Your ASTU Management System Account is Now Active';
+    const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nYour account has been verified and activated by an administrator. You can now log in and access your ${role} dashboard.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #003366;">Account Activated</h2>
+        <p>Dear User,</p>
+        <p>Welcome to the Adama Science and Technology University (ASTU) Management System.</p>
+        <p>We are pleased to inform you that your account has been verified and activated by an administrator.</p>
+        <p>You can now log in and access your <strong>${role}</strong> dashboard.</p>
+        <p>We are thrilled to have you on board!</p>
+        <br/>
+        <p>Best regards,<br/><strong>ASTU Management System Team</strong></p>
+      </div>
+    `;
+    return this.sendMail({ to: email, subject, text, html });
+  }
+
+  async sendDirectMessageNotification(toEmail: string, recipientName: string, senderName: string, messageSnippet: string) {
+    const subject = `New Message from ${senderName} on ASTU Alumni Portal`;
+    const text = `Hello ${recipientName},\n\n${senderName} has sent you a message on ASTU Alumni Portal:\n\n"${messageSnippet}"\n\nPlease log in to your portal to view and reply.\n\nBest regards,\nASTU Alumni Portal Team`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
+        <div style="background-color: #003366; padding: 20px; text-align: center; color: #ffffff;">
+          <h2 style="margin: 0; font-size: 20px;">ASTU Alumni Messenger</h2>
+        </div>
+        <div style="padding: 24px; color: #333333;">
+          <p style="font-size: 15px;">Hello <strong>${recipientName}</strong>,</p>
+          <p style="font-size: 14px;"><strong>${senderName}</strong> is messaged u login and reply on the ASTU Alumni Portal.</p>
+          <div style="background-color: #f5f7fa; border-left: 4px solid #003366; padding: 14px; margin: 18px 0; font-style: italic; border-radius: 4px;">
+            "${messageSnippet}"
+          </div>
+          <div style="text-align: center; margin-top: 24px;">
+            <a href="http://localhost:5173" style="background-color: #003366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block;">Log in & Reply</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    console.log(`\n================================`);
+    console.log(`[EMAIL DISPATCH] Alert sent to ${toEmail} from ${senderName}: "${messageSnippet}"`);
+    console.log(`================================\n`);
+
+    try {
+      return await this.sendMail({ to: toEmail, subject, text, html });
+    } catch (e) {
+      console.warn('Email send warning (SMTP fallback active):', e);
+      return null;
+    }
   }
 }

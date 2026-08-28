@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 /**
  * SubmitManualVerification
@@ -40,21 +40,21 @@ export class SubmitManualVerification {
       throw new Error('This alumni account is already active.');
     }
 
-    // Store the manual verification request in DocumentRequest
-    const docRequest = await prisma.documentRequest.create({
+    // Store the manual verification request in VerificationRequest
+    const verifyRequest = await prisma.verificationRequest.create({
       data: {
         alumniId: profile.id,
-        documentType: documentType || 'MANUAL_VERIFICATION',
+        type: documentType || 'MANUAL_VERIFICATION',
         status: 'PENDING',
-        additionalInstructions: [
+        notes: [
           fullName ? `Full Name: ${fullName}` : '',
           graduationYear ? `Graduation Year: ${graduationYear}` : '',
           country ? `Country: ${country}` : '',
           phone ? `Phone: ${phone}` : '',
-        ].filter(Boolean).join(' | '),
-        fileUrls: fileUrls,
-        notes: notes || null,
-        contactEmail: contactEmail || null,
+          notes ? `Notes: ${notes}` : '',
+          contactEmail ? `Contact Email: ${contactEmail}` : ''
+        ].filter(Boolean).join('\n'),
+        documentUrl: fileUrls.length > 0 ? fileUrls[0] : null,
       },
     });
 
@@ -79,7 +79,7 @@ export class SubmitManualVerification {
 
     return {
       success: true,
-      requestId: docRequest.id,
+      requestId: verifyRequest.id,
       message: 'Your verification request has been submitted successfully. The registrar will review your documents and activate your account.',
     };
   }

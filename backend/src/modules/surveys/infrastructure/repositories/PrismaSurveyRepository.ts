@@ -117,8 +117,10 @@ export class PrismaSurveyRepository implements ISurveyRepository {
       const existing = await tx.survey.findUnique({ where: { id } });
       if (!existing) throw new Error('Survey template not found');
 
-      await tx.surveyQuestion.deleteMany({ where: { surveyId: id } });
-      await tx.surveySection.deleteMany({ where: { surveyId: id } });
+      if (data.sections !== undefined || data.questions !== undefined) {
+        await tx.surveyQuestion.deleteMany({ where: { surveyId: id } });
+        await tx.surveySection.deleteMany({ where: { surveyId: id } });
+      }
 
       const updated = await tx.survey.update({
         where: { id },

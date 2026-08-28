@@ -47,7 +47,10 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       selectedLocation === 'All' ||
       job.location.toLowerCase().includes(selectedLocation.toLowerCase());
 
-    const matchesFormat = selectedFormat === 'All' || job.type === selectedFormat;
+    const matchesFormat =
+      selectedFormat === 'All' ||
+      job.type.toLowerCase().replace(/[^a-z]/g, '').includes(selectedFormat.toLowerCase().replace(/[^a-z]/g, '')) ||
+      selectedFormat.toLowerCase().replace(/[^a-z]/g, '').includes(job.type.toLowerCase().replace(/[^a-z]/g, ''));
 
     return matchesSearch && matchesLocation && matchesFormat;
   });
@@ -88,12 +91,8 @@ return (
           <div className="flex flex-col sm:flex-row items-start gap-5">
             <img
               alt="ASTU Logo"
-              className="h-16 w-16 object-contain rounded-xl bg-white p-1 border border-white/20 shadow-md"
-              src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
-              onError={(e) => {
-                // Fallback icon placeholder if your local image isn't loaded
-                (e.target as HTMLElement).style.display = 'none';
-              }}
+              className="h-14 w-14 object-contain scale-110 shrink-0"
+              src="/images/astu-seal-logo.png"
             />
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFCC00]/20 text-[#FFD700] text-xs font-bold uppercase tracking-widest rounded-full border border-[#FFCC00]/30">

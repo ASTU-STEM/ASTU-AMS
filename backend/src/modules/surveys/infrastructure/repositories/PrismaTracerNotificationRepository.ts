@@ -4,7 +4,7 @@ import prisma from '../../../../core/config/db';
 
 export class PrismaTracerNotificationRepository implements ITracerNotificationRepository {
   async create(data: Omit<TracerNotification, 'id' | 'createdAt'>): Promise<TracerNotification> {
-    const notification = await prisma.tracerNotification.create({ data });
+    const notification = await prisma.tracerNotification.create({ data: data as any });
     return notification as any as TracerNotification;
   }
 

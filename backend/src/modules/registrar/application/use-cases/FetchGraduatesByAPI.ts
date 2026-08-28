@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
+import { TracerStudyService } from '../../../surveys/services/TracerStudyService';
 
 export interface GraduateRecord {
   studentId: string;
@@ -116,6 +117,14 @@ export class FetchGraduatesByAPI {
         console.error(`Failed to sync graduate ${grad.studentId}:`, err.message);
         results.failed++;
       }
+    }
+
+    // Trigger milestone survey pipeline for newly synced/updated graduates
+    try {
+      const tracerService = new TracerStudyService();
+      await tracerService.checkEligibleAlumni();
+    } catch (e: any) {
+      console.warn('Tracer milestone check warning after graduate sync:', e.message);
     }
 
     return results;

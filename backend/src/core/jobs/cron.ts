@@ -7,7 +7,47 @@ const dispatcher = new NotificationDispatcher();
 export function initCronJobs() {
   console.log('Initializing background cron jobs...');
 
-  // Run every day at 8:00 AM
+  // 1. Run every minute: Server-side automatic content scheduler
+  cron.schedule('* * * * *', async () => {
+    try {
+      const setting = await (prisma as any).systemSetting.findUnique({ where: { key: 'cms_content_items' } });
+      if (!setting || !setting.value || !Array.isArray(setting.value)) return;
+
+      const items: any[] = setting.value;
+      const now = new Date();
+      let updatedCount = 0;
+
+      const updatedItems = items.map((item) => {
+        if (item.status === 'Scheduled') {
+          const schedTime = item.scheduledIso ? new Date(item.scheduledIso) : (item.scheduledFor ? new Date(item.scheduledFor) : null);
+          if (schedTime && !isNaN(schedTime.getTime()) && schedTime <= now) {
+            updatedCount++;
+            console.log(`[Cron Publisher] Automatically publishing scheduled item: "${item.title}"`);
+            return {
+              ...item,
+              status: 'Published',
+              publishedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              updatedAt: 'Just now',
+            };
+          }
+        }
+        return item;
+      });
+
+      if (updatedCount > 0) {
+        await (prisma as any).systemSetting.upsert({
+          where: { key: 'cms_content_items' },
+          update: { value: updatedItems, updatedAt: new Date() },
+          create: { key: 'cms_content_items', value: updatedItems },
+        });
+        console.log(`[Cron Publisher] Successfully published ${updatedCount} scheduled item(s) to DB.`);
+      }
+    } catch {
+      /* ignore cron errors */
+    }
+  });
+
+  // 2. Run every day at 8:00 AM: Survey reminders
   cron.schedule('0 8 * * *', async () => {
     console.log('Running daily survey reminder job...');
     try {
@@ -15,13 +55,12 @@ export function initCronJobs() {
       const threeDaysFromNow = new Date();
       threeDaysFromNow.setDate(now.getDate() + 3);
 
-      // Find assignments due in the next 3 days where reminder wasn't sent
       const pendingAssignments = await prisma.surveyAssignment.findMany({
         where: {
           status: 'PENDING',
           dueDate: {
             lte: threeDaysFromNow,
-            gt: now, // still in the future
+            gt: now,
           },
           threeDayReminderSent: false,
         },
@@ -42,7 +81,6 @@ export function initCronJobs() {
             assignment.dueDate
           );
 
-          // Mark reminder as sent
           await prisma.surveyAssignment.update({
             where: { id: assignment.id },
             data: { threeDayReminderSent: true }

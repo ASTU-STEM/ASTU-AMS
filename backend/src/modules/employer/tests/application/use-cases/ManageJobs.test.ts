@@ -24,7 +24,7 @@ describe('ManageJobs Use Cases', () => {
       const useCase = new CreateJob(mockJobRepo, mockEmpRepo);
       const result = await useCase.execute('usr1', { title: 'Dev' });
 
-      expect(result).toEqual(mockJob);
+      expect(result).toEqual({ ...mockJob, recommendations: [] });
       expect(mockJobRepo.create).toHaveBeenCalledWith(expect.objectContaining({ title: 'Dev', employerId: 'emp1' }));
     });
   });

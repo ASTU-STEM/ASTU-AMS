@@ -5,7 +5,10 @@ import { requestDocumentSchema, updateDocumentStatusSchema } from './documents.v
 import { PrismaDocumentRequestRepository } from '../infrastructure/repositories/PrismaDocumentRequestRepository';
 import { RequestDocument, UpdateDocumentStatus, GetAlumniDocuments, GetAllDocumentRequests } from '../application/use-cases/ManageDocuments';
 
+import { EmailService } from '../../../core/services/EmailService';
+
 const repo = new PrismaDocumentRequestRepository();
+const emailService = new EmailService();
 
 export class DocumentsController {
 
@@ -13,7 +16,7 @@ export class DocumentsController {
     try {
       const alumniId = (req as any).user?.userId;
       const data = requestDocumentSchema.parse(req.body);
-      const useCase = new RequestDocument(repo);
+      const useCase = new RequestDocument(repo, emailService);
       const result = await useCase.execute(alumniId, data);
       return sendSuccess(res, 'Document request submitted successfully.', result, 201);
     } catch (err) { next(err); }

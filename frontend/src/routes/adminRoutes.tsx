@@ -15,6 +15,8 @@ import SystemSettings from '../features/admin/pages/SystemSettings';
 import SuperAdminModules from '../features/admin/pages/SuperAdminModules';
 import ReportsCenter from '../features/admin/pages/ReportsCenter';
 import AdminProfile from '../features/admin/pages/AdminProfile';
+import DonationsManagement from '../features/admin/pages/DonationsManagement';
+import AdminChatPage from '../features/admin/pages/AdminChatPage';
 
 export default function AdminRoutes() {
   return (
@@ -24,6 +26,7 @@ export default function AdminRoutes() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="modules" element={<SuperAdminModules />} />
         <Route path="reports" element={<ReportsCenter />} />
+        <Route path="messages" element={<AdminChatPage />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="roles" element={<RoleManagement />} />
         <Route path="analytics" element={<AnalyticsOverview />} />
@@ -31,6 +34,7 @@ export default function AdminRoutes() {
         <Route path="jobs" element={<JobsManagement />} />
         <Route path="departments" element={<DepartmentManagement />} />
         <Route path="departments/:id" element={<DepartmentManagement />} />
+        <Route path="donations" element={<DonationsManagement />} />
         <Route path="notifications" element={<NotificationCenter />} />
         <Route path="logs" element={<SystemLogs />} />
         <Route path="backup" element={<BackupSecurity />} />

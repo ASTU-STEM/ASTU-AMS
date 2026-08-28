@@ -21,13 +21,7 @@ router.get('/logs', asyncHandler(RegistrarController.getLogs));
 router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));
 router.post('/fetch-graduates/current-and-previous', asyncHandler(RegistrarController.fetchCurrentAndPreviousGraduates));
 
-router.get('/dashboard', asyncHandler(RegistrarController.getDashboardSummary));
 router.get('/students/:studentId', asyncHandler(RegistrarController.getStudentRecord));
-router.get('/graduates', asyncHandler(RegistrarController.getAllGraduates));
-router.post('/graduates', asyncHandler(RegistrarController.addGraduate));
-router.put('/graduates/:id', asyncHandler(RegistrarController.updateGraduate));
-router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
-router.patch('/verifications/:requestId', asyncHandler(RegistrarController.resolveVerification));
 
 // Document Requests (Manual verification)
 router.get('/document-requests', asyncHandler(RegistrarController.getDocumentRequests));
@@ -38,5 +32,25 @@ router.get('/alumni/:alumniId', asyncHandler(RegistrarController.getAlumniDetail
 router.put('/alumni/:alumniId/status', asyncHandler(RegistrarController.updateAlumniStatus));
 router.post('/alumni/:alumniId/approve', asyncHandler(RegistrarController.approveAlumni));
 router.post('/alumni/:alumniId/suspend', asyncHandler(RegistrarController.suspendAlumni));
+
+// Registration Issues (Data Correction Requests)
+router.get('/registration-issues', asyncHandler(RegistrarController.getRegistrationIssues));
+router.put('/registration-issues/:id/resolve', asyncHandler(RegistrarController.resolveRegistrationIssue));
+router.post('/registration-issues/:id/create-account', asyncHandler(RegistrarController.createAccountFromIssue));
+
+// SIS Records & Batch Import
+router.get('/sis-records', asyncHandler(RegistrarController.getSisRecords));
+router.post('/batch-import', asyncHandler(RegistrarController.batchImport));
+
+// Dashboard Stats
+router.get('/dashboard-stats', asyncHandler(RegistrarController.getDashboardStats));
+
+// Verifications
+router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
+router.patch('/verifications/:id/status', asyncHandler(RegistrarController.updateVerificationStatus));
+
+// Document Status Update
+router.patch('/document-requests/:id/status', asyncHandler(RegistrarController.updateDocumentStatus));
+router.post('/document-requests/:id/approve', upload.single('document'), asyncHandler(RegistrarController.approveDocumentRequest));
 
 export default router;

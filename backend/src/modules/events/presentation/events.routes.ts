@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateJWT } from '../../../core/middleware/auth.middleware';
+import { authenticateJWT, optionalAuthenticateJWT } from '../../../core/middleware/auth.middleware';
 import { requireRoles } from '../../../core/middleware/role.middleware';
 import { Role } from '@prisma/client';
 import {
@@ -13,8 +13,8 @@ import {
 
 const router = Router();
 
-// Publicly available to all authenticated users
-router.get('/', authenticateJWT, getEventsController);
+// Publicly available for landing page (optional auth for user details)
+router.get('/', optionalAuthenticateJWT, getEventsController);
 router.get('/:eventId/attendees', authenticateJWT, getAttendeesController);
 
 // Restricted to ALUMNI_OFFICE and ADMIN for managing events

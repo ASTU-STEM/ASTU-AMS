@@ -40,10 +40,13 @@ export interface EmployerJob {
 
 export interface CandidateApplication {
   id: number;
+  alumniId?: string;
+  userId?: string;
   jobId?: number;
   jobTitle: string;
   alumnusName: string;
   alumnusEmail: string;
+  alumnusAvatar?: string;
   cgpa: string;
   department: string;
   graduationYear: string;

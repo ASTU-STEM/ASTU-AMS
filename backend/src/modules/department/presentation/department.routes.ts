@@ -17,14 +17,4 @@ router.use(requireRoles([Role.DEPARTMENT_HEAD]));
 router.get('/my-stats', asyncHandler(DepartmentController.getMyDepartmentStats));
 router.get('/my-alumni', asyncHandler(DepartmentController.getMyDepartmentAlumni));
 
-// Analytics endpoints
-router.post('/overview', asyncHandler(DepartmentController.getOverview));
-router.post('/employment', asyncHandler(DepartmentController.getEmploymentData));
-router.post('/employer-feedback', asyncHandler(DepartmentController.getEmployerFeedback));
-router.post('/skill-gap', asyncHandler(DepartmentController.getSkillGapData));
-router.post('/tracer-surveys', asyncHandler(DepartmentController.getTracerSurveyData));
-router.post('/curriculum', asyncHandler(DepartmentController.getCurriculumInsights));
-router.get('/accreditation-reports', asyncHandler(DepartmentController.getAccreditationReports));
-router.get('/export-reports', asyncHandler(DepartmentController.getExportReports));
-
 export default router;

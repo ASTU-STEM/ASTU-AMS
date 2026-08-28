@@ -4,7 +4,7 @@ import {
   Eye, FilePlus2, GripVertical, MoreHorizontal, Plus,
   Send, Sparkles, Trash2, X, BarChart as BarChartIcon,
   Calendar, Edit2, Play, Search, Filter, RefreshCw, Mail,
-  Users, CheckCircle, Clock, AlertTriangle, AlertCircle, TrendingUp
+  Users, CheckCircle, Clock, AlertTriangle, AlertCircle, TrendingUp, GraduationCap
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
@@ -54,12 +54,76 @@ export default function SurveyManagement() {
   const [loading, setLoading] = useState(false);
   const [selectedSurvey, setSelectedSurvey] = useState<any | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduledDateTime, setScheduledDateTime] = useState('');
+  const [isScheduling, setIsScheduling] = useState(false);
+
+  const getNowDateTimeLocal = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const handleScheduleSurvey = async () => {
+    if (!selectedSurvey || !scheduledDateTime) return;
+    setIsScheduling(true);
+    try {
+      const scheduledDateObj = new Date(scheduledDateTime);
+      const isoString = scheduledDateObj.toISOString();
+      const isNowOrPast = scheduledDateObj <= new Date();
+
+      await surveyService.updateSurvey(selectedSurvey.id, {
+        scheduledAt: isoString,
+        isActive: true,
+      });
+
+      if (isNowOrPast) {
+        await surveyService.activateSurvey(selectedSurvey.id).catch(() => {});
+        toast.success(`Survey scheduled for NOW (${scheduledDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}) and activated for alumni!`);
+      } else {
+        toast.success(`Survey successfully scheduled for ${scheduledDateObj.toLocaleString()}!`);
+      }
+
+      setIsScheduleModalOpen(false);
+      fetchSurveys();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to schedule survey');
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
+  const handleDeleteSurvey = async (e: React.MouseEvent, survey: any) => {
+    e.stopPropagation();
+    const isFixed = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(survey.type);
+    if (isFixed) {
+      return toast.error('Fixed milestone templates (6, 12, 18, 24-Month) cannot be deleted.');
+    }
+
+    if (!window.confirm(`Are you sure you want to delete custom survey "${survey.title}"?`)) return;
+
+    try {
+      await surveyService.deleteSurvey(survey.id);
+      toast.success('Custom survey deleted successfully!');
+      if (selectedSurvey?.id === survey.id) {
+        setSelectedSurvey(null);
+        setActiveTab('all');
+      }
+      fetchSurveys();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete custom survey');
+    }
+  };
 
   // Builder State
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<SurveyType>('SIX_MONTH');
+  const [type, setType] = useState<SurveyType>('CUSTOM');
+  const [targetAudience, setTargetAudience] = useState<'ALUMNI' | 'EMPLOYERS' | 'BOTH'>('ALUMNI');
   const [sections, setSections] = useState<Section[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,8 +132,15 @@ export default function SurveyManagement() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [batchFilter, setBatchFilter] = useState<string>('ALL');
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+
+  // Survey Details Responses State
+  const [selectedSurveyResponses, setSelectedSurveyResponses] = useState<any[]>([]);
+  const [surveyResponsesLoading, setSurveyResponsesLoading] = useState(false);
+  const [detailsSubTab, setDetailsSubTab] = useState<'questions' | 'responses'>('questions');
+  const [viewingResponseModal, setViewingResponseModal] = useState<any | null>(null);
 
   useEffect(() => {
     fetchSurveys(); // Always fetch on mount for stats
@@ -78,13 +149,13 @@ export default function SurveyManagement() {
   useEffect(() => {
     if (activeTab === 'all') fetchSurveys();
     if (activeTab === 'analytics') {
-      fetchStats();
-      fetchReport();
+      fetchStats(batchFilter);
+      fetchReport(batchFilter);
     }
     if (activeTab === 'waves') {
       fetchAssignments();
     }
-  }, [activeTab]);
+  }, [activeTab, batchFilter]);
 
   const fetchSurveys = async () => {
     setLoading(true);
@@ -98,10 +169,10 @@ export default function SurveyManagement() {
     }
   };
 
-  const fetchStats = async () => {
+  const fetchStats = async (batch?: string) => {
     setLoading(true);
     try {
-      const data = await surveyService.getSurveyStats();
+      const data = await surveyService.getSurveyStats(batch);
       setStats(data);
     } catch (err) {
       console.error(err);
@@ -110,10 +181,10 @@ export default function SurveyManagement() {
     }
   };
 
-  const fetchReport = async () => {
+  const fetchReport = async (batch?: string) => {
     setAnalyticsLoading(true);
     try {
-      const data = await surveyService.getCompletionReport();
+      const data = await surveyService.getCompletionReport(batch);
       setCompletionReport(data || []);
     } catch (err) {
       console.error(err);
@@ -161,7 +232,7 @@ export default function SurveyManagement() {
     setType(survey.type);
     
     // Map existing sections and questions to builder state
-    const mappedSections = survey.sections?.map((s: any) => ({
+    let mappedSections = survey.sections?.map((s: any) => ({
       id: s.id,
       title: s.title,
       description: s.description || '',
@@ -176,21 +247,28 @@ export default function SurveyManagement() {
       })) || []
     })) || [];
     
-    // If questions exist directly on survey but no sections (legacy), wrap them in a default section
-    if (mappedSections.length === 0 && survey.questions && survey.questions.length > 0) {
-      mappedSections.push({
-        title: 'Main Section',
-        description: '',
-        order: 0,
-        questions: survey.questions.map((q: any) => ({
-          id: q.id,
-          questionText: q.questionText,
-          questionType: q.questionType,
-          required: q.required,
-          options: q.options || [],
-          order: q.order
-        }))
-      });
+    // If section questions are empty, but direct questions exist on survey object, populate them into the section!
+    const totalSectionQs = mappedSections.reduce((sum: number, s: any) => sum + s.questions.length, 0);
+    if (totalSectionQs === 0 && survey.questions && survey.questions.length > 0) {
+      const formattedQuestions = survey.questions.map((q: any, i: number) => ({
+        id: q.id,
+        questionText: q.questionText,
+        questionType: q.questionType,
+        required: q.required,
+        options: q.options || [],
+        order: q.order ?? i
+      }));
+
+      if (mappedSections.length > 0) {
+        mappedSections[0].questions = formattedQuestions;
+      } else {
+        mappedSections = [{
+          title: 'General Questions',
+          description: 'Survey Questions',
+          order: 0,
+          questions: formattedQuestions
+        }];
+      }
     }
     
     setSections(mappedSections);
@@ -201,7 +279,7 @@ export default function SurveyManagement() {
     setEditId(null);
     setTitle('');
     setDescription('');
-    setType('SIX_MONTH');
+    setType('CUSTOM');
     setSections([]);
   };
 
@@ -211,11 +289,23 @@ export default function SurveyManagement() {
     
     setIsSubmitting(true);
     try {
+      const flatQuestions = sections.flatMap((s, sIdx) =>
+        (s.questions || []).map((q, qIdx) => ({
+          questionText: q.questionText,
+          questionType: q.questionType,
+          required: q.required,
+          options: q.options || [],
+          order: sIdx * 100 + qIdx
+        }))
+      );
+
       const payload = {
         title,
         description,
         type,
+        targetAudience,
         milestoneMonths: type === 'SIX_MONTH' ? 6 : type === 'TWELVE_MONTH' ? 12 : type === 'EIGHTEEN_MONTH' ? 18 : type === 'TWENTY_FOUR_MONTH' ? 24 : undefined,
+        questions: flatQuestions,
         sections: sections.map(s => ({
           title: s.title,
           description: s.description,
@@ -224,7 +314,7 @@ export default function SurveyManagement() {
             questionText: q.questionText,
             questionType: q.questionType,
             required: q.required,
-            options: q.options,
+            options: q.options || [],
             order: i
           }))
         }))
@@ -238,7 +328,8 @@ export default function SurveyManagement() {
         setActiveTab('details');
       } else {
         const newSurvey = await surveyService.createSurvey(payload);
-        toast.success('Survey created successfully!');
+        const targetLabel = targetAudience === 'BOTH' ? 'Alumni & Employers' : targetAudience === 'EMPLOYERS' ? 'Employers' : 'Alumni';
+        toast.success(`🚀 Survey created & published! Multi-channel notifications dispatched via In-App, Email, and SMS to ${targetLabel}.`);
         setSelectedSurvey(newSurvey);
         setActiveTab('details');
       }
@@ -251,9 +342,20 @@ export default function SurveyManagement() {
     }
   };
 
-  const viewDetails = (survey: any) => {
+  const viewDetails = async (survey: any) => {
     setSelectedSurvey(survey);
+    setDetailsSubTab('questions');
     setActiveTab('details');
+    setSurveyResponsesLoading(true);
+    try {
+      const responses = await surveyService.getResponsesBySurvey(survey.id);
+      setSelectedSurveyResponses(responses || []);
+    } catch (err) {
+      console.error(err);
+      setSelectedSurveyResponses([]);
+    } finally {
+      setSurveyResponsesLoading(false);
+    }
   };
 
   // Compute aggregate stats from loaded surveys
@@ -339,22 +441,42 @@ export default function SurveyManagement() {
                     <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Milestone</th>
                     <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Status</th>
                     <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Questions</th>
+                    <th className="border-b border-slate-200 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {surveys.map(s => (
-                    <tr key={s.id} onClick={() => viewDetails(s)} className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer">
-                      <td className="px-4 py-4 font-semibold text-slate-900">{s.title}</td>
-                      <td className="px-4 py-4 text-slate-600">{s.type}</td>
-                      <td className="px-4 py-4 text-slate-600">{s.milestoneMonths ? `${s.milestoneMonths} Months` : 'Custom'}</td>
-                      <td className="px-4 py-4">
-                        <AdminBadge variant={s.isActive ? 'success' : 'neutral'}>{s.isActive ? 'Active' : 'Inactive'}</AdminBadge>
-                      </td>
-                      <td className="px-4 py-4 text-slate-600">{s.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) + (s.questions?.length || 0)}</td>
-                    </tr>
-                  ))}
+                  {surveys.map(s => {
+                    const isFixed = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(s.type);
+                    const qCount = (s.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) || 0) + (s.questions?.length || 0);
+                    return (
+                      <tr key={s.id} onClick={() => viewDetails(s)} className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer">
+                        <td className="px-4 py-4 font-semibold text-slate-900">{s.title}</td>
+                        <td className="px-4 py-4 text-slate-600">{s.type}</td>
+                        <td className="px-4 py-4 text-slate-600">{s.milestoneMonths ? `${s.milestoneMonths} Months` : 'Custom'}</td>
+                        <td className="px-4 py-4">
+                          <AdminBadge variant={s.isActive ? 'success' : 'neutral'}>{s.isActive ? 'Active' : 'Inactive'}</AdminBadge>
+                        </td>
+                        <td className="px-4 py-4 text-slate-600">{qCount}</td>
+                        <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                          {!isFixed ? (
+                            <button
+                              onClick={(e) => handleDeleteSurvey(e, s)}
+                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 shadow-sm transition-all"
+                              title="Delete custom survey"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                            </button>
+                          ) : (
+                            <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              Fixed Milestone
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {surveys.length === 0 && (
-                    <tr><td colSpan={5} className="p-8 text-center text-slate-500">No survey templates found. Create one!</td></tr>
+                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">No survey templates found. Create one!</td></tr>
                   )}
                 </tbody>
               </table>
@@ -365,6 +487,30 @@ export default function SurveyManagement() {
 
       {activeTab === 'analytics' && (
         <div className="space-y-6">
+          {/* Analytics Header & Batch Filter */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-[10px] border border-slate-200 bg-white p-4 shadow-sm">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-[#003580]" /> Graduation Batch Analytics & ABET Reports
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Filter tracer survey response rates and accreditation statistics by graduating class batch.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-600">Batch Filter:</span>
+              <select
+                value={batchFilter}
+                onChange={(e) => setBatchFilter(e.target.value)}
+                className="rounded-[8px] border border-slate-200 px-3 py-1.5 text-sm font-semibold text-[#003580] bg-slate-50 outline-none focus:border-[#003580] shadow-sm"
+              >
+                <option value="ALL">🎓 All Graduating Batches</option>
+                <option value="2024">🎓 2024 GC (Class of 2024)</option>
+                <option value="2025">🎓 2025 GC (Class of 2025)</option>
+                <option value="2026">🎓 2026 GC (Class of 2026)</option>
+                <option value="2027">🎓 2027 GC (Class of 2027)</option>
+              </select>
+            </div>
+          </div>
+
           {analyticsLoading ? (
             <div className="rounded-[10px] border border-slate-200 bg-white p-8 text-center text-slate-500">
               <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-[#003580]" />
@@ -674,6 +820,22 @@ export default function SurveyManagement() {
                       />
                     </div>
 
+                    {/* Batch filter dropdown */}
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-slate-400" />
+                      <select
+                        value={batchFilter}
+                        onChange={(e) => setBatchFilter(e.target.value)}
+                        className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                      >
+                        <option value="ALL">All Batches</option>
+                        <option value="2024">2024 GC</option>
+                        <option value="2025">2025 GC</option>
+                        <option value="2026">2026 GC</option>
+                        <option value="2027">2027 GC</option>
+                      </select>
+                    </div>
+
                     {/* Status filter dropdown */}
                     <div className="flex items-center gap-2">
                       <Filter className="h-4 w-4 text-slate-400" />
@@ -719,8 +881,9 @@ export default function SurveyManagement() {
                             surveyTitle.toLowerCase().includes(searchQuery.toLowerCase());
 
                           const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                          const matchesBatch = batchFilter === 'ALL' || String(item.alumni?.graduationYear) === batchFilter;
 
-                          return matchesSearch && matchesStatus;
+                          return matchesSearch && matchesStatus && matchesBatch;
                         });
 
                         if (filtered.length === 0) {
@@ -748,7 +911,14 @@ export default function SurveyManagement() {
                           return (
                             <tr key={item.id || idx} className="border-b border-slate-100 hover:bg-slate-50/50">
                               <td className="px-6 py-4">
-                                <div className="font-semibold text-slate-900">{item.alumni?.fullName}</div>
+                                <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                                  {item.alumni?.fullName}
+                                  {item.alumni?.graduationYear && (
+                                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200">
+                                      🎓 {item.alumni.graduationYear} GC
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="text-xs text-slate-500">{item.alumni?.email}</div>
                                 <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.alumni?.studentId}</div>
                               </td>
@@ -820,6 +990,11 @@ export default function SurveyManagement() {
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
                   Created: {new Date(selectedSurvey.createdAt).toISOString().split('T')[0]}
                 </span>
+                {['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(selectedSurvey.type) && (
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-200">
+                    🔒 Fixed Milestone (Admin Managed)
+                  </span>
+                )}
               </div>
               
               <div className="flex items-start justify-between">
@@ -828,12 +1003,52 @@ export default function SurveyManagement() {
                   <p className="text-slate-600 max-w-3xl">{selectedSurvey.description}</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => startEditSurvey(selectedSurvey)} className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">
-                    <Edit2 className="h-4 w-4" /> Edit Survey
-                  </button>
-                  <button onClick={() => setIsScheduleModalOpen(true)} className="flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2 font-semibold text-white hover:bg-[#002660]">
+                  {(() => {
+                    const userRaw = localStorage.getItem('user') || localStorage.getItem('authUser');
+                    const currentUser = userRaw ? JSON.parse(userRaw) : null;
+                    const userRole = currentUser?.role || 'ADMIN';
+                    const isFixed = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(selectedSurvey.type);
+                    const canEdit = userRole === 'ADMIN' || !isFixed;
+
+                    return (
+                      <button
+                        onClick={() => {
+                          if (canEdit) startEditSurvey(selectedSurvey);
+                          else toast.error('Fixed milestone templates (6/12/18/24-Month) can only be edited by Administrators.');
+                        }}
+                        disabled={!canEdit}
+                        className={`flex items-center gap-2 rounded-[8px] border px-4 py-2 font-semibold transition-all ${
+                          canEdit
+                            ? 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                            : 'border-slate-100 bg-slate-100 text-slate-400 cursor-not-allowed'
+                        }`}
+                        title={!canEdit ? 'Only Administrators can edit fixed milestone survey templates' : 'Edit survey'}
+                      >
+                        <Edit2 className="h-4 w-4" /> Edit Survey
+                      </button>
+                    );
+                  })()}
+                  <button
+                    onClick={() => {
+                      const defaultVal = selectedSurvey?.scheduledAt
+                        ? new Date(selectedSurvey.scheduledAt).toISOString().slice(0, 16)
+                        : getNowDateTimeLocal();
+                      setScheduledDateTime(defaultVal);
+                      setIsScheduleModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2 font-semibold text-white hover:bg-[#002660]"
+                  >
                     <Calendar className="h-4 w-4" /> Schedule Launch
                   </button>
+
+                  {!['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(selectedSurvey.type) && (
+                    <button
+                      onClick={(e) => handleDeleteSurvey(e, selectedSurvey)}
+                      className="flex items-center gap-2 rounded-[8px] border border-rose-200 bg-rose-50 px-4 py-2 font-semibold text-rose-700 hover:bg-rose-100 transition-all shadow-sm"
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete Survey
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -878,26 +1093,46 @@ export default function SurveyManagement() {
               );
             })()}
 
-            {/* Questions List */}
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">
-                Questions ({selectedSurvey.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) + (selectedSurvey.questions?.length || 0)})
-              </h3>
-              <div className="space-y-3">
-                {selectedSurvey.sections?.map((section: any, sIdx: number) => (
-                  <React.Fragment key={section.id || sIdx}>
-                    {/* Section divider */}
-                    <div className="flex items-center gap-3 pt-2">
-                      <div className="h-px flex-1 bg-slate-200" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#003580]">{section.title}</span>
-                      <div className="h-px flex-1 bg-slate-200" />
-                    </div>
-                    {section.questions?.map((q: any, qIdx: number) => {
-                      const totalIdx = selectedSurvey.sections.slice(0, sIdx).reduce((acc: number, s: any) => acc + (s.questions?.length || 0), 0) + qIdx + 1;
-                      return (
+            {/* Sub-Tabs: Questions vs Submitted Responses */}
+            {(() => {
+              const directQs = selectedSurvey.questions || [];
+              const sectionQs = selectedSurvey.sections?.flatMap((s: any) => s.questions || []) || [];
+              const allQs = directQs.length > 0 ? directQs : sectionQs;
+
+              return (
+                <div>
+                  <div className="flex border-b border-slate-200 mb-6">
+                    <button
+                      onClick={() => setDetailsSubTab('questions')}
+                      className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all ${
+                        detailsSubTab === 'questions'
+                          ? 'border-[#003580] text-[#003580] bg-slate-50/50'
+                          : 'border-transparent text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      📋 Questions ({allQs.length})
+                    </button>
+                    <button
+                      onClick={() => setDetailsSubTab('responses')}
+                      className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all ${
+                        detailsSubTab === 'responses'
+                          ? 'border-[#003580] text-[#003580] bg-slate-50/50'
+                          : 'border-transparent text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      💬 Submitted Alumni Responses
+                      <span className="rounded-full bg-[#003580] px-2.5 py-0.5 text-xs text-white">
+                        {selectedSurveyResponses.length}
+                      </span>
+                    </button>
+                  </div>
+
+                  {detailsSubTab === 'questions' && (
+                    <div className="space-y-3">
+                      {allQs.map((q: any, qIdx: number) => (
                         <div key={q.id || qIdx} className="flex items-center gap-4 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 hover:bg-slate-50">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[#fce7f3] text-sm font-bold text-[#db2777]">
-                            {totalIdx}
+                            {qIdx + 1}
                           </div>
                           <div className="flex-1">
                             <span className="font-medium text-slate-700">{q.questionText}</span>
@@ -912,33 +1147,82 @@ export default function SurveyManagement() {
                             ${q.questionType === 'CHECKBOX' ? 'bg-[#ecfdf5] text-[#059669]' : ''}
                             ${!['RADIO', 'SELECT', 'TEXT', 'TEXTAREA', 'RATING', 'CHECKBOX'].includes(q.questionType) ? 'bg-slate-100 text-slate-600' : ''}
                           `}>
-                            {q.questionType.replace('_', ' ')}
+                            {q.questionType ? q.questionType.replace('_', ' ') : 'TEXT'}
                           </span>
                         </div>
-                      );
-                    })}
-                  </React.Fragment>
-                ))}
-                
-                {/* Fallback for direct questions without sections (legacy support) */}
-                {(!selectedSurvey.sections || selectedSurvey.sections.length === 0) && selectedSurvey.questions?.map((q: any, qIdx: number) => (
-                  <div key={q.id || qIdx} className="flex items-center gap-4 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 hover:bg-slate-50">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[#fce7f3] text-sm font-bold text-[#db2777]">
-                      {qIdx + 1}
+                      ))}
+                      {allQs.length === 0 && (
+                        <div className="p-8 text-center text-slate-400">No questions found for this survey template.</div>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <span className="font-medium text-slate-700">{q.questionText}</span>
+                  )}
+
+                  {detailsSubTab === 'responses' && (
+                    <div className="space-y-4">
+                      {surveyResponsesLoading ? (
+                        <div className="p-8 text-center text-slate-500">Loading submitted responses...</div>
+                      ) : selectedSurveyResponses.length === 0 ? (
+                        <div className="p-8 text-center text-slate-400 rounded-lg border border-slate-100 bg-slate-50">
+                          No responses submitted for this survey yet.
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto rounded-lg border border-slate-200">
+                          <table className="min-w-full text-sm border-separate border-spacing-0">
+                            <thead className="bg-slate-50">
+                              <tr>
+                                <th className="border-b border-slate-200 px-4 py-3 text-left font-semibold text-slate-600 text-xs">Alumni Respondent</th>
+                                <th className="border-b border-slate-200 px-4 py-3 text-left font-semibold text-slate-600 text-xs">Department</th>
+                                <th className="border-b border-slate-200 px-4 py-3 text-left font-semibold text-slate-600 text-xs">Submitted Date</th>
+                                <th className="border-b border-slate-200 px-4 py-3 text-center font-semibold text-slate-600 text-xs">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {selectedSurveyResponses.map((resItem: any) => {
+                                const submittedDateStr = resItem.submittedAt
+                                  ? new Date(resItem.submittedAt).toLocaleString()
+                                  : 'Recently Submitted';
+                                const alumniName = resItem.alumni?.fullName || 'Graduate Alumnus';
+                                const alumniEmail = resItem.alumni?.email || resItem.alumni?.user?.email || '';
+                                const studentId = resItem.alumni?.studentId || '';
+                                const deptName = resItem.alumni?.department?.name || 'ASTU Graduate';
+                                const batchLabel = resItem.alumni?.graduationYear ? `${resItem.alumni.graduationYear} GC` : '';
+
+                                return (
+                                  <tr key={resItem.id} className="border-b border-slate-100 hover:bg-slate-50">
+                                    <td className="px-4 py-3">
+                                      <div className="font-semibold text-slate-900 flex items-center gap-2">
+                                        {alumniName}
+                                        {batchLabel && (
+                                          <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200">
+                                            🎓 {batchLabel}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-slate-500">{alumniEmail}</div>
+                                      {studentId && <div className="text-[10px] text-slate-400 font-mono">{studentId}</div>}
+                                    </td>
+                                    <td className="px-4 py-3 text-slate-700">{deptName}</td>
+                                    <td className="px-4 py-3 text-slate-600 text-xs">{submittedDateStr}</td>
+                                    <td className="px-4 py-3 text-center">
+                                      <button
+                                        onClick={() => setViewingResponseModal(resItem)}
+                                        className="inline-flex items-center gap-1 rounded-md bg-[#003580] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#002660] shadow-sm transition-all"
+                                      >
+                                        <Eye className="h-3.5 w-3.5" /> View Answers
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
-                    {q.required && (
-                      <span className="rounded bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">REQ</span>
-                    )}
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                      {q.questionType.replace('_', ' ')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -956,16 +1240,48 @@ export default function SurveyManagement() {
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Description</span>
                 <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580]" rows={3} placeholder="Survey description..." />
               </label>
-              <label className="block space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Survey Type (Trigger)</span>
-                <select value={type} onChange={e => setType(e.target.value as SurveyType)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580]">
-                  <option value="SIX_MONTH">6-Month Post Graduation</option>
-                  <option value="TWELVE_MONTH">12-Month Post Graduation</option>
-                  <option value="EIGHTEEN_MONTH">18-Month Post Graduation</option>
-                  <option value="TWENTY_FOUR_MONTH">24-Month Post Graduation</option>
-                  <option value="CUSTOM">Custom / Manual Assignment</option>
-                </select>
-              </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Survey Type (Trigger)</span>
+                  {!editId ? (
+                    <div>
+                      <input
+                        type="text"
+                        disabled
+                        value="Custom / Manual Assignment (CUSTOM)"
+                        className="w-full rounded-[8px] border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 cursor-not-allowed"
+                      />
+                      <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                        💡 Fixed milestone templates (6, 12, 18, 24-Month) are pre-configured system defaults. New surveys are created as Custom Surveys.
+                      </p>
+                    </div>
+                  ) : (
+                    <select disabled={['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(type)} value={type} onChange={e => setType(e.target.value as SurveyType)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:cursor-not-allowed font-medium text-slate-700">
+                      <option value="SIX_MONTH">6-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="TWELVE_MONTH">12-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="EIGHTEEN_MONTH">18-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="TWENTY_FOUR_MONTH">24-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="CUSTOM">Custom / Manual Assignment</option>
+                    </select>
+                  )}
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Target Audience</span>
+                  <select
+                    value={targetAudience}
+                    onChange={e => setTargetAudience(e.target.value as any)}
+                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-bold text-slate-800 outline-none focus:border-[#003580]"
+                  >
+                    <option value="ALUMNI">🎓 Alumni Graduates Only</option>
+                    <option value="EMPLOYERS">🏢 Employer Partners Only</option>
+                    <option value="BOTH">🌐 Both Alumni &amp; Employer Partners</option>
+                  </select>
+                  <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                    Select recipients to dispatch multi-channel notifications (In-app, Email &amp; SMS).
+                  </p>
+                </label>
+              </div>
             </div>
           </section>
 
@@ -1065,7 +1381,7 @@ export default function SurveyManagement() {
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
               <div>
                 <h3 className="text-xl font-bold text-slate-900">Schedule Survey</h3>
-                <p className="text-sm text-slate-500">Set a launch date for automatic activation</p>
+                <p className="text-sm text-slate-500">Set launch date & time for automatic activation</p>
               </div>
               <button onClick={() => setIsScheduleModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
                 <X className="h-4 w-4" />
@@ -1074,25 +1390,116 @@ export default function SurveyManagement() {
             
             <div className="p-6">
               <div className="mb-6 rounded-[8px] border border-[#3b82f6]/20 bg-[#eff6ff] p-4 text-sm font-medium text-[#1e40af]">
-                Set the date to automatically activate this survey and send notifications to graduates.
+                Set the exact date and time to automatically activate this survey and send notifications to graduates.
               </div>
               
-              <label className="block space-y-2 mb-8">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Scheduled Launch Date <span className="text-red-500">*</span></span>
-                <input type="date" className="w-full rounded-[8px] border border-slate-200 px-4 py-3 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]" />
-              </label>
+              <div className="space-y-2 mb-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Scheduled Launch Date & Time <span className="text-red-500">*</span></span>
+                  <button
+                    type="button"
+                    onClick={() => setScheduledDateTime(getNowDateTimeLocal())}
+                    className="text-xs font-semibold text-[#003580] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded px-2 py-1 transition-colors flex items-center gap-1"
+                  >
+                    ⚡ Set to Right Now
+                  </button>
+                </div>
+                <input
+                  type="datetime-local"
+                  value={scheduledDateTime}
+                  onChange={(e) => setScheduledDateTime(e.target.value)}
+                  className="w-full rounded-[8px] border border-slate-200 px-4 py-3 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580] font-medium text-slate-800"
+                />
+                <p className="text-xs text-slate-400">
+                  Tip: Selecting today and right now will immediately activate and dispatch the survey to alumni.
+                </p>
+              </div>
               
               <div className="flex gap-3">
-                <button onClick={() => setIsScheduleModalOpen(false)} className="flex-1 rounded-[8px] border border-slate-200 py-3 font-semibold text-slate-700 hover:bg-slate-50">
+                <button
+                  type="button"
+                  onClick={() => setIsScheduleModalOpen(false)}
+                  disabled={isScheduling}
+                  className="flex-1 rounded-[8px] border border-slate-200 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
                   Cancel
                 </button>
-                <button onClick={() => {
-                  toast.success('Survey successfully scheduled!');
-                  setIsScheduleModalOpen(false);
-                }} className="flex-1 flex items-center justify-center gap-2 rounded-[8px] bg-slate-100 py-3 font-semibold text-slate-400 hover:bg-slate-200 transition-colors">
-                  Schedule <ChevronRight className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={handleScheduleSurvey}
+                  disabled={isScheduling || !scheduledDateTime}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-[8px] bg-[#003580] py-3 font-semibold text-white hover:bg-[#002660] transition-colors disabled:opacity-50"
+                >
+                  {isScheduling ? 'Scheduling...' : 'Schedule & Launch'} <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Full Answers Inspector Modal */}
+      {viewingResponseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl rounded-[16px] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  🎓 Alumni Survey Response
+                  {viewingResponseModal.alumni?.graduationYear && (
+                    <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
+                      {viewingResponseModal.alumni.graduationYear} GC
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Submitted by <strong>{viewingResponseModal.alumni?.fullName || 'Graduate'}</strong> ({viewingResponseModal.alumni?.email}) on {new Date(viewingResponseModal.submittedAt || viewingResponseModal.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <button onClick={() => setViewingResponseModal(null)} className="rounded-full bg-slate-200 p-1.5 text-slate-600 hover:bg-slate-300">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-3 text-xs text-blue-900 flex justify-between items-center">
+                <div><strong>Department:</strong> {viewingResponseModal.alumni?.department?.name || 'ASTU Graduate'}</div>
+                <div><strong>Student ID:</strong> {viewingResponseModal.alumni?.studentId || 'N/A'}</div>
+              </div>
+
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4 mb-2">Answers ({viewingResponseModal.answers?.length || 0})</h4>
+
+              {(viewingResponseModal.answers || []).map((ans: any, aIdx: number) => {
+                const questionText = ans.question?.questionText || `Question ${aIdx + 1}`;
+                const questionType = ans.question?.questionType || 'TEXT';
+                return (
+                  <div key={ans.id || aIdx} className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-sm font-semibold text-slate-800">
+                        {aIdx + 1}. {questionText}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-200 px-2 py-0.5 rounded">
+                        {questionType}
+                      </span>
+                    </div>
+                    <div className="text-sm font-medium text-[#003580] bg-white p-3 rounded-md border border-slate-100 shadow-sm">
+                      {ans.answerText || <span className="italic text-slate-400">No answer provided</span>}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {(!viewingResponseModal.answers || viewingResponseModal.answers.length === 0) && (
+                <div className="p-8 text-center text-slate-400">No answer details recorded for this response.</div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 px-6 py-4 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setViewingResponseModal(null)}
+                className="rounded-md bg-[#003580] px-5 py-2 text-sm font-semibold text-white hover:bg-[#002660]"
+              >
+                Close Response
+              </button>
             </div>
           </div>
         </div>

@@ -135,9 +135,9 @@ export const adminService = {
     }
   },
 
-  async getAnalyticsReport(): Promise<ApiResult<any>> {
+  async getAnalyticsReport(params?: { academicYear?: string; department?: string }): Promise<ApiResult<any>> {
     try {
-      const response = await apiClient.get<{ success: boolean; data: any }>('/analytics/report');
+      const response = await apiClient.get<{ success: boolean; data: any }>('/analytics/report', { params });
       return { ok: true, data: response.data.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'GET_ANALYTICS_ERROR', message: error.response?.data?.message || 'Failed to fetch analytics' };
@@ -289,6 +289,52 @@ export const adminService = {
       return { ok: true, data: response.data.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'UPDATE_SETTINGS_ERROR', message: error.response?.data?.message || 'Failed to update settings' };
+    }
+  },
+
+  // --- Donations & Campaigns Management ---
+  async getDonationCampaigns(): Promise<ApiResult<any[]>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any[] }>('/admin/donations/campaigns');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_CAMPAIGNS_ERROR', message: error.response?.data?.message || 'Failed to fetch campaigns' };
+    }
+  },
+
+  async createDonationCampaign(data: { title: string; description?: string; targetAmount: number; category?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any }>('/admin/donations/campaigns', data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'CREATE_CAMPAIGN_ERROR', message: error.response?.data?.message || 'Failed to create campaign' };
+    }
+  },
+
+  async updateDonationCampaign(id: string, data: any): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any }>(`/admin/donations/campaigns/${id}`, data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_CAMPAIGN_ERROR', message: error.response?.data?.message || 'Failed to update campaign' };
+    }
+  },
+
+  async deleteDonationCampaign(id: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.delete<{ success: boolean; message: string }>(`/admin/donations/campaigns/${id}`);
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'DELETE_CAMPAIGN_ERROR', message: error.response?.data?.message || 'Failed to delete campaign' };
+    }
+  },
+
+  async getDonorsList(): Promise<ApiResult<any[]>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any[] }>('/admin/donations/donors');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_DONORS_ERROR', message: error.response?.data?.message || 'Failed to fetch donors' };
     }
   }
 };

@@ -21,6 +21,7 @@ export class OpenRouterService {
         'https://openrouter.ai/api/v1/chat/completions',
         {
           model: this.getModel(),
+          max_tokens: 4000,
           messages: [
             ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
             { role: 'user', content: prompt },
@@ -55,6 +56,7 @@ export class OpenRouterService {
         'https://openrouter.ai/api/v1/chat/completions',
         {
           model: this.getModel(),
+          max_tokens: 4000,
           response_format: { type: 'json_object' },
           messages: [
             ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),

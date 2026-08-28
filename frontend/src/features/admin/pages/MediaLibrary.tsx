@@ -1,16 +1,21 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   CheckCircle2,
   Download,
+  Edit3,
   FileText,
   Filter,
   Folder,
   Grid3x3,
   Image as ImageIcon,
+  Info,
   List,
   Music,
+  Plus,
+  Save,
   Search,
+  Tag,
   Trash2,
   Upload,
   Video,
@@ -18,9 +23,11 @@ import {
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
+import AdminModal from '../components/AdminModal';
 
-type MediaType = 'image' | 'video' | 'audio' | 'document';
-type MediaItem = {
+export type MediaType = 'image' | 'video' | 'audio' | 'document';
+
+export type MediaItem = {
   id: string;
   name: string;
   url?: string;
@@ -28,6 +35,8 @@ type MediaItem = {
   size: number;
   folder: string;
   tags: string[];
+  description?: string;
+  altText?: string;
   uploadedAt: string;
   uploadedBy: string;
   width?: number;
@@ -35,40 +44,155 @@ type MediaItem = {
   duration?: string;
 };
 
-const FOLDERS = ['All', 'Hero Banners', 'Event Photos', 'Documents', 'Logos', 'Videos', 'Audio'];
+const FOLDERS = ['All', 'Hero Banners', 'Event Photos', 'Documents', 'Logos', 'Videos', 'Audio', 'General'];
+const MEDIA_STORAGE_KEY = 'astu_cms_media_library';
 
-const sampleMedia: MediaItem[] = [
-  { id: 'm-1', name: 'astu-campus-aerial.jpg', url: 'https://images.unsplash.com/photo-1562774053-701939374585?w=600', type: 'image', size: 248000, folder: 'Hero Banners', tags: ['campus', 'aerial'], uploadedAt: '2 days ago', uploadedBy: 'PR Team', width: 1920, height: 1080 },
-  { id: 'm-2', name: 'graduation-2026-1.jpg', url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600', type: 'image', size: 312000, folder: 'Event Photos', tags: ['graduation'], uploadedAt: '1 week ago', uploadedBy: 'Registrar', width: 1920, height: 1280 },
-  { id: 'm-3', name: 'career-fair-booth.jpg', url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600', type: 'image', size: 198000, folder: 'Event Photos', tags: ['career', 'fair'], uploadedAt: '3 days ago', uploadedBy: 'Career Services', width: 1600, height: 900 },
-  { id: 'm-4', name: 'research-lab-1.jpg', url: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600', type: 'image', size: 274000, folder: 'Hero Banners', tags: ['research'], uploadedAt: '4 days ago', uploadedBy: 'Research', width: 1920, height: 1080 },
-  { id: 'm-5', name: 'partnership-summit.mp4', type: 'video', size: 12400000, folder: 'Videos', tags: ['partnership'], uploadedAt: 'Yesterday', uploadedBy: 'Industry Liaison', duration: '04:21' },
-  { id: 'm-6', name: 'alumni-handbook-2026.pdf', type: 'document', size: 2400000, folder: 'Documents', tags: ['alumni', 'handbook'], uploadedAt: '2 weeks ago', uploadedBy: 'Alumni Office' },
-  { id: 'm-7', name: 'astu-logo-primary.png', type: 'image', size: 38000, folder: 'Logos', tags: ['logo', 'brand'], uploadedAt: '1 month ago', uploadedBy: 'Brand Team', width: 350, height: 350 },
-  { id: 'm-8', name: 'student-innovation.jpg', url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600', type: 'image', size: 220000, folder: 'Event Photos', tags: ['innovation'], uploadedAt: '5 days ago', uploadedBy: 'PR Team', width: 1920, height: 1280 },
-  { id: 'm-9', name: 'alumni-podcast-ep-12.mp3', type: 'audio', size: 8200000, folder: 'Audio', tags: ['podcast'], uploadedAt: '1 week ago', uploadedBy: 'Alumni Office', duration: '32:11' },
-  { id: 'm-10', name: 'campus-library.jpg', url: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=600', type: 'image', size: 245000, folder: 'Hero Banners', tags: ['library', 'campus'], uploadedAt: '2 weeks ago', uploadedBy: 'PR Team', width: 1920, height: 1080 },
-  { id: 'm-11', name: 'alumni-handbook-amharic.pdf', type: 'document', size: 2100000, folder: 'Documents', tags: ['alumni', 'handbook', 'amharic'], uploadedAt: '3 weeks ago', uploadedBy: 'Alumni Office' },
-  { id: 'm-12', name: 'engineering-workshop.mp4', type: 'video', size: 18200000, folder: 'Videos', tags: ['workshop', 'engineering'], uploadedAt: '1 month ago', uploadedBy: 'Engineering Dept', duration: '12:48' },
+export function detectMediaType(file: File | { name: string; type?: string }): MediaType {
+  const mime = (file.type || '').toLowerCase();
+  const ext = (file.name || '').split('.').pop()?.toLowerCase() || '';
+
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'heic', 'heif', 'ico', 'avif'];
+  const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv', 'flv', 'wmv'];
+  const audioExts = ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg', 'wma'];
+
+  if (mime.startsWith('image/') || imageExts.includes(ext)) return 'image';
+  if (mime.startsWith('video/') || videoExts.includes(ext)) return 'video';
+  if (mime.startsWith('audio/') || audioExts.includes(ext)) return 'audio';
+  return 'document';
+}
+
+const initialSampleMedia: MediaItem[] = [
+  {
+    id: 'M-001',
+    name: 'astu_campus_hero.jpg',
+    url: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop',
+    type: 'image',
+    size: 1450000,
+    folder: 'Hero Banners',
+    description: 'Aerial overview of ASTU main campus buildings and grounds.',
+    altText: 'ASTU main campus aerial photo',
+    tags: ['campus', 'hero', 'banner', 'astu'],
+    uploadedAt: 'Aug 24, 2026',
+    uploadedBy: 'Content Manager',
+    width: 1920,
+    height: 1080,
+  },
+  {
+    id: 'M-002',
+    name: 'graduation_ceremony_2026.jpg',
+    url: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
+    type: 'image',
+    size: 2100000,
+    folder: 'Event Photos',
+    description: 'Students celebrating at the 2026 graduation ceremony.',
+    altText: 'Graduation ceremony celebrating students',
+    tags: ['graduation', 'event', 'alumni'],
+    uploadedAt: 'Aug 25, 2026',
+    uploadedBy: 'Registrar',
+    width: 1920,
+    height: 1280,
+  },
+  {
+    id: 'M-003',
+    name: 'astu_logo_vector.png',
+    url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop',
+    type: 'image',
+    size: 340000,
+    folder: 'Logos',
+    description: 'Official ASTU logo transparent background.',
+    altText: 'ASTU official logo',
+    tags: ['logo', 'brand'],
+    uploadedAt: 'Aug 20, 2026',
+    uploadedBy: 'Brand Team',
+    width: 500,
+    height: 500,
+  },
+  {
+    id: 'M-004',
+    name: 'academic_catalog_2026.pdf',
+    url: '',
+    type: 'document',
+    size: 3200000,
+    folder: 'Documents',
+    description: 'Complete academic course catalog for 2026-2027.',
+    tags: ['catalog', 'academic', 'pdf'],
+    uploadedAt: 'Aug 18, 2026',
+    uploadedBy: 'Academic Affairs',
+  },
 ];
 
 const typeIcon: Record<MediaType, React.ComponentType<{ className?: string }>> = {
-  image: ImageIcon, video: Video, audio: Music, document: FileText,
+  image: ImageIcon,
+  video: Video,
+  audio: Music,
+  document: FileText,
 };
+
 const typeColor: Record<MediaType, string> = {
-  image: 'bg-blue-100 text-blue-700',
-  video: 'bg-rose-100 text-rose-700',
-  audio: 'bg-violet-100 text-violet-700',
-  document: 'bg-slate-100 text-slate-700',
+  image: 'bg-blue-100 text-blue-700 border-blue-200',
+  video: 'bg-rose-100 text-rose-700 border-rose-200',
+  audio: 'bg-violet-100 text-violet-700 border-violet-200',
+  document: 'bg-amber-100 text-amber-800 border-amber-200',
 };
+
 const formatBytes = (bytes: number) => {
+  if (!bytes || bytes <= 0) return '0 B';
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
+function ImageThumbnail({ src, alt, className }: { src?: string; alt: string; className: string }) {
+  const [error, setError] = useState(false);
+  const ext = alt.split('.').pop()?.toUpperCase() || 'IMG';
+
+  if (!src || error) {
+    return (
+      <div className={`flex flex-col items-center justify-center bg-slate-100 p-2 text-slate-400 ${className}`}>
+        <ImageIcon className="h-8 w-8 text-slate-300" />
+        <span className="mt-1 text-[10px] font-bold tracking-wider text-slate-500">{ext} IMAGE</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={() => setError(true)}
+      className={className}
+    />
+  );
+}
+
+interface PendingUpload {
+  id: string;
+  file: File;
+  dataUrl: string;
+  name: string;
+  type: MediaType;
+  size: number;
+  folder: string;
+  description: string;
+  altText: string;
+  tagsInput: string;
+  width?: number;
+  height?: number;
+}
+
 export default function MediaLibrary() {
-  const [media, setMedia] = useState<MediaItem[]>(sampleMedia);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [media, setMedia] = useState<MediaItem[]>(() => {
+    try {
+      const stored = localStorage.getItem(MEDIA_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return initialSampleMedia;
+  });
+
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
   const [folder, setFolder] = useState('All');
@@ -76,13 +200,185 @@ export default function MediaLibrary() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [lightboxItem, setLightboxItem] = useState<MediaItem | null>(null);
 
+  // Upload Modal State
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
+  const [activeUploadIndex, setActiveUploadIndex] = useState(0);
+
+  // Lightbox Edit State
+  const [isEditingLightbox, setIsEditingLightbox] = useState(false);
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    folder: string;
+    description: string;
+    altText: string;
+    tagsInput: string;
+  }>({ name: '', folder: 'General', description: '', altText: '', tagsInput: '' });
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(media));
+  }, [media]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const fileList = Array.from(files);
+    const pendingList: PendingUpload[] = [];
+    let processedCount = 0;
+
+    fileList.forEach((file) => {
+      const mediaType = detectMediaType(file);
+      let assignedFolder = 'General';
+      if (mediaType === 'image') assignedFolder = 'Event Photos';
+      else if (mediaType === 'video') assignedFolder = 'Videos';
+      else if (mediaType === 'audio') assignedFolder = 'Audio';
+      else if (mediaType === 'document') assignedFolder = 'Documents';
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = (event.target?.result as string) || '';
+        const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+
+        const pendingItem: PendingUpload = {
+          id: `pending-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+          file,
+          dataUrl,
+          name: file.name,
+          type: mediaType,
+          size: file.size,
+          folder: assignedFolder,
+          description: '',
+          altText: mediaType === 'image' ? nameWithoutExt : '',
+          tagsInput: `${mediaType}, ${assignedFolder.toLowerCase().replace(/\s+/g, '-')}`,
+        };
+
+        if (mediaType === 'image' && dataUrl) {
+          const img = new Image();
+          img.onload = () => {
+            pendingItem.width = img.width;
+            pendingItem.height = img.height;
+            pendingList.push(pendingItem);
+            processedCount++;
+            if (processedCount === fileList.length) {
+              setPendingUploads(pendingList);
+              setActiveUploadIndex(0);
+              setUploadModalOpen(true);
+            }
+          };
+          img.onerror = () => {
+            pendingList.push(pendingItem);
+            processedCount++;
+            if (processedCount === fileList.length) {
+              setPendingUploads(pendingList);
+              setActiveUploadIndex(0);
+              setUploadModalOpen(true);
+            }
+          };
+          img.src = dataUrl;
+        } else {
+          pendingList.push(pendingItem);
+          processedCount++;
+          if (processedCount === fileList.length) {
+            setPendingUploads(pendingList);
+            setActiveUploadIndex(0);
+            setUploadModalOpen(true);
+          }
+        }
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const updatePendingItem = (index: number, updates: Partial<PendingUpload>) => {
+    setPendingUploads((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, ...updates } : item))
+    );
+  };
+
+  const handleConfirmUpload = () => {
+    if (pendingUploads.length === 0) return;
+
+    const newItems: MediaItem[] = pendingUploads.map((item) => {
+      const tags = item.tagsInput
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean);
+
+      return {
+        id: `M-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        name: item.name.trim() || item.file.name,
+        url: item.dataUrl,
+        type: item.type,
+        size: item.size,
+        folder: item.folder,
+        description: item.description.trim(),
+        altText: item.altText.trim(),
+        tags: tags.length > 0 ? tags : [item.type],
+        uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        uploadedBy: 'Content Manager',
+        width: item.width,
+        height: item.height,
+      };
+    });
+
+    setMedia((prev) => [...newItems, ...prev]);
+    toast.success(`Successfully uploaded ${newItems.length} file(s) with details!`);
+    setPendingUploads([]);
+    setUploadModalOpen(false);
+  };
+
+  const openLightbox = (item: MediaItem) => {
+    setLightboxItem(item);
+    setIsEditingLightbox(false);
+    setEditForm({
+      name: item.name,
+      folder: item.folder,
+      description: item.description || '',
+      altText: item.altText || '',
+      tagsInput: (item.tags || []).join(', '),
+    });
+  };
+
+  const handleSaveLightboxEdit = () => {
+    if (!lightboxItem) return;
+
+    const updatedTags = editForm.tagsInput
+      .split(',')
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+
+    const updatedItem: MediaItem = {
+      ...lightboxItem,
+      name: editForm.name.trim() || lightboxItem.name,
+      folder: editForm.folder,
+      description: editForm.description.trim(),
+      altText: editForm.altText.trim(),
+      tags: updatedTags,
+    };
+
+    setMedia((prev) => prev.map((m) => (m.id === lightboxItem.id ? updatedItem : m)));
+    setLightboxItem(updatedItem);
+    setIsEditingLightbox(false);
+    toast.success('Media details updated successfully!');
+  };
+
   const filtered = useMemo(() => {
     return media.filter((m) => {
       if (folder !== 'All' && m.folder !== folder) return false;
       if (typeFilter !== 'all' && m.type !== typeFilter) return false;
       if (search) {
         const q = search.toLowerCase();
-        if (!m.name.toLowerCase().includes(q) && !m.tags.some((t) => t.toLowerCase().includes(q))) return false;
+        if (
+          !m.name.toLowerCase().includes(q) &&
+          !(m.description && m.description.toLowerCase().includes(q)) &&
+          !m.tags.some((t) => t.toLowerCase().includes(q))
+        )
+          return false;
       }
       return true;
     });
@@ -104,21 +400,123 @@ export default function MediaLibrary() {
   const deleteSelected = () => {
     if (selectedIds.length === 0) return;
     setMedia((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
-    toast.success(`${selectedIds.length} item(s) deleted`);
+    toast.success(`${selectedIds.length} file(s) permanently deleted`);
     setSelectedIds([]);
   };
 
+  const copyMediaUrl = (item: MediaItem) => {
+    const urlToCopy = item.url || window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(urlToCopy)
+        .then(() => toast.success(`Copied URL for "${item.name}" to clipboard!`))
+        .catch(() => {
+          fallbackCopy(urlToCopy);
+          toast.success(`Copied URL for "${item.name}" to clipboard!`);
+        });
+    } else {
+      fallbackCopy(urlToCopy);
+      toast.success(`Copied URL for "${item.name}" to clipboard!`);
+    }
+  };
+
+  const fallbackCopy = (text: string) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+    } catch {}
+    document.body.removeChild(textArea);
+  };
+
+  const downloadMediaAsset = async (item: MediaItem) => {
+    if (!item.url) {
+      toast.error(`No download URL available for "${item.name}"`);
+      return;
+    }
+
+    const toastId = `dl-${item.id}`;
+    toast.loading(`Preparing download for "${item.name}"...`, { id: toastId });
+
+    try {
+      if (item.url.startsWith('data:') || item.url.startsWith('blob:')) {
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.download = item.name || 'downloaded-media';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success(`Downloaded "${item.name}"!`, { id: toastId });
+        return;
+      }
+
+      const res = await fetch(item.url);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = item.name || 'downloaded-media';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+
+      toast.success(`Downloaded "${item.name}"!`, { id: toastId });
+    } catch {
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.target = '_blank';
+      link.download = item.name || 'downloaded-media';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Triggered download for "${item.name}"!`, { id: toastId });
+    }
+  };
+
+  const downloadSelected = () => {
+    if (selectedIds.length === 0) return;
+    const itemsToDownload = media.filter((m) => selectedIds.includes(m.id));
+    itemsToDownload.forEach((item, index) => {
+      setTimeout(() => {
+        downloadMediaAsset(item);
+      }, index * 350);
+    });
+  };
+
+  const currentPending = pendingUploads[activeUploadIndex];
+
   return (
     <div className="space-y-5">
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileSelect}
+        multiple
+        accept="image/*,video/*,audio/*,application/pdf,.heic,.heif"
+        className="hidden"
+      />
+
       <AdminPageHeader
         title="Media Library"
-        subtitle="Centralized hub for all images, videos, documents, and audio used across the public site."
+        subtitle="Centralized hub for images, videos, documents, and audio uploaded to the database with category, description, and accessibility metadata."
         breadcrumbs={[{ label: 'CMS' }, { label: 'Media' }]}
         actions={
           <div className="flex items-center gap-2">
-            <AdminBadge variant="info">{counts.total} files · {formatBytes(counts.totalSize)}</AdminBadge>
-            <button type="button" className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-sm">
-              <Upload className="h-3.5 w-3.5" />
+            <AdminBadge variant="info">{counts.total} uploaded files · {formatBytes(counts.totalSize)}</AdminBadge>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md transition-all cursor-pointer"
+            >
+              <Upload className="h-4 w-4" />
               Upload Media
             </button>
           </div>
@@ -156,7 +554,7 @@ export default function MediaLibrary() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search files and tags..."
+              placeholder="Search files, descriptions, and tags..."
               className="w-full rounded-[8px] border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
             />
             {search && (
@@ -209,7 +607,7 @@ export default function MediaLibrary() {
         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-[10px] border border-[#003580]/30 bg-[#003580]/5 px-4 py-2 shadow-sm">
           <span className="text-sm font-semibold text-[#003580]">{selectedIds.length} selected</span>
           <div className="flex items-center gap-1.5">
-            <button type="button" onClick={() => toast.success('Download started')} className="inline-flex items-center gap-1 rounded-md bg-[#003580] px-2.5 py-1 text-xs font-semibold text-white">
+            <button type="button" onClick={downloadSelected} className="inline-flex items-center gap-1 rounded-md bg-[#003580] px-2.5 py-1 text-xs font-semibold text-white hover:brightness-110">
               <Download className="h-3 w-3" /> Download
             </button>
             <button type="button" onClick={deleteSelected} className="inline-flex items-center gap-1 rounded-md bg-rose-500 px-2.5 py-1 text-xs font-semibold text-white">
@@ -236,24 +634,27 @@ export default function MediaLibrary() {
               >
                 <button
                   type="button"
-                  onClick={() => setLightboxItem(m)}
+                  onClick={() => openLightbox(m)}
                   className="relative aspect-video w-full overflow-hidden bg-slate-100"
                 >
-                  {m.type === 'image' && m.url ? (
-                    <img src={m.url} alt={m.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                  {m.type === 'image' ? (
+                    <ImageThumbnail src={m.url} alt={m.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <Icon className="h-10 w-10 text-slate-300" />
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100">
+                      <Icon className="h-10 w-10 text-slate-400" />
+                      <span className="mt-1 text-[9px] font-bold text-slate-500 uppercase">{m.name.split('.').pop()}</span>
                     </div>
                   )}
-                  <span className={`absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${typeColor[m.type]}`}>
+                  <span className={`absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${typeColor[m.type]}`}>
                     {m.type}
                   </span>
                 </button>
                 <div className="p-2">
-                  <p className="truncate text-[11px] font-semibold text-slate-800">{m.name}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">{formatBytes(m.size)}</p>
-                  <p className="mt-0.5 truncate text-[10px] text-slate-400">{m.folder}</p>
+                  <p className="truncate text-[11px] font-semibold text-slate-800" title={m.name}>{m.name}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">{formatBytes(m.size)} · {m.folder}</p>
+                  {m.description && (
+                    <p className="mt-1 line-clamp-1 text-[10px] text-slate-500 italic">{m.description}</p>
+                  )}
                 </div>
                 <input
                   type="checkbox"
@@ -266,10 +667,23 @@ export default function MediaLibrary() {
             );
           })}
           {filtered.length === 0 && (
-            <div className="col-span-full rounded-[10px] border border-dashed border-slate-300 bg-white p-10 text-center">
-              <ImageIcon className="mx-auto h-8 w-8 text-slate-300" />
-              <p className="mt-2 text-sm font-semibold text-slate-700">No media found</p>
-              <p className="mt-1 text-xs text-slate-500">Try a different filter or upload new media to get started.</p>
+            <div className="col-span-full rounded-[12px] border-2 border-dashed border-slate-300 bg-white p-12 text-center space-y-3">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                <Upload className="h-7 w-7 text-[#003580]" />
+              </div>
+              <div>
+                <p className="text-base font-bold text-slate-800">No media files found</p>
+                <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+                  Click below to upload images, documents, videos, or audio directly with category and details.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:brightness-110 transition-all cursor-pointer"
+              >
+                <Upload className="h-4 w-4" /> Upload Media File
+              </button>
             </div>
           )}
         </div>
@@ -278,7 +692,7 @@ export default function MediaLibrary() {
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50">
               <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500">
-                <th className="px-3 py-2 font-semibold">Name</th>
+                <th className="px-3 py-2 font-semibold">Name & Details</th>
                 <th className="px-3 py-2 font-semibold">Type</th>
                 <th className="px-3 py-2 font-semibold">Folder</th>
                 <th className="px-3 py-2 font-semibold">Size</th>
@@ -293,14 +707,17 @@ export default function MediaLibrary() {
                   <tr key={m.id} className="hover:bg-slate-50">
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
-                        {m.type === 'image' && m.url ? (
-                          <img src={m.url} alt={m.name} className="h-8 w-12 rounded object-cover" />
+                        {m.type === 'image' ? (
+                          <ImageThumbnail src={m.url} alt={m.name} className="h-9 w-12 rounded object-cover border border-slate-200" />
                         ) : (
-                          <div className="flex h-8 w-12 items-center justify-center rounded bg-slate-100">
+                          <div className="flex h-9 w-12 items-center justify-center rounded bg-slate-100">
                             <Icon className="h-4 w-4 text-slate-500" />
                           </div>
                         )}
-                        <span className="font-medium text-slate-800">{m.name}</span>
+                        <div>
+                          <span className="font-medium text-slate-800">{m.name}</span>
+                          {m.description && <p className="text-[10px] text-slate-400 truncate max-w-xs">{m.description}</p>}
+                        </div>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-xs uppercase text-slate-500">{m.type}</td>
@@ -309,10 +726,10 @@ export default function MediaLibrary() {
                     <td className="px-3 py-2 text-xs text-slate-500">{m.uploadedAt}</td>
                     <td className="px-3 py-2">
                       <div className="flex items-center justify-end gap-1">
-                        <button type="button" onClick={() => setLightboxItem(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100" title="Preview">
+                        <button type="button" onClick={() => openLightbox(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100" title="Preview & Edit">
                           <FileText className="h-3.5 w-3.5" />
                         </button>
-                        <button type="button" onClick={() => toast.success('Download started')} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600" title="Download">
+                        <button type="button" onClick={() => downloadMediaAsset(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600" title="Download">
                           <Download className="h-3.5 w-3.5" />
                         </button>
                         <button type="button" onClick={() => { setMedia((prev) => prev.filter((x) => x.id !== m.id)); toast.success('Deleted'); }} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-100" title="Delete">
@@ -333,48 +750,308 @@ export default function MediaLibrary() {
         </div>
       )}
 
+      {/* Upload Details Modal */}
+      <AdminModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        title={`Upload Media Details (${pendingUploads.length} file${pendingUploads.length > 1 ? 's' : ''})`}
+        size="lg"
+        footer={
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {pendingUploads.length > 1 && (
+                <span className="text-xs text-slate-500">
+                  Configuring file {activeUploadIndex + 1} of {pendingUploads.length}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setUploadModalOpen(false)}
+                className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmUpload}
+                className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md transition-all cursor-pointer"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Confirm & Save to Media Library
+              </button>
+            </div>
+          </div>
+        }
+      >
+        {currentPending && (
+          <div className="space-y-4">
+            {/* Multiple files selector tab if multiple files selected */}
+            {pendingUploads.length > 1 && (
+              <div className="flex flex-wrap gap-1 border-b border-slate-100 pb-2">
+                {pendingUploads.map((p, idx) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setActiveUploadIndex(idx)}
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                      activeUploadIndex === idx
+                        ? 'bg-[#003580] text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    File {idx + 1}: {p.name.length > 15 ? p.name.substring(0, 12) + '...' : p.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="grid gap-4 md:grid-cols-12">
+              {/* Media Preview Thumbnail */}
+              <div className="md:col-span-5 flex flex-col items-center justify-center rounded-[10px] border border-slate-200 bg-slate-50 p-3">
+                {currentPending.type === 'image' ? (
+                  <ImageThumbnail
+                    src={currentPending.dataUrl}
+                    alt={currentPending.name}
+                    className="max-h-48 w-full rounded-[8px] object-cover shadow-sm"
+                  />
+                ) : (
+                  <div className="flex h-36 w-full flex-col items-center justify-center">
+                    {React.createElement(typeIcon[currentPending.type], { className: 'h-16 w-16 text-slate-400' })}
+                    <span className="mt-2 text-xs font-semibold text-slate-600 uppercase">{currentPending.type}</span>
+                  </div>
+                )}
+                <div className="mt-2 w-full text-center text-[11px] text-slate-500 space-y-0.5">
+                  <p className="font-semibold text-slate-700">{formatBytes(currentPending.size)}</p>
+                  {currentPending.width && currentPending.height && (
+                    <p>{currentPending.width} × {currentPending.height} px</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Form Metadata Fields */}
+              <div className="md:col-span-7 space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Display Name / Title <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={currentPending.name}
+                    onChange={(e) => updatePendingItem(activeUploadIndex, { name: e.target.value })}
+                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+                    placeholder="Enter file display name..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Category / Folder <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={currentPending.folder}
+                    onChange={(e) => updatePendingItem(activeUploadIndex, { folder: e.target.value })}
+                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 bg-white"
+                  >
+                    {FOLDERS.filter((f) => f !== 'All').map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={currentPending.description}
+                    onChange={(e) => updatePendingItem(activeUploadIndex, { description: e.target.value })}
+                    className="w-full rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+                    placeholder="Add a detailed description for this media asset..."
+                  />
+                </div>
+
+                {currentPending.type === 'image' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Alt Text (Accessibility)
+                    </label>
+                    <input
+                      type="text"
+                      value={currentPending.altText}
+                      onChange={(e) => updatePendingItem(activeUploadIndex, { altText: e.target.value })}
+                      className="w-full rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+                      placeholder="Image description for screen readers"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tags (Comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={currentPending.tagsInput}
+                    onChange={(e) => updatePendingItem(activeUploadIndex, { tagsInput: e.target.value })}
+                    className="w-full rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+                    placeholder="e.g. event, alumni, campus, photo"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </AdminModal>
+
+      {/* Lightbox / Details Modal */}
       {lightboxItem && (
-        <div onClick={() => setLightboxItem(null)} className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/85 p-6 backdrop-blur-sm">
+        <div onClick={() => setLightboxItem(null)} className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm">
           <div onClick={(e) => e.stopPropagation()} className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[12px] border border-white/10 bg-white shadow-2xl">
             <button type="button" onClick={() => setLightboxItem(null)} className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/70 text-white hover:bg-slate-900">
               <X className="h-4 w-4" />
             </button>
-            <div className="flex max-h-[80vh] flex-col md:flex-row">
-              <div className="flex flex-1 items-center justify-center bg-slate-100 p-4">
-                {lightboxItem.type === 'image' && lightboxItem.url ? (
-                  <img src={lightboxItem.url} alt={lightboxItem.name} className="max-h-[70vh] w-auto rounded" />
+            <div className="flex max-h-[85vh] flex-col md:flex-row overflow-y-auto">
+              <div className="flex flex-1 items-center justify-center bg-slate-100 p-6 min-h-[260px]">
+                {lightboxItem.type === 'image' ? (
+                  <ImageThumbnail src={lightboxItem.url} alt={lightboxItem.name} className="max-h-[70vh] w-auto rounded shadow-md" />
                 ) : (
-                  <div className="flex h-48 w-48 items-center justify-center">
+                  <div className="flex flex-col items-center justify-center p-8">
                     {React.createElement(typeIcon[lightboxItem.type], { className: 'h-24 w-24 text-slate-300' })}
+                    <span className="mt-2 text-sm font-bold text-slate-500 uppercase">{lightboxItem.type}</span>
                   </div>
                 )}
               </div>
-              <div className="w-full space-y-3 border-t border-slate-200 p-5 md:w-80 md:border-l md:border-t-0">
-                <h3 className="text-base font-semibold text-slate-900">{lightboxItem.name}</h3>
-                <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColor[lightboxItem.type]}`}>
-                  {lightboxItem.type}
-                </span>
-                <dl className="space-y-2 text-xs text-slate-600">
-                  <div className="flex justify-between"><dt className="text-slate-400">Folder</dt><dd className="font-medium">{lightboxItem.folder}</dd></div>
-                  <div className="flex justify-between"><dt className="text-slate-400">Size</dt><dd className="font-medium">{formatBytes(lightboxItem.size)}</dd></div>
-                  {lightboxItem.width && <div className="flex justify-between"><dt className="text-slate-400">Dimensions</dt><dd className="font-medium">{lightboxItem.width} × {lightboxItem.height}</dd></div>}
-                  {lightboxItem.duration && <div className="flex justify-between"><dt className="text-slate-400">Duration</dt><dd className="font-medium">{lightboxItem.duration}</dd></div>}
-                  <div className="flex justify-between"><dt className="text-slate-400">Uploaded</dt><dd className="font-medium">{lightboxItem.uploadedAt}</dd></div>
-                  <div className="flex justify-between"><dt className="text-slate-400">By</dt><dd className="font-medium">{lightboxItem.uploadedBy}</dd></div>
-                </dl>
-                <div className="flex flex-wrap gap-1.5">
-                  {lightboxItem.tags.map((tag) => (
-                    <span key={tag} className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">#{tag}</span>
-                  ))}
-                </div>
-                <div className="flex flex-col gap-1.5 pt-2">
-                  <button type="button" onClick={() => toast.success('Copied URL')} className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#003580] px-3 py-1.5 text-xs font-semibold text-white">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Copy URL
-                  </button>
-                  <button type="button" onClick={() => toast.success('Downloaded')} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">
-                    <Download className="h-3.5 w-3.5" /> Download
+
+              <div className="w-full space-y-4 border-t border-slate-200 p-5 md:w-96 md:border-l md:border-t-0 bg-white">
+                <div className="flex items-center justify-between">
+                  <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColor[lightboxItem.type]}`}>
+                    {lightboxItem.type}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingLightbox(!isEditingLightbox)}
+                    className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                    {isEditingLightbox ? 'View Details' : 'Edit Details'}
                   </button>
                 </div>
+
+                {!isEditingLightbox ? (
+                  <>
+                    <div>
+                      <h3 className="text-base font-semibold text-slate-900">{lightboxItem.name}</h3>
+                      {lightboxItem.description && (
+                        <p className="mt-1 text-xs text-slate-600">{lightboxItem.description}</p>
+                      )}
+                      {lightboxItem.altText && (
+                        <p className="mt-1 text-[11px] text-slate-400 italic">Alt: {lightboxItem.altText}</p>
+                      )}
+                    </div>
+
+                    <dl className="space-y-2 text-xs text-slate-600 border-t border-b border-slate-100 py-3">
+                      <div className="flex justify-between"><dt className="text-slate-400">Category/Folder</dt><dd className="font-semibold text-slate-800">{lightboxItem.folder}</dd></div>
+                      <div className="flex justify-between"><dt className="text-slate-400">Size</dt><dd className="font-medium">{formatBytes(lightboxItem.size)}</dd></div>
+                      {lightboxItem.width && lightboxItem.height && (
+                        <div className="flex justify-between"><dt className="text-slate-400">Dimensions</dt><dd className="font-medium">{lightboxItem.width} × {lightboxItem.height} px</dd></div>
+                      )}
+                      <div className="flex justify-between"><dt className="text-slate-400">Uploaded</dt><dd className="font-medium">{lightboxItem.uploadedAt}</dd></div>
+                      <div className="flex justify-between"><dt className="text-slate-400">By</dt><dd className="font-medium">{lightboxItem.uploadedBy}</dd></div>
+                    </dl>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {lightboxItem.tags.map((tag) => (
+                        <span key={tag} className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">#{tag}</span>
+                      ))}
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 pt-2">
+                      <button type="button" onClick={() => copyMediaUrl(lightboxItem)} className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#003580] px-3 py-2 text-xs font-semibold text-white hover:brightness-110">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Copy File URL
+                      </button>
+                      <button type="button" onClick={() => downloadMediaAsset(lightboxItem)} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                        <Download className="h-3.5 w-3.5" /> Download
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Name</label>
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Folder</label>
+                      <select
+                        value={editForm.folder}
+                        onChange={(e) => setEditForm({ ...editForm, folder: e.target.value })}
+                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] bg-white"
+                      >
+                        {FOLDERS.filter((f) => f !== 'All').map((f) => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Description</label>
+                      <textarea
+                        rows={2}
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580]"
+                      />
+                    </div>
+
+                    {lightboxItem.type === 'image' && (
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">Alt Text</label>
+                        <input
+                          type="text"
+                          value={editForm.altText}
+                          onChange={(e) => setEditForm({ ...editForm, altText: e.target.value })}
+                          className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580]"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">Tags (Comma separated)</label>
+                      <input
+                        type="text"
+                        value={editForm.tagsInput}
+                        onChange={(e) => setEditForm({ ...editForm, tagsInput: e.target.value })}
+                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580]"
+                      />
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleSaveLightboxEdit}
+                        className="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-[#003580] py-1.5 text-xs font-semibold text-white hover:brightness-110"
+                      >
+                        <Save className="h-3.5 w-3.5" /> Save Changes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingLightbox(false)}
+                        className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -383,3 +1060,4 @@ export default function MediaLibrary() {
     </div>
   );
 }
+

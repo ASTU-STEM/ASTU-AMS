@@ -28,16 +28,34 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     return (sorted[middle - 1] + sorted[middle]) / 2;
   }
 
-  async getOverallEmploymentStats(): Promise<EmploymentStats> {
-    const totalAlumni = await prisma.alumniProfile.count();
+  private parseGraduationYear(academicYear?: string): number | null {
+    if (!academicYear || academicYear === 'All Time') return null;
+    const parts = academicYear.split('-');
+    const yr = parseInt(parts[0], 10);
+    return isNaN(yr) ? null : yr;
+  }
+
+  async getOverallEmploymentStats(filters?: { academicYear?: string; department?: string }): Promise<EmploymentStats> {
+    const targetYear = this.parseGraduationYear(filters?.academicYear);
+    const deptFilter = filters?.department && filters.department !== 'All' ? filters.department : null;
+
+    const whereClause: any = {};
+    if (targetYear !== null) whereClause.graduationYear = targetYear;
+    if (deptFilter) {
+      whereClause.department = {
+        name: { contains: deptFilter, mode: 'insensitive' }
+      };
+    }
+
+    const totalAlumni = await prisma.alumniProfile.count({ where: whereClause });
     const employed = await prisma.alumniProfile.count({
-      where: { employmentStatus: 'EMPLOYED' },
+      where: { ...whereClause, employmentStatus: 'EMPLOYED' },
     });
     const selfEmployed = await prisma.alumniProfile.count({
-      where: { employmentStatus: 'SELF_EMPLOYED' },
+      where: { ...whereClause, employmentStatus: 'SELF_EMPLOYED' },
     });
     const unemployed = await prisma.alumniProfile.count({
-      where: { employmentStatus: 'UNEMPLOYED' },
+      where: { ...whereClause, employmentStatus: 'UNEMPLOYED' },
     });
 
     const employmentRate = totalAlumni > 0 ? ((employed + selfEmployed) / totalAlumni) * 100 : 0;
@@ -48,6 +66,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     const salariesAgg = await prisma.alumniProfile.aggregate({
       _avg: { salary: true },
       where: {
+        ...whereClause,
         employmentStatus: { in: ['EMPLOYED', 'SELF_EMPLOYED'] },
         salary: { not: null },
       },
@@ -58,6 +77,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     const allAlumniSalaries = await prisma.alumniProfile.findMany({
       select: { salary: true },
       where: {
+        ...whereClause,
         employmentStatus: { in: ['EMPLOYED', 'SELF_EMPLOYED'] },
         salary: { not: null },
       },
@@ -77,10 +97,11 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     let totalTimeToHireMonths = 0;
     let timeToHireCount = 0;
 
-    for (const exp of experiences) {
-      const graduationYear = exp.alumni.graduationYear;
+    for (const exp of (experiences || [])) {
+      if (!exp?.alumni) continue;
+      const graduationYear = exp.alumni.graduationYear || 2024;
       const gradDate = new Date(graduationYear, 0, 1);
-      const diffMs = exp.startDate.getTime() - gradDate.getTime();
+      const diffMs = exp.startDate ? (exp.startDate.getTime() - gradDate.getTime()) : 0;
       const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
       if (diffMonths >= 0) {
         totalTimeToHireMonths += diffMonths;
@@ -94,17 +115,17 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       select: { graduationYear: true, employmentStatus: true },
     });
 
-    const years: number[] = Array.from(new Set(alumniList.map((a: AlumniStatusInfo) => a.graduationYear))).sort((a, b) => a - b);
+    const years: number[] = Array.from(new Set((alumniList || []).map((a: AlumniStatusInfo) => a.graduationYear))).sort((a, b) => a - b);
     
     const employmentTrend = years.map((yr: number) => {
-      const yearAlumni = alumniList.filter((a: AlumniStatusInfo) => a.graduationYear === yr);
+      const yearAlumni = (alumniList || []).filter((a: AlumniStatusInfo) => a.graduationYear === yr);
       const yearEmployed = yearAlumni.filter((a: AlumniStatusInfo) => a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED').length;
       const rate = yearAlumni.length > 0 ? (yearEmployed / yearAlumni.length) * 100 : 0;
       return { year: yr, rate };
     });
 
     const graduateOutcomeTrend = years.map((yr: number) => {
-      const yearAlumni = alumniList.filter((a: AlumniStatusInfo) => a.graduationYear === yr);
+      const yearAlumni = (alumniList || []).filter((a: AlumniStatusInfo) => a.graduationYear === yr);
       return {
         year: yr,
         employed: yearAlumni.filter((a: AlumniStatusInfo) => a.employmentStatus === 'EMPLOYED').length,
@@ -130,7 +151,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getSkillGapStats(): Promise<SkillGapStats> {
+  async getSkillGapStats(filters?: { academicYear?: string; department?: string }): Promise<SkillGapStats> {
     const aggregations = await prisma.employerFeedback.aggregate({
       _avg: {
         technicalSkill: true,
@@ -143,43 +164,59 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       _count: { id: true },
     });
 
+    const avg = aggregations?._avg || {};
+    const cnt = typeof aggregations?._count === 'number' ? aggregations._count : (aggregations?._count?.id || 0);
+
     return new SkillGapStats(
-      aggregations._avg.technicalSkill || 0,
-      aggregations._avg.communicationSkill || 0,
-      aggregations._avg.leadershipSkill || 0,
-      aggregations._avg.teamworkSkill || 0,
-      aggregations._avg.problemSolvingSkill || 0,
-      aggregations._avg.innovationSkill || 0,
-      aggregations._count.id
+      avg.technicalSkill || 0,
+      avg.communicationSkill || 0,
+      avg.leadershipSkill || 0,
+      avg.teamworkSkill || 0,
+      avg.problemSolvingSkill || 0,
+      avg.innovationSkill || 0,
+      cnt
     );
   }
 
-  async getDepartmentMetrics(): Promise<DepartmentMetric[]> {
+  async getDepartmentMetrics(filters?: { academicYear?: string; department?: string }): Promise<DepartmentMetric[]> {
+    const targetYear = this.parseGraduationYear(filters?.academicYear);
+    const deptFilter = filters?.department && filters.department !== 'All' ? filters.department : null;
+
+    const profileWhere: any = {};
+    if (targetYear !== null) profileWhere.graduationYear = targetYear;
+
+    const deptWhere: any = {};
+    if (deptFilter) deptWhere.name = { contains: deptFilter, mode: 'insensitive' };
+
     const departments = await prisma.department.findMany({
+      where: deptWhere,
       include: {
         alumniProfiles: {
+          where: profileWhere,
           select: {
             employmentStatus: true,
             salary: true,
             cgpa: true,
+            graduationYear: true,
           }
         },
       },
     });
 
-    return departments.map((dept: any) => {
-      const totalAlumni = dept.alumniProfiles.length;
-      const employed = dept.alumniProfiles.filter(
+    return (departments || []).map((dept: any) => {
+      const profiles = dept.alumniProfiles || [];
+      const totalAlumni = profiles.length;
+      const employed = profiles.filter(
         (a: any) => a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED'
       ).length;
       const employmentRate = totalAlumni > 0 ? (employed / totalAlumni) * 100 : 0;
 
-      const salaries = dept.alumniProfiles
-        .filter((a: any) => a.salary !== null)
+      const salaries = profiles
+        .filter((a: any) => a.salary !== null && a.salary !== undefined)
         .map((a: any) => a.salary as number);
       const averageSalary = salaries.length > 0 ? salaries.reduce((a: number, b: number) => a + b, 0) / salaries.length : 0;
 
-      const cgpas = dept.alumniProfiles.map((a: any) => a.cgpa);
+      const cgpas = profiles.map((a: any) => a.cgpa).filter((c: any) => c !== null && c !== undefined);
       const avgCgpa = cgpas.length > 0 ? cgpas.reduce((a: number, b: number) => a + b, 0) / cgpas.length : 3.0;
 
       const cgpaScore = (avgCgpa / 4.0) * 100;
@@ -188,12 +225,12 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       const statuses = ['EMPLOYED', 'UNEMPLOYED', 'SELF_EMPLOYED'];
       const statusDistribution = statuses.map(st => ({
         status: st,
-        count: dept.alumniProfiles.filter((a: any) => a.employmentStatus === st).length,
+        count: profiles.filter((a: any) => a.employmentStatus === st).length,
       }));
 
       return new DepartmentMetric(
-        dept.name,
-        dept.code,
+        dept.name || 'Department',
+        dept.code || 'DEPT',
         totalAlumni,
         employmentRate,
         averageSalary,
@@ -203,13 +240,15 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     });
   }
 
-  async getEmployerAnalytics(): Promise<EmployerAnalytics> {
+  async getEmployerAnalytics(filters?: { academicYear?: string; department?: string }): Promise<EmployerAnalytics> {
     const workExperiences = await prisma.workExperience.findMany({
       select: { companyName: true },
     });
     const companyCounts: Record<string, number> = {};
-    for (const exp of workExperiences) {
-      companyCounts[exp.companyName] = (companyCounts[exp.companyName] || 0) + 1;
+    for (const exp of (workExperiences || [])) {
+      if (exp.companyName) {
+        companyCounts[exp.companyName] = (companyCounts[exp.companyName] || 0) + 1;
+      }
     }
     const topHiringCompanies = Object.entries(companyCounts)
       .map(([companyName, count]) => ({ companyName, count }))
@@ -220,8 +259,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       include: { employer: true },
     });
     const jobCounts: Record<string, number> = {};
-    for (const job of jobs) {
-      const name = job.employer.companyName;
+    for (const job of (jobs || [])) {
+      const name = job.employer?.companyName || 'Corporate Partner';
       jobCounts[name] = (jobCounts[name] || 0) + 1;
     }
     const mostActiveEmployers = Object.entries(jobCounts)
@@ -233,8 +272,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       include: { job: { include: { employer: true } } },
     });
     const appStats: Record<string, { total: number; accepted: number }> = {};
-    for (const app of applications) {
-      const name = app.job.employer.companyName;
+    for (const app of (applications || [])) {
+      const name = app.job?.employer?.companyName || 'Corporate Partner';
       if (!appStats[name]) appStats[name] = { total: 0, accepted: 0 };
       appStats[name].total++;
       if (app.status === 'ACCEPTED') appStats[name].accepted++;
@@ -244,7 +283,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       rate: stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0,
     }));
 
-    const skillStats = await this.getSkillGapStats();
+    const skillStats = await this.getSkillGapStats(filters);
     const averageEmployerSatisfaction = skillStats.totalFeedbackCount > 0 
       ? (skillStats.averageTechnical + skillStats.averageCommunication + skillStats.averageLeadership + skillStats.averageTeamwork + skillStats.averageProblemSolving + skillStats.averageInnovation) / 6
       : 8.2;
@@ -255,15 +294,15 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       { month: 'Mar', jobCount: 2 },
       { month: 'Apr', jobCount: 1 },
       { month: 'May', jobCount: 3 },
-      { month: 'Jun', jobCount: jobs.length },
+      { month: 'Jun', jobCount: (jobs || []).length },
     ];
 
     const feedbacks = await prisma.employerFeedback.findMany({
       include: { employer: true },
     });
     const feedbackScores: Record<string, { totalScore: number; count: number }> = {};
-    for (const fb of feedbacks) {
-      const name = fb.employer.companyName;
+    for (const fb of (feedbacks || [])) {
+      const name = fb.employer?.companyName || 'Corporate Partner';
       const score = (fb.technicalSkill + fb.communicationSkill + fb.leadershipSkill + fb.teamworkSkill + fb.problemSolvingSkill + fb.innovationSkill) / 6;
       if (!feedbackScores[name]) feedbackScores[name] = { totalScore: 0, count: 0 };
       feedbackScores[name].totalScore += score;
@@ -279,8 +318,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       include: { experiences: true },
     });
     const companySalaries: Record<string, { totalSalary: number; count: number }> = {};
-    for (const a of alumni) {
-      const currentJob = a.experiences.find((exp: any) => exp.isCurrent);
+    for (const a of (alumni || [])) {
+      const currentJob = (a.experiences || []).find((exp: any) => exp.isCurrent);
       if (currentJob && a.salary) {
         const name = currentJob.companyName;
         if (!companySalaries[name]) companySalaries[name] = { totalSalary: 0, count: 0 };
@@ -315,8 +354,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getDepartmentAnalytics(): Promise<DepartmentAnalytics> {
-    const metrics = await this.getDepartmentMetrics();
+  async getDepartmentAnalytics(filters?: { academicYear?: string; department?: string }): Promise<DepartmentAnalytics> {
+    const metrics = await this.getDepartmentMetrics(filters);
 
     const departmentRankings = [...metrics]
       .sort((a, b) => b.employmentRate - a.employmentRate)
@@ -326,16 +365,28 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       .sort((a, b) => b.averageSalary - a.averageSalary)
       .map(m => ({ code: m.departmentCode, averageSalary: m.averageSalary }));
 
-    const trendAnalysis = [
-      {
-        year: 2023,
-        departments: metrics.map(m => ({ code: m.departmentCode, rate: m.employmentRate * 0.95 })),
-      },
-      {
-        year: 2024,
-        departments: metrics.map(m => ({ code: m.departmentCode, rate: m.employmentRate })),
-      },
-    ];
+    // Query actual alumni profiles grouped by graduationYear (Batch) and department
+    const alumniList = await prisma.alumniProfile.findMany({
+      include: { department: true }
+    });
+
+    const uniqueYears = Array.from(new Set(alumniList.map(a => a.graduationYear))).sort((a, b) => a - b);
+    const validYears = uniqueYears.length > 0 ? uniqueYears : [2023, 2024];
+
+    const trendAnalysis = validYears.map(yr => {
+      const yearAlumni = alumniList.filter(a => a.graduationYear === yr);
+      const deptsRates = metrics.map(m => {
+        const deptYearAlumni = yearAlumni.filter(a => (a.department?.code || a.department?.name) === m.departmentCode);
+        const employed = deptYearAlumni.filter(a => a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED').length;
+        const rate = deptYearAlumni.length > 0 ? Math.round((employed / deptYearAlumni.length) * 100) : m.employmentRate;
+        return { code: m.departmentCode, rate };
+      });
+
+      return {
+        year: yr,
+        departments: deptsRates
+      };
+    });
 
     const performanceBenchmarks = metrics.map(m => ({
       code: m.departmentCode,
@@ -351,8 +402,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getCurriculumAnalytics(): Promise<CurriculumAnalytics> {
-    const skillStats = await this.getSkillGapStats();
+  async getCurriculumAnalytics(filters?: { academicYear?: string; department?: string }): Promise<CurriculumAnalytics> {
+    const skillStats = await this.getSkillGapStats(filters);
     
     const skillGaps = [
       { skill: 'Technical Skills', gapScore: Math.max(0, 9.0 - skillStats.averageTechnical) },
@@ -366,8 +417,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     const jobs = await prisma.job.findMany({ select: { skillsRequired: true } });
     const alumniProfiles = await prisma.alumniProfile.findMany({ select: { skills: true } });
 
-    const jobSkills = jobs.flatMap((j: { skillsRequired: string[] }) => j.skillsRequired);
-    const alumniSkills = new Set(alumniProfiles.flatMap((a: { skills: string[] }) => a.skills));
+    const jobSkills = (jobs || []).flatMap((j: { skillsRequired?: string[] }) => j.skillsRequired || []);
+    const alumniSkills = new Set((alumniProfiles || []).flatMap((a: { skills?: string[] }) => a.skills || []));
 
     const missingSkillsCounts: Record<string, number> = {};
     for (const skill of jobSkills) {
@@ -403,7 +454,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
 
     let totalPoints = 0;
     let count = 0;
-    for (const ans of answers) {
+    for (const ans of (answers || [])) {
       if (ans.answerText === 'Highly Relevant') totalPoints += 100;
       else if (ans.answerText === 'Somewhat Relevant') totalPoints += 50;
       else if (ans.answerText === 'Unrelated') totalPoints += 0;
@@ -436,19 +487,34 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     );
   }
 
-  async getTracerAnalytics(): Promise<TracerAnalytics> {
-    const totalAssignments = await prisma.surveyAssignment.count();
+  async getTracerAnalytics(filters?: { academicYear?: string; department?: string }): Promise<TracerAnalytics> {
+    const targetYear = this.parseGraduationYear(filters?.academicYear);
+    const deptFilter = filters?.department && filters.department !== 'All' ? filters.department : null;
+
+    const profileWhere: any = {};
+    if (targetYear !== null) profileWhere.graduationYear = targetYear;
+    if (deptFilter) {
+      profileWhere.department = { name: { contains: deptFilter, mode: 'insensitive' } };
+    }
+
+    const assignmentWhere: any = {};
+    if (targetYear !== null || deptFilter) {
+      assignmentWhere.alumni = profileWhere;
+    }
+
+    const totalAssignments = await prisma.surveyAssignment.count({ where: assignmentWhere });
     const completedAssignments = await prisma.surveyAssignment.count({
-      where: { status: 'COMPLETED' },
+      where: { ...assignmentWhere, status: 'COMPLETED' },
     });
 
-    const totalAlumni = await prisma.alumniProfile.count();
+    const totalAlumni = await prisma.alumniProfile.count({ where: profileWhere });
     const distinctParticipants = await prisma.surveyResponse.groupBy({
       by: ['alumniId'],
+      where: targetYear !== null || deptFilter ? { alumni: profileWhere } : undefined,
     });
 
     const surveyCompletionRate = totalAssignments > 0 ? (completedAssignments / totalAssignments) * 100 : 0;
-    const surveyParticipationRate = totalAlumni > 0 ? (distinctParticipants.length / totalAlumni) * 100 : 0;
+    const surveyParticipationRate = totalAlumni > 0 ? ((distinctParticipants || []).length / totalAlumni) * 100 : 0;
     const responseRate = totalAssignments > 0 ? (completedAssignments / totalAssignments) * 100 : 0;
 
     const responseTrend = [
@@ -459,12 +525,12 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       include: { experiences: true, surveyResponses: true },
     });
     let totalScore = 0;
-    for (const p of profiles) {
+    for (const p of (profiles || [])) {
       let score = 0;
-      if (p.skills.length > 0) score += 25;
-      if (p.experiences.length > 0) score += 25;
+      if ((p.skills || []).length > 0) score += 25;
+      if ((p.experiences || []).length > 0) score += 25;
       if (p.resumeUrl) score += 25;
-      if (p.surveyResponses.length > 0) score += 25;
+      if ((p.surveyResponses || []).length > 0) score += 25;
       totalScore += score;
     }
     const alumniEngagementScore = totalAlumni > 0 ? totalScore / totalAlumni : 75.0;

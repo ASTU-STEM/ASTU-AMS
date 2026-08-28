@@ -20,7 +20,6 @@ const envSchema = z.object({
   SMTP_PASS: z.string().default('mock_password'),
   SMTP_FROM: z.string().email().default('no-reply@astu.edu.et'),
   MAX_FILE_SIZE: z.coerce.number().default(5242880), // 5MB
-  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
 });
 
 const parsed = envSchema.safeParse(process.env);

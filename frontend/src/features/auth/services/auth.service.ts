@@ -70,12 +70,16 @@ export const authService = {
         message: data.message || 'Login failed. Please check your credentials.'
       };
     } catch (error) {
-      let message = 'An unexpected error occurred during login.';
+      let message = 'Login failed. Please check your email/student ID and password.';
       let errorCode = 'SERVER_ERROR';
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const resData = error.response.data as any;
-        message = resData.message || resData.error || message;
-        errorCode = resData.errorCode || errorCode;
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data) {
+          const resData = error.response.data as any;
+          message = resData.message || resData.error || message;
+          errorCode = resData.errorCode || errorCode;
+        } else if (error.code === 'ERR_NETWORK' || !error.response) {
+          message = 'Unable to reach backend server (http://localhost:5000). Please ensure the backend server is running.';
+        }
       }
       return { ok: false, errorCode, message };
     }

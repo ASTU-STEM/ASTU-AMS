@@ -142,7 +142,7 @@ export default function BackupSecurity() {
       { label: 'API Keys', value: `${apiKeys.length}`, icon: KeyRound },
       { label: 'Whitelisted IPs', value: `${whitelist.length}`, icon: Globe2 },
     ];
-  }, [whitelist.length]);
+  }, [activeSessions.length, apiKeys.length, whitelist.length]);
 
   const runBackup = () => {
     setConfirmOpen(false);

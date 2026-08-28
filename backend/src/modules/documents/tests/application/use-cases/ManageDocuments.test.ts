@@ -2,9 +2,11 @@ import { RequestDocument, UpdateDocumentStatus, GetAlumniDocuments, GetAllDocume
 import { IDocumentRequestRepository } from '../../../application/ports/IDocumentRequestRepository';
 import { DocumentRequest } from '../../../domain/entities/Document';
 import { DocumentNotFoundError, DuplicateDocumentRequestError } from '../../../domain/errors/DocumentErrors';
+import { EmailService } from '../../../../../core/services/EmailService';
 
 describe('ManageDocuments Use Cases', () => {
   let mockRepo: jest.Mocked<IDocumentRequestRepository>;
+  let mockEmailService: jest.Mocked<EmailService>;
 
   const mockReq = new DocumentRequest('req1', 'alumni1', 'TRANSCRIPT', 'PENDING', null, new Date(), new Date());
 
@@ -16,6 +18,9 @@ describe('ManageDocuments Use Cases', () => {
       create: jest.fn(),
       updateStatus: jest.fn(),
     };
+    mockEmailService = {
+      sendMail: jest.fn().mockResolvedValue(undefined),
+    } as any;
   });
 
   describe('RequestDocument', () => {
@@ -23,7 +28,7 @@ describe('ManageDocuments Use Cases', () => {
       mockRepo.findByAlumniId.mockResolvedValue([]);
       mockRepo.create.mockResolvedValue(mockReq);
 
-      const useCase = new RequestDocument(mockRepo);
+      const useCase = new RequestDocument(mockRepo, mockEmailService);
       const result = await useCase.execute('alumni1', { documentType: 'TRANSCRIPT' });
       
       expect(result).toEqual(mockReq);
@@ -32,7 +37,7 @@ describe('ManageDocuments Use Cases', () => {
     it('should throw DuplicateDocumentRequestError if a pending request of same type exists', async () => {
       mockRepo.findByAlumniId.mockResolvedValue([mockReq]);
       
-      const useCase = new RequestDocument(mockRepo);
+      const useCase = new RequestDocument(mockRepo, mockEmailService);
       await expect(useCase.execute('alumni1', { documentType: 'TRANSCRIPT' })).rejects.toThrow(DuplicateDocumentRequestError);
     });
   });

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   CalendarDays,
   ChevronDown,
@@ -133,12 +133,7 @@ export default function SystemLogs() {
     return () => window.clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    fetchLogs();
-    fetchStats();
-  }, [actionType, userSearch, dateFrom, dateTo, severity]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     const result = await adminService.getLogs({
       query: userSearch,
@@ -155,14 +150,19 @@ export default function SystemLogs() {
       setLogs(fetchedLogs);
     }
     setLoading(false);
-  };
+  }, [actionType, userSearch, dateFrom, dateTo, severity]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     const result = await adminService.getLogStats();
     if (result.ok) {
       setStats(result.data);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchLogs();
+    fetchStats();
+  }, [fetchLogs, fetchStats]);
 
   const filteredLogs = logs;
 

@@ -64,7 +64,7 @@ export default function AdminProfile() {
       setIsLoading(false);
     };
     fetchProfile();
-  }, []);
+  }, [user?.email]);
 
   // Security Form State
   const [securityForm, setSecurityForm] = useState({

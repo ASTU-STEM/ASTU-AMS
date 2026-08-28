@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BarChart3,
   BookOpen,
@@ -49,6 +49,8 @@ import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import ImageUploader from '../components/ImageUploader';
+import homepageCmsService, { HomepageCmsConfig } from '../services/homepageCms.service';
 
 /* ─── Types ─── */
 interface HeroSlide {
@@ -58,7 +60,7 @@ interface ImpactStat {
   id: string; label: string; value: string; suffix: string; detail: string; icon: string; active: boolean;
 }
 interface StakeholderPortal {
-  id: string; title: string; icon: string; points: string[]; cta: string; route: string; active: boolean;
+  id: string; title: string; icon: string; points: string[]; cta: string; route: string; active: boolean; description?: string;
 }
 interface CampusLifeCard {
   id: string; title: string; campus: string; description: string; image: string; action: string; active: boolean;
@@ -325,628 +327,130 @@ export default function HomepageManagement() {
     return heroSlides.length + impactStats.length + portals.length + campusLife.length + campuses.length + gallery.length + videos.length + events.length + workshops.length + newsItems.length + announcements.length + stories.length + partners.length + testimonials.length + faq.length;
   }, [heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq]);
 
+  const isLoaded = useRef(false);
+
+  useEffect(() => {
+    const config = homepageCmsService.getSettings();
+    if (config) {
+      if (config.welcomeMessage) setWelcomeMessage(config.welcomeMessage);
+      if (config.heroSlides) setHeroSlides(config.heroSlides);
+      if (config.impactStats) setImpactStats(config.impactStats);
+      if (config.portals) setPortals(config.portals);
+      if (config.campusLife) setCampusLife(config.campusLife);
+      if (config.campuses) setCampuses(config.campuses);
+      if (config.gallery) setGallery(config.gallery);
+      if (config.videos) setVideos(config.videos);
+      if (config.events) setEvents(config.events);
+      if (config.workshops) setWorkshops(config.workshops);
+      if (config.newsItems) setNewsItems(config.newsItems);
+      if (config.announcements) setAnnouncements(config.announcements);
+      if (config.stories) setStories(config.stories);
+      if (config.partners) setPartners(config.partners);
+      if (config.testimonials) setTestimonials(config.testimonials);
+      if (config.faq) setFaq(config.faq);
+    }
+    setTimeout(() => {
+      isLoaded.current = true;
+    }, 100);
+  }, []);
+
+  const saveAllConfig = useCallback((showToast = true) => {
+    const config: HomepageCmsConfig = {
+      welcomeMessage,
+      heroSlides,
+      impactStats,
+      portals,
+      campusLife,
+      campuses,
+      gallery,
+      videos,
+      events,
+      workshops,
+      newsItems,
+      announcements,
+      stories,
+      partners,
+      testimonials,
+      faq,
+      tracerSpotlight,
+      employerFeedback,
+      mentorshipStats,
+    };
+    homepageCmsService.saveSettings(config);
+    if (showToast) {
+      toast.success('Homepage CMS published live to backend database & landing page!');
+    }
+  }, [
+    welcomeMessage,
+    heroSlides,
+    impactStats,
+    portals,
+    campusLife,
+    campuses,
+    gallery,
+    videos,
+    events,
+    workshops,
+    newsItems,
+    announcements,
+    stories,
+    partners,
+    testimonials,
+    faq,
+    tracerSpotlight,
+    employerFeedback,
+    mentorshipStats,
+  ]);
+
+  useEffect(() => {
+    if (!isLoaded.current) return;
+    saveAllConfig(false);
+  }, [
+    welcomeMessage,
+    heroSlides,
+    impactStats,
+    portals,
+    campusLife,
+    campuses,
+    gallery,
+    videos,
+    events,
+    workshops,
+    newsItems,
+    announcements,
+    stories,
+    partners,
+    testimonials,
+    faq,
+    tracerSpotlight,
+    employerFeedback,
+    mentorshipStats,
+    saveAllConfig,
+  ]);
+
   const saveWelcome = useCallback(() => {
     setWelcomeSaved(true);
-    toast.success('Welcome message saved');
+    saveAllConfig(true);
     setTimeout(() => setWelcomeSaved(false), 2000);
-  }, []);
+  }, [saveAllConfig]);
 
   const renderTabContent = () => {
     switch (activeTab) {
-      /* ─── Hero Slider ─── */
-      case 'hero': {
-        const modal = useModalState<HeroSlide>();
-        const [form, setForm] = useState({ image: '', tagline: '', title: '', description: '' });
-        const openAdd = useCallback(() => { setForm({ image: '', tagline: '', title: '', description: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: HeroSlide) => { setForm({ image: item.image, tagline: item.tagline, title: item.title, description: item.description }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) {
-            setHeroSlides(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s));
-            toast.success('Slide updated');
-          } else {
-            setHeroSlides(prev => [...prev, { id: `HS-${Date.now()}`, ...form, active: true }]);
-            toast.success('Slide created');
-          }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Hero Slider" subtitle="Manage the 3 rotating hero slides on the homepage banner." icon={ImagePlus}>
-            <InlineEditor items={heroSlides} setItems={setHeroSlides} title="Slides" onAdd={openAdd}
-              renderItem={(slide) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-12 w-20 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={slide.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 truncate">{slide.title}</p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">{slide.tagline}</p>
-                    <p className="text-xs text-slate-400 truncate">{slide.description.slice(0, 80)}...</p>
-                  </div>
-                  <button onClick={() => openEdit(slide)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580] transition-all"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Slide' : 'New Slide'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="https://..." /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Tagline</label><input value={form.tagline} onChange={e => setForm(p => ({ ...p, tagline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Quality Assurance & Accreditation" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Slide title" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Impact Stats ─── */
-      case 'stats': {
-        const modal = useModalState<ImpactStat>();
-        const [form, setForm] = useState({ label: '', value: '', suffix: '', detail: '', icon: 'Users' });
-        const openAdd = useCallback(() => { setForm({ label: '', value: '', suffix: '+', detail: '', icon: 'Users' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: ImpactStat) => { setForm({ label: item.label, value: item.value, suffix: item.suffix, detail: item.detail, icon: item.icon }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.label.trim() || !form.value.trim()) { toast.error('Label and value are required'); return; }
-          if (modal.editing) { setImpactStats(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s)); toast.success('Stat updated'); }
-          else { setImpactStats(prev => [...prev, { id: `IS-${Date.now()}`, ...form, active: true }]); toast.success('Stat created'); }
-          modal.close();
-        }, [form, modal]);
-        const iconOptions = Object.keys(iconMap);
-        return (
-          <SectionPanel title="Impact Statistics" subtitle="Configure the key metric counters shown below the hero section." icon={BarChart3}>
-            <InlineEditor items={impactStats} setItems={setImpactStats} title="Statistics" onAdd={openAdd}
-              renderItem={(stat) => {
-                const Icon = iconMap[stat.icon] || Users;
-                return (
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{stat.value}{stat.suffix} <span className="text-xs font-normal text-slate-500">{stat.label}</span></p>
-                      <p className="text-xs text-slate-400">{stat.detail}</p>
-                    </div>
-                    <button onClick={() => openEdit(stat)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                  </div>
-                );
-              }}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Stat' : 'New Stat'} onClose={modal.close} size="md">
-              <div className="space-y-4 p-1">
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Value</label><input value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="1,238" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Suffix</label><input value={form.suffix} onChange={e => setForm(p => ({ ...p, suffix: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="+" /></div>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-500">Label</label><input value={form.label} onChange={e => setForm(p => ({ ...p, label: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Registered Alumni Members" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Detail</label><input value={form.detail} onChange={e => setForm(p => ({ ...p, detail: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Stakeholder Portals ─── */
-      case 'portals': {
-        const modal = useModalState<StakeholderPortal>();
-        const [form, setForm] = useState({ title: '', icon: 'Users', points: ['', '', ''], cta: '', route: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', icon: 'Users', points: ['', '', ''], cta: '', route: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: StakeholderPortal) => { setForm({ title: item.title, icon: item.icon, points: [...item.points], cta: item.cta, route: item.route }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          const filtered = form.points.filter(p => p.trim());
-          if (modal.editing) { setPortals(prev => prev.map(p => p.id === modal.editing!.id ? { ...p, ...form, points: filtered } : p)); toast.success('Portal updated'); }
-          else { setPortals(prev => [...prev, { id: `SP-${Date.now()}`, ...form, points: filtered, active: true }]); toast.success('Portal created'); }
-          modal.close();
-        }, [form, modal]);
-        const iconOptions = Object.keys(iconMap);
-        return (
-          <SectionPanel title="Stakeholder Portals" subtitle="Edit the role-based portal cards (Alumni, Employers, Departments, etc.)." icon={Users}>
-            <InlineEditor items={portals} setItems={setPortals} title="Portals" onAdd={openAdd}
-              renderItem={(portal) => {
-                const Icon = iconMap[portal.icon] || Users;
-                return (
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{portal.title}</p>
-                      <p className="text-xs text-slate-400">{portal.cta} · {portal.points.length} features</p>
-                    </div>
-                    <button onClick={() => openEdit(portal)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                  </div>
-                );
-              }}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Portal' : 'New Portal'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">CTA Button</label><input value={form.cta} onChange={e => setForm(p => ({ ...p, cta: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Route</label><input value={form.route} onChange={e => setForm(p => ({ ...p, route: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-500">Feature Points (one per line)</label><textarea value={form.points.join('\n')} onChange={e => setForm(p => ({ ...p, points: e.target.value.split('\n') }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Campus Life ─── */
-      case 'campus-life': {
-        const modal = useModalState<CampusLifeCard>();
-        const [form, setForm] = useState({ title: '', campus: '', description: '', image: '', action: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', campus: '', description: '', image: '', action: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: CampusLifeCard) => { setForm({ title: item.title, campus: item.campus, description: item.description, image: item.image, action: item.action }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setCampusLife(prev => prev.map(c => c.id === modal.editing!.id ? { ...c, ...form } : c)); toast.success('Card updated'); }
-          else { setCampusLife(prev => [...prev, { id: `CL-${Date.now()}`, ...form, active: true }]); toast.success('Card created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Campus Life Cards" subtitle="Edit the 3 campus life feature cards (Events, Facilities, Museums)." icon={Star}>
-            <InlineEditor items={campusLife} setItems={setCampusLife} title="Cards" onAdd={openAdd}
-              renderItem={(card) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={card.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div><p className="text-sm font-semibold text-slate-900">{card.title}</p><p className="text-xs text-slate-400">{card.campus}</p></div>
-                  <button onClick={() => openEdit(card)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Card' : 'New Card'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Campus Label</label><input value={form.campus} onChange={e => setForm(p => ({ ...p, campus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Action Text</label><input value={form.action} onChange={e => setForm(p => ({ ...p, action: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Campuses ─── */
-      case 'campuses': {
-        const modal = useModalState<Campus>();
-        const [form, setForm] = useState({ name: '', description: '', image: '' });
-        const openAdd = useCallback(() => { setForm({ name: '', description: '', image: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: Campus) => { setForm({ name: item.name, description: item.description, image: item.image }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.name.trim()) { toast.error('Name is required'); return; }
-          if (modal.editing) { setCampuses(prev => prev.map(c => c.id === modal.editing!.id ? { ...c, ...form } : c)); toast.success('Campus updated'); }
-          else { setCampuses(prev => [...prev, { id: `CM-${Date.now()}`, ...form, active: true }]); toast.success('Campus created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Campuses" subtitle="Manage the campus location cards displayed on the homepage." icon={Building2}>
-            <InlineEditor items={campuses} setItems={setCampuses} title="Campuses" onAdd={openAdd}
-              renderItem={(campus) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={campus.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div><p className="text-sm font-semibold text-slate-900">{campus.name}</p><p className="text-xs text-slate-400 truncate max-w-[200px]">{campus.description}</p></div>
-                  <button onClick={() => openEdit(campus)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Campus' : 'New Campus'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Gallery ─── */
-      case 'gallery': {
-        const modal = useModalState<GalleryImage>();
-        const [form, setForm] = useState({ title: '', src: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', src: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: GalleryImage) => { setForm({ title: item.title, src: item.src }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setGallery(prev => prev.map(g => g.id === modal.editing!.id ? { ...g, ...form } : g)); toast.success('Image updated'); }
-          else { setGallery(prev => [...prev, { id: `GI-${Date.now()}`, ...form, active: true }]); toast.success('Image added'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Gallery Images" subtitle="Manage the photo gallery displayed on the homepage." icon={Image}>
-            <InlineEditor items={gallery} setItems={setGallery} title="Images" onAdd={openAdd}
-              renderItem={(img) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={img.src} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div><p className="text-sm font-semibold text-slate-900">{img.title}</p></div>
-                  <button onClick={() => openEdit(img)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Image' : 'Add Image'} onClose={modal.close} size="md">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.src} onChange={e => setForm(p => ({ ...p, src: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Video Gallery ─── */
-      case 'video': {
-        const modal = useModalState<VideoItem>();
-        const [form, setForm] = useState({ title: '', image: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', image: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: VideoItem) => { setForm({ title: item.title, image: item.image }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setVideos(prev => prev.map(v => v.id === modal.editing!.id ? { ...v, ...form } : v)); toast.success('Video updated'); }
-          else { setVideos(prev => [...prev, { id: `VI-${Date.now()}`, ...form, active: true }]); toast.success('Video added'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Video Gallery" subtitle="Manage video thumbnails and titles for the homepage video gallery." icon={PlayCircle}>
-            <InlineEditor items={videos} setItems={setVideos} title="Videos" onAdd={openAdd}
-              renderItem={(video) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={video.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div><p className="text-sm font-semibold text-slate-900">{video.title}</p></div>
-                  <button onClick={() => openEdit(video)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Video' : 'Add Video'} onClose={modal.close} size="md">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Thumbnail URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Events ─── */
-      case 'events': {
-        const modal = useModalState<EventItem>();
-        const [form, setForm] = useState({ title: '', date: '', location: '', image: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', date: '', location: '', image: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: EventItem) => { setForm({ title: item.title, date: item.date, location: item.location, image: item.image }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setEvents(prev => prev.map(e => e.id === modal.editing!.id ? { ...e, ...form } : e)); toast.success('Event updated'); }
-          else { setEvents(prev => [...prev, { id: `EV-${Date.now()}`, ...form, active: true }]); toast.success('Event created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Events" subtitle="Manage the featured events shown on the homepage." icon={CalendarDays}>
-            <InlineEditor items={events} setItems={setEvents} title="Events" onAdd={openAdd}
-              renderItem={(ev) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={ev.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div><p className="text-sm font-semibold text-slate-900">{ev.title}</p><p className="text-xs text-slate-400">{ev.date} · {ev.location}</p></div>
-                  <button onClick={() => openEdit(ev)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Event' : 'New Event'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="April 25-26, 2026" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Location</label><input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Workshops ─── */
-      case 'workshops': {
-        const modal = useModalState<WorkshopItem>();
-        const [form, setForm] = useState({ title: '', date: '', seats: '', focus: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', date: '', seats: '', focus: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: WorkshopItem) => { setForm({ title: item.title, date: item.date, seats: item.seats, focus: item.focus }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setWorkshops(prev => prev.map(w => w.id === modal.editing!.id ? { ...w, ...form } : w)); toast.success('Workshop updated'); }
-          else { setWorkshops(prev => [...prev, { id: `WS-${Date.now()}`, ...form, active: true }]); toast.success('Workshop created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Workshops" subtitle="Manage the workshop cards shown on the homepage." icon={GraduationCap}>
-            <InlineEditor items={workshops} setItems={setWorkshops} title="Workshops" onAdd={openAdd}
-              renderItem={(ws) => (
-                <div className="flex items-center gap-3">
-                  <div><p className="text-sm font-semibold text-slate-900">{ws.title}</p><p className="text-xs text-slate-400">{ws.date} · {ws.seats} · {ws.focus}</p></div>
-                  <button onClick={() => openEdit(ws)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Workshop' : 'New Workshop'} onClose={modal.close} size="md">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Seats</label><input value={form.seats} onChange={e => setForm(p => ({ ...p, seats: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="120 seats" /></div>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-500">Focus Area</label><input value={form.focus} onChange={e => setForm(p => ({ ...p, focus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Research & Innovation" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Latest News ─── */
-      case 'news': {
-        const modal = useModalState<NewsItem>();
-        const [form, setForm] = useState({ title: '', date: '' });
-        const openAdd = useCallback(() => { setForm({ title: '', date: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: NewsItem) => { setForm({ title: item.title, date: item.date }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setNewsItems(prev => prev.map(n => n.id === modal.editing!.id ? { ...n, ...form } : n)); toast.success('News updated'); }
-          else { setNewsItems(prev => [...prev, { id: `NW-${Date.now()}`, ...form, active: true }]); toast.success('News item created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Latest News" subtitle="Manage the news articles displayed in the Latest News section." icon={Newspaper}>
-            <InlineEditor items={newsItems} setItems={setNewsItems} title="News" onAdd={openAdd}
-              renderItem={(nw) => (
-                <div className="flex items-center gap-3">
-                  <div><p className="text-sm font-semibold text-slate-900">{nw.title}</p><p className="text-xs text-slate-400">{nw.date}</p></div>
-                  <button onClick={() => openEdit(nw)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit News' : 'New News'} onClose={modal.close} size="md">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Announcements ─── */
-      case 'announcements': {
-        const modal = useModalState<Announcement>();
-        const [form, setForm] = useState({ title: '', date: '', type: 'Alumni Announcement' });
-        const openAdd = useCallback(() => { setForm({ title: '', date: '', type: 'Alumni Announcement' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: Announcement) => { setForm({ title: item.title, date: item.date, type: item.type }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.title.trim()) { toast.error('Title is required'); return; }
-          if (modal.editing) { setAnnouncements(prev => prev.map(a => a.id === modal.editing!.id ? { ...a, ...form } : a)); toast.success('Announcement updated'); }
-          else { setAnnouncements(prev => [...prev, { id: `AN-${Date.now()}`, ...form, active: true }]); toast.success('Announcement created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Announcements" subtitle="Manage the official announcement notices section." icon={Megaphone}>
-            <InlineEditor items={announcements} setItems={setAnnouncements} title="Announcements" onAdd={openAdd}
-              renderItem={(ann) => (
-                <div className="flex items-center gap-3">
-                  <Bell className="h-4 w-4 text-astu-red shrink-0" />
-                  <div><p className="text-sm font-semibold text-slate-900">{ann.title}</p><p className="text-xs text-slate-400">{ann.type} · {ann.date}</p></div>
-                  <button onClick={() => openEdit(ann)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Announcement' : 'New Announcement'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Type</label><select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">
-                    {['Alumni Announcement', 'Employer Announcement', 'Alumni Achievement', 'Campus Notice', 'Academic Calendar'].map(t => <option key={t}>{t}</option>)}
-                  </select></div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Success Stories ─── */
-      case 'stories': {
-        const modal = useModalState<SuccessStory>();
-        const [form, setForm] = useState({ name: '', role: '', text: '', image: '' });
-        const openAdd = useCallback(() => { setForm({ name: '', role: '', text: '', image: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: SuccessStory) => { setForm({ name: item.name, role: item.role, text: item.text, image: item.image }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.name.trim()) { toast.error('Name is required'); return; }
-          if (modal.editing) { setStories(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s)); toast.success('Story updated'); }
-          else { setStories(prev => [...prev, { id: `SS-${Date.now()}`, ...form, active: true }]); toast.success('Story created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Success Stories" subtitle="Manage alumni success stories displayed on the homepage." icon={Star}>
-            <InlineEditor items={stories} setItems={setStories} title="Stories" onAdd={openAdd}
-              renderItem={(story) => (
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 overflow-hidden"><img src={story.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-                  <div><p className="text-sm font-semibold text-slate-900">{story.name}</p><p className="text-xs text-slate-400">{story.role}</p></div>
-                  <button onClick={() => openEdit(story)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Story' : 'New Story'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div className="grid grid-cols-2 gap-3">
-                  <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                  <div><label className="text-xs font-semibold text-slate-500">Role</label><input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                </div>
-                <div><label className="text-xs font-semibold text-slate-500">Story Text</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Image URL</label><input value={form.image} onChange={e => setForm(p => ({ ...p, image: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Partner Companies ─── */
-      case 'partners': {
-        const modal = useModalState<Partner>();
-        const [form, setForm] = useState({ name: '' });
-        const openAdd = useCallback(() => { setForm({ name: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: Partner) => { setForm({ name: item.name }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.name.trim()) { toast.error('Name is required'); return; }
-          if (modal.editing) { setPartners(prev => prev.map(p => p.id === modal.editing!.id ? { ...p, ...form } : p)); toast.success('Partner updated'); }
-          else { setPartners(prev => [...prev, { id: `PT-${Date.now()}`, ...form, active: true }]); toast.success('Partner added'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Partner Companies" subtitle="Manage the partner company logos scrolling on the homepage." icon={Handshake}>
-            <InlineEditor items={partners} setItems={setPartners} title="Partners" onAdd={openAdd}
-              renderItem={(partner) => (
-                <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-navy text-white text-xs font-bold">{partner.name.slice(0, 2).toUpperCase()}</span>
-                  <p className="text-sm font-semibold text-slate-900">{partner.name}</p>
-                  <button onClick={() => openEdit(partner)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Partner' : 'Add Partner'} onClose={modal.close} size="md">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Company Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Ethio Telecom" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── Testimonials ─── */
-      case 'testimonials': {
-        const modal = useModalState<Testimonial>();
-        const [form, setForm] = useState({ quote: '', by: '' });
-        const openAdd = useCallback(() => { setForm({ quote: '', by: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: Testimonial) => { setForm({ quote: item.quote, by: item.by }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.quote.trim() || !form.by.trim()) { toast.error('Both quote and author are required'); return; }
-          if (modal.editing) { setTestimonials(prev => prev.map(t => t.id === modal.editing!.id ? { ...t, ...form } : t)); toast.success('Testimonial updated'); }
-          else { setTestimonials(prev => [...prev, { id: `TT-${Date.now()}`, ...form, active: true }]); toast.success('Testimonial created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="Testimonials" subtitle="Manage the testimonial quotes from stakeholders." icon={Quote}>
-            <InlineEditor items={testimonials} setItems={setTestimonials} title="Testimonials" onAdd={openAdd}
-              renderItem={(tt) => (
-                <div className="flex items-center gap-3">
-                  <Quote className="h-5 w-5 text-astu-red shrink-0" />
-                  <div><p className="text-sm font-semibold text-slate-900">&ldquo;{tt.quote.length > 60 ? tt.quote.slice(0, 60) + '...' : tt.quote}&rdquo;</p><p className="text-xs text-slate-400">&mdash; {tt.by}</p></div>
-                  <button onClick={() => openEdit(tt)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit Testimonial' : 'New Testimonial'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Quote</label><textarea value={form.quote} onChange={e => setForm(p => ({ ...p, quote: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Author</label><input value={form.by} onChange={e => setForm(p => ({ ...p, by: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Department Head" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
-
-      /* ─── FAQ ─── */
-      case 'faq': {
-        const modal = useModalState<FaqItem>();
-        const [form, setForm] = useState({ question: '', answer: '' });
-        const openAdd = useCallback(() => { setForm({ question: '', answer: '' }); modal.openFor(); }, [modal]);
-        const openEdit = useCallback((item: FaqItem) => { setForm({ question: item.question, answer: item.answer }); modal.openFor(item); }, [modal]);
-        const save = useCallback(() => {
-          if (!form.question.trim() || !form.answer.trim()) { toast.error('Both question and answer are required'); return; }
-          if (modal.editing) { setFaq(prev => prev.map(f => f.id === modal.editing!.id ? { ...f, ...form } : f)); toast.success('FAQ updated'); }
-          else { setFaq(prev => [...prev, { id: `FQ-${Date.now()}`, ...form, active: true }]); toast.success('FAQ created'); }
-          modal.close();
-        }, [form, modal]);
-        return (
-          <SectionPanel title="FAQ Management" subtitle="Manage the frequently asked questions section (now rendered on homepage)." icon={HelpCircle}>
-            <InlineEditor items={faq} setItems={setFaq} title="FAQs" onAdd={openAdd}
-              renderItem={(fq) => (
-                <div className="flex items-center gap-3">
-                  <HelpCircle className="h-4 w-4 text-astu-red shrink-0" />
-                  <div><p className="text-sm font-semibold text-slate-900">{fq.question}</p><p className="text-xs text-slate-400 line-clamp-1">{fq.answer}</p></div>
-                  <button onClick={() => openEdit(fq)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
-                </div>
-              )}
-            />
-            <AdminModal open={modal.open} title={modal.editing ? 'Edit FAQ' : 'New FAQ'} onClose={modal.close} size="lg">
-              <div className="space-y-4 p-1">
-                <div><label className="text-xs font-semibold text-slate-500">Question</label><input value={form.question} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                <div><label className="text-xs font-semibold text-slate-500">Answer</label><textarea value={form.answer} onChange={e => setForm(p => ({ ...p, answer: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-              </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-                <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
-              </div>
-            </AdminModal>
-          </SectionPanel>
-        );
-      }
+      case 'hero': return <HeroSection heroSlides={heroSlides} setHeroSlides={setHeroSlides} />;
+      case 'stats': return <StatsSection impactStats={impactStats} setImpactStats={setImpactStats} />;
+      case 'portals': return <PortalsSection portals={portals} setPortals={setPortals} />;
+      case 'campus-life': return <CampusLifeSection campusLife={campusLife} setCampusLife={setCampusLife} />;
+      case 'campuses': return <CampusesSection campuses={campuses} setCampuses={setCampuses} />;
+      case 'gallery': return <GallerySection gallery={gallery} setGallery={setGallery} />;
+      case 'video': return <VideoSection videos={videos} setVideos={setVideos} />;
+      case 'events': return <EventsSection events={events} setEvents={setEvents} />;
+      case 'workshops': return <WorkshopsSection workshops={workshops} setWorkshops={setWorkshops} />;
+      case 'news': return <NewsSection newsItems={newsItems} setNewsItems={setNewsItems} />;
+      case 'announcements': return <AnnouncementsSection announcements={announcements} setAnnouncements={setAnnouncements} />;
+      case 'stories': return <StoriesSection stories={stories} setStories={setStories} />;
+      case 'partners': return <PartnersSection partners={partners} setPartners={setPartners} />;
+      case 'testimonials': return <TestimonialsSection testimonials={testimonials} setTestimonials={setTestimonials} />;
+      case 'faq': return <FaqSection faq={faq} setFaq={setFaq} />;
 
       /* ─── PROPOSAL FEATURES ─── */
       case 'proposal': {
@@ -1104,7 +608,7 @@ export default function HomepageManagement() {
         actions={
           <div className="flex items-center gap-2">
             <AdminBadge variant="info">{totalActive} active items</AdminBadge>
-            <button onClick={() => { toast.success('Homepage changes published to live site'); }}
+            <button onClick={() => saveAllConfig(true)}
               className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all shadow-sm">
               <Save className="h-3.5 w-3.5" /> Publish All
             </button>
@@ -1188,5 +692,615 @@ function SectionPanel({ title, subtitle, icon: Icon, children }: { title: string
       </div>
       <div className="mt-5">{children}</div>
     </section>
+  );
+}
+
+
+/* ─── Sub-Components for Tab Sections ─── */
+function HeroSection({ heroSlides, setHeroSlides }: { heroSlides: HeroSlide[]; setHeroSlides: React.Dispatch<React.SetStateAction<HeroSlide[]>> }) {
+  const modal = useModalState<HeroSlide>();
+  const [form, setForm] = useState({ image: '', tagline: '', title: '', description: '' });
+  const openAdd = useCallback(() => { setForm({ image: '', tagline: '', title: '', description: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: HeroSlide) => { setForm({ image: item.image, tagline: item.tagline, title: item.title, description: item.description }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) {
+      setHeroSlides(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s));
+      toast.success('Slide updated');
+    } else {
+      setHeroSlides(prev => [...prev, { id: `HS-${Date.now()}`, ...form, active: true }]);
+      toast.success('Slide created');
+    }
+    modal.close();
+  }, [form, modal, setHeroSlides]);
+
+  return (
+    <SectionPanel title="Hero Slider" subtitle="Manage the 3 rotating hero slides on the homepage banner." icon={ImagePlus}>
+      <InlineEditor items={heroSlides} setItems={setHeroSlides} title="Slides" onAdd={openAdd}
+        renderItem={(slide) => (
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-20 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={slide.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">{slide.title}</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">{slide.tagline}</p>
+              <p className="text-xs text-slate-400 truncate">{slide.description.slice(0, 80)}...</p>
+            </div>
+            <button onClick={() => openEdit(slide)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580] transition-all"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Slide' : 'New Slide'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <ImageUploader label="Upload Slide Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+          <div><label className="text-xs font-semibold text-slate-500">Tagline</label><input value={form.tagline} onChange={e => setForm(p => ({ ...p, tagline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Quality Assurance & Accreditation" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Slide title" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function StatsSection({ impactStats, setImpactStats }: { impactStats: ImpactStat[]; setImpactStats: React.Dispatch<React.SetStateAction<ImpactStat[]>> }) {
+  const modal = useModalState<ImpactStat>();
+  const [form, setForm] = useState({ label: '', value: '', suffix: '', detail: '', icon: 'Users' });
+  const openAdd = useCallback(() => { setForm({ label: '', value: '', suffix: '+', detail: '', icon: 'Users' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: ImpactStat) => { setForm({ label: item.label, value: item.value, suffix: item.suffix, detail: item.detail, icon: item.icon }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.label.trim() || !form.value.trim()) { toast.error('Label and value are required'); return; }
+    if (modal.editing) { setImpactStats(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s)); toast.success('Stat updated'); }
+    else { setImpactStats(prev => [...prev, { id: `IS-${Date.now()}`, ...form, active: true }]); toast.success('Stat created'); }
+    modal.close();
+  }, [form, modal, setImpactStats]);
+  const iconOptions = Object.keys(iconMap);
+  return (
+    <SectionPanel title="Impact Statistics" subtitle="Configure the key metric counters shown below the hero section." icon={BarChart3}>
+      <InlineEditor items={impactStats} setItems={setImpactStats} title="Statistics" onAdd={openAdd}
+        renderItem={(stat) => {
+          const Icon = iconMap[stat.icon] || Users;
+          return (
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{stat.value}{stat.suffix} <span className="text-xs font-normal text-slate-500">{stat.label}</span></p>
+                <p className="text-xs text-slate-400">{stat.detail}</p>
+              </div>
+              <button onClick={() => openEdit(stat)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            </div>
+          );
+        }}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Stat' : 'New Stat'} onClose={modal.close} size="md">
+        <div className="space-y-4 p-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Value</label><input value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="1,238" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Suffix</label><input value={form.suffix} onChange={e => setForm(p => ({ ...p, suffix: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="+" /></div>
+          </div>
+          <div><label className="text-xs font-semibold text-slate-500">Label</label><input value={form.label} onChange={e => setForm(p => ({ ...p, label: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Registered Alumni Members" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Detail</label><input value={form.detail} onChange={e => setForm(p => ({ ...p, detail: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function PortalsSection({ portals, setPortals }: { portals: StakeholderPortal[]; setPortals: React.Dispatch<React.SetStateAction<StakeholderPortal[]>> }) {
+  const modal = useModalState<StakeholderPortal>();
+  const [form, setForm] = useState({ title: '', icon: 'Users', points: ['', '', ''], cta: '', route: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', icon: 'Users', points: ['', '', ''], cta: '', route: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: StakeholderPortal) => {
+    setForm({
+      title: item.title || '',
+      icon: item.icon || 'Users',
+      points: Array.isArray(item.points) ? [...item.points] : (item.description ? [item.description] : []),
+      cta: item.cta || '',
+      route: item.route || '',
+    });
+    modal.openFor(item);
+  }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    const filtered = (form.points || []).filter(p => p.trim());
+    if (modal.editing) { setPortals(prev => prev.map(p => p.id === modal.editing!.id ? { ...p, ...form, points: filtered } : p)); toast.success('Portal updated'); }
+    else { setPortals(prev => [...prev, { id: `SP-${Date.now()}`, ...form, points: filtered, active: true }]); toast.success('Portal created'); }
+    modal.close();
+  }, [form, modal, setPortals]);
+  const iconOptions = Object.keys(iconMap);
+  return (
+    <SectionPanel title="Stakeholder Portals" subtitle="Edit the role-based portal cards (Alumni, Employers, Departments, etc.)." icon={Users}>
+      <InlineEditor items={portals} setItems={setPortals} title="Portals" onAdd={openAdd}
+        renderItem={(portal) => {
+          const Icon = iconMap[portal.icon] || Users;
+          return (
+            <div className="flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{portal.title}</p>
+                <p className="text-xs text-slate-400">{portal.cta || 'Portal'} · {(portal.points || []).length} features</p>
+              </div>
+              <button onClick={() => openEdit(portal)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            </div>
+          );
+        }}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Portal' : 'New Portal'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">CTA Button</label><input value={form.cta} onChange={e => setForm(p => ({ ...p, cta: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Route</label><input value={form.route} onChange={e => setForm(p => ({ ...p, route: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          </div>
+          <div><label className="text-xs font-semibold text-slate-500">Feature Points (one per line)</label><textarea value={(form.points || []).join('\n')} onChange={e => setForm(p => ({ ...p, points: e.target.value.split('\n') }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function CampusLifeSection({ campusLife, setCampusLife }: { campusLife: CampusLifeCard[]; setCampusLife: React.Dispatch<React.SetStateAction<CampusLifeCard[]>> }) {
+  const modal = useModalState<CampusLifeCard>();
+  const [form, setForm] = useState({ title: '', campus: '', description: '', image: '', action: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', campus: '', description: '', image: '', action: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: CampusLifeCard) => { setForm({ title: item.title, campus: item.campus, description: item.description, image: item.image, action: item.action }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setCampusLife(prev => prev.map(c => c.id === modal.editing!.id ? { ...c, ...form } : c)); toast.success('Card updated'); }
+    else { setCampusLife(prev => [...prev, { id: `CL-${Date.now()}`, ...form, active: true }]); toast.success('Card created'); }
+    modal.close();
+  }, [form, modal, setCampusLife]);
+  return (
+    <SectionPanel title="Campus Life Cards" subtitle="Edit the 3 campus life feature cards (Events, Facilities, Museums)." icon={Star}>
+      <InlineEditor items={campusLife} setItems={setCampusLife} title="Cards" onAdd={openAdd}
+        renderItem={(card) => (
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={card.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-slate-900">{card.title}</p><p className="text-xs text-slate-400">{card.campus}</p></div>
+            <button onClick={() => openEdit(card)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Card' : 'New Card'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Campus Label</label><input value={form.campus} onChange={e => setForm(p => ({ ...p, campus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          </div>
+          <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <ImageUploader label="Upload Card Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+          <div><label className="text-xs font-semibold text-slate-500">Action Text</label><input value={form.action} onChange={e => setForm(p => ({ ...p, action: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function CampusesSection({ campuses, setCampuses }: { campuses: Campus[]; setCampuses: React.Dispatch<React.SetStateAction<Campus[]>> }) {
+  const modal = useModalState<Campus>();
+  const [form, setForm] = useState({ name: '', description: '', image: '' });
+  const openAdd = useCallback(() => { setForm({ name: '', description: '', image: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: Campus) => { setForm({ name: item.name, description: item.description, image: item.image }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.name.trim()) { toast.error('Name is required'); return; }
+    if (modal.editing) { setCampuses(prev => prev.map(c => c.id === modal.editing!.id ? { ...c, ...form } : c)); toast.success('Campus updated'); }
+    else { setCampuses(prev => [...prev, { id: `CM-${Date.now()}`, ...form, active: true }]); toast.success('Campus created'); }
+    modal.close();
+  }, [form, modal, setCampuses]);
+  return (
+    <SectionPanel title="Campuses" subtitle="Manage the campus location cards displayed on the homepage." icon={Building2}>
+      <InlineEditor items={campuses} setItems={setCampuses} title="Campuses" onAdd={openAdd}
+        renderItem={(campus) => (
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={campus.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-slate-900">{campus.name}</p><p className="text-xs text-slate-400 truncate max-w-[200px]">{campus.description}</p></div>
+            <button onClick={() => openEdit(campus)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Campus' : 'New Campus'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <ImageUploader label="Upload Campus Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function GallerySection({ gallery, setGallery }: { gallery: GalleryImage[]; setGallery: React.Dispatch<React.SetStateAction<GalleryImage[]>> }) {
+  const modal = useModalState<GalleryImage>();
+  const [form, setForm] = useState({ title: '', src: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', src: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: GalleryImage) => { setForm({ title: item.title, src: item.src }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setGallery(prev => prev.map(g => g.id === modal.editing!.id ? { ...g, ...form } : g)); toast.success('Image updated'); }
+    else { setGallery(prev => [...prev, { id: `GI-${Date.now()}`, ...form, active: true }]); toast.success('Image added'); }
+    modal.close();
+  }, [form, modal, setGallery]);
+  return (
+    <SectionPanel title="Gallery Images" subtitle="Manage the photo gallery displayed on the homepage." icon={Image}>
+      <InlineEditor items={gallery} setItems={setGallery} title="Images" onAdd={openAdd}
+        renderItem={(img) => (
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={img.src} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-slate-900">{img.title}</p></div>
+            <button onClick={() => openEdit(img)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Image' : 'Add Image'} onClose={modal.close} size="md">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <ImageUploader label="Upload Photo" value={form.src} onChange={url => setForm(p => ({ ...p, src: url }))} />
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function VideoSection({ videos, setVideos }: { videos: VideoItem[]; setVideos: React.Dispatch<React.SetStateAction<VideoItem[]>> }) {
+  const modal = useModalState<VideoItem>();
+  const [form, setForm] = useState({ title: '', image: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', image: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: VideoItem) => { setForm({ title: item.title, image: item.image }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setVideos(prev => prev.map(v => v.id === modal.editing!.id ? { ...v, ...form } : v)); toast.success('Video updated'); }
+    else { setVideos(prev => [...prev, { id: `VI-${Date.now()}`, ...form, active: true }]); toast.success('Video added'); }
+    modal.close();
+  }, [form, modal, setVideos]);
+  return (
+    <SectionPanel title="Video Gallery" subtitle="Manage video thumbnails and titles for the homepage video gallery." icon={PlayCircle}>
+      <InlineEditor items={videos} setItems={setVideos} title="Videos" onAdd={openAdd}
+        renderItem={(video) => (
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={video.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-slate-900">{video.title}</p></div>
+            <button onClick={() => openEdit(video)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Video' : 'Add Video'} onClose={modal.close} size="md">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <ImageUploader label="Upload Thumbnail Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function EventsSection({ events, setEvents }: { events: EventItem[]; setEvents: React.Dispatch<React.SetStateAction<EventItem[]>> }) {
+  const modal = useModalState<EventItem>();
+  const [form, setForm] = useState({ title: '', date: '', location: '', image: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', date: '', location: '', image: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: EventItem) => { setForm({ title: item.title, date: item.date, location: item.location, image: item.image }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setEvents(prev => prev.map(e => e.id === modal.editing!.id ? { ...e, ...form } : e)); toast.success('Event updated'); }
+    else { setEvents(prev => [...prev, { id: `EV-${Date.now()}`, ...form, active: true }]); toast.success('Event created'); }
+    modal.close();
+  }, [form, modal, setEvents]);
+  return (
+    <SectionPanel title="Events" subtitle="Manage the featured events shown on the homepage." icon={CalendarDays}>
+      <InlineEditor items={events} setItems={setEvents} title="Events" onAdd={openAdd}
+        renderItem={(ev) => (
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={ev.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-slate-900">{ev.title}</p><p className="text-xs text-slate-400">{ev.date} · {ev.location}</p></div>
+            <button onClick={() => openEdit(ev)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Event' : 'New Event'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="April 25-26, 2026" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Location</label><input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          </div>
+          <ImageUploader label="Upload Event Banner Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function WorkshopsSection({ workshops, setWorkshops }: { workshops: WorkshopItem[]; setWorkshops: React.Dispatch<React.SetStateAction<WorkshopItem[]>> }) {
+  const modal = useModalState<WorkshopItem>();
+  const [form, setForm] = useState({ title: '', date: '', seats: '', focus: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', date: '', seats: '', focus: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: WorkshopItem) => { setForm({ title: item.title, date: item.date, seats: item.seats, focus: item.focus }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setWorkshops(prev => prev.map(w => w.id === modal.editing!.id ? { ...w, ...form } : w)); toast.success('Workshop updated'); }
+    else { setWorkshops(prev => [...prev, { id: `WS-${Date.now()}`, ...form, active: true }]); toast.success('Workshop created'); }
+    modal.close();
+  }, [form, modal, setWorkshops]);
+  return (
+    <SectionPanel title="Workshops" subtitle="Manage the workshop cards shown on the homepage." icon={GraduationCap}>
+      <InlineEditor items={workshops} setItems={setWorkshops} title="Workshops" onAdd={openAdd}
+        renderItem={(ws) => (
+          <div className="flex items-center gap-3">
+            <div><p className="text-sm font-semibold text-slate-900">{ws.title}</p><p className="text-xs text-slate-400">{ws.date} · {ws.seats} · {ws.focus}</p></div>
+            <button onClick={() => openEdit(ws)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Workshop' : 'New Workshop'} onClose={modal.close} size="md">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Seats</label><input value={form.seats} onChange={e => setForm(p => ({ ...p, seats: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="120 seats" /></div>
+          </div>
+          <div><label className="text-xs font-semibold text-slate-500">Focus Area</label><input value={form.focus} onChange={e => setForm(p => ({ ...p, focus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Research & Innovation" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function NewsSection({ newsItems, setNewsItems }: { newsItems: NewsItem[]; setNewsItems: React.Dispatch<React.SetStateAction<NewsItem[]>> }) {
+  const modal = useModalState<NewsItem>();
+  const [form, setForm] = useState({ title: '', date: '' });
+  const openAdd = useCallback(() => { setForm({ title: '', date: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: NewsItem) => { setForm({ title: item.title, date: item.date }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setNewsItems(prev => prev.map(n => n.id === modal.editing!.id ? { ...n, ...form } : n)); toast.success('News updated'); }
+    else { setNewsItems(prev => [...prev, { id: `NW-${Date.now()}`, ...form, active: true }]); toast.success('News item created'); }
+    modal.close();
+  }, [form, modal, setNewsItems]);
+  return (
+    <SectionPanel title="Latest News" subtitle="Manage the news articles displayed in the Latest News section." icon={Newspaper}>
+      <InlineEditor items={newsItems} setItems={setNewsItems} title="News" onAdd={openAdd}
+        renderItem={(nw) => (
+          <div className="flex items-center gap-3">
+            <div><p className="text-sm font-semibold text-slate-900">{nw.title}</p><p className="text-xs text-slate-400">{nw.date}</p></div>
+            <button onClick={() => openEdit(nw)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit News' : 'New News'} onClose={modal.close} size="md">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function AnnouncementsSection({ announcements, setAnnouncements }: { announcements: Announcement[]; setAnnouncements: React.Dispatch<React.SetStateAction<Announcement[]>> }) {
+  const modal = useModalState<Announcement>();
+  const [form, setForm] = useState({ title: '', date: '', type: 'Alumni Announcement' });
+  const openAdd = useCallback(() => { setForm({ title: '', date: '', type: 'Alumni Announcement' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: Announcement) => { setForm({ title: item.title, date: item.date, type: item.type }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.title.trim()) { toast.error('Title is required'); return; }
+    if (modal.editing) { setAnnouncements(prev => prev.map(a => a.id === modal.editing!.id ? { ...a, ...form } : a)); toast.success('Announcement updated'); }
+    else { setAnnouncements(prev => [...prev, { id: `AN-${Date.now()}`, ...form, active: true }]); toast.success('Announcement created'); }
+    modal.close();
+  }, [form, modal, setAnnouncements]);
+  return (
+    <SectionPanel title="Announcements" subtitle="Manage the official announcement notices section." icon={Megaphone}>
+      <InlineEditor items={announcements} setItems={setAnnouncements} title="Announcements" onAdd={openAdd}
+        renderItem={(ann) => (
+          <div className="flex items-center gap-3">
+            <Bell className="h-4 w-4 text-astu-red shrink-0" />
+            <div><p className="text-sm font-semibold text-slate-900">{ann.title}</p><p className="text-xs text-slate-400">{ann.type} · {ann.date}</p></div>
+            <button onClick={() => openEdit(ann)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Announcement' : 'New Announcement'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Type</label><select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">
+              {['Alumni Announcement', 'Employer Announcement', 'Alumni Achievement', 'Campus Notice', 'Academic Calendar'].map(t => <option key={t}>{t}</option>)}
+            </select></div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function StoriesSection({ stories, setStories }: { stories: SuccessStory[]; setStories: React.Dispatch<React.SetStateAction<SuccessStory[]>> }) {
+  const modal = useModalState<SuccessStory>();
+  const [form, setForm] = useState({ name: '', role: '', text: '', image: '' });
+  const openAdd = useCallback(() => { setForm({ name: '', role: '', text: '', image: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: SuccessStory) => { setForm({ name: item.name, role: item.role, text: item.text, image: item.image }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.name.trim()) { toast.error('Name is required'); return; }
+    if (modal.editing) { setStories(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s)); toast.success('Story updated'); }
+    else { setStories(prev => [...prev, { id: `SS-${Date.now()}`, ...form, active: true }]); toast.success('Story created'); }
+    modal.close();
+  }, [form, modal, setStories]);
+  return (
+    <SectionPanel title="Success Stories" subtitle="Manage alumni success stories displayed on the homepage." icon={Star}>
+      <InlineEditor items={stories} setItems={setStories} title="Stories" onAdd={openAdd}
+        renderItem={(story) => (
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 overflow-hidden"><img src={story.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-slate-900">{story.name}</p><p className="text-xs text-slate-400">{story.role}</p></div>
+            <button onClick={() => openEdit(story)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Story' : 'New Story'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Role</label><input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          </div>
+          <div><label className="text-xs font-semibold text-slate-500">Story Text</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <ImageUploader label="Upload Photo / Headshot" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function PartnersSection({ partners, setPartners }: { partners: Partner[]; setPartners: React.Dispatch<React.SetStateAction<Partner[]>> }) {
+  const modal = useModalState<Partner>();
+  const [form, setForm] = useState({ name: '' });
+  const openAdd = useCallback(() => { setForm({ name: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: Partner) => { setForm({ name: item.name }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.name.trim()) { toast.error('Name is required'); return; }
+    if (modal.editing) { setPartners(prev => prev.map(p => p.id === modal.editing!.id ? { ...p, ...form } : p)); toast.success('Partner updated'); }
+    else { setPartners(prev => [...prev, { id: `PT-${Date.now()}`, ...form, active: true }]); toast.success('Partner added'); }
+    modal.close();
+  }, [form, modal, setPartners]);
+  return (
+    <SectionPanel title="Partner Companies" subtitle="Manage the partner company logos scrolling on the homepage." icon={Handshake}>
+      <InlineEditor items={partners} setItems={setPartners} title="Partners" onAdd={openAdd}
+        renderItem={(partner) => (
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-navy text-white text-xs font-bold">{partner.name.slice(0, 2).toUpperCase()}</span>
+            <p className="text-sm font-semibold text-slate-900">{partner.name}</p>
+            <button onClick={() => openEdit(partner)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Partner' : 'Add Partner'} onClose={modal.close} size="md">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Company Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Ethio Telecom" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function TestimonialsSection({ testimonials, setTestimonials }: { testimonials: Testimonial[]; setTestimonials: React.Dispatch<React.SetStateAction<Testimonial[]>> }) {
+  const modal = useModalState<Testimonial>();
+  const [form, setForm] = useState({ quote: '', by: '' });
+  const openAdd = useCallback(() => { setForm({ quote: '', by: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: Testimonial) => { setForm({ quote: item.quote, by: item.by }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.quote.trim() || !form.by.trim()) { toast.error('Both quote and author are required'); return; }
+    if (modal.editing) { setTestimonials(prev => prev.map(t => t.id === modal.editing!.id ? { ...t, ...form } : t)); toast.success('Testimonial updated'); }
+    else { setTestimonials(prev => [...prev, { id: `TT-${Date.now()}`, ...form, active: true }]); toast.success('Testimonial created'); }
+    modal.close();
+  }, [form, modal, setTestimonials]);
+  return (
+    <SectionPanel title="Testimonials" subtitle="Manage the testimonial quotes from stakeholders." icon={Quote}>
+      <InlineEditor items={testimonials} setItems={setTestimonials} title="Testimonials" onAdd={openAdd}
+        renderItem={(tt) => (
+          <div className="flex items-center gap-3">
+            <Quote className="h-5 w-5 text-astu-red shrink-0" />
+            <div><p className="text-sm font-semibold text-slate-900">&ldquo;{tt.quote.length > 60 ? tt.quote.slice(0, 60) + '...' : tt.quote}&rdquo;</p><p className="text-xs text-slate-400">&mdash; {tt.by}</p></div>
+            <button onClick={() => openEdit(tt)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit Testimonial' : 'New Testimonial'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Quote</label><textarea value={form.quote} onChange={e => setForm(p => ({ ...p, quote: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Author</label><input value={form.by} onChange={e => setForm(p => ({ ...p, by: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Department Head" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
+  );
+}
+
+function FaqSection({ faq, setFaq }: { faq: FaqItem[]; setFaq: React.Dispatch<React.SetStateAction<FaqItem[]>> }) {
+  const modal = useModalState<FaqItem>();
+  const [form, setForm] = useState({ question: '', answer: '' });
+  const openAdd = useCallback(() => { setForm({ question: '', answer: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: FaqItem) => { setForm({ question: item.question, answer: item.answer }); modal.openFor(item); }, [modal]);
+  const save = useCallback(() => {
+    if (!form.question.trim() || !form.answer.trim()) { toast.error('Both question and answer are required'); return; }
+    if (modal.editing) { setFaq(prev => prev.map(f => f.id === modal.editing!.id ? { ...f, ...form } : f)); toast.success('FAQ updated'); }
+    else { setFaq(prev => [...prev, { id: `FQ-${Date.now()}`, ...form, active: true }]); toast.success('FAQ created'); }
+    modal.close();
+  }, [form, modal, setFaq]);
+  return (
+    <SectionPanel title="FAQ Management" subtitle="Manage the frequently asked questions section (now rendered on homepage)." icon={HelpCircle}>
+      <InlineEditor items={faq} setItems={setFaq} title="FAQs" onAdd={openAdd}
+        renderItem={(fq) => (
+          <div className="flex items-center gap-3">
+            <HelpCircle className="h-4 w-4 text-astu-red shrink-0" />
+            <div><p className="text-sm font-semibold text-slate-900">{fq.question}</p><p className="text-xs text-slate-400 line-clamp-1">{fq.answer}</p></div>
+            <button onClick={() => openEdit(fq)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
+      />
+      <AdminModal open={modal.open} title={modal.editing ? 'Edit FAQ' : 'New FAQ'} onClose={modal.close} size="lg">
+        <div className="space-y-4 p-1">
+          <div><label className="text-xs font-semibold text-slate-500">Question</label><input value={form.question} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Answer</label><textarea value={form.answer} onChange={e => setForm(p => ({ ...p, answer: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+        </div>
+        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
+        </div>
+      </AdminModal>
+    </SectionPanel>
   );
 }

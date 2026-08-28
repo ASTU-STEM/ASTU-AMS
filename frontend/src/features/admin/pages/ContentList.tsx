@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   Archive,
@@ -23,184 +23,8 @@ import AdminBadge from '../components/AdminBadge';
 import ContentCard, { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
 import ScheduleDialog, { ScheduleValue } from '../components/ScheduleDialog';
 import AdminModal from '../components/AdminModal';
-
-const initialItems: ContentCardItem[] = [
-  {
-    id: 'C-001',
-    title: 'ASTU Alumni Network: Bridging Generations',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
-    author: 'Content Manager',
-    updatedAt: '2 hours ago',
-    publishedAt: 'May 28, 2026',
-    views: 1240,
-    tags: ['alumni', 'community', 'networking'],
-    pinned: true,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-002',
-    title: 'Industry Partnership Week 2026',
-    type: 'page',
-    status: 'Scheduled',
-    excerpt: 'Five-day summit connecting ASTU students with leading employers across Ethiopia and East Africa.',
-    author: 'Content Manager',
-    updatedAt: 'Jun 5, 2026',
-    scheduledFor: 'Jun 12, 9:00 AM',
-    views: 0,
-    tags: ['partnership', 'employers', 'career'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-003',
-    title: 'Tracer Survey Campaign Banner',
-    type: 'page',
-    status: 'Draft',
-    excerpt: 'Encourages 2024 alumni batch to complete the annual tracer study for institutional improvement.',
-    author: 'Content Manager',
-    updatedAt: 'Yesterday',
-    views: 0,
-    tags: ['tracer', 'survey', 'alumni'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-004',
-    title: 'Semester Break: Campus Safety Notice',
-    type: 'announcement',
-    status: 'Published',
-    excerpt: 'Important safety reminders for students, faculty, and visitors during the upcoming semester break.',
-    author: 'System Admin',
-    updatedAt: '45 min ago',
-    publishedAt: 'Jun 7, 2026',
-    views: 892,
-    tags: ['safety', 'campus', 'announcement'],
-    pinned: true,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-005',
-    title: 'Campus Tour 2026 Photo Album',
-    type: 'gallery',
-    status: 'Needs Review',
-    excerpt: 'Stunning aerial and ground-level photos from the 2026 campus tour. Awaiting final approval before publishing.',
-    author: 'Dept Head',
-    updatedAt: '3 days ago',
-    views: 0,
-    tags: ['campus', 'tour', 'photos'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-006',
-    title: 'Career Fair 2026 Registration Open',
-    type: 'event',
-    status: 'Needs Review',
-    excerpt: 'Meet 40+ top employers at the annual career fair. Open to all ASTU students and recent graduates.',
-    author: 'Event Coordinator',
-    updatedAt: '2 hours ago',
-    views: 0,
-    tags: ['career', 'fair', 'event'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-007',
-    title: 'Graduation Photo Gallery 2025',
-    type: 'gallery',
-    status: 'Published',
-    excerpt: 'Celebrating 3,500+ graduates from the Class of 2025 with full ceremony coverage and portraits.',
-    author: 'Content Manager',
-    updatedAt: '1 week ago',
-    publishedAt: 'May 15, 2026',
-    views: 3401,
-    tags: ['graduation', 'students', '2025'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-008',
-    title: 'Alumni Spotlight: Mekdes Yilma',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'From ASTU to NASA: How Mekdes Yilma turned her engineering passion into a space industry career.',
-    author: 'Content Manager',
-    updatedAt: 'Jun 2, 2026',
-    publishedAt: 'Jun 2, 2026',
-    views: 567,
-    tags: ['alumni', 'spotlight', 'engineering'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-009',
-    title: 'Employer Branding: Ethio Telecom',
-    type: 'page',
-    status: 'Draft',
-    excerpt: 'Promote Ethio Telecom as a featured recruitment partner with company profile and open positions.',
-    author: 'Content Manager',
-    updatedAt: 'May 30, 2026',
-    views: 0,
-    tags: ['employer', 'telecom', 'branding'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-010',
-    title: 'Workshop Registration CTA',
-    type: 'page',
-    status: 'Scheduled',
-    excerpt: 'Add QR attendance and certificate language to the workshop section for the upcoming AI/ML workshop.',
-    author: 'Content Manager',
-    updatedAt: 'Jun 8, 2026',
-    scheduledFor: 'Jun 10, 12:00 PM',
-    views: 0,
-    tags: ['workshop', 'ai', 'ml'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-011',
-    title: 'Research Innovation Showcase',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'Highlighting breakthrough research from ASTU faculty and students in renewable energy and biotech.',
-    author: 'Research Directorate',
-    updatedAt: '4 days ago',
-    publishedAt: 'Jun 5, 2026',
-    views: 423,
-    tags: ['research', 'innovation', 'showcase'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-012',
-    title: 'Old Homepage (Archived)',
-    type: 'page',
-    status: 'Archived',
-    excerpt: 'Legacy homepage from the previous system. Archived after migration to the new ASTU-AMS platform.',
-    author: 'System Admin',
-    updatedAt: '2 months ago',
-    views: 0,
-    tags: ['legacy', 'archive'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-];
+import ImageUploader from '../components/ImageUploader';
+import contentService from '../services/content.service';
 
 const STATUS_TABS: Array<{ key: 'all' | ContentStatus; label: string }> = [
   { key: 'all', label: 'All Content' },
@@ -222,7 +46,7 @@ const TYPE_FILTERS: Array<{ key: 'all' | ContentType; label: string }> = [
 ];
 
 export default function ContentList() {
-  const [items, setItems] = useState<ContentCardItem[]>(initialItems);
+  const [items, setItems] = useState<ContentCardItem[]>(() => contentService.getItems());
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [statusTab, setStatusTab] = useState<'all' | ContentStatus>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | ContentType>('all');
@@ -232,7 +56,49 @@ export default function ContentList() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleTarget, setScheduleTarget] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newType, setNewType] = useState<ContentType>('post');
+  const [newExcerpt, setNewExcerpt] = useState('');
   const [previewItem, setPreviewItem] = useState<ContentCardItem | null>(null);
+  const [editItem, setEditItem] = useState<ContentCardItem | null>(null);
+
+  useEffect(() => {
+    const handleSync = () => setItems(contentService.getItems());
+    window.addEventListener('astu-cms-content-changed', handleSync);
+    return () => window.removeEventListener('astu-cms-content-changed', handleSync);
+  }, []);
+
+  const handleCreateContent = (status: ContentStatus = 'Published') => {
+    if (!newTitle.trim()) { toast.error('Title is required'); return; }
+    const created = contentService.addItem({
+      title: newTitle.trim(),
+      type: newType,
+      status,
+      excerpt: newExcerpt.trim() || `${newType.toUpperCase()}: ${newTitle.trim()}`,
+      author: 'Content Manager',
+      updatedAt: 'Just now',
+      publishedAt: status === 'Published' ? new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined,
+      tags: [newType, 'astu', 'cms'],
+      pinned: false,
+      featured: true,
+      language: 'EN',
+    });
+    setStatusTab('all');
+    setTypeFilter('all');
+    setItems(contentService.getItems());
+    setNewTitle('');
+    setNewExcerpt('');
+    setCreateOpen(false);
+    toast.success(`Content "${created.title}" published & added live!`);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editItem) return;
+    contentService.updateItem(editItem.id, editItem);
+    setItems(contentService.getItems());
+    toast.success(`Changes to "${editItem.title}" saved!`);
+    setEditItem(null);
+  };
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
@@ -274,29 +140,29 @@ export default function ContentList() {
   };
 
   const updateItem = useCallback((id: string, partial: Partial<ContentCardItem>) => {
-    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...partial, updatedAt: 'Just now' } : item)));
+    contentService.updateItem(id, partial);
+    setItems(contentService.getItems());
   }, []);
 
   const bulkUpdate = useCallback((status: ContentStatus) => {
     if (selectedIds.length === 0) return;
-    setItems((prev) =>
-      prev.map((item) =>
-        selectedIds.includes(item.id) ? { ...item, status, updatedAt: 'Just now' } : item
-      )
-    );
+    selectedIds.forEach(id => contentService.updateItem(id, { status }));
+    setItems(contentService.getItems());
     toast.success(`${selectedIds.length} item(s) set to ${status}`);
     setSelectedIds([]);
   }, [selectedIds]);
 
   const bulkDelete = useCallback(() => {
     if (selectedIds.length === 0) return;
-    setItems((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
+    selectedIds.forEach(id => contentService.deleteItem(id));
+    setItems(contentService.getItems());
     toast.success(`${selectedIds.length} item(s) deleted`);
     setSelectedIds([]);
   }, [selectedIds]);
 
   const handleScheduleSubmit = (value: ScheduleValue) => {
-    const formattedDate = new Date(`${value.date}T${value.time}`).toLocaleString('en-US', {
+    const scheduledDateObj = new Date(`${value.date}T${value.time}:00`);
+    const formattedDate = scheduledDateObj.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
@@ -306,8 +172,9 @@ export default function ContentList() {
       updateItem(scheduleTarget, {
         status: 'Scheduled',
         scheduledFor: formattedDate,
+        scheduledIso: scheduledDateObj.toISOString(),
       });
-      toast.success('Item scheduled');
+      toast.success(`Content scheduled to publish live on ${formattedDate}`);
     }
     setScheduleOpen(false);
     setScheduleTarget(null);
@@ -325,18 +192,22 @@ export default function ContentList() {
 
   const submitBulkSchedule = (value: ScheduleValue) => {
     if (selectedIds.length === 0) return;
-    const formattedDate = new Date(`${value.date}T${value.time}`).toLocaleString('en-US', {
+    const scheduledDateObj = new Date(`${value.date}T${value.time}:00`);
+    const formattedDate = scheduledDateObj.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
     });
-    setItems((prev) =>
-      prev.map((item) =>
-        selectedIds.includes(item.id) ? { ...item, status: 'Scheduled', scheduledFor: formattedDate, updatedAt: 'Just now' } : item
-      )
-    );
-    toast.success(`${selectedIds.length} item(s) scheduled`);
+    selectedIds.forEach((id) => {
+      contentService.updateItem(id, {
+        status: 'Scheduled',
+        scheduledFor: formattedDate,
+        scheduledIso: scheduledDateObj.toISOString(),
+      });
+    });
+    setItems(contentService.getItems());
+    toast.success(`${selectedIds.length} item(s) scheduled to publish live on ${formattedDate}`);
     setSelectedIds([]);
     setScheduleOpen(false);
   };
@@ -550,14 +421,15 @@ export default function ContentList() {
                 selected={selectedIds.includes(item.id)}
                 onSelect={toggleSelected}
                 onPreview={() => setPreviewItem(item)}
-                onEdit={() => toast.success(`Opening editor for "${item.title}"`)}
+                onEdit={() => setEditItem(item)}
                 onPublish={() => {
                   updateItem(item.id, { status: 'Published' });
-                  toast.success('Item published');
+                  toast.success(`"${item.title}" published live!`);
                 }}
                 onSchedule={() => openScheduleFor(item.id)}
                 onDelete={() => {
-                  setItems((prev) => prev.filter((entry) => entry.id !== item.id));
+                  contentService.deleteItem(item.id);
+                  setItems(contentService.getItems());
                   toast.success(`"${item.title}" deleted`);
                 }}
                 onTogglePin={() => {
@@ -567,6 +439,15 @@ export default function ContentList() {
                 onToggleFeature={() => {
                   updateItem(item.id, { featured: !item.featured });
                   toast.success(item.featured ? 'Featured removed' : 'Marked as featured');
+                }}
+                onMore={() => {
+                  const url = `${window.location.origin}/announcements/${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url);
+                    toast.success(`Copied announcement link for "${item.title}"!`);
+                  } else {
+                    setEditItem(item);
+                  }
                 }}
               />
             ))}
@@ -623,7 +504,7 @@ export default function ContentList() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => toast.success(`Editing "${item.title}"`)}
+                          onClick={() => setEditItem(item)}
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600"
                           title="Edit"
                         >
@@ -640,7 +521,8 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => {
-                            setItems((prev) => prev.filter((entry) => entry.id !== item.id));
+                            contentService.deleteItem(item.id);
+                            setItems(contentService.getItems());
                             toast.success(`"${item.title}" deleted`);
                           }}
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-100"
@@ -702,13 +584,17 @@ export default function ContentList() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                toast.success('New draft created');
-                setCreateOpen(false);
-              }}
+              onClick={() => handleCreateContent('Draft')}
+              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Save Draft
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCreateContent('Published')}
               className="rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
             >
-              Create Draft
+              Publish Now
             </button>
           </div>
         }
@@ -716,27 +602,37 @@ export default function ContentList() {
         <div className="space-y-3">
           <label className="block">
             <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Content Type</span>
-            <select className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">
-              <option>Page</option>
-              <option>Post</option>
-              <option>Announcement</option>
-              <option>Gallery</option>
-              <option>Event</option>
-              <option>Template</option>
+            <select
+              value={newType}
+              onChange={(e) => setNewType(e.target.value as ContentType)}
+              className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+            >
+              <option value="post">Post (Article / News)</option>
+              <option value="announcement">Announcement</option>
+              <option value="page">Page</option>
+              <option value="gallery">Gallery</option>
+              <option value="event">Event</option>
+              <option value="template">Template</option>
             </select>
           </label>
           <label className="block">
             <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Title</span>
             <input
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
               className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
               placeholder="e.g. ASTU Hosts International Engineering Summit"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Slug</span>
-            <input
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Excerpt / Description</span>
+            <textarea
+              value={newExcerpt}
+              onChange={(e) => setNewExcerpt(e.target.value)}
+              rows={3}
               className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
-              placeholder="astu-international-engineering-summit"
+              placeholder="Brief summary or description..."
             />
           </label>
         </div>
@@ -808,6 +704,117 @@ export default function ContentList() {
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Scheduled</p>
                 <p className="mt-1 text-sm font-medium text-slate-800">{previewItem.scheduledFor ?? '—'}</p>
               </div>
+            </div>
+          </div>
+        )}
+      </AdminModal>
+
+      {/* Edit Content Modal */}
+      <AdminModal
+        open={!!editItem}
+        onClose={() => setEditItem(null)}
+        title={editItem ? `Edit Content: ${editItem.title}` : ''}
+        size="md"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditItem(null)}
+              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveEdit}
+              className="rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            >
+              Save Changes
+            </button>
+          </div>
+        }
+      >
+        {editItem && (
+          <div className="space-y-3">
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Title</span>
+              <input
+                type="text"
+                value={editItem.title}
+                onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
+                className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+              />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Content Type</span>
+                <select
+                  value={editItem.type}
+                  onChange={(e) => setEditItem({ ...editItem, type: e.target.value as ContentType })}
+                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                >
+                  <option value="post">Post (Article / News)</option>
+                  <option value="announcement">Announcement</option>
+                  <option value="page">Page</option>
+                  <option value="gallery">Gallery</option>
+                  <option value="event">Event</option>
+                  <option value="template">Template</option>
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status</span>
+                <select
+                  value={editItem.status}
+                  onChange={(e) => setEditItem({ ...editItem, status: e.target.value as ContentStatus })}
+                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                >
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Needs Review">Needs Review</option>
+                  <option value="Archived">Archived</option>
+                </select>
+              </label>
+            </div>
+
+            <ImageUploader
+              label="Upload Article Cover Image / Media File"
+              value={editItem.image}
+              onChange={(url) => setEditItem({ ...editItem, image: url })}
+            />
+
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Excerpt / Content Summary</span>
+              <textarea
+                value={editItem.excerpt || ''}
+                onChange={(e) => setEditItem({ ...editItem, excerpt: e.target.value })}
+                rows={3}
+                className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+              />
+            </label>
+
+            <div className="flex items-center gap-4 pt-2">
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!editItem.pinned}
+                  onChange={(e) => setEditItem({ ...editItem, pinned: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                />
+                Pinned Notice
+              </label>
+
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!editItem.featured}
+                  onChange={(e) => setEditItem({ ...editItem, featured: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                />
+                Featured Card
+              </label>
             </div>
           </div>
         )}

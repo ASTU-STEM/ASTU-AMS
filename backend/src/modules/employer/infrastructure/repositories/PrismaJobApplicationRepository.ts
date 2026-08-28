@@ -7,7 +7,7 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
   async findById(applicationId: string): Promise<JobApplication | null> {
     const app = await prisma.jobApplication.findUnique({
       where: { id: applicationId },
-      include: { job: { include: { employer: true } }, alumni: { include: { department: true } } },
+      include: { job: { include: { employer: true } }, alumni: { include: { department: true, user: true } } },
     });
     if (!app) return null;
     return app as any as JobApplication;
@@ -16,6 +16,7 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
   async findByJobId(jobId: string): Promise<JobApplication[]> {
     const apps = await prisma.jobApplication.findMany({
       where: { jobId },
+      include: { alumni: { include: { department: true, user: true } } },
       orderBy: { createdAt: 'desc' },
     });
     return apps as any as JobApplication[];
@@ -24,6 +25,7 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
   async findByAlumniId(alumniId: string): Promise<JobApplication[]> {
     const apps = await prisma.jobApplication.findMany({
       where: { alumniId },
+      include: { job: true },
       orderBy: { createdAt: 'desc' },
     });
     return apps as any as JobApplication[];
@@ -32,7 +34,20 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
   async findByEmployerId(employerId: string): Promise<JobApplication[]> {
     const apps = await prisma.jobApplication.findMany({
       where: { job: { employerId } },
-      include: { job: true, alumni: true },
+      include: {
+        job: true,
+        alumni: {
+          include: {
+            department: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+              }
+            }
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' },
     });
     return apps as any as JobApplication[];

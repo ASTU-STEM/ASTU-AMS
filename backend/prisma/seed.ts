@@ -74,14 +74,23 @@ async function main() {
   });
 
   // SWE Department Head
-  await prisma.user.upsert({
+  const deptHeadUser = await prisma.user.upsert({
     where: { email: 'depthead.swe@astu.edu.et' },
-    update: {},
+    update: { isActive: true },
     create: {
       email: 'depthead.swe@astu.edu.et',
       password: defaultPassword,
       role: Role.DEPARTMENT_HEAD,
       isActive: true,
+    },
+  });
+
+  await prisma.departmentHeadProfile.upsert({
+    where: { userId: deptHeadUser.id },
+    update: { departmentId: swe.id },
+    create: {
+      userId: deptHeadUser.id,
+      departmentId: swe.id,
     },
   });
 
@@ -472,112 +481,6 @@ async function main() {
         },
       });
     }
-  }
-
-  // 9. Additional Mock Employers from Frontend
-  console.log('Creating additional mock employers...');
-  const additionalEmployers = [
-    { name: 'Ethio Telecom', industry: 'Telecommunications', website: 'https://www.ethiotelecom.et', contact: 'hr@ethiotelecom.et' },
-    { name: 'INSA', industry: 'Public Sector', website: 'https://www.insa.gov.et', contact: 'careers@insa.gov.et' },
-    { name: 'Ethiopian Airlines', industry: 'Aviation', website: 'https://www.ethiopianairlines.com', contact: 'recruitment@ethiopianairlines.com' },
-    { name: 'Huawei Ethiopia', industry: 'Technology', website: 'https://www.huawei.com', contact: 'jobs@huawei.com' },
-    { name: 'METEC', industry: 'Manufacturing', website: 'https://www.metec.gov.et', contact: 'hr@metec.gov.et' }
-  ];
-
-  const employerProfiles: Record<string, any> = {};
-  for (const emp of additionalEmployers) {
-    const email = emp.contact;
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {},
-      create: {
-        email,
-        password: employerPassword,
-        role: Role.EMPLOYER,
-        isActive: true,
-      },
-    });
-
-    const profile = await prisma.employerProfile.upsert({
-      where: { userId: user.id },
-      update: {},
-      create: {
-        userId: user.id,
-        companyName: emp.name,
-        industry: emp.industry,
-        website: emp.website,
-        location: 'Addis Ababa',
-        hrContact: emp.contact,
-        isVerified: true,
-      },
-    });
-    employerProfiles[emp.name] = profile;
-  }
-
-  // 10. Additional Mock Jobs from Frontend
-  console.log('Creating additional mock jobs...');
-  const mockJobsData = [
-    {
-      company: 'Ethio Telecom', title: 'Senior Software Engineer', employmentType: 'FULL_TIME',
-      desc: 'We are looking for a Senior Software Engineer to join our digital transformation team.',
-      skills: ['React', 'Node.js', 'Cloud', 'Leadership'], min: 35000, max: 50000,
-    },
-    {
-      company: 'Ethiopian Airlines', title: 'Network Engineer', employmentType: 'FULL_TIME',
-      desc: 'Join our aviation IT team to manage and optimize network infrastructure.',
-      skills: ['CCNA', 'Network Security'], min: 25000, max: 40000,
-    },
-    {
-      company: 'INSA', title: 'Cybersecurity Analyst', employmentType: 'FULL_TIME',
-      desc: 'Protect national infrastructure through advanced cybersecurity operations.',
-      skills: ['Python', 'Security', 'Incident Response'], min: 30000, max: 45000,
-    },
-    {
-      company: 'Safaricom Ethiopia', title: 'Junior Frontend Developer', employmentType: 'FULL_TIME',
-      desc: 'Build user interfaces for mobile money and digital services platforms.',
-      skills: ['React', 'TypeScript'], min: 15000, max: 25000,
-    },
-    {
-      company: 'Huawei Ethiopia', title: 'AI Research Intern', employmentType: 'INTERNSHIP',
-      desc: 'Contribute to cutting-edge AI research projects with industry mentors.',
-      skills: ['Python', 'ML', 'Research'], min: 8000, max: 12000,
-    },
-    {
-      company: 'METEC', title: 'Mechanical Design Engineer', employmentType: 'FULL_TIME',
-      desc: 'Design and optimize mechanical systems for manufacturing.',
-      skills: ['SolidWorks', 'Manufacturing'], min: 20000, max: 35000,
-    }
-  ];
-
-  for (const job of mockJobsData) {
-    const profile = employerProfiles[job.company] || safaricomProfile;
-    await prisma.job.create({
-      data: {
-        employerId: profile.id,
-        title: job.title,
-        description: job.desc,
-        salaryMin: job.min,
-        salaryMax: job.max,
-        deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
-        skillsRequired: job.skills,
-        location: 'Addis Ababa',
-        employmentType: job.employmentType,
-        isActive: true,
-      },
-    });
-  }
-
-  // 11. Mock Notifications from Frontend
-  console.log('Creating mock notifications...');
-  const systemUsers = await prisma.user.findMany({ take: 5 });
-  for (const user of systemUsers) {
-    await prisma.notification.createMany({
-      data: [
-        { userId: user.id, title: 'Tracer Study Reminder', content: 'Dear alumnus, your 6-month tracer study survey is now available. Please take 5 minutes to complete it.' },
-        { userId: user.id, title: 'New Job Match', content: 'A new job opportunity matching your profile has been posted.' },
-        { userId: user.id, title: 'Event Registration Confirmation', content: 'You have successfully registered for the upcoming Networking Event.' }
-      ]
-    });
   }
 
   console.log('🌱 Seeding completed successfully!');

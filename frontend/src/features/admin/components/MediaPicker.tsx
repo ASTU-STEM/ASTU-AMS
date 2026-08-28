@@ -189,14 +189,26 @@ export default function MediaPicker({
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  const assets = useMemo<MediaAsset[]>(() => {
+    if (!open) return sampleAssets;
+    try {
+      const stored = localStorage.getItem('astu_cms_media_library');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return sampleAssets;
+  }, [open]);
+
   const filtered = useMemo(() => {
-    return sampleAssets.filter((asset) => {
+    return assets.filter((asset) => {
       if (accept && !accept.includes(asset.type)) return false;
       if (folder !== 'All' && asset.folder !== folder) return false;
       if (search && !asset.name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [search, folder, accept]);
+  }, [search, folder, accept, assets]);
 
   const toggleSelect = (id: string) => {
     if (multiple) {
@@ -210,11 +222,11 @@ export default function MediaPicker({
 
   const handleConfirm = () => {
     if (multiple) {
-      const assets = sampleAssets.filter((asset) => selectedIds.includes(asset.id));
-      if (assets.length === 0) return;
-      onSelect(assets);
+      const selectedAssets = assets.filter((asset) => selectedIds.includes(asset.id));
+      if (selectedAssets.length === 0) return;
+      onSelect(selectedAssets);
     } else {
-      const asset = sampleAssets.find((a) => a.id === selectedIds[0]);
+      const asset = assets.find((a) => a.id === selectedIds[0]);
       if (asset) onSelect(asset);
     }
     setSelectedIds([]);

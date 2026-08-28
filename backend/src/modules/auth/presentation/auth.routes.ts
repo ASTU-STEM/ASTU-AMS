@@ -43,6 +43,12 @@ router.post(
   asyncHandler(AuthController.submitManualVerification)
 );
 
+router.post(
+  '/register/issue',
+  upload.fields([{ name: 'identificationDocument', maxCount: 1 }]),
+  asyncHandler(AuthController.submitRegistrationIssue)
+);
+
 // Didit Verification Flow
 router.post('/didit-session', asyncHandler(AuthController.startDiditSession));
 router.get('/didit-status/:sessionId', asyncHandler(AuthController.getDiditStatus));

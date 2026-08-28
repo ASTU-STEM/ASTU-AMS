@@ -15,8 +15,12 @@ const repo = new PrismaAnalyticsRepository();
 export class AnalyticsController {
   static async getDashboard(req: Request, res: Response, next: NextFunction) {
     try {
+      const { academicYear, department } = req.query;
       const useCase = new GetAnalyticsReport(repo);
-      const result = await useCase.execute();
+      const result = await useCase.execute({
+        academicYear: academicYear as string,
+        department: department as string,
+      });
       return sendSuccess(res, 'Consolidated dashboard analytics retrieved successfully.', result);
     } catch (err) { next(err); }
   }

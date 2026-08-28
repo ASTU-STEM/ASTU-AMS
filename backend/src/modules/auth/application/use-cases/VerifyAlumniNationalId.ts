@@ -1,7 +1,7 @@
 import { IUserRepository } from '../ports/IUserRepository';
 import { PrismaClient, Role } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../../../../core/config/db';
 
 export interface VerifyNationalIdRequest {
   studentId: string;

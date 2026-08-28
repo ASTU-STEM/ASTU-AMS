@@ -110,20 +110,47 @@ const AlumniDashboard = () => {
     setProfile(updatedProfile);
   };
 
-  const handleApplyJob = async (jobId: string | number) => {
+  const handleApplyJob = async (jobId: string | number, coverLetter?: string) => {
     try {
-      await alumniService.applyToJob(String(jobId), {});
-      const updatedJobs = jobs.map(j => j.id === jobId ? { ...j, applied: true, applicationStatus: 'Applied' as const } : j);
+      await alumniService.applyToJob(String(jobId), { coverLetter });
+      const updatedJobs = jobs.map(j => j.id === jobId ? {
+        ...j,
+        applied: true,
+        applicationStatus: 'Applied' as const,
+        applications: j.applications + 1
+      } : j);
       setJobs(updatedJobs);
       const appliedJob = jobs.find(j => j.id === jobId);
       if (appliedJob) {
         toast.success(`Application sent to ${appliedJob.company}!`);
         setNotifications(prev => [{ id: Date.now(), text: `Applied for ${appliedJob.title} at ${appliedJob.company}.`, unread: true, time: 'Just now' }, ...prev]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to submit application:', err);
-      toast.error('Failed to submit application. Please try again later.');
+      const msg = err?.response?.data?.message || err?.message || 'Failed to submit application. Please try again later.';
+      toast.error(msg);
     }
+  };
+
+  const handleViewJob = async (job: JobMatch) => {
+    setSelectedJobForModal(job);
+    if (!job.id || typeof job.id === 'number' || String(job.id).length < 10) return;
+    try {
+      const detail: any = await alumniService.getJobDetail(String(job.id));
+      if (detail) {
+        setJobs(prevJobs => prevJobs.map(j => {
+          if (String(j.id) === String(job.id)) {
+            return {
+              ...j,
+              views: detail.viewsCount ?? detail.viewCount ?? (j.views + 1),
+              applications: detail.applicationsCount ?? detail.applicationCount ?? j.applications,
+              shortlisted: detail.shortlistedCount ?? j.shortlisted
+            };
+          }
+          return j;
+        }));
+      }
+    } catch (_) {}
   };
 
   const handleToggleSaveJob = async (jobId: string | number) => {
@@ -150,10 +177,31 @@ const AlumniDashboard = () => {
     setNotifications(prev => [{ id: Date.now(), text: `Submitted Tracer Survey: ${surveys.find(s => s.id === surveyId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
   };
 
-  const handleRegisterEvent = (eventId: number) => {
-    const updatedEvents = events.map(e => e.id === eventId ? { ...e, registered: true } : e);
-    setEvents(updatedEvents);
-    setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${events.find(e => e.id === eventId)?.title}.`, unread: true, time: 'Just now' }, ...prev]);
+  const handleRegisterEvent = async (eventId: number | string) => {
+    try {
+      const strId = String(eventId);
+      await alumniService.rsvpEvent(strId, 'ATTENDING').catch(err => {
+        console.warn('API RSVP sync warning:', err);
+      });
+
+      // Save to localStorage persistence
+      try {
+        const saved = localStorage.getItem('astu_registered_event_ids');
+        const list = saved ? JSON.parse(saved) : [];
+        if (!list.includes(strId)) list.push(strId);
+        localStorage.setItem('astu_registered_event_ids', JSON.stringify(list));
+      } catch (_) {}
+
+      const updatedEvents = events.map(e => String(e.id) === strId ? { ...e, registered: true } : e);
+      setEvents(updatedEvents);
+      const targetEvent = events.find(e => String(e.id) === strId);
+      if (targetEvent) {
+        setNotifications(prev => [{ id: Date.now(), text: `Registered for event: ${targetEvent.title}.`, unread: true, time: 'Just now' }, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to register for event:', err);
+      toast.error('Failed to complete event registration.');
+    }
   };
 
   const handleRequestMentorship = async (mentorId: number) => {
@@ -221,15 +269,21 @@ const AlumniDashboard = () => {
     }
   };
 
-  const handleDonate = async (campaignId: string, amount: number) => {
+  const handleDonate = (campaignId: string, amount: number = 500) => {
+    const targetCampaign = campaigns.find(c => c.id === campaignId) || {
+      id: campaignId,
+      title: 'ASTU Fund',
+      category: 'Scholarship'
+    };
+    setDonationCampaign({ ...targetCampaign, defaultAmount: amount });
+  };
+
+  const handleRefreshCampaigns = async () => {
     try {
-      await alumniService.makeDonation(campaignId, amount);
-      toast.success('Thank you for your generous donation!');
-      // Refresh campaigns locally
       const campaignsRes = await alumniService.getDonationCampaigns();
       if (Array.isArray(campaignsRes)) setCampaigns(campaignsRes);
     } catch (err) {
-      toast.error('Failed to process donation');
+      console.error('Failed to refresh campaigns', err);
     }
   };
 
@@ -360,31 +414,53 @@ const AlumniDashboard = () => {
           appMap.set(app.jobId || app.job?.id, st);
         });
 
-        const mappedJobs: JobMatch[] = rawJobs.map((j: any) => ({
-          id: j.id,
-          title: j.title,
-          company: j.companyName || j.employer?.companyName || 'ASTU Partner',
-          location: j.location || 'Unknown',
-          type: j.employmentType || 'Full-Time',
-          salary: j.salary || (j.salaryMin ? `${j.salaryMin} - ${j.salaryMax}` : 'Negotiable'),
-          postedDate: j.createdAt ? new Date(j.createdAt).toLocaleDateString() : 'Recent',
-          match: '85%',
-          description: j.description || '',
-          skills: j.skillsRequired || [],
-          views: j.views || 0,
-          applications: j.applications || 0,
-          shortlisted: 0,
-          experience: j.experienceRequired ? `${j.experienceRequired} years` : 'Entry Level',
-          saved: savedJobIds.has(j.id),
-          applied: appMap.has(j.id),
-          applicationStatus: appMap.get(j.id) || undefined,
-          requirements: j.requirements || [],
-          benefits: j.benefits || [],
-        }));
+        const mappedJobs: JobMatch[] = rawJobs.map((j: any) => {
+          let empType = 'Full-Time';
+          if (j.employmentType === 'FULL_TIME') empType = 'Full-Time';
+          else if (j.employmentType === 'PART_TIME') empType = 'Part-Time';
+          else if (j.employmentType === 'INTERNSHIP') empType = 'Internship';
+          else if (j.employmentType === 'CONTRACT') empType = 'Contract';
+          else if (j.type) empType = j.type;
+
+          return {
+            id: j.id,
+            title: j.title,
+            company: j.companyName || j.employer?.companyName || 'ASTU Corporate Partner',
+            location: j.location || 'Addis Ababa',
+            type: empType,
+            salary: j.salary || (j.salaryMin ? `${j.salaryMin} - ${j.salaryMax} ETB` : 'Negotiable'),
+            postedDate: j.createdAt ? new Date(j.createdAt).toLocaleDateString() : 'Recent',
+            match: '92%',
+            description: j.description || '',
+            skills: Array.isArray(j.skillsRequired) ? j.skillsRequired : (j.skills || []),
+            views: j.viewsCount ?? j.viewCount ?? j._count?.views ?? j.views ?? 0,
+            applications: j.applicationsCount ?? j.applicationCount ?? j._count?.applications ?? j.applications ?? 0,
+            shortlisted: j.shortlistedCount ?? j.shortlisted ?? 0,
+            experience: j.experienceRequired ? `${j.experienceRequired} yrs` : 'Entry Level',
+            saved: savedJobIds.has(j.id),
+            applied: appMap.has(j.id),
+            applicationStatus: appMap.get(j.id) || undefined,
+            requirements: j.requirements || [],
+            benefits: j.benefits || [],
+          };
+        });
         
         setJobs(mappedJobs);
 
-        if (eventsData) setEvents(Array.isArray(eventsData) ? eventsData : []);
+        let savedRegisteredEventIds = new Set<string>();
+        try {
+          const saved = localStorage.getItem('astu_registered_event_ids');
+          if (saved) JSON.parse(saved).forEach((id: string) => savedRegisteredEventIds.add(String(id)));
+        } catch (_) {}
+
+        if (eventsData && Array.isArray(eventsData)) {
+          const mappedEvents = eventsData.map((ev: any) => ({
+            ...ev,
+            registered: Boolean(ev.registered || savedRegisteredEventIds.has(String(ev.id)))
+          }));
+          setEvents(mappedEvents);
+        }
+
         if (mentorsData) setMentors(Array.isArray(mentorsData) ? mentorsData : []);
         const mappedDocuments = (Array.isArray(documentsData) ? documentsData : []).map((doc: any) => ({
           id: doc.id,
@@ -494,19 +570,22 @@ const AlumniDashboard = () => {
     </div>
   );
 
-  const navItems = [
+  const recruitingItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'management', label: 'Management Hub', icon: 'dashboard_customize' },
-    { id: 'profile', label: 'My Profile', icon: 'account_circle' },
-    { id: 'career', label: 'Career Center', icon: 'school' },
-    { id: 'surveys', label: 'Surveys', icon: 'assignment' },
     { id: 'jobs', label: 'Jobs Board', icon: 'work' },
+    { id: 'career', label: 'Career Center', icon: 'school' },
+    { id: 'surveys', label: 'Surveys', icon: 'assignment', badge: realPendingSurveysCount > 0 ? realPendingSurveysCount.toString() : null },
+  ];
+
+  const communityItems = [
+    { id: 'profile', label: 'My Profile', icon: 'account_circle' },
     { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3' },
     { id: 'forum', label: 'Community', icon: 'group' },
     { id: 'donations', label: 'Giving', icon: 'volunteer_activism' },
   ];
 
-  const commItems = [
+  const serviceItems = [
     { id: 'documents', label: 'Documents', icon: 'description', badge: null as string | null },
     { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadMessagesCount > 0 ? unreadMessagesCount.toString() : null },
     { id: 'settings', label: 'Settings', icon: 'settings', badge: null },
@@ -548,113 +627,174 @@ const AlumniDashboard = () => {
       `}</style>
 
       {mobileSidebarOpen && (
-        <button type="button" aria-label="Close navigation" onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden" />
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+        />
       )}
 
-      {/* Enhanced Sidebar with Animated Gradient */}
-      <aside className={`fixed left-0 top-0 z-40 flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-gradient-to-b from-[#001a33] via-[#002a55] to-[#003366] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-        {/* Animated overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite]" />
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-emerald-400/30 sidebar-particle" />
-          <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#FFD700]/25 sidebar-particle" />
-          <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-blue-400/20 sidebar-particle" />
-        </div>
-
-        {/* Sidebar Logo */}
-        <div className="relative z-10 p-5 border-b border-white/10">
+      {/* Clean White Premium Sidebar */}
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        {/* Sidebar Logo Header */}
+        <div className="relative z-10 px-4 py-4 border-b border-slate-100">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="relative">
-              <div className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/15 shadow-lg">
-                <img alt="ASTU Logo" className="h-8 w-8 object-contain rounded-md"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#001a33] shadow-lg animate-pulse" />
+            <div className="relative shrink-0 flex items-center justify-center h-10 w-10">
+              <img
+                src="/images/astu-seal-logo.png"
+                alt="ASTU Logo"
+                className="h-full w-full object-contain scale-110"
+              />
             </div>
-            {!sidebarCollapsed && <div>
-              <h1 className="text-base font-extrabold text-white tracking-tight">ASTU Alumni</h1>
-              <p className="text-[9px] text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Management System</p>
-            </div>}
+            {!sidebarCollapsed && (
+              <div className="min-w-0">
+                <h1 className="text-base font-bold text-slate-900 tracking-tight truncate">ASTU Alumni</h1>
+                <p className="text-[9px] text-emerald-600 uppercase tracking-widest font-extrabold truncate">Graduate Network</p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Navigation Links */}
-        <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin">
-          {!sidebarCollapsed && <p className="px-3 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Main Menu</p>}
-          <div className="space-y-0.5">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                title={sidebarCollapsed ? item.label : undefined}
-                className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
-                  ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'} relative`}>
-                  <span className="material-symbols-outlined">{item.icon}</span>
-                  {item.id === 'surveys' && realPendingSurveysCount > 0 && sidebarCollapsed && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-[#001a33] animate-pulse" />
-                  )}
-                </span>
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                {item.id === 'surveys' && realPendingSurveysCount > 0 && !sidebarCollapsed && (
-                  <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[9px] font-extrabold text-white shadow-md">
-                    {realPendingSurveysCount}
+        <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin space-y-5">
+          {/* Section 1: Recruiting & Career */}
+          <div>
+            {!sidebarCollapsed && (
+              <div className="flex items-center justify-between px-3 mb-2">
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Recruiting & Career</p>
+              </div>
+            )}
+            <div className="space-y-1">
+              {recruitingItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
+                    sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                  } ${
+                    activeTab === item.id
+                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                    activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                  }`}>
+                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
                   </span>
-                )}
-                {activeTab === item.id && !sidebarCollapsed && (item.id !== 'surveys' || realPendingSurveysCount === 0) && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
-              </button>
-            ))}
+                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                  {item.badge && !sidebarCollapsed && (
+                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                      {item.badge}
+                    </span>
+                  )}
+                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {!sidebarCollapsed && <p className="px-3 mt-5 mb-2 text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">Communication</p>}
-          <div className="space-y-0.5">
-            {commItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                title={sidebarCollapsed ? item.label : undefined}
-                className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
-                  ? 'bg-white/15 text-white font-bold shadow-lg shadow-black/10 backdrop-blur-sm'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-emerald-400/20 text-emerald-400' : 'bg-white/5 text-white/40 group-hover:text-white/70'}`}>
-                  <span className="material-symbols-outlined">{item.icon}</span>
-                </span>
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                {item.badge && !sidebarCollapsed && (
-                  <span className="ml-auto w-5 h-5 rounded-full bg-[#CC0033] flex items-center justify-center text-[9px] font-extrabold text-white shadow-md">{item.badge}</span>
-                )}
-                {activeTab === item.id && !item.badge && !sidebarCollapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-              </button>
-            ))}
+          {/* Section 2: Community & Network */}
+          <div>
+            {!sidebarCollapsed && (
+              <div className="flex items-center justify-between px-3 mb-2 pt-1">
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Community</p>
+              </div>
+            )}
+            <div className="space-y-1">
+              {communityItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
+                    sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                  } ${
+                    activeTab === item.id
+                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                    activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                  }`}>
+                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                  </span>
+                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                  {activeTab === item.id && !sidebarCollapsed && (
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 3: Services & Account */}
+          <div>
+            {!sidebarCollapsed && (
+              <div className="flex items-center justify-between px-3 mb-2 pt-1">
+                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Services</p>
+              </div>
+            )}
+            <div className="space-y-1">
+              {serviceItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  title={sidebarCollapsed ? item.label : undefined}
+                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
+                    sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                  } ${
+                    activeTab === item.id
+                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                  }`}
+                >
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                    activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                  }`}>
+                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                  </span>
+                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                  {item.badge && !sidebarCollapsed && (
+                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                      {item.badge}
+                    </span>
+                  )}
+                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="relative z-10 p-4 border-t border-white/10 space-y-1">
-          <button onClick={() => setHelpOpen(true)} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'Help Center' : undefined}>
-            <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm text-white/40 group-hover:text-white/70 material-symbols-outlined">help</span>
-            {!sidebarCollapsed && (
-              <>
-                <span className="text-sm font-medium">Help Center</span>
-                <span className="ml-auto text-[8px] text-white/20 font-bold px-1.5 py-0.5 bg-white/5 rounded border border-white/10">v1.4</span>
-              </>
-            )}
-            {sidebarCollapsed && (
-              <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
-            )}
+        <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
+          <button
+            onClick={() => setHelpOpen(true)}
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${
+              sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            }`}
+            title={sidebarCollapsed ? 'Help Center' : undefined}
+          >
+            <HelpCircle className="h-4.5 w-4.5 text-[#003366] shrink-0" />
+            {!sidebarCollapsed && <span>Help Center</span>}
           </button>
-          <button onClick={handleLogout} className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-left group ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`} title={sidebarCollapsed ? 'Logout' : undefined}>
-            <span className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 material-symbols-outlined">logout</span>
-            {!sidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
-            {sidebarCollapsed && (
-              <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
-            )}
+          <button
+            onClick={handleLogout}
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-all ${
+              sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            }`}
+            title={sidebarCollapsed ? 'Logout' : undefined}
+          >
+            <LogOut className="h-4.5 w-4.5 shrink-0" />
+            {!sidebarCollapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
@@ -679,13 +819,8 @@ const AlumniDashboard = () => {
               className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden" aria-label="Open navigation">
               <Menu className="h-5 w-5" />
             </button>
-            <div className="min-w-0 space-y-0.5">
-              <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-secondary)]">
-                <span>Alumni</span>
-                <span>/</span>
-                <span className="text-[var(--text-primary)] font-semibold">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}</span>
-              </div>
-              <h1 className="truncate text-[16px] font-semibold tracking-tight text-[var(--text-primary)]">
+            <div className="min-w-0">
+              <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
                 {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
               </h1>
             </div>
@@ -728,20 +863,55 @@ const AlumniDashboard = () => {
                   </div>
                   <div className="max-h-60 space-y-1 overflow-y-auto p-2">
                     {notifications.length > 0 ? notifications.map((n) => (
-                      <div key={n.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
-                        <span className={`mt-1 h-2.5 w-2.5 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                      <div
+                        key={n.id}
+                        onClick={() => {
+                          setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, unread: false } : x));
+                          setNotificationOpen(false);
+                          const lower = n.text.toLowerCase();
+                          if (lower.includes('job')) {
+                            setActiveTab('jobs');
+                          } else if (lower.includes('survey')) {
+                            setActiveTab('surveys');
+                          } else if (lower.includes('mentor')) {
+                            setActiveTab('mentorship');
+                          } else if (lower.includes('document')) {
+                            setActiveTab('documents');
+                          } else {
+                            setActiveTab('jobs');
+                          }
+                        }}
+                        className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
+                      >
+                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
                         <div className="min-w-0 flex-1">
                           <p className="text-sm text-[var(--text-primary)]">{n.text}</p>
                           <p className="text-xs text-[var(--text-secondary)]">{n.time}</p>
                         </div>
-                        <button onClick={() => setNotifications((prev) => prev.filter((x) => x.id !== n.id))} className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setNotifications((prev) => prev.filter((x) => x.id !== n.id));
+                          }}
+                          className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        >
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                       </div>
                     )) : <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">No notifications</p>}
                   </div>
                   <div className="border-t border-[var(--border-color)] px-4 py-3">
-                    <button type="button" className="text-sm font-semibold text-[#003580] hover:underline">View all →</button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotificationOpen(false);
+                        setActiveTab('jobs');
+                      }}
+                      className="text-sm font-semibold text-[#003580] hover:underline"
+                    >
+                      View all →
+                    </button>
                   </div>
                 </div>
               )}
@@ -765,8 +935,8 @@ const AlumniDashboard = () => {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[var(--bg-page)]" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        {/* Main Workspace Board */}
+        <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[#f8fafc] p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
@@ -816,9 +986,21 @@ const AlumniDashboard = () => {
           )}
 
           {activeTab === 'profile' && <ProfileTab profile={profile} onSave={handleSaveProfile} />}
-          {activeTab === 'career' && <CareerTab events={events} jobs={jobs} mentors={mentors} onRegisterEvent={handleRegisterEvent} />}
+          {activeTab === 'career' && (
+            <CareerTab
+              events={events}
+              jobs={jobs}
+              mentors={mentors}
+              profile={profile}
+              statsData={statsData}
+              onRegisterEvent={handleRegisterEvent}
+              onApplyJob={handleApplyJob}
+              onViewJob={handleViewJob}
+              onRequestMentorship={handleRequestMentorship}
+            />
+          )}
           {activeTab === 'surveys' && <SurveysTab />}
-          {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={setSelectedJobForModal} onToggleSaveJob={handleToggleSaveJob} />}
+          {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={handleViewJob} onToggleSaveJob={handleToggleSaveJob} />}
           {activeTab === 'mentorship' && <MentorshipTab mentors={mentors} onRequestMentorship={handleRequestMentorship} onScheduleSession={handleScheduleSession} />}
           {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
           {activeTab === 'messages' && <MessagingTab darkMode={darkMode} userId={(profile as any)?.userId} />}
@@ -839,7 +1021,7 @@ const AlumniDashboard = () => {
               <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                 <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Recent Posts</h3>
                 <div className="mb-6 flex gap-3">
-                  <img src={profile?.profilePicture ? `http://localhost:5000${profile.profilePicture}` : "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                  <img src={profile?.profilePicture ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${profile.profilePicture}` : "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                   <div className="flex-1 relative">
                     <input type="text" placeholder="Share something with the community..." className="w-full text-xs p-3 pr-20 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all" onKeyDown={(e) => { if (e.key === 'Enter' && e.currentTarget.value.trim()) { handleCreatePost(e.currentTarget.value); e.currentTarget.value = ''; } }} />
                     <button onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input.value.trim()) { handleCreatePost(input.value); input.value = ''; } }} className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#003366] text-white text-[10px] font-bold rounded-lg hover:bg-[#002244] transition-colors">Post</button>
@@ -927,6 +1109,7 @@ const AlumniDashboard = () => {
         isOpen={!!donationCampaign}
         onClose={() => setDonationCampaign(null)}
         campaign={donationCampaign}
+        onSuccess={handleRefreshCampaigns}
       />
     </div>
   );

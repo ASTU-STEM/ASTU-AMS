@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   Bar,
   BarChart,
@@ -191,11 +191,7 @@ export default function JobsManagement() {
   const [jobs, setJobs] = useState<JobRecord[]>([]);
   const [totalJobs, setTotalJobs] = useState(0);
 
-  React.useEffect(() => {
-    loadJobs();
-  }, [query, selectedJobStatus, selectedJobType]);
-
-  const loadJobs = async () => {
+  const loadJobs = useCallback(async () => {
     const res = await adminService.getJobs({
       query,
       status: selectedJobStatus === 'All' ? undefined : selectedJobStatus,
@@ -204,7 +200,11 @@ export default function JobsManagement() {
       setJobs(res.data.jobs);
       setTotalJobs(res.data.total);
     }
-  };
+  }, [query, selectedJobStatus]);
+
+  React.useEffect(() => {
+    loadJobs();
+  }, [loadJobs]);
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     const res = await adminService.updateJobStatus(id, newStatus);

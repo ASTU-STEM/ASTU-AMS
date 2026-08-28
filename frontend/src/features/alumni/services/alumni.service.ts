@@ -130,6 +130,14 @@ export const alumniService = {
     return unwrap(await apiClient.post('/alumni/document-requests', data));
   },
 
+  async initializeChapaDocumentPayment(data: { documentType: string; additionalInstructions?: string; amount: number }) {
+    return unwrap(await apiClient.post('/alumni/chapa/initialize-document-payment', data));
+  },
+
+  async verifyChapaDocumentPayment(data: { tx_ref: string; documentType: string; additionalInstructions?: string; amount: number }) {
+    return unwrap(await apiClient.post('/alumni/chapa/verify-document-payment', data));
+  },
+
   // ─── Forum / Community ────────────────────────────────────────────────────
   async getForumPosts() {
     return unwrap(await apiClient.get('/alumni/forum'));
@@ -154,6 +162,14 @@ export const alumniService = {
 
   async makeDonation(campaignId: string, amount: number, paymentRef?: string) {
     return unwrap(await apiClient.post('/alumni/donations', { campaignId, amount, paymentRef }));
+  },
+
+  async initializeChapaDonationPayment(data: { campaignId: string; amount: number; donorName?: string }) {
+    return unwrap(await apiClient.post('/alumni/chapa/initialize-donation-payment', data));
+  },
+
+  async verifyChapaDonationPayment(data: { tx_ref: string; campaignId: string; amount: number; paymentRef?: string }) {
+    return unwrap(await apiClient.post('/alumni/chapa/verify-donation-payment', data));
   },
 
   // ─── Messages ───────────────────────────────────────────────────────────
