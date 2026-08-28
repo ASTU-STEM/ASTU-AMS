@@ -101,24 +101,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode =
   };
 
   const renderKPICard = (kpi: KPICard) => (
-    <div className={`p-5 border rounded-xl hover:shadow-lg transition-all duration-300 group ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
+    <div className={`p-5 border rounded-2xl hover:shadow-md transition-all duration-300 group ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200/80 shadow-xs'}`}>
       <div className="flex items-start justify-between mb-3">
-        <div className={`p-2 rounded-lg group-hover:bg-gray-200 transition-colors ${darkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
-          <div className={kpi.color === 'astu-green' ? 'text-astu-green' : kpi.color === 'astu-navy' ? 'text-astu-navy' : kpi.color === 'astu-red' ? 'text-astu-red' : 'text-gray-600'}>
-            {getIcon(kpi.icon)}
-          </div>
+        <div className={`p-2.5 rounded-xl transition-colors ${darkMode ? 'bg-slate-700 text-blue-400' : 'bg-[#003580]/10 text-[#003580]'}`}>
+          {getIcon(kpi.icon)}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
           {getTrendIcon(kpi.trendDirection)}
-          <span className={`text-xs font-semibold ${kpi.trendDirection === 'up' ? 'text-astu-green' : kpi.trendDirection === 'down' ? 'text-astu-red' : 'text-gray-400'}`}>
+          <span className={`text-[10px] font-extrabold ${kpi.trendDirection === 'up' ? 'text-emerald-600' : kpi.trendDirection === 'down' ? 'text-rose-600' : 'text-slate-500'}`}>
             {Math.abs(kpi.trend)}%
           </span>
         </div>
       </div>
-      <p className={`text-xs uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{kpi.label}</p>
-      <p className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{kpi.value}</p>
       <div className="flex items-center justify-between">
-        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{kpi.comparison}</p>
+        <p className={`text-[10px] uppercase font-extrabold tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.label}</p>
+        <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 uppercase">
+          VERIFIED
+        </span>
+      </div>
+      <p className={`text-2xl font-extrabold my-1 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{kpi.value}</p>
+      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <p className={`text-[11px] font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.comparison}</p>
         {renderSparkline(kpi.sparkline, kpi.color)}
       </div>
     </div>
@@ -221,65 +224,106 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode =
 
   return (
     <div className="space-y-6">
-      {/* Header Area */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+      {/* Department Command Center Banner */}
+      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#003580] via-[#004b99] to-[#0066cc] p-6 text-white shadow-md">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Department Dashboard Overview</h2>
-            <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Executive summary of department performance and graduate outcomes</p>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white">
+              DEPARTMENT ACCREDITATION &amp; OUTCOMES HUB
+            </span>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight">Software Engineering Department Command Center</h2>
+            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-white/90">
+              Executive monitoring of graduate employment rates, curriculum skill alignment, ABET accreditation evidence, and department survey completions.
+            </p>
           </div>
+
           <div className="flex items-center gap-3">
             <button
               onClick={handleRefresh}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl transition-all duration-300 font-bold text-xs"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2.5 bg-astu-navy hover:bg-blue-900 text-white rounded-xl transition-all duration-300 font-medium text-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#1D9E75] hover:brightness-110 text-white rounded-xl transition-all duration-300 font-bold text-xs shadow-sm"
             >
               <Download className="h-4 w-4" />
-              Export
+              Export Report
             </button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <select
-            value={filters.department}
-            onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="Computer Science">Computer Science</option>
-            <option value="Software Engineering">Software Engineering</option>
-            <option value="Electrical Engineering">Electrical Engineering</option>
-            <option value="Mechanical Engineering">Mechanical Engineering</option>
-          </select>
-          <select
-            value={filters.academicYear}
-            onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-          </select>
-          <select
-            value={filters.tracerPeriod}
-            onChange={(e) => setFilters({ ...filters, tracerPeriod: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="6-month">6-Month Tracer</option>
-            <option value="12-month">12-Month Tracer</option>
-            <option value="24-month">24-Month Tracer</option>
-          </select>
+        {/* Command Center 4-Card Quick Metrics */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/15">
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">DEPARTMENT GRADUATES</span>
+            <p className="text-2xl font-extrabold mt-1 text-white">1,247</p>
+            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">✓ 98% Verified SIS Census</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">EMPLOYMENT RATE</span>
+            <p className="text-2xl font-extrabold mt-1 text-white">85%</p>
+            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">↑ +8% vs last year</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">EMPLOYER SATISFACTION</span>
+            <p className="text-2xl font-extrabold mt-1 text-white">4.2 / 5</p>
+            <p className="text-[10px] text-amber-300 font-semibold mt-0.5">★ ABET Quality Target Met</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">ACTIVE PARTNERSHIPS</span>
+            <p className="text-2xl font-extrabold mt-1 text-white">45 Companies</p>
+            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">128 Job Requisitions</p>
+          </div>
         </div>
       </div>
 
-      {/* KPI Section */}
+      {/* Filters Bar */}
+      <div className={`rounded-2xl p-4 shadow-xs border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 block">Department Program</label>
+            <select
+              value={filters.department}
+              onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
+            >
+              <option value="Computer Science">Software Engineering (SWE)</option>
+              <option value="Electrical Engineering">Electrical &amp; Computer Eng (ECE)</option>
+              <option value="Mechanical Engineering">Mechanical Engineering (MEG)</option>
+              <option value="Civil Engineering">Civil Engineering (CVE)</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 block">Academic Cohort Year</label>
+            <select
+              value={filters.academicYear}
+              onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
+              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
+            >
+              <option value="2024">2024 Graduating Class</option>
+              <option value="2023">2023 Graduating Class</option>
+              <option value="2022">2022 Graduating Class</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 block">Tracer Study Milestone</label>
+            <select
+              value={filters.tracerPeriod}
+              onChange={(e) => setFilters({ ...filters, tracerPeriod: e.target.value })}
+              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
+            >
+              <option value="6-month">6-Month Post-Graduation Tracer</option>
+              <option value="12-month">12-Month Post-Graduation Tracer</option>
+              <option value="24-month">24-Month Post-Graduation Tracer</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {mockDashboardKPICards.map(renderKPICard)}
       </div>

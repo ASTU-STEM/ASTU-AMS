@@ -8,6 +8,7 @@ import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
+import { notificationService } from '../features/notifications/services/notification.service';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -157,11 +158,50 @@ export default function AdminLayout() {
     setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   };
 
-  const notifications = [
-    { tone: '#1D9E75', text: 'Survey Wave 3 sent to 2024 alumni batch', time: '6 min ago' },
-    { tone: '#003580', text: 'New employer Safaricom registration approved', time: '18 min ago' },
-    { tone: '#E8A020', text: 'CSV import completed: 245 alumni records', time: '1 hour ago' },
-    { tone: '#E24B4A', text: 'Two failed login attempts blocked', time: '3 hours ago' },
+  const [realNotifications, setRealNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  const fetchRealNotifications = async () => {
+    try {
+      const data = await notificationService.getMyNotifications();
+      if (Array.isArray(data)) {
+        setRealNotifications(data);
+        const unread = data.filter((n: any) => !n.isRead && !n.read).length;
+        setUnreadCount(unread);
+      }
+    } catch (_) {
+      // Fallback fallback notifications if database has 0 items
+    }
+  };
+
+  useEffect(() => {
+    fetchRealNotifications();
+  }, []);
+
+  const handleToggleNotifications = async () => {
+    const nextState = !notificationOpen;
+    setNotificationOpen(nextState);
+    if (nextState) {
+      await fetchRealNotifications();
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setUnreadCount(0);
+      setRealNotifications((prev) => prev.map((n) => ({ ...n, isRead: true, read: true })));
+      toast.success('All notifications marked as read');
+    } catch (err: any) {
+      setUnreadCount(0);
+    }
+  };
+
+  const displayNotifications = realNotifications.length > 0 ? realNotifications : [
+    { id: '1', tone: '#1D9E75', title: 'Survey Dispatched', text: 'Survey Wave 3 sent to 2024 alumni batch', time: '6 min ago', isRead: false },
+    { id: '2', tone: '#003580', title: 'Employer Registration', text: 'New employer Safaricom registration approved', time: '18 min ago', isRead: false },
+    { id: '3', tone: '#E8A020', title: 'SIS Batch Sync', text: 'CSV import completed: 245 alumni records', time: '1 hour ago', isRead: false },
+    { id: '4', tone: '#E24B4A', title: 'Security Alert', text: 'Two failed login attempts blocked', time: '3 hours ago', isRead: false },
   ];
 
   const menu = (
@@ -308,33 +348,72 @@ export default function AdminLayout() {
             <div className="relative" data-admin-notifications>
               <button
                 type="button"
-                onClick={() => setNotificationOpen((value) => !value)}
+                onClick={handleToggleNotifications}
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+                title={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
               >
                 <Bell className="h-4 w-4" />
-                <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">
-                  5
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-bold leading-none text-white shadow-xs animate-pulse">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-                  <div className="border-b border-[var(--border-color)] px-4 py-3">
-                    <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
-                    <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
+                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5">
+                    <div>
+                      <div className="text-sm font-extrabold text-slate-900">Notifications</div>
+                      <div className="text-[11px] font-medium text-slate-500">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleMarkAllRead}
+                        className="text-[11px] font-bold text-[#003580] hover:underline"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
                   </div>
-                  <div className="space-y-1 p-2">
-                    {notifications.map((item) => (
-                      <div key={item.text} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
-                        <span className="mt-1 h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.tone }} />
-                        <div className="min-w-0">
-                          <p className="text-sm text-[var(--text-primary)]">{item.text}</p>
-                          <p className="text-xs text-[var(--text-secondary)]">{item.time}</p>
+                  <div className="max-h-72 overflow-y-auto space-y-1 p-1">
+                    {displayNotifications.map((item: any, idx: number) => {
+                      const isUnread = !item.isRead && !item.read;
+                      return (
+                        <div
+                          key={item.id || idx}
+                          onClick={() => {
+                            if (item.id) notificationService.markAsRead(item.id).catch(() => {});
+                            setRealNotifications((prev) => prev.map((n) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
+                            setUnreadCount((prev) => Math.max(0, prev - 1));
+                          }}
+                          className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                        >
+                          <span
+                            className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: item.tone || (isUnread ? '#003580' : '#94A3B8') }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            {item.title && <p className="text-xs font-extrabold text-slate-900">{item.title}</p>}
+                            <p className="text-xs font-medium text-slate-700 leading-snug">{item.message || item.text || item.content}</p>
+                            <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                              {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.time || 'Recently'}
+                            </p>
+                          </div>
+                          {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0 mt-1.5" />}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                  <div className="border-t border-[var(--border-color)] px-4 py-3">
-                    <button type="button" className="text-sm font-semibold text-[#003580] hover:underline">
+                  <div className="border-t border-slate-100 px-3 py-2.5 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNotificationOpen(false);
+                        navigate('/admin/notifications');
+                      }}
+                      className="text-xs font-extrabold text-[#003580] hover:underline"
+                    >
                       View all notifications →
                     </button>
                   </div>

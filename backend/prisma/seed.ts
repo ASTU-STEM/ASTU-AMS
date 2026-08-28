@@ -74,14 +74,23 @@ async function main() {
   });
 
   // SWE Department Head
-  await prisma.user.upsert({
+  const deptHeadUser = await prisma.user.upsert({
     where: { email: 'depthead.swe@astu.edu.et' },
-    update: {},
+    update: { isActive: true },
     create: {
       email: 'depthead.swe@astu.edu.et',
       password: defaultPassword,
       role: Role.DEPARTMENT_HEAD,
       isActive: true,
+    },
+  });
+
+  await prisma.departmentHeadProfile.upsert({
+    where: { userId: deptHeadUser.id },
+    update: { departmentId: swe.id },
+    create: {
+      userId: deptHeadUser.id,
+      departmentId: swe.id,
     },
   });
 

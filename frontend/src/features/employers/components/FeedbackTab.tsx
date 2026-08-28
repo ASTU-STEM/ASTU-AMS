@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { GraduateFeedback } from '../types/employer.types';
 import { employerService } from '../services/employer.service';
+import { surveyService } from '../../surveys/services/survey.service';
 import toast from 'react-hot-toast';
-import { Download, Search, Filter, Star, TrendingUp, Users, Award } from 'lucide-react';
+import { Download, Search, Filter, Star, TrendingUp, Users, Award, ClipboardCheck, X, CheckCircle, Send } from 'lucide-react';
 
 interface FeedbackTabProps {
   feedbacks: GraduateFeedback[];
@@ -12,6 +13,63 @@ interface FeedbackTabProps {
 }
 
 export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFeedback, onRefreshFeedbacks, darkMode }) => {
+  const [assignedSurveys, setAssignedSurveys] = useState<any[]>([]);
+  const [surveysLoading, setSurveysLoading] = useState<boolean>(true);
+  const [activeSurveyModal, setActiveSurveyModal] = useState<any | null>(null);
+  const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string>>({});
+  const [submittingSurvey, setSubmittingSurvey] = useState<boolean>(false);
+  const [completedSurveyIds, setCompletedSurveyIds] = useState<Set<string>>(new Set());
+
+  const fetchEmployerSurveys = async () => {
+    setSurveysLoading(true);
+    try {
+      const data = await surveyService.getMySurveys();
+      if (Array.isArray(data)) {
+        setAssignedSurveys(data);
+      }
+    } catch (_) {
+      // Fallback sample survey if network unavailable
+    } finally {
+      setSurveysLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployerSurveys();
+  }, []);
+
+  const handleOpenSurveyModal = (survey: any) => {
+    setActiveSurveyModal(survey);
+    setSurveyAnswers({});
+  };
+
+  const handleSubmitSurveyAnswers = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeSurveyModal) return;
+
+    setSubmittingSurvey(true);
+    try {
+      const formattedAnswers = Object.entries(surveyAnswers).map(([qId, text]) => ({
+        questionId: qId,
+        answerText: text,
+      }));
+
+      await surveyService.submitAssignedSurvey(
+        activeSurveyModal.id,
+        formattedAnswers
+      );
+
+      setCompletedSurveyIds((prev) => new Set(prev).add(activeSurveyModal.id));
+      toast.success('Thank you! Your employer survey response has been submitted to ASTU Administration.');
+      setActiveSurveyModal(null);
+      fetchEmployerSurveys();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit survey. Please try again.');
+    } finally {
+      setSubmittingSurvey(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     alumnusName: '',
     department: 'Computer Science and Engineering',
@@ -212,6 +270,223 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
 
   return (
     <div className="space-y-8">
+      {/* Assigned Employer Surveys Section */}
+      <section className={`p-6 border rounded-3xl shadow-sm transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'}`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-gray-150">
+          <div>
+            <h3 className="text-lg font-extrabold flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-astu-navy" />
+              Assigned ASTU Employer Surveys
+            </h3>
+            <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+              Surveys dispatched by ASTU Administration for employer satisfaction, skill requirements, and curriculum feedback.
+            </p>
+          </div>
+          <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-[#003580] border border-blue-200">
+            {assignedSurveys.length} Available Surveys
+          </span>
+        </div>
+
+        {surveysLoading ? (
+          <div className="p-8 text-center text-xs text-gray-400">Loading active employer surveys...</div>
+        ) : assignedSurveys.length === 0 ? (
+          <div className="p-8 text-center rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+            <p className="text-sm font-semibold text-gray-600">No pending employer surveys at this time.</p>
+            <p className="text-xs text-gray-400 mt-1">ASTU Administration will notify your organization via In-App, Email, and SMS when new surveys are published.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {assignedSurveys.map((survey: any) => {
+              const isDone = completedSurveyIds.has(survey.id);
+              const qCount = (survey.questions?.length || 0) + ((survey.sections || []).reduce((acc: number, s: any) => acc + (s.questions?.length || 0), 0));
+
+              return (
+                <div
+                  key={survey.id}
+                  className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                    isDone
+                      ? 'bg-emerald-50/40 border-emerald-200'
+                      : darkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-50/60 border-gray-200 hover:border-astu-navy/40 hover:bg-white hover:shadow-md'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+                        isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {isDone ? 'COMPLETED' : 'PENDING ACTION'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-semibold">{qCount} Questions</span>
+                    </div>
+
+                    <h4 className="font-bold text-sm text-gray-900 line-clamp-1">{survey.title}</h4>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{survey.description || 'ASTU Partner Employer Survey'}</p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-gray-150 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-400">ASTU Quality Board</span>
+                    {isDone ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                        <CheckCircle className="w-4 h-4" /> Submitted
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenSurveyModal(survey)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#003580] text-white text-xs font-extrabold hover:bg-[#002660] transition-all shadow-xs"
+                      >
+                        Take Survey →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Survey Modal */}
+      {activeSurveyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between border-b border-gray-150 pb-4">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-100 text-blue-700 uppercase tracking-wider">
+                  Employer Survey
+                </span>
+                <h3 className="text-lg font-extrabold text-gray-900 mt-1">{activeSurveyModal.title}</h3>
+                <p className="text-xs text-gray-500">{activeSurveyModal.description}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveSurveyModal(null)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitSurveyAnswers} className="space-y-6">
+              {(() => {
+                const questions = [
+                  ...(activeSurveyModal.questions || []),
+                  ...((activeSurveyModal.sections || []).flatMap((s: any) => s.questions || []))
+                ];
+
+                if (questions.length === 0) {
+                  return (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <label className="block text-xs font-bold text-gray-800 mb-2">1. Technical &amp; Practical Skill Preparedness (Rating 1-5)</label>
+                        <select
+                          onChange={(e) => setSurveyAnswers(prev => ({ ...prev, q1: e.target.value }))}
+                          className="w-full p-2.5 text-xs rounded-xl border border-gray-200"
+                          required
+                        >
+                          <option value="">Select rating...</option>
+                          <option value="5 - Excellent">5 - Excellent</option>
+                          <option value="4 - Good">4 - Good</option>
+                          <option value="3 - Satisfactory">3 - Satisfactory</option>
+                          <option value="2 - Needs Improvement">2 - Needs Improvement</option>
+                          <option value="1 - Poor">1 - Poor</option>
+                        </select>
+                      </div>
+                      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <label className="block text-xs font-bold text-gray-800 mb-2">2. Missing Skills &amp; Technology Frameworks in ASTU Curriculum</label>
+                        <textarea
+                          onChange={(e) => setSurveyAnswers(prev => ({ ...prev, q2: e.target.value }))}
+                          className="w-full p-2.5 text-xs rounded-xl border border-gray-200 h-20"
+                          placeholder="e.g. Cloud Architecture, Docker/Kubernetes, Mobile App Development..."
+                          required
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                return questions.map((q: any, idx: number) => (
+                  <div key={q.id || idx} className="p-4 rounded-2xl border border-gray-150 bg-gray-50/50 space-y-2">
+                    <label className="block text-xs font-bold text-gray-800">
+                      {idx + 1}. {q.questionText} {q.required && <span className="text-red-500">*</span>}
+                    </label>
+
+                    {q.questionType === 'RATING' ? (
+                      <div className="flex gap-2 pt-1">
+                        {[1, 2, 3, 4, 5].map((val) => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setSurveyAnswers(prev => ({ ...prev, [q.id]: String(val) }))}
+                            className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                              surveyAnswers[q.id] === String(val)
+                                ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                                : 'bg-white border-gray-200 text-gray-700 hover:bg-amber-50'
+                            }`}
+                          >
+                            ★ {val}
+                          </button>
+                        ))}
+                      </div>
+                    ) : q.questionType === 'TEXTAREA' ? (
+                      <textarea
+                        value={surveyAnswers[q.id] || ''}
+                        onChange={(e) => setSurveyAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                        className="w-full p-2.5 text-xs rounded-xl border border-gray-200 h-20 outline-none focus:border-astu-navy"
+                        placeholder="Your detailed response..."
+                        required={q.required}
+                      />
+                    ) : q.options && q.options.length > 0 ? (
+                      <div className="space-y-1.5 pt-1">
+                        {q.options.map((opt: string, optIdx: number) => (
+                          <label key={optIdx} className="flex items-center gap-2.5 text-xs text-gray-700 font-semibold cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`q_${q.id}`}
+                              value={opt}
+                              checked={surveyAnswers[q.id] === opt}
+                              onChange={(e) => setSurveyAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                              className="text-astu-navy"
+                              required={q.required}
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={surveyAnswers[q.id] || ''}
+                        onChange={(e) => setSurveyAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                        className="w-full p-2.5 text-xs rounded-xl border border-gray-200 outline-none focus:border-astu-navy"
+                        placeholder="Your answer..."
+                        required={q.required}
+                      />
+                    )}
+                  </div>
+                ));
+              })()}
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-150">
+                <button
+                  type="button"
+                  onClick={() => setActiveSurveyModal(null)}
+                  className="px-4 py-2 text-xs font-bold text-gray-600 rounded-xl hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingSurvey}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-astu-navy text-white text-xs font-extrabold rounded-xl hover:bg-astu-navy/90 shadow-md disabled:opacity-50"
+                >
+                  {submittingSurvey ? 'Submitting...' : 'Submit Survey Response'} <Send className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">

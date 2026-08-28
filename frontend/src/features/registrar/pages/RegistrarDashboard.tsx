@@ -431,11 +431,8 @@ useEffect(() => {
             ].map(group => (
               <div key={group.sectionKey}>
                 {!sidebarCollapsed && (
-                  <div className="flex items-center justify-between px-2.5 mb-1.5 mt-1">
+                  <div className="px-2.5 mb-1.5 mt-1">
                     <p className="text-[11.5px] font-extrabold text-slate-400 uppercase tracking-[0.16em]">{group.sectionLabel}</p>
-                    <span className="text-[9px] text-slate-500 font-extrabold px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200">
-                      {group.items.length}
-                    </span>
                   </div>
                 )}
                 <div className="space-y-1">

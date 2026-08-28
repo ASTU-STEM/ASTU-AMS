@@ -126,56 +126,149 @@ export class TracerStudyService {
   }
 
   /**
-   * Instantly dispatches a survey template to all eligible active alumni.
+   * Instantly dispatches a survey template to all eligible active alumni (or department-scoped alumni).
    */
-  async dispatchSurveyInstantly(surveyId: string) {
+  async dispatchSurveyInstantly(surveyId: string, departmentId?: string) {
     const template = await this.surveyRepo.findById(surveyId);
     if (!template) throw new Error('Survey template not found');
 
+    const targetAudience = (template as any).targetAudience || 'ALUMNI';
     const now = new Date();
     const dueDate = addDays(now, 21);
 
-    const eligibleAlumni = await prisma.alumniProfile.findMany({
-      where: {
+    let dispatchedCount = 0;
+    let totalTargeted = 0;
+
+    let departmentObj: any = null;
+    if (departmentId) {
+      departmentObj = await prisma.department.findUnique({ where: { id: departmentId } });
+    }
+
+    // 1. Dispatch to Alumni if targetAudience is ALUMNI or BOTH
+    if (targetAudience === 'ALUMNI' || targetAudience === 'BOTH') {
+      const alumniWhere: any = {
         status: 'ACTIVE',
         userId: { not: null }
-      },
-      include: { user: true }
-    });
+      };
 
-    let dispatchedCount = 0;
-    for (const alumni of eligibleAlumni) {
-      if (!alumni.userId) continue;
-      const existing = await this.assignmentRepo.findBySurveyAndAlumni(template.id, alumni.id);
-      if (existing) continue;
+      if (departmentId) {
+        alumniWhere.departmentId = departmentId;
+      }
 
-      const assignment = await this.assignmentRepo.create({
-        surveyId: template.id,
-        alumniId: alumni.id,
-        status: 'PENDING',
-        assignedAt: now,
-        dueDate,
-        completedAt: null,
-        sevenDayReminderSent: false,
-        threeDayReminderSent: false,
-        overdueReminderSent: false,
-        responseId: null,
+      const eligibleAlumni = await prisma.alumniProfile.findMany({
+        where: alumniWhere,
+        include: { user: true, department: true }
       });
 
-      const title = `🎓 New Survey Published: ${template.title}`;
-      const content = `A new tracer study survey '${template.title}' is available in your portal and due on ${dueDate.toISOString().split('T')[0]}.`;
-      
-      await this.sendMultiChannelNotification({
-        alumni,
-        assignmentId: assignment.id,
-        type: 'NEW_SURVEY',
-        title,
-        content,
-        surveyTitle: template.title,
-        dueDateStr: dueDate.toISOString().split('T')[0]
+      totalTargeted += eligibleAlumni.length;
+
+      for (const alumni of eligibleAlumni) {
+        if (!alumni.userId) continue;
+        const existing = await this.assignmentRepo.findBySurveyAndAlumni(template.id, alumni.id);
+        if (existing) continue;
+
+        const assignment = await this.assignmentRepo.create({
+          surveyId: template.id,
+          alumniId: alumni.id,
+          status: 'PENDING',
+          assignedAt: now,
+          dueDate,
+          completedAt: null,
+          sevenDayReminderSent: false,
+          threeDayReminderSent: false,
+          overdueReminderSent: false,
+          responseId: null,
+        });
+
+        const deptTag = departmentObj ? `🏛️ [${departmentObj.name} Dept] ` : '🎓 ';
+        const title = `${deptTag}New Survey Published: ${template.title}`;
+        const content = departmentObj
+          ? `Your Department Head (${departmentObj.name}) has issued a department tracer study survey '${template.title}'. Available in your portal and due on ${dueDate.toISOString().split('T')[0]}.`
+          : `A new tracer study survey '${template.title}' is available in your portal and due on ${dueDate.toISOString().split('T')[0]}.`;
+        
+        await this.sendMultiChannelNotification({
+          alumni,
+          assignmentId: assignment.id,
+          type: 'NEW_SURVEY',
+          title,
+          content,
+          surveyTitle: template.title,
+          dueDateStr: dueDate.toISOString().split('T')[0]
+        });
+
+        dispatchedCount++;
+      }
+    }
+
+    // 2. Dispatch to Employers if targetAudience is EMPLOYERS or BOTH
+    if (targetAudience === 'EMPLOYERS' || targetAudience === 'BOTH') {
+      const eligibleEmployers = await prisma.employerProfile.findMany({
+        where: { userId: { not: '' } },
+        include: { user: true }
       });
 
-      dispatchedCount++;
+      totalTargeted += eligibleEmployers.length;
+
+      for (const employer of eligibleEmployers) {
+        if (!employer.userId) continue;
+
+        const empUser = (employer as any).user;
+        const title = `🏢 ASTU Employer Survey: ${template.title}`;
+        const content = `ASTU Administration published a new employer feedback survey '${template.title}'. Please log in to your Employer Portal to complete your submission.`;
+
+        // In-App Notification
+        await this.notificationRepo.create({
+          userId: employer.userId,
+          title: `🏢 New Employer Survey: ${template.title}`,
+          content: `A new employer survey '${template.title}' is ready for submission in your portal.`,
+          isRead: false
+        }).catch(() => {});
+
+        // Email Notification
+        const email = employer.contactEmail || empUser?.email;
+        if (email) {
+          const emailHtml = `
+            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+              <div style="background-color: #003366; color: #ffffff; padding: 20px; text-align: center;">
+                <h2 style="margin: 0; font-size: 20px;">🏢 ASTU Employer Quality &amp; Feedback Survey</h2>
+                <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">Adama Science and Technology University</p>
+              </div>
+              
+              <div style="padding: 24px;">
+                <p style="font-size: 15px;">Dear <strong>${employer.companyName || 'Employer Partner'}</strong>,</p>
+                <p style="font-size: 14px; color: #475569;">${content}</p>
+                
+                <div style="background-color: #f0f7ff; padding: 14px; margin: 18px 0; border-radius: 6px; border: 1px solid #bae6fd;">
+                  <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Survey Title:</strong> ${template.title}</p>
+                  <p style="margin: 0; font-size: 13px;"><strong>Submission Due Date:</strong> ${dueDate.toISOString().split('T')[0]}</p>
+                </div>
+
+                <div style="text-align: center; margin: 28px 0 20px 0;">
+                  <a href="http://localhost:5173/login" style="background-color: #003366; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; box-shadow: 0 2px 4px rgba(0,51,102,0.2);">
+                    🚀 Open Employer Portal &amp; Submit Survey
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+
+          await this.emailService.sendMail({
+            to: email,
+            subject: title,
+            text: content,
+            html: emailHtml
+          }).catch(() => {});
+        }
+
+        // SMS Notification
+        const phone = employer.phone || empUser?.phoneNumber;
+        if (phone) {
+          const smsText = `[ASTU AMS - Employer Survey] ${template.title}: Please log in to your Employer Portal at http://localhost:5173/login to submit your survey response. Thank you for partnering with ASTU!`;
+          await this.smsService.sendSms(phone, smsText).catch(() => {});
+        }
+
+        dispatchedCount++;
+      }
     }
 
     // Notify staff (Admin & Registrar) that survey dispatch has occurred
@@ -183,7 +276,7 @@ export class TracerStudyService {
       await this.notifyStaffOnDispatch(template.title, dispatchedCount);
     }
 
-    return { surveyId: template.id, dispatchedCount, totalTargeted: eligibleAlumni.length };
+    return { surveyId: template.id, dispatchedCount, totalTargeted };
   }
 
   /**

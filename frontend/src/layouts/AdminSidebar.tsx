@@ -45,14 +45,14 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Messages', path: '/admin/messages', icon: MessageSquareText, section: 'main', tooltip: 'ASTU_AMS direct messaging hub' },
   { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield, section: 'system', tooltip: 'Advanced system modules' },
   { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart, section: 'system', tooltip: 'Generate & export reports' },
-  { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', badge: '142', tooltip: '142 pending verifications' },
+  { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', tooltip: 'Pending verifications' },
   { label: 'Role Management', path: '/admin/roles', icon: ShieldCheck, section: 'system', tooltip: 'Manage roles & permissions' },
   { label: 'Analytics', path: '/admin/analytics', icon: BarChart3, section: 'system', tooltip: 'View platform analytics' },
-  { label: 'Survey Management', path: '/admin/surveys', icon: ClipboardList, section: 'system', badge: '3', tooltip: '3 active surveys' },
-  { label: 'Jobs Management', path: '/admin/jobs', icon: Briefcase, section: 'system', badge: '47', tooltip: '47 active job posts' },
+  { label: 'Survey Management', path: '/admin/surveys', icon: ClipboardList, section: 'system', tooltip: 'Active surveys' },
+  { label: 'Jobs Management', path: '/admin/jobs', icon: Briefcase, section: 'system', tooltip: 'Active job posts' },
   { label: 'Departments', path: '/admin/departments', icon: GraduationCap, section: 'system', tooltip: 'Manage departments' },
   { label: 'Donations & Giving', path: '/admin/donations', icon: Heart, section: 'system', tooltip: 'Fundraising causes & Chapa donors' },
-  { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'settings', badge: '5', tooltip: '5 unread notifications' },
+  { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'settings', tooltip: 'Unread notifications' },
   { label: 'System Logs', path: '/admin/logs', icon: ScrollText, section: 'settings', tooltip: 'Audit trail & system logs' },
   { label: 'Backup & Security', path: '/admin/backup', icon: Shield, section: 'settings', tooltip: 'Backup & security settings' },
   { label: 'Settings', path: '/admin/settings', icon: Settings, section: 'settings', tooltip: 'System configuration' },
@@ -75,6 +75,39 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
     notifications: 0,
   });
 
+  const [seenPaths, setSeenPaths] = React.useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('astu_admin_seen_sidebar_badges');
+      return saved ? JSON.parse(saved) : {};
+    } catch (_) {
+      return {};
+    }
+  });
+
+  // Mark current route as seen automatically
+  React.useEffect(() => {
+    if (location.pathname) {
+      setSeenPaths((prev) => {
+        if (prev[location.pathname]) return prev;
+        const updated = { ...prev, [location.pathname]: true };
+        try {
+          localStorage.setItem('astu_admin_seen_sidebar_badges', JSON.stringify(updated));
+        } catch (_) {}
+        return updated;
+      });
+    }
+  }, [location.pathname]);
+
+  const markAsSeen = (path: string) => {
+    setSeenPaths((prev) => {
+      const updated = { ...prev, [path]: true };
+      try {
+        localStorage.setItem('astu_admin_seen_sidebar_badges', JSON.stringify(updated));
+      } catch (_) {}
+      return updated;
+    });
+  };
+
   React.useEffect(() => {
     adminService.getSidebarStats().then(res => {
       if (res.ok) {
@@ -89,10 +122,44 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
   }, []);
 
   const dynamicNavItems = navItems.map(item => {
-    if (item.label === 'User Management') return { ...item, badge: stats.users > 0 ? stats.users.toString() : undefined, tooltip: `${stats.users} pending verifications` };
-    if (item.label === 'Survey Management') return { ...item, badge: stats.surveys > 0 ? stats.surveys.toString() : undefined, tooltip: `${stats.surveys} active surveys` };
-    if (item.label === 'Jobs Management') return { ...item, badge: stats.jobs > 0 ? stats.jobs.toString() : undefined, tooltip: `${stats.jobs} active job posts` };
-    if (item.label === 'Notifications') return { ...item, badge: stats.notifications > 0 ? stats.notifications.toString() : undefined, tooltip: `${stats.notifications} unread notifications` };
+    const isCurrentlyActive = item.exact
+      ? location.pathname === item.path
+      : location.pathname.startsWith(item.path);
+
+    const isSeen = seenPaths[item.path] || isCurrentlyActive;
+
+    if (item.label === 'User Management') {
+      const count = stats.users;
+      return {
+        ...item,
+        badge: (!isSeen && count > 0) ? count.toString() : undefined,
+        tooltip: `${count} pending verifications`,
+      };
+    }
+    if (item.label === 'Survey Management') {
+      const count = stats.surveys;
+      return {
+        ...item,
+        badge: (!isSeen && count > 0) ? count.toString() : undefined,
+        tooltip: `${count} active surveys`,
+      };
+    }
+    if (item.label === 'Jobs Management') {
+      const count = stats.jobs;
+      return {
+        ...item,
+        badge: (!isSeen && count > 0) ? count.toString() : undefined,
+        tooltip: `${count} active job posts`,
+      };
+    }
+    if (item.label === 'Notifications') {
+      const count = stats.notifications;
+      return {
+        ...item,
+        badge: (!isSeen && count > 0) ? count.toString() : undefined,
+        tooltip: `${count} unread notifications`,
+      };
+    }
     return item;
   });
 
@@ -148,7 +215,10 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                         key={item.path}
                         to={item.path}
                         end={item.exact}
-                        onClick={onNavigate}
+                        onClick={() => {
+                          markAsSeen(item.path);
+                          if (onNavigate) onNavigate();
+                        }}
                         title={collapsed ? item.tooltip || item.label : undefined}
                         className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
                           collapsed ? 'justify-center' : 'gap-2.5'

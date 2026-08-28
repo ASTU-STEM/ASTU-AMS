@@ -123,6 +123,7 @@ export default function SurveyManagement() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<SurveyType>('CUSTOM');
+  const [targetAudience, setTargetAudience] = useState<'ALUMNI' | 'EMPLOYERS' | 'BOTH'>('ALUMNI');
   const [sections, setSections] = useState<Section[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -302,6 +303,7 @@ export default function SurveyManagement() {
         title,
         description,
         type,
+        targetAudience,
         milestoneMonths: type === 'SIX_MONTH' ? 6 : type === 'TWELVE_MONTH' ? 12 : type === 'EIGHTEEN_MONTH' ? 18 : type === 'TWENTY_FOUR_MONTH' ? 24 : undefined,
         questions: flatQuestions,
         sections: sections.map(s => ({
@@ -326,7 +328,8 @@ export default function SurveyManagement() {
         setActiveTab('details');
       } else {
         const newSurvey = await surveyService.createSurvey(payload);
-        toast.success('Survey created successfully!');
+        const targetLabel = targetAudience === 'BOTH' ? 'Alumni & Employers' : targetAudience === 'EMPLOYERS' ? 'Employers' : 'Alumni';
+        toast.success(`🚀 Survey created & published! Multi-channel notifications dispatched via In-App, Email, and SMS to ${targetLabel}.`);
         setSelectedSurvey(newSurvey);
         setActiveTab('details');
       }
@@ -1237,30 +1240,48 @@ export default function SurveyManagement() {
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Description</span>
                 <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580]" rows={3} placeholder="Survey description..." />
               </label>
-              <label className="block space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Survey Type (Trigger)</span>
-                {!editId ? (
-                  <div>
-                    <input
-                      type="text"
-                      disabled
-                      value="Custom / Manual Assignment (CUSTOM)"
-                      className="w-full rounded-[8px] border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 cursor-not-allowed"
-                    />
-                    <p className="mt-1 text-[11px] text-slate-500 font-medium">
-                      💡 Fixed milestone templates (6, 12, 18, 24-Month) are pre-configured system defaults. New surveys are created as Custom Surveys.
-                    </p>
-                  </div>
-                ) : (
-                  <select disabled={['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(type)} value={type} onChange={e => setType(e.target.value as SurveyType)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:cursor-not-allowed font-medium text-slate-700">
-                    <option value="SIX_MONTH">6-Month Post Graduation (Fixed Milestone)</option>
-                    <option value="TWELVE_MONTH">12-Month Post Graduation (Fixed Milestone)</option>
-                    <option value="EIGHTEEN_MONTH">18-Month Post Graduation (Fixed Milestone)</option>
-                    <option value="TWENTY_FOUR_MONTH">24-Month Post Graduation (Fixed Milestone)</option>
-                    <option value="CUSTOM">Custom / Manual Assignment</option>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Survey Type (Trigger)</span>
+                  {!editId ? (
+                    <div>
+                      <input
+                        type="text"
+                        disabled
+                        value="Custom / Manual Assignment (CUSTOM)"
+                        className="w-full rounded-[8px] border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 cursor-not-allowed"
+                      />
+                      <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                        💡 Fixed milestone templates (6, 12, 18, 24-Month) are pre-configured system defaults. New surveys are created as Custom Surveys.
+                      </p>
+                    </div>
+                  ) : (
+                    <select disabled={['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(type)} value={type} onChange={e => setType(e.target.value as SurveyType)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:cursor-not-allowed font-medium text-slate-700">
+                      <option value="SIX_MONTH">6-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="TWELVE_MONTH">12-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="EIGHTEEN_MONTH">18-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="TWENTY_FOUR_MONTH">24-Month Post Graduation (Fixed Milestone)</option>
+                      <option value="CUSTOM">Custom / Manual Assignment</option>
+                    </select>
+                  )}
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Target Audience</span>
+                  <select
+                    value={targetAudience}
+                    onChange={e => setTargetAudience(e.target.value as any)}
+                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-bold text-slate-800 outline-none focus:border-[#003580]"
+                  >
+                    <option value="ALUMNI">🎓 Alumni Graduates Only</option>
+                    <option value="EMPLOYERS">🏢 Employer Partners Only</option>
+                    <option value="BOTH">🌐 Both Alumni &amp; Employer Partners</option>
                   </select>
-                )}
-              </label>
+                  <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                    Select recipients to dispatch multi-channel notifications (In-app, Email &amp; SMS).
+                  </p>
+                </label>
+              </div>
             </div>
           </section>
 

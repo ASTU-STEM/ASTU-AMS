@@ -77,6 +77,7 @@ export class SurveysController {
 
   static async createSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const data = createSurveyTemplateSchema.parse(req.body);
 
       if (['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(data.type)) {
@@ -90,8 +91,16 @@ export class SurveysController {
         isArchived: false,
       } as any);
 
+      let departmentId: string | undefined = undefined;
+      if (user.role === 'DEPARTMENT_HEAD') {
+        const deptHead = await prisma.departmentHeadProfile.findUnique({
+          where: { userId: user.userId },
+        });
+        departmentId = deptHead?.departmentId;
+      }
+
       if (data.sendInstantly || data.isActive !== false) {
-        await tracerService.dispatchSurveyInstantly(result.id).catch(() => {});
+        await tracerService.dispatchSurveyInstantly(result.id, departmentId).catch(() => {});
       }
 
       return sendSuccess(res, 'Survey template created and dispatched successfully.', result, 201);
@@ -222,8 +231,15 @@ export class SurveysController {
 
   static async getMySurveys(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user.userId;
-      const alumniId = await getAlumniIdFromUser(userId);
+      const user = (req as any).user;
+      if (user.role === 'EMPLOYER') {
+        const templates = await surveyRepo.findAll(true, false);
+        const employerSurveys = templates.filter((t: any) =>
+          ['EMPLOYERS', 'BOTH'].includes(t.targetAudience || 'ALUMNI') || t.type === 'CUSTOM'
+        );
+        return sendSuccess(res, 'Assigned employer surveys retrieved.', employerSurveys);
+      }
+      const alumniId = await getAlumniIdFromUser(user.userId);
       const useCase = new GetAlumniAssignments(assignmentRepo);
       const assignments = await useCase.execute(alumniId);
       return sendSuccess(res, 'Assigned surveys retrieved.', assignments);
@@ -232,8 +248,12 @@ export class SurveysController {
 
   static async getMySurveyAssignment(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user.userId;
-      const alumniId = await getAlumniIdFromUser(userId);
+      const user = (req as any).user;
+      if (user.role === 'EMPLOYER') {
+        const template = await surveyRepo.findById(req.params.assignmentId);
+        return sendSuccess(res, 'Assigned survey retrieved.', { survey: template, id: req.params.assignmentId, status: 'PENDING' });
+      }
+      const alumniId = await getAlumniIdFromUser(user.userId);
       const useCase = new GetSurveyAssignmentById(assignmentRepo);
       const assignment = await useCase.execute(req.params.assignmentId);
       if (assignment.alumniId !== alumniId) throw new Error('Access denied');
@@ -254,9 +274,32 @@ export class SurveysController {
 
   static async submitAssignedSurvey(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user.userId;
-      const alumniId = await getAlumniIdFromUser(userId);
+      const user = (req as any).user;
       const data = submitSurveySchema.parse(req.body);
+
+      if (user.role === 'EMPLOYER') {
+        const employer = await prisma.employerProfile.findUnique({ where: { userId: user.userId } });
+        if (!employer) throw new ApiError('Employer profile not found', 404);
+
+        const surveyId = data.assignmentId || req.body.surveyId;
+        const response = await prisma.surveyResponse.create({
+          data: {
+            surveyId: surveyId || '',
+            alumniId: employer.id,
+            isDraft: false,
+            submittedAt: new Date(),
+            answers: {
+              create: data.answers.map((ans) => ({
+                questionId: ans.questionId,
+                answerText: ans.answerText,
+              })),
+            },
+          },
+        });
+        return sendSuccess(res, 'Employer survey submitted successfully.', response, 201);
+      }
+
+      const alumniId = await getAlumniIdFromUser(user.userId);
       const useCase = new SubmitAssignedSurvey(assignmentRepo, responseRepo);
       const result = await useCase.execute(alumniId, data.assignmentId || '', data.answers);
       return sendSuccess(res, 'Survey submitted successfully.', result, 201);
@@ -265,8 +308,11 @@ export class SurveysController {
 
   static async getMyHistory(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user.userId;
-      const alumniId = await getAlumniIdFromUser(userId);
+      const user = (req as any).user;
+      if (user.role === 'EMPLOYER') {
+        return sendSuccess(res, 'Survey history retrieved.', []);
+      }
+      const alumniId = await getAlumniIdFromUser(user.userId);
       const useCase = new GetAlumniAssignments(assignmentRepo);
       const assignments = await useCase.execute(alumniId);
       const history = assignments.filter((assignment) => ['COMPLETED', 'OVERDUE', 'EXPIRED'].includes(assignment.status));
@@ -276,10 +322,31 @@ export class SurveysController {
 
   static async submitResponse(req: Request, res: Response, next: NextFunction) {
     try {
-      const alumniId = (req as any).user?.userId;
+      const user = (req as any).user;
       const { answers } = submitSurveySchema.parse(req.body);
+      const surveyId = req.params.surveyId;
+
+      if (user.role === 'EMPLOYER') {
+        const employer = await prisma.employerProfile.findUnique({ where: { userId: user.userId } });
+        const response = await prisma.surveyResponse.create({
+          data: {
+            surveyId,
+            alumniId: employer?.id || user.userId,
+            isDraft: false,
+            submittedAt: new Date(),
+            answers: {
+              create: answers.map((ans) => ({
+                questionId: ans.questionId,
+                answerText: ans.answerText,
+              })),
+            },
+          },
+        });
+        return sendSuccess(res, 'Employer survey response submitted successfully.', response, 201);
+      }
+
       const useCase = new SubmitSurveyResponse(surveyRepo, responseRepo);
-      const result = await useCase.execute(req.params.surveyId, alumniId, answers);
+      const result = await useCase.execute(surveyId, user.userId, answers);
       return sendSuccess(res, 'Survey response submitted successfully.', result, 201);
     } catch (err) { next(err); }
   }
@@ -360,16 +427,36 @@ export class SurveysController {
 
   static async sendSurveyInstantly(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const { templateId } = req.params;
-      const result = await tracerService.dispatchSurveyInstantly(templateId);
-      return sendSuccess(res, 'Survey dispatched instantly to all target alumni.', result, 200);
+      let departmentId: string | undefined = undefined;
+
+      if (user?.role === 'DEPARTMENT_HEAD') {
+        const deptHead = await prisma.departmentHeadProfile.findUnique({
+          where: { userId: user.userId },
+        });
+        departmentId = deptHead?.departmentId;
+      }
+
+      const result = await tracerService.dispatchSurveyInstantly(templateId, departmentId);
+      return sendSuccess(res, 'Survey dispatched instantly to target alumni.', result, 200);
     } catch (err) { next(err); }
   }
 
   static async activateSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+      let departmentId: string | undefined = undefined;
+
+      if (user?.role === 'DEPARTMENT_HEAD') {
+        const deptHead = await prisma.departmentHeadProfile.findUnique({
+          where: { userId: user.userId },
+        });
+        departmentId = deptHead?.departmentId;
+      }
+
       const result = await surveyRepo.update(req.params.templateId, { isActive: true });
-      await tracerService.dispatchSurveyInstantly(req.params.templateId).catch(() => {});
+      await tracerService.dispatchSurveyInstantly(req.params.templateId, departmentId).catch(() => {});
       return sendSuccess(res, 'Survey template activated and dispatched.', result);
     } catch (err) { next(err); }
   }
