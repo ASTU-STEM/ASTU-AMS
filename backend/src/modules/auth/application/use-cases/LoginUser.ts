@@ -3,6 +3,7 @@ import { IAuditLogRepository } from '../ports/IAuditLogRepository';
 import { InvalidCredentialsError, AccountPendingApprovalError } from '../../domain/errors/AuthErrors';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken } from '../../../../core/utils/jwt.utils';
+import { verifyTOTP, verifyEmail2FAOTP } from '../../../../core/utils/totp.utils';
 import { Role, PrismaClient } from '@prisma/client';
 
 import prisma from '../../../../core/config/db';
@@ -47,12 +48,34 @@ export class LoginUser {
     }
 
     // Employers now use the same login page as others, so no strict isEmployerLoginFlow check is needed.
-    let isPasswordValid = await bcrypt.compare(data.password, user.password as string);
-    if (!isPasswordValid && (data.password === 'Test@123' || data.password === 'Test@1234')) {
-      isPasswordValid = true;
-    }
+    const isPasswordValid = await bcrypt.compare(data.password, user.password as string);
     if (!isPasswordValid) {
       throw new InvalidCredentialsError();
+    }
+
+    // Check if user has Two-Factor Authentication enabled in preferences
+    const profile = await prisma.alumniProfile.findUnique({
+      where: { userId: user.id }
+    }).catch(() => null);
+
+    const userPrefs = (profile?.preferences as any) || {};
+    const is2FAEnabled = Boolean(userPrefs.twoFactorEnabled);
+
+    if (is2FAEnabled) {
+      if (!data.twoFactorCode) {
+        return {
+          requires2FA: true,
+          email: user.email,
+          message: 'Two-Factor Authentication required',
+        };
+      }
+
+      const isTotpValid = verifyTOTP(data.twoFactorCode);
+      const isEmailOtpValid = verifyEmail2FAOTP(user.email, data.twoFactorCode);
+
+      if (!isTotpValid && !isEmailOtpValid) {
+        throw new InvalidCredentialsError();
+      }
     }
 
     const payload = { userId: user.id, email: user.email, role: user.role as Role };

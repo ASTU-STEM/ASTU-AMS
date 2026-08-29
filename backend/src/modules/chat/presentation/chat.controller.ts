@@ -368,18 +368,25 @@ export class UnifiedChatController {
         let recipientTitle = targetUser?.email ? targetUser.email.split('@')[0] : 'User';
         let recipientEmail = targetUser?.email || targetAlumni?.email || targetEmployer?.contactEmail;
 
-        await prisma.notification.create({
-          data: {
-            userId: receiverUserId,
-            title: `New Message from ${senderTitle}`,
-            content: text.trim().substring(0, 100),
+        try {
+          const userExists = await prisma.user.findUnique({ where: { id: receiverUserId }, select: { id: true } });
+          if (userExists) {
+            await prisma.notification.create({
+              data: {
+                userId: receiverUserId,
+                title: `New Message from ${senderTitle}`,
+                content: text.trim().substring(0, 100),
+              }
+            });
           }
-        }).catch(() => null);
+        } catch (_) { }
 
         if (recipientEmail) {
-          const { EmailService } = require('../../../core/services/EmailService');
-          const emailSvc = new EmailService();
-          emailSvc.sendDirectMessageNotification(recipientEmail, recipientTitle, senderTitle, text.trim().substring(0, 150)).catch(() => null);
+          try {
+            const { EmailService } = require('../../../core/services/EmailService');
+            const emailSvc = new EmailService();
+            emailSvc.sendDirectMessageNotification(recipientEmail, recipientTitle, senderTitle, text.trim().substring(0, 150)).catch(() => null);
+          } catch (_) { }
         }
       }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlumniPreferences } from '../types/alumni.types';
 import { alumniService } from '../services/alumni.service';
+import { authService } from '../../auth/services/auth.service';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -10,10 +11,44 @@ interface SettingsTabProps {
   onSavePreferences: (updatedPrefs: AlumniPreferences) => void;
 }
 
+const DEFAULT_PREFERENCES: AlumniPreferences = {
+  emailJobs: true,
+  emailSurveys: true,
+  emailMentorship: true,
+  emailEvents: true,
+  emailNewsletter: true,
+  smsNotifications: true,
+  profileVisibleToEmployers: true,
+  profileVisibleToPeers: true,
+  profileVisibleToAlumni: true,
+  anonymousTracerResponses: false,
+  shareAchievementsPublic: true,
+};
+
+const getEffectivePrefs = (rawPrefs?: Partial<AlumniPreferences>): AlumniPreferences => {
+  return {
+    emailJobs: rawPrefs?.emailJobs ?? true,
+    emailSurveys: rawPrefs?.emailSurveys ?? true,
+    emailMentorship: rawPrefs?.emailMentorship ?? true,
+    emailEvents: rawPrefs?.emailEvents ?? true,
+    emailNewsletter: rawPrefs?.emailNewsletter ?? true,
+    smsNotifications: rawPrefs?.smsNotifications ?? true,
+    profileVisibleToEmployers: rawPrefs?.profileVisibleToEmployers ?? true,
+    shareCgpaToEmployers: rawPrefs?.shareCgpaToEmployers ?? true,
+    profileVisibleToPeers: rawPrefs?.profileVisibleToPeers ?? true,
+    profileVisibleToAlumni: rawPrefs?.profileVisibleToAlumni ?? true,
+    anonymousTracerResponses: rawPrefs?.anonymousTracerResponses ?? false,
+    shareAchievementsPublic: rawPrefs?.shareAchievementsPublic ?? true,
+  };
+};
+
 export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePreferences }) => {
-  const [prefs, setPrefs] = useState<AlumniPreferences>({ ...preferences });
-  const [digest, setDigest] = useState((preferences as any)?.digestFrequency || 'weekly');
-  const [donationEnabled, setDonationEnabled] = useState((preferences as any)?.donationEnabled || false);
+  const [prefs, setPrefs] = useState<AlumniPreferences>(() => getEffectivePrefs(preferences));
+  const [digest, setDigest] = useState((preferences as any)?.digestFrequency || 'instant');
+  const [donationEnabled, setDonationEnabled] = useState((preferences as any)?.donationEnabled ?? true);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('theme') as 'light' | 'dark') || (preferences as any)?.theme || 'light';
+  });
   const [activeSection, setActiveSection] = useState<string>('notifications');
   const [passwords, setPasswords] = useState({
     currentPassword: '',
@@ -27,15 +62,37 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   });
   const [changingPassword, setChangingPassword] = useState(false);
   const [securityStatus, setSecurityStatus] = useState<any>(null);
-  const { logout } = useAuth();
+  const [setup2FAMode, setSetup2FAMode] = useState<'app' | 'email'>('app');
+  const [sendingSetupOtp, setSendingSetupOtp] = useState(false);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const handleSendSetupEmailOtp = async () => {
+    const targetEmail = user?.email || (preferences as any)?.email || 'alumni@astu.edu.et';
+    setSendingSetupOtp(true);
+    try {
+      const res = await authService.send2FAOTP(targetEmail);
+      if (res.ok) {
+        toast.success(`Verification code sent to ${targetEmail}`);
+      } else {
+        toast.error(res.message || 'Failed to send code.');
+      }
+    } catch (err) {
+      toast.error('Failed to send verification code.');
+    } finally {
+      setSendingSetupOtp(false);
+    }
+  };
 
   // Sync local state when preferences prop changes (e.g., from backend)
   useEffect(() => {
     if (preferences) {
-      setPrefs({ ...preferences });
-      setDigest((preferences as any)?.digestFrequency || 'weekly');
-      setDonationEnabled((preferences as any)?.donationEnabled || false);
+      setPrefs(getEffectivePrefs(preferences));
+      setDigest((preferences as any)?.digestFrequency || 'instant');
+      setDonationEnabled((preferences as any)?.donationEnabled ?? true);
+      if ((preferences as any)?.theme) {
+        setTheme((preferences as any).theme);
+      }
     }
   }, [preferences]);
 
@@ -53,32 +110,48 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   }, []);
 
   const handleToggleChange = (key: keyof AlumniPreferences) => {
+    const currentVal = prefs[key] ?? true;
     const updated = {
       ...prefs,
-      [key]: !prefs[key],
+      [key]: !currentVal,
       digestFrequency: digest,
       donationEnabled,
+      theme,
     };
-    setPrefs(updated);
-    onSavePreferences(updated);
-    toast.success('Preference updated successfully!');
+    setPrefs(updated as AlumniPreferences);
+    onSavePreferences(updated as AlumniPreferences);
+    toast.success('Preference updated and saved!');
   };
 
   const handleDigestChange = (option: string) => {
     setDigest(option);
-    const updated = { ...prefs, digestFrequency: option, donationEnabled } as any;
+    const updated = { ...prefs, digestFrequency: option, donationEnabled, theme } as any;
     setPrefs(updated);
     onSavePreferences(updated);
-    toast.success(`Digest frequency set to ${option}.`);
+    toast.success(`Tracer survey reminder frequency set to ${option}.`);
   };
 
   const handleDonationToggle = () => {
     const newVal = !donationEnabled;
     setDonationEnabled(newVal);
-    const updated = { ...prefs, digestFrequency: digest, donationEnabled: newVal } as any;
+    const updated = { ...prefs, digestFrequency: digest, donationEnabled: newVal, theme } as any;
     setPrefs(updated);
     onSavePreferences(updated);
-    toast.success(newVal ? 'Donation prompts enabled.' : 'Donation prompts paused.');
+    toast.success(newVal ? 'Alumni Giving prompts enabled.' : 'Alumni Giving prompts paused.');
+  };
+
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    const updated = { ...prefs, digestFrequency: digest, donationEnabled, theme: newTheme } as any;
+    setPrefs(updated);
+    onSavePreferences(updated);
+    toast.success(`${newTheme === 'dark' ? 'Dark' : 'Light'} Mode activated!`);
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +161,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       [name]: value
     }));
   };
+
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [showLoginHistoryModal, setShowLoginHistoryModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +185,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       toast.success('Password changed successfully!');
       setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Failed to change password.';
+      const msg = err?.response?.data?.message || 'Failed to change password. Please check your current password.';
       toast.error(msg);
     } finally {
       setChangingPassword(false);
@@ -113,11 +193,39 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   };
 
   const handleEnable2FA = () => {
-    toast('Two-Factor Authentication is coming soon!', { icon: '🛡️' });
+    setShow2FAModal(true);
+  };
+
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!twoFactorCode || twoFactorCode.trim().length < 6) {
+      toast.error('Please enter a valid 6-digit verification code.');
+      return;
+    }
+
+    const targetEmail = user?.email || (preferences as any)?.email || 'alumni@astu.edu.et';
+
+    toast.loading('Verifying 2FA code...', { id: 'verify-2fa-setup' });
+    const verifyRes = await authService.verify2FACode(twoFactorCode.trim(), targetEmail);
+    if (!verifyRes.ok) {
+      toast.error(verifyRes.message || 'Invalid 2FA code. Please check the code and try again.', { id: 'verify-2fa-setup' });
+      return;
+    }
+    toast.dismiss('verify-2fa-setup');
+
+    const isEnabling = !securityStatus?.twoFactorEnabled;
+    const updatedStatus = { ...securityStatus, twoFactorEnabled: isEnabling };
+    setSecurityStatus(updatedStatus);
+    const updated = { ...prefs, digestFrequency: digest, donationEnabled, theme, twoFactorEnabled: isEnabling } as any;
+    onSavePreferences(updated);
+    toast.success(isEnabling ? 'Two-Factor Authentication enabled successfully!' : '2FA disabled.');
+    setShow2FAModal(false);
+    setTwoFactorCode('');
   };
 
   const handleDownloadData = async () => {
     try {
+      toast.loading('Preparing your account data export...', { id: 'export-data' });
       const data = await alumniService.exportAccountData();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -128,32 +236,44 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success('Account data downloaded successfully.');
+      toast.success('Account data downloaded successfully!', { id: 'export-data' });
     } catch (err) {
-      toast.error('Failed to export account data.');
+      toast.error('Failed to export account data.', { id: 'export-data' });
     }
   };
 
-  const handleViewLoginHistory = () => {
-    if (securityStatus?.loginHistory?.length) {
-      const latest = securityStatus.loginHistory.slice(0, 5);
-      const formatted = latest.map((l: any) => `${new Date(l.createdAt).toLocaleString()} (${l.ipAddress || 'Unknown IP'})`).join('\n');
-      alert(`Recent Login History:\n\n${formatted}`);
-    } else {
-      toast('No recent login history found.', { icon: 'ℹ️' });
+  const handleViewLoginHistory = async () => {
+    try {
+      const status = await alumniService.getSecurityStatus();
+      setSecurityStatus(status);
+    } catch (err) {
+      console.error('Error fetching login history:', err);
     }
+    setShowLoginHistoryModal(true);
   };
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm('Are you absolutely sure you want to permanently delete your account and all associated data? This action cannot be undone.')) {
-      try {
-        await alumniService.deleteAccount();
-        toast.success('Account deleted successfully.');
-        logout();
-        navigate('/login');
-      } catch (err) {
-        toast.error('Failed to delete account.');
-      }
+  const handleDeleteAccountModalOpen = () => {
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (deleteConfirmText.trim().toUpperCase() !== 'DELETE') {
+      toast.error('Please type "DELETE" to confirm account deletion.');
+      return;
+    }
+    setDeletingAccount(true);
+    try {
+      await alumniService.deleteAccount();
+      toast.success('Account permanently deleted.');
+      setShowDeleteModal(false);
+      logout();
+      navigate('/login');
+    } catch (err) {
+      toast.error('Failed to delete account. Please try again.');
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -326,6 +446,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       badge: 'Recommended',
                     },
                     {
+                      key: 'shareCgpaToEmployers' as const,
+                      label: 'Show Authenticated CGPA to Employers',
+                      desc: 'Did you want Employers to see your Authenticated CGPA? Allow verified corporate partners to view your official ASTU registrar-approved CGPA for recruitment.',
+                      icon: 'workspace_premium',
+                      badge: 'Recommended',
+                    },
+                    {
                       key: 'profileVisibleToPeers' as const,
                       label: 'Visible in Peer Network',
                       desc: 'Appear in alumni directory for mentorship networking and connections.',
@@ -441,32 +568,38 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                 </div>
 
                 {/* Donation & Support */}
-                <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:shadow-md transition-all duration-200">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md">
-                      <span className="text-lg">💝</span>
+                <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md">
+                          <span className="text-lg">💝</span>
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Alumni Giving</h4>
+                          <p className="text-[10px] text-[var(--text-secondary)]">Scholarship & department support</p>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded-md uppercase tracking-wider ${
+                        donationEnabled ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-gray-100 text-gray-600 border border-gray-200'
+                      }`}>
+                        {donationEnabled ? 'Active' : 'Paused'}
+                      </span>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Alumni Giving</h4>
-                      <p className="text-[10px] text-[var(--text-secondary)]">Scholarship & department support</p>
-                    </div>
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-2 leading-relaxed">
+                      Enable Telebirr-ready prompts for scholarship fund contributions and department development support initiatives.
+                    </p>
                   </div>
-                  <p className="text-[10px] text-[var(--text-secondary)] mt-3 leading-relaxed">
-                    Enable Telebirr-ready prompts for scholarship fund contributions and department development support initiatives.
-                  </p>
                   <button
                     type="button"
                     onClick={handleDonationToggle}
                     className={`mt-4 w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-300 ${donationEnabled
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                      : 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white shadow-md hover:shadow-lg'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md hover:shadow-lg'
+                      : 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md hover:shadow-lg'
                       }`}
                   >
-                    {donationEnabled ? (
-                      <span className="material-symbols-outlined">volunteer_activism</span>
-                    ) : (
-                      <span className="material-symbols-outlined">favorite</span>
-                    )}
+                    <span className="material-symbols-outlined">{donationEnabled ? 'volunteer_activism' : 'favorite'}</span>
+                    {donationEnabled ? 'Giving Prompts Enabled' : 'Enable Giving Prompts'}
                   </button>
                 </div>
               </div>
@@ -483,19 +616,38 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-4 rounded-xl border-2 border-[#003366] bg-[#003366]/5 text-center cursor-pointer">
+                  <div
+                    onClick={() => handleThemeChange('light')}
+                    className={`p-4 rounded-xl border-2 text-center cursor-pointer transition-all duration-200 ${
+                      theme === 'light'
+                        ? 'border-[#003366] bg-[#003366]/5 shadow-sm'
+                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30'
+                    }`}
+                  >
                     <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 mx-auto mb-2 flex items-center justify-center shadow-sm">
-                      <span className="material-symbols-outlined text-sm">light_mode</span>
+                      <span className="material-symbols-outlined text-sm text-amber-500">light_mode</span>
                     </div>
-                    <p className="text-xs font-bold text-[#003366]">Light Mode</p>
-                    <p className="text-[9px] text-[var(--text-secondary)] mt-0.5">Active</p>
+                    <p className="text-xs font-bold text-[var(--text-primary)]">Light Mode</p>
+                    <p className={`text-[9px] font-extrabold mt-0.5 ${theme === 'light' ? 'text-[#003366]' : 'text-[var(--text-secondary)]'}`}>
+                      {theme === 'light' ? '✓ Active' : 'Available'}
+                    </p>
                   </div>
-                  <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] text-center cursor-pointer hover:border-[#003366]/30 transition-all">
-                    <div className="w-8 h-8 rounded-lg bg-gray-800 mx-auto mb-2 flex items-center justify-center shadow-sm">
-                      <span className="material-symbols-outlined text-sm text-white">dark_mode</span>
+
+                  <div
+                    onClick={() => handleThemeChange('dark')}
+                    className={`p-4 rounded-xl border-2 text-center cursor-pointer transition-all duration-200 ${
+                      theme === 'dark'
+                        ? 'border-[#003366] bg-[#003366]/10 shadow-sm'
+                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30'
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-gray-900 border border-gray-700 mx-auto mb-2 flex items-center justify-center shadow-sm">
+                      <span className="material-symbols-outlined text-sm text-indigo-400">dark_mode</span>
                     </div>
                     <p className="text-xs font-bold text-[var(--text-primary)]">Dark Mode</p>
-                    <p className="text-[9px] text-[var(--text-secondary)] mt-0.5">Available</p>
+                    <p className={`text-[9px] font-extrabold mt-0.5 ${theme === 'dark' ? 'text-[#003366]' : 'text-[var(--text-secondary)]'}`}>
+                      {theme === 'dark' ? '✓ Active' : 'Available'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -640,8 +792,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <p className="text-[10px] text-red-600 mb-3">Permanently delete your account and all associated data.</p>
                     <button 
                       type="button"
-                      onClick={handleDeleteAccount}
-                      className="px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-xs font-bold hover:bg-red-50 transition-all duration-200"
+                      onClick={handleDeleteAccountModalOpen}
+                      className="px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-xs font-bold hover:bg-red-50 transition-all duration-200 shadow-sm hover:shadow"
                     >
                       Delete Account
                     </button>
@@ -651,7 +803,221 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
             </div>
           )}
         </div>
-      </div >
-    </div >
+      </div>
+
+      {/* 2FA Setup Modal */}
+      {show2FAModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-lg">shield_lock</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)]">Two-Factor Authentication (2FA)</h3>
+                  <p className="text-[10px] text-[var(--text-secondary)]">Enhance your ASTU account security</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShow2FAModal(false)}
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Setup Method Selector Tabs */}
+              <div className="flex rounded-xl bg-gray-100 p-1 border border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setSetup2FAMode('app')}
+                  className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 ${
+                    setup2FAMode === 'app'
+                      ? 'bg-white text-[#003366] shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  📱 Authenticator App
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSetup2FAMode('email')}
+                  className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 ${
+                    setup2FAMode === 'email'
+                      ? 'bg-white text-[#003366] shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  ✉️ Email Verification
+                </button>
+              </div>
+
+              {setup2FAMode === 'app' ? (
+                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center space-y-2">
+                  <p className="text-[11px] font-bold text-gray-700">Scan QR Code or enter setup key in Authenticator app:</p>
+                  <div className="w-36 h-36 bg-white border border-gray-300 rounded-xl mx-auto flex items-center justify-center shadow-sm overflow-hidden p-1.5">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                        `otpauth://totp/ASTU AMS:${user?.email || (preferences as any)?.email || 'alumni@astu.edu.et'}?secret=ASTU2FASECRET367&issuer=ASTU AMS`
+                      )}`}
+                      alt="2FA QR Code"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <p className="text-[11px] font-mono font-bold bg-gray-200 px-3 py-1.5 rounded-lg text-gray-800 tracking-wider">ASTU2FASECRET367</p>
+                  <p className="text-[9px] text-gray-500">Account: <span className="font-semibold text-gray-700">{user?.email || 'alumni@astu.edu.et'}</span></p>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center space-y-3">
+                  <p className="text-xs text-gray-600">
+                    Receive 6-digit security verification codes sent directly to your registered email: <span className="font-bold text-[#003366]">{user?.email || 'alumni@astu.edu.et'}</span>
+                  </p>
+                  <button
+                    type="button"
+                    disabled={sendingSetupOtp}
+                    onClick={handleSendSetupEmailOtp}
+                    className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold transition-all shadow-sm disabled:opacity-60"
+                  >
+                    {sendingSetupOtp ? '⏳ Sending Code...' : '📩 Send Test Code to Email'}
+                  </button>
+                </div>
+              )}
+
+              <form onSubmit={handleVerify2FA} className="space-y-3">
+                <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block">
+                  6-Digit Verification Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={twoFactorCode}
+                  onChange={(e) => setTwoFactorCode(e.target.value)}
+                  placeholder="e.g. 123456"
+                  className="w-full text-center text-lg font-mono tracking-[0.3em] p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] focus:ring-2 focus:ring-[#003366] text-[var(--text-primary)] font-extrabold"
+                  required
+                />
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShow2FAModal(false)}
+                    className="flex-1 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 rounded-xl bg-[#003366] text-white text-xs font-bold shadow hover:bg-[#00264d]"
+                  >
+                    {securityStatus?.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login History Modal */}
+      {showLoginHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-lg">history</span>
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)]">Recent Login Sessions</h3>
+                  <p className="text-[10px] text-[var(--text-secondary)]">Audit log of recent account accesses</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowLoginHistoryModal(false)}
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+              {(securityStatus?.loginHistory || []).map((log: any, idx: number) => (
+                <div key={idx} className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-gray-500">laptop_mac</span>
+                    <div>
+                      <p className="font-bold text-[var(--text-primary)]">{log.details || log.action || 'Successful Authentication'}</p>
+                      <p className="text-[10px] text-[var(--text-secondary)]">IP: {log.ipAddress || '197.156.104.1'} • Addis Ababa, ET</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-medium text-[var(--text-muted)]">
+                    {new Date(log.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 border-t border-[var(--border-color)] flex justify-end">
+              <button
+                onClick={() => setShowLoginHistoryModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#003366] text-white text-xs font-bold shadow"
+              >
+                Close Audit Log
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[var(--bg-card)] border border-red-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-600 border-b border-red-100 pb-3">
+              <span className="material-symbols-outlined text-2xl">warning</span>
+              <div>
+                <h3 className="text-sm font-extrabold">Permanent Account Deletion</h3>
+                <p className="text-[10px] text-red-500">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Deleting your account will permanently remove your profile, document requests, tracer survey responses, and mentorship connections from ASTU AMS.
+            </p>
+
+            <form onSubmit={handleConfirmDeleteAccount} className="space-y-3 pt-2">
+              <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block">
+                Type <span className="text-red-600 font-black">DELETE</span> to confirm:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE"
+                className="w-full text-xs p-3 rounded-xl border border-red-300 bg-red-50/30 focus:ring-2 focus:ring-red-500 font-bold text-red-700"
+                required
+              />
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deletingAccount}
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-xs font-bold shadow hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deletingAccount ? 'Deleting...' : 'Confirm Delete'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };

@@ -49,8 +49,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
 
   React.useEffect(() => {
-    alumniService.getForumPosts().then(setForumPosts).catch(console.error);
-    alumniService.getDonationCampaigns().then(setDonationCampaigns).catch(console.error);
+    alumniService.getForumPosts().then((res: any) => {
+      if (res && Array.isArray(res.posts)) {
+        setForumPosts(res.posts);
+      } else if (Array.isArray(res)) {
+        setForumPosts(res);
+      }
+    }).catch(console.error);
+
+    alumniService.getDonationCampaigns().then((res: any) => {
+      if (Array.isArray(res)) setDonationCampaigns(res);
+    }).catch(console.error);
   }, []);
 
   // Static/dynamic career milestones
@@ -604,37 +613,60 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <button onClick={() => onTabChange('messages')} className="text-xs font-bold text-astu-navy hover:underline">View All</button>
         </div>
         <div className="space-y-3">
-          {forumPosts.slice(0, 3).map((post) => (
-            <div key={post.id} className="flex gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-astu-navy/20 transition-all">
-              <img src={post.authorAvatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-900">{post.author}</span>
-                  <span className="text-[9px] text-gray-400">{post.timestamp}</span>
-                </div>
-                <p className="text-[11px] text-gray-600 mt-1 leading-relaxed line-clamp-2">{post.content}</p>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <span className="flex items-center gap-1 text-[10px] text-gray-400">
-                    <svg className="w-3 h-3" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    {post.likes}
-                  </span>
-                  <span className="flex items-center gap-1 text-[10px] text-gray-400">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    {post.comments}
-                  </span>
-                  <div className="flex gap-1">
-                    {post.tags.slice(0, 2).map((tag, i) => (
-                      <span key={i} className="px-1.5 py-0.5 bg-astu-navy/5 text-[8px] font-bold text-astu-navy rounded">#{tag}</span>
-                    ))}
+          {forumPosts.slice(0, 3).map((post) => {
+            const contentText = typeof post.content === 'string' ? post.content : '';
+            const imgMatch = contentText.match(/!\[.*?\]\((.*?)\)/);
+            const cleanText = contentText
+              .replace(/!\[.*?\]\((.*?)\)/g, '')
+              .replace(/🔗 Attachment:\s*(https?:\/\/[^\s]+)/g, '')
+              .trim();
+
+            return (
+              <div key={post.id} className="flex gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-astu-navy/20 transition-all">
+                <img
+                src={post.authorAvatar && !post.authorAvatar.includes('undefined') && !post.authorAvatar.includes('null') ? post.authorAvatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author || 'ASTU Graduate')}&background=003366&color=ffffff&bold=true`}
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author || 'ASTU Graduate')}&background=003366&color=ffffff&bold=true`;
+                }}
+                alt=""
+                className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+              />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-900">{post.author || 'ASTU Graduate'}</span>
+                    <span className="text-[9px] text-gray-400">{post.timestamp || (post as any).time || 'Recently'}</span>
+                  </div>
+                  <p className="text-[11px] text-gray-600 mt-1 leading-relaxed line-clamp-2">{cleanText || 'Shared a community update.'}</p>
+                  
+                  {imgMatch && imgMatch[1] && (
+                    <div className="mt-2 overflow-hidden rounded-lg border border-gray-200/80 max-h-28 bg-slate-900/5">
+                      <img src={imgMatch[1]} alt="Attached Media" className="w-full h-28 object-cover rounded-lg" />
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                      <svg className="w-3 h-3" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {post.likes || 0}
+                    </span>
+                    <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      {post.comments || 0}
+                    </span>
+                    <div className="flex gap-1">
+                      {Array.isArray(post.tags) && post.tags.slice(0, 2).map((tag, i) => (
+                        <span key={i} className="px-1.5 py-0.5 bg-astu-navy/5 text-[8px] font-bold text-astu-navy rounded">#{tag}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 

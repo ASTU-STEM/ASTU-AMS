@@ -229,28 +229,27 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
   };
 
   // 1. Load active conversation threads (Stable callback, no dependencies)
-  const loadThreads = useCallback(async () => {
+  const loadThreads = useCallback(async (isInitial = false) => {
+    if (isInitial) setIsLoading(true);
     try {
       const response = await apiClient.get('/chat/threads');
       const data: ConversationThread[] = response.data.data || [];
       setThreads(data);
 
       setActiveThread(current => {
-        if (!current) {
-          return null;
-        }
+        if (!current) return null; // Do not auto-select any thread
         const match = data.find(t =>
           (current.userId && t.userId === current.userId) ||
           (current.partnerId && t.partnerId === current.partnerId) ||
           (current.email && t.email === current.email) ||
           (current.name && t.name.toLowerCase() === current.name.toLowerCase())
         );
-        return match ? match : current;
+        return match || current;
       });
-    } catch (err: any) {
-      console.error('Failed to load chat threads:', err);
+    } catch (err) {
+      console.error('Failed to load chat threads', err);
     } finally {
-      setIsLoading(false);
+      if (isInitial) setIsLoading(false);
     }
   }, []);
 
@@ -319,7 +318,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
   // Run on mount ONCE
   useEffect(() => {
-    loadThreads();
+    loadThreads(true);
     loadContacts();
 
     // Register WebSocket for live messaging
@@ -336,7 +335,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
           if (currentUser.employerProfile?.id) socket.emit('register', currentUser.employerProfile.id);
 
           socket.on('newMessage', () => {
-            loadThreads();
+            loadThreads(false);
           });
 
           return () => {
@@ -378,7 +377,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
       setTypedMessage('');
       setSelectedFile(null);
-      await loadThreads();
+      await loadThreads(false);
     } catch (err: any) {
       toast.error('Failed to send message.');
     } finally {
@@ -580,8 +579,9 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         {/* Thread List */}
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50 pb-8">
           {isLoading ? (
-            <div className="flex justify-center p-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-3 border-[#003366] border-t-transparent"></div>
+            <div className="flex flex-col items-center justify-center py-16 px-4 space-y-3">
+              <div className="w-8 h-8 rounded-full border-4 border-[#003366] border-t-transparent animate-spin"></div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold animate-pulse">Loading messages...</p>
             </div>
           ) : filteredThreads.length === 0 ? (
             <div className="p-8 text-center space-y-3">
@@ -672,7 +672,17 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
       {/* ── Main Chat Pane (Telegram Style) ────────────────────────────────────── */}
       <div className={`flex-1 min-w-0 flex flex-col ${!activeThread ? 'hidden md:flex' : 'flex'} h-full max-h-full overflow-hidden`}>
-        {activeThread ? (
+        {isLoading ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#003366] dark:text-blue-400 flex items-center justify-center shadow-lg border border-blue-100 dark:border-slate-700">
+              <span className="material-symbols-outlined text-3xl animate-spin">sync</span>
+            </div>
+            <div className="text-center space-y-1">
+              <h4 className="text-sm font-extrabold text-slate-800 dark:text-white">Connecting to ASTU Messenger...</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Loading your secure conversations from database</p>
+            </div>
+          </div>
+        ) : activeThread ? (
           <>
             {/* Chat Header */}
             <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xs min-w-0 z-20 shrink-0 sticky top-0">

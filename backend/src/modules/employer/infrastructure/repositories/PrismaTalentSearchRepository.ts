@@ -61,17 +61,24 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
       }),
     ]);
 
-    // Mask CGPA if privacy setting is false
-    const maskedData = data.map((profile) => {
-      if (!profile.isCgpaPublic) {
-        return { ...profile, cgpa: null };
+    // Filter by employer visibility and mask CGPA based on shareCgpaToEmployers preference
+    const visibleData = data.filter((profile: any) => {
+      const prefs = (profile.preferences as any) || {};
+      return prefs.profileVisibleToEmployers !== false;
+    });
+
+    const maskedData = visibleData.map((profile: any) => {
+      const prefs = (profile.preferences as any) || {};
+      const isCgpaAllowed = prefs.shareCgpaToEmployers !== false && profile.isCgpaPublic !== false;
+      if (!isCgpaAllowed) {
+        return { ...profile, cgpa: null, cgpaHidden: true };
       }
       return profile;
     });
 
     return {
       data: maskedData,
-      total,
+      total: visibleData.length,
       page: Number(page),
       limit: Number(limit),
     };
@@ -82,8 +89,14 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
       where: { id: alumniId },
       include: { department: true, experiences: true, surveyResponses: true },
     });
-    if (profile && !profile.isCgpaPublic) {
-      return { ...profile, cgpa: null };
+    if (!profile) return null;
+
+    const prefs = (profile.preferences as any) || {};
+    if (prefs.profileVisibleToEmployers === false) return null;
+
+    const isCgpaAllowed = prefs.shareCgpaToEmployers !== false && profile.isCgpaPublic !== false;
+    if (!isCgpaAllowed) {
+      return { ...profile, cgpa: null, cgpaHidden: true };
     }
     return profile;
   }

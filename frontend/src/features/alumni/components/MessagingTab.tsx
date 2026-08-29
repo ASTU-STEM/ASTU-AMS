@@ -4,8 +4,9 @@ import { TelegramChat } from '../../../components/TelegramChat';
 interface MessagingTabProps {
   darkMode: boolean;
   userId?: string;
+  initialTarget?: any;
 }
 
-export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode }) => {
-  return <TelegramChat darkMode={darkMode} />;
+export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, initialTarget }) => {
+  return <TelegramChat darkMode={darkMode} initialTarget={initialTarget} />;
 };

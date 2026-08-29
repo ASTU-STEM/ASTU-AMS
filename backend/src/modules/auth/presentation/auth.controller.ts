@@ -20,6 +20,7 @@ import { VerifyDiditSession } from '../application/use-cases/VerifyDiditSession'
 import { SubmitRegistrationIssue } from '../application/use-cases/SubmitRegistrationIssue';
 import { DiditService } from '../infrastructure/services/DiditService';
 import { EmailService } from '../../../core/services/EmailService';
+import { storeEmail2FAOTP, verifyTOTP, verifyEmail2FAOTP } from '../../../core/utils/totp.utils';
 import { loginSchema, activateAlumniSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
 
 const userRepository = new PrismaUserRepository();
@@ -239,6 +240,49 @@ export class AuthController {
       const useCase = new VerifyDiditSession();
       const result = await useCase.execute(sessionId, nationalIdName);
       return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Send 2FA Verification Code via Email
+  static async send2FAOTP(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ success: false, message: 'Email address is required' });
+      }
+
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      storeEmail2FAOTP(email, otpCode);
+      await emailService.send2FAVerificationCode(email, otpCode);
+
+      return sendSuccess(res, `2FA verification code sent to ${email}`, {
+        email,
+        codeSent: true,
+        devCode: otpCode
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Verify 2FA Setup Code (TOTP or Email OTP)
+  static async verify2FACode(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, code } = req.body;
+      if (!code || !email) {
+        return res.status(400).json({ success: false, message: 'Email address and verification code are required' });
+      }
+
+      const isTotpValid = verifyTOTP(code);
+      const isEmailOtpValid = verifyEmail2FAOTP(email, code);
+
+      if (!isTotpValid && !isEmailOtpValid) {
+        return res.status(400).json({ success: false, message: 'Invalid 2FA verification code. Please check the code and try again.' });
+      }
+
+      return sendSuccess(res, '2FA verification code valid', { valid: true });
     } catch (err) {
       next(err);
     }

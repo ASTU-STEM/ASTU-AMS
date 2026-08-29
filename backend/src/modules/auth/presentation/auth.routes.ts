@@ -28,6 +28,8 @@ const upload = multer({ storage: storage });
 
 // Public Routes
 router.post('/login', asyncHandler(AuthController.login));
+router.post('/send-2fa-otp', asyncHandler(AuthController.send2FAOTP));
+router.post('/verify-2fa-code', asyncHandler(AuthController.verify2FACode));
 router.post('/activate-alumni', asyncHandler(AuthController.activateAlumni));
 router.post('/refresh', asyncHandler(AuthController.refresh));
 
