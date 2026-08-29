@@ -57,6 +57,35 @@ export class EmailService {
     }
   }
 
+  async send2FAVerificationCode(email: string, code: string) {
+    const subject = 'ASTU AMS - 2FA Security Verification Code';
+    const text = `Your ASTU AMS 2FA verification code is ${code}. It expires in 10 minutes.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 500px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <h2 style="color: #003366; margin-top: 0;">ASTU AMS Security Verification</h2>
+        <p>Hello,</p>
+        <p>Your Two-Factor Authentication (2FA) verification code is:</p>
+        <div style="background-color: #f0f4f8; padding: 16px; border-radius: 8px; text-align: center; margin: 20px 0;">
+          <span style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #003366;">${code}</span>
+        </div>
+        <p style="font-size: 13px; color: #666;">This code expires in 10 minutes. If you did not attempt to sign in, please secure your account immediately.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 11px; color: #999; text-align: center;">Adama Science and Technology University - Alumni Management System</p>
+      </div>
+    `;
+
+    console.log(`\n================================`);
+    console.log(`[2FA OTP CODE] for ${email}: ${code}`);
+    console.log(`================================\n`);
+
+    try {
+      return await this.sendMail({ to: email, subject, text, html });
+    } catch (e) {
+      console.warn('Email send warning (SMTP). The 2FA code is logged above.');
+      return null;
+    }
+  }
+
   async sendTemporaryPassword(email: string, temporaryPassword: string, role: string) {
     const subject = 'Welcome to ASTU Management System - Your Account Credentials';
     const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nAn administrator has successfully created an account for you with the role of ${role}.\n\nYour login credentials are as follows:\nEmail: ${email}\nTemporary Password: ${temporaryPassword}\n\nFor security reasons, please ensure that you change this temporary password immediately after your first login.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;

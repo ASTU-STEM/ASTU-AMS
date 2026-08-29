@@ -213,6 +213,7 @@ model Certification {
   issueDate       String?
   expiryDate      String?
   credentialUrl   String?
+  imageUrl        String?
   description     String?
   createdAt       DateTime      @default(now())
 }
@@ -225,6 +226,7 @@ model Project {
   description     String?
   technologies    String[]
   url             String?
+  imageUrl        String?
   role            String?
   startDate       String?
   endDate         String?

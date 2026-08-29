@@ -8,7 +8,8 @@ const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 // Ensure directories exist
 const profileDirs = [
   path.join(UPLOADS_DIR, 'profiles'),
-  path.join(UPLOADS_DIR, 'resumes')
+  path.join(UPLOADS_DIR, 'resumes'),
+  path.join(UPLOADS_DIR, 'certifications')
 ];
 
 profileDirs.forEach(dir => {
@@ -23,6 +24,8 @@ const storage = multer.diskStorage({
       cb(null, path.join(UPLOADS_DIR, 'profiles'));
     } else if (file.fieldname === 'resume') {
       cb(null, path.join(UPLOADS_DIR, 'resumes'));
+    } else if (file.fieldname === 'certificateImage' || file.fieldname === 'certificationImage') {
+      cb(null, path.join(UPLOADS_DIR, 'certifications'));
     } else {
       cb(null, UPLOADS_DIR);
     }

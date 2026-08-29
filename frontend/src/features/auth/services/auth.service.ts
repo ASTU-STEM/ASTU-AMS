@@ -45,22 +45,44 @@ export type ApiResult<T> =
   | { ok: false; errorCode: string; message: string };
 
 export const authService = {
+  // ==================== SEND 2FA OTP ====================
+  async send2FAOTP(email: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post('/auth/send-2fa-otp', { email });
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'OTP_ERROR', message: error.response?.data?.message || 'Failed to send OTP email.' };
+    }
+  },
+
+  // ==================== VERIFY 2FA CODE ====================
+  async verify2FACode(code: string, email: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post('/auth/verify-2fa-code', { code, email });
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'VERIFY_ERROR', message: error.response?.data?.message || 'Invalid 2FA verification code.' };
+    }
+  },
+
   // ==================== LOGIN ====================
   async login(credentials: LoginCredentials): Promise<ApiResult<AuthResponse['data']>> {
     try {
       const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
       const { data } = response;
 
-      if (data.success && data.data?.token) {
-        localStorage.setItem('authToken', data.data.token);
-        if (data.data.refreshToken) {
-          localStorage.setItem('refreshToken', data.data.refreshToken);
+      if (data.success && (data.data?.token || (data.data as any)?.requires2FA)) {
+        if (data.data?.token) {
+          localStorage.setItem('authToken', data.data.token);
+          if (data.data.refreshToken) {
+            localStorage.setItem('refreshToken', data.data.refreshToken);
+          }
+          if (data.data.user) {
+            localStorage.setItem('user', JSON.stringify(data.data.user));
+            localStorage.setItem('astu_ams_user_role', data.data.user.role);
+          }
+          window.dispatchEvent(new Event('astu-auth-changed'));
         }
-        if (data.data.user) {
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-          localStorage.setItem('astu_ams_user_role', data.data.user.role);
-        }
-        window.dispatchEvent(new Event('astu-auth-changed'));
         return { ok: true, data: data.data };
       }
 

@@ -6,6 +6,7 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters long'),
   rememberMe: z.boolean().optional(),
   isEmployerLoginFlow: z.boolean().optional(),
+  twoFactorCode: z.string().optional(),
 });
 
 export const forgotPasswordSchema = z.object({
