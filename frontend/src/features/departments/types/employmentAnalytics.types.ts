@@ -11,8 +11,8 @@ export interface EmploymentKPIMetric {
   id: string;
   label: string;
   value: string;
-  trend: number;
-  trendDirection: 'up' | 'down' | 'neutral';
+  trend?: number;
+  trendDirection?: 'up' | 'down' | 'neutral';
   comparison: string;
   icon: string;
   color: string;

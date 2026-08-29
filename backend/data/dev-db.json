@@ -1,5 +1,15 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "user-depthead-swe",
+      "email": "depthead.swe@astu.edu.et",
+      "password": "$2a$10$RHR9KqBU3w4s6pHoTbTgvudYdc/bjCTVlufpkg68VnYk15jJe0oK6",
+      "role": "DEPARTMENT_HEAD",
+      "isActive": true,
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
+    }
+  ],
   "alumniProfiles": [
     {
       "userId": "e2e-alumni-user",
@@ -60,6 +70,106 @@
       "id": "dev-alumni-1787765356770",
       "createdAt": "2026-08-26T17:29:16.770Z",
       "updatedAt": "2026-08-27T07:06:34.940Z"
+    },
+    {
+      "id": "alumni-swe-1",
+      "userId": "user-alumni-swe-1",
+      "studentId": "ASTU/SWE/A1",
+      "fullName": "Abebe Kebede",
+      "email": "abebe@alumni.com",
+      "cgpa": 3.5,
+      "graduationYear": 2021,
+      "gender": "Female",
+      "departmentId": "dept-swe",
+      "status": "ACTIVE",
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "employmentStatus": "EMPLOYED",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
+    },
+    {
+      "id": "alumni-swe-2",
+      "userId": "user-alumni-swe-2",
+      "studentId": "ASTU/SWE/A2",
+      "fullName": "Selam Tadesse",
+      "email": "selam@alumni.com",
+      "cgpa": 3.5,
+      "graduationYear": 2022,
+      "gender": "Female",
+      "departmentId": "dept-swe",
+      "status": "ACTIVE",
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "employmentStatus": "EMPLOYED",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
+    },
+    {
+      "id": "alumni-swe-3",
+      "userId": "user-alumni-swe-3",
+      "studentId": "ASTU/SWE/A3",
+      "fullName": "Bereket Assefa",
+      "email": "bereket@alumni.com",
+      "cgpa": 3.5,
+      "graduationYear": 2020,
+      "gender": "Male",
+      "departmentId": "dept-swe",
+      "status": "ACTIVE",
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "employmentStatus": "UNEMPLOYED",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
+    },
+    {
+      "id": "alumni-swe-4",
+      "userId": "user-alumni-swe-4",
+      "studentId": "ASTU/SWE/A4",
+      "fullName": "Hanna Lemma",
+      "email": "hanna@alumni.com",
+      "cgpa": 3.5,
+      "graduationYear": 2023,
+      "gender": "Female",
+      "departmentId": "dept-swe",
+      "status": "ACTIVE",
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "employmentStatus": "SELF_EMPLOYED",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
+    },
+    {
+      "id": "alumni-swe-5",
+      "userId": "user-alumni-swe-5",
+      "studentId": "ASTU/SWE/A5",
+      "fullName": "Yonas Girma",
+      "email": "yonas@alumni.com",
+      "cgpa": 3.5,
+      "graduationYear": 2022,
+      "gender": "Male",
+      "departmentId": "dept-swe",
+      "status": "ACTIVE",
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "employmentStatus": "EMPLOYED",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
     }
   ],
   "employerProfiles": [
@@ -77,7 +187,15 @@
       "updatedAt": "2026-08-27T07:06:45.855Z"
     }
   ],
-  "departments": [],
+  "departments": [
+    {
+      "id": "dept-swe",
+      "code": "SWE",
+      "name": "Software Engineering",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
+    }
+  ],
   "registrarStudents": [],
   "registrarSyncLogs": [],
   "auditLogs": [],
@@ -1124,6 +1242,15 @@
       "wouldHireAgain": true,
       "id": "fb-1787763857099",
       "createdAt": "2026-08-26T17:04:17.099Z"
+    }
+  ],
+  "departmentHeadProfiles": [
+    {
+      "userId": "user-depthead-swe",
+      "departmentId": "dept-swe",
+      "id": "depthead-swe-1",
+      "createdAt": "2026-08-28T16:48:46.357Z",
+      "updatedAt": "2026-08-28T16:48:46.357Z"
     }
   ]
 }

@@ -43,11 +43,7 @@ const RegistrarDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Duplicate record warnings resolved in class batch 2024.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
   const [graduates, setGraduates] = useState<any[]>([]);
@@ -95,6 +91,8 @@ const RegistrarDashboard = () => {
   const pendingVerificationsCount = dashboardStats.pendingVerifications;
   const documentRequestsCount = dashboardStats.pendingDocuments;
 
+  const verifiedRate = totalGraduatesCount > 0 ? Math.round((verifiedAlumniCount / totalGraduatesCount) * 100) : 0;
+
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;
     return graduates.filter((g) => {
@@ -130,9 +128,9 @@ const RegistrarDashboard = () => {
       color: 'astu-navy',
       icon: 'database',
       bgGradient: 'from-blue-50 to-indigo-50',
-      trend: '+1,200 this batch',
-      trendIcon: 'trending_up',
-      trendColor: 'astu-green'
+      trend: 'SIS graduate records',
+      trendIcon: 'database',
+      trendColor: 'astu-navy'
     },
     {
       id: 2,
@@ -141,7 +139,7 @@ const RegistrarDashboard = () => {
       color: 'astu-green',
       icon: 'verified_user',
       bgGradient: 'from-emerald-50 to-green-50',
-      trend: '76% validation rate',
+      trend: `${verifiedRate}% verified`,
       trendIcon: 'check_circle',
       trendColor: 'astu-green'
     },

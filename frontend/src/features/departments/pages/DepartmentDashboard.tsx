@@ -8,33 +8,26 @@ import HelpCenter from '../../../components/HelpCenter';
 // Components
 import { DashboardOverview } from '../components/DashboardOverview';
 import { EmploymentAnalytics } from '../components/EmploymentAnalytics';
-import { SkillGapAnalysis } from '../components/SkillGapAnalysis';
-import { EmployerFeedback } from '../components/EmployerFeedback';
-import { TracerReports } from '../components/TracerReports';
-import { CurriculumInsights } from '../components/CurriculumInsights';
-import { ExportCenter } from '../components/ExportCenter';
-import { AccreditationReports } from '../components/AccreditationReports';
 import { DepartmentSurveyCenter } from '../components/DepartmentSurveyCenter';
 import { TelegramChat } from '../../../components/TelegramChat';
-
-// Data
-import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerSurveyData, mockCurriculumInsights, mockExportReports } from '../services/mockDepartmentData';
+import DepartmentBackendGapNotice from '../components/DepartmentBackendGapNotice';
+import { useDepartmentData } from '../hooks/useDepartmentData';
 
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
+    const { data: departmentData, isLoading, error } = useDepartmentData();
+    const userFullName = user ? `${user.firstName} ${user.lastName}`.trim() : 'Department Head';
+    const userInitials = user ? (user.firstName?.[0] ?? '') + (user.lastName?.[0] ?? '') : 'DH';
+    const departmentLabel = user?.role === 'ADMIN' ? 'Department Access (Admin)' : 'Department Management Portal';
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('department_sidebar_collapsed') === 'true');
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('dashboard');
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
     const [showNotifications, setShowNotifications] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [notifications, setNotifications] = useState([
-        { id: 1, text: 'New tracer survey responses received from 2024 graduates.', unread: true, time: '2 hours ago' },
-        { id: 2, text: 'Employer feedback report generated for Computer Science.', unread: true, time: '1 day ago' },
-        { id: 3, text: 'Accreditation evidence audit completed successfully.', unread: false, time: '3 days ago' },
-    ]);
+    const [notifications, setNotifications] = useState<Array<{ id: number; text: string; unread: boolean; time: string }>>([]);
 
     const handleLogout = () => {
         logout();
@@ -109,23 +102,67 @@ const DepartmentDashboard = () => {
                     </section>
                 );
             case 'dashboard':
-                return <DashboardOverview darkMode={darkMode} />;
+                return (
+                    <DashboardOverview darkMode={darkMode} data={departmentData} isLoading={isLoading} error={error} />
+                );
             case 'employment-analytics':
-                return <EmploymentAnalytics data={mockEmploymentData} darkMode={darkMode} />;
+                return <EmploymentAnalytics data={departmentData} isLoading={isLoading} error={error} darkMode={darkMode} />;
             case 'skill-gap':
-                return <SkillGapAnalysis data={mockSkillGapData} darkMode={darkMode} />;
+                return (
+                    <DepartmentBackendGapNotice
+                        darkMode={darkMode}
+                        title="Skill Gap Analysis"
+                        description="Skill-gap analytics require department-scoped employer and alumni career data, which is not currently available through the authenticated department endpoints. No fabricated statistics are shown."
+                        icon="school"
+                    />
+                );
             case 'employer-feedback':
-                return <EmployerFeedback data={mockEmployerFeedback} darkMode={darkMode} />;
+                return (
+                    <DepartmentBackendGapNotice
+                        darkMode={darkMode}
+                        title="Employer Feedback"
+                        description="Employer feedback and satisfaction analytics are not exposed for the authenticated department in the current backend. No fabricated statistics are shown."
+                        icon="rate_review"
+                    />
+                );
             case 'department-surveys':
                 return <DepartmentSurveyCenter darkMode={darkMode} />;
             case 'tracer-reports':
-                return <TracerReports data={mockTracerSurveyData} darkMode={darkMode} />;
+                return (
+                    <DepartmentBackendGapNotice
+                        darkMode={darkMode}
+                        title="Tracer Reports"
+                        description="Tracer-study reporting is only surfaced institution-wide in the backend and cannot be scoped to the authenticated department. No fabricated statistics are shown."
+                        icon="assignment"
+                    />
+                );
             case 'curriculum':
-                return <CurriculumInsights data={mockCurriculumInsights} darkMode={darkMode} />;
+                return (
+                    <DepartmentBackendGapNotice
+                        darkMode={darkMode}
+                        title="Curriculum Insights"
+                        description="Curriculum review analytics are not available through department-scoped endpoints. No fabricated statistics are shown."
+                        icon="menu_book"
+                    />
+                );
             case 'accreditation':
-                return <AccreditationReports darkMode={darkMode} />;
+                return (
+                    <DepartmentBackendGapNotice
+                        darkMode={darkMode}
+                        title="Accreditation Reports"
+                        description="Accreditation evidence and readiness metrics are not surfaced for the authenticated department in the current backend. No fabricated statistics are shown."
+                        icon="verified"
+                    />
+                );
             case 'export':
-                return <ExportCenter reports={mockExportReports} darkMode={darkMode} />;
+                return (
+                    <DepartmentBackendGapNotice
+                        darkMode={darkMode}
+                        title="Export Reports"
+                        description="There are no backend-generated report files available for the department. Use the Export Report buttons on the Dashboard and Employment Analytics tabs to download the real department data as CSV."
+                        icon="download"
+                    />
+                );
             case 'messages':
                 return (
                     <div className="space-y-4">
@@ -342,6 +379,9 @@ const DepartmentDashboard = () => {
                                 <h1 className={`truncate text-[16px] font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
                                     {activeTab === 'dashboard' ? 'Dashboard' : activeTab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                 </h1>
+                                <p className={`truncate text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    {activeTab === 'dashboard' ? 'Overview of graduate outcomes and department performance' : departmentLabel}
+                                </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -357,13 +397,19 @@ const DepartmentDashboard = () => {
 
                             {/* Dark Mode Toggle Switch */}
                             <button
+                                type="button"
                                 onClick={() => {
-                                    setDarkMode(!darkMode);
-                                    toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
+                                    const next = !darkMode;
+                                    setDarkMode(next);
+                                    const root = document.documentElement;
+                                    root.classList.remove('light', 'dark');
+                                    root.classList.add(next ? 'dark' : 'light');
+                                    localStorage.setItem('theme', next ? 'dark' : 'light');
                                 }}
                                 className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
                                     }`}
                                 title="Toggle Dark/Light Mode"
+                                aria-label="Toggle dark mode"
                             >
                                 <span className="material-symbols-outlined text-xl">
                                     {darkMode ? 'light_mode' : 'dark_mode'}
@@ -372,10 +418,13 @@ const DepartmentDashboard = () => {
 
                             {/* Notification Bell */}
                             <button
+                                type="button"
                                 onClick={() => {
                                     setShowNotifications(!showNotifications);
                                     if (!showNotifications) handleMarkNotificationsRead();
                                 }}
+                                aria-label={showNotifications ? 'Close notifications' : 'Open notifications'}
+                                aria-expanded={showNotifications}
                                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-full relative transition-all duration-300 hover:scale-105"
                             >
                                 <span className="material-symbols-outlined">notifications</span>
@@ -423,22 +472,22 @@ const DepartmentDashboard = () => {
 
                             {/* Header User Profile Display */}
                             <div className="relative" data-dept-menu>
-                                <div onClick={() => setMenuOpen((v) => !v)} className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity">
-                                    <div className="text-right hidden sm:block">
-                                        <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Department Head</p>
-                                        <p className="text-xs text-gray-500 font-semibold">Computer Science</p>
+                                <button type="button" onClick={() => setMenuOpen((v) => !v)} aria-haspopup="menu" aria-expanded={menuOpen} aria-label="Open user menu" className="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/50 rounded-lg py-1">
+                                    <div className="text-right hidden sm:block pointer-events-none">
+                                        <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{userFullName}</p>
+                                        <p className="text-xs text-gray-500 font-semibold">{departmentLabel}</p>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full border-2 border-astu-navy/20 shadow-sm bg-astu-navy flex items-center justify-center text-white font-bold">
-                                        DH
+                                    <div className="w-10 h-10 rounded-full border-2 border-astu-navy/20 shadow-sm bg-astu-navy flex items-center justify-center text-white font-bold pointer-events-none">
+                                        {userInitials}
                                     </div>
-                                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
-                                </div>
+                                    <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform pointer-events-none ${menuOpen ? 'rotate-180' : ''}`} />
+                                </button>
                                 {menuOpen && (
                                     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-gray-200 bg-white p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-gray-900 dark:border-gray-700">
                                         <div className="px-3 py-3">
-                                            <div className="text-sm font-semibold text-gray-900 dark:text-white">Department Head</div>
+                                            <div className="text-sm font-semibold text-gray-900 dark:text-white">{userFullName}</div>
                                             <div className="mt-1">
-                                                <span className="inline-flex items-center rounded-md bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 border border-purple-200">Computer Science</span>
+                                                <span className="inline-flex items-center rounded-md bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 border border-purple-200">{departmentLabel}</span>
                                             </div>
                                         </div>
                                         <div className="my-1 h-px bg-gray-100" />

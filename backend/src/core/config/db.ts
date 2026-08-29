@@ -258,6 +258,31 @@ class FakePrisma {
     },
   };
 
+  departmentHeadProfile = {
+    findUnique: async ({ where }: any) => {
+      if (where.userId) return this.store.departmentHeadProfiles?.find((p: any) => p.userId === where.userId) || null;
+      if (where.id) return this.store.departmentHeadProfiles?.find((p: any) => p.id === where.id) || null;
+      return null;
+    },
+    findFirst: async ({ where }: any = {}) => {
+      if (where?.userId) return this.store.departmentHeadProfiles?.find((p: any) => p.userId === where.userId) || null;
+      return this.store.departmentHeadProfiles?.[0] || null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const existing = where?.userId ? this.store.departmentHeadProfiles?.find((p: any) => p.userId === where.userId) : null;
+      if (existing) {
+        Object.assign(existing, update);
+        writeDevDb(this.store);
+        return existing;
+      }
+      const rec = { ...create, id: `dev-depthead-${Date.now()}` };
+      if (!this.store.departmentHeadProfiles) this.store.departmentHeadProfiles = [];
+      this.store.departmentHeadProfiles.push(rec);
+      writeDevDb(this.store);
+      return rec;
+    },
+  };
+
   registrarStudent = {
     findUnique: async ({ where }: any) => {
       if (where.studentId) return this.store.registrarStudents.find((r: any) => r.studentId === where.studentId) || null;

@@ -106,7 +106,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
       };
 
       await surveyService.createSurvey(payload);
-      toast.success('🚀 Department Level Survey published! Multi-channel notifications dispatched via In-App, Email, and SMS to all department alumni.');
+      toast.success('Department Level Survey published! Multi-channel notifications dispatched via In-App, Email, and SMS to all department alumni.');
       
       setTitle('');
       setDescription('');
@@ -122,7 +122,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
   const handleDispatchInstantly = async (surveyId: string, surveyTitle: string) => {
     try {
       await surveyService.activateSurvey(surveyId);
-      toast.success(`🚀 Multi-channel survey notifications dispatched via In-App, Email, and SMS for "${surveyTitle}".`);
+      toast.success(`Multi-channel survey notifications dispatched via In-App, Email, and SMS for "${surveyTitle}".`);
       fetchSurveys();
     } catch (err: any) {
       toast.error(err.message || 'Failed to dispatch survey notifications.');
@@ -148,20 +148,24 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setActiveSubTab('manage')}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
+              className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all ${
                 activeSubTab === 'manage' ? 'bg-white text-astu-navy shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'
               }`}
             >
-              📋 Department Surveys
+              <ClipboardList className="w-4 h-4" />
+              Department Surveys
             </button>
             <button
+              type="button"
               onClick={() => setActiveSubTab('create')}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
+              className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all ${
                 activeSubTab === 'create' ? 'bg-white text-astu-navy shadow-sm' : 'bg-white/15 text-white hover:bg-white/25'
               }`}
             >
-              ➕ Create New Survey
+              <Plus className="w-4 h-4" />
+              Create New Survey
             </button>
           </div>
         </div>
@@ -199,9 +203,10 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
               </p>
               <button
                 onClick={() => setActiveSubTab('create')}
-                className="mt-4 px-5 py-2.5 bg-astu-navy text-white text-xs font-extrabold rounded-xl hover:bg-astu-navy/90"
+                className="mt-4 px-5 py-2.5 bg-astu-navy text-white text-xs font-extrabold rounded-xl hover:bg-astu-navy/90 inline-flex items-center gap-1.5"
               >
-                ➕ Create Department Survey
+                <Plus className="w-4 h-4" />
+                Create Department Survey
               </button>
             </div>
           ) : (
@@ -274,34 +279,34 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Survey Title *</label>
+              <label className={`text-[11px] font-extrabold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>Survey Title *</label>
               <input
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. CSE Alumni Syllabus & Practical Skill Survey 2026"
-                className="w-full p-2.5 text-xs rounded-xl border border-gray-250 outline-none focus:border-astu-navy font-semibold"
+                className={`w-full p-2.5 text-xs rounded-xl border outline-none focus:border-astu-navy font-semibold ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-500' : 'border-gray-250 bg-white text-gray-900'}`}
                 required
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Department Scope</label>
+              <label className={`text-[11px] font-extrabold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>Department Scope</label>
               <input
                 type="text"
                 disabled
-                value="🏛️ Scoped to your Department Alumni"
-                className="w-full p-2.5 text-xs rounded-xl border border-gray-200 bg-gray-100 font-bold text-gray-700 cursor-not-allowed"
+                value="Scoped to your Department Alumni"
+                className={`w-full p-2.5 text-xs rounded-xl border bg-gray-100 font-bold text-gray-700 cursor-not-allowed ${darkMode ? 'bg-slate-700 border-slate-600 text-slate-300' : 'border-gray-200'}`}
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Description / Instructions</label>
+            <label className={`text-[11px] font-extrabold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>Description / Instructions</label>
             <textarea
               value={description}
               onChange={e => setDescription(e.target.value)}
               placeholder="Explain the purpose of this department survey to alumni..."
-              className="w-full p-2.5 text-xs rounded-xl border border-gray-250 outline-none focus:border-astu-navy h-20"
+              className={`w-full p-2.5 text-xs rounded-xl border outline-none focus:border-astu-navy h-20 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-500' : 'border-gray-250 bg-white text-gray-900'}`}
             />
           </div>
 
@@ -320,7 +325,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
 
             <div className="space-y-4">
               {questions.map((q, qIdx) => (
-                <div key={qIdx} className="p-4 rounded-2xl border border-gray-200 bg-gray-50/70 space-y-3">
+                <div key={qIdx} className={`p-4 rounded-2xl border space-y-3 ${darkMode ? 'border-slate-700 bg-slate-800/60' : 'border-gray-200 bg-gray-50/70'}`}>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-navy">Question #{qIdx + 1}</span>
                     <button
@@ -342,7 +347,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                         setQuestions(updated);
                       }}
                       placeholder={`Enter Question #${qIdx + 1} text...`}
-                      className="w-full p-2.5 text-xs rounded-xl border border-gray-250 bg-white font-semibold outline-none focus:border-astu-navy"
+                      className={`w-full p-2.5 text-xs rounded-xl border font-semibold outline-none focus:border-astu-navy ${darkMode ? 'border-slate-600 bg-slate-700 text-white placeholder-slate-400' : 'border-gray-250 bg-white text-gray-900'}`}
                     />
 
                     <select
@@ -352,7 +357,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                         updated[qIdx].questionType = e.target.value;
                         setQuestions(updated);
                       }}
-                      className="p-2.5 text-xs rounded-xl border border-gray-250 bg-white font-bold outline-none"
+                      className={`p-2.5 text-xs rounded-xl border font-bold outline-none ${darkMode ? 'border-slate-600 bg-slate-700 text-white' : 'border-gray-250 bg-white text-gray-900'}`}
                     >
                       <option value="TEXT">Short Text</option>
                       <option value="TEXTAREA">Paragraph Text</option>
@@ -365,7 +370,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
 
                   {['RADIO', 'CHECKBOX', 'SELECT'].includes(q.questionType) && (
                     <div className="pl-4 space-y-2">
-                      <label className="text-[10px] font-bold text-gray-500 uppercase">Answer Options</label>
+                      <label className={`text-[10px] font-bold uppercase ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Answer Options</label>
                       {(q.options || []).map((opt: string, optIdx: number) => (
                         <div key={optIdx} className="flex items-center gap-2">
                           <input

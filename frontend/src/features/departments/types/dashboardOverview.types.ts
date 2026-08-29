@@ -10,12 +10,12 @@ export interface KPICard {
   id: string;
   label: string;
   value: string;
-  trend: number;
-  trendDirection: 'up' | 'down' | 'neutral';
+  trend?: number;
+  trendDirection?: 'up' | 'down' | 'neutral';
   comparison: string;
   icon: string;
   tooltip: string;
-  sparkline: number[];
+  sparkline?: number[];
   color: string;
 }
 

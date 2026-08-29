@@ -77,13 +77,13 @@ const AlumniDashboard = () => {
   const profileCompletion = statsData?.profileCompletion || calculateCompletion(profile || {} as any);
   const pendingSurveysCount = realPendingSurveysCount;
   const matchCount = statsData?.openJobMatches || (Array.isArray(jobs) ? jobs.filter(j => !j.applied).length : 0);
-  const connectedMentorsCount = statsData?.activeMentorships || (Array.isArray(mentors) ? mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length : 0) + 347;
+  const connectedMentorsCount = statsData?.activeMentorships || (Array.isArray(mentors) ? mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length : 0);
 
   const stats = [
     { id: 1, label: 'Profile Status', value: `${profileCompletion}%`, color: 'astu-navy', icon: 'account_circle', bgGradient: 'from-blue-50 to-indigo-50', trend: 'Complete fields to boost', trendIcon: 'trending_up', trendColor: 'astu-green' },
-    { id: 2, label: 'Job Matches', value: `${matchCount}`, color: 'astu-green', icon: 'work', bgGradient: 'from-emerald-50 to-green-50', trend: '+3 new placements', trendIcon: 'trending_up', trendColor: 'astu-green' },
+    { id: 2, label: 'Job Matches', value: `${matchCount}`, color: 'astu-green', icon: 'work', bgGradient: 'from-emerald-50 to-green-50', trend: `${matchCount} open matches`, trendIcon: 'work', trendColor: 'astu-green' },
     { id: 3, label: 'Pending Surveys', value: `${pendingSurveysCount}`, color: 'astu-red', icon: 'assignment', bgGradient: 'from-red-50 to-orange-50', trend: pendingSurveysCount > 0 ? 'Urgent Tracer studies' : 'All studies submitted', trendIcon: pendingSurveysCount > 0 ? 'schedule' : 'check_circle', trendColor: pendingSurveysCount > 0 ? 'astu-red' : 'astu-green' },
-    { id: 4, label: 'Network Peers', value: `${connectedMentorsCount}`, color: 'purple-600', icon: 'people', bgGradient: 'from-purple-50 to-pink-50', trend: '+28 peers connected', trendIcon: 'trending_up', trendColor: 'astu-green' },
+    { id: 4, label: 'Network Peers', value: `${connectedMentorsCount}`, color: 'purple-600', icon: 'people', bgGradient: 'from-purple-50 to-pink-50', trend: `${connectedMentorsCount} connected`, trendIcon: 'people', trendColor: 'astu-purple' },
   ];
 
   const managementActions = [

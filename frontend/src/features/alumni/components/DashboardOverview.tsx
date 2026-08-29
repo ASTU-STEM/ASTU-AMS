@@ -379,7 +379,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}/20 to-${stat.color}/10`}>
                   <span className={`material-symbols-outlined text-2xl text-${stat.color}`}>{stat.icon}</span>
                 </div>
-                <span className="text-xs font-semibold text-astu-green bg-astu-green/15 px-3 py-1 rounded-full">+5%</span>
               </div>
 
               <p className="text-sm text-gray-600 font-medium mb-2">{stat.label}</p>
