@@ -85,6 +85,7 @@ model User {
   password         String
   role             Role
   isActive         Boolean           @default(false)
+  twoFactorEnabled Boolean           @default(false)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   alumniProfile         AlumniProfile?

@@ -25,16 +25,66 @@ export class EmailService {
     });
   }
 
+  /**
+   * Universal 3-Tier Email Fallback Resolution Engine:
+   * Tier 1: Primary custom contact/notification email (if provided and valid)
+   * Tier 2: Profile domain email stored in database (AlumniProfile / Employer / Staff)
+   * Tier 3: Account registration email stored in User model
+   */
+  async resolveUserDeliveryEmail(targetEmailOrUserId: string): Promise<string> {
+    if (!targetEmailOrUserId) return '';
+    const trimmed = targetEmailOrUserId.trim();
+
+    try {
+      const prisma = require('../config/db').default;
+      if (!trimmed.includes('@')) {
+        // Look up by User ID
+        const user = await prisma.user.findUnique({
+          where: { id: trimmed },
+          include: { alumniProfile: true, employerProfile: true }
+        });
+        if (user) {
+          const tier1or2 = user.employerProfile?.contactEmail || user.alumniProfile?.email;
+          if (tier1or2 && tier1or2.includes('@')) return tier1or2.trim();
+          if (user.email) return user.email.trim();
+        }
+      } else {
+        // Look up by Email address
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: trimmed },
+              { alumniProfile: { email: trimmed } },
+              { employerProfile: { contactEmail: trimmed } }
+            ]
+          },
+          include: { alumniProfile: true, employerProfile: true }
+        });
+        if (user) {
+          const tier1or2 = user.employerProfile?.contactEmail || user.alumniProfile?.email || trimmed;
+          if (tier1or2 && tier1or2.trim()) return tier1or2.trim();
+          if (user.email) return user.email.trim();
+        }
+      }
+    } catch (err) {
+      // Return provided string on lookup exception
+    }
+
+    return trimmed;
+  }
+
   async sendMail(options: MailOptions) {
+    const resolvedTo = await this.resolveUserDeliveryEmail(options.to);
     const message = {
       from: options.from || env.SMTP_FROM,
-      to: options.to,
+      to: resolvedTo || options.to,
       subject: options.subject,
       text: options.text,
       html: options.html,
       bcc: options.bcc,
     };
 
+    console.log(`[EMAIL DISPATCH] Delivered to (Tier 1/2/3 Resolved): ${message.to} | Subject: "${options.subject}"`);
     const info = await this.transporter.sendMail(message);
     return info;
   }

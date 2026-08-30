@@ -978,7 +978,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                         )}
                         {cert.credentialUrl && (
                           <a
-                            href={cert.credentialUrl}
+                            href={cert.credentialUrl.startsWith('http') ? cert.credentialUrl : (cert.credentialUrl.startsWith('/') ? `${UPLOAD_BASE}${cert.credentialUrl}` : `${UPLOAD_BASE}/${cert.credentialUrl}`)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-[10px] font-extrabold hover:bg-blue-100 transition-all"

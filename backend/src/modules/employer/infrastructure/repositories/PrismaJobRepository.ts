@@ -4,17 +4,41 @@ import prisma from '../../../../core/config/db';
 
 export class PrismaJobRepository implements IJobRepository {
   async findById(jobId: string): Promise<Job | null> {
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      include: {
+        _count: { select: { applications: true, views: true } },
+        applications: { select: { status: true } },
+      },
+    });
     if (!job) return null;
-    return job as any as Job;
+    return {
+      ...job,
+      applicationsCount: (job as any)._count?.applications || 0,
+      viewsCount: (job as any)._count?.views || 0,
+      shortlistedCount: Array.isArray((job as any).applications)
+        ? (job as any).applications.filter((a: any) => a.status === 'SHORTLISTED' || a.status === 'ACCEPTED').length
+        : 0,
+    } as any as Job;
   }
 
   async findByEmployerId(employerId: string): Promise<Job[]> {
     const jobs = await prisma.job.findMany({
       where: { employerId },
       orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { applications: true, views: true } },
+        applications: { select: { status: true } },
+      },
     });
-    return jobs as any as Job[];
+    return jobs.map((j: any) => ({
+      ...j,
+      applicationsCount: j._count?.applications || 0,
+      viewsCount: j._count?.views || 0,
+      shortlistedCount: Array.isArray(j.applications)
+        ? j.applications.filter((a: any) => a.status === 'SHORTLISTED' || a.status === 'ACCEPTED').length
+        : 0,
+    })) as any as Job[];
   }
 
   async search(criteria: any): Promise<Job[]> {

@@ -8,25 +8,50 @@ interface AnalyticsTabProps {
 
 export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
   const [stats, setStats] = useState<EmployerDashboardSummary | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    employerService.getDashboardSummary()
-      .then(data => { setStats(data); setIsLoading(false); })
-      .catch(() => setIsLoading(false));
+    Promise.all([
+      employerService.getDashboardSummary(),
+      employerService.getEmployerJobs().catch(() => [])
+    ]).then(([summaryData, jobsData]) => {
+      setStats(summaryData);
+      setJobs(jobsData || []);
+      setIsLoading(false);
+    }).catch(() => setIsLoading(false));
   }, []);
 
   const shortlistRate = stats
-    ? (stats.totalApplications > 0 ? ((stats.shortlistedApplications / stats.totalApplications) * 100).toFixed(1) : '0')
-    : '0';
+    ? (stats.totalApplications > 0 ? ((stats.shortlistedApplications / stats.totalApplications) * 100).toFixed(1) : '0.0')
+    : '0.0';
 
   const timeToHire = stats && stats.totalApplications > 0
-    ? `${Math.max(7, Math.round(30 - (stats.shortlistedApplications * 2)))} Days`
-    : '—';
+    ? (stats.shortlistedApplications > 0 ? `${Math.max(7, Math.round(30 - (stats.shortlistedApplications * 2)))} Days` : '30 Days')
+    : '30 Days';
 
-  const avgSalary = stats && stats.activeJobs > 0
-    ? `${(50000 + stats.totalApplications * 500).toLocaleString()} ETB`
-    : '—';
+  const calculatedAvgSalary = React.useMemo(() => {
+    if (!jobs || jobs.length === 0) return '50,000 ETB';
+    let totalSalary = 0;
+    let count = 0;
+    jobs.forEach(j => {
+      if (j.salaryRange) {
+        const numbers = j.salaryRange.replace(/,/g, '').match(/\d+/g);
+        if (numbers && numbers.length > 0) {
+          const vals = numbers.map(Number).filter(n => n >= 5000);
+          if (vals.length > 0) {
+            const avg = vals.reduce((a: number, b: number) => a + b, 0) / vals.length;
+            totalSalary += avg;
+            count++;
+          }
+        }
+      }
+    });
+    if (count > 0) {
+      return `${Math.round(totalSalary / count).toLocaleString()} ETB`;
+    }
+    return `${(50000 + (stats?.totalApplications || 0) * 500).toLocaleString()} ETB`;
+  }, [jobs, stats?.totalApplications]);
 
   return (
     <div className="space-y-8">
@@ -53,7 +78,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { label: 'Avg. Time-to-Hire', value: timeToHire, desc: 'From application to shortlist/offer', trend: stats && stats.shortlistedApplications > 0 ? 'Active pipeline' : 'No hires yet' },
-              { label: 'Estimated Avg. Salary', value: avgSalary, desc: 'Based on job listings & market data', trend: stats && stats.activeJobs > 0 ? `${stats.activeJobs} active positions` : 'Post jobs to track' },
+              { label: 'Estimated Avg. Salary', value: calculatedAvgSalary, desc: 'Based on job listings & market data', trend: stats && stats.activeJobs > 0 ? `${stats.activeJobs} active positions` : 'Post jobs to track' },
               { label: 'Shortlist Conversion', value: `${shortlistRate}%`, desc: `${stats?.shortlistedApplications || 0} of ${stats?.totalApplications || 0} applicants shortlisted`, trend: Number(shortlistRate) > 20 ? 'Strong conversion' : 'Room to improve' }
             ].map((item, idx) => (
               <div
