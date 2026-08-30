@@ -68,12 +68,22 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   const navigate = useNavigate();
 
   const handleSendSetupEmailOtp = async () => {
-    const targetEmail = user?.email || (preferences as any)?.email || 'alumni@astu.edu.et';
+    const targetEmail = authService.resolveTarget2FAEmail(
+      (preferences as any)?.contactEmail || (preferences as any)?.email,
+      (preferences as any)?.personalEmail || user?.email
+    );
+    if (!targetEmail) {
+      toast.error('No account or contact email found for 2FA verification.');
+      return;
+    }
     setSendingSetupOtp(true);
     try {
       const res = await authService.send2FAOTP(targetEmail);
       if (res.ok) {
         toast.success(`Verification code sent to ${targetEmail}`);
+        if (res.data?.devCode) {
+          toast(`DEV CODE: ${res.data.devCode}`, { icon: '🔑', duration: 8000 });
+        }
       } else {
         toast.error(res.message || 'Failed to send code.');
       }

@@ -62,8 +62,18 @@ router.get('/messages/:alumniId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asy
 router.post('/messages', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.sendMessageToAlumni));
 router.post('/messages/:alumniId', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.sendMessageToAlumni));
 
-// Logo Upload
+// Logo Upload & Verification Docs Upload
 const logoUpload = multer({ dest: 'uploads/logos' });
+const verifUpload = multer({ dest: 'uploads/verification' });
 router.post('/profile/logo', requireRoles([Role.EMPLOYER, Role.ADMIN]), logoUpload.single('logo'), asyncHandler(EmployerController.uploadLogo));
+router.post('/profile/verification-docs', requireRoles([Role.EMPLOYER, Role.ADMIN]), verifUpload.fields([
+  { name: 'businessLicense', maxCount: 1 },
+  { name: 'hrAuthorization', maxCount: 1 }
+]), asyncHandler(EmployerController.uploadVerificationDocs));
+
+// Chapa Premium & Partnerships
+router.post('/chapa/initialize-premium', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.initializePremiumPayment));
+router.post('/chapa/verify-premium', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.verifyPremiumPayment));
+router.post('/profile/partnership-proposal', requireRoles([Role.EMPLOYER, Role.ADMIN]), asyncHandler(EmployerController.savePartnershipProposal));
 
 export default router;

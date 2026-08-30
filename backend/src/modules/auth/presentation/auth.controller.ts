@@ -287,4 +287,77 @@ export class AuthController {
       next(err);
     }
   }
+
+  // Change Password
+  static async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized authentication' });
+      }
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long' });
+      }
+
+      const bcrypt = require('bcryptjs');
+      const prisma = require('../../../core/config/db').default;
+
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User account not found' });
+      }
+
+      if (currentPassword) {
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+        }
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword }
+      });
+
+      return sendSuccess(res, 'Password changed successfully!', { updated: true });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async toggle2FA(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+
+      const { enabled } = req.body;
+      const isEnabled = Boolean(enabled);
+      const prisma = require('../../../core/config/db').default;
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { twoFactorEnabled: isEnabled }
+      });
+
+      const alumniProfile = await prisma.alumniProfile.findUnique({ where: { userId } }).catch(() => null);
+      if (alumniProfile) {
+        const existingPrefs = (alumniProfile.preferences as any) || {};
+        await prisma.alumniProfile.update({
+          where: { userId },
+          data: {
+            preferences: { ...existingPrefs, twoFactorEnabled: isEnabled }
+          }
+        }).catch(() => null);
+      }
+
+      return sendSuccess(res, isEnabled ? '2FA protection enabled successfully' : '2FA protection disabled', { twoFactorEnabled: isEnabled });
+    } catch (err) {
+      next(err);
+    }
+  }
 }

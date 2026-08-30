@@ -3,7 +3,7 @@ import prisma from '../../../../core/config/db';
 
 export class PrismaTalentSearchRepository implements ITalentSearchRepository {
   async search(criteria: SearchCriteria): Promise<SearchResult> {
-    const { search, department, departmentId, graduationYear, minCgpa, skills, employmentStatus, location, sortBy, page = 1, limit = 10 } = criteria as any;
+    const { search, department, departmentId, graduationYear, minCgpa, skills, employmentStatus, location, sortBy, page = 1, limit = 100 } = criteria as any;
     const skip = (page - 1) * limit;
 
     const whereClause: any = {};
@@ -13,7 +13,7 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
         { fullName: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { skills: { hasSome: [search] } },
-        { experiences: { some: { title: { contains: search, mode: 'insensitive' } } } }
+        { experiences: { some: { position: { contains: search, mode: 'insensitive' } } } }
       ];
     }
 
@@ -51,7 +51,14 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
     const [data, total] = await Promise.all([
       prisma.alumniProfile.findMany({
         where: whereClause,
-        include: { department: true, experiences: true },
+        include: {
+          department: true,
+          experiences: true,
+          certifications: true,
+          projects: true,
+          achievements: true,
+          user: true,
+        },
         orderBy: orderByClause,
         skip,
         take: Number(limit),

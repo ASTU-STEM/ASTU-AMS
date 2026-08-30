@@ -27,7 +27,7 @@ export class PrismaEmployerFeedbackRepository implements IEmployerFeedbackReposi
   async findByEmployerId(employerId: string): Promise<EmployerFeedback[]> {
     const feedbacks = await prisma.employerFeedback.findMany({
       where: { employerId },
-      include: { alumni: true },
+      include: { alumni: { include: { department: true } } },
       orderBy: { createdAt: 'desc' },
     });
     return feedbacks as any as EmployerFeedback[];
@@ -35,7 +35,7 @@ export class PrismaEmployerFeedbackRepository implements IEmployerFeedbackReposi
 
   async findAll(): Promise<EmployerFeedback[]> {
     const feedbacks = await prisma.employerFeedback.findMany({
-      include: { employer: true, alumni: true },
+      include: { employer: true, alumni: { include: { department: true } } },
       orderBy: { createdAt: 'desc' },
     });
     return feedbacks as any as EmployerFeedback[];

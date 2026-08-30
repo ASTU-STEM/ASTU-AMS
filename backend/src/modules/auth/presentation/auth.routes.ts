@@ -66,6 +66,8 @@ router.post('/reset-password', asyncHandler(AuthController.resetPassword));
 
 // Protected Routes
 router.post('/logout', authenticateJWT, asyncHandler(AuthController.logout));
+router.put('/change-password', authenticateJWT, asyncHandler(AuthController.changePassword));
+router.put('/toggle-2fa', authenticateJWT, asyncHandler(AuthController.toggle2FA));
 
 // Admin Only Routes
 router.post(
