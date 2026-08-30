@@ -7,7 +7,19 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
   async findById(applicationId: string): Promise<JobApplication | null> {
     const app = await prisma.jobApplication.findUnique({
       where: { id: applicationId },
-      include: { job: { include: { employer: true } }, alumni: { include: { department: true, user: true } } },
+      include: {
+        job: { include: { employer: true } },
+        alumni: {
+          include: {
+            department: true,
+            user: true,
+            experiences: true,
+            certifications: true,
+            projects: true,
+            achievements: true,
+          }
+        }
+      },
     });
     if (!app) return null;
     return app as any as JobApplication;
@@ -16,7 +28,18 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
   async findByJobId(jobId: string): Promise<JobApplication[]> {
     const apps = await prisma.jobApplication.findMany({
       where: { jobId },
-      include: { alumni: { include: { department: true, user: true } } },
+      include: {
+        alumni: {
+          include: {
+            department: true,
+            user: true,
+            experiences: true,
+            certifications: true,
+            projects: true,
+            achievements: true,
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' },
     });
     return apps as any as JobApplication[];
@@ -39,18 +62,33 @@ export class PrismaJobApplicationRepository implements IJobApplicationRepository
         alumni: {
           include: {
             department: true,
-            user: {
-              select: {
-                id: true,
-                email: true,
-              }
-            }
+            user: true,
+            experiences: true,
+            certifications: true,
+            projects: true,
+            achievements: true,
           }
         }
       },
       orderBy: { createdAt: 'desc' },
     });
-    return apps as any as JobApplication[];
+
+    const maskedApps = apps.map((app: any) => {
+      if (app.alumni) {
+        const prefs = (app.alumni.preferences as any) || {};
+        const isCgpaAllowed = prefs.shareCgpaToEmployers !== false && app.alumni.isCgpaPublic !== false;
+        if (!isCgpaAllowed) {
+          app.alumni = {
+            ...app.alumni,
+            cgpa: null,
+            cgpaHidden: true,
+          };
+        }
+      }
+      return app;
+    });
+
+    return maskedApps as any as JobApplication[];
   }
 
   async create(data: Omit<JobApplication, 'id'>): Promise<JobApplication> {

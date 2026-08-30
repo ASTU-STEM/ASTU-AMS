@@ -56,6 +56,27 @@ export interface CandidateApplication {
   cvFileName?: string;
   resumeUrl?: string;
   coverLetter?: string;
+
+  // Extended Profile Fields from My Profile
+  phone?: string;
+  studentId?: string;
+  bio?: string;
+  nationality?: string;
+  gender?: string;
+  languages?: string[];
+  volunteerWork?: string;
+  currentAddress?: string;
+  honors?: string;
+  socialLinks?: {
+    linkedin?: string;
+    github?: string;
+    website?: string;
+    twitter?: string;
+  };
+  certifications?: Array<{ id?: string; title: string; issuer?: string; issueDate?: string; expiryDate?: string; credentialUrl?: string }>;
+  experiences?: Array<{ id?: string; title: string; company: string; location?: string; startDate?: string; endDate?: string; current?: boolean; description?: string }>;
+  projects?: Array<{ id?: string; title: string; description?: string; link?: string; technologies?: string[] }>;
+  achievements?: Array<{ id?: string; title: string; issuer?: string; date?: string; description?: string }>;
 }
 
 export interface GraduateFeedback {

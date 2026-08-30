@@ -33,6 +33,14 @@ export const alumniService = {
     return unwrap(await apiClient.put('/alumni/me', data));
   },
 
+  async uploadCertificate(file: File): Promise<{ imageUrl: string }> {
+    const formData = new FormData();
+    formData.append('certificateImage', file);
+    return unwrap(await apiClient.post('/alumni/upload-certificate', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }));
+  },
+
   async addExperience(data: any) {
     return unwrap(await apiClient.post('/alumni/experiences', data));
   },
@@ -117,6 +125,18 @@ export const alumniService = {
     return unwrap(await apiClient.get('/alumni/mentors'));
   },
 
+  async getMyMentorStatus() {
+    return unwrap(await apiClient.get('/alumni/mentors/my-status'));
+  },
+
+  async registerAsMentor(data: { expertise?: string[]; yearsExperience?: number; availability?: string; status?: string }) {
+    return unwrap(await apiClient.post('/alumni/mentors/register', data));
+  },
+
+  async toggleMentorStatus() {
+    return unwrap(await apiClient.post('/alumni/mentors/toggle'));
+  },
+
   async scheduleSession(mentorId: string, data: { date: string; time: string; topic: string }) {
     return unwrap(await apiClient.post('/alumni/mentorship-sessions', { mentorId, ...data }));
   },
@@ -143,8 +163,16 @@ export const alumniService = {
     return unwrap(await apiClient.get('/alumni/forum'));
   },
 
-  async createForumPost(content: string) {
-    return unwrap(await apiClient.post('/alumni/forum', { content }));
+  async createForumPost(content: string, category: string = 'General') {
+    return unwrap(await apiClient.post('/alumni/forum', { content, category }));
+  },
+
+  async updateForumPost(postId: string, content: string) {
+    return unwrap(await apiClient.put(`/alumni/forum/${postId}`, { content }));
+  },
+
+  async deleteForumPost(postId: string) {
+    return unwrap(await apiClient.delete(`/alumni/forum/${postId}`));
   },
 
   async toggleForumLike(postId: string) {

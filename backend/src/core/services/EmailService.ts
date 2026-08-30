@@ -25,16 +25,66 @@ export class EmailService {
     });
   }
 
+  /**
+   * Universal 3-Tier Email Fallback Resolution Engine:
+   * Tier 1: Primary custom contact/notification email (if provided and valid)
+   * Tier 2: Profile domain email stored in database (AlumniProfile / Employer / Staff)
+   * Tier 3: Account registration email stored in User model
+   */
+  async resolveUserDeliveryEmail(targetEmailOrUserId: string): Promise<string> {
+    if (!targetEmailOrUserId) return '';
+    const trimmed = targetEmailOrUserId.trim();
+
+    try {
+      const prisma = require('../config/db').default;
+      if (!trimmed.includes('@')) {
+        // Look up by User ID
+        const user = await prisma.user.findUnique({
+          where: { id: trimmed },
+          include: { alumniProfile: true, employerProfile: true }
+        });
+        if (user) {
+          const tier1or2 = user.employerProfile?.contactEmail || user.alumniProfile?.email;
+          if (tier1or2 && tier1or2.includes('@')) return tier1or2.trim();
+          if (user.email) return user.email.trim();
+        }
+      } else {
+        // Look up by Email address
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: trimmed },
+              { alumniProfile: { email: trimmed } },
+              { employerProfile: { contactEmail: trimmed } }
+            ]
+          },
+          include: { alumniProfile: true, employerProfile: true }
+        });
+        if (user) {
+          const tier1or2 = user.employerProfile?.contactEmail || user.alumniProfile?.email || trimmed;
+          if (tier1or2 && tier1or2.trim()) return tier1or2.trim();
+          if (user.email) return user.email.trim();
+        }
+      }
+    } catch (err) {
+      // Return provided string on lookup exception
+    }
+
+    return trimmed;
+  }
+
   async sendMail(options: MailOptions) {
+    const resolvedTo = await this.resolveUserDeliveryEmail(options.to);
     const message = {
       from: options.from || env.SMTP_FROM,
-      to: options.to,
+      to: resolvedTo || options.to,
       subject: options.subject,
       text: options.text,
       html: options.html,
       bcc: options.bcc,
     };
 
+    console.log(`[EMAIL DISPATCH] Delivered to (Tier 1/2/3 Resolved): ${message.to} | Subject: "${options.subject}"`);
     const info = await this.transporter.sendMail(message);
     return info;
   }
@@ -53,6 +103,35 @@ export class EmailService {
       return await this.sendMail({ to: email, subject, text, html });
     } catch (e) {
       console.warn('Email send failed (ensure SMTP env variables are set). The code is logged above.');
+      return null;
+    }
+  }
+
+  async send2FAVerificationCode(email: string, code: string) {
+    const subject = 'ASTU AMS - 2FA Security Verification Code';
+    const text = `Your ASTU AMS 2FA verification code is ${code}. It expires in 10 minutes.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 500px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px;">
+        <h2 style="color: #003366; margin-top: 0;">ASTU AMS Security Verification</h2>
+        <p>Hello,</p>
+        <p>Your Two-Factor Authentication (2FA) verification code is:</p>
+        <div style="background-color: #f0f4f8; padding: 16px; border-radius: 8px; text-align: center; margin: 20px 0;">
+          <span style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #003366;">${code}</span>
+        </div>
+        <p style="font-size: 13px; color: #666;">This code expires in 10 minutes. If you did not attempt to sign in, please secure your account immediately.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 11px; color: #999; text-align: center;">Adama Science and Technology University - Alumni Management System</p>
+      </div>
+    `;
+
+    console.log(`\n================================`);
+    console.log(`[2FA OTP CODE] for ${email}: ${code}`);
+    console.log(`================================\n`);
+
+    try {
+      return await this.sendMail({ to: email, subject, text, html });
+    } catch (e) {
+      console.warn('Email send warning (SMTP). The 2FA code is logged above.');
       return null;
     }
   }

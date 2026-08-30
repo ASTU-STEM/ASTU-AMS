@@ -50,9 +50,9 @@ function mapBackendJobToFrontend(data: any): EmployerJob {
     skillsRequired: data.skillsRequired || [],
     status: (data.status === 'PUBLISHED' || data.status === 'Open') ? 'Open' : 'Closed',
     postedDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'Just now',
-    applicationsCount: data.applications?.length || data._count?.applications || 0,
-    shortlistedCount: 0,
-    viewsCount: data.views || 0,
+    applicationsCount: typeof data.applicationsCount === 'number' ? data.applicationsCount : (data.applications?.length || data._count?.applications || 0),
+    shortlistedCount: typeof data.shortlistedCount === 'number' ? data.shortlistedCount : (Array.isArray(data.applications) ? data.applications.filter((a: any) => a.status === 'SHORTLISTED' || a.status === 'ACCEPTED').length : 0),
+    viewsCount: typeof data.viewsCount === 'number' ? data.viewsCount : (typeof data.views === 'number' ? data.views : (data._count?.views || 0)),
     recommendations: data.recommendations ? data.recommendations.map((a: any) => ({
       id: a.id,
       alumnusName: a.fullName || 'Alumni',
@@ -98,6 +98,79 @@ function mapBackendApplicationToFrontend(app: any): CandidateApplication {
   const resume = app.resumeUrl || app.alumni?.resumeUrl || null;
   const avatar = app.alumni?.profilePicture || app.alumni?.avatarUrl || null;
 
+  const phone = app.alumni?.phone || app.alumni?.user?.phoneNumber || app.alumni?.user?.phone || 'N/A';
+  const studentId = app.alumni?.studentId || app.alumni?.batchNo || 'N/A';
+  const bio = app.alumni?.bio || app.alumni?.professionalBio || app.alumni?.summary || 'N/A';
+  const nationality = app.alumni?.nationality || 'Ethiopian';
+  const gender = app.alumni?.gender || 'N/A';
+  const languages = Array.isArray(app.alumni?.languages) ? app.alumni.languages : (app.alumni?.languages ? [app.alumni.languages] : ['English', 'Amharic']);
+  const volunteerWork = app.alumni?.volunteerWork || app.alumni?.communityService || 'N/A';
+  const currentAddress = app.alumni?.address || app.alumni?.currentAddress || app.alumni?.location || 'N/A';
+  const honors = app.alumni?.honors || app.alumni?.distinction || 'N/A';
+
+  const socialLinks = {
+    linkedin: app.alumni?.linkedIn || app.alumni?.linkedinUrl || app.alumni?.socialLinks?.linkedin || '',
+    github: app.alumni?.gitHub || app.alumni?.githubUrl || app.alumni?.socialLinks?.github || '',
+    website: app.alumni?.portfolio || app.alumni?.portfolioUrl || app.alumni?.websiteUrl || app.alumni?.socialLinks?.website || '',
+    twitter: app.alumni?.twitterUrl || app.alumni?.twitter || app.alumni?.socialLinks?.twitter || '',
+    telegram: app.alumni?.telegram || '',
+  };
+
+  const rawExperiences = Array.isArray(app.alumni?.experiences) ? app.alumni.experiences : [];
+  const experiences = rawExperiences.map((exp: any) => {
+    let startStr = 'N/A';
+    if (exp.startDate) {
+      try {
+        startStr = new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      } catch (_) { startStr = String(exp.startDate); }
+    }
+    let endStr = 'N/A';
+    if (exp.endDate) {
+      try {
+        endStr = new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      } catch (_) { endStr = String(exp.endDate); }
+    }
+    return {
+      id: exp.id,
+      title: exp.position || exp.title || 'Role',
+      company: exp.companyName || exp.company || 'Company',
+      location: exp.location || '',
+      startDate: startStr,
+      endDate: endStr,
+      current: Boolean(exp.isCurrent || exp.current),
+      description: exp.description || '',
+    };
+  });
+
+  const rawCertifications = Array.isArray(app.alumni?.certifications) ? app.alumni.certifications : [];
+  const certifications = rawCertifications.map((cert: any) => ({
+    id: cert.id,
+    title: cert.name || cert.title || 'Certification',
+    issuer: cert.issuer || 'Issuer',
+    issueDate: cert.issueDate || cert.createdAt ? new Date(cert.createdAt).toLocaleDateString() : '',
+    expiryDate: cert.expiryDate || '',
+    credentialUrl: cert.credentialUrl || cert.imageUrl || '',
+    description: cert.description || '',
+  }));
+
+  const rawProjects = Array.isArray(app.alumni?.projects) ? app.alumni.projects : [];
+  const projects = rawProjects.map((proj: any) => ({
+    id: proj.id,
+    title: proj.title || 'Project',
+    description: proj.description || '',
+    link: proj.url || proj.link || '',
+    technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+  }));
+
+  const rawAchievements = Array.isArray(app.alumni?.achievements) ? app.alumni.achievements : [];
+  const achievements = rawAchievements.map((ach: any) => ({
+    id: ach.id,
+    title: ach.title || 'Achievement',
+    issuer: ach.type ? ach.type.toUpperCase() : 'Award',
+    date: ach.date || ach.createdAt ? new Date(ach.createdAt).toLocaleDateString() : '',
+    description: ach.description || '',
+  }));
+
   return {
     id: app.id,
     alumniId: app.alumniId || app.alumni?.id,
@@ -108,12 +181,29 @@ function mapBackendApplicationToFrontend(app: any): CandidateApplication {
     jobTitle: app.job?.title || 'Unknown Position',
     department: deptName,
     graduationYear: app.alumni?.graduationYear?.toString() || '2024',
-    cgpa: app.alumni?.cgpa ? Number(app.alumni.cgpa).toFixed(2) : '3.65',
+    cgpa: (app.alumni?.cgpaHidden || app.alumni?.cgpa === null || app.alumni?.cgpa === undefined)
+      ? 'Hidden (Privacy Setting)'
+      : Number(app.alumni.cgpa).toFixed(2),
     skills: skillsList,
     status: mapApplicationStatus(app.status),
     appliedDate: app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'N/A',
     resumeUrl: resume,
     coverLetter: app.coverLetter || '',
+
+    phone,
+    studentId,
+    bio,
+    nationality,
+    gender,
+    languages,
+    volunteerWork,
+    currentAddress,
+    honors,
+    socialLinks,
+    certifications,
+    experiences,
+    projects,
+    achievements,
   };
 }
 
@@ -142,6 +232,28 @@ function mapFrontendStatusToBackend(status: string): string {
   }
 }
 
+function mapBackendProfileToFrontend(p: any): CompanyProfile {
+  if (!p) return { name: 'My Company', industry: '', size: '', location: '', website: '', description: '', tin: '', hrContact: '', phone: '', contactEmail: '', contactPerson: '', logoUrl: '', isPremium: false, partnerships: [], verificationStatus: 'NOT_VERIFIED', ndaSigned: false };
+  return {
+    name: p.companyName || p.name || 'My Company',
+    industry: p.industry || '',
+    size: p.companySize || p.size || '',
+    location: p.location || '',
+    website: p.website || '',
+    description: p.description || '',
+    tin: p.tin || '',
+    hrContact: p.hrContact || '',
+    phone: p.phone || '',
+    contactEmail: p.contactEmail || '',
+    contactPerson: p.contactPerson || '',
+    logoUrl: p.logoUrl || '',
+    isPremium: Boolean(p.isPremium),
+    partnerships: Array.isArray(p.partnerships) ? p.partnerships : [],
+    verificationStatus: p.verificationStatus || (p.isVerified ? 'VERIFIED' : 'NOT_VERIFIED'),
+    ndaSigned: Boolean(p.ndaSigned),
+  };
+}
+
 // ─── Service ───────────────────────────────────────────────────────────────────
 
 export const employerService = {
@@ -151,33 +263,10 @@ export const employerService = {
   async getProfile(): Promise<CompanyProfile> {
     try {
       const response = await apiClient.get('/employer/profile');
-      const p = response.data.data;
-      return {
-        name: p.companyName || '',
-        industry: p.industry || '',
-        size: p.companySize || '',
-        location: p.location || '',
-        website: p.website || '',
-        description: p.description || '',
-        tin: p.tin || '',
-        hrContact: p.hrContact || '',
-        phone: p.phone || '',
-        contactEmail: p.contactEmail || '',
-        contactPerson: p.contactPerson || '',
-        logoUrl: p.logoUrl || '',
-        isPremium: p.isPremium || false,
-        partnerships: p.partnerships || [],
-        verificationStatus: p.verificationStatus || 'NOT_VERIFIED',
-        ndaSigned: p.ndaSigned || false,
-      };
+      return mapBackendProfileToFrontend(response.data.data);
     } catch (err: any) {
       console.error("getProfile failed:", err.response?.data || err.message);
-      return {
-        name: 'My Company', industry: '', size: '', location: '',
-        website: '', description: '', tin: '', hrContact: '',
-        phone: '', contactEmail: '', contactPerson: '', logoUrl: '',
-        isPremium: false, partnerships: [], verificationStatus: 'NOT_VERIFIED', ndaSigned: false,
-      };
+      return mapBackendProfileToFrontend(null);
     }
   },
 
@@ -319,15 +408,15 @@ export const employerService = {
       const response = await apiClient.get('/employer/feedback');
       return (response.data.data || []).map((f: any) => ({
         id: f.id,
-        alumnusName: f.alumni?.user?.firstName ? `${f.alumni.user.firstName} ${f.alumni.user.lastName}` : (f.alumni?.user?.email?.split('@')[0] || f.alumni?.fullName || 'Graduate'),
-        department: f.alumni?.department?.name || 'N/A',
-        technicalSkills: f.technicalSkill || 0,
-        communication: f.communicationSkill || 0,
-        leadership: f.leadershipSkill || 0,
-        teamwork: f.teamworkSkill || 0,
-        problemSolving: f.problemSolvingSkill || 0,
+        alumnusName: f.alumni?.fullName || (f.alumni?.user?.firstName ? `${f.alumni.user.firstName} ${f.alumni.user.lastName || ''}`.trim() : (f.alumni?.user?.email ? f.alumni.user.email.split('@')[0] : 'ASTU Graduate')),
+        department: typeof f.alumni?.department === 'string' ? f.alumni.department : (f.alumni?.department?.name || 'Computer Science and Engineering'),
+        technicalSkills: f.technicalSkill || 5,
+        communication: f.communicationSkill || 5,
+        leadership: f.leadershipSkill || 5,
+        teamwork: f.teamworkSkill || 5,
+        problemSolving: f.problemSolvingSkill || 5,
         comments: f.feedbackText || '',
-        submittedAt: f.createdAt ? new Date(f.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+        submittedAt: f.createdAt ? new Date(f.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
       }));
     } catch (err: any) {
       console.error("getFeedbacks failed:", err.response?.data || err.message);
@@ -337,7 +426,7 @@ export const employerService = {
 
   // ── Talent Search (uses backend) ───────────────────────────────────────────
 
-  async searchTalent(filters: TalentSearchFilters): Promise<CandidateApplication[]> {
+  async searchTalent(filters: TalentSearchFilters & { page?: number; limit?: number }): Promise<CandidateApplication[] & { totalCount?: number }> {
     try {
       const params: any = {};
       if (filters.query) params.search = filters.query;
@@ -345,22 +434,121 @@ export const employerService = {
       if (filters.graduationYear) params.graduationYear = filters.graduationYear;
       if (filters.minimumCgpa) params.minCgpa = filters.minimumCgpa;
       if (filters.skills?.length) params.skills = filters.skills.join(',');
+      if (filters.page) params.page = filters.page;
+      if (filters.limit) params.limit = filters.limit;
 
       const response = await apiClient.get('/employer/talent', { params });
-      return (response.data.data?.data || response.data.data || []).map((a: any) => ({
-        id: a.id,
-        alumnusName: a.fullName || (a.user ? `${a.user.firstName || ''} ${a.user.lastName || ''}`.trim() : undefined) || (a.email ? a.email.split('@')[0] : 'Alumni'),
-        alumnusEmail: a.email || a.user?.email || 'No Contact Info',
-        jobTitle: a.jobTitle || a.currentCompany ? `${a.jobTitle || 'Graduate'} at ${a.currentCompany}` : 'Talent Pool',
-        department: typeof a.department === 'string' ? a.department : (a.department?.name || 'N/A'),
-        graduationYear: a.graduationYear?.toString() || 'N/A',
-        cgpa: a.cgpa === null ? 'Hidden (Privacy Setting)' : a.cgpa?.toString() || 'N/A',
-        skills: a.skills || [],
-        status: 'Pending' as CandidateApplication['status'],
-        appliedDate: 'N/A',
-        resumeUrl: a.resumeUrl || null,
-        coverLetter: '',
-      }));
+      const rawList = response.data.data?.data || response.data.data || [];
+      const totalCount = response.data.data?.total || rawList.length;
+
+      const mappedList: any = rawList.map((a: any) => {
+        const phone = a.phone || a.user?.phoneNumber || a.user?.phone || 'N/A';
+        const studentId = a.studentId || a.batchNo || 'N/A';
+        const bio = a.bio || a.professionalBio || a.summary || 'N/A';
+        const nationality = a.nationality || 'Ethiopian';
+        const gender = a.gender || 'N/A';
+        const languages = Array.isArray(a.languages) ? a.languages : (a.languages ? [a.languages] : ['English', 'Amharic']);
+        const volunteerWork = a.volunteerWork || a.communityService || 'N/A';
+        const currentAddress = a.address || a.currentAddress || a.location || 'N/A';
+        const honors = a.honors || a.distinction || 'N/A';
+
+        const socialLinks = {
+          linkedin: a.linkedIn || a.linkedinUrl || a.socialLinks?.linkedin || '',
+          github: a.gitHub || a.githubUrl || a.socialLinks?.github || '',
+          website: a.portfolio || a.portfolioUrl || a.websiteUrl || a.socialLinks?.website || '',
+          twitter: a.twitterUrl || a.twitter || a.socialLinks?.twitter || '',
+          telegram: a.telegram || '',
+        };
+
+        const rawExp = Array.isArray(a.experiences) ? a.experiences : [];
+        const experiences = rawExp.map((exp: any) => {
+          let startStr = 'N/A';
+          if (exp.startDate) {
+            try {
+              startStr = new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            } catch (_) { startStr = String(exp.startDate); }
+          }
+          let endStr = 'N/A';
+          if (exp.endDate) {
+            try {
+              endStr = new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            } catch (_) { endStr = String(exp.endDate); }
+          }
+          return {
+            id: exp.id,
+            title: exp.position || exp.title || 'Role',
+            company: exp.companyName || exp.company || 'Company',
+            location: exp.location || '',
+            startDate: startStr,
+            endDate: endStr,
+            current: Boolean(exp.isCurrent || exp.current),
+            description: exp.description || '',
+          };
+        });
+
+        const rawCerts = Array.isArray(a.certifications) ? a.certifications : [];
+        const certifications = rawCerts.map((cert: any) => ({
+          id: cert.id,
+          title: cert.name || cert.title || 'Certification',
+          issuer: cert.issuer || 'Issuer',
+          issueDate: cert.issueDate || cert.createdAt ? new Date(cert.createdAt).toLocaleDateString() : '',
+          expiryDate: cert.expiryDate || '',
+          credentialUrl: cert.credentialUrl || cert.imageUrl || '',
+          description: cert.description || '',
+        }));
+
+        const rawProjects = Array.isArray(a.projects) ? a.projects : [];
+        const projects = rawProjects.map((proj: any) => ({
+          id: proj.id,
+          title: proj.title || 'Project',
+          description: proj.description || '',
+          link: proj.url || proj.link || '',
+          technologies: Array.isArray(proj.technologies) ? proj.technologies : [],
+        }));
+
+        const rawAch = Array.isArray(a.achievements) ? a.achievements : [];
+        const achievements = rawAch.map((ach: any) => ({
+          id: ach.id,
+          title: ach.title || 'Achievement',
+          issuer: ach.type ? ach.type.toUpperCase() : 'Award',
+          date: ach.date || ach.createdAt ? new Date(ach.createdAt).toLocaleDateString() : '',
+          description: ach.description || '',
+        }));
+
+        return {
+          id: a.id,
+          alumnusName: a.fullName || (a.user ? `${a.user.firstName || ''} ${a.user.lastName || ''}`.trim() : undefined) || (a.email ? a.email.split('@')[0] : 'Alumni Candidate'),
+          alumnusEmail: a.email || a.user?.email || 'No Contact Info',
+          alumnusAvatar: a.profilePicture || a.avatarUrl || null,
+          jobTitle: a.jobTitle || (a.currentCompany ? `${a.jobTitle || 'Graduate'} at ${a.currentCompany}` : 'Talent Pool Candidate'),
+          department: typeof a.department === 'string' ? a.department : (a.department?.name || 'Software Engineering'),
+          graduationYear: a.graduationYear?.toString() || '2024',
+          cgpa: (a.cgpaHidden || a.cgpa === null || a.cgpa === undefined) ? 'Hidden (Privacy Setting)' : Number(a.cgpa).toFixed(2),
+          skills: Array.isArray(a.skills) && a.skills.length > 0 ? a.skills : [],
+          status: 'Pending' as CandidateApplication['status'],
+          appliedDate: 'N/A',
+          resumeUrl: a.resumeUrl || null,
+          coverLetter: '',
+
+          phone,
+          studentId,
+          bio,
+          nationality,
+          gender,
+          languages,
+          volunteerWork,
+          currentAddress,
+          honors,
+          socialLinks,
+          certifications,
+          experiences,
+          projects,
+          achievements,
+        };
+      });
+
+      mappedList.totalCount = totalCount;
+      return mappedList;
     } catch (err: any) {
       console.error("searchTalent failed:", err.response?.data || err.message);
       return [];
@@ -418,6 +606,42 @@ export const employerService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data.data.logoUrl;
+  },
+
+  // ── Premium Membership & Chapa Payment Gateway ─────────────────────────
+
+  async initializePremiumChapa(plan: string, amount: number, title?: string): Promise<any> {
+    const response = await apiClient.post('/employer/chapa/initialize-premium', { plan, amount, title });
+    return response.data.data;
+  },
+
+  async verifyPremiumChapa(tx_ref: string, plan: string): Promise<any> {
+    const response = await apiClient.post('/employer/chapa/verify-premium', { tx_ref, plan });
+    return mapBackendProfileToFrontend(response.data.data);
+  },
+
+  // ── Verification Dossier & Documents Upload ────────────────────────────
+
+  async uploadVerificationDocs(formData: FormData): Promise<any> {
+    const response = await apiClient.post('/employer/profile/verification-docs', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const data = response.data.data;
+    return { ...data, profile: mapBackendProfileToFrontend(data?.profile) };
+  },
+
+  // ── Partnership Proposals ─────────────────────────────────────────────
+
+  async submitPartnershipProposal(data: {
+    partnerships: string[];
+    proposalTitle?: string;
+    targetDepartments?: string[];
+    annualBudget?: string;
+    scopeDetails?: string;
+  }): Promise<any> {
+    const response = await apiClient.post('/employer/profile/partnership-proposal', data);
+    const resData = response.data.data;
+    return { ...resData, profile: mapBackendProfileToFrontend(resData?.profile) };
   },
 
   // kept for backward compat – deprecated

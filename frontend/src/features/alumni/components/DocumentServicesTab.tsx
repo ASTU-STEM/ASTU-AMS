@@ -365,9 +365,21 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                       </td>
                       <td className="px-5 py-4">
                         {req.status === 'Approved' ? (
-                          <button onClick={() => toast.success('Downloading digitally signed document...')} className="inline-flex items-center gap-1 rounded-md bg-astu-green px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-astu-green/90 transition-all shadow-sm">
-                            <FileDown className="h-3 w-3" />
-                            Download
+                          <button
+                            onClick={() => {
+                              if (req.issuedDocumentUrl) {
+                                const targetUrl = req.issuedDocumentUrl.startsWith('http')
+                                  ? req.issuedDocumentUrl
+                                  : `http://localhost:5000${req.issuedDocumentUrl}`;
+                                window.open(targetUrl, '_blank');
+                              } else {
+                                toast.success(`Downloading official verified ${req.type} from ASTU Registrar...`);
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-all shadow-sm"
+                          >
+                            <FileDown className="h-3.5 w-3.5" />
+                            Download Document
                           </button>
                         ) : req.status === 'Dispatched' ? (
                           <button onClick={() => toast.success('Tracking: Dispatched via EMS. Estimated delivery: 3-5 days.')} className="inline-flex items-center gap-1 rounded-md bg-violet-500 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-violet-600 transition-all shadow-sm">

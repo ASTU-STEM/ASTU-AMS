@@ -9,6 +9,7 @@ import AdminBadge from '../components/AdminBadge';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../contexts/AuthContext';
 import { adminService } from '../services/admin.service';
+import { authService } from '../../auth/services/auth.service';
 
 type TabType = 'personal' | 'security' | 'permissions';
 
@@ -28,6 +29,70 @@ export default function AdminProfile() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+
+  // 2FA State for Admin Profile with 3-tier fallback
+  const [isAdmin2FAEnabled, setIsAdmin2FAEnabled] = useState(() => {
+    return localStorage.getItem('admin_2fa_enabled') === 'true';
+  });
+  const [adminOtpCode, setAdminOtpCode] = useState('');
+  const [isSendingAdminOTP, setIsSendingAdminOTP] = useState(false);
+  const [isVerifyingAdmin2FA, setIsVerifyingAdmin2FA] = useState(false);
+  const [adminOtpSent, setAdminOtpSent] = useState(false);
+
+  const getAdmin2FAEmail = () => {
+    return authService.resolveTarget2FAEmail(personalForm.email, user?.email);
+  };
+
+  const handleSendAdmin2FAOTP = async () => {
+    const email = getAdmin2FAEmail();
+    if (!email) {
+      toast.error('No account or admin email found for 2FA OTP verification.');
+      return;
+    }
+    setIsSendingAdminOTP(true);
+    try {
+      const res = await authService.send2FAOTP(email);
+      if (res.ok) {
+        setAdminOtpSent(true);
+        toast.success(`Verification code sent to ${email}`);
+        if (res.data?.devCode) {
+          toast(`DEV CODE: ${res.data.devCode}`, { icon: '🔑', duration: 8000 });
+        }
+      } else {
+        toast.error(res.message || 'Failed to send OTP code');
+      }
+    } catch {
+      toast.error('Failed to send OTP code');
+    } finally {
+      setIsSendingAdminOTP(false);
+    }
+  };
+
+  const handleVerifyAdmin2FACode = async () => {
+    const email = getAdmin2FAEmail();
+    if (!adminOtpCode || adminOtpCode.length < 6) {
+      toast.error('Please enter 6-digit verification code');
+      return;
+    }
+    setIsVerifyingAdmin2FA(true);
+    try {
+      const res = await authService.verify2FACode(adminOtpCode, email);
+      if (res.ok) {
+        const nextState = !isAdmin2FAEnabled;
+        setIsAdmin2FAEnabled(nextState);
+        localStorage.setItem('admin_2fa_enabled', String(nextState));
+        toast.success(nextState ? 'Admin 2FA Protection enabled!' : 'Admin 2FA Protection disabled.');
+        setAdminOtpSent(false);
+        setAdminOtpCode('');
+      } else {
+        toast.error(res.message || 'Invalid 2FA code');
+      }
+    } catch {
+      toast.error('Verification failed');
+    } finally {
+      setIsVerifyingAdmin2FA(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -379,6 +444,68 @@ export default function AdminProfile() {
                     >
                       {isSaving ? 'Updating...' : 'Update Password'}
                     </button>
+                  </div>
+
+                  {/* Admin 2FA Section */}
+                  <div className="mt-8 pt-6 border-t border-slate-200 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-emerald-600" />
+                        <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Two-Factor Authentication (2FA)</h4>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                        isAdmin2FAEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {isAdmin2FAEnabled ? '🛡️ 2FA Protected' : '⚠️ 2FA Disabled'}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Enforce secondary email OTP verification codes whenever logging in as an administrator. 
+                      OTP codes are sent to your resolved email: <span className="font-mono font-bold text-slate-700">{getAdmin2FAEmail() || 'Not Configured'}</span>.
+                    </p>
+
+                    {!adminOtpSent ? (
+                      <button
+                        type="button"
+                        onClick={handleSendAdmin2FAOTP}
+                        disabled={isSendingAdminOTP}
+                        className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white transition-all ${
+                          isAdmin2FAEnabled ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                        }`}
+                      >
+                        {isSendingAdminOTP ? 'Sending Code...' : isAdmin2FAEnabled ? 'Disable Admin 2FA' : 'Send 2FA Verification Code'}
+                      </button>
+                    ) : (
+                      <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <label className="block text-xs font-bold text-slate-700">Enter 6-Digit Verification Code</label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          placeholder="e.g. 849201"
+                          value={adminOtpCode}
+                          onChange={(e) => setAdminOtpCode(e.target.value)}
+                          className="w-full text-center tracking-widest font-mono text-lg py-2 border rounded-xl"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setAdminOtpSent(false)}
+                            className="flex-1 py-2 text-xs font-bold text-slate-600 border rounded-xl"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleVerifyAdmin2FACode}
+                            disabled={isVerifyingAdmin2FA || adminOtpCode.length < 6}
+                            className="flex-2 py-2 text-xs font-bold text-white bg-emerald-600 rounded-xl disabled:opacity-50"
+                          >
+                            {isVerifyingAdmin2FA ? 'Verifying...' : 'Confirm 2FA'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </form>
               )}

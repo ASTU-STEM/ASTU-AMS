@@ -28,6 +28,8 @@ const upload = multer({ storage: storage });
 
 // Public Routes
 router.post('/login', asyncHandler(AuthController.login));
+router.post('/send-2fa-otp', asyncHandler(AuthController.send2FAOTP));
+router.post('/verify-2fa-code', asyncHandler(AuthController.verify2FACode));
 router.post('/activate-alumni', asyncHandler(AuthController.activateAlumni));
 router.post('/refresh', asyncHandler(AuthController.refresh));
 
@@ -64,6 +66,8 @@ router.post('/reset-password', asyncHandler(AuthController.resetPassword));
 
 // Protected Routes
 router.post('/logout', authenticateJWT, asyncHandler(AuthController.logout));
+router.put('/change-password', authenticateJWT, asyncHandler(AuthController.changePassword));
+router.put('/toggle-2fa', authenticateJWT, asyncHandler(AuthController.toggle2FA));
 
 // Admin Only Routes
 router.post(

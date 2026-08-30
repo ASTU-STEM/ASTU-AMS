@@ -3,7 +3,7 @@ import prisma from '../../../../core/config/db';
 
 export class PrismaTalentSearchRepository implements ITalentSearchRepository {
   async search(criteria: SearchCriteria): Promise<SearchResult> {
-    const { search, department, departmentId, graduationYear, minCgpa, skills, employmentStatus, location, sortBy, page = 1, limit = 10 } = criteria as any;
+    const { search, department, departmentId, graduationYear, minCgpa, skills, employmentStatus, location, sortBy, page = 1, limit = 100 } = criteria as any;
     const skip = (page - 1) * limit;
 
     const whereClause: any = {};
@@ -13,7 +13,7 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
         { fullName: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { skills: { hasSome: [search] } },
-        { experiences: { some: { title: { contains: search, mode: 'insensitive' } } } }
+        { experiences: { some: { position: { contains: search, mode: 'insensitive' } } } }
       ];
     }
 
@@ -51,7 +51,14 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
     const [data, total] = await Promise.all([
       prisma.alumniProfile.findMany({
         where: whereClause,
-        include: { department: true, experiences: true },
+        include: {
+          department: true,
+          experiences: true,
+          certifications: true,
+          projects: true,
+          achievements: true,
+          user: true,
+        },
         orderBy: orderByClause,
         skip,
         take: Number(limit),
@@ -61,17 +68,24 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
       }),
     ]);
 
-    // Mask CGPA if privacy setting is false
-    const maskedData = data.map((profile) => {
-      if (!profile.isCgpaPublic) {
-        return { ...profile, cgpa: null };
+    // Filter by employer visibility and mask CGPA based on shareCgpaToEmployers preference
+    const visibleData = data.filter((profile: any) => {
+      const prefs = (profile.preferences as any) || {};
+      return prefs.profileVisibleToEmployers !== false;
+    });
+
+    const maskedData = visibleData.map((profile: any) => {
+      const prefs = (profile.preferences as any) || {};
+      const isCgpaAllowed = prefs.shareCgpaToEmployers !== false && profile.isCgpaPublic !== false;
+      if (!isCgpaAllowed) {
+        return { ...profile, cgpa: null, cgpaHidden: true };
       }
       return profile;
     });
 
     return {
       data: maskedData,
-      total,
+      total: visibleData.length,
       page: Number(page),
       limit: Number(limit),
     };
@@ -82,8 +96,14 @@ export class PrismaTalentSearchRepository implements ITalentSearchRepository {
       where: { id: alumniId },
       include: { department: true, experiences: true, surveyResponses: true },
     });
-    if (profile && !profile.isCgpaPublic) {
-      return { ...profile, cgpa: null };
+    if (!profile) return null;
+
+    const prefs = (profile.preferences as any) || {};
+    if (prefs.profileVisibleToEmployers === false) return null;
+
+    const isCgpaAllowed = prefs.shareCgpaToEmployers !== false && profile.isCgpaPublic !== false;
+    if (!isCgpaAllowed) {
+      return { ...profile, cgpa: null, cgpaHidden: true };
     }
     return profile;
   }

@@ -20,6 +20,7 @@ import { VerifyDiditSession } from '../application/use-cases/VerifyDiditSession'
 import { SubmitRegistrationIssue } from '../application/use-cases/SubmitRegistrationIssue';
 import { DiditService } from '../infrastructure/services/DiditService';
 import { EmailService } from '../../../core/services/EmailService';
+import { storeEmail2FAOTP, verifyTOTP, verifyEmail2FAOTP } from '../../../core/utils/totp.utils';
 import { loginSchema, activateAlumniSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
 
 const userRepository = new PrismaUserRepository();
@@ -239,6 +240,122 @@ export class AuthController {
       const useCase = new VerifyDiditSession();
       const result = await useCase.execute(sessionId, nationalIdName);
       return sendSuccess(res, result.message, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Send 2FA Verification Code via Email
+  static async send2FAOTP(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ success: false, message: 'Email address is required' });
+      }
+
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      storeEmail2FAOTP(email, otpCode);
+      await emailService.send2FAVerificationCode(email, otpCode);
+
+      return sendSuccess(res, `2FA verification code sent to ${email}`, {
+        email,
+        codeSent: true,
+        devCode: otpCode
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Verify 2FA Setup Code (TOTP or Email OTP)
+  static async verify2FACode(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, code } = req.body;
+      if (!code || !email) {
+        return res.status(400).json({ success: false, message: 'Email address and verification code are required' });
+      }
+
+      const isTotpValid = verifyTOTP(code);
+      const isEmailOtpValid = verifyEmail2FAOTP(email, code);
+
+      if (!isTotpValid && !isEmailOtpValid) {
+        return res.status(400).json({ success: false, message: 'Invalid 2FA verification code. Please check the code and try again.' });
+      }
+
+      return sendSuccess(res, '2FA verification code valid', { valid: true });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Change Password
+  static async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized authentication' });
+      }
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long' });
+      }
+
+      const bcrypt = require('bcryptjs');
+      const prisma = require('../../../core/config/db').default;
+
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User account not found' });
+      }
+
+      if (currentPassword) {
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+          return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+        }
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword }
+      });
+
+      return sendSuccess(res, 'Password changed successfully!', { updated: true });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async toggle2FA(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+
+      const { enabled } = req.body;
+      const isEnabled = Boolean(enabled);
+      const prisma = require('../../../core/config/db').default;
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { twoFactorEnabled: isEnabled }
+      });
+
+      const alumniProfile = await prisma.alumniProfile.findUnique({ where: { userId } }).catch(() => null);
+      if (alumniProfile) {
+        const existingPrefs = (alumniProfile.preferences as any) || {};
+        await prisma.alumniProfile.update({
+          where: { userId },
+          data: {
+            preferences: { ...existingPrefs, twoFactorEnabled: isEnabled }
+          }
+        }).catch(() => null);
+      }
+
+      return sendSuccess(res, isEnabled ? '2FA protection enabled successfully' : '2FA protection disabled', { twoFactorEnabled: isEnabled });
     } catch (err) {
       next(err);
     }

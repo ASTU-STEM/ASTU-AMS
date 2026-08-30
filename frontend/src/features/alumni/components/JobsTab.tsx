@@ -21,7 +21,44 @@ export const JobsTab: React.FC<JobsTabProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
-  const locations = ['All', 'Addis Ababa', 'Remote'];
+  const defaultLocations = [
+    'Addis Ababa',
+    'Adama (Nazret)',
+    'Bishoftu (Debre Zeit)',
+    'Hawassa',
+    'Dire Dawa',
+    'Bahir Dar',
+    'Mekelle',
+    'Gondar',
+    'Jimma',
+    'Dessie / Kombolcha',
+    'Arba Minch',
+    'Jigjiga',
+    'Harar',
+    'Dilla',
+    'Asosa',
+    'Semera',
+    'Gambela',
+    'Remote (Ethiopia)',
+    'Remote (Global)',
+    'Hybrid',
+    'International / Overseas'
+  ];
+
+  // Dynamically include any additional location found in the loaded jobs
+  const dynamicJobLocations = Array.from(
+    new Set(
+      jobs
+        .map(j => j.location)
+        .filter((loc): loc is string => Boolean(loc && loc.trim()))
+        .map(loc => loc.trim())
+    )
+  );
+
+  const allLocationOptions = Array.from(
+    new Set([...defaultLocations, ...dynamicJobLocations])
+  );
+
   const formats = ['All', 'Full-Time', 'Internship', 'Contract', 'Part-Time'];
 
   const handleToggleSave = (e: React.MouseEvent, id: number, saved: boolean) => {
@@ -43,9 +80,24 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.skills?.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())) || false;
 
-    const matchesLocation =
-      selectedLocation === 'All' ||
-      job.location.toLowerCase().includes(selectedLocation.toLowerCase());
+    const matchesLocation = (() => {
+      if (selectedLocation === 'All') return true;
+      if (!job.location) return false;
+
+      const jobLoc = job.location.toLowerCase();
+      const selLoc = selectedLocation.toLowerCase();
+
+      if (jobLoc.includes(selLoc) || selLoc.includes(jobLoc)) return true;
+      if (selLoc.includes('adama') && (jobLoc.includes('adama') || jobLoc.includes('nazret'))) return true;
+      if (selLoc.includes('bishoftu') && (jobLoc.includes('bishoftu') || jobLoc.includes('debre zeit'))) return true;
+      if (selLoc.includes('remote') && jobLoc.includes('remote')) return true;
+      if (selLoc.includes('hybrid') && jobLoc.includes('hybrid')) return true;
+
+      const cleanSel = selLoc.replace(/\s*\([^)]*\)/g, '').trim();
+      if (cleanSel && (jobLoc.includes(cleanSel) || cleanSel.includes(jobLoc))) return true;
+
+      return false;
+    })();
 
     const matchesFormat =
       selectedFormat === 'All' ||
@@ -173,12 +225,28 @@ return (
             <select
               value={selectedLocation}
               onChange={e => { setSelectedLocation(e.target.value); setCurrentPage(1); }}
-              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
+              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[170px]"
             >
               <option value="All">📍 All Locations</option>
-              {locations.filter(l => l !== 'All').map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
-              ))}
+              <optgroup label="📍 Ethiopian Cities & Regional Hubs">
+                {allLocationOptions
+                  .filter(loc => !loc.toLowerCase().includes('remote') && !loc.toLowerCase().includes('hybrid') && !loc.toLowerCase().includes('international'))
+                  .map(loc => (
+                    <option key={loc} value={loc}>
+                      📍 {loc}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="🌐 Work Modes & International">
+                {allLocationOptions
+                  .filter(loc => loc.toLowerCase().includes('remote') || loc.toLowerCase().includes('hybrid') || loc.toLowerCase().includes('international'))
+                  .map(loc => (
+                    <option key={loc} value={loc}>
+                      {loc.toLowerCase().includes('remote') ? '🌐 ' : loc.toLowerCase().includes('hybrid') ? '🏢 ' : '✈️ '}
+                      {loc}
+                    </option>
+                  ))}
+              </optgroup>
             </select>
 
             <select

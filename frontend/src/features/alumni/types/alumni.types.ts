@@ -11,6 +11,7 @@ export interface Certification {
   issueDate: string;
   expiryDate?: string;
   credentialUrl?: string;
+  imageUrl?: string;
   description?: string;
 }
 
@@ -20,9 +21,10 @@ export interface Project {
   description: string;
   technologies: string[];
   url?: string;
-  startDate: string;
+  imageUrl?: string;
+  startDate?: string;
   endDate?: string;
-  role: string;
+  role?: string;
 }
 
 export interface Achievement {
@@ -39,6 +41,7 @@ export interface AlumniProfile {
   phone: string;
   studentId: string;
   batch: string;
+  graduationYear?: number | string;
   department: string;
   cgpa: string;
   currentRole: string;
@@ -51,9 +54,12 @@ export interface AlumniProfile {
   resume: ResumeFile | null;
   resumeUrl?: string;
   linkedInUrl?: string;
+  linkedIn?: string;
   gitHubUrl?: string;
+  gitHub?: string;
   twitterUrl?: string;
   portfolioUrl?: string;
+  portfolio?: string;
   certifications?: Certification[];
   projects?: Project[];
   achievements?: Achievement[];
@@ -155,6 +161,7 @@ export interface DocumentRequest {
   requestDate: string;
   status: 'Pending' | 'Approved' | 'In Progress' | 'Dispatched';
   notes?: string;
+  issuedDocumentUrl?: string;
 }
 
 export interface CareerEvent {
@@ -180,6 +187,7 @@ export interface AlumniPreferences {
   emailSurveys: boolean;
   emailMentorship: boolean;
   profileVisibleToEmployers: boolean;
+  shareCgpaToEmployers?: boolean;
   profileVisibleToPeers: boolean;
   emailEvents: boolean;
   emailNewsletter: boolean;
@@ -187,6 +195,8 @@ export interface AlumniPreferences {
   profileVisibleToAlumni: boolean;
   anonymousTracerResponses: boolean;
   shareAchievementsPublic: boolean;
+  digestFrequency?: 'instant' | 'weekly' | 'monthly';
+  donationEnabled?: boolean;
 }
 
 export interface AlumniNotification {

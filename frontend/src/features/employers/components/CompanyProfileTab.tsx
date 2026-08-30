@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { CompanyProfile } from '../types/employer.types';
 import { employerService } from '../services/employer.service';
+import { authService } from '../../auth/services/auth.service';
+import { PremiumListingModal } from './PremiumListingModal';
+import { PartnershipModal } from './PartnershipModal';
+import { EmployerVerificationModal } from './EmployerVerificationModal';
 import toast from 'react-hot-toast';
 
 interface CompanyProfileTabProps {
@@ -14,10 +18,127 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
   const [formData, setFormData] = useState<CompanyProfile>({ ...profile });
   const [isSaving, setIsSaving] = useState(false);
 
+  // Modal triggers
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showPartnershipModal, setShowPartnershipModal] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+
+  // Security & Password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // 2FA state
+  const [is2FAEnabled, setIs2FAEnabled] = useState(() => {
+    return localStorage.getItem('employer_2fa_enabled') === 'true';
+  });
+  const [otpCode, setOtpCode] = useState('');
+  const [isSendingOTP, setIsSendingOTP] = useState(false);
+  const [isVerifying2FA, setIsVerifying2FA] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return { score: 0, label: '', color: 'bg-slate-200 dark:bg-slate-800', text: 'text-slate-400', width: 'w-0' };
+    let score = 0;
+    if (pwd.length >= 6) score += 1;
+    if (pwd.length >= 10) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+    if (score <= 2) return { score: 1, label: 'Weak', color: 'bg-rose-500', text: 'text-rose-500', width: 'w-1/3' };
+    if (score <= 4) return { score: 2, label: 'Medium', color: 'bg-amber-500', text: 'text-amber-500', width: 'w-2/3' };
+    return { score: 3, label: 'Strong', color: 'bg-emerald-500', text: 'text-emerald-500', width: 'w-full' };
+  };
+
   // Sync formData when parent profile prop changes (e.g. after initial fetch)
   useEffect(() => {
     setFormData({ ...profile });
   }, [profile]);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters long');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New password and confirmation do not match');
+      return;
+    }
+    setIsChangingPassword(true);
+    const res = await authService.changePassword({ currentPassword, newPassword });
+    setIsChangingPassword(false);
+    if (res.ok) {
+      toast.success(res.message || 'Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      toast.error(res.message || 'Failed to update password');
+    }
+  };
+
+  const getTarget2FAEmail = () => {
+    let email = formData.contactEmail || profile.contactEmail || (profile as any).hrEmail;
+    if (!email) {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          if (parsed.email) email = parsed.email;
+        }
+      } catch {}
+    }
+    return email || '';
+  };
+
+  const handleSend2FAOTP = async () => {
+    const email = getTarget2FAEmail();
+    if (!email) {
+      toast.error('No HR or account email configured. Please enter your HR Email Address.');
+      return;
+    }
+    setIsSendingOTP(true);
+    const res = await authService.send2FAOTP(email);
+    setIsSendingOTP(false);
+    if (res.ok) {
+      setOtpSent(true);
+      toast.success(`Verification code sent to ${email}`);
+      if (res.data?.devCode) {
+        toast(`DEV CODE: ${res.data.devCode}`, { icon: '🔑', duration: 8000 });
+      }
+    } else {
+      toast.error(res.message || 'Failed to send OTP code');
+    }
+  };
+
+  const handleVerify2FACode = async () => {
+    const email = getTarget2FAEmail();
+    if (!otpCode || otpCode.length < 6) {
+      toast.error('Please enter 6-digit verification code');
+      return;
+    }
+    setIsVerifying2FA(true);
+    const res = await authService.verify2FACode(otpCode, email);
+    setIsVerifying2FA(false);
+    if (res.ok) {
+      const nextState = !is2FAEnabled;
+      setIs2FAEnabled(nextState);
+      localStorage.setItem('employer_2fa_enabled', String(nextState));
+      authService.toggle2FA(nextState).catch(console.error);
+      employerService.saveProfile({ ...formData, is2FAEnabled: nextState, twoFactorEnabled: nextState } as any).catch(console.error);
+      toast.success(nextState ? '2FA Protection enabled successfully!' : '2FA Protection disabled.');
+      setOtpSent(false);
+      setOtpCode('');
+    } else {
+      toast.error(res.message || 'Invalid 2FA code');
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -242,6 +363,227 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
             </div>
           </div>
 
+          {/* Security & Authentication Section */}
+          <div className="p-6 border-b border-[var(--border-color)]">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white flex-shrink-0">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] tracking-tight">Security & Authentication</h3>
+                  <p className="text-xs font-medium text-[var(--text-secondary)]">Protect your recruiter portal with strong passwords & 2FA authentication</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border shadow-xs ${
+                  is2FAEnabled
+                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-400'
+                    : 'bg-amber-500/10 text-amber-600 border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${is2FAEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                  {is2FAEnabled ? '2FA Protection Active' : '2FA Security Disabled'}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {/* Change Password Card */}
+              <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] p-5 shadow-xs flex flex-col justify-between space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z" /></svg>
+                      </span>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Change Account Password</h4>
+                    </div>
+                    {newPassword && (
+                      <span className={`text-[11px] font-bold ${getPasswordStrength(newPassword).text}`}>
+                        {getPasswordStrength(newPassword).label}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className={labelClass}>Current Password</label>
+                      <div className="relative mt-1">
+                        <input
+                          type={showCurrentPwd ? 'text' : 'password'}
+                          placeholder="Enter your current password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          className={`${inputClass} pr-10`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                          <span className="material-symbols-outlined text-lg">{showCurrentPwd ? 'visibility_off' : 'visibility'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass}>New Password</label>
+                        <div className="relative mt-1">
+                          <input
+                            type={showNewPwd ? 'text' : 'password'}
+                            placeholder="At least 6 chars"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className={`${inputClass} pr-10`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPwd(!showNewPwd)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                          >
+                            <span className="material-symbols-outlined text-lg">{showNewPwd ? 'visibility_off' : 'visibility'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={labelClass}>Confirm New Password</label>
+                        <div className="relative mt-1">
+                          <input
+                            type={showConfirmPwd ? 'text' : 'password'}
+                            placeholder="Re-enter password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className={`${inputClass} pr-10`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                          >
+                            <span className="material-symbols-outlined text-lg">{showConfirmPwd ? 'visibility_off' : 'visibility'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Password Strength Meter */}
+                    {newPassword && (
+                      <div className="space-y-1 pt-1">
+                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div className={`h-full transition-all duration-500 rounded-full ${getPasswordStrength(newPassword).color} ${getPasswordStrength(newPassword).width}`} />
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium">Use 8+ characters with letters, numbers & symbols for maximum security.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleChangePassword}
+                  disabled={isChangingPassword || !newPassword}
+                  className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  {isChangingPassword ? (
+                    <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Updating Password...</>
+                  ) : (
+                    <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg> Update Security Password</>
+                  )}
+                </button>
+              </div>
+
+              {/* Two-Factor Authentication (2FA) Card */}
+              <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] p-5 shadow-xs flex flex-col justify-between space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                      </span>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Two-Factor Authentication (2FA)</h4>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Email OTP & Authenticator</span>
+                  </div>
+
+                  <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
+                    Enforce secondary one-time verification codes (Email OTP or Authenticator app) whenever logging into your employer recruitment console.
+                  </p>
+
+                  <div className="rounded-xl border border-[var(--border-color)] p-3 bg-white/50 dark:bg-slate-900/50 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm text-emerald-500">mark_email_read</span>
+                        HR Contact Email 2FA
+                      </span>
+                      <span className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">
+                        {getTarget2FAEmail() || 'No Email Configured'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  {!otpSent ? (
+                    <button
+                      type="button"
+                      onClick={handleSend2FAOTP}
+                      disabled={isSendingOTP}
+                      className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-md transition-all active:scale-[0.99] cursor-pointer ${
+                        is2FAEnabled
+                          ? 'bg-rose-500/10 text-rose-600 border border-rose-500/30 hover:bg-rose-500/20 dark:text-rose-400'
+                          : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
+                      }`}
+                    >
+                      {isSendingOTP ? (
+                        <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Generating Security OTP...</>
+                      ) : is2FAEnabled ? (
+                        'Disable 2FA Protection'
+                      ) : (
+                        'Send 2FA Verification Code'
+                      )}
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className={labelClass}>Enter 6-Digit OTP Verification Code</label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          placeholder="e.g. 849201"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          className={`${inputClass} tracking-widest font-mono text-center font-bold text-lg bg-slate-50 dark:bg-slate-950 border-emerald-500/50 focus:border-emerald-500`}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setOtpSent(false)}
+                          className="flex-1 px-3 py-2 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleVerify2FACode}
+                          disabled={isVerifying2FA || otpCode.length < 6}
+                          className="flex-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 hover:from-emerald-700 hover:to-teal-800 disabled:opacity-50 transition-all cursor-pointer"
+                        >
+                          {isVerifying2FA ? 'Verifying Code...' : 'Confirm & Enable 2FA'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Premium & Partnership Section */}
           <div className="p-5">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -257,7 +599,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                   </div>
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] mb-3">Promote priority vacancies, career fairs, scholarships, or department events to top graduates.</p>
-                <button type="button" onClick={togglePremium}
+                <button type="button" onClick={() => setShowPremiumModal(true)}
                   className={`w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold transition-all duration-300 ${
                     isPremium ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md' : 'bg-gradient-to-r from-[#003366] to-[#004d99] text-white shadow-md hover:shadow-lg'
                   }`}>
@@ -282,7 +624,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                 </div>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {['Internship agreements', 'Sponsorship of events', 'Research collaboration', 'Curriculum advisory'].map(item => (
-                    <button type="button" key={item} onClick={() => togglePartnership(item)}
+                    <button type="button" key={item} onClick={() => setShowPartnershipModal(true)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 ${
                         partnerships.includes(item) ? 'border-[#003366] bg-[#003366]/10 text-[#003366]' : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003366]/30'
                       }`}>
@@ -306,7 +648,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                     <p className="text-xs text-[var(--text-secondary)] mt-0.5">Submit business license, HR contact proof, and data-sharing agreement for verified access to alumni records.</p>
                   </div>
                 </div>
-                <button type="button" onClick={submitVerification}
+                <button type="button" onClick={() => setShowVerificationModal(true)}
                   disabled={isPendingVerification || isVerified}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold transition-all duration-300 whitespace-nowrap ${
                     isVerified
@@ -328,6 +670,46 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
           </div>
         </form>
       </div>
+
+      {/* Interactive Feature Modals */}
+      <PremiumListingModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        onSuccess={(res) => {
+          const profileObj = res?.profile || res || formData;
+          setFormData(prev => ({ ...prev, ...profileObj }));
+          onSave({ ...formData, ...profileObj });
+        }}
+        darkMode={darkMode}
+        companyName={formData.name}
+      />
+
+      <PartnershipModal
+        isOpen={showPartnershipModal}
+        onClose={() => setShowPartnershipModal(false)}
+        onSuccess={(res) => {
+          const profileObj = res?.profile || res || formData;
+          setFormData(prev => ({ ...prev, ...profileObj }));
+          onSave({ ...formData, ...profileObj });
+        }}
+        darkMode={darkMode}
+        companyName={formData.name}
+        initialPartnerships={partnerships}
+      />
+
+      <EmployerVerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        onSuccess={(res) => {
+          const profileObj = res?.profile || res || formData;
+          setFormData(prev => ({ ...prev, ...profileObj }));
+          onSave({ ...formData, ...profileObj });
+        }}
+        darkMode={darkMode}
+        companyName={formData.name}
+        initialTin={formData.tin}
+        verificationStatus={verificationStatus}
+      />
     </div>
   );
 };

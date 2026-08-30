@@ -23,6 +23,7 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
@@ -56,6 +57,7 @@ function AppContent() {
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-2fa" element={<Verify2FAPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
 
