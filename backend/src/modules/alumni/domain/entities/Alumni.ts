@@ -47,6 +47,7 @@ export class DocumentRequest {
     public readonly documentType: string,
     public readonly additionalInstructions: string | null,
     public readonly status: string,
-    public readonly createdAt: Date
+    public readonly createdAt: Date,
+    public readonly fileUrls?: string[] | null
   ) {}
 }

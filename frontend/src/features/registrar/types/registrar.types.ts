@@ -42,6 +42,13 @@ export interface DocumentProcessingRequest {
     graduationYear?: number;
     email?: string;
     phone?: string;
+    cgpa?: number | string;
+    bio?: string;
+    department?: { name: string } | string;
+    experiences?: any[];
+    certifications?: any[];
+    projects?: any[];
+    achievements?: any[];
   };
 }
 

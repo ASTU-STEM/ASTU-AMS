@@ -24,6 +24,7 @@ export class RequestDocument {
       alumniId: profile.id,
       documentType: data.documentType,
       additionalInstructions: data.additionalInstructions || null,
+      fileUrls: data.fileUrls || [],
     });
 
     await this.auditLogger.log(

@@ -131,9 +131,16 @@ export class AuthController {
   // Submit Registration Issue
   static async submitRegistrationIssue(req: Request, res: Response, next: NextFunction) {
     try {
-      const identificationUrl = req.files && (req.files as any)['identificationDocument']
-        ? (req.files as any)['identificationDocument'][0].path.replace(/\\/g, '/')
+      const fileObj = req.files && (req.files as any)['identificationDocument']
+        ? (req.files as any)['identificationDocument'][0]
         : null;
+
+      let identificationUrl: string | null = null;
+      if (fileObj) {
+        const normPath = fileObj.path.replace(/\\/g, '/');
+        const match = normPath.match(/uploads\/.*/i);
+        identificationUrl = match ? match[0] : `uploads/VerificationDocument/${fileObj.filename}`;
+      }
 
       if (!identificationUrl) {
         throw new Error('Identification document is required.');
