@@ -49,12 +49,12 @@ export const registerEmployerSchema = z.object({
 // Alumni Registration Schemas
 export const registerAlumniSchema = z.object({
   firstName: z.string().min(2, 'First name is required'),
-  middleName: z.string().min(2, 'Middle name is required'),
+  middleName: z.preprocess((val) => (val === null || val === undefined ? '' : String(val)), z.string().optional()),
   lastName: z.string().min(2, 'Last name is required'),
-  gender: z.string().min(1, 'Gender is required'),
-  educationalQualification: z.string().min(1, 'Educational qualification is required'),
-  workPlace: z.string().min(1, 'Work place is required'),
-  workPosition: z.string().min(1, 'Work position is required'),
+  gender: z.preprocess((val) => (val === null || val === undefined ? '' : String(val)), z.string().optional()),
+  educationalQualification: z.preprocess((val) => (val === null || val === undefined ? '' : String(val)), z.string().optional()),
+  workPlace: z.preprocess((val) => (val === null || val === undefined ? '' : String(val)), z.string().optional()),
+  workPosition: z.preprocess((val) => (val === null || val === undefined ? '' : String(val)), z.string().optional()),
   studentId: z.string().min(1, 'Student ID is required'),
   batch: z.string().min(1, 'Year of graduation is required'),
   department: z.string().min(1, 'Field of study is required'),

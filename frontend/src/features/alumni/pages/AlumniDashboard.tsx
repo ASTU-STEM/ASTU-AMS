@@ -242,9 +242,9 @@ const AlumniDashboard = () => {
     }
   };
 
-  const handleRequestDocument = async (type: DocumentRequest['type'], notes?: string) => {
+  const handleRequestDocument = async (type: DocumentRequest['type'], notes?: string, fileUrls?: string[]) => {
     try {
-      await alumniService.requestDocument({ documentType: type, additionalInstructions: notes });
+      await alumniService.requestDocument({ documentType: type, additionalInstructions: notes, fileUrls });
       const newDoc: DocumentRequest = { id: documents.length + 1, type, requestDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), status: 'Pending', notes: notes || 'Awaiting registrar verification.' };
       setDocuments([newDoc, ...documents]);
       setNotifications(prev => [{ id: Date.now(), text: `Submitted official request for: ${type}.`, unread: true, time: 'Just now' }, ...prev]);
@@ -553,13 +553,25 @@ const AlumniDashboard = () => {
         }
 
         if (mentorsData) setMentors(Array.isArray(mentorsData) ? mentorsData : []);
-        const mappedDocuments = (Array.isArray(documentsData) ? documentsData : []).map((doc: any) => ({
-          id: doc.id,
-          type: doc.documentType || 'Official Transcript',
-          requestDate: doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
-          status: (doc.status === 'COMPLETED' ? 'Approved' : doc.status === 'IN_PROGRESS' ? 'In Progress' : doc.status === 'REJECTED' ? 'Pending' : 'Pending') as any,
-          notes: doc.notes || doc.additionalInstructions || 'Awaiting registrar verification.'
-        }));
+        const mappedDocuments = (Array.isArray(documentsData) ? documentsData : []).map((doc: any) => {
+          const rawStatus = String(doc.status || '').toUpperCase();
+          const mappedStatus = (rawStatus === 'APPROVED' || rawStatus === 'COMPLETED')
+            ? 'Approved'
+            : rawStatus === 'IN_PROGRESS'
+            ? 'In Progress'
+            : rawStatus === 'REJECTED'
+            ? 'Rejected'
+            : 'Pending';
+
+          return {
+            id: doc.id,
+            type: doc.documentType || 'Official Transcript',
+            requestDate: doc.createdAt ? new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
+            status: mappedStatus as any,
+            notes: doc.notes || doc.additionalInstructions || 'Awaiting registrar verification.',
+            issuedDocumentUrl: doc.issuedDocumentUrl
+          };
+        });
         if (documentsData) setDocuments(mappedDocuments);
 
         const DEFAULT_PREFS = {

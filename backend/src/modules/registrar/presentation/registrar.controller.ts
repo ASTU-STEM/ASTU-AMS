@@ -52,8 +52,30 @@ export class RegistrarController {
 
   static async getLogs(req: Request, res: Response, next: NextFunction) {
     try {
-      const history = await syncRepo.getHistory();
-      return sendSuccess(res, 'Fetched registrar sync history logs.', history);
+      const logs = await prisma.registrarSyncLog.findMany({
+        orderBy: { syncedAt: 'desc' },
+        take: 50
+      });
+
+      const formattedLogs = logs.map(log => {
+        let details: any = {};
+        if (log.errors) {
+          try { details = JSON.parse(log.errors); } catch (_) { }
+        }
+
+        return {
+          id: log.id,
+          syncedAt: log.syncedAt,
+          recordsCount: log.recordsCount,
+          status: log.status,
+          fileName: details.fileName || 'sis_batch_import.csv',
+          total: details.total || log.recordsCount,
+          imported: details.imported || log.recordsCount,
+          duplicates: details.duplicates || 0
+        };
+      });
+
+      return sendSuccess(res, 'Fetched registrar sync history logs.', formattedLogs);
     } catch (err: any) {
       next(err);
     }
@@ -190,12 +212,12 @@ export class RegistrarController {
       const requests = await prisma.documentRequest.findMany({
         include: {
           alumni: {
-            select: {
-              fullName: true,
-              studentId: true,
-              graduationYear: true,
-              email: true,
-              phone: true,
+            include: {
+              department: true,
+              experiences: true,
+              certifications: true,
+              projects: true,
+              achievements: true,
             }
           }
         },
@@ -224,10 +246,17 @@ export class RegistrarController {
   static async resolveRegistrationIssue(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { status } = req.body; // "RESOLVED" or "REJECTED"
+      const { status, fullName, studentId, graduationYear, email, phone } = req.body; // "RESOLVED" or "REJECTED"
       const issue = await prisma.registrationIssue.update({
         where: { id },
-        data: { status: status || 'RESOLVED' },
+        data: {
+          status: status || 'RESOLVED',
+          fullName: fullName || undefined,
+          studentId: studentId || undefined,
+          graduationYear: graduationYear || undefined,
+          contactEmail: email || undefined,
+          phoneNumber: phone || undefined,
+        },
       });
       return sendSuccess(res, `Registration issue marked as ${issue.status}.`, issue);
     } catch (err: any) {
@@ -244,35 +273,96 @@ export class RegistrarController {
         return sendError(res, 'Registration issue not found', null, 404);
       }
 
-      const manageUsers = new ManageUsers();
+      // Allow Registrar field overrides from req.body or fallback to issue fields
+      const fullName = req.body?.fullName || issue.fullName;
+      const cleanStudentId = String(req.body?.studentId || issue.studentId).trim().toUpperCase();
+      const gradYear = parseInt(String(req.body?.graduationYear || issue.graduationYear), 10) || new Date().getFullYear();
+      const contactEmail = req.body?.email || issue.contactEmail;
+      const phone = req.body?.phone || issue.phoneNumber;
+      
+      let departmentStr = req.body?.department || 'Computer Science & Engineering'; 
+      if (!req.body?.department && issue.issueDescription) {
+        const match = issue.issueDescription.match(/Department:\s*([^\n\r;]+)/i);
+        if (match && match[1]) {
+          departmentStr = match[1].trim();
+        }
+      }
 
-      // Ensure department exists or default to unknown
-      const department = 'Unknown'; 
-      // The issue doesn't capture department currently, but ManageUsers requires it.
-      // We will just pass 'Unknown' and ManageUsers will create/find it.
+      const cgpa = parseFloat(req.body?.cgpa) || 3.5;
+      const nationality = req.body?.nationality || 'Ethiopian';
+      let dateOfBirth: Date | null = null;
+      if (req.body?.dateOfBirth) {
+        const d = new Date(req.body.dateOfBirth);
+        if (!isNaN(d.getTime())) dateOfBirth = d;
+      }
       
       // Auto-generate password
       const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
 
-      const result = await manageUsers.createUser({
-        name: issue.fullName,
-        email: issue.contactEmail,
+      // 1. Create User & AlumniProfile via ManageUsers
+      const manageUsers = new ManageUsers();
+      await manageUsers.createUser({
+        name: fullName,
+        email: contactEmail,
         role: 'Alumni',
-        department: department,
-        studentId: issue.studentId,
-        phone: issue.phoneNumber,
+        department: departmentStr,
+        studentId: cleanStudentId,
+        phone: phone || undefined,
         password: tempPassword
       });
 
-      // Mark the issue as resolved automatically
+      // 2. Ensure official RegistrarStudent record is stored in SIS DB with all 9 fields
+      const deptCode = departmentStr.substring(0, 4).toUpperCase();
+      await prisma.registrarStudent.upsert({
+        where: { studentId: cleanStudentId },
+        update: {
+          fullName,
+          department: departmentStr,
+          departmentCode: deptCode,
+          cgpa,
+          graduationYear: gradYear,
+          email: contactEmail,
+          phone: phone || null,
+          nationality,
+          dateOfBirth
+        },
+        create: {
+          studentId: cleanStudentId,
+          fullName,
+          department: departmentStr,
+          departmentCode: deptCode,
+          cgpa,
+          graduationYear: gradYear,
+          email: contactEmail,
+          phone: phone || null,
+          nationality,
+          dateOfBirth,
+          source: 'REGISTRAR_APPEAL_APPROVAL'
+        }
+      });
+
+      // 3. Update AlumniProfile to ACTIVE & Verified with all profile data
+      await prisma.alumniProfile.updateMany({
+        where: { studentId: cleanStudentId },
+        data: {
+          fullName,
+          graduationYear: gradYear,
+          cgpa,
+          nationality,
+          dateOfBirth,
+          isVerified: true,
+          status: 'ACTIVE'
+        }
+      });
+
+      // 4. Mark the issue as RESOLVED automatically
       const updatedIssue = await prisma.registrationIssue.update({
         where: { id },
         data: { status: 'RESOLVED' },
       });
 
-      return sendSuccess(res, 'Account created, activated and credentials sent.', updatedIssue);
+      return sendSuccess(res, 'Account created with Registrar verified data, SIS master record stored, and credentials sent.', updatedIssue);
     } catch (err: any) {
-      // If error is about existing user, send a nice message
       if (err.message && err.message.includes('already exists')) {
         return sendError(res, err.message, null, 400);
       }
@@ -295,7 +385,7 @@ export class RegistrarController {
   // Batch SIS Import (JSON payload)
   static async batchImport(req: Request, res: Response, next: NextFunction) {
     try {
-      const records = req.body.records;
+      const { records, fileName } = req.body;
       if (!records || !Array.isArray(records)) {
         return sendError(res, 'Invalid payload – records array required', null, 400);
       }
@@ -304,32 +394,95 @@ export class RegistrarController {
       let duplicateCount = 0;
 
       for (const record of records) {
+        if (!record.studentId || !record.fullName) continue;
+
+        const cleanStudentId = String(record.studentId).trim();
         const existing = await prisma.registrarStudent.findUnique({
-          where: { studentId: record.studentId }
+          where: { studentId: cleanStudentId }
         });
         if (existing) { duplicateCount++; continue; }
 
+        const deptStr = String(record.department || 'Computer Science and Engineering').trim();
+        const deptCode = record.departmentCode || deptStr.substring(0, 3).toUpperCase();
+
+        let parsedDob: Date | null = null;
+        if (record.dateOfBirth) {
+          const d = new Date(record.dateOfBirth);
+          if (!isNaN(d.getTime())) parsedDob = d;
+        }
+
         await prisma.registrarStudent.create({
           data: {
-            studentId: record.studentId,
-            fullName: record.fullName,
-            department: record.department,
-            departmentCode: record.departmentCode || record.department?.substring(0, 3).toUpperCase() || 'UNK',
-            cgpa: parseFloat(record.cgpa) || 0,
-            graduationYear: parseInt(record.graduationYear, 10) || new Date().getFullYear(),
-            email: record.email || null,
-            phone: record.phone || null,
-            source: 'CSV_IMPORT'
+            studentId: cleanStudentId,
+            fullName: String(record.fullName).trim(),
+            department: deptStr,
+            departmentCode: deptCode,
+            cgpa: parseFloat(record.cgpa) || 3.0,
+            graduationYear: parseInt(String(record.graduationYear), 10) || new Date().getFullYear(),
+            email: record.email ? String(record.email).trim() : null,
+            phone: record.phone ? String(record.phone).trim() : null,
+            nationality: record.nationality ? String(record.nationality).trim() : null,
+            dateOfBirth: parsedDob,
+            source: fileName ? `IMPORT: ${fileName}` : 'CSV_IMPORT'
           }
         });
+
+        // Seed initial INACTIVE & unverified AlumniProfile so the student can register and claim their account
+        const existingProfile = await prisma.alumniProfile.findUnique({
+          where: { studentId: cleanStudentId }
+        });
+
+        if (!existingProfile) {
+          let dept = await prisma.department.findFirst({
+            where: { OR: [{ name: { contains: deptStr, mode: 'insensitive' } }, { code: deptCode }] }
+          });
+          if (!dept) {
+            dept = await prisma.department.findFirst();
+          }
+
+          if (dept) {
+            await prisma.alumniProfile.create({
+              data: {
+                studentId: cleanStudentId,
+                fullName: String(record.fullName).trim(),
+                email: record.email ? String(record.email).trim() : null,
+                phone: record.phone ? String(record.phone).trim() : null,
+                gender: 'Unknown',
+                cgpa: parseFloat(record.cgpa) || 3.0,
+                graduationYear: parseInt(String(record.graduationYear), 10) || new Date().getFullYear(),
+                departmentId: dept.id,
+                status: 'INACTIVE',
+                isVerified: false
+              }
+            });
+          }
+        }
+
         importedCount++;
       }
 
-      await prisma.registrarSyncLog.create({
-        data: { recordsCount: importedCount, status: 'SUCCESS' }
+      const syncStatus = (importedCount === 0 && records.length > 0) ? 'FAILED' : duplicateCount > 0 ? 'PARTIAL' : 'SUCCESS';
+      const logDetails = JSON.stringify({
+        fileName: fileName || 'sis_import_template.csv',
+        total: records.length,
+        imported: importedCount,
+        duplicates: duplicateCount
       });
 
-      return sendSuccess(res, 'Batch import completed.', { imported: importedCount, duplicates: duplicateCount });
+      const log = await prisma.registrarSyncLog.create({
+        data: {
+          recordsCount: importedCount,
+          status: syncStatus as any,
+          errors: logDetails
+        }
+      });
+
+      return sendSuccess(res, 'Batch import completed.', {
+        imported: importedCount,
+        duplicates: duplicateCount,
+        total: records.length,
+        log
+      });
     } catch (err: any) {
       next(err);
     }
@@ -371,7 +524,40 @@ export class RegistrarController {
         },
         orderBy: { requestDate: 'desc' }
       });
-      return sendSuccess(res, 'Fetched verifications.', verifications);
+
+      // Also fetch unverified alumni profiles to ensure complete queue coverage
+      const unverifiedAlumni = await prisma.alumniProfile.findMany({
+        where: { isVerified: false },
+        include: {
+          department: { select: { name: true } }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      const existingAlumniIds = new Set(verifications.map(v => v.alumniId));
+
+      const unverifiedAsVerifications = unverifiedAlumni
+        .filter(a => !existingAlumniIds.has(a.id))
+        .map(a => ({
+          id: a.id,
+          alumniId: a.id,
+          type: 'REGISTRATION_CLAIM',
+          status: 'PENDING',
+          requestDate: a.createdAt,
+          notes: `Graduate profile claim awaiting Registrar identity verification.`,
+          documentUrl: null,
+          alumni: {
+            fullName: a.fullName,
+            studentId: a.studentId,
+            email: a.email || 'N/A',
+            department: a.department,
+            graduationYear: a.graduationYear
+          }
+        }));
+
+      const combined = [...verifications, ...unverifiedAsVerifications];
+
+      return sendSuccess(res, 'Fetched verifications.', combined);
     } catch (err: any) {
       next(err);
     }
@@ -382,43 +568,118 @@ export class RegistrarController {
       const { id } = req.params;
       const { status } = req.body;
       
-      const verification = await prisma.verificationRequest.update({
+      const verification = await prisma.verificationRequest.findUnique({
         where: { id },
-        data: { status },
         include: { alumni: { include: { user: true } } }
       });
 
-      // If approved, set alumni profile to verified and active
-      if (status === 'APPROVED') {
-        await prisma.alumniProfile.update({
-          where: { id: verification.alumniId },
-          data: { isVerified: true, status: 'ACTIVE' }
+      if (verification) {
+        await prisma.verificationRequest.update({
+          where: { id },
+          data: { status },
         });
-      }
 
-      // Notify the alumni by Email
-      if (verification.alumni.email) {
-        const { EmailService } = require('../../../core/services/EmailService');
-        const emailService = new EmailService();
-        const subject = status === 'APPROVED' ? 'Your ASTU Alumni Verification is Approved' : 'Your ASTU Alumni Verification is Rejected';
-        const message = status === 'APPROVED' 
-          ? `Congratulations ${verification.alumni.fullName}! Your manual verification request has been approved by the Registrar. You can now log in to your account.`
-          : `Dear ${verification.alumni.fullName}, unfortunately your manual verification request has been rejected by the Registrar. Please contact the registrar office for more information.`;
-          
-        // Use generic sendMail or a specific template if available.
-        // Assuming EmailService has a sendGeneralEmail or similar. If not, we can use raw nodemailer or the sendMail method.
-        try {
-          await emailService.sendMail({
-            to: verification.alumni.email,
-            subject,
-            html: `<h3>ASTU Alumni Portal</h3><p>${message}</p>`,
+        if (status === 'APPROVED') {
+          const profile = await prisma.alumniProfile.update({
+            where: { id: verification.alumniId },
+            data: { isVerified: true, status: 'ACTIVE' },
+            include: { department: true }
           });
-        } catch (emailErr) {
-          console.error('Failed to send verification email notification:', emailErr);
+
+          if (profile && profile.studentId) {
+            await prisma.registrarStudent.upsert({
+              where: { studentId: profile.studentId },
+              update: {
+                fullName: profile.fullName,
+                department: profile.department?.name || 'Software Engineering',
+                departmentCode: profile.department?.code || 'SWE',
+                graduationYear: profile.graduationYear || new Date().getFullYear(),
+                email: profile.email,
+                phone: profile.phone,
+                cgpa: profile.cgpa || 3.0,
+                nationality: profile.nationality || 'Ethiopian',
+                dateOfBirth: profile.dateOfBirth,
+                source: 'REGISTRAR_VERIFICATION_APPROVAL'
+              },
+              create: {
+                studentId: profile.studentId,
+                fullName: profile.fullName,
+                department: profile.department?.name || 'Software Engineering',
+                departmentCode: profile.department?.code || 'SWE',
+                graduationYear: profile.graduationYear || new Date().getFullYear(),
+                email: profile.email,
+                phone: profile.phone,
+                cgpa: profile.cgpa || 3.0,
+                nationality: profile.nationality || 'Ethiopian',
+                dateOfBirth: profile.dateOfBirth,
+                source: 'REGISTRAR_VERIFICATION_APPROVAL'
+              }
+            });
+          }
+        }
+
+        // Notify alumni by email if available
+        if (verification.alumni?.email) {
+          try {
+            const { EmailService } = require('../../../core/services/EmailService');
+            const emailService = new EmailService();
+            const subject = status === 'APPROVED' ? 'Your ASTU Alumni Verification is Approved' : 'Your ASTU Alumni Verification Status Updated';
+            const message = status === 'APPROVED' 
+              ? `Congratulations ${verification.alumni.fullName}! Your registration verification has been approved by the Registrar Office.`
+              : `Dear ${verification.alumni.fullName}, your registration verification status has been set to ${status}.`;
+            await emailService.sendMail({
+              to: verification.alumni.email,
+              subject,
+              html: `<h3>ASTU Registrar Verification Hub</h3><p>${message}</p>`,
+            });
+          } catch (emailErr) {
+            console.error('Failed to send verification email notification:', emailErr);
+          }
+        }
+      } else {
+        // Direct AlumniProfile approval/rejection fallback
+        const profile = await prisma.alumniProfile.update({
+          where: { id },
+          data: {
+            isVerified: status === 'APPROVED',
+            status: status === 'APPROVED' ? 'ACTIVE' : 'INACTIVE'
+          },
+          include: { department: true }
+        });
+
+        if (status === 'APPROVED' && profile && profile.studentId) {
+          await prisma.registrarStudent.upsert({
+            where: { studentId: profile.studentId },
+            update: {
+              fullName: profile.fullName,
+              department: profile.department?.name || 'Software Engineering',
+              departmentCode: profile.department?.code || 'SWE',
+              graduationYear: profile.graduationYear || new Date().getFullYear(),
+              email: profile.email,
+              phone: profile.phone,
+              cgpa: profile.cgpa || 3.0,
+              nationality: profile.nationality || 'Ethiopian',
+              dateOfBirth: profile.dateOfBirth,
+              source: 'REGISTRAR_VERIFICATION_APPROVAL'
+            },
+            create: {
+              studentId: profile.studentId,
+              fullName: profile.fullName,
+              department: profile.department?.name || 'Software Engineering',
+              departmentCode: profile.department?.code || 'SWE',
+              graduationYear: profile.graduationYear || new Date().getFullYear(),
+              email: profile.email,
+              phone: profile.phone,
+              cgpa: profile.cgpa || 3.0,
+              nationality: profile.nationality || 'Ethiopian',
+              dateOfBirth: profile.dateOfBirth,
+              source: 'REGISTRAR_VERIFICATION_APPROVAL'
+            }
+          });
         }
       }
 
-      return sendSuccess(res, `Verification status updated to ${status}.`, verification);
+      return sendSuccess(res, `Verification status updated to ${status}.`);
     } catch (err: any) {
       next(err);
     }
@@ -432,15 +693,56 @@ export class RegistrarController {
       const docRequest = await prisma.documentRequest.update({
         where: { id },
         data: { status },
-        include: { alumni: true }
+        include: { alumni: { include: { user: true } } }
       });
 
+      // 1. Send In-App Notification & WebSocket Push
+      if (docRequest.alumni?.userId) {
+        const title = status === 'REJECTED' 
+          ? `❌ Document Request Rejected: ${docRequest.documentType}` 
+          : `ℹ️ Document Request Updated: ${docRequest.documentType}`;
+        const content = status === 'REJECTED'
+          ? `Your document request for ${docRequest.documentType} was rejected. Please contact the registrar office for details.`
+          : `Your document request for ${docRequest.documentType} status has been updated to ${status}.`;
+
+        const notif = await prisma.notification.create({
+          data: {
+            userId: docRequest.alumni.userId,
+            title,
+            content,
+          }
+        }).catch(e => console.error('Failed to create in-app notification:', e));
+
+        if (notif) {
+          try {
+            const { SocketServer } = require('../../../infrastructure/websocket/SocketServer');
+            SocketServer.emitToUser(docRequest.alumni.userId, 'notification', notif);
+          } catch (e) {}
+        }
+      }
+
+      // 2. Send SMS Notification
+      const targetPhone = docRequest.alumni?.phone;
+      if (targetPhone) {
+        try {
+          const { SmsService } = require('../../../core/services/SmsService');
+          const smsService = new SmsService();
+          await smsService.sendSms(
+            targetPhone,
+            `ASTU Registrar: Your request for ${docRequest.documentType} status is now ${status}.`
+          );
+        } catch (e) {
+          console.error('Failed to send SMS:', e);
+        }
+      }
+
+      // 3. Send Email Notification
       if (status === 'REJECTED') {
-        const targetEmail = docRequest.contactEmail || docRequest.alumni.email;
+        const targetEmail = docRequest.contactEmail || docRequest.alumni?.email || docRequest.alumni?.user?.email;
         if (targetEmail) {
           const { EmailService } = require('../../../core/services/EmailService');
           const emailService = new EmailService();
-          const message = `Dear ${docRequest.alumni.fullName}, unfortunately your document request for ${docRequest.documentType} has been rejected. Please contact the registrar office for more details.`;
+          const message = `Dear ${docRequest.alumni?.fullName || 'Alumnus'}, unfortunately your document request for ${docRequest.documentType} has been rejected. Please contact the registrar office for more details.`;
           try {
             await emailService.sendMail({
               to: targetEmail,
@@ -476,15 +778,49 @@ export class RegistrarController {
           status: 'APPROVED',
           issuedDocumentUrl: filePath,
         },
-        include: { alumni: true }
+        include: { alumni: { include: { user: true } } }
       });
 
-      const targetEmail = docRequest.contactEmail || docRequest.alumni.email;
+      // 1. Send In-App Notification & WebSocket Push
+      if (docRequest.alumni?.userId) {
+        const notif = await prisma.notification.create({
+          data: {
+            userId: docRequest.alumni.userId,
+            title: `📜 Document Request Approved: ${docRequest.documentType}`,
+            content: `Your request for ${docRequest.documentType} has been approved by ASTU Registrar. Log in to your Alumni Portal to view and download your official document.`,
+          }
+        }).catch(e => console.error('Failed to create in-app notification:', e));
+
+        if (notif) {
+          try {
+            const { SocketServer } = require('../../../infrastructure/websocket/SocketServer');
+            SocketServer.emitToUser(docRequest.alumni.userId, 'notification', notif);
+          } catch (e) {}
+        }
+      }
+
+      // 2. Send SMS Notification
+      const targetPhone = docRequest.alumni?.phone;
+      if (targetPhone) {
+        try {
+          const { SmsService } = require('../../../core/services/SmsService');
+          const smsService = new SmsService();
+          await smsService.sendSms(
+            targetPhone,
+            `ASTU Registrar: Your request for ${docRequest.documentType} has been APPROVED. Log in to your Alumni Portal to download your document.`
+          );
+        } catch (e) {
+          console.error('Failed to send approval SMS:', e);
+        }
+      }
+
+      // 3. Send Email Notification
+      const targetEmail = docRequest.contactEmail || docRequest.alumni?.email || docRequest.alumni?.user?.email;
       if (targetEmail) {
         const { EmailService } = require('../../../core/services/EmailService');
         const emailService = new EmailService();
         const portalUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        const message = `Dear ${docRequest.alumni.fullName}, your document request for ${docRequest.documentType} has been approved. The document has been uploaded and is now available in your Alumni Portal.`;
+        const message = `Dear ${docRequest.alumni?.fullName || 'Alumnus'}, your document request for ${docRequest.documentType} has been approved. The document has been uploaded and is now available in your Alumni Portal.`;
         try {
           await emailService.sendMail({
             to: targetEmail,

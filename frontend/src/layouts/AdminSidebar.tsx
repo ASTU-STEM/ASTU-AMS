@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Heart,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   MessageSquareText,
   PanelLeftClose,
@@ -43,6 +44,7 @@ interface EnhancedNavItem extends AdminNavItem {
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard, exact: true, section: 'main', tooltip: 'Operational command center' },
   { label: 'Messages', path: '/admin/messages', icon: MessageSquareText, section: 'main', tooltip: 'ASTU_AMS direct messaging hub' },
+  { label: 'Support Desk', path: '/admin/support-tickets', icon: LifeBuoy, section: 'system', tooltip: 'User support tickets & help desk' },
   { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield, section: 'system', tooltip: 'Advanced system modules' },
   { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart, section: 'system', tooltip: 'Generate & export reports' },
   { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', tooltip: 'Pending verifications' },

@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { registrarService } from '../services/registrar.service';
 
 interface DataIntegrationTabProps {
   onBatchInsert: (records: any[]) => void;
 }
 
 interface ImportHistoryEntry {
-  id: number;
+  id: string | number;
   timestamp: string;
   fileName: string;
   totalRecords: number;
@@ -17,6 +18,7 @@ interface ImportHistoryEntry {
 
 export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchInsert }) => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string>('');
   const [isValidating, setIsValidating] = useState(false);
   const [validationReport, setValidationReport] = useState<{
     total: number;
@@ -26,13 +28,101 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
     records: any[];
   } | null>(null);
 
+  const [selectedBatchFilter, setSelectedBatchFilter] = useState<string>('ALL');
+
+  const getBatchBreakdown = (records: any[]) => {
+    const groups: { [batchYear: string]: number } = {};
+    records.forEach(r => {
+      const year = String(r.graduationYear || 'Unspecified').trim();
+      groups[year] = (groups[year] || 0) + 1;
+    });
+    return groups;
+  };
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'done'>('idle');
   const [activeStep, setActiveStep] = useState<'upload' | 'validate' | 'import'>('upload');
-  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([
-    { id: 3, timestamp: '2026-05-28 14:30', fileName: 'graduates_batch_2024_v2.csv', totalRecords: 124, importedRecords: 118, duplicates: 6, status: 'Partial' },
-    { id: 2, timestamp: '2026-05-15 09:15', fileName: 'cse_graduates_2024.xlsx', totalRecords: 87, importedRecords: 87, duplicates: 0, status: 'Success' },
-    { id: 1, timestamp: '2026-04-30 11:00', fileName: 'ece_batch_2023.csv', totalRecords: 52, importedRecords: 48, duplicates: 4, status: 'Partial' },
-  ]);
+  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([]);
+
+  // Fetch real import history logs from DB
+  const loadImportHistory = async () => {
+    try {
+      const logs = await registrarService.getLogs();
+      if (Array.isArray(logs)) {
+        const formatted = logs.map((log: any) => ({
+          id: log.id,
+          timestamp: log.syncedAt ? new Date(log.syncedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent',
+          fileName: log.fileName || 'sis_batch_import.csv',
+          totalRecords: log.total || log.recordsCount || 0,
+          importedRecords: log.imported || log.recordsCount || 0,
+          duplicates: log.duplicates || 0,
+          status: (log.status === 'SUCCESS' ? 'Success' : log.status === 'PARTIAL' ? 'Partial' : 'Failed') as any
+        }));
+        setImportHistory(formatted);
+      }
+    } catch (e) {
+      console.error('Failed to load import history logs:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadImportHistory();
+  }, []);
+
+  const runValidationEngine = async (text: string, fileObj: File) => {
+    if (!text) return;
+    setIsValidating(true);
+
+    try {
+      const existingGraduates = await registrarService.getGraduates();
+      const existingIds = new Set((existingGraduates || []).map((g: any) => String(g.studentId || '').trim()));
+
+      const parsedRecords = parseCsvContent(text);
+      const errorsList: string[] = [];
+
+      let validCount = 0;
+      let dupCount = 0;
+
+      const validatedRecords = parsedRecords.map((r, index) => {
+        const cleanId = String(r.studentId || '').trim();
+        const isDuplicate = existingIds.has(cleanId);
+        const missingFields = [];
+        if (!r.studentId) missingFields.push('StudentID');
+        if (!r.fullName) missingFields.push('FullName');
+        if (!r.department) missingFields.push('Department');
+
+        if (missingFields.length > 0) {
+          errorsList.push(`Row ${index + 1}: Missing required field(s) (${missingFields.join(', ')})`);
+        }
+        if (isDuplicate) {
+          dupCount++;
+          errorsList.push(`Row ${index + 1}: Student ID "${r.studentId}" already exists in ASTU-SIS database (Duplicate Detected).`);
+        } else if (missingFields.length === 0) {
+          validCount++;
+        }
+
+        return {
+          ...r,
+          isDuplicate,
+          isValid: !isDuplicate && missingFields.length === 0
+        };
+      });
+
+      setValidationReport({
+        total: parsedRecords.length,
+        valid: validCount,
+        duplicates: dupCount,
+        errors: errorsList,
+        records: validatedRecords
+      });
+
+      setActiveStep('validate');
+      toast.success(`SIS Validation complete: ${validCount} valid, ${dupCount} duplicates.`);
+    } catch (e) {
+      console.error('Validation engine error:', e);
+      toast.error('Failed to execute SIS validation checks');
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,14 +131,22 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
       setValidationReport(null);
       setProcessingStatus('idle');
       setActiveStep('validate');
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const content = (event.target?.result as string) || '';
+        setFileContent(content);
+        await runValidationEngine(content, file);
+      };
+      reader.readAsText(file);
       toast.success(`Loaded file: ${file.name}`);
     }
   };
 
   const handleDownloadTemplate = () => {
-    const template = `StudentID,FullName,Email,Department,GraduationYear,CGPA
-UG/12345/14,John Doe,john.doe@astu.edu.et,Computer Science and Engineering,2024,3.50
-UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineering,2024,3.75`;
+    const template = `StudentID,FullName,Email,Phone,Nationality,DateOfBirth,Department,GraduationYear,CGPA
+UG/12345/14,John Doe,john.doe@gmail.com,+251911223344,Ethiopian,1999-05-14,Computer Science and Engineering,2024,3.50
+UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,Electrical and Computer Engineering,2024,3.75`;
     const blob = new Blob([template], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -56,65 +154,89 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
     a.download = 'sis_import_template.csv';
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Template downloaded.');
+    toast.success('Template containing all 9 Registrar fields downloaded.');
   };
 
-  const handleRunValidation = () => {
-    if (!csvFile) return;
-    setIsValidating(true);
+  const parseCsvContent = (text: string) => {
+    const lines = text.split(/\r\n|\n/).filter(line => line.trim().length > 0);
+    if (lines.length === 0) return [];
 
-    setTimeout(() => {
-      const mockRecords = [
-        { studentId: 'UG/19082/14', fullName: 'Solomon Kebede', email: 'solomon.k@astu.edu.et', department: 'Computer Science and Engineering', graduationYear: '2024', cgpa: '3.72' },
-        { studentId: 'UG/12839/14', fullName: 'Abebe Bikila', email: 'abebe.b@gmail.com', department: 'Computer Science and Engineering', graduationYear: '2024', cgpa: '3.78' },
-        { studentId: 'UG/14299/14', fullName: 'Hiwot Tadesse', email: 'hiwot.t@astu.edu.et', department: 'Electrical and Computer Engineering', graduationYear: '2024', cgpa: '3.95' },
-        { studentId: 'UG/18029/14', fullName: 'Mered Girma', email: 'mered.g@astu.edu.et', department: 'Chemical Engineering', graduationYear: '2024', cgpa: '2.40' },
-      ];
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    const records: any[] = [];
 
-      setValidationReport({
-        total: 4,
-        valid: 3,
-        duplicates: 1,
-        errors: ['Row 2 Error: Student ID "UG/12839/14" already exists in ASTU-SIS database (Duplicate Detected).'],
-        records: mockRecords
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+      if (values.length < 2) continue;
+
+      const row: any = {};
+      headers.forEach((h, idx) => {
+        const key = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const val = values[idx] || '';
+        if (key.includes('student') || key.includes('id')) row.studentId = val;
+        else if (key.includes('fullname') || key.includes('name')) row.fullName = val;
+        else if (key.includes('email')) row.email = val;
+        else if (key.includes('phone')) row.phone = val;
+        else if (key.includes('nationality')) row.nationality = val;
+        else if (key.includes('dob') || key.includes('birth')) row.dateOfBirth = val;
+        else if (key.includes('dept') || key.includes('department')) row.department = val;
+        else if (key.includes('year') || key.includes('batch') || key.includes('grad')) row.graduationYear = val;
+        else if (key.includes('cgpa') || key.includes('gpa')) row.cgpa = val;
       });
-      setIsValidating(false);
-      setActiveStep('import');
-      toast.success('SIS validation engine check complete.');
-    }, 1500);
+
+      if (!row.studentId && values[0]) row.studentId = values[0];
+      if (!row.fullName && values[1]) row.fullName = values[1];
+      if (!row.department && values[3]) row.department = values[3];
+      if (!row.graduationYear && values[4]) row.graduationYear = values[4];
+      if (!row.cgpa && values[5]) row.cgpa = values[5];
+
+      if (row.studentId || row.fullName) {
+        records.push(row);
+      }
+    }
+    return records;
   };
 
-  const handleProcessBatch = () => {
-    if (!validationReport) return;
+  const handleRunValidation = async () => {
+    if (!csvFile || !fileContent) return;
+    await runValidationEngine(fileContent, csvFile);
+  };
+
+  const handleProcessBatch = async () => {
+    if (!validationReport || !csvFile) return;
+    setActiveStep('import');
     setProcessingStatus('processing');
 
-    setTimeout(() => {
-      const validToInsert = validationReport.records.filter(r => r.studentId !== 'UG/12839/14');
-      onBatchInsert(validToInsert.map(r => ({
-        studentId: r.studentId,
-        fullName: r.fullName,
-        email: r.email,
-        department: r.department,
-        graduationYear: r.graduationYear,
-        cgpa: r.cgpa
-      })));
+    try {
+      const validRecords = validationReport.records
+        .filter(r => r.isValid)
+        .map(r => ({
+          studentId: r.studentId,
+          fullName: r.fullName,
+          email: r.email || undefined,
+          phone: r.phone || undefined,
+          nationality: r.nationality || undefined,
+          dateOfBirth: r.dateOfBirth || undefined,
+          department: r.department,
+          graduationYear: r.graduationYear || new Date().getFullYear(),
+          cgpa: r.cgpa || 3.0
+        }));
+
+      await registrarService.importBatch(validRecords, csvFile.name);
+      onBatchInsert(validRecords);
 
       setProcessingStatus('done');
-      setImportHistory(prev => [{
-        id: Date.now(),
-        timestamp: new Date().toLocaleString(),
-        fileName: csvFile?.name || 'unknown',
-        totalRecords: validationReport.total,
-        importedRecords: validToInsert.length,
-        duplicates: validationReport.duplicates,
-        status: validationReport.duplicates > 0 ? 'Partial' : 'Success'
-      }, ...prev]);
-      toast.success(`Successfully registered ${validToInsert.length} alumni accounts and generated activation emails!`);
-    }, 2000);
+      await loadImportHistory();
+      toast.success(`Successfully registered ${validRecords.length} SIS graduate records to database!`);
+    } catch (e) {
+      console.error('Failed to commit batch import:', e);
+      toast.error('Failed to process batch import');
+      setProcessingStatus('idle');
+    }
   };
 
   const handleReset = () => {
     setCsvFile(null);
+    setFileContent('');
     setValidationReport(null);
     setProcessingStatus('idle');
     setActiveStep('upload');
@@ -230,6 +352,45 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
                 </div>
               </div>
 
+              {/* Automatic Batch Categorization Breakdown Banner */}
+              {validationReport.records.length > 0 && (
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-astu-navy">auto_awesome</span>
+                      Automatic Batch Categorization Breakdown
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-semibold">Categorized by Graduation Year</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedBatchFilter('ALL')}
+                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                        selectedBatchFilter === 'ALL'
+                          ? 'bg-astu-navy text-white shadow-sm'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      All Batches ({validationReport.records.length})
+                    </button>
+                    {Object.entries(getBatchBreakdown(validationReport.records)).map(([batchYear, count]) => (
+                      <button
+                        key={batchYear}
+                        onClick={() => setSelectedBatchFilter(batchYear)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          selectedBatchFilter === batchYear
+                            ? 'bg-astu-navy text-white shadow-sm'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>🎓 Batch {batchYear}</span>
+                        <span className="px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full text-[10px]">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {validationReport.errors.length > 0 && (
                 <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
                   <p className="font-bold text-red-700 flex items-center gap-1.5 text-xs mb-2">
@@ -250,26 +411,30 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
                       <th className="p-3">Student ID</th>
                       <th className="p-3">Full Name</th>
                       <th className="p-3">Department</th>
+                      <th className="p-3">Batch</th>
                       <th className="p-3">CGPA</th>
                       <th className="p-3">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {validationReport.records.map((r, i) => (
-                      <tr key={i} className={r.studentId === 'UG/12839/14' ? 'bg-red-50/50' : 'hover:bg-gray-50/50'}>
-                        <td className="p-3 font-mono font-bold">{r.studentId}</td>
-                        <td className="p-3 font-medium">{r.fullName}</td>
-                        <td className="p-3 text-gray-600">{r.department}</td>
-                        <td className="p-3 font-semibold">{r.cgpa}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
-                            r.studentId === 'UG/12839/14' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
-                          }`}>
-                            {r.studentId === 'UG/12839/14' ? 'Duplicate' : 'Valid'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {validationReport.records
+                      .filter(r => selectedBatchFilter === 'ALL' || String(r.graduationYear || 'Unspecified').trim() === selectedBatchFilter)
+                      .map((r, i) => (
+                        <tr key={i} className={r.isDuplicate ? 'bg-red-50/50' : 'hover:bg-gray-50/50'}>
+                          <td className="p-3 font-mono font-bold">{r.studentId}</td>
+                          <td className="p-3 font-medium">{r.fullName}</td>
+                          <td className="p-3 text-gray-600">{r.department}</td>
+                          <td className="p-3 text-gray-600 font-semibold">{r.graduationYear || '2024'}</td>
+                          <td className="p-3 font-semibold">{r.cgpa}</td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                              r.isDuplicate ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
+                            }`}>
+                              {r.isDuplicate ? 'Duplicate' : 'Valid'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -290,7 +455,7 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
                     {processingStatus === 'processing' ? (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-                        Processing batch import and generating activation emails...
+                        Processing batch import and saving to database...
                       </>
                     ) : (
                       <>
@@ -342,24 +507,30 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {importHistory.map(entry => (
-                <tr key={entry.id} className="hover:bg-gray-50/50">
-                  <td className="py-3 pr-2 text-gray-500">{entry.timestamp}</td>
-                  <td className="py-3 pr-2 font-medium text-gray-800">{entry.fileName}</td>
-                  <td className="py-3 pr-2 font-semibold">{entry.totalRecords}</td>
-                  <td className="py-3 pr-2 text-emerald-600 font-bold">{entry.importedRecords}</td>
-                  <td className="py-3 pr-2 text-amber-600 font-bold">{entry.duplicates}</td>
-                  <td className="py-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                      entry.status === 'Success' ? 'bg-emerald-100 text-emerald-700' :
-                      entry.status === 'Partial' ? 'bg-amber-100 text-amber-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {entry.status}
-                    </span>
-                  </td>
+              {importHistory.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-6 text-center text-gray-400 italic">No previous import logs found in database.</td>
                 </tr>
-              ))}
+              ) : (
+                importHistory.map(entry => (
+                  <tr key={entry.id} className="hover:bg-gray-50/50">
+                    <td className="py-3 pr-2 text-gray-500">{entry.timestamp}</td>
+                    <td className="py-3 pr-2 font-medium text-gray-800">{entry.fileName}</td>
+                    <td className="py-3 pr-2 font-semibold">{entry.totalRecords}</td>
+                    <td className="py-3 pr-2 text-emerald-600 font-bold">{entry.importedRecords}</td>
+                    <td className="py-3 pr-2 text-amber-600 font-bold">{entry.duplicates}</td>
+                    <td className="py-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                        entry.status === 'Success' ? 'bg-emerald-100 text-emerald-700' :
+                        entry.status === 'Partial' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {entry.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

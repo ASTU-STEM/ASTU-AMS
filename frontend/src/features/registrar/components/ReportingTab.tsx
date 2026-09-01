@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 
 interface ScheduledReport {
@@ -10,7 +10,11 @@ interface ScheduledReport {
   status: 'Active' | 'Paused' | 'Completed';
 }
 
-export const ReportingTab: React.FC = () => {
+interface ReportingTabProps {
+  graduates?: any[];
+}
+
+export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) => {
   const [activeReportTab, setActiveReportTab] = useState<'overview' | 'exports' | 'scheduled' | 'accreditation'>('overview');
   const [scheduledReports] = useState<ScheduledReport[]>([
     { id: 1, title: 'Monthly Graduate Tracer Summary', format: 'PDF', schedule: 'Every 1st of month', nextRun: 'Jun 1, 2026', status: 'Active' },
@@ -18,8 +22,92 @@ export const ReportingTab: React.FC = () => {
     { id: 3, title: 'Quarterly Accreditation Report', format: 'PDF', schedule: 'Quarterly (Q2)', nextRun: 'Jul 1, 2026', status: 'Paused' },
   ]);
 
+  // Compute dynamic stats directly from live database records
+  const totalGrads = graduates.length;
+
+  const avgCgpa = useMemo(() => {
+    if (!graduates.length) return '0.00';
+    const validGpas = graduates.map(g => parseFloat(g.cgpa)).filter(g => !isNaN(g) && g > 0);
+    if (!validGpas.length) return '0.00';
+    const sum = validGpas.reduce((a, b) => a + b, 0);
+    return (sum / validGpas.length).toFixed(2);
+  }, [graduates]);
+
+  const employmentRate = useMemo(() => {
+    if (!graduates.length) return '0.0%';
+    const activeOrEmployed = graduates.filter(g => g.status === 'Active' || g.identityVerified).length;
+    return `${Math.round((activeOrEmployed / graduates.length) * 100)}%`;
+  }, [graduates]);
+
+  const departmentPerformance = useMemo(() => {
+    const map = new Map<string, { count: number; sumCgpa: number }>();
+    graduates.forEach(g => {
+      const dept = g.department || 'Software Engineering';
+      const cgpaVal = parseFloat(g.cgpa) || 0;
+      if (!map.has(dept)) map.set(dept, { count: 0, sumCgpa: 0 });
+      const entry = map.get(dept)!;
+      entry.count += 1;
+      entry.sumCgpa += cgpaVal;
+    });
+
+    const colors = ['#002B5E', '#005C2B', '#00C853', '#FFB300', '#6366F1', '#EC4899', '#8B5CF6'];
+    return Array.from(map.entries()).map(([dept, data], idx) => {
+      const avg = data.count > 0 ? (data.sumCgpa / data.count).toFixed(2) : '0.00';
+      const percentage = Math.min(100, Math.max(15, Math.round((parseFloat(avg) / 4.0) * 100)));
+      return {
+        dept,
+        gpa: avg,
+        count: data.count,
+        width: `${percentage}%`,
+        color: colors[idx % colors.length]
+      };
+    });
+  }, [graduates]);
+
+  const destinationStats = useMemo(() => {
+    const total = graduates.length || 1;
+    const verifiedCount = graduates.filter(g => g.identityVerified).length;
+    const activeCount = graduates.filter(g => g.status === 'Active').length;
+    const seekingCount = graduates.filter(g => !g.identityVerified).length;
+    const otherCount = Math.max(0, total - verifiedCount);
+
+    return [
+      { status: 'Verified Graduates', count: String(verifiedCount), percent: `${Math.round((verifiedCount / total) * 100)}%`, color: '#00C853' },
+      { status: 'Active Registered Accounts', count: String(activeCount), percent: `${Math.round((activeCount / total) * 100)}%`, color: '#002B5E' },
+      { status: 'In Process / Active Tracer', count: String(otherCount), percent: `${Math.round((otherCount / total) * 100)}%`, color: '#FFB300' },
+      { status: 'Pending Verification Claim', count: String(seekingCount), percent: `${Math.round((seekingCount / total) * 100)}%`, color: '#FF6B00' },
+    ];
+  }, [graduates]);
+
+  const [exportCount, setExportCount] = useState<number>(() => {
+    const saved = localStorage.getItem('astu_data_exports_count');
+    return saved ? parseInt(saved, 10) : 1203;
+  });
+
   const handleExport = (format: 'PDF' | 'Excel' | 'Stata' | 'CSV', scope: string) => {
-    toast.success(`Generating ${format} report: ${scope}`, { duration: 2800 });
+    setExportCount(prev => {
+      const next = prev + 1;
+      localStorage.setItem('astu_data_exports_count', String(next));
+      return next;
+    });
+
+    if (format === 'CSV' || format === 'Excel') {
+      const headers = ['Student ID,Full Name,Email,Department,Graduation Year,CGPA,Verified,Status'];
+      const rows = graduates.map(g =>
+        `${g.studentId},"${g.fullName}",${g.email},"${g.department}",${g.graduationYear},${g.cgpa},${g.identityVerified},${g.status}`
+      );
+      const csv = [...headers, ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `astu_report_${scope.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.${format === 'CSV' ? 'csv' : 'xlsx'}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${graduates.length} records to ${format}!`);
+    } else {
+      toast.success(`Generating ${format} report: ${scope}`, { duration: 2800 });
+    }
   };
 
   const handleScheduleReport = () => {
@@ -27,6 +115,11 @@ export const ReportingTab: React.FC = () => {
   };
 
   const handleDownload = (title: string) => {
+    setExportCount(prev => {
+      const next = prev + 1;
+      localStorage.setItem('astu_data_exports_count', String(next));
+      return next;
+    });
     toast.success(`Downloading: ${title}`, { icon: '📥', duration: 2000 });
   };
 
@@ -58,13 +151,13 @@ export const ReportingTab: React.FC = () => {
       {/* Overview Tab */}
       {activeReportTab === 'overview' && (
         <>
-          {/* KPI Cards */}
+          {/* Dynamic KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Total Graduates Tracked', value: '2,847', change: '+184', trend: '↑' },
-              { label: 'Average CGPA', value: '3.41', change: '+0.12', trend: '↑' },
-              { label: 'Employment Rate', value: '78.4%', change: '+6.2%', trend: '↑' },
-              { label: 'Data Exports Generated', value: '1,203', change: '+231', trend: '↑' },
+              { label: 'Total Graduates Tracked', value: totalGrads.toLocaleString(), change: `Live Database`, trend: '✓' },
+              { label: 'Average CGPA', value: avgCgpa, change: `Live Calculation`, trend: '↑' },
+              { label: 'Employment Rate', value: employmentRate, change: `Real-time`, trend: '↑' },
+              { label: 'Data Exports Generated', value: exportCount.toLocaleString(), change: 'Live Counter', trend: '↑' },
             ].map((kpi, i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-all">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{kpi.label}</p>
@@ -82,21 +175,16 @@ export const ReportingTab: React.FC = () => {
               <div className="flex justify-between items-end mb-5">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">Department Performance</h3>
-                  <p className="text-xs text-gray-500">Average CGPA by Engineering College • Batch 2024</p>
+                  <p className="text-xs text-gray-500">Live Average CGPA by Department Roster</p>
                 </div>
-                <span className="text-[10px] px-3 py-1 bg-gray-100 rounded-lg font-bold text-gray-500">4 Departments</span>
+                <span className="text-[10px] px-3 py-1 bg-gray-100 rounded-lg font-bold text-gray-500">{departmentPerformance.length} Departments</span>
               </div>
               <div className="space-y-5">
-                {[
-                  { dept: 'Computer Science and Engineering', gpa: '3.62', width: '93%', color: '#002B5E' },
-                  { dept: 'Electrical and Computer Engineering', gpa: '3.48', width: '87%', color: '#005C2B' },
-                  { dept: 'Mechanical and Vehicle Engineering', gpa: '3.31', width: '82%', color: '#00C853' },
-                  { dept: 'Chemical Engineering', gpa: '3.18', width: '77%', color: '#FFB300' },
-                ].map((item, idx) => (
+                {departmentPerformance.map((item, idx) => (
                   <div key={idx}>
                     <div className="flex justify-between mb-1.5 text-xs">
-                      <span className="font-semibold text-gray-800">{item.dept}</span>
-                      <span className="font-bold text-astu-navy">{item.gpa}</span>
+                      <span className="font-semibold text-gray-800">{item.dept} <span className="text-gray-400 font-normal">({item.count} grads)</span></span>
+                      <span className="font-bold text-astu-navy">Avg CGPA: {item.gpa}</span>
                     </div>
                     <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-700"
@@ -108,15 +196,10 @@ export const ReportingTab: React.FC = () => {
             </div>
 
             <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-              <h3 className="text-lg font-bold mb-1">Graduate Destination 2024</h3>
-              <p className="text-xs text-gray-500 mb-5">Tracer Study Summary</p>
+              <h3 className="text-lg font-bold mb-1">Graduate Destination & Verification</h3>
+              <p className="text-xs text-gray-500 mb-5">Live Database Status Summary</p>
               <div className="space-y-3">
-                {[
-                  { status: 'Employed Full-Time', count: '412', percent: '62%', color: '#00C853' },
-                  { status: 'Pursuing MSc / PhD', count: '74', percent: '11%', color: '#002B5E' },
-                  { status: 'Entrepreneurship', count: '32', percent: '5%', color: '#FFB300' },
-                  { status: 'Still Seeking Placement', count: '142', percent: '22%', color: '#FF6B00' },
-                ].map((item, i) => (
+                {destinationStats.map((item, i) => (
                   <div key={i} className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 p-4 rounded-xl transition-all">
                     <div>
                       <p className="text-sm font-semibold text-gray-800">{item.status}</p>
@@ -131,21 +214,21 @@ export const ReportingTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Recent Reports */}
+          {/* Recent Reports & Quick Access */}
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-gray-900">Recent Reports & Quick Access</h3>
-              <button className="text-xs font-bold text-astu-navy hover:text-astu-navy/70 transition-all flex items-center gap-1">
+              <button onClick={() => setActiveReportTab('exports')} className="text-xs font-bold text-astu-navy hover:text-astu-navy/70 transition-all flex items-center gap-1">
                 View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { title: '2024 Graduate Tracer Study Full Report', type: 'PDF', date: 'May 28, 2026', size: '8.4 MB' },
+                { title: 'Graduate Tracer Study Full Report', type: 'PDF', date: 'May 28, 2026', size: '8.4 MB' },
                 { title: 'College of Engineering Performance Dashboard', type: 'Excel', date: 'May 22, 2026', size: '4.1 MB' },
-                { title: 'National Research Dataset – Batch 2023-24', type: 'Stata', date: 'May 15, 2026', size: '12.7 MB' },
+                { title: 'National Research Dataset Batch', type: 'CSV', date: 'May 15, 2026', size: '12.7 MB' },
               ].map((report, i) => (
-                <div key={i} onClick={() => handleDownload(report.title)}
+                <div key={i} onClick={() => handleExport(report.type as any, report.title)}
                   className="border border-gray-200 hover:border-emerald-400 p-5 rounded-xl transition-all group cursor-pointer hover:shadow-md">
                   <div className="flex justify-between mb-3">
                     <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 px-3 py-1 rounded-lg">{report.type}</span>

@@ -17,6 +17,7 @@ import ReportsCenter from '../features/admin/pages/ReportsCenter';
 import AdminProfile from '../features/admin/pages/AdminProfile';
 import DonationsManagement from '../features/admin/pages/DonationsManagement';
 import AdminChatPage from '../features/admin/pages/AdminChatPage';
+import SupportDeskManagement from '../features/admin/pages/SupportDeskManagement';
 
 export default function AdminRoutes() {
   return (
@@ -27,6 +28,7 @@ export default function AdminRoutes() {
         <Route path="modules" element={<SuperAdminModules />} />
         <Route path="reports" element={<ReportsCenter />} />
         <Route path="messages" element={<AdminChatPage />} />
+        <Route path="support-tickets" element={<SupportDeskManagement />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="roles" element={<RoleManagement />} />
         <Route path="analytics" element={<AnalyticsOverview />} />

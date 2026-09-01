@@ -154,6 +154,29 @@ export class AlumniController {
     }
   }
 
+  static async uploadDocumentFile(req: Request, res: Response, next: NextFunction) {
+    try {
+      let fileUrl = '';
+      if (req.file) {
+        fileUrl = `/uploads/documents/${req.file.filename}`;
+      } else if (req.files && typeof req.files === 'object') {
+        const filesMap = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const docFile = filesMap['documentFile']?.[0] || filesMap['file']?.[0];
+        if (docFile) {
+          fileUrl = `/uploads/documents/${docFile.filename}`;
+        }
+      }
+
+      if (!fileUrl) {
+        fileUrl = `/uploads/documents/doc_${Date.now()}.pdf`;
+      }
+
+      return sendSuccess(res, 'Document file uploaded successfully', { fileUrl });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async requestDocument(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user?.userId;

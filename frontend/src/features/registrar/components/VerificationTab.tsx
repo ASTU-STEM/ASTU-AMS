@@ -54,8 +54,11 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
 
   const getDocumentUrl = (path?: string) => {
     if (!path) return '';
-    if (path.startsWith('http')) return path;
-    return `${UPLOAD_BASE}/${path.replace(/^\//, '')}`;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const normPath = path.replace(/\\/g, '/');
+    const match = normPath.match(/uploads\/.*/i);
+    const cleanPath = match ? match[0] : normPath.replace(/^\//, '');
+    return `${UPLOAD_BASE}/${cleanPath}`;
   };
 
   const isImageFile = (url?: string) => {

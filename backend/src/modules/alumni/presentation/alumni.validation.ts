@@ -31,4 +31,5 @@ export const addExperienceSchema = z.object({
 export const documentRequestSchema = z.object({
   documentType: z.string().min(2, 'Document type is required'),
   additionalInstructions: z.string().optional().nullable(),
+  fileUrls: z.array(z.string()).optional(),
 });

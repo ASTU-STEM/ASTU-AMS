@@ -505,8 +505,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Full Name</label>
-                  <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className={inputClass} required />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Full Name</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input type="text" name="fullName" value={formData.fullName} className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`} readOnly disabled title="Full Name is synced from ASTU Registrar and cannot be edited in portal" />
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Email Address</label>
@@ -514,11 +517,14 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Phone Number</label>
-                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className={inputClass} />
+                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className={inputClass} placeholder="+251 9..." />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Student ID / Batch No.</label>
-                  <input type="text" name="studentId" value={formData.studentId} onChange={handleInputChange} className={`${inputClass} opacity-60 cursor-not-allowed`} readOnly />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Student ID / Batch No.</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input type="text" name="studentId" value={formData.studentId} className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`} readOnly disabled title="Student ID is synced from ASTU Registrar and cannot be edited in portal" />
                 </div>
               </div>
                   <div className="space-y-1.5">
@@ -537,7 +543,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       <input type="text" name="nationality" value={formData.nationality || ''} onChange={handleInputChange} className={inputClass} placeholder="e.g. Ethiopian" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Date of Birth</label>
+                      <div className="flex items-center justify-between">
+                        <label className={labelClass}>Date of Birth</label>
+                        <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                      </div>
                       <input
                         type="date"
                         name="dateOfBirth"
@@ -546,8 +555,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                             ? new Date(formData.dateOfBirth).toISOString().split('T')[0]
                             : ''
                         }
-                        onChange={(e) => setFormData(p => ({ ...p, dateOfBirth: e.target.value }))}
-                        className={inputClass}
+                        className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                        readOnly
+                        disabled
+                        title="Date of Birth is synced from ASTU Registrar record and cannot be edited in portal"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -594,26 +605,53 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div>
                 <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Academic Record</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Your ASTU academic information synced from the student information system.</p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Your ASTU official academic information synced from the Registrar Student Information System.</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Department</label>
-                  <select name="department" value={typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department} onChange={handleInputChange} className={inputClass}>
-                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                    <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
-                    <option value="Chemical Engineering">Chemical Engineering</option>
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Department</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="department"
+                    value={typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department}
+                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    readOnly
+                    disabled
+                    title="Department is synced from ASTU Registrar and cannot be edited in portal"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Graduation Batch</label>
-                  <input type="text" name="batch" value={formData.batch || (formData.graduationYear ? `${formData.graduationYear}` : '')} onChange={handleInputChange} className={inputClass} placeholder="e.g. 2024" />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Graduation Batch</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="batch"
+                    value={formData.batch || (formData.graduationYear ? `${formData.graduationYear}` : '')}
+                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    readOnly
+                    disabled
+                    title="Graduation Batch is synced from ASTU Registrar and cannot be edited in portal"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Final CGPA</label>
-                  <input type="text" name="cgpa" value={formData.cgpa} onChange={handleInputChange} className={inputClass} placeholder="e.g. 3.75" />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Final CGPA</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="cgpa"
+                    value={formData.cgpa}
+                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    readOnly
+                    disabled
+                    title="Final CGPA is synced from ASTU Registrar and cannot be edited in portal"
+                  />
                 </div>
               </div>
             </div>

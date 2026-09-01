@@ -142,11 +142,19 @@ export const alumniService = {
   },
 
   // ─── Documents ────────────────────────────────────────────────────────────
+  async uploadDocumentFile(file: File): Promise<{ fileUrl: string }> {
+    const formData = new FormData();
+    formData.append('documentFile', file);
+    return unwrap(await apiClient.post('/alumni/upload-document-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }));
+  },
+
   async getMyDocuments() {
     return unwrap(await apiClient.get('/alumni/document-requests'));
   },
 
-  async requestDocument(data: { documentType: string; additionalInstructions?: string }) {
+  async requestDocument(data: { documentType: string; additionalInstructions?: string; fileUrls?: string[] }) {
     return unwrap(await apiClient.post('/alumni/document-requests', data));
   },
 
