@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { GraduateRecord } from '../types/registrar.types';
 import toast from 'react-hot-toast';
 
