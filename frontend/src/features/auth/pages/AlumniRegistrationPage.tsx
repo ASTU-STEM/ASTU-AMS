@@ -20,26 +20,10 @@ const alumniRegistrationSchema = yup.object().shape({
     .string()
     .required('First name is required')
     .min(2, 'First name must be at least 2 characters'),
-  middleName: yup
-    .string()
-    .required('Middle name is required')
-    .min(2, 'Middle name must be at least 2 characters'),
   lastName: yup
     .string()
     .required('Last name is required')
     .min(2, 'Last name must be at least 2 characters'),
-  gender: yup
-    .string()
-    .required('Gender is required'),
-  educationalQualification: yup
-    .string()
-    .required('Educational qualification is required'),
-  workPlace: yup
-    .string()
-    .required('Work place is required'),
-  workPosition: yup
-    .string()
-    .required('Work position is required'),
   
   // Conditional validations based on hasNoAstuEmail
   hasNoAstuEmail: yup.boolean(),
@@ -275,21 +259,6 @@ export default function AlumniRegistrationPage() {
                   />
 
                   <FormField
-                    name="middleName"
-                    label="Middle Name *"
-                    type="text"
-                    placeholder="Enter your middle name"
-                    value={values.middleName}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.middleName}
-                    touched={touched.middleName}
-                    disabled={isLoading}
-                    required
-                    autoComplete="additional-name"
-                  />
-
-                  <FormField
                     name="lastName"
                     label="Last Name *"
                     type="text"
@@ -304,75 +273,63 @@ export default function AlumniRegistrationPage() {
                     autoComplete="family-name"
                   />
 
-                  <div>
-                    <FormField
-                      name="gender"
-                      label="Gender *"
-                      as="select"
-                      value={values.gender}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.gender}
-                      touched={touched.gender}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-on-surface-variant mb-1">Phone Number *</label>
+                    <PhoneInput
+                      international
+                      defaultCountry="ET"
+                      value={values.phone}
+                      onChange={(value) => setFieldValue('phone', value)}
+                      placeholder="+251 911 123 456"
                       disabled={isLoading}
-                      required
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </FormField>
+                    />
+                    {touched.phone && errors.phone && (
+                      <p className="text-xs text-astu-red">{errors.phone as string}</p>
+                    )}
                   </div>
 
+                  {/* Toggle Checkbox: I don't have ASTU email */}
                   <div>
-                    <FormField
-                      name="educationalQualification"
-                      label="Educational Qualification *"
-                      as="select"
-                      value={values.educationalQualification}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      error={errors.educationalQualification}
-                      touched={touched.educationalQualification}
-                      disabled={isLoading}
-                      required
-                    >
-                      <option value="">Select Qualification</option>
-                      <option value="Bachelor's">Bachelor's Degree</option>
-                      <option value="Master's">Master's Degree</option>
-                      <option value="PhD">PhD</option>
-                      <option value="Diploma">Diploma</option>
-                    </FormField>
+                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-slate-50 border border-outline-variant">
+                      <input
+                        id="hasNoAstuEmail"
+                        name="hasNoAstuEmail"
+                        type="checkbox"
+                        className="h-4.5 w-4.5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy"
+                        checked={values.hasNoAstuEmail}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFieldValue('hasNoAstuEmail', checked);
+                          if (checked) {
+                            setFieldValue('email', '');
+                          }
+                        }}
+                        disabled={isLoading}
+                      />
+                      <label htmlFor="hasNoAstuEmail" className="text-xs font-semibold text-astu-navy select-none cursor-pointer">
+                        I don't know / don't have my ASTU email
+                      </label>
+                    </div>
                   </div>
 
-                  <FormField
-                    name="workPlace"
-                    label="Work Place (Institution, City, Region) *"
-                    type="text"
-                    placeholder="Enter your work place"
-                    value={values.workPlace}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.workPlace}
-                    touched={touched.workPlace}
-                    disabled={isLoading}
-                    required
-                    autoComplete="organization"
-                  />
-
-                  <FormField
-                    name="workPosition"
-                    label="Work Position *"
-                    type="text"
-                    placeholder="Enter your work position"
-                    value={values.workPosition}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.workPosition}
-                    touched={touched.workPosition}
-                    disabled={isLoading}
-                    required
-                    autoComplete="organization-title"
-                  />
+                  {/* ASTU Email Form Field (conditionally rendered) */}
+                  {!values.hasNoAstuEmail && (
+                    <FormField
+                      name="email"
+                      label="ASTU University Email *"
+                      type="email"
+                      placeholder="yourname@astu.edu.et"
+                      value={values.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={errors.email}
+                      touched={touched.email}
+                      disabled={isLoading}
+                      required
+                      helpText="Institutional email addresses must end with @astu.edu.et or @astust.edu.et"
+                      autoComplete="email"
+                    />
+                  )}
                 </div>
 
                 {/* Right Column */}
@@ -413,80 +370,33 @@ export default function AlumniRegistrationPage() {
                     </FormField>
                   </div>
 
-                  <FormField
-                    name="fieldOfStudy"
-                    label="Field of Study *"
-                    type="text"
-                    placeholder="Enter your field of study"
-                    value={values.fieldOfStudy}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={errors.fieldOfStudy}
-                    touched={touched.fieldOfStudy}
-                    disabled={isLoading}
-                    required
-                    autoComplete="organization"
-                  />
-
-                  {/* Toggle Checkbox: I don't have ASTU email */}
                   <div>
-                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-slate-50 border border-outline-variant">
-                      <input
-                        id="hasNoAstuEmail"
-                        name="hasNoAstuEmail"
-                        type="checkbox"
-                        className="h-4.5 w-4.5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy"
-                        checked={values.hasNoAstuEmail}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFieldValue('hasNoAstuEmail', checked);
-                          // Clear email when checkbox is checked; navigation handled after form submission
-                          if (checked) {
-                            setFieldValue('email', '');
-                          }
-                        }}
-                        disabled={isLoading}
-                      />
-                      <label htmlFor="hasNoAstuEmail" className="text-xs font-semibold text-astu-navy select-none cursor-pointer">
-                        I don't know / don't have my ASTU email
-                      </label>
-                    </div>
-
-
-                  </div>
-
-                  {/* ASTU Email Form Field (conditionally rendered) */}
-                  {!values.hasNoAstuEmail && (
                     <FormField
-                      name="email"
-                      label="ASTU University Email *"
-                      type="email"
-                      placeholder="yourname@astu.edu.et"
-                      value={values.email}
+                      name="fieldOfStudy"
+                      label="Field of Study / Department *"
+                      as="select"
+                      value={values.fieldOfStudy}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={errors.email}
-                      touched={touched.email}
+                      error={errors.fieldOfStudy}
+                      touched={touched.fieldOfStudy}
                       disabled={isLoading}
                       required
-                      helpText="Institutional email addresses must end with @astu.edu.et or @astust.edu.et"
-                      autoComplete="email"
-                    />
-                  )}
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-on-surface-variant mb-1">Phone Number *</label>
-                    <PhoneInput
-                      international
-                      defaultCountry="ET"
-                      value={values.phone}
-                      onChange={(value) => setFieldValue('phone', value)}
-                      placeholder="+251 911 123 456"
-                      disabled={isLoading}
-                    />
-                    {touched.phone && errors.phone && (
-                      <p className="text-xs text-astu-red">{errors.phone as string}</p>
-                    )}
+                    >
+                      <option value="">Select Field of Study / Department</option>
+                      <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                      <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
+                      <option value="Civil Engineering">Civil Engineering</option>
+                      <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
+                      <option value="Chemical Engineering">Chemical Engineering</option>
+                      <option value="Architecture and Urban Planning">Architecture and Urban Planning</option>
+                      <option value="Water Resources and Environmental Engineering">Water Resources and Environmental Engineering</option>
+                      <option value="Materials Science and Engineering">Materials Science and Engineering</option>
+                      <option value="Applied Physics">Applied Physics</option>
+                      <option value="Applied Mathematics">Applied Mathematics</option>
+                      <option value="Industrial Engineering">Industrial Engineering</option>
+                      <option value="Other / Interdisciplinary Program">Other / Interdisciplinary Program</option>
+                    </FormField>
                   </div>
 
                   {/* Create Password */}

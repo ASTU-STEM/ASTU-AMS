@@ -5,8 +5,27 @@ import { requireRoles } from '../../../core/middleware/role.middleware';
 import { Role } from '@prisma/client';
 import { asyncHandler } from '../../../core/utils/asyncHandler';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
-const upload = multer({ dest: 'uploads/' });
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (_req: any, _file: any, cb: any) => {
+    cb(null, UPLOADS_DIR);
+  },
+  filename: (_req: any, file: Express.Multer.File, cb: any) => {
+    const ext = path.extname(file.originalname) || '.pdf';
+    const cleanName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e4);
+    cb(null, `${cleanName}_${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({ storage });
 const router = Router();
 
 // Public verification route for registration

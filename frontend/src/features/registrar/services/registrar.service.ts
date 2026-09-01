@@ -40,17 +40,28 @@ export const registrarService = {
   async getGraduates(): Promise<any[]> {
     try {
       const response = await get<{ data: any[] }>('/registrar/sis-records');
-      return response.data;
+      return (response && Array.isArray(response.data)) ? response.data : [];
     } catch (error) {
       console.error('Error fetching SIS records:', error);
-      throw error;
+      return [];
+    }
+  },
+
+  // All Registered Alumni Accounts
+  async getAllRegisteredAlumni(): Promise<any[]> {
+    try {
+      const response = await get<{ data: any[] }>('/registrar/alumni');
+      return (response && Array.isArray(response.data)) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching registered alumni:', error);
+      return [];
     }
   },
 
   // Batch Import
-  async importBatch(records: BatchImportRecord[]): Promise<BatchImportResult> {
+  async importBatch(records: any[], fileName?: string): Promise<BatchImportResult> {
     try {
-      const response = await post<{ data: any }>('/registrar/batch-import', { records });
+      const response = await post<{ data: any }>('/registrar/batch-import', { records, fileName });
       return {
         accepted: response.data.imported,
         duplicates: response.data.duplicates,
@@ -60,6 +71,16 @@ export const registrarService = {
     } catch (error) {
       console.error('Error importing batch:', error);
       throw error;
+    }
+  },
+
+  async getLogs(): Promise<any[]> {
+    try {
+      const response = await get<{ data: any[] }>('/registrar/logs');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching registrar sync logs:', error);
+      return [];
     }
   },
 
