@@ -73,9 +73,9 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
   const filteredGraduates = useMemo(() => {
     return graduates.filter(g => {
       // 1. Search Filter
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         `${g.studentId} ${g.fullName} ${g.email} ${g.department}`.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       // 2. Department Filter
       const matchesDept = departmentFilter === 'All' || g.department === departmentFilter;
 
@@ -83,12 +83,12 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       const matchesBatch = batchFilter === 'All' || String(g.graduationYear) === batchFilter;
 
       // 4. Verification Identity Filter
-      const matchesVerification = verificationFilter === 'All' || 
+      const matchesVerification = verificationFilter === 'All' ||
         (verificationFilter === 'Verified' && g.identityVerified) ||
         (verificationFilter === 'Unverified' && !g.identityVerified);
 
       // 5. Account Status Filter
-      const matchesStatus = statusFilter === 'All' || 
+      const matchesStatus = statusFilter === 'All' ||
         (statusFilter === 'Active' && (g.status === 'Active' || (g.status as string) === 'ACTIVE')) ||
         (statusFilter === 'Inactive' && ((g.status as string) === 'Inactive' || (g.status as string) === 'INACTIVE')) ||
         (statusFilter === 'Archived' && g.status === 'Archived');
@@ -145,7 +145,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     deptBreakdown: departments.filter(d => d !== 'All').map(d => ({
       name: d,
       count: graduates.filter(g => g.department === d).length,
-      avgCgpa: (graduates.filter(g => g.department === d).reduce((sum, g) => sum + parseFloat(g.cgpa), 0) / 
+      avgCgpa: (graduates.filter(g => g.department === d).reduce((sum, g) => sum + parseFloat(g.cgpa), 0) /
         (graduates.filter(g => g.department === d).length || 1)).toFixed(2)
     }))
   }), [graduates, departments]);
@@ -216,20 +216,208 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     );
   };
 
-  const handleExportCSV = () => {
-    const headers = ['Student ID,Full Name,Email,Department,Graduation Year,CGPA,Verified,Status'];
-    const rows = filteredGraduates.map(g =>
-      `${g.studentId},"${g.fullName}",${g.email},"${g.department}",${g.graduationYear},${g.cgpa},${g.identityVerified},${g.status}`
-    );
-    const csv = [...headers, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+  // Advanced CSV Export Modal State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportFilters, setExportFilters] = useState({
+    search: '',
+    batchYear: 'All',
+    department: 'All',
+    verification: 'All',
+    status: 'All',
+    cgpaTier: 'All',
+    gender: 'All',
+    employmentStatus: 'All',
+    source: 'All',
+    dateRange: 'All'
+  });
+
+  const [exportColumns, setExportColumns] = useState({
+    studentId: true,
+    fullName: true,
+    email: true,
+    phone: true,
+    department: true,
+    graduationYear: true,
+    cgpa: true,
+    identityVerified: true,
+    status: true,
+    gender: false,
+    nationality: false,
+    source: false
+  });
+
+  const DEFAULT_EXPORT_COLUMNS = [
+    { key: 'studentId', label: 'Student ID' },
+    { key: 'fullName', label: 'Full Name' },
+    { key: 'email', label: 'Email Address' },
+    { key: 'phone', label: 'Phone Number' },
+    { key: 'department', label: 'Department' },
+    { key: 'graduationYear', label: 'Graduation Year' },
+    { key: 'cgpa', label: 'CGPA' },
+    { key: 'identityVerified', label: 'Verification Status' },
+    { key: 'status', label: 'Account Status' },
+    { key: 'gender', label: 'Gender' },
+    { key: 'nationality', label: 'Nationality' },
+    { key: 'source', label: 'Data Source' }
+  ];
+
+  const [columnSequence, setColumnSequence] = useState(DEFAULT_EXPORT_COLUMNS);
+
+  const moveColumnSequence = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= columnSequence.length) return;
+    const updated = [...columnSequence];
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+    setColumnSequence(updated);
+  };
+
+  const resetColumnSequence = () => {
+    setColumnSequence(DEFAULT_EXPORT_COLUMNS);
+  };
+
+  // Calculate live matching records for Export Modal based on 10+ criteria
+  const exportMatchedRecords = useMemo(() => {
+    return graduates.filter(g => {
+      // 1. Search Query
+      const matchSearch = !exportFilters.search ||
+        `${g.studentId} ${g.fullName} ${g.email} ${g.department}`.toLowerCase().includes(exportFilters.search.toLowerCase());
+
+      // 2. Batch Year
+      const matchBatch = exportFilters.batchYear === 'All' || String(g.graduationYear) === exportFilters.batchYear;
+
+      // 3. Department
+      const matchDept = exportFilters.department === 'All' || g.department === exportFilters.department;
+
+      // 4. Verification
+      const matchVerif = exportFilters.verification === 'All' ||
+        (exportFilters.verification === 'Verified' && g.identityVerified) ||
+        (exportFilters.verification === 'Unverified' && !g.identityVerified);
+
+      // 5. Account Status
+      const matchStatus = exportFilters.status === 'All' ||
+        (exportFilters.status === 'Active' && (g.status === 'Active' || g.status === 'ACTIVE')) ||
+        (exportFilters.status === 'Inactive' && (g.status === 'Inactive' || g.status === 'INACTIVE')) ||
+        (exportFilters.status === 'Archived' && g.status === 'Archived');
+
+      // 6. CGPA Tier
+      const cgpaVal = parseFloat(g.cgpa) || 0;
+      const matchCgpa = exportFilters.cgpaTier === 'All' ||
+        (exportFilters.cgpaTier === '3.5+' && cgpaVal >= 3.5) ||
+        (exportFilters.cgpaTier === '3.0-3.49' && cgpaVal >= 3.0 && cgpaVal < 3.5) ||
+        (exportFilters.cgpaTier === '<3.0' && cgpaVal < 3.0);
+
+      // 7. Gender
+      const matchGender = exportFilters.gender === 'All' ||
+        (g.gender && g.gender.toLowerCase() === exportFilters.gender.toLowerCase());
+
+      // 8. Employment Status
+      const matchEmp = exportFilters.employmentStatus === 'All' ||
+        (g.employmentStatus && g.employmentStatus.toLowerCase() === exportFilters.employmentStatus.toLowerCase());
+
+      // 9. Source / Origin
+      const matchSource = exportFilters.source === 'All' ||
+        (g.source && g.source.toUpperCase().includes(exportFilters.source.toUpperCase()));
+
+      // 10. Date Range / Timeframe
+      let matchDate = true;
+      if (exportFilters.dateRange !== 'All' && g.createdAt) {
+        const createdTime = new Date(g.createdAt).getTime();
+        const now = Date.now();
+        if (exportFilters.dateRange === '30d') matchDate = (now - createdTime) <= 30 * 86400000;
+        else if (exportFilters.dateRange === '90d') matchDate = (now - createdTime) <= 90 * 86400000;
+        else if (exportFilters.dateRange === 'this_year') matchDate = new Date(g.createdAt).getFullYear() === new Date().getFullYear();
+      }
+
+      return matchSearch && matchBatch && matchDept && matchVerif && matchStatus && matchCgpa && matchGender && matchEmp && matchSource && matchDate;
+    });
+  }, [graduates, exportFilters]);
+
+  const resetExportFilters = () => {
+    setExportFilters({
+      search: '',
+      batchYear: 'All',
+      department: 'All',
+      verification: 'All',
+      status: 'All',
+      cgpaTier: 'All',
+      gender: 'All',
+      employmentStatus: 'All',
+      source: 'All',
+      dateRange: 'All'
+    });
+  };
+
+  const toggleAllExportColumns = (enable: boolean) => {
+    setExportColumns({
+      studentId: enable,
+      fullName: enable,
+      email: enable,
+      phone: enable,
+      department: enable,
+      graduationYear: enable,
+      cgpa: enable,
+      identityVerified: enable,
+      status: enable,
+      gender: enable,
+      nationality: enable,
+      source: enable
+    });
+  };
+
+  const executeExportCSV = () => {
+    if (exportMatchedRecords.length === 0) {
+      toast.error('No graduate records match your selected export filters.');
+      return;
+    }
+
+    const activeCols = columnSequence.filter(col => (exportColumns as any)[col.key]);
+    if (activeCols.length === 0) {
+      toast.error('Please select at least one column to export.');
+      return;
+    }
+
+    const columnLabels: Record<string, string> = {
+      studentId: 'Student ID',
+      fullName: 'Full Name',
+      email: 'Email Address',
+      phone: 'Phone Number',
+      department: 'Department',
+      graduationYear: 'Graduation Year',
+      cgpa: 'CGPA',
+      identityVerified: 'Verification Status',
+      status: 'Account Status',
+      gender: 'Gender',
+      nationality: 'Nationality',
+      source: 'Data Origin / Source'
+    };
+
+    const headers = activeCols.map(col => `"${columnLabels[col.key] || col.label}"`).join(',');
+
+    const rows = exportMatchedRecords.map(g => {
+      return activeCols.map(col => {
+        let val: any = (g as any)[col.key];
+        if (col.key === 'identityVerified') val = g.identityVerified ? 'VERIFIED' : 'UNVERIFIED';
+        if (val === null || val === undefined) val = '';
+        const cleanStr = String(val).replace(/"/g, '""');
+        return `"${cleanStr}"`;
+      }).join(',');
+    });
+
+    // Add UTF-8 BOM for Microsoft Excel compatibility
+    const csvString = '\uFEFF' + [headers, ...rows].join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sis_graduates_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    const dateTag = new Date().toISOString().slice(0, 10);
+    link.download = `ASTU_Graduates_Export_${exportFilters.batchYear !== 'All' ? exportFilters.batchYear + '_' : ''}${dateTag}.csv`;
+    link.click();
     URL.revokeObjectURL(url);
-    toast.success(`Exported ${filteredGraduates.length} records to CSV.`);
+
+    toast.success(`Successfully exported ${exportMatchedRecords.length} records to CSV!`);
+    setIsExportModalOpen(false);
   };
 
   return (
@@ -248,7 +436,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
               <span className="material-symbols-outlined text-sm">{isAdding ? 'close' : 'add'}</span>
               {isAdding ? 'Cancel' : 'Add Graduate Record'}
             </button>
-            <button onClick={handleExportCSV} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all">
+            <button onClick={() => setIsExportModalOpen(true)} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all cursor-pointer">
               <span className="material-symbols-outlined text-sm">download</span>
               Export CSV
             </button>
@@ -433,7 +621,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       {/* Advanced Modern & Sleek Filter Control Bar */}
       <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3">
         <div className="flex flex-col xl:flex-row gap-3 items-stretch xl:items-center justify-between">
-          
+
           {/* Modern Search Box */}
           <div className="relative min-w-[280px] flex-grow xl:flex-grow-0">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-sm">search</span>
@@ -449,7 +637,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
           {/* Sleek Custom Filter Controls Grid */}
           <div className="flex flex-wrap items-center gap-2">
-            
+
             {/* Batch Filter */}
             <div className="relative inline-flex items-center">
               <span className="absolute left-3 text-slate-400 material-symbols-outlined text-sm pointer-events-none">school</span>
@@ -518,22 +706,12 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                 Reset ({activeFilterCount})
               </button>
             )}
-
+            <button onClick={() => setIsExportModalOpen(true)} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all cursor-pointer">
+              <span className="material-symbols-outlined text-sm">download</span>
+              Export CSV
+            </button>
           </div>
         </div>
-
-        {/* Bulk Action Controls */}
-        {selectedRecords.length > 0 && (
-          <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
-            <span className="text-xs font-bold text-astu-navy">{selectedRecords.length} records selected</span>
-            <button onClick={handleBulkVerify} className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-all flex items-center gap-1">
-              <span className="material-symbols-outlined text-xs">verified</span> Verify Selected
-            </button>
-            <button onClick={handleBulkArchive} className="px-3 py-1.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-bold hover:bg-red-100 transition-all flex items-center gap-1">
-              <span className="material-symbols-outlined text-xs">archive</span> Archive Selected
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Database Table with Dynamic Pagination */}
@@ -575,16 +753,14 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                   <td className="p-3 font-semibold text-gray-700">{grad.graduationYear}</td>
                   <td className="p-3 font-bold text-emerald-600">{grad.cgpa}</td>
                   <td className="p-3">
-                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                      grad.identityVerified ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
-                    }`}>
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${grad.identityVerified ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
+                      }`}>
                       {grad.identityVerified ? 'Verified' : 'Unverified'}
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      grad.status === 'Active' || (grad.status as string) === 'ACTIVE' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-gray-100 text-gray-800 border border-gray-200'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${grad.status === 'Active' || (grad.status as string) === 'ACTIVE' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-gray-100 text-gray-800 border border-gray-200'
+                      }`}>
                       {grad.status}
                     </span>
                   </td>
@@ -625,7 +801,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
             </button>
           </div>
         )}
-        
+
         {/* Dynamic Pagination Footer */}
         <div className="border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 gap-2">
           <span className="text-[11px] text-gray-500 font-medium">
@@ -646,6 +822,314 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Advanced CSV Export Modal */}
+      {isExportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 p-6 md:p-8 relative">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <span className="material-symbols-outlined text-2xl">file_download</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Export SIS Graduates Roster</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Configure 10+ multi-dimensional filtering criteria and select export columns</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsExportModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+
+            {/* Match Counter & Quick Preset Bar */}
+            <div className="p-4 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200">
+                  Matched Records Preview: <span className="text-sm font-extrabold">{exportMatchedRecords.length}</span> of {graduates.length} total
+                </span>
+              </div>
+              <button
+                onClick={resetExportFilters}
+                className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-xs">restart_alt</span>
+                Reset All Export Filters
+              </button>
+            </div>
+
+            {/* 10+ Multi-Dimensional Filtering Criteria Section */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sm text-astu-navy">filter_alt</span>
+                10+ Filtering Criteria Configuration
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 1. Search Query */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">1. Keyword / Search Query</label>
+                  <input
+                    type="text"
+                    placeholder="Search by Name, Student ID, or Email..."
+                    value={exportFilters.search}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, search: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  />
+                </div>
+
+                {/* 2. Graduation Batch Year */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">2. Graduation Batch Year</label>
+                  <select
+                    value={exportFilters.batchYear}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, batchYear: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    {graduationBatches.map(b => (
+                      <option key={b} value={b}>{b === 'All' ? 'All Batches (2000 - 2036)' : `Class of ${b}`}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 3. Department */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">3. Academic Department</label>
+                  <select
+                    value={exportFilters.department}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, department: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    {departments.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 4. Verification Status */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">4. Identity Verification</label>
+                  <select
+                    value={exportFilters.verification}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, verification: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    <option value="All">All Identities (Verified & Unverified)</option>
+                    <option value="Verified">Verified Identities Only</option>
+                    <option value="Unverified">Unverified Identities Only</option>
+                  </select>
+                </div>
+
+                {/* 5. Account Status */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">5. Account Status</label>
+                  <select
+                    value={exportFilters.status}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, status: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    <option value="All">All Statuses (Active, Inactive, Archived)</option>
+                    <option value="Active">Active Accounts</option>
+                    <option value="Inactive">Inactive / Pending Activation</option>
+                    <option value="Archived">Archived Records</option>
+                  </select>
+                </div>
+
+                {/* 6. CGPA Tier */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">6. CGPA Threshold</label>
+                  <select
+                    value={exportFilters.cgpaTier}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, cgpaTier: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    <option value="All">All CGPA Scores</option>
+                    <option value="3.5+">First Class / Distinction (3.50 – 4.00)</option>
+                    <option value="3.0-3.49">Second Class (3.00 – 3.49)</option>
+                    <option value="<3.0">Pass Tier (&lt; 3.00)</option>
+                  </select>
+                </div>
+
+                {/* 7. Gender */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">7. Gender Filter</label>
+                  <select
+                    value={exportFilters.gender}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, gender: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    <option value="All">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Unspecified">Unspecified / Unknown</option>
+                  </select>
+                </div>
+
+                {/* 8. Employment Status */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">8. Employment Status</label>
+                  <select
+                    value={exportFilters.employmentStatus}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, employmentStatus: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    <option value="All">All Employment Statuses</option>
+                    <option value="Employed">Employed</option>
+                    <option value="Unemployed">Unemployed</option>
+                    <option value="Entrepreneur">Entrepreneur / Self-Employed</option>
+                    <option value="Higher Studies">Higher Studies / MSc / PhD</option>
+                  </select>
+                </div>
+
+                {/* 9. Source / Origin */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">9. Data Source / Origin</label>
+                  <select
+                    value={exportFilters.source}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, source: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                  >
+                    <option value="All">All Sources (API Sync, File Upload, Manual)</option>
+                    <option value="SIS_API">SIS API Server Sync</option>
+                    <option value="FILE_UPLOAD">File Batch Import (.csv/.xlsx)</option>
+                    <option value="MANUAL">Manual Record Entry</option>
+                  </select>
+                </div>
+
+                {/* 10. Date Range / Timeframe */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">10. Record Timeframe</label>
+                  <select
+                    value={exportFilters.dateRange}
+                    onChange={(e) => setExportFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy">
+                    <option value="All">All Time Records</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="this_year">Current Calendar Year</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Column Selector Checkboxes & Reordering Section */}
+            <div className="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm text-emerald-600">view_column</span>
+                    Select & Reorder Export Columns (Sequence #1 – #{columnSequence.length})
+                  </h4>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Use the ◀ / ▶ arrows on any column card to dynamically adjust its output position in the CSV header</p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleAllExportColumns(true)}
+                    className="text-[10px] font-bold text-astu-navy dark:text-sky-400 hover:underline cursor-pointer"
+                  >
+                    Select All
+                  </button>
+                  <span className="text-slate-300 dark:text-slate-700">|</span>
+                  <button
+                    onClick={() => toggleAllExportColumns(false)}
+                    className="text-[10px] font-bold text-slate-500 hover:underline cursor-pointer"
+                  >
+                    Deselect All
+                  </button>
+                  <span className="text-slate-300 dark:text-slate-700">|</span>
+                  <button
+                    onClick={resetColumnSequence}
+                    className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-0.5"
+                    title="Restore default sequence order"
+                  >
+                    <span className="material-symbols-outlined text-[11px]">refresh</span>
+                    Reset Order
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                {columnSequence.map((col, idx) => {
+                  const isChecked = (exportColumns as any)[col.key];
+                  return (
+                    <div
+                      key={col.key}
+                      className={`flex items-center justify-between gap-1 p-2 rounded-xl border transition-all ${
+                        isChecked
+                          ? 'bg-white dark:bg-slate-800 border-emerald-300/80 dark:border-emerald-700/80 shadow-2xs'
+                          : 'bg-slate-100/70 dark:bg-slate-900/40 border-slate-200/50 dark:border-slate-800 opacity-60'
+                      }`}
+                    >
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none truncate">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => setExportColumns(prev => ({ ...prev, [col.key]: e.target.checked }))}
+                          className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                        />
+                        <span className="flex items-center gap-1.5 truncate">
+                          <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800/80 rounded-md shrink-0">
+                            #{idx + 1}
+                          </span>
+                          <span className="truncate">{col.label}</span>
+                        </span>
+                      </label>
+
+                      <div className="flex items-center gap-0.5 shrink-0 ml-1">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => moveColumnSequence(idx, 'up')}
+                          className="w-5 h-5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
+                          title="Move Earlier / Up in CSV sequence"
+                        >
+                          <span className="material-symbols-outlined text-xs">arrow_back</span>
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === columnSequence.length - 1}
+                          onClick={() => moveColumnSequence(idx, 'down')}
+                          className="w-5 h-5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
+                          title="Move Later / Down in CSV sequence"
+                        >
+                          <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+              <button
+                onClick={() => setIsExportModalOpen(false)}
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={executeExportCSV}
+                disabled={exportMatchedRecords.length === 0}
+                className="px-6 py-2.5 bg-gradient-to-r from-astu-navy to-emerald-700 hover:from-astu-navy/95 hover:to-emerald-800 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">download</span>
+                <span>Generate & Download CSV ({exportMatchedRecords.length})</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

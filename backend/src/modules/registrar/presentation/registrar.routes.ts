@@ -37,6 +37,7 @@ router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 
 router.post('/import', upload.single('file'), asyncHandler(RegistrarController.importFile));
 router.get('/logs', asyncHandler(RegistrarController.getLogs));
+router.get('/sis-status', asyncHandler(RegistrarController.getSisStatus));
 router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));
 router.post('/fetch-graduates/current-and-previous', asyncHandler(RegistrarController.fetchCurrentAndPreviousGraduates));
 
@@ -71,5 +72,8 @@ router.patch('/verifications/:id/status', asyncHandler(RegistrarController.updat
 // Document Status Update
 router.patch('/document-requests/:id/status', asyncHandler(RegistrarController.updateDocumentStatus));
 router.post('/document-requests/:id/approve', upload.single('document'), asyncHandler(RegistrarController.approveDocumentRequest));
+
+// Trigger Pending Task Reminder
+router.post('/trigger-pending-reminder', asyncHandler(RegistrarController.triggerPendingTaskReminder));
 
 export default router;

@@ -7,7 +7,14 @@ export interface GraduateRecord {
   graduationYear: string;
   cgpa: string;
   identityVerified: boolean;
-  status: 'Active' | 'Archived';
+  status: 'Active' | 'Archived' | 'INACTIVE' | 'Inactive' | string;
+  phone?: string;
+  nationality?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  source?: string;
+  employmentStatus?: string;
+  createdAt?: string;
 }
 
 export interface VerificationRequest {
