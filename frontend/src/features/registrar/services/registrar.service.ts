@@ -74,6 +74,32 @@ export const registrarService = {
     }
   },
 
+  // Direct Sync from University SIS API
+  async syncFromSisApi(batchYear?: number | string): Promise<any> {
+    try {
+      const year = batchYear && batchYear !== 'ALL' ? batchYear : 'current-and-previous';
+      const endpoint = year === 'current-and-previous' 
+        ? '/registrar/fetch-graduates/current-and-previous'
+        : `/registrar/fetch-graduates/${year}`;
+      
+      const response = await post<{ data: any }>(endpoint, {});
+      return response.data;
+    } catch (error: any) {
+      console.error('Error syncing from SIS API:', error);
+      throw error;
+    }
+  },
+
+  async getSisStatus(): Promise<any> {
+    try {
+      const response = await get<{ data: any }>('/registrar/sis-status');
+      return response.data;
+    } catch (error) {
+      console.error('Error checking SIS status:', error);
+      return { status: 'OFFLINE' };
+    }
+  },
+
   async getLogs(): Promise<any[]> {
     try {
       const response = await get<{ data: any[] }>('/registrar/logs');
@@ -150,5 +176,27 @@ export const registrarService = {
       requestedAt: new Date().toISOString(),
       status: 'Ready' as const
     };
+  },
+
+  // Registration Issues / Data Corrections
+  async getRegistrationIssues(): Promise<any[]> {
+    try {
+      const response = await get<{ success: boolean; data: any[] }>('/registrar/registration-issues');
+      return (response && response.data && Array.isArray(response.data)) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching registration issues:', error);
+      return [];
+    }
+  },
+
+  // 3-Day Undone Task Interval Reminder Trigger
+  async triggerPendingTaskReminder(): Promise<any> {
+    try {
+      const response = await post<{ success: boolean; message: string; data: any }>('/registrar/trigger-pending-reminder', {});
+      return response;
+    } catch (error) {
+      console.error('Error triggering pending reminder:', error);
+      throw error;
+    }
   }
 };

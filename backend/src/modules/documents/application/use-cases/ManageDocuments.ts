@@ -1,6 +1,7 @@
 import { IDocumentRequestRepository } from '../ports/IDocumentRequestRepository';
 import { DocumentNotFoundError, DuplicateDocumentRequestError } from '../../domain/errors/DocumentErrors';
 import { EmailService } from '../../../../core/services/EmailService';
+import prisma from '../../../../core/config/db';
 
 export class RequestDocument {
   constructor(
@@ -24,7 +25,7 @@ export class RequestDocument {
 
     try {
       await this.emailService.sendMail({
-        to: 'registrar@astust.edu.et',
+        to: 'REGISTRAR',
         subject: `New Document Request: ${data.documentType}`,
         text: `A new document request of type ${data.documentType} has been submitted by alumni (ID: ${alumniId}).\nInstructions: ${data.additionalInstructions || 'None'}`,
         html: `

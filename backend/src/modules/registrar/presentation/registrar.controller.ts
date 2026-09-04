@@ -163,7 +163,7 @@ export class RegistrarController {
       const { year } = req.params;
       const yearNum = parseInt(year, 10);
       
-      if (!yearNum || yearNum < 1900 || yearNum > new Date().getFullYear()) {
+      if (!yearNum || yearNum < 1900 || yearNum > new Date().getFullYear() + 2) {
         return sendError(res, 'Invalid graduation year', null, 400);
       }
 
@@ -175,6 +175,7 @@ export class RegistrarController {
         year: yearNum,
         totalFetched: graduates.length,
         syncResults: syncResult,
+        graduates: graduates,
       });
     } catch (err: any) {
       next(err);
@@ -193,16 +194,43 @@ export class RegistrarController {
       const currentSync = await fetchService.syncGraduatesToAlumniProfiles(currentGraduates);
       const previousSync = await fetchService.syncGraduatesToAlumniProfiles(previousGraduates);
 
+      const combinedGraduates = [...previousGraduates, ...currentGraduates];
+
       return sendSuccess(res, `Fetched and synced graduates for ${currentYear} and ${previousYear}.`, {
         years: [previousYear, currentYear],
-        totalFetched: currentGraduates.length + previousGraduates.length,
+        totalFetched: combinedGraduates.length,
         syncResults: {
           [previousYear]: previousSync,
           [currentYear]: currentSync,
         },
+        graduates: combinedGraduates,
       });
     } catch (err: any) {
       next(err);
+    }
+  }
+
+  static async getSisStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const fetchService = new FetchGraduatesByAPI();
+      const health = await fetchService.checkHealthStatus();
+      return sendSuccess(res, 'Fetched SIS API integration status.', {
+        status: health.status,
+        mode: health.status === 'ONLINE' ? 'Live SIS API Connection' : 'SIS API Server Standby',
+        apiVersion: 'v1.4',
+        lastChecked: new Date().toISOString(),
+        serverEndpoint: health.url,
+        message: health.message
+      });
+    } catch (err: any) {
+      return sendSuccess(res, 'Fetched SIS API integration status.', {
+        status: 'OFFLINE',
+        mode: 'SIS API Server Standby',
+        apiVersion: 'v1.4',
+        lastChecked: new Date().toISOString(),
+        serverEndpoint: process.env.REGISTRAR_API_URL || 'None',
+        message: err.message
+      });
     }
   }
 
@@ -833,6 +861,22 @@ export class RegistrarController {
       }
 
       return sendSuccess(res, 'Document approved and uploaded successfully.', docRequest);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async triggerPendingTaskReminder(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { sendRegistrarPendingTaskReminder } = require('../../../core/jobs/cron');
+      const result = await sendRegistrarPendingTaskReminder();
+      return sendSuccess(
+        res,
+        result.sent
+          ? `Pending task email digest dispatched to Registrar (${result.totalPending} pending task(s))`
+          : 'No pending tasks in queue.',
+        result
+      );
     } catch (err: any) {
       next(err);
     }

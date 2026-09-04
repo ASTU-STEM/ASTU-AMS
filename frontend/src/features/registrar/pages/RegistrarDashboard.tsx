@@ -87,6 +87,7 @@ const RegistrarDashboard = () => {
   const [graduates, setGraduates] = useState<any[]>([]);
   const [verifications, setVerifications] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [registrationIssues, setRegistrationIssues] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>({
     totalSisGraduates: 0,
     verifiedAlumni: 0,
@@ -102,9 +103,10 @@ const RegistrarDashboard = () => {
         registrarService.getGraduates(),
         registrarService.getVerifications(),
         registrarService.getDocumentRequests(),
-        registrarService.getAllRegisteredAlumni()
+        registrarService.getAllRegisteredAlumni(),
+        registrarService.getRegistrationIssues()
       ]).then((results) => {
-        const [statsResult, gradsResult, verifsResult, docsResult, allAlumniResult] = results;
+        const [statsResult, gradsResult, verifsResult, docsResult, allAlumniResult, issuesResult] = results;
 
         if (statsResult.status === 'fulfilled') {
           const stats = statsResult.value;
@@ -172,6 +174,7 @@ const RegistrarDashboard = () => {
           setVerifications(mappedVerifs);
         }
         if (docsResult.status === 'fulfilled') setDocuments(docsResult.value);
+        if (issuesResult.status === 'fulfilled' && Array.isArray(issuesResult.value)) setRegistrationIssues(issuesResult.value);
 
         setIsLoadingData(false);
       });
@@ -247,6 +250,13 @@ const RegistrarDashboard = () => {
     return dashboardStats.pendingDocuments || 0;
   }, [documents, dashboardStats.pendingDocuments]);
 
+  const pendingDataIssuesCount = useMemo(() => {
+    if (Array.isArray(registrationIssues) && registrationIssues.length > 0) {
+      return registrationIssues.filter((i: any) => (i.status || '').toUpperCase() === 'PENDING').length;
+    }
+    return 0;
+  }, [registrationIssues]);
+
   // Sync Notifications Bell with real pending requests
   useEffect(() => {
     const realNotifs: any[] = [];
@@ -273,10 +283,21 @@ const RegistrarDashboard = () => {
       });
     });
 
+    (registrationIssues || []).forEach((i: any) => {
+      const isPending = (i.status || '').toUpperCase() === 'PENDING';
+      const name = i.fullName || 'Alumnus';
+      realNotifs.push({
+        id: `issue_${i.id}`,
+        text: `Data correction request pending for ${name}`,
+        unread: isPending,
+        time: i.createdAt ? new Date(i.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent'
+      });
+    });
+
     if (realNotifs.length > 0) {
       setNotifications(realNotifs);
     }
-  }, [documents, verifications]);
+  }, [documents, verifications, registrationIssues]);
 
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;
@@ -708,7 +729,7 @@ useEffect(() => {
                 items: [
                   { id: 'verification', label: 'Verifications', icon: 'verified_user', badge: pendingVerificationsCount > 0 ? pendingVerificationsCount : null, tooltip: `${pendingVerificationsCount} pending approvals` },
                   { id: 'documents', label: 'Document Queue', icon: 'description', badge: documentRequestsCount > 0 ? documentRequestsCount : null, tooltip: `${documentRequestsCount} documents awaiting action` },
-                  { id: 'data_issues', label: 'Data Corrections', icon: 'report_problem', badge: null, tooltip: 'Registration data correction requests' },
+                  { id: 'data_issues', label: 'Data Corrections', icon: 'report_problem', badge: pendingDataIssuesCount > 0 ? pendingDataIssuesCount : null, tooltip: pendingDataIssuesCount > 0 ? `${pendingDataIssuesCount} pending correction requests` : 'Registration data correction requests' },
                 ]
               },
               {
@@ -756,7 +777,7 @@ useEffect(() => {
                         <>
                           <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
                           {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
                           )}
@@ -1316,7 +1337,7 @@ useEffect(() => {
             )}
 
             {activeTab === 'data_issues' && (
-              <DataIssuesTab />
+              <DataIssuesTab onIssuesChange={setRegistrationIssues} />
             )}
 
             {activeTab === 'documents' && (
