@@ -18,7 +18,7 @@
       ],
       "id": "dev-alumni-1787763781926",
       "createdAt": "2026-08-26T17:03:01.926Z",
-      "updatedAt": "2026-09-04T08:03:49.833Z",
+      "updatedAt": "2026-09-04T12:15:07.237Z",
       "employmentStatus": "EMPLOYED",
       "salary": 18000,
       "preferences": {
@@ -43,7 +43,7 @@
       ],
       "id": "dev-alumni-1787763782058",
       "createdAt": "2026-08-26T17:03:02.058Z",
-      "updatedAt": "2026-09-04T08:04:02.842Z",
+      "updatedAt": "2026-09-04T12:14:55.244Z",
       "employmentStatus": "EMPLOYED",
       "salary": 25000,
       "preferences": {
@@ -67,7 +67,22 @@
       ],
       "id": "dev-alumni-1787765356770",
       "createdAt": "2026-08-26T17:29:16.770Z",
-      "updatedAt": "2026-09-04T08:03:36.050Z"
+      "updatedAt": "2026-09-04T12:14:36.167Z"
+    },
+    {
+      "id": "dev-alumni-12345",
+      "userId": null,
+      "studentId": "UGR/12345/24",
+      "fullName": "Abebe Kebede",
+      "email": "wabitena11@gmail.com",
+      "cgpa": 3.65,
+      "graduationYear": 2024,
+      "gender": "Male",
+      "departmentId": "dev-department-1787763781949",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "createdAt": "2026-09-04T00:00:00.000Z",
+      "updatedAt": "2026-09-04T00:00:00.000Z"
     }
   ],
   "employerProfiles": [
@@ -82,11 +97,40 @@
       "companySize": "11-50",
       "id": "dev-employer-1787763781981",
       "createdAt": "2026-08-26T17:03:01.981Z",
-      "updatedAt": "2026-09-04T08:04:00.098Z"
+      "updatedAt": "2026-09-04T12:14:52.155Z"
     }
   ],
   "departments": [],
-  "registrarStudents": [],
+  "registrarStudents": [
+    {
+      "id": "dev-sis-12345",
+      "studentId": "UGR/12345/24",
+      "fullName": "Abebe Kebede",
+      "email": null,
+      "phone": "+251911234567",
+      "cgpa": 3.65,
+      "graduationYear": 2024,
+      "department": "Software Engineering",
+      "departmentCode": "SWE",
+      "status": "GRADUATED",
+      "createdAt": "2026-09-04T00:00:00.000Z",
+      "updatedAt": "2026-09-04T00:00:00.000Z"
+    },
+    {
+      "id": "dev-sis-37999",
+      "studentId": "UGR/37999/87",
+      "fullName": "Tewodros Kassahun",
+      "email": null,
+      "phone": "+251912345678",
+      "cgpa": 3.8,
+      "graduationYear": 2024,
+      "department": "Software Engineering",
+      "departmentCode": "SWE",
+      "status": "GRADUATED",
+      "createdAt": "2026-09-04T00:00:00.000Z",
+      "updatedAt": "2026-09-04T00:00:00.000Z"
+    }
+  ],
   "registrarSyncLogs": [],
   "auditLogs": [],
   "notifications": [
@@ -398,29 +442,92 @@
       "userId": "test-alumni-user-uuid",
       "title": "Application SHORTLISTED",
       "content": "Great news! Your application for \"Fullstack Engineer\" at Google East Africa has been shortlisted. They will be in touch with you soon.",
-      "id": "dev-notif-1788509040304",
-      "createdAt": "2026-09-04T08:04:00.304Z",
+      "id": "dev-notif-1788524092540",
+      "createdAt": "2026-09-04T12:14:52.540Z",
       "isRead": false
     },
     {
       "userId": "test-alumni-user-uuid",
       "title": "Interview Scheduled",
-      "content": "An interview has been scheduled for the position of Fullstack Engineer on 9/5/2026, 11:04:02 AM.",
-      "id": "dev-notif-1788509042801",
-      "createdAt": "2026-09-04T08:04:02.801Z",
+      "content": "An interview has been scheduled for the position of Fullstack Engineer on 9/5/2026, 3:14:54 PM.",
+      "id": "dev-notif-1788524095184",
+      "createdAt": "2026-09-04T12:14:55.184Z",
       "isRead": false
     },
     {
       "userId": "test-alumni-user-uuid",
       "title": "🎉 Congratulations! You are Hired!",
       "content": "Congratulations! You have been hired by Google East Africa for the position of \"Fullstack Engineer\". Your profile placement has been updated to Employed at Google East Africa.",
-      "id": "dev-notif-1788509042882",
-      "createdAt": "2026-09-04T08:04:02.882Z",
+      "id": "dev-notif-1788524095307",
+      "createdAt": "2026-09-04T12:14:55.307Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/5/2026, 3:15:07 PM.",
+      "id": "dev-notif-1788524107156",
+      "createdAt": "2026-09-04T12:15:07.156Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1788524107304",
+      "createdAt": "2026-09-04T12:15:07.304Z",
       "isRead": false
     }
   ],
   "documentRequests": [],
   "jobs": [
+    {
+      "employerId": "dev-employer-1788524107001",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-09T12:15:07.017Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1788524107038",
+      "createdAt": "2026-09-04T12:15:07.038Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-09-14T12:14:52.303Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1788524092348",
+      "createdAt": "2026-09-04T12:14:52.348Z",
+      "views": 0
+    },
     {
       "employerId": "dev-employer-1787763781981",
       "title": "Fullstack Engineer",
@@ -1154,6 +1261,27 @@
   "jobApplications": [],
   "hiringEvents": [],
   "employerFeedbacks": [
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1788524099921",
+      "createdAt": "2026-09-04T12:14:59.921Z"
+    },
     {
       "employerId": "dev-employer-1787763781981",
       "alumniId": "dev-alumni-1787763782058",

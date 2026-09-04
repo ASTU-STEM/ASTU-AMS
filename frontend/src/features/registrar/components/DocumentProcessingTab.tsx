@@ -9,9 +9,21 @@ interface DocumentProcessingTabProps {
   documents: DocumentProcessingRequest[];
   onProcessDocument: (id: string, status: 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'PENDING') => void;
   onApproveDocument: (id: string, file: File) => void;
+  onBulkProcess?: (ids: string[], status: 'IN_PROGRESS' | 'APPROVED') => Promise<void>;
+  onBulkApproveWithFiles?: (items: { id: string; file: File }[]) => Promise<void>;
+  onUploadDraftDocument?: (id: string, file: File) => Promise<void>;
+  onRemoveDraftDocument?: (id: string) => Promise<void>;
 }
 
-export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ documents, onProcessDocument, onApproveDocument }) => {
+export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
+  documents,
+  onProcessDocument,
+  onApproveDocument,
+  onBulkProcess,
+  onBulkApproveWithFiles,
+  onUploadDraftDocument,
+  onRemoveDraftDocument,
+}) => {
   const [filterStatus, setFilterStatus] = useState<'All' | 'PENDING' | 'IN_PROGRESS' | 'APPROVED' | 'REJECTED'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [approveModalDoc, setApproveModalDoc] = useState<DocumentProcessingRequest | null>(null);
@@ -19,7 +31,14 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
   const [previewDoc, setPreviewDoc] = useState<DocumentProcessingRequest | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<'academic' | 'personal' | 'employment' | 'certifications' | 'documents'>('academic');
+  const [confirmModal, setConfirmModal] = useState<{
+    action: 'IN_PROGRESS' | 'APPROVED';
+    pendingList: DocumentProcessingRequest[];
+  } | null>(null);
+  const [bulkFilesMap, setBulkFilesMap] = useState<Record<string, File>>({});
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const normalizeStatus = (status: string) => status.toUpperCase().replace(' ', '_');
@@ -97,15 +116,123 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
   };
 
   const handleBulkAction = (status: 'IN_PROGRESS' | 'APPROVED') => {
-    const actionable = documents.filter(d =>
-      status === 'IN_PROGRESS' ? normalizeStatus(d.status) === 'PENDING' : normalizeStatus(d.status) !== 'APPROVED'
+    const pendingList = documents.filter(d =>
+      status === 'IN_PROGRESS'
+        ? normalizeStatus(d.status) === 'PENDING'
+        : normalizeStatus(d.status) === 'PENDING' || normalizeStatus(d.status) === 'IN_PROGRESS'
     );
-    if (actionable.length === 0) {
-      toast.error('No document requests to process.');
+    if (pendingList.length === 0) {
+      toast.error(
+        status === 'IN_PROGRESS'
+          ? 'No pending document requests to process.'
+          : 'No pending or in-progress document requests to approve.'
+      );
       return;
     }
-    actionable.forEach(d => onProcessDocument(d.id, status));
-    toast.success(`Moved ${actionable.length} document requests to ${getStatusLabel(status)}.`);
+    setBulkFilesMap({});
+    setConfirmModal({ action: status, pendingList });
+  };
+
+  const getFilenameFromUrl = (url?: string) => {
+    if (!url) return '';
+    const parts = url.split('/');
+    const raw = parts[parts.length - 1] || 'attached_document.pdf';
+    return raw.replace(/^(.+?)_[0-9]+-[0-9]+(\.[a-zA-Z0-9]+)$/, '$1$2');
+  };
+
+  const handleBulkFileChange = async (docId: string | number, file: File | null) => {
+    const idStr = String(docId);
+    if (file) {
+      setBulkFilesMap(prev => ({ ...prev, [idStr]: file }));
+      if (onUploadDraftDocument) {
+        setUploadingRowId(idStr);
+        try {
+          await onUploadDraftDocument(idStr, file);
+        } catch (err) {
+          console.error('Failed to auto-save draft file attachment:', err);
+        } finally {
+          setUploadingRowId(null);
+        }
+      }
+    } else {
+      handleBulkFileRemove(docId);
+    }
+  };
+
+  const handleBulkFileRemove = async (docId: string | number) => {
+    const idStr = String(docId);
+    setBulkFilesMap(prev => {
+      const next = { ...prev };
+      delete next[idStr];
+      return next;
+    });
+    if (onRemoveDraftDocument) {
+      setUploadingRowId(idStr);
+      try {
+        await onRemoveDraftDocument(idStr);
+      } catch (err) {
+        console.error('Failed to remove draft file attachment:', err);
+      } finally {
+        setUploadingRowId(null);
+      }
+    }
+  };
+
+  const executeBulkAction = async () => {
+    if (!confirmModal) return;
+    const { action, pendingList } = confirmModal;
+
+    if (action === 'APPROVED') {
+      const missingFiles = pendingList.filter(d => !d.issuedDocumentUrl && !bulkFilesMap[String(d.id)]);
+      if (missingFiles.length > 0) {
+        toast.error(`Please attach document files for all ${pendingList.length} profiles before approving (${missingFiles.length} missing).`);
+        return;
+      }
+
+      setIsBulkSubmitting(true);
+      try {
+        const ids = pendingList.map(d => String(d.id));
+        const unSavedItems = pendingList
+          .filter(d => !d.issuedDocumentUrl && bulkFilesMap[String(d.id)])
+          .map(d => ({ id: String(d.id), file: bulkFilesMap[String(d.id)] }));
+
+        if (unSavedItems.length > 0 && onBulkApproveWithFiles) {
+          await onBulkApproveWithFiles(unSavedItems);
+        }
+
+        if (onBulkProcess) {
+          await onBulkProcess(ids, 'APPROVED');
+        } else {
+          pendingList.forEach(d => onProcessDocument(String(d.id), 'APPROVED'));
+        }
+
+        toast.success(`Successfully approved and issued documents for all ${pendingList.length} alumni.`);
+        setConfirmModal(null);
+        setBulkFilesMap({});
+      } catch (err) {
+        toast.error('Failed to process bulk document approval.');
+      } finally {
+        setIsBulkSubmitting(false);
+      }
+      return;
+    }
+
+    // Process All Pending (IN_PROGRESS status update)
+    const ids = pendingList.map(d => String(d.id));
+    setIsBulkSubmitting(true);
+    try {
+      if (onBulkProcess) {
+        await onBulkProcess(ids, action);
+      } else {
+        pendingList.forEach(d => onProcessDocument(String(d.id), action));
+        toast.success(`Successfully updated ${ids.length} document requests to ${getStatusLabel(action)}.`);
+      }
+      setConfirmModal(null);
+    } catch (err) {
+      toast.error('Failed to process bulk request update.');
+    } finally {
+      setIsBulkSubmitting(false);
+    }
   };
 
   const handleApproveSubmit = async () => {
@@ -841,6 +968,222 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
                   Approve & Issue Document
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Action Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 overflow-y-auto">
+          <div className={`w-full ${confirmModal.action === 'APPROVED' ? 'max-w-2xl' : 'max-w-lg'} rounded-3xl bg-white dark:bg-slate-900 p-6 md:p-8 shadow-2xl border border-gray-100 dark:border-slate-800 space-y-5 my-8`}>
+            <div className="flex items-start gap-4">
+              <div className={`p-3.5 rounded-2xl ${confirmModal.action === 'APPROVED' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400'}`}>
+                <span className="material-symbols-outlined text-2xl">
+                  {confirmModal.action === 'APPROVED' ? 'done_all' : 'playlist_add_check'}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  {confirmModal.action === 'APPROVED' ? 'Confirm Bulk Approval & File Upload' : 'Confirm Process All Pending'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {confirmModal.action === 'APPROVED'
+                    ? `Attach the issued document file for each alumnus request below before completing approval.`
+                    : `Are you sure you want to mark all ${confirmModal.pendingList.length} pending document requests as In Progress?`
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* If APPROVED: Show file upload progress & per-profile attachment list */}
+            {confirmModal.action === 'APPROVED' ? (
+              <div className="space-y-3">
+                {/* Upload Status Header */}
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">File Attachments Status:</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      confirmModal.pendingList.every(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)]))
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    }`}>
+                      {confirmModal.pendingList.filter(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)])).length} / {confirmModal.pendingList.length} Attached
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="w-32 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-emerald-500 h-full transition-all duration-300"
+                      style={{
+                        width: `${(confirmModal.pendingList.filter(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)])).length / confirmModal.pendingList.length) * 100}%`
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Per-Profile Attachment List */}
+                <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-800 max-h-72 overflow-y-auto space-y-3">
+                  {confirmModal.pendingList.map((doc) => {
+                    const localFile = bulkFilesMap[String(doc.id)];
+                    const serverUrl = doc.issuedDocumentUrl;
+                    const hasFile = Boolean(localFile || serverUrl);
+                    const displayName = localFile ? localFile.name : getFilenameFromUrl(serverUrl);
+                    const isRowUploading = uploadingRowId === String(doc.id);
+
+                    return (
+                      <div
+                        key={doc.id}
+                        className={`p-3.5 rounded-2xl border transition-all ${
+                          hasFile
+                            ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/40'
+                            : 'bg-white dark:bg-slate-900 border-amber-200/80 dark:border-amber-900/40 shadow-sm'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                                {doc.alumni?.fullName || 'Alumni'}
+                              </p>
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                {doc.alumni?.studentId || 'N/A'}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[12px]">{getDocTypeIcon(doc.documentType)}</span>
+                              {getDocTypeLabel(doc.documentType)}
+                            </p>
+                          </div>
+
+                          {/* File Attachment Action */}
+                          <div className="flex items-center gap-2">
+                            {isRowUploading ? (
+                              <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 text-xs font-bold text-amber-700">
+                                <span className="w-3.5 h-3.5 border-2 border-amber-600/30 border-t-amber-600 rounded-full animate-spin" />
+                                Saving File...
+                              </div>
+                            ) : hasFile ? (
+                              <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700">
+                                <FileText className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                <div className="text-left min-w-0 max-w-[140px]">
+                                  <p className="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate" title={displayName}>{displayName}</p>
+                                  <p className="text-[8px] text-emerald-600 font-semibold">
+                                    {localFile ? `${(localFile.size / 1024).toFixed(1)} KB` : 'Saved on Server'}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleBulkFileRemove(doc.id)}
+                                  className="text-slate-400 hover:text-red-500 p-0.5 transition-colors"
+                                  title="Remove file"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md shadow-emerald-600/20">
+                                <Upload className="h-3.5 w-3.5" />
+                                Attach File
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                  onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                      handleBulkFileChange(doc.id, e.target.files[0]);
+                                    }
+                                  }}
+                                />
+                              </label>
+                            )}
+
+                            {/* Status Badge */}
+                            <span className={`px-2 py-1 rounded-lg text-[9px] font-extrabold uppercase border ${
+                              hasFile
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                : 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                            }`}>
+                              {hasFile ? 'File Ready' : 'Waiting Upload'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Validation Banner */}
+                {confirmModal.pendingList.some(d => !d.issuedDocumentUrl && !bulkFilesMap[String(d.id)]) ? (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800/50 flex items-center gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+                    <span className="material-symbols-outlined text-amber-600 text-base shrink-0">warning</span>
+                    <span>
+                      Please attach an issued document file for all <strong>{confirmModal.pendingList.length}</strong> profiles ({confirmModal.pendingList.filter(d => !d.issuedDocumentUrl && !bulkFilesMap[String(d.id)]).length} remaining).
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-2.5 text-xs text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>All <strong>{confirmModal.pendingList.length}</strong> profiles have document files attached and are ready for batch approval!</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* If IN_PROGRESS: Standard status update preview */
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 max-h-44 overflow-y-auto space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                  Affected Requests ({confirmModal.pendingList.length})
+                </p>
+                {confirmModal.pendingList.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 text-xs">
+                    <div className="min-w-0 pr-2">
+                      <p className="font-bold text-slate-800 dark:text-slate-200 truncate">{doc.alumni?.fullName || 'Alumni'}</p>
+                      <p className="text-[10px] text-slate-500 font-mono">{doc.alumni?.studentId || '—'} • {getDocTypeLabel(doc.documentType)}</p>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border ${getStatusBadge(doc.status)}`}>
+                      {getStatusLabel(doc.status)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmModal(null);
+                  setBulkFilesMap({});
+                }}
+                disabled={isBulkSubmitting}
+                className="px-5 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeBulkAction}
+                disabled={isBulkSubmitting}
+                className={`px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-lg transition-all flex items-center gap-1.5 ${
+                  confirmModal.action === 'APPROVED'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                    : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'
+                } disabled:opacity-50`}
+              >
+                {isBulkSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-base">
+                      {confirmModal.action === 'APPROVED' ? 'check_circle' : 'play_arrow'}
+                    </span>
+                    Yes, {confirmModal.action === 'APPROVED' ? 'Approve & Issue All' : 'Process All'} ({confirmModal.pendingList.length})
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

@@ -162,7 +162,7 @@ const RegistrarDashboard = () => {
             id: v.id,
             studentId: v.alumni?.studentId || v.studentId || 'N/A',
             fullName: v.alumni?.fullName || v.fullName || 'N/A',
-            email: v.alumni?.email || v.email || 'N/A',
+            email: (v.alumni?.email && v.alumni?.email !== 'N/A') ? v.alumni.email : (v.notes?.match(/Contact Email:\s*([^\s\n]+)/i)?.[1] || v.email || 'N/A'),
             department: v.alumni?.department?.name || v.department || 'General',
             graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '2024'),
             type: v.type || 'Alumni Registration',
@@ -565,9 +565,18 @@ const RegistrarDashboard = () => {
       toast.success(`Verification ${status.toLowerCase()}`);
       
       // Update local state optimistically
-      setVerifications(prev => prev.map(v => v.id === id ? { ...v, status: apiStatus } : v));
     } catch (err) {
       toast.error('Failed to resolve verification');
+    }
+  };
+
+  const handleBulkVerifyRequestAction = async (ids: string[], status: 'APPROVED' | 'REJECTED') => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.bulkResolveVerifications(ids, status);
+      setVerifications(prev => prev.map(v => ids.includes(v.id) ? { ...v, status } : v));
+    } catch (err) {
+      toast.error('Failed to process bulk verifications');
     }
   };
 
@@ -593,6 +602,55 @@ const RegistrarDashboard = () => {
       setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: 'APPROVED' } : d));
     } catch (err) {
       toast.error('Failed to approve and upload document');
+    }
+  };
+
+  const handleBulkProcessDocumentAction = async (ids: string[], status: 'IN_PROGRESS' | 'APPROVED') => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.bulkProcessDocuments(ids, status);
+      toast.success(`Successfully updated ${ids.length} document requests to ${status === 'IN_PROGRESS' ? 'In Progress' : 'Approved'}.`);
+      setDocuments(prev => prev.map(d => ids.includes(String(d.id)) ? { ...d, status } : d));
+    } catch (err) {
+      toast.error('Failed to process bulk document status update');
+    }
+  };
+
+  const handleBulkApproveDocumentsWithFilesAction = async (items: { id: string; file: File }[]) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.bulkApproveDocuments(items);
+      toast.success(`Successfully approved and uploaded documents for ${items.length} profiles.`);
+      const approvedIds = items.map(i => i.id);
+      setDocuments(prev => prev.map(d => approvedIds.includes(String(d.id)) ? { ...d, status: 'APPROVED' } : d));
+    } catch (err) {
+      toast.error('Failed to process bulk document approval and upload');
+      throw err;
+    }
+  };
+
+  const handleUploadDraftDocumentAction = async (id: string | number, file: File) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      const response = await registrarService.uploadDraftDocument(String(id), file);
+      const issuedDocumentUrl = response?.data?.issuedDocumentUrl || response?.issuedDocumentUrl;
+      toast.success('Document file attached.');
+      setDocuments(prev => prev.map(d => d.id === id ? { ...d, issuedDocumentUrl } : d));
+    } catch (err) {
+      toast.error('Failed to attach document file.');
+      throw err;
+    }
+  };
+
+  const handleRemoveDraftDocumentAction = async (id: string | number) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.removeDraftDocument(String(id));
+      toast.success('Attached document file removed.');
+      setDocuments(prev => prev.map(d => d.id === id ? { ...d, issuedDocumentUrl: undefined } : d));
+    } catch (err) {
+      toast.error('Failed to remove attached document file.');
+      throw err;
     }
   };
 
@@ -1333,6 +1391,7 @@ useEffect(() => {
               <VerificationTab
                 verifications={filteredVerifications}
                 onVerify={handleVerifyRequestAction}
+                onBulkVerify={handleBulkVerifyRequestAction}
               />
             )}
 
@@ -1345,6 +1404,10 @@ useEffect(() => {
                 documents={filteredDocuments}
                 onProcessDocument={handleProcessDocumentAction}
                 onApproveDocument={handleApproveDocumentAction}
+                onBulkProcess={handleBulkProcessDocumentAction}
+                onBulkApproveWithFiles={handleBulkApproveDocumentsWithFilesAction}
+                onUploadDraftDocument={handleUploadDraftDocumentAction}
+                onRemoveDraftDocument={handleRemoveDraftDocumentAction}
               />
             )}
 
