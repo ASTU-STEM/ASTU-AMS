@@ -8,13 +8,19 @@ const UPLOAD_BASE = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'h
 interface VerificationTabProps {
   verifications: VerificationRequest[];
   onVerify: (id: string, status: 'APPROVED' | 'REJECTED') => void;
+  onBulkVerify?: (ids: string[], status: 'APPROVED' | 'REJECTED') => Promise<void> | void;
 }
 
-export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications, onVerify }) => {
+export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications, onVerify, onBulkVerify }) => {
   const [filterTab, setFilterTab] = useState<'All' | 'PENDING' | 'APPROVED' | 'REJECTED'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVerification, setSelectedVerification] = useState<VerificationRequest | null>(null);
+  const [activeDocIndex, setActiveDocIndex] = useState(0);
   const [imgError, setImgError] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    action: 'APPROVED' | 'REJECTED';
+    pendingList: VerificationRequest[];
+  } | null>(null);
 
   const getStatus = (status: string) => status.toUpperCase();
 
@@ -42,23 +48,46 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
     }
   };
 
-  const handleBulkAction = (status: 'APPROVED' | 'REJECTED') => {
-    const pending = verifications.filter(v => getStatus(v.status) === 'PENDING');
-    if (pending.length === 0) {
-      toast.error('No pending verifications to process.');
+  const handleBulkActionClick = (status: 'APPROVED' | 'REJECTED') => {
+    const pendingList = verifications.filter(v => getStatus(v.status) === 'PENDING');
+    if (pendingList.length === 0) {
+      toast.error(`No pending verifications to ${status.toLowerCase()}.`);
       return;
     }
-    pending.forEach(v => onVerify(v.id, status));
-    toast.success(`${status} ${pending.length} verification requests.`);
+    setConfirmModal({ action: status, pendingList });
+  };
+
+  const executeBulkAction = async () => {
+    if (!confirmModal) return;
+    const { action, pendingList } = confirmModal;
+    const ids = pendingList.map(v => v.id);
+    
+    if (onBulkVerify) {
+      await onBulkVerify(ids, action);
+    } else {
+      pendingList.forEach(v => onVerify(v.id, action));
+    }
+    
+    toast.success(`Successfully ${action.toLowerCase()} ${ids.length} verification requests.`);
+    setConfirmModal(null);
+  };
+
+  const getDocumentUrls = (path?: string): string[] => {
+    if (!path) return [];
+    const parts = path.includes(',') ? path.split(',') : [path];
+    return parts.map(p => {
+      const clean = p.trim();
+      if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+      const normPath = clean.replace(/\\/g, '/');
+      const match = normPath.match(/uploads\/.*/i);
+      const cleanPath = match ? match[0] : `uploads/VerificationDocument/${normPath.replace(/^\//, '')}`;
+      return `${UPLOAD_BASE}/${cleanPath}`;
+    });
   };
 
   const getDocumentUrl = (path?: string) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const normPath = path.replace(/\\/g, '/');
-    const match = normPath.match(/uploads\/.*/i);
-    const cleanPath = match ? match[0] : normPath.replace(/^\//, '');
-    return `${UPLOAD_BASE}/${cleanPath}`;
+    const urls = getDocumentUrls(path);
+    return urls[activeDocIndex] || urls[0] || '';
   };
 
   const isImageFile = (url?: string) => {
@@ -78,11 +107,11 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
           <h2 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight">Registration Verifications</h2>
           <p className="mt-2 max-w-2xl text-sm text-white/80">Cross-reference alumni registration requests against official graduation logs. Review manual verifications and approve or reject requests.</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <button onClick={() => handleBulkAction('APPROVED')} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all">
+            <button onClick={() => handleBulkActionClick('APPROVED')} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500/20 backdrop-blur-sm border border-emerald-400/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all">
               <span className="material-symbols-outlined text-sm">done_all</span>
               Approve All Pending
             </button>
-            <button onClick={() => handleBulkAction('REJECTED')} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl text-xs font-bold hover:bg-red-500/30 transition-all">
+            <button onClick={() => handleBulkActionClick('REJECTED')} className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-red-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl text-xs font-bold hover:bg-red-500/30 transition-all">
               <span className="material-symbols-outlined text-sm">block</span>
               Reject All Pending
             </button>
@@ -272,68 +301,101 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
 
                 {/* Right Column: Document */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Identity Document</h4>
-                    {selectedVerification.documentUrl && (
-                      <a
-                        href={getDocumentUrl(selectedVerification.documentUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download
-                        className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-astu-navy hover:bg-slate-200 transition-colors"
-                      >
-                        <Download className="h-3 w-3" />
-                        Download
-                      </a>
-                    )}
-                  </div>
+                  {(() => {
+                    const docUrls = getDocumentUrls(selectedVerification.documentUrl);
+                    const currentUrl = docUrls[activeDocIndex] || docUrls[0] || '';
 
-                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 min-h-[250px] flex items-center justify-center">
-                    {!selectedVerification.documentUrl ? (
-                      <div className="text-center p-4">
-                        <FileText className="h-12 w-12 text-slate-300 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500 font-medium">No document provided</p>
-                      </div>
-                    ) : isImageFile(selectedVerification.documentUrl) && !imgError ? (
-                      <img
-                        src={getDocumentUrl(selectedVerification.documentUrl)}
-                        alt="Submitted Document"
-                        className="w-full h-auto max-h-72 object-contain bg-white"
-                        onError={() => setImgError(true)}
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-10 px-4">
-                        <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                          <FileText className="h-8 w-8 text-slate-400" />
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                            Identity Documents {docUrls.length > 1 && `(${docUrls.length} uploaded)`}
+                          </h4>
+                          {currentUrl && (
+                            <a
+                              href={currentUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-astu-navy hover:bg-slate-200 transition-colors"
+                            >
+                              <Download className="h-3 w-3" />
+                              Download
+                            </a>
+                          )}
                         </div>
-                        <p className="text-sm font-semibold text-slate-700 mb-1">
-                          {imgError ? 'Image could not be loaded' : 'Document uploaded'}
-                        </p>
-                        <p className="text-xs text-slate-500 mb-4">
-                          Click below to download or open the document
-                        </p>
-                        <div className="flex gap-2">
-                          <a
-                            href={getDocumentUrl(selectedVerification.documentUrl)}
-                            download
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 transition-colors"
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                            Download
-                          </a>
-                          <a
-                            href={getDocumentUrl(selectedVerification.documentUrl)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                            Open
-                          </a>
+
+                        {/* Multi-document Tabs */}
+                        {docUrls.length > 1 && (
+                          <div className="flex gap-2 overflow-x-auto pb-1">
+                            {docUrls.map((_, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  setActiveDocIndex(idx);
+                                  setImgError(false);
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shrink-0 ${
+                                  activeDocIndex === idx
+                                    ? 'bg-astu-navy text-white border-astu-navy shadow-sm'
+                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                }`}
+                              >
+                                Document {idx + 1}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 min-h-[250px] flex items-center justify-center">
+                          {!currentUrl ? (
+                            <div className="text-center p-4">
+                              <FileText className="h-12 w-12 text-slate-300 mx-auto mb-2" />
+                              <p className="text-sm text-slate-500 font-medium">No document provided</p>
+                            </div>
+                          ) : isImageFile(currentUrl) && !imgError ? (
+                            <img
+                              src={currentUrl}
+                              alt={`Submitted Document ${activeDocIndex + 1}`}
+                              className="w-full h-auto max-h-72 object-contain bg-white"
+                              onError={() => setImgError(true)}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-10 px-4">
+                              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                                <FileText className="h-8 w-8 text-slate-400" />
+                              </div>
+                              <p className="text-sm font-semibold text-slate-700 mb-1">
+                                {imgError ? 'Image could not be loaded' : `Document ${activeDocIndex + 1} uploaded`}
+                              </p>
+                              <p className="text-xs text-slate-500 mb-4">
+                                Click below to download or open the document
+                              </p>
+                              <div className="flex gap-2">
+                                <a
+                                  href={currentUrl}
+                                  download
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 transition-colors"
+                                >
+                                  <Download className="h-3.5 w-3.5" />
+                                  Download
+                                </a>
+                                <a
+                                  href={currentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                >
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                  Open
+                                </a>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      </>
+                    );
+                  })()}
 
                   <div className="rounded-xl bg-blue-50 p-3.5 border border-blue-100">
                     <p className="text-xs text-blue-800 leading-relaxed">
@@ -383,6 +445,53 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Action Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setConfirmModal(null)}>
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className={`p-3 rounded-full ${confirmModal.action === 'APPROVED' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                {confirmModal.action === 'APPROVED' ? <CheckCircle className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900">
+                  {confirmModal.action === 'APPROVED' ? 'Confirm Bulk Approval' : 'Confirm Bulk Rejection'}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">Action cannot be undone automatically</p>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Are you sure you want to <strong>{confirmModal.action.toLowerCase()} all {confirmModal.pendingList.length} pending verification requests</strong>?
+              {confirmModal.action === 'APPROVED'
+                ? ' This will activate all corresponding alumni accounts and send confirmation emails.'
+                : ' This will set their status to rejected and send update notifications.'}
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeBulkAction}
+                className={`px-5 py-2 text-xs font-bold text-white rounded-xl shadow-md transition-all ${
+                  confirmModal.action === 'APPROVED'
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                Yes, {confirmModal.action === 'APPROVED' ? 'Approve All' : 'Reject All'} ({confirmModal.pendingList.length})
+              </button>
             </div>
           </div>
         </div>

@@ -227,7 +227,7 @@ export class AuthController {
       const files = req.files as Express.Multer.File[];
       const fileUrls = files?.map(f => f.filename) || [];
 
-      const useCase = new SubmitManualVerification();
+      const useCase = new SubmitManualVerification(emailService);
       const result = await useCase.execute({
         studentId, fullName, graduationYear, country, contactEmail, phone, documentType, notes, fileUrls
       });
