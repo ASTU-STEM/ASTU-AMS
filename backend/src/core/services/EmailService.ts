@@ -26,14 +26,156 @@ export class EmailService {
   }
 
   /**
+   * Universal Dynamic Recipient Resolution Engine:
+   * Resolves recipient email addresses dynamically for any role, user ID, email address, or comma-separated list.
+   * Supports System Roles: REGISTRAR, DEPARTMENT_HEAD, ALUMNI_OFFICE / CMS, ADMIN, EMPLOYER, ALUMNI.
+   * 1. Checks Admin-configured environment overrides (REGISTRAR_EMAIL, DEPT_HEAD_EMAIL, CMS_EMAIL, ADMIN_EMAIL).
+   * 2. Queries active User accounts assigned by Admin in database matching the role/department.
+   * 3. Resolves profile-level primary emails (AlumniProfile / EmployerProfile).
+   */
+  async resolveRoleRecipients(roleToken: string): Promise<string[]> {
+    if (!roleToken) return [];
+    const normalized = roleToken.trim().toUpperCase();
+    const emailsSet = new Set<string>();
+
+    const clean = (e?: string | null) => (e && e.trim().includes('@') ? e.trim() : null);
+
+    try {
+      const prisma = require('../config/db').default;
+
+      if (normalized === 'REGISTRAR') {
+        const envEmail = clean(process.env.REGISTRAR_EMAIL || process.env.REGISTRAR_NOTIFICATION_EMAIL);
+        if (envEmail) emailsSet.add(envEmail);
+
+        const users = await prisma.user.findMany({
+          where: { role: 'REGISTRAR' },
+          select: { email: true }
+        });
+        users.forEach((u: any) => {
+          const em = clean(u.email);
+          if (em) emailsSet.add(em);
+        });
+
+        if (emailsSet.size === 0) {
+          const admins = await prisma.user.findMany({
+            where: { role: 'ADMIN' },
+            select: { email: true }
+          });
+          admins.forEach((u: any) => {
+            const em = clean(u.email);
+            if (em) emailsSet.add(em);
+          });
+        }
+      } else if (normalized === 'DEPARTMENT_HEAD' || normalized === 'DEPT_HEAD') {
+        const envEmail = clean(process.env.DEPARTMENT_HEAD_EMAIL || process.env.DEPT_HEAD_EMAIL);
+        if (envEmail) emailsSet.add(envEmail);
+
+        const users = await prisma.user.findMany({
+          where: { role: 'DEPARTMENT_HEAD' },
+          select: { email: true }
+        });
+        users.forEach((u: any) => {
+          const em = clean(u.email);
+          if (em) emailsSet.add(em);
+        });
+
+        if (emailsSet.size === 0) {
+          const registrars = await prisma.user.findMany({
+            where: { role: { in: ['REGISTRAR', 'ADMIN'] } },
+            select: { email: true }
+          });
+          registrars.forEach((u: any) => {
+            const em = clean(u.email);
+            if (em) emailsSet.add(em);
+          });
+        }
+      } else if (normalized === 'ALUMNI_OFFICE' || normalized === 'CMS') {
+        const envEmail = clean(process.env.CMS_EMAIL || process.env.ALUMNI_OFFICE_EMAIL);
+        if (envEmail) emailsSet.add(envEmail);
+
+        const users = await prisma.user.findMany({
+          where: { role: 'ALUMNI_OFFICE' },
+          select: { email: true }
+        });
+        users.forEach((u: any) => {
+          const em = clean(u.email);
+          if (em) emailsSet.add(em);
+        });
+
+        if (emailsSet.size === 0) {
+          const admins = await prisma.user.findMany({
+            where: { role: 'ADMIN' },
+            select: { email: true }
+          });
+          admins.forEach((u: any) => {
+            const em = clean(u.email);
+            if (em) emailsSet.add(em);
+          });
+        }
+      } else if (normalized === 'ADMIN' || normalized === 'SUPER_ADMIN') {
+        const envEmail = clean(process.env.ADMIN_EMAIL || process.env.SUPER_ADMIN_EMAIL);
+        if (envEmail) emailsSet.add(envEmail);
+
+        const admins = await prisma.user.findMany({
+          where: { role: 'ADMIN' },
+          select: { email: true }
+        });
+        admins.forEach((u: any) => {
+          const em = clean(u.email);
+          if (em) emailsSet.add(em);
+        });
+      } else if (normalized === 'EMPLOYER') {
+        const employers = await prisma.employerProfile.findMany({
+          select: { contactEmail: true, user: { select: { email: true } } }
+        });
+        employers.forEach((emp: any) => {
+          const contact = clean(emp.contactEmail);
+          const userEm = clean(emp.user?.email);
+          if (contact) emailsSet.add(contact);
+          if (userEm) emailsSet.add(userEm);
+        });
+      } else if (normalized === 'ALUMNI') {
+        const alumni = await prisma.alumniProfile.findMany({
+          where: { status: 'ACTIVE' },
+          select: { email: true, user: { select: { email: true } } }
+        });
+        alumni.forEach((a: any) => {
+          const contact = clean(a.email);
+          const userEm = clean(a.user?.email);
+          if (contact) emailsSet.add(contact);
+          if (userEm) emailsSet.add(userEm);
+        });
+      }
+    } catch (err) {
+      console.warn(`[EmailService] Failed to resolve role recipients for ${roleToken}:`, err);
+    }
+
+    return Array.from(emailsSet);
+  }
+
+  /**
    * Universal 3-Tier Email Fallback Resolution Engine:
-   * Tier 1: Primary custom contact/notification email (if provided and valid)
-   * Tier 2: Profile domain email stored in database (AlumniProfile / Employer / Staff)
+   * Tier 1: System Role Token resolution (REGISTRAR, DEPARTMENT_HEAD, ALUMNI_OFFICE, CMS, ADMIN, EMPLOYER, ALUMNI)
+   * Tier 2: Primary custom contact/notification email stored in Profile (AlumniProfile / EmployerProfile)
    * Tier 3: Account registration email stored in User model
    */
   async resolveUserDeliveryEmail(targetEmailOrUserId: string): Promise<string> {
     if (!targetEmailOrUserId) return '';
     const trimmed = targetEmailOrUserId.trim();
+
+    // Check if target is a comma-separated list
+    if (trimmed.includes(',')) {
+      const parts = trimmed.split(',');
+      const resolvedParts = await Promise.all(parts.map(p => this.resolveUserDeliveryEmail(p.trim())));
+      const unique = Array.from(new Set(resolvedParts.map(r => r.split(',')).flat().map(s => s.trim()).filter(Boolean)));
+      return unique.join(', ');
+    }
+
+    const upper = trimmed.toUpperCase();
+    if (['REGISTRAR', 'DEPARTMENT_HEAD', 'DEPT_HEAD', 'ALUMNI_OFFICE', 'CMS', 'ADMIN', 'SUPER_ADMIN', 'EMPLOYER', 'ALUMNI'].includes(upper)) {
+      const roleEmails = await this.resolveRoleRecipients(upper);
+      if (roleEmails.length > 0) return roleEmails.join(', ');
+    }
 
     try {
       const prisma = require('../config/db').default;
@@ -84,7 +226,7 @@ export class EmailService {
       bcc: options.bcc,
     };
 
-    console.log(`[EMAIL DISPATCH] Delivered to (Tier 1/2/3 Resolved): ${message.to} | Subject: "${options.subject}"`);
+    console.log(`[EMAIL DISPATCH] Delivered to (Dynamic DB/Role Resolved): ${message.to} | Subject: "${options.subject}"`);
     const info = await this.transporter.sendMail(message);
     return info;
   }

@@ -87,6 +87,7 @@ const RegistrarDashboard = () => {
   const [graduates, setGraduates] = useState<any[]>([]);
   const [verifications, setVerifications] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [registrationIssues, setRegistrationIssues] = useState<any[]>([]);
   const [dashboardStats, setDashboardStats] = useState<any>({
     totalSisGraduates: 0,
     verifiedAlumni: 0,
@@ -102,9 +103,10 @@ const RegistrarDashboard = () => {
         registrarService.getGraduates(),
         registrarService.getVerifications(),
         registrarService.getDocumentRequests(),
-        registrarService.getAllRegisteredAlumni()
+        registrarService.getAllRegisteredAlumni(),
+        registrarService.getRegistrationIssues()
       ]).then((results) => {
-        const [statsResult, gradsResult, verifsResult, docsResult, allAlumniResult] = results;
+        const [statsResult, gradsResult, verifsResult, docsResult, allAlumniResult, issuesResult] = results;
 
         if (statsResult.status === 'fulfilled') {
           const stats = statsResult.value;
@@ -160,7 +162,7 @@ const RegistrarDashboard = () => {
             id: v.id,
             studentId: v.alumni?.studentId || v.studentId || 'N/A',
             fullName: v.alumni?.fullName || v.fullName || 'N/A',
-            email: v.alumni?.email || v.email || 'N/A',
+            email: (v.alumni?.email && v.alumni?.email !== 'N/A') ? v.alumni.email : (v.notes?.match(/Contact Email:\s*([^\s\n]+)/i)?.[1] || v.email || 'N/A'),
             department: v.alumni?.department?.name || v.department || 'General',
             graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '2024'),
             type: v.type || 'Alumni Registration',
@@ -172,6 +174,7 @@ const RegistrarDashboard = () => {
           setVerifications(mappedVerifs);
         }
         if (docsResult.status === 'fulfilled') setDocuments(docsResult.value);
+        if (issuesResult.status === 'fulfilled' && Array.isArray(issuesResult.value)) setRegistrationIssues(issuesResult.value);
 
         setIsLoadingData(false);
       });
@@ -247,6 +250,13 @@ const RegistrarDashboard = () => {
     return dashboardStats.pendingDocuments || 0;
   }, [documents, dashboardStats.pendingDocuments]);
 
+  const pendingDataIssuesCount = useMemo(() => {
+    if (Array.isArray(registrationIssues) && registrationIssues.length > 0) {
+      return registrationIssues.filter((i: any) => (i.status || '').toUpperCase() === 'PENDING').length;
+    }
+    return 0;
+  }, [registrationIssues]);
+
   // Sync Notifications Bell with real pending requests
   useEffect(() => {
     const realNotifs: any[] = [];
@@ -273,10 +283,21 @@ const RegistrarDashboard = () => {
       });
     });
 
+    (registrationIssues || []).forEach((i: any) => {
+      const isPending = (i.status || '').toUpperCase() === 'PENDING';
+      const name = i.fullName || 'Alumnus';
+      realNotifs.push({
+        id: `issue_${i.id}`,
+        text: `Data correction request pending for ${name}`,
+        unread: isPending,
+        time: i.createdAt ? new Date(i.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent'
+      });
+    });
+
     if (realNotifs.length > 0) {
       setNotifications(realNotifs);
     }
-  }, [documents, verifications]);
+  }, [documents, verifications, registrationIssues]);
 
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;
@@ -544,9 +565,18 @@ const RegistrarDashboard = () => {
       toast.success(`Verification ${status.toLowerCase()}`);
       
       // Update local state optimistically
-      setVerifications(prev => prev.map(v => v.id === id ? { ...v, status: apiStatus } : v));
     } catch (err) {
       toast.error('Failed to resolve verification');
+    }
+  };
+
+  const handleBulkVerifyRequestAction = async (ids: string[], status: 'APPROVED' | 'REJECTED') => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.bulkResolveVerifications(ids, status);
+      setVerifications(prev => prev.map(v => ids.includes(v.id) ? { ...v, status } : v));
+    } catch (err) {
+      toast.error('Failed to process bulk verifications');
     }
   };
 
@@ -572,6 +602,55 @@ const RegistrarDashboard = () => {
       setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: 'APPROVED' } : d));
     } catch (err) {
       toast.error('Failed to approve and upload document');
+    }
+  };
+
+  const handleBulkProcessDocumentAction = async (ids: string[], status: 'IN_PROGRESS' | 'APPROVED') => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.bulkProcessDocuments(ids, status);
+      toast.success(`Successfully updated ${ids.length} document requests to ${status === 'IN_PROGRESS' ? 'In Progress' : 'Approved'}.`);
+      setDocuments(prev => prev.map(d => ids.includes(String(d.id)) ? { ...d, status } : d));
+    } catch (err) {
+      toast.error('Failed to process bulk document status update');
+    }
+  };
+
+  const handleBulkApproveDocumentsWithFilesAction = async (items: { id: string; file: File }[]) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.bulkApproveDocuments(items);
+      toast.success(`Successfully approved and uploaded documents for ${items.length} profiles.`);
+      const approvedIds = items.map(i => i.id);
+      setDocuments(prev => prev.map(d => approvedIds.includes(String(d.id)) ? { ...d, status: 'APPROVED' } : d));
+    } catch (err) {
+      toast.error('Failed to process bulk document approval and upload');
+      throw err;
+    }
+  };
+
+  const handleUploadDraftDocumentAction = async (id: string | number, file: File) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      const response = await registrarService.uploadDraftDocument(String(id), file);
+      const issuedDocumentUrl = response?.data?.issuedDocumentUrl || response?.issuedDocumentUrl;
+      toast.success('Document file attached.');
+      setDocuments(prev => prev.map(d => d.id === id ? { ...d, issuedDocumentUrl } : d));
+    } catch (err) {
+      toast.error('Failed to attach document file.');
+      throw err;
+    }
+  };
+
+  const handleRemoveDraftDocumentAction = async (id: string | number) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.removeDraftDocument(String(id));
+      toast.success('Attached document file removed.');
+      setDocuments(prev => prev.map(d => d.id === id ? { ...d, issuedDocumentUrl: undefined } : d));
+    } catch (err) {
+      toast.error('Failed to remove attached document file.');
+      throw err;
     }
   };
 
@@ -708,7 +787,7 @@ useEffect(() => {
                 items: [
                   { id: 'verification', label: 'Verifications', icon: 'verified_user', badge: pendingVerificationsCount > 0 ? pendingVerificationsCount : null, tooltip: `${pendingVerificationsCount} pending approvals` },
                   { id: 'documents', label: 'Document Queue', icon: 'description', badge: documentRequestsCount > 0 ? documentRequestsCount : null, tooltip: `${documentRequestsCount} documents awaiting action` },
-                  { id: 'data_issues', label: 'Data Corrections', icon: 'report_problem', badge: null, tooltip: 'Registration data correction requests' },
+                  { id: 'data_issues', label: 'Data Corrections', icon: 'report_problem', badge: pendingDataIssuesCount > 0 ? pendingDataIssuesCount : null, tooltip: pendingDataIssuesCount > 0 ? `${pendingDataIssuesCount} pending correction requests` : 'Registration data correction requests' },
                 ]
               },
               {
@@ -756,7 +835,7 @@ useEffect(() => {
                         <>
                           <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
                           {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
                           )}
@@ -1312,11 +1391,12 @@ useEffect(() => {
               <VerificationTab
                 verifications={filteredVerifications}
                 onVerify={handleVerifyRequestAction}
+                onBulkVerify={handleBulkVerifyRequestAction}
               />
             )}
 
             {activeTab === 'data_issues' && (
-              <DataIssuesTab />
+              <DataIssuesTab onIssuesChange={setRegistrationIssues} />
             )}
 
             {activeTab === 'documents' && (
@@ -1324,6 +1404,10 @@ useEffect(() => {
                 documents={filteredDocuments}
                 onProcessDocument={handleProcessDocumentAction}
                 onApproveDocument={handleApproveDocumentAction}
+                onBulkProcess={handleBulkProcessDocumentAction}
+                onBulkApproveWithFiles={handleBulkApproveDocumentsWithFilesAction}
+                onUploadDraftDocument={handleUploadDraftDocumentAction}
+                onRemoveDraftDocument={handleRemoveDraftDocumentAction}
               />
             )}
 

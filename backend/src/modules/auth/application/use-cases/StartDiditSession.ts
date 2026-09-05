@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 
 import prisma from '../../../../core/config/db';
+import { diditService } from '../../infrastructure/services/DiditService';
 
 /**
  * StartDiditSession
@@ -32,8 +33,10 @@ export class StartDiditSession {
       throw new Error('No pending registration found. Please register first before verifying.');
     }
 
-    const sessionId = crypto.randomBytes(16).toString('hex');
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-national-id/callback?sessionId=${sessionId}`;
+    const callbackUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-national-id/callback`;
+    const diditRes = await diditService.createSession(studentId, callbackUrl);
+    const sessionId = diditRes.sessionId || crypto.randomBytes(16).toString('hex');
+    const verificationUrl = diditRes.url || `${callbackUrl}?sessionId=${sessionId}`;
 
     // Store the session data in AnalyticsCache
     await prisma.analyticsCache.create({
@@ -42,6 +45,7 @@ export class StartDiditSession {
         data: {
           studentId,
           status: 'processing',
+          diditUrl: diditRes.url || null,
           createdAt: new Date().toISOString()
         },
         expiresAt: new Date(Date.now() + 15 * 60 * 1000) // 15 mins

@@ -30,6 +30,86 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
 
   const [selectedBatchFilter, setSelectedBatchFilter] = useState<string>('ALL');
 
+  // Import mode & API sync states
+  const [importMethod, setImportMethod] = useState<'file' | 'api'>('file');
+  const [apiBatchYear, setApiBatchYear] = useState<string>('2024');
+  const [isFetchingApi, setIsFetchingApi] = useState<boolean>(false);
+  const [sisStatus, setSisStatus] = useState<{ status: string; mode?: string } | null>(null);
+
+  // Direct SIS API Fetch & Synchronization handler
+  const handleFetchFromSisApi = async () => {
+    setIsFetchingApi(true);
+    setProcessingStatus('processing');
+    toast.loading(`Connecting to ASTU SIS API server (${apiBatchYear})...`, { id: 'sis-api-toast' });
+
+    try {
+      // Call real backend API endpoint /api/registrar/fetch-graduates/:year
+      const res = await registrarService.syncFromSisApi(apiBatchYear);
+
+      // Extract records returned from backend API
+      const fetchedRecords: any[] = (res && Array.isArray(res.graduates)) ? res.graduates : [];
+
+      if (fetchedRecords.length === 0) {
+        toast.error('No graduate records returned from SIS API for the selected batch year.', { id: 'sis-api-toast' });
+        setProcessingStatus('idle');
+        setIsFetchingApi(false);
+        return;
+      }
+
+      toast.success(`Successfully fetched ${fetchedRecords.length} graduate roster records from ASTU SIS API!`, { id: 'sis-api-toast' });
+
+      // Fetch existing graduates from DB to validate duplicates
+      const existingGraduates = await registrarService.getGraduates();
+      const existingIds = new Set((existingGraduates || []).map((g: any) => String(g.studentId || '').trim()));
+
+      let validCount = 0;
+      let dupCount = 0;
+      const errorsList: string[] = [];
+
+      const validated = fetchedRecords.map((r: any, idx: number) => {
+        const cleanId = String(r.studentId || '').trim();
+        const isDup = existingIds.has(cleanId);
+        if (isDup) {
+          dupCount++;
+          errorsList.push(`Record ${idx + 1}: Student ID "${cleanId}" already exists in DB.`);
+        } else {
+          validCount++;
+        }
+        return {
+          studentId: cleanId,
+          fullName: r.fullName,
+          email: r.email || undefined,
+          phone: r.phone || undefined,
+          department: r.department,
+          departmentCode: r.departmentCode,
+          graduationYear: r.graduationYear || (apiBatchYear === 'ALL' ? new Date().getFullYear() : Number(apiBatchYear)),
+          cgpa: r.cgpa || 3.0,
+          isValid: !isDup,
+          isDuplicate: isDup,
+          rowNum: idx + 1
+        };
+      });
+
+      setValidationReport({
+        total: fetchedRecords.length,
+        valid: validCount,
+        duplicates: dupCount,
+        errors: errorsList,
+        records: validated
+      });
+
+      setCsvFile(new File([''], `ASTU_SIS_API_Batch_${apiBatchYear}.json`));
+      setActiveStep('validate');
+      setProcessingStatus('idle');
+      setIsFetchingApi(false);
+    } catch (err: any) {
+      console.error('SIS API Fetch error:', err);
+      toast.error(err.message || 'Failed to fetch roster from ASTU SIS API server', { id: 'sis-api-toast' });
+      setProcessingStatus('idle');
+      setIsFetchingApi(false);
+    }
+  };
+
   const getBatchBreakdown = (records: any[]) => {
     const groups: { [batchYear: string]: number } = {};
     records.forEach(r => {
@@ -65,6 +145,7 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
 
   useEffect(() => {
     loadImportHistory();
+    registrarService.getSisStatus().then(status => setSisStatus(status)).catch(() => setSisStatus({ status: 'OFFLINE' }));
   }, []);
 
   const runValidationEngine = async (text: string, fileObj: File) => {
@@ -292,24 +373,120 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
 
       {/* Upload Area */}
       {activeStep === 'upload' && (
-        <section className="bg-white border border-gray-200/60 rounded-3xl p-8 shadow-sm">
-          <div className="text-center max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-astu-navy/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-3xl text-astu-navy">cloud_upload</span>
-            </div>
-            <h3 className="text-lg font-bold mb-2">Upload Graduate Roster</h3>
-            <p className="text-sm text-gray-500 mb-6">Select an Excel (.xlsx) or CSV file exported from the university SIS system.</p>
-            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 relative group hover:border-astu-navy/50 transition-colors cursor-pointer bg-gray-50/50">
-              <input type="file" accept=".csv,.xlsx" onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-              <div className="space-y-2">
-                <span className="material-symbols-outlined text-4xl text-gray-300 group-hover:text-astu-navy/50 transition-colors">upload</span>
-                <p className="text-sm font-bold text-gray-900">Drop your file here or click to browse</p>
-                <p className="text-xs text-gray-400">Supports: .csv, .xlsx (max 10MB)</p>
-              </div>
-            </div>
+        <div className="space-y-6">
+          {/* Method Selection Tabs */}
+          <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-2xl max-w-md">
+            <button
+              onClick={() => setImportMethod('file')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all ${
+                importMethod === 'file'
+                  ? 'bg-white text-astu-navy shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm">upload_file</span>
+              Upload File (.csv / .xlsx)
+            </button>
+            <button
+              onClick={() => setImportMethod('api')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all ${
+                importMethod === 'api'
+                  ? 'bg-white text-astu-navy shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm text-emerald-600">sync_alt</span>
+              Fetch via SIS API
+              <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-extrabold rounded-md uppercase">
+                Live
+              </span>
+            </button>
           </div>
-        </section>
+
+          {importMethod === 'file' ? (
+            <section className="bg-white border border-gray-200/60 rounded-3xl p-8 shadow-sm">
+              <div className="text-center max-w-lg mx-auto">
+                <div className="w-16 h-16 bg-astu-navy/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-3xl text-astu-navy">cloud_upload</span>
+                </div>
+                <h3 className="text-lg font-bold mb-2">Upload Graduate Roster</h3>
+                <p className="text-sm text-gray-500 mb-6">Select an Excel (.xlsx) or CSV file exported from the university SIS system.</p>
+                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 relative group hover:border-astu-navy/50 transition-colors cursor-pointer bg-gray-50/50">
+                  <input type="file" accept=".csv,.xlsx" onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div className="space-y-2">
+                    <span className="material-symbols-outlined text-4xl text-gray-300 group-hover:text-astu-navy/50 transition-colors">upload</span>
+                    <p className="text-sm font-bold text-gray-900">Drop your file here or click to browse</p>
+                    <p className="text-xs text-gray-400">Supports: .csv, .xlsx (max 10MB)</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section className="bg-white border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <span className="material-symbols-outlined text-2xl">api</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-gray-900">ASTU University SIS API Server Integration</h3>
+                    <p className="text-xs text-gray-500">Fetch & synchronize graduate rosters directly from your university SIS database via API</p>
+                  </div>
+                </div>
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold self-start sm:self-auto ${
+                  sisStatus?.status === 'ONLINE' 
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${sisStatus?.status === 'ONLINE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500 animate-pulse'}`} />
+                  {sisStatus?.status === 'ONLINE' ? 'SIS Server Online' : 'SIS Server Offline'}
+                </div>
+              </div>
+
+              <div className="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-5 md:p-6 space-y-4">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div className="flex-1 max-w-xl">
+                    <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-astu-navy">school</span>
+                      Select Graduation Batch Year
+                    </label>
+                    <select
+                      value={apiBatchYear}
+                      onChange={(e) => setApiBatchYear(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-astu-navy shadow-sm"
+                    >
+                      <option value="2026">Class of 2026 (Upcoming Roster)</option>
+                      <option value="2025">Class of 2025 (Latest Graduated)</option>
+                      <option value="2024">Class of 2024</option>
+                      <option value="2023">Class of 2023</option>
+                      <option value="2022">Class of 2022</option>
+                      <option value="ALL">All Recent Batches (Current & Previous Year)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={handleFetchFromSisApi}
+                    disabled={isFetchingApi}
+                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-astu-navy to-emerald-700 hover:from-astu-navy/95 hover:to-emerald-800 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer h-[46px]"
+                  >
+                    {isFetchingApi ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Fetching Roster...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-sm">sync_alt</span>
+                        <span>Sync & Fetch Roster from SIS API</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
       )}
 
       {/* Validation Step */}

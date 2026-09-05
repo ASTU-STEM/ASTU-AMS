@@ -58,12 +58,17 @@ export class VerifyDiditSession {
     const nameFromId = normalize(nationalIdName);
     const nameFromProfile = normalize(profile.fullName);
 
-    if (nameFromId !== nameFromProfile) {
+    const idTokens = nameFromId.split(/\s+/).filter(t => t.length > 1);
+    const profileTokens = nameFromProfile.split(/\s+/).filter(t => t.length > 1);
+
+    const tokenOverlap = profileTokens.some(t => idTokens.includes(t)) || idTokens.some(t => profileTokens.includes(t));
+
+    if (nameFromId !== nameFromProfile && !tokenOverlap) {
       // Name mismatch — do NOT activate
       await prisma.analyticsCache.delete({ where: { key: cacheKey } });
       return {
         status: 'failed' as const,
-        message: `Name mismatch: the name on your National ID does not match your alumni record. Please try manual verification instead.`,
+        message: `Name mismatch: the name on your National ID ("${nationalIdName}") does not match your alumni record ("${profile.fullName}"). Please try manual verification instead.`,
       };
     }
 

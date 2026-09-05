@@ -162,7 +162,11 @@ class FakePrisma {
     },
     update: async ({ where, data }: any) => {
       const store = readDevDb();
-      const idx = (store.alumniProfiles || []).findIndex((a: any) => a.id === where.id || a.userId === where.userId || a.studentId === where.studentId);
+      const idx = (store.alumniProfiles || []).findIndex((a: any) =>
+        (where?.id !== undefined && (a.id === where.id || a.userId === where.id)) ||
+        (where?.userId !== undefined && a.userId === where.userId) ||
+        (where?.studentId !== undefined && a.studentId === where.studentId)
+      );
       if (idx === -1) throw new Error('Alumni profile not found');
       store.alumniProfiles[idx] = { ...store.alumniProfiles[idx], ...data, updatedAt: new Date().toISOString() };
       writeDevDb(store);

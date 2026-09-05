@@ -11,7 +11,7 @@ import prisma from '../../../../core/config/db';
  * activates the alumni if the names match.
  */
 export class GetDiditStatus {
-  async execute(sessionId: string) {
+  async execute(sessionId: string, scannedName?: string) {
     const cacheKey = `didit_${sessionId}`;
     const cacheEntry = await prisma.analyticsCache.findUnique({
       where: { key: cacheKey },
@@ -28,8 +28,8 @@ export class GetDiditStatus {
       return { status: 'expired' as const, message: 'Session has expired.' };
     }
 
-    // First poll returns processing to simulate Didit scanning
-    if (sessionData.status === 'processing') {
+    // First poll returns processing to simulate Didit scanning if no scannedName is supplied
+    if (sessionData.status === 'processing' && !scannedName) {
       // Update to 'verifying' so next poll does the actual check
       await prisma.analyticsCache.update({
         where: { key: cacheKey },
@@ -40,7 +40,7 @@ export class GetDiditStatus {
       return { status: 'processing' as const, message: 'Verification in progress...' };
     }
 
-    // Second poll: do the actual name matching and activation
+    // Do the actual name matching and activation
     const profile = await prisma.alumniProfile.findUnique({
       where: { studentId: sessionData.studentId },
       include: { user: true },
@@ -56,10 +56,24 @@ export class GetDiditStatus {
       return { status: 'success' as const, message: 'Account is already active.' };
     }
 
-    // The Didit system would return the name from the National ID.
-    // In this simulation, we use the profile's own fullName as the "scanned" name 
-    // (since a real Didit integration would OCR the physical ID card).
-    // The real check is: does the profile exist and have a pending registration?
+    // If scannedName is passed (from Didit cloud or camera OCR), compare names
+    if (scannedName) {
+      const normalizedRecordName = profile.fullName.trim().toLowerCase();
+      const normalizedScannedName = scannedName.trim().toLowerCase();
+
+      // Check if parts of the name match (or full string contains)
+      const recordTokens = normalizedRecordName.split(/\s+/);
+      const scannedTokens = normalizedScannedName.split(/\s+/);
+      const tokenMatch = recordTokens.some(t => scannedTokens.includes(t)) || scannedTokens.some(t => recordTokens.includes(t));
+
+      if (!tokenMatch && normalizedRecordName !== normalizedScannedName) {
+        return {
+          status: 'failed' as const,
+          message: `Name on scanned National ID ("${scannedName}") does not match alumni record ("${profile.fullName}").`,
+        };
+      }
+    }
+
     const passwordHash = profile.pendingPasswordHash;
     if (!passwordHash) {
       await prisma.analyticsCache.delete({ where: { key: cacheKey } });
@@ -67,17 +81,19 @@ export class GetDiditStatus {
     }
 
     // Name match confirmed by Didit → activate the alumni
-    let user = profile.user;
+    const targetEmail = (profile.email || `${profile.studentId.replace(/\//g, '-')}@alumni.astu.edu.et`).toLowerCase();
+    let userId = profile.userId || profile.user?.id;
+    let user: any = null;
+
+    if (userId) {
+      user = await prisma.user.findUnique({ where: { id: userId } });
+    }
+
     if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: (profile.email || `${profile.studentId.replace(/\//g, '-')}@alumni.astu.edu.et`).toLowerCase(),
-          password: passwordHash,
-          role: Role.ALUMNI,
-          isActive: true,
-        },
-      });
-    } else {
+      user = await prisma.user.findUnique({ where: { email: targetEmail } });
+    }
+
+    if (user) {
       await prisma.user.update({
         where: { id: user.id },
         data: {
@@ -85,9 +101,20 @@ export class GetDiditStatus {
           password: passwordHash,
         },
       });
+      userId = user.id;
+    } else {
+      user = await prisma.user.create({
+        data: {
+          email: targetEmail,
+          password: passwordHash,
+          role: Role.ALUMNI,
+          isActive: true,
+        },
+      });
+      userId = user.id;
     }
 
-    await prisma.alumniProfile.update({
+    const updated = await prisma.alumniProfile.update({
       where: { id: profile.id },
       data: {
         userId: user.id,

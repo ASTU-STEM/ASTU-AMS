@@ -67,9 +67,17 @@ export class RegisterEmployer {
       ipAddress,
     });
 
-    // Send confirmation email (non-blocking — don't crash registration if email fails)
+    // Send confirmation email to employer and alert ADMIN & CMS (Alumni Office) staff dynamically
     try {
       await this.emailService.sendEmployerRegistrationPending(result.user.email, result.profile.companyName);
+
+      // Alert Admin & Alumni Office staff using dynamic role resolution engine
+      await this.emailService.sendMail({
+        to: 'ADMIN, ALUMNI_OFFICE',
+        subject: `[ASTU AMS Alert] New Employer Registration Pending: ${result.profile.companyName}`,
+        text: `A new employer "${result.profile.companyName}" (TIN: ${result.profile.tin}) has registered and is pending approval in the Admin Dashboard.`,
+        html: `<p>A new employer <strong>${result.profile.companyName}</strong> (TIN: ${result.profile.tin}) has registered and is pending admin approval. Log in to your portal to review and verify their company profile.</p>`
+      }).catch(() => {});
     } catch (emailError) {
       console.warn('Failed to send employer registration email:', emailError);
     }

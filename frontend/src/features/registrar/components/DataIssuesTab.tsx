@@ -46,7 +46,11 @@ interface RegistrationIssue {
   createdAt: string;
 }
 
-export const DataIssuesTab: React.FC = () => {
+interface DataIssuesTabProps {
+  onIssuesChange?: (issues: RegistrationIssue[]) => void;
+}
+
+export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) => {
   const [issues, setIssues] = useState<RegistrationIssue[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,6 +76,7 @@ export const DataIssuesTab: React.FC = () => {
 
   useEffect(() => {
     fetchIssues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync edit form state when a new issue is selected
@@ -104,6 +109,7 @@ export const DataIssuesTab: React.FC = () => {
       const res = await apiClient.get<{ success: boolean; data: RegistrationIssue[] }>('/registrar/registration-issues');
       if (res.data.success) {
         setIssues(res.data.data);
+        onIssuesChange?.(res.data.data);
       }
     } catch (error) {
       toast.error('Failed to load data correction requests');
@@ -125,7 +131,11 @@ export const DataIssuesTab: React.FC = () => {
       });
       if (res.data.success) {
         toast.success(`Request marked as ${status.toLowerCase()}`);
-        setIssues((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
+        setIssues((prev) => {
+          const next: RegistrationIssue[] = prev.map((i) => (i.id === id ? { ...i, status } : i));
+          onIssuesChange?.(next);
+          return next;
+        });
         setSelectedIssue(null);
       }
     } catch (error) {
@@ -155,7 +165,11 @@ export const DataIssuesTab: React.FC = () => {
       );
       if (res.data.success) {
         toast.success('Account created with Registrar verified data! Credentials sent via email.');
-        setIssues((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'RESOLVED' } : i)));
+        setIssues((prev) => {
+          const next: RegistrationIssue[] = prev.map((i) => (i.id === id ? { ...i, status: 'RESOLVED' } : i));
+          onIssuesChange?.(next);
+          return next;
+        });
         setSelectedIssue(null);
       }
     } catch (error: any) {

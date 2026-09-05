@@ -1,4 +1,4 @@
-import { get, post, patch } from '../../../services/api';
+import { get, post, patch, del } from '../../../services/api';
 import {
   BatchImportRecord,
   BatchImportResult,
@@ -74,6 +74,32 @@ export const registrarService = {
     }
   },
 
+  // Direct Sync from University SIS API
+  async syncFromSisApi(batchYear?: number | string): Promise<any> {
+    try {
+      const year = batchYear && batchYear !== 'ALL' ? batchYear : 'current-and-previous';
+      const endpoint = year === 'current-and-previous' 
+        ? '/registrar/fetch-graduates/current-and-previous'
+        : `/registrar/fetch-graduates/${year}`;
+      
+      const response = await post<{ data: any }>(endpoint, {});
+      return response.data;
+    } catch (error: any) {
+      console.error('Error syncing from SIS API:', error);
+      throw error;
+    }
+  },
+
+  async getSisStatus(): Promise<any> {
+    try {
+      const response = await get<{ data: any }>('/registrar/sis-status');
+      return response.data;
+    } catch (error) {
+      console.error('Error checking SIS status:', error);
+      return { status: 'OFFLINE' };
+    }
+  },
+
   async getLogs(): Promise<any[]> {
     try {
       const response = await get<{ data: any[] }>('/registrar/logs');
@@ -105,6 +131,16 @@ export const registrarService = {
     }
   },
 
+  async bulkResolveVerifications(ids: string[], status: 'APPROVED' | 'REJECTED'): Promise<any> {
+    try {
+      const response = await post<{ data: any }>('/registrar/verifications/bulk-status', { ids, status });
+      return response.data;
+    } catch (error) {
+      console.error('Error in bulkResolveVerifications:', error);
+      throw error;
+    }
+  },
+
   // Documents
   async getDocumentRequests(): Promise<any[]> {
     try {
@@ -126,6 +162,16 @@ export const registrarService = {
     }
   },
 
+  async bulkProcessDocuments(ids: string[], status: 'IN_PROGRESS' | 'APPROVED' | 'REJECTED'): Promise<any> {
+    try {
+      const response = await post<{ data: any }>('/registrar/document-requests/bulk-status', { ids, status });
+      return response.data;
+    } catch (error) {
+      console.error('Error in bulkProcessDocuments:', error);
+      throw error;
+    }
+  },
+
   async approveDocument(requestId: string, file: File): Promise<any> {
     try {
       const formData = new FormData();
@@ -142,6 +188,51 @@ export const registrarService = {
     }
   },
 
+  async bulkApproveDocuments(items: { id: string; file: File }[]): Promise<any> {
+    try {
+      const formData = new FormData();
+      items.forEach(item => {
+        formData.append('requestIds', item.id);
+        formData.append(`file_${item.id}`, item.file);
+      });
+      const response = await post<{ data: any }>('/registrar/document-requests/bulk-approve', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error in bulkApproveDocuments:', error);
+      throw error;
+    }
+  },
+
+  async uploadDraftDocument(requestId: string, file: File): Promise<any> {
+    try {
+      const formData = new FormData();
+      formData.append('document', file);
+      const response = await post<{ data: any }>(`/registrar/document-requests/${requestId}/upload-draft`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading draft document:', error);
+      throw error;
+    }
+  },
+
+  async removeDraftDocument(requestId: string): Promise<any> {
+    try {
+      const response = await del<{ data: any }>(`/registrar/document-requests/${requestId}/remove-draft`);
+      return response.data;
+    } catch (error) {
+      console.error('Error removing draft document:', error);
+      throw error;
+    }
+  },
+
   // Data Exports (Stub)
   createExportManifest(request: DataExportRequest) {
     return {
@@ -150,5 +241,87 @@ export const registrarService = {
       requestedAt: new Date().toISOString(),
       status: 'Ready' as const
     };
+  },
+
+  // Registration Issues / Data Corrections
+  async getRegistrationIssues(): Promise<any[]> {
+    try {
+      const response = await get<{ success: boolean; data: any[] }>('/registrar/registration-issues');
+      return (response && response.data && Array.isArray(response.data)) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching registration issues:', error);
+      return [];
+    }
+  },
+
+  // 3-Day Undone Task Interval Reminder Trigger
+  async triggerPendingTaskReminder(): Promise<any> {
+    try {
+      const response = await post<{ success: boolean; message: string; data: any }>('/registrar/trigger-pending-reminder', {});
+      return response;
+    } catch (error) {
+      console.error('Error triggering pending reminder:', error);
+      throw error;
+    }
+  },
+
+  // Export Logs & Scheduled Reports
+  async getExportLogs(): Promise<any[]> {
+    try {
+      const response = await get<{ data: any[] }>('/registrar/export-logs');
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching export logs:', error);
+      return [];
+    }
+  },
+
+  async logExport(logData: { reportName: string; format: string; recordCount?: number; fileSize?: string }): Promise<any> {
+    try {
+      const response = await post<{ data: any }>('/registrar/export-logs', logData);
+      return response.data;
+    } catch (error) {
+      console.error('Error logging export:', error);
+    }
+  },
+
+  async getScheduledReports(): Promise<any[]> {
+    try {
+      const response = await get<{ data: any[] }>('/registrar/scheduled-reports');
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching scheduled reports:', error);
+      return [];
+    }
+  },
+
+  async createScheduledReport(reportData: { title: string; format: string; schedule: string; nextRun?: string }): Promise<any> {
+    try {
+      const response = await post<{ data: any }>('/registrar/scheduled-reports', reportData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating scheduled report:', error);
+      throw error;
+    }
+  },
+
+  async toggleScheduledReportStatus(id: string | number, status: 'Active' | 'Paused' | 'Completed'): Promise<any> {
+    try {
+      const response = await patch<{ data: any }>(`/registrar/scheduled-reports/${id}/status`, { status });
+      return response.data;
+    } catch (error) {
+      console.error('Error toggling scheduled report status:', error);
+      throw error;
+    }
+  },
+
+  async deleteScheduledReport(id: string | number): Promise<any> {
+    try {
+      const response = await del<{ data: any }>(`/registrar/scheduled-reports/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting scheduled report:', error);
+      throw error;
+    }
   }
 };

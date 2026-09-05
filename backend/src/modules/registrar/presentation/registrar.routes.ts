@@ -37,6 +37,7 @@ router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 
 router.post('/import', upload.single('file'), asyncHandler(RegistrarController.importFile));
 router.get('/logs', asyncHandler(RegistrarController.getLogs));
+router.get('/sis-status', asyncHandler(RegistrarController.getSisStatus));
 router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));
 router.post('/fetch-graduates/current-and-previous', asyncHandler(RegistrarController.fetchCurrentAndPreviousGraduates));
 
@@ -66,10 +67,26 @@ router.get('/dashboard-stats', asyncHandler(RegistrarController.getDashboardStat
 
 // Verifications
 router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
+router.post('/verifications/bulk-status', asyncHandler(RegistrarController.bulkUpdateVerificationStatus));
 router.patch('/verifications/:id/status', asyncHandler(RegistrarController.updateVerificationStatus));
 
 // Document Status Update
+router.post('/document-requests/bulk-status', asyncHandler(RegistrarController.bulkUpdateDocumentStatus));
+router.post('/document-requests/bulk-approve', upload.any(), asyncHandler(RegistrarController.bulkApproveDocumentRequests));
+router.post('/document-requests/:id/upload-draft', upload.single('document'), asyncHandler(RegistrarController.uploadDraftDocumentRequest));
+router.delete('/document-requests/:id/remove-draft', asyncHandler(RegistrarController.removeDraftDocumentRequest));
 router.patch('/document-requests/:id/status', asyncHandler(RegistrarController.updateDocumentStatus));
 router.post('/document-requests/:id/approve', upload.single('document'), asyncHandler(RegistrarController.approveDocumentRequest));
+
+// Trigger Pending Task Reminder
+router.post('/trigger-pending-reminder', asyncHandler(RegistrarController.triggerPendingTaskReminder));
+
+// Export Logs & Scheduled Reports
+router.get('/export-logs', asyncHandler(RegistrarController.getExportLogs));
+router.post('/export-logs', asyncHandler(RegistrarController.createExportLog));
+router.get('/scheduled-reports', asyncHandler(RegistrarController.getScheduledReports));
+router.post('/scheduled-reports', asyncHandler(RegistrarController.createScheduledReport));
+router.patch('/scheduled-reports/:id/status', asyncHandler(RegistrarController.toggleScheduledReportStatus));
+router.delete('/scheduled-reports/:id', asyncHandler(RegistrarController.deleteScheduledReport));
 
 export default router;

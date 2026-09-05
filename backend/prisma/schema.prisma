@@ -881,3 +881,25 @@ model RegistrationIssue {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
+
+model ExportLog {
+  id          String   @id @default(uuid())
+  reportName  String
+  format      String   // "PDF" | "Excel" | "Stata" | "CSV"
+  exportedBy  String   @default("Registrar Admin")
+  recordCount Int      @default(0)
+  fileSize    String   @default("0 KB")
+  createdAt   DateTime @default(now())
+}
+
+model ScheduledReport {
+  id        String   @id @default(uuid())
+  title     String
+  format    String   // "PDF" | "Excel" | "CSV"
+  schedule  String   // "Every 1st of month" | "Every Monday" | "Quarterly"
+  nextRun   String   // e.g. "Jun 1, 2026"
+  status    String   @default("Active") // "Active" | "Paused" | "Completed"
+  createdBy String   @default("Registrar Admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
