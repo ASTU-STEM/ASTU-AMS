@@ -118,8 +118,34 @@ export class LoginUser {
       ipAddress,
     });
 
+    let displayName = (user as any).firstName
+      ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim()
+      : user.email.split('@')[0];
+
+    if (alumniProfile?.fullName) {
+      displayName = alumniProfile.fullName;
+    } else if (employerProfile?.companyName) {
+      displayName = employerProfile.companyName;
+    } else if (user.role === Role.ADMIN) {
+      displayName = 'System Admin';
+    } else if (user.role === Role.REGISTRAR) {
+      displayName = 'Office of Registrar';
+    } else if (user.role === Role.DEPARTMENT_HEAD) {
+      displayName = 'Department Head';
+    }
+
     return {
-      user: { id: user.id, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: displayName,
+        fullName: displayName,
+        firstName: (user as any).firstName || undefined,
+        lastName: (user as any).lastName || undefined,
+        alumniProfile: alumniProfile ? { id: alumniProfile.id, fullName: alumniProfile.fullName } : undefined,
+        employerProfile: employerProfile ? { id: employerProfile.id, companyName: employerProfile.companyName } : undefined,
+      },
       token: accessToken,
       refreshToken,
     };

@@ -889,9 +889,22 @@ function wrapModel(modelName: string, realModel: any): any {
 export const initPrisma = async () => {
   if (initialized && client) return client;
 
+  const rawUrl = process.env.DATABASE_URL || '';
+  let dbUrl = rawUrl;
+  if (dbUrl) {
+    const params: string[] = [];
+    if (!dbUrl.includes('connect_timeout')) params.push('connect_timeout=30');
+    if (!dbUrl.includes('pool_timeout')) params.push('pool_timeout=60');
+    if (!dbUrl.includes('connection_limit')) params.push('connection_limit=50');
+    if (params.length > 0) {
+      dbUrl += (dbUrl.includes('?') ? '&' : '?') + params.join('&');
+    }
+  }
+
   try {
     const real = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      datasources: dbUrl ? { db: { url: dbUrl } } : undefined,
+      log: ['error'],
     });
     await real.$connect();
     client = real;

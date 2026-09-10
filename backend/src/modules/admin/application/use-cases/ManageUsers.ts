@@ -161,58 +161,64 @@ export class ManageUsers {
       filteredUsers = filteredUsers.filter((u: any) => u.department === params.department);
     }
 
-    // Compute Global Stats (ignoring filters to show overall system health)
-    const allUsers = await prisma.user.findMany({
-      include: {
-        alumniProfile: true,
-        employerProfile: true,
-      }
-    });
+    // Compute Global Stats using parallel count queries instead of full table scan
+    const [totalUsers, activeAlumni, suspendedAlumni, pendingAlumni, verifiedEmployers, unverifiedEmployers] = await Promise.all([
+      prisma.user.count().catch(() => 0),
+      prisma.alumniProfile.count({ where: { status: AlumniStatus.ACTIVE } }).catch(() => 0),
+      prisma.alumniProfile.count({ where: { status: AlumniStatus.SUSPENDED } }).catch(() => 0),
+      prisma.alumniProfile.count({ where: { status: AlumniStatus.INACTIVE } }).catch(() => 0),
+      prisma.employerProfile.count({ where: { isVerified: true } }).catch(() => 0),
+      prisma.employerProfile.count({ where: { isVerified: false } }).catch(() => 0)
+    ]);
 
-    let activeCount = 0;
-    let pendingCount = 0;
-    let suspendedCount = 0;
-    let inactiveCount = 0;
-
-    for (const u of allUsers) {
-      if (u.role === Role.ALUMNI && u.alumniProfile) {
-        if (u.alumniProfile.status === AlumniStatus.ACTIVE) activeCount++;
-        else if (u.alumniProfile.status === AlumniStatus.SUSPENDED) suspendedCount++;
-        else pendingCount++;
-      } else if (u.role === Role.EMPLOYER && u.employerProfile) {
-        if (!u.employerProfile.isVerified) pendingCount++;
-        else if (u.isActive) activeCount++;
-        else suspendedCount++;
-      } else {
-        if (u.isActive) activeCount++;
-        else inactiveCount++;
-      }
-    }
+    const activeCount = activeAlumni + verifiedEmployers;
+    const pendingCount = pendingAlumni + unverifiedEmployers;
+    const suspendedCount = suspendedAlumni;
+    const inactiveCount = Math.max(0, totalUsers - activeCount - pendingCount - suspendedCount);
 
     return {
       users: filteredUsers,
-      totalCount: params.status && params.status !== 'All' ? filteredUsers.length : totalCount, // Approximate if filtered manually
+      totalCount: params.status && params.status !== 'All' ? filteredUsers.length : totalCount,
       totalPages: Math.ceil((params.status && params.status !== 'All' ? filteredUsers.length : totalCount) / limit),
       currentPage: page,
       stats: {
-        total: allUsers.length,
+        total: totalUsers,
         active: activeCount,
         pending: pendingCount,
         suspended: suspendedCount,
-        inactive: inactiveCount
+        inactive: inactiveCount,
       }
     };
   }
 
-  async createUser(data: { name: string; email: string; role: string; department: string; studentId?: string; phone?: string; password?: string }) {
-    // Basic password hash logic skipped for admin direct creation or assumed to be handled by auth layer.
-    // For demo/simplicity, we'll create the user and profile.
+  async createUser(data: {
+    name: string;
+    email: string;
+    role: string;
+    status?: string;
+    isVerified?: boolean;
+    department?: string;
+    studentId?: string;
+    phone?: string;
+    password?: string;
+    nationality?: string;
+    dateOfBirth?: string;
+    dob?: string;
+    graduationYear?: number | string;
+    batch?: number | string;
+    cgpa?: number | string;
+    gender?: string;
+    industry?: string;
+    location?: string;
+    hrContact?: string;
+  }) {
     let roleEnum: Role = Role.ALUMNI;
     switch (data.role) {
       case 'Alumni': roleEnum = Role.ALUMNI; break;
       case 'Employer': roleEnum = Role.EMPLOYER; break;
       case 'Department Head': roleEnum = Role.DEPARTMENT_HEAD; break;
       case 'Registrar': roleEnum = Role.REGISTRAR; break;
+      case 'CMS Manager':
       case 'CMS Mgr': roleEnum = Role.ALUMNI_OFFICE; break;
       case 'Admin': roleEnum = Role.ADMIN; break;
     }
@@ -231,6 +237,22 @@ export class ManageUsers {
       }
     }
 
+    let isActive = true;
+    let alumniStatus: AlumniStatus = AlumniStatus.ACTIVE;
+
+    if (data.status === 'Inactive') {
+      isActive = false;
+      alumniStatus = AlumniStatus.INACTIVE;
+    } else if (data.status === 'Suspended') {
+      isActive = false;
+      alumniStatus = AlumniStatus.SUSPENDED;
+    } else if (data.status === 'Pending Verification' || data.status === 'Pending') {
+      isActive = false;
+      alumniStatus = AlumniStatus.INACTIVE;
+    }
+
+    const isVerifiedFinal = data.isVerified !== undefined ? Boolean(data.isVerified) : isActive;
+
     const tempPassword = data.password ? data.password : 'admin-generated';
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
@@ -238,29 +260,38 @@ export class ManageUsers {
       data: {
         email: data.email,
         role: roleEnum,
-        isActive: true, // Auto-activate admin-created users
+        isActive: isActive,
         password: hashedPassword,
       }
     });
 
     if (roleEnum === Role.ALUMNI) {
-      // Need a default dept for alumni if not provided properly. We'll find or create one just in case.
-      let dept = await prisma.department.findFirst({ where: { name: data.department } });
+      const deptName = data.department || 'Computer Science';
+      let dept = await prisma.department.findFirst({ where: { name: deptName } });
       if (!dept) {
-        dept = await prisma.department.create({ data: { name: data.department, code: data.department.substring(0, 3).toUpperCase() } });
+        dept = await prisma.department.create({ data: { name: deptName, code: deptName.substring(0, 3).toUpperCase() } });
       }
+
+      const parsedGradYear = parseInt(String(data.graduationYear || data.batch || new Date().getFullYear()), 10);
+      const parsedCgpa = parseFloat(String(data.cgpa || '3.5'));
+      const rawDob = data.dateOfBirth || data.dob;
+      const parsedDob = rawDob ? new Date(rawDob) : null;
+
       await prisma.alumniProfile.create({
         data: {
           userId: user.id,
-          studentId: data.studentId || `ASTU/TMP/${Date.now()}`,
+          studentId: data.studentId || `ASTU/UGR/${Date.now()}`,
           fullName: data.name,
+          email: data.email,
           departmentId: dept.id,
-          graduationYear: new Date().getFullYear(),
-          phone: data.phone,
-          status: AlumniStatus.ACTIVE,
-          isVerified: true,
-          cgpa: 0.0,
-          gender: 'Unknown'
+          graduationYear: isNaN(parsedGradYear) ? new Date().getFullYear() : parsedGradYear,
+          cgpa: isNaN(parsedCgpa) ? 3.5 : parsedCgpa,
+          nationality: data.nationality || 'Ethiopian',
+          dateOfBirth: parsedDob,
+          phone: data.phone || null,
+          status: alumniStatus,
+          isVerified: isVerifiedFinal,
+          gender: data.gender || 'Unknown'
         }
       });
     } else if (roleEnum === Role.EMPLOYER) {
@@ -268,17 +299,18 @@ export class ManageUsers {
         data: {
           userId: user.id,
           companyName: data.name,
-          industry: 'Unknown',
-          location: 'Unknown',
-          hrContact: data.name,
-          phone: data.phone,
-          isVerified: true
+          industry: data.industry || 'Technology & Engineering',
+          location: data.location || 'Ethiopia',
+          hrContact: data.hrContact || data.name,
+          phone: data.phone || null,
+          isVerified: isVerifiedFinal
         }
       });
     } else if (roleEnum === Role.DEPARTMENT_HEAD) {
-      let dept = await prisma.department.findFirst({ where: { name: data.department } });
+      const deptName = data.department || 'Computer Science';
+      let dept = await prisma.department.findFirst({ where: { name: deptName } });
       if (!dept) {
-        dept = await prisma.department.create({ data: { name: data.department, code: data.department.substring(0, 3).toUpperCase() } });
+        dept = await prisma.department.create({ data: { name: deptName, code: deptName.substring(0, 3).toUpperCase() } });
       }
       await prisma.departmentHeadProfile.create({
         data: {

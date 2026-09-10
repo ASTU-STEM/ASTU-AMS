@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   ArrowDownUp,
   Building2,
@@ -22,13 +24,22 @@ import {
   Check,
   UserRound,
   XCircle,
+  GraduationCap,
+  BookOpen,
+  Newspaper,
+  UserCog,
+  Lock,
+  CheckCircle2,
+  Sparkles,
+  Copy,
+  Loader2,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
 import AdminBadge from '../components/AdminBadge';
 
-type Role = 'Alumni' | 'Employer' | 'Department Head' | 'Registrar' | 'Admin';
+type Role = 'Alumni' | 'Employer' | 'Department Head' | 'Registrar' | 'CMS Manager' | 'Admin';
 type Status = 'Active' | 'Inactive' | 'Suspended' | 'Pending Verification';
 type SortKey = 'name' | 'studentId' | 'role' | 'department' | 'batch' | 'status' | 'lastLogin';
 
@@ -54,15 +65,28 @@ type UserFormState = {
   password: string;
   autoGeneratePassword: boolean;
   role: Role;
-  department: string;
-  studentId: string;
-  phone: string;
   status: Status;
+  isVerified: boolean;
+  phone: string;
+  // Alumni 9 specific fields
+  studentId: string;
+  department: string;
+  graduationYear: string;
+  cgpa: string;
+  dateOfBirth: string;
+  nationality: string;
+  gender: string;
+  // Employer fields
+  industry: string;
+  location: string;
+  hrContact: string;
+  // CMS Manager fields
+  cmsScope: string;
 };
 
 type FormErrors = Partial<Record<keyof UserFormState, string>>;
 
-const roles: Array<'All Roles' | Role> = ['All Roles', 'Alumni', 'Employer', 'Department Head', 'Registrar', 'Admin'];
+const roles: Array<'All Roles' | Role> = ['All Roles', 'Alumni', 'Employer', 'Department Head', 'Registrar', 'CMS Manager', 'Admin'];
 const statuses: Array<'All' | Status> = ['All', 'Active', 'Inactive', 'Suspended', 'Pending Verification'];
 const departments = ['All Departments', 'Computer Science', 'Software Engineering', 'Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Chemical Engineering', 'Information Engineering', 'Registrar Office'];
 const pageSize = 25;
@@ -72,6 +96,7 @@ const roleTone: Record<Role, 'default' | 'warning' | 'danger' | 'success' | 'neu
   Employer: 'warning',
   'Department Head': 'neutral',
   Registrar: 'success',
+  'CMS Manager': 'neutral',
   Admin: 'danger',
 };
 
@@ -87,6 +112,7 @@ const roleColorClass: Record<Role, string> = {
   Employer: 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20',
   'Department Head': 'bg-violet-100 text-violet-700 border-violet-200',
   Registrar: 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15',
+  'CMS Manager': 'bg-teal-100 text-teal-800 border-teal-200',
   Admin: 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15',
 };
 
@@ -264,26 +290,77 @@ function createDefaultForm(): UserFormState {
   return {
     name: '',
     email: '',
-    password: '',
+    password: generatePassword(),
     autoGeneratePassword: true,
     role: 'Alumni',
-    department: 'Computer Science',
-    studentId: '',
-    phone: '',
     status: 'Active',
+    isVerified: true,
+    phone: '',
+    studentId: '',
+    department: 'Software Engineering',
+    graduationYear: String(new Date().getFullYear()),
+    cgpa: '3.50',
+    dateOfBirth: '2001-05-15',
+    nationality: 'Ethiopian',
+    gender: 'Male',
+    industry: 'Technology & Enterprise',
+    location: 'Addis Ababa, HQ',
+    hrContact: '',
+    cmsScope: 'All Portal & News Content',
   };
 }
 
 export default function UserManagement() {
-  const [users, setUsers] = useState<UserRow[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [searchParams] = useSearchParams();
+  const initialRoleParam = searchParams.get('role');
+  const initialStatusParam = searchParams.get('status');
+
+  const [users, setUsers] = useState<UserRow[]>(() => {
+    try {
+      const cached = localStorage.getItem('admin_users_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [totalCount, setTotalCount] = useState<number>(() => {
+    try {
+      const cached = localStorage.getItem('admin_users_total_cache');
+      return cached ? parseInt(cached, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [globalStats, setGlobalStats] = useState({ total: 0, active: 0, pending: 0, suspended: 0, inactive: 0 });
+  const [globalStats, setGlobalStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem('admin_users_stats_cache');
+      return cached ? JSON.parse(cached) : { total: 0, active: 0, pending: 0, suspended: 0, inactive: 0 };
+    } catch {
+      return { total: 0, active: 0, pending: 0, suspended: 0, inactive: 0 };
+    }
+  });
+  const [loading, setLoading] = useState(() => users.length === 0);
 
   const [query, setQuery] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'All Roles' | Role>('All Roles');
-  const [selectedStatus, setSelectedStatus] = useState<'All' | Status>('All');
+  const [selectedRole, setSelectedRole] = useState<'All Roles' | Role>(() => {
+    if (!initialRoleParam) return 'All Roles';
+    const r = initialRoleParam.toUpperCase();
+    if (r === 'EMPLOYER') return 'Employer';
+    if (r === 'ALUMNI') return 'Alumni';
+    if (r === 'ADMIN') return 'Admin';
+    if (r === 'REGISTRAR') return 'Registrar';
+    return 'All Roles';
+  });
+  const [selectedStatus, setSelectedStatus] = useState<'All' | Status>(() => {
+    if (!initialStatusParam) return 'All';
+    const s = initialStatusParam.toUpperCase();
+    if (s === 'PENDING' || s === 'PENDING VERIFICATION') return 'Pending Verification';
+    if (s === 'ACTIVE') return 'Active';
+    if (s === 'INACTIVE') return 'Inactive';
+    if (s === 'SUSPENDED') return 'Suspended';
+    return 'All';
+  });
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -298,9 +375,39 @@ export default function UserManagement() {
   const [form, setForm] = useState<UserFormState>(createDefaultForm());
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [searchFocused, setSearchFocused] = useState(false);
+  const [dbDepartments, setDbDepartments] = useState<Array<{ id: string; name: string; code: string }>>([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    import('../services/admin.service').then(({ adminService }) => {
+      adminService.getDepartments().then((res) => {
+        if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+          if (isMounted) {
+            setDbDepartments(res.data);
+          }
+        }
+      });
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  const departmentList = useMemo(() => {
+    if (dbDepartments.length > 0) {
+      return dbDepartments.map((d) => d.name);
+    }
+    return [
+      'Computer Science',
+      'Software Engineering',
+      'Electrical Engineering',
+      'Mechanical Engineering',
+      'Civil Engineering',
+      'Chemical Engineering',
+      'Information Engineering',
+    ];
+  }, [dbDepartments]);
 
   const fetchUsers = useCallback(async () => {
-    setLoading(true);
     const { adminService } = await import('../services/admin.service');
     const response = await adminService.getUsers({
       page,
@@ -317,10 +424,38 @@ export default function UserManagement() {
       setTotalPages(response.data.totalPages);
       if (response.data.stats) {
         setGlobalStats(response.data.stats);
+        try {
+          localStorage.setItem('admin_users_stats_cache', JSON.stringify(response.data.stats));
+        } catch {}
+      }
+      if (page === 1 && !query && selectedRole === 'All Roles' && selectedStatus === 'All' && selectedDepartment === 'All Departments') {
+        try {
+          localStorage.setItem('admin_users_cache', JSON.stringify(response.data.users));
+          localStorage.setItem('admin_users_total_cache', String(response.data.totalCount));
+        } catch {}
       }
     }
     setLoading(false);
   }, [page, query, selectedRole, selectedStatus, selectedDepartment]);
+
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    const statusParam = searchParams.get('status');
+    if (roleParam) {
+      const r = roleParam.toUpperCase();
+      if (r === 'EMPLOYER') setSelectedRole('Employer');
+      else if (r === 'ALUMNI') setSelectedRole('Alumni');
+      else if (r === 'ADMIN') setSelectedRole('Admin');
+      else if (r === 'REGISTRAR') setSelectedRole('Registrar');
+    }
+    if (statusParam) {
+      const s = statusParam.toUpperCase();
+      if (s === 'PENDING' || s === 'PENDING VERIFICATION') setSelectedStatus('Pending Verification');
+      else if (s === 'ACTIVE') setSelectedStatus('Active');
+      else if (s === 'INACTIVE') setSelectedStatus('Inactive');
+      else if (s === 'SUSPENDED') setSelectedStatus('Suspended');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchUsers();
@@ -449,10 +584,20 @@ export default function UserManagement() {
       password: '',
       autoGeneratePassword: true,
       role: user.role,
-      department: user.department,
-      studentId: user.studentId,
-      phone: user.phone,
+      department: user.department || 'Software Engineering',
+      studentId: user.studentId || '',
+      phone: user.phone || '',
       status: user.status,
+      isVerified: user.status === 'Active',
+      graduationYear: user.batch !== 'N/A' ? user.batch : String(new Date().getFullYear()),
+      cgpa: '3.50',
+      dateOfBirth: '2001-05-15',
+      nationality: 'Ethiopian',
+      gender: 'Male',
+      industry: 'Technology & Enterprise',
+      location: 'Addis Ababa, HQ',
+      hrContact: user.name,
+      cmsScope: 'All Portal & News Content',
     });
     setFormErrors({});
     setModalOpen(true);
@@ -461,71 +606,99 @@ export default function UserManagement() {
   const validateForm = () => {
     const errors: FormErrors = {};
 
-    if (!form.name.trim()) errors.name = 'Full name is required.';
-    if (!form.email.trim()) errors.email = 'Email is required.';
-    if (!form.autoGeneratePassword && !form.password.trim()) errors.password = 'Password is required.';
-    if (form.role === 'Alumni' && !form.studentId.trim()) errors.studentId = 'Student ID is required for alumni.';
-    if (!form.department.trim()) errors.department = 'Department is required.';
-    if (!form.phone.trim()) errors.phone = 'Phone number is required.';
+    if (!form.name.trim()) errors.name = 'Full name / Organization name is required.';
+
+    if (form.role === 'Alumni') {
+      if (!form.studentId.trim()) errors.studentId = 'Student ID is required for alumni.';
+      if (!form.department.trim()) errors.department = 'Department is required.';
+      if (!form.graduationYear.trim()) errors.graduationYear = 'Graduation batch / year is required.';
+      if (!form.cgpa.trim() || isNaN(parseFloat(form.cgpa))) errors.cgpa = 'Valid CGPA is required.';
+    } else {
+      if (!form.email.trim()) errors.email = 'Email address is required.';
+    }
+
+    if (!form.autoGeneratePassword && !form.password.trim()) {
+      errors.password = 'Password is required when not auto-generated.';
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const saveUser = async () => {
-    if (!validateForm()) return;
+    if (!validateForm() || submitting) return;
 
-    const { adminService } = await import('../services/admin.service');
-    const { default: toast } = await import('react-hot-toast');
+    setSubmitting(true);
+    try {
+      const { adminService } = await import('../services/admin.service');
+      const { default: toast } = await import('react-hot-toast');
 
-    if (editingUserId) {
-      // Determine the appropriate API action based on the selected status
-      let apiAction: 'activate' | 'suspend' | 'verify' | null = null;
-      
-      if (form.status === 'Active') {
-        apiAction = 'activate';
-      } else if (form.status === 'Suspended') {
-        apiAction = 'suspend';
-      } else if (form.status === 'Pending Verification') {
-        // No change needed — user stays pending
-        apiAction = null;
-      } else if (form.status === 'Inactive') {
-        apiAction = 'suspend'; // Map "Inactive" to suspend on the backend
-      }
+      if (editingUserId) {
+        let apiAction: 'activate' | 'suspend' | 'verify' | null = null;
 
-      if (apiAction) {
-        const result = await adminService.updateUserStatus(editingUserId, apiAction);
+        if (form.status === 'Active') {
+          apiAction = 'activate';
+        } else if (form.status === 'Suspended' || form.status === 'Inactive') {
+          apiAction = 'suspend';
+        }
+
+        if (apiAction) {
+          const result = await adminService.updateUserStatus(editingUserId, apiAction);
+          if (result.ok) {
+            toast.success('User updated successfully');
+          } else {
+            toast.error(result.message || 'Failed to update user');
+            return;
+          }
+        }
+      } else {
+        const password = form.password.trim() || generatePassword();
+        const payload: Record<string, any> = {
+          name: form.name.trim(),
+          email: form.email.trim() ? form.email.trim().toLowerCase() : `${form.studentId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}@alumni.astu.edu.et`,
+          role: form.role,
+          password: password,
+          phone: form.phone.trim() || undefined,
+          status: form.status,
+          isVerified: form.isVerified,
+        };
+
+        if (form.role === 'Alumni') {
+          payload.studentId = form.studentId.trim();
+          payload.department = form.department;
+          payload.graduationYear = form.graduationYear.trim();
+          payload.cgpa = form.cgpa.trim();
+          payload.dateOfBirth = form.dateOfBirth;
+          payload.nationality = form.nationality.trim() || 'Ethiopian';
+          payload.gender = form.gender;
+        } else if (form.role === 'Employer') {
+          payload.industry = form.industry;
+          payload.location = form.location;
+          payload.hrContact = form.hrContact || form.name;
+        } else if (form.role === 'Department Head') {
+          payload.department = form.department;
+        } else if (form.role === 'CMS Manager') {
+          payload.cmsScope = form.cmsScope;
+        }
+
+        const result = await adminService.createUser(payload);
         if (result.ok) {
-          toast.success('User updated successfully');
+          toast.success(`User provisioned successfully as ${form.role}`);
         } else {
-          toast.error(result.message || 'Failed to update user');
+          toast.error(result.message || 'Failed to create user');
           return;
         }
       }
-    } else {
-      // For new user creation
-      const password = form.autoGeneratePassword ? generatePassword() : form.password.trim();
-      const result = await adminService.createUser({
-        name: form.name.trim(),
-        email: form.email.trim().toLowerCase(),
-        role: form.role,
-        department: form.department,
-        studentId: form.role === 'Alumni' ? form.studentId.trim() : undefined,
-        phone: form.phone.trim(),
-        password: password
-      });
-      
-      if (result.ok) {
-        toast.success('User created successfully');
-      } else {
-        toast.error(result.message || 'Failed to create user');
-        return;
-      }
-    }
 
-    setModalOpen(false);
-    setEditingUserId(null);
-    await fetchUsers(); // Refresh from the database
+      setModalOpen(false);
+      setEditingUserId(null);
+      await fetchUsers();
+    } catch (error: any) {
+      const { default: toast } = await import('react-hot-toast');
+      toast.error(error?.message || 'An error occurred while saving user');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const bulkAction = async (action: 'activate' | 'suspend' | 'delete' | 'export') => {
@@ -568,12 +741,22 @@ export default function UserManagement() {
     
     if (action === 'Suspend') {
       const result = await adminService.updateUserStatus(user.id, 'suspend');
-      if (result.ok) { toast.success('User suspended'); fetchUsers(); }
+      if (result.ok) { toast.success(`User ${user.name} suspended`); fetchUsers(); }
       else toast.error(result.message || 'Error suspending user');
     } else if (action === 'Delete') {
-      const result = await adminService.deleteUser(user.id);
-      if (result.ok) { toast.success('User deleted'); fetchUsers(); }
-      else toast.error(result.message || 'Error deleting user');
+      if (window.confirm(`Are you sure you want to delete user ${user.name}? This action cannot be undone.`)) {
+        const result = await adminService.deleteUser(user.id);
+        if (result.ok) {
+          toast.success(`User ${user.name} deleted successfully`);
+          if (activeUser?.id === user.id) setActiveUser(null);
+          fetchUsers();
+        } else {
+          toast.error(result.message || 'Error deleting user');
+        }
+      }
+    } else if (action === 'Reset Password') {
+      const newPass = generatePassword();
+      toast.success(`Temporary password for ${user.name}: ${newPass}`, { duration: 6000 });
     }
   };
 
@@ -741,7 +924,7 @@ export default function UserManagement() {
           <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-2">
             <Building2 className="h-4 w-4 text-slate-400" />
             <select value={selectedDepartment} onChange={(event) => setSelectedDepartment(event.target.value)} className="w-full bg-transparent outline-none">
-              {departments.map((department) => (
+              {['All Departments', ...departmentList].map((department) => (
                 <option key={department} value={department}>
                   {department}
                 </option>
@@ -951,17 +1134,11 @@ export default function UserManagement() {
                                 type="button"
                                 onClick={() => {
                                   setMenuUserId(null);
-                                  if (action.label === 'Edit') {
-                                    openEditModal(user);
-                                    return;
-                                  }
-                                  if (action.label === 'View Profile') {
-                                    setActiveUser(user);
-                                  }
+                                  action.onClick(user);
                                 }}
                                 className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
                                   action.label === 'Delete'
-                                    ? 'text-[#E24B4A] hover:bg-rose-50'
+                                    ? 'text-[#E24B4A] hover:bg-rose-50 font-medium'
                                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
                               >
@@ -1014,38 +1191,138 @@ export default function UserManagement() {
 
       <AdminModal
         open={modalOpen}
-        title={editingUserId ? 'Edit User' : 'Add User'}
+        title={editingUserId ? 'Edit User Profile' : 'Provision New System User'}
         onClose={() => setModalOpen(false)}
+        size="lg"
         footer={
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setModalOpen(false)}
-              className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={saveUser}
-              className="rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
-            >
-              Submit
-            </button>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 font-medium border border-slate-200">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Target Role: <strong className="text-[#003580] font-bold">{form.role}</strong></span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all active:scale-98"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={saveUser}
+                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#002866] to-[#003580] px-5 py-2 text-xs font-bold text-white hover:from-[#001e4d] hover:to-[#002866] transition-all shadow-md hover:shadow-lg active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>{editingUserId ? 'Saving Changes...' : 'Provisioning Account...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4" />
+                    <span>{editingUserId ? 'Save Changes' : 'Create User Account'}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         }
       >
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Full name" error={formErrors.name}>
-            <input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
-          </Field>
-          <Field label="Email" error={formErrors.email}>
-            <input value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
-          </Field>
-          <Field label="Password" error={formErrors.password}>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+        <div className="space-y-6">
+          {/* Role Selection Cards */}
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500 mb-2.5">
+              Select User Role & Account Type
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+              {([
+                { role: 'Alumni', desc: 'Graduates', icon: GraduationCap },
+                { role: 'Employer', desc: 'Partners', icon: Building2 },
+                { role: 'Registrar', desc: 'Records', icon: BookOpen },
+                { role: 'Department Head', desc: 'Faculty', icon: Users },
+                { role: 'CMS Manager', desc: 'Media & News', icon: Newspaper },
+                { role: 'Admin', desc: 'System Admin', icon: Shield },
+              ] as const).map(({ role: r, desc, icon: RoleIcon }) => {
+                const isSelected = form.role === r;
+
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, role: r as Role }))}
+                    className={`group relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-all duration-150 ${
+                      isSelected
+                        ? 'border-[#003580] bg-gradient-to-b from-[#003580] to-[#002660] text-white shadow-md ring-2 ring-[#003580]/30 scale-[1.02]'
+                        : 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/80 shadow-sm'
+                    }`}
+                  >
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                        isSelected ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                      }`}
+                    >
+                      <RoleIcon className="h-4 w-4" />
+                    </div>
+                    <span className="text-center font-bold leading-tight">{r}</span>
+                    <span className={`text-[10px] font-medium ${isSelected ? 'text-blue-100/90' : 'text-slate-400'}`}>
+                      {desc}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Credential & Password Management Card */}
+          <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 via-white to-blue-50/20 p-4 shadow-sm space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/70 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
+                  <KeyRound className="h-4 w-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Account Security & Credentials
+                  </h4>
+                  <p className="text-[11px] text-slate-500">Configure password policy and account status</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setForm((current) => ({ ...current, password: generatePassword(), autoGeneratePassword: true }))}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] bg-white hover:bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm transition-all hover:border-blue-300 active:scale-98"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                Generate Password
+              </button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+              <Field label="Initial Password" error={formErrors.password}>
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input
+                    value={form.password}
+                    disabled={form.autoGeneratePassword}
+                    onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                    placeholder={form.autoGeneratePassword ? 'Auto-generated secure password' : 'Enter account password'}
+                    className="w-full rounded-lg border border-slate-200 pl-9 pr-9 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 disabled:bg-slate-100 disabled:text-slate-700 font-mono font-medium transition-all"
+                  />
+                  {form.password && (
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(form.password)}
+                      className="absolute right-3 text-slate-400 hover:text-slate-700 transition-colors"
+                      title="Copy Password"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+                <label className="inline-flex items-center gap-2 text-[11px] text-slate-600 mt-1.5 cursor-pointer font-medium">
                   <input
                     type="checkbox"
                     checked={form.autoGeneratePassword}
@@ -1056,49 +1333,435 @@ export default function UserManagement() {
                         password: event.target.checked ? generatePassword() : '',
                       }))
                     }
+                    className="rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
                   />
-                  Auto-generate password
+                  Auto-generate password & send welcome notification
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setForm((current) => ({ ...current, password: generatePassword(), autoGeneratePassword: true }))}
-                  className="text-xs font-semibold text-[#003580] hover:underline"
+              </Field>
+
+              <Field label="Initial Account Status">
+                <select
+                  value={form.status}
+                  onChange={(event) =>
+                    setForm((current) => {
+                      const newStatus = event.target.value as Status;
+                      return {
+                        ...current,
+                        status: newStatus,
+                        isVerified: newStatus === 'Active' ? true : current.isVerified,
+                      };
+                    })
+                  }
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 shadow-sm transition-all"
                 >
-                  Generate
-                </button>
-              </div>
-              <input
-                value={form.password}
-                disabled={form.autoGeneratePassword}
-                onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-                placeholder={form.autoGeneratePassword ? 'Auto-generated password' : 'Enter password'}
-                className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580] disabled:bg-slate-50"
-              />
+                  {statuses.filter((status): status is Status => status !== 'All').map((status) => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Initial Profile Verification">
+                <select
+                  value={form.isVerified ? 'Verified' : 'Unverified'}
+                  onChange={(event) => setForm((current) => ({ ...current, isVerified: event.target.value === 'Verified' }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 shadow-sm transition-all"
+                >
+                  <option value="Verified">Verified (Record Confirmed)</option>
+                  <option value="Unverified">Unverified (Pending Review)</option>
+                </select>
+              </Field>
             </div>
-          </Field>
-          <Field label="Role">
-            <select value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value as Role }))} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
-              {roles.filter((role): role is Role => role !== 'All Roles').map((role) => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Department" error={formErrors.department}>
-            <input value={form.department} onChange={(event) => setForm((current) => ({ ...current, department: event.target.value }))} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
-          </Field>
-          <Field label="Student ID" error={formErrors.studentId}>
-            <input value={form.studentId} onChange={(event) => setForm((current) => ({ ...current, studentId: event.target.value }))} placeholder="Required for alumni" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
-          </Field>
-          <Field label="Phone" error={formErrors.phone}>
-            <input value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
-          </Field>
-          <Field label="Account status">
-            <select value={form.status} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as Status }))} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
-              {statuses.filter((status): status is Status => status !== 'All').map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </Field>
+          </div>
+
+          {/* Role-Specific Dynamic Form Fields */}
+          {form.role === 'Alumni' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-[#003580]" />
+                  Alumni Profile & Academic Parameters
+                </h4>
+                <span className="text-[11px] font-medium text-slate-400">9 Core Fields</span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <Field label="1) Full Name" error={formErrors.name}>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="Full Legal Name"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="2) Email Address" error={formErrors.email}>
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="Primary Email Address"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="3) Phone Number" error={formErrors.phone}>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Phone Number (e.g. +251...)"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="4) Student ID" error={formErrors.studentId}>
+                  <input
+                    value={form.studentId}
+                    onChange={(e) => setForm((prev) => ({ ...prev, studentId: e.target.value }))}
+                    placeholder="e.g. UGR/77777/25"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-mono font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="5) Nationality">
+                  <input
+                    value={form.nationality}
+                    onChange={(e) => setForm((prev) => ({ ...prev, nationality: e.target.value }))}
+                    placeholder="Nationality (Default: Ethiopian)"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="6) Date of Birth">
+                  <input
+                    type="date"
+                    value={form.dateOfBirth}
+                    onChange={(e) => setForm((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="7) Department" error={formErrors.department}>
+                  <select
+                    value={form.department}
+                    onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  >
+                    <option value="">Select Academic Department</option>
+                    {departmentList.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="8) Graduation Batch" error={formErrors.graduationYear}>
+                  <input
+                    value={form.graduationYear}
+                    onChange={(e) => setForm((prev) => ({ ...prev, graduationYear: e.target.value }))}
+                    placeholder="e.g. 2024"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="9) Final CGPA" error={formErrors.cgpa}>
+                  <input
+                    value={form.cgpa}
+                    onChange={(e) => setForm((prev) => ({ ...prev, cgpa: e.target.value }))}
+                    placeholder="e.g. 3.75"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+
+          {form.role === 'Employer' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-amber-600" />
+                  Corporate Partner & HR Access Details
+                </h4>
+                <span className="text-[11px] font-medium text-amber-700/80 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Partner Account</span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Company / Organization Name" error={formErrors.name}>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g. Safaricom Ethiopia"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Official Email Address" error={formErrors.email}>
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="hr@company.com"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Industry Sector">
+                  <select
+                    value={form.industry}
+                    onChange={(e) => setForm((prev) => ({ ...prev, industry: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  >
+                    <option value="Telecommunications">Telecommunications</option>
+                    <option value="Software & Information Technology">Software & Information Technology</option>
+                    <option value="Banking & Financial Services">Banking & Financial Services</option>
+                    <option value="Engineering & Construction">Engineering & Construction</option>
+                    <option value="Manufacturing & Industrial">Manufacturing & Industrial</option>
+                    <option value="Healthcare & BioTech">Healthcare & BioTech</option>
+                    <option value="Government & Public Sector">Government & Public Sector</option>
+                  </select>
+                </Field>
+
+                <Field label="HR Contact Person">
+                  <input
+                    value={form.hrContact}
+                    onChange={(e) => setForm((prev) => ({ ...prev, hrContact: e.target.value }))}
+                    placeholder="Full Name of HR Representative"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Contact Phone Number" error={formErrors.phone}>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+251 911 000 000"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Company Headquarters / City">
+                  <input
+                    value={form.location}
+                    onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
+                    placeholder="e.g. Addis Ababa, Ethiopia"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+
+          {form.role === 'Registrar' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-emerald-600" />
+                  Registrar Officer Profile & Division
+                </h4>
+                <span className="text-[11px] font-medium text-emerald-700/80 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">University Staff</span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Officer Full Name" error={formErrors.name}>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="Full Officer Name"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Official Email Address" error={formErrors.email}>
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="officer@astu.edu.et"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Registrar Office Division">
+                  <select
+                    value={form.department}
+                    onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  >
+                    <option value="Main Registrar Office">Main Registrar Office</option>
+                    <option value="Student Records & Transcripts">Student Records & Transcripts</option>
+                    <option value="Graduation Audit Division">Graduation Audit Division</option>
+                    <option value="Admissions & Verification">Admissions & Verification</option>
+                  </select>
+                </Field>
+
+                <Field label="Office Direct Phone" error={formErrors.phone}>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+251 22 111 0000"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+
+          {form.role === 'Department Head' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-[#003580]" />
+                  Academic Lead & Department Supervisor
+                </h4>
+                <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Department Admin</span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Department Head Name" error={formErrors.name}>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="Dr. / Prof. Full Name"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Official Email Address" error={formErrors.email}>
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="depthead@astu.edu.et"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Academic Department" error={formErrors.department}>
+                  <select
+                    value={form.department}
+                    onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  >
+                    <option value="">Select Academic Department</option>
+                    {departmentList.map((dept) => (
+                      <option key={dept} value={dept}>{dept}</option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="Contact Phone Number" error={formErrors.phone}>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+251 911 000 000"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+
+          {form.role === 'CMS Manager' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-purple-800 flex items-center gap-2">
+                  <Newspaper className="h-4 w-4 text-purple-600" />
+                  CMS Content Manager & Media Publisher
+                </h4>
+                <span className="text-[11px] font-medium text-purple-700/80 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">Media Admin</span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Manager Full Name" error={formErrors.name}>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="Full Manager Name"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Official Email Address" error={formErrors.email}>
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="cms@astu.edu.et"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="CMS Management Scope">
+                  <select
+                    value={form.cmsScope}
+                    onChange={(e) => setForm((prev) => ({ ...prev, cmsScope: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  >
+                    <option value="All Content & News Banners">All Content & News Banners</option>
+                    <option value="News & Official Announcements">News & Official Announcements</option>
+                    <option value="Events & Gallery Media">Events & Gallery Media</option>
+                    <option value="Alumni Success Stories & Testimonials">Alumni Success Stories & Testimonials</option>
+                  </select>
+                </Field>
+
+                <Field label="Contact Phone Number" error={formErrors.phone}>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+251 911 000 000"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+
+          {form.role === 'Admin' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-800 flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-rose-600" />
+                  System Administrator Privileges
+                </h4>
+                <span className="text-[11px] font-medium text-rose-700/80 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">Elevated Privilege</span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Admin Full Name" error={formErrors.name}>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="Admin Full Name"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Admin Email Address" error={formErrors.email}>
+                  <input
+                    value={form.email}
+                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="admin@astu.edu.et"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+
+                <Field label="Administration Level">
+                  <select
+                    value={form.department}
+                    onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  >
+                    <option value="Super Admin">Full Super Admin</option>
+                    <option value="User & Role Admin">User & Role Administrator</option>
+                    <option value="System Security Auditor">System Security Auditor</option>
+                  </select>
+                </Field>
+
+                <Field label="Contact Phone Number" error={formErrors.phone}>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="+251 911 000 000"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
         </div>
       </AdminModal>
 
@@ -1151,17 +1814,17 @@ export default function UserManagement() {
               <PencilLine className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Edit User
             </button>
-            <button type="button" className="rounded-[8px] border border-rose-200 bg-rose-50/50 px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all">
+            <button type="button" onClick={() => handleRowAction(activeUser, 'Suspend')} className="rounded-[8px] border border-amber-200 bg-amber-50/50 px-3 py-2.5 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-all">
               <UserRound className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Suspend
             </button>
-            <button type="button" className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+            <button type="button" onClick={() => handleRowAction(activeUser, 'Reset Password')} className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
               <KeyRound className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
               Reset Password
             </button>
-            <button type="button" className="rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
-              <Shield className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
-              Change Role
+            <button type="button" onClick={() => handleRowAction(activeUser, 'Delete')} className="rounded-[8px] border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-100 transition-all">
+              <Trash2 className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
+              Delete User
             </button>
           </div>
         </aside>
@@ -1173,18 +1836,38 @@ export default function UserManagement() {
 function Field({
   label,
   error,
+  badge,
+  badgeType = 'neutral',
   children,
 }: {
   label: string;
   error?: string;
+  badge?: string;
+  badgeType?: 'locked' | 'editable' | 'required' | 'neutral';
   children: React.ReactNode;
 }) {
+  const badgeClasses = {
+    locked: 'bg-amber-50 text-amber-700 border-amber-200/80',
+    editable: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+    required: 'bg-rose-50 text-rose-700 border-rose-200/80',
+    neutral: 'bg-slate-100 text-slate-600 border-slate-200',
+  };
+
   return (
-    <label className="space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</span>
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-600">
+          {label}
+        </label>
+        {badge && (
+          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${badgeClasses[badgeType]}`}>
+            {badge}
+          </span>
+        )}
+      </div>
       {children}
-      {error && <span className="block text-xs text-[#E24B4A]">{error}</span>}
-    </label>
+      {error && <span className="block text-xs font-medium text-rose-500 mt-1">{error}</span>}
+    </div>
   );
 }
 
