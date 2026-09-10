@@ -95,6 +95,8 @@ model User {
   notifications         Notification[]
   auditLogs        AuditLog[]
   tracerNotifications TracerNotification[]
+  contentItems     ContentItem[]
+  mediaAssets      MediaAsset[]
 }
 
 model Department {
@@ -903,3 +905,76 @@ model ScheduledReport {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum ContentType {
+  POST
+  PAGE
+  ANNOUNCEMENT
+  GALLERY
+  EVENT
+  TEMPLATE
+}
+
+enum ContentStatus {
+  DRAFT
+  NEEDS_REVIEW
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model ContentItem {
+  id           String          @id @default(uuid())
+  title        String
+  slug         String?         @unique
+  type         ContentType     @default(POST)
+  status       ContentStatus   @default(PUBLISHED)
+  priority     ContentPriority @default(NORMAL)
+  excerpt      String?         @db.Text
+  body         String?         @db.Text
+  featuredImg  String?
+  author       String          @default("Content Manager")
+  authorId     String?
+  user         User?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  tags         String[]
+  pinned       Boolean         @default(false)
+  featured     Boolean         @default(false)
+  language     String          @default("EN")
+  views        Int             @default(0)
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model MediaAsset {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  album        String?  @default("General")
+  altText      String?
+  uploaderId   String?
+  user         User?    @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model HomepageConfig {
+  id         String   @id @default(uuid())
+  key        String   @unique @default("main")
+  data       Json
+  updatedBy  String?  @default("CMS Admin")
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+}
+
