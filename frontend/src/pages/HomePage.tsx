@@ -438,74 +438,104 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true;
 
+    // Helper: apply a loaded CMS config object to all homepage state slices
+    const applyCmsConfig = (cmsConfig: any) => {
+      if (!cmsConfig || !isMounted) return;
+      if (cmsConfig.heroSlides?.length) {
+        const active = cmsConfig.heroSlides.filter((s: any) => s.active !== false);
+        if (active.length) setLiveSlides(active);
+      }
+      if (cmsConfig.impactStats?.length) {
+        const active = cmsConfig.impactStats.filter((s: any) => s.active !== false);
+        if (active.length) setLiveStats(active);
+      }
+      if (cmsConfig.portals?.length) {
+        const active = cmsConfig.portals.filter((p: any) => p.active !== false);
+        if (active.length) setLivePortals(active);
+      }
+      if (cmsConfig.campusLife?.length) {
+        const active = cmsConfig.campusLife.filter((c: any) => c.active !== false);
+        if (active.length) setLiveCampusLife(active);
+      }
+      if (cmsConfig.campuses?.length) {
+        const active = cmsConfig.campuses.filter((c: any) => c.active !== false);
+        if (active.length) setLiveCampuses(active);
+      }
+      if (cmsConfig.gallery?.length) {
+        const active = cmsConfig.gallery.filter((g: any) => g.active !== false);
+        if (active.length) setLiveGallery(active);
+      }
+      if (cmsConfig.videos?.length) {
+        const active = cmsConfig.videos.filter((v: any) => v.active !== false);
+        if (active.length) setLiveVideos(active);
+      }
+      if (cmsConfig.newsItems?.length) {
+        const active = cmsConfig.newsItems.filter((n: any) => n.active !== false);
+        if (active.length) setLiveNews(active);
+      }
+      if (cmsConfig.announcements?.length) {
+        const active = cmsConfig.announcements.filter((a: any) => a.active !== false);
+        if (active.length) setLiveAnnouncements(active);
+      }
+      if (cmsConfig.stories?.length) {
+        const active = cmsConfig.stories.filter((s: any) => s.active !== false);
+        if (active.length) setLiveStories(active);
+      }
+      if (cmsConfig.partners?.length) {
+        const active = cmsConfig.partners.filter((p: any) => p.active !== false);
+        if (active.length) setLivePartners(active);
+      }
+      if (cmsConfig.faq?.length) {
+        const active = cmsConfig.faq.filter((f: any) => f.active !== false);
+        if (active.length) setLiveFaq(active);
+      }
+    };
+
     const syncContent = async () => {
+      // 1. Apply localStorage snapshot immediately for instant render (no flash)
+      const localConfig = homepageCmsService.getSettings();
+      applyCmsConfig(localConfig);
+
       const publishedNews = contentService.getPublishedNews();
       if (publishedNews.length && isMounted) setLiveNews(publishedNews);
-
       const publishedAnnounce = contentService.getPublishedAnnouncements();
       if (publishedAnnounce.length && isMounted) setLiveAnnouncements(publishedAnnounce);
-
       if (isMounted) setLiveStories(storiesService.getStories());
 
-      const cmsConfig = homepageCmsService.getSettings();
-      if (cmsConfig && isMounted) {
-        if (cmsConfig.heroSlides?.length) {
-          const active = cmsConfig.heroSlides.filter((s: any) => s.active);
-          if (active.length) setLiveSlides(active);
+      // 2. Fetch live data from backend API — drives real CMS→Homepage integration
+      try {
+        const [apiConfig, apiItems] = await Promise.all([
+          homepageCmsService.fetchFromApi(),
+          contentService.fetchItemsFromApi(),
+        ]);
+
+        // Apply live API config (overrides localStorage snapshot)
+        if (isMounted) applyCmsConfig(apiConfig);
+
+        // Apply live content items (news, announcements)
+        if (isMounted && Array.isArray(apiItems) && apiItems.length) {
+          const liveNews = apiItems
+            .filter((i: any) => i.status === 'Published' && (i.type === 'post' || i.type === 'announcement'))
+            .map((i: any) => ({ id: i.id, title: i.title, date: i.publishedAt || i.updatedAt, excerpt: i.excerpt }));
+          if (liveNews.length) setLiveNews(liveNews);
+
+          const liveAnnounce = apiItems
+            .filter((i: any) => i.status === 'Published')
+            .map((i: any) => ({
+              id: i.id,
+              title: i.title,
+              date: i.publishedAt || i.updatedAt || 'Just now',
+              type: i.type === 'announcement' ? 'Official Announcement' : `${String(i.type).toUpperCase()} Announcement`,
+              excerpt: i.excerpt,
+            }));
+          if (liveAnnounce.length) setLiveAnnouncements(liveAnnounce);
         }
-        if (cmsConfig.impactStats?.length) {
-          const active = cmsConfig.impactStats.filter((s: any) => s.active);
-          if (active.length) setLiveStats(active);
-        }
-        if (cmsConfig.portals?.length) {
-          const active = cmsConfig.portals.filter((p: any) => p.active);
-          if (active.length) setLivePortals(active);
-          else setLivePortals(howItWorksSteps);
-        } else {
-          setLivePortals(howItWorksSteps);
-        }
-        if (cmsConfig.campusLife?.length) {
-          const active = cmsConfig.campusLife.filter((c: any) => c.active);
-          if (active.length) setLiveCampusLife(active);
-        }
-        if (cmsConfig.campuses?.length) {
-          const active = cmsConfig.campuses.filter((c: any) => c.active);
-          if (active.length) setLiveCampuses(active);
-        }
-        if (cmsConfig.gallery?.length) {
-          const active = cmsConfig.gallery.filter((g: any) => g.active);
-          if (active.length) setLiveGallery(active);
-        }
-        if (cmsConfig.videos?.length) {
-          const active = cmsConfig.videos.filter((v: any) => v.active);
-          if (active.length) setLiveVideos(active);
-        }
-        if (cmsConfig.newsItems?.length) {
-          const active = cmsConfig.newsItems.filter((n: any) => n.active);
-          if (active.length) setLiveNews(active);
-        }
-        if (cmsConfig.announcements?.length) {
-          const active = cmsConfig.announcements.filter((a: any) => a.active);
-          if (active.length) setLiveAnnouncements(active);
-        }
-        if (cmsConfig.stories?.length) {
-          const active = cmsConfig.stories.filter((s: any) => s.active);
-          if (active.length) setLiveStories(active);
-          else setLiveStories(storiesService.getStories());
-        } else {
-          setLiveStories(storiesService.getStories());
-        }
-        if (cmsConfig.partners?.length) {
-          const active = cmsConfig.partners.filter((p: any) => p.active);
-          if (active.length) setLivePartners(active);
-        }
-        if (cmsConfig.faq?.length) {
-          const active = cmsConfig.faq.filter((f: any) => f.active);
-          if (active.length) setLiveFaq(active);
-        }
+      } catch {
+        // Silently fall back to localStorage data already applied above
       }
 
-      // Sync Events & Workshops from DB API + fallback to Local Storage + fallback to initial defaults
+
+      // Sync Events & Workshops from DB API
       try {
         const apiEvents = await eventsService.getAllEvents();
         let fetchedEvents: any[] = [];

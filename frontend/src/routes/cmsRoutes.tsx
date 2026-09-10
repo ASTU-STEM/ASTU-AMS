@@ -16,6 +16,7 @@ import LatestNewsManagement from '../features/admin/pages/LatestNewsManagement';
 import FaqManagement from '../features/admin/pages/FaqManagement';
 import CmsSettings from '../features/admin/pages/CmsSettings';
 import CmsChatPage from '../features/admin/pages/CmsChatPage';
+import AdminProfile from '../features/admin/pages/AdminProfile';
 
 export default function CmsRoutes() {
   return (
@@ -37,6 +38,7 @@ export default function CmsRoutes() {
         <Route path="templates" element={<ContentTemplates />} />
         <Route path="approvals" element={<ApprovalWorkflow />} />
         <Route path="settings" element={<CmsSettings />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Route>
     </Routes>
   );
