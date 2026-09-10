@@ -3,13 +3,18 @@ import toast from 'react-hot-toast';
 import {
   Archive,
   Calendar,
+  CheckCircle2,
   ChevronDown,
   Copy,
   Download,
+  Edit3,
+  ExternalLink,
   Eye,
   Filter,
   Grid3x3,
   LayoutList,
+  MoreHorizontal,
+  Pin,
   Plus,
   RefreshCcw,
   Search,
@@ -61,12 +66,47 @@ export default function ContentList() {
   const [newExcerpt, setNewExcerpt] = useState('');
   const [previewItem, setPreviewItem] = useState<ContentCardItem | null>(null);
   const [editItem, setEditItem] = useState<ContentCardItem | null>(null);
+  const [moreModalItem, setMoreModalItem] = useState<ContentCardItem | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    contentService.fetchItemsFromApi().then((apiItems) => {
+      if (isMounted && Array.isArray(apiItems) && apiItems.length) {
+        setItems(apiItems);
+      }
+    });
     const handleSync = () => setItems(contentService.getItems());
     window.addEventListener('astu-cms-content-changed', handleSync);
-    return () => window.removeEventListener('astu-cms-content-changed', handleSync);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('astu-cms-content-changed', handleSync);
+    };
   }, []);
+
+  const handleDuplicate = (item: ContentCardItem) => {
+    const duplicated = contentService.addItem({
+      ...item,
+      title: `${item.title} (Copy)`,
+      status: 'Draft',
+      publishedAt: undefined,
+      scheduledFor: undefined,
+      scheduledIso: undefined,
+      updatedAt: 'Just now',
+    });
+    setItems(contentService.getItems());
+    toast.success(`Duplicated "${item.title}" as Draft!`);
+  };
+
+  const handleExport = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(filtered, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `astu-cms-content-${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    toast.success(`Exported ${filtered.length} content item(s) as JSON!`);
+  };
 
   const handleCreateContent = (status: ContentStatus = 'Published') => {
     if (!newTitle.trim()) { toast.error('Title is required'); return; }
@@ -242,7 +282,7 @@ export default function ContentList() {
       />
 
       {/* Toolbar */}
-      <div className="cms-fade flex flex-col gap-3 rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="cms-fade flex flex-col gap-3 rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[220px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
@@ -251,13 +291,13 @@ export default function ContentList() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title, excerpt, or tag..."
-              className="w-full rounded-[8px] border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+              className="w-full rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-8 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -266,8 +306,8 @@ export default function ContentList() {
           <button
             type="button"
             onClick={() => setShowFilters((open) => !open)}
-            className={`inline-flex items-center gap-1.5 rounded-[8px] border px-3 py-2 text-xs font-semibold transition-all ${
-              showFilters ? 'border-[#003580] bg-[#003580]/5 text-[#003580]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+            className={`inline-flex items-center gap-1.5 rounded-[8px] border px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+              showFilters ? 'border-[#003580] bg-[#003580]/5 text-[#003580] dark:border-sky-500 dark:bg-sky-950/30 dark:text-sky-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
             }`}
           >
             <Filter className="h-3.5 w-3.5" />
@@ -282,23 +322,25 @@ export default function ContentList() {
               setTypeFilter('all');
               setSelectedIds([]);
             }}
-            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
           >
             <RefreshCcw className="h-3.5 w-3.5" />
             Reset
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            onClick={handleExport}
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+            title="Export all visible content as JSON"
           >
             <Download className="h-3.5 w-3.5" />
             Export
           </button>
-          <div className="inline-flex rounded-md border border-slate-200 bg-white p-0.5">
+          <div className="inline-flex rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-0.5">
             <button
               type="button"
               onClick={() => setView('grid')}
-              className={`inline-flex h-8 w-8 items-center justify-center rounded ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
               title="Grid view"
             >
               <Grid3x3 className="h-4 w-4" />
@@ -422,15 +464,18 @@ export default function ContentList() {
                 onSelect={toggleSelected}
                 onPreview={() => setPreviewItem(item)}
                 onEdit={() => setEditItem(item)}
+                onDuplicate={() => handleDuplicate(item)}
                 onPublish={() => {
                   updateItem(item.id, { status: 'Published' });
                   toast.success(`"${item.title}" published live!`);
                 }}
                 onSchedule={() => openScheduleFor(item.id)}
                 onDelete={() => {
-                  contentService.deleteItem(item.id);
-                  setItems(contentService.getItems());
-                  toast.success(`"${item.title}" deleted`);
+                  if (window.confirm(`Delete "${item.title}"? This cannot be undone.`)) {
+                    contentService.deleteItem(item.id);
+                    setItems(contentService.getItems());
+                    toast.success(`"${item.title}" deleted`);
+                  }
                 }}
                 onTogglePin={() => {
                   updateItem(item.id, { pinned: !item.pinned });
@@ -440,64 +485,68 @@ export default function ContentList() {
                   updateItem(item.id, { featured: !item.featured });
                   toast.success(item.featured ? 'Featured removed' : 'Marked as featured');
                 }}
-                onMore={() => {
-                  const url = `${window.location.origin}/announcements/${item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-                  if (navigator.clipboard) {
-                    navigator.clipboard.writeText(url);
-                    toast.success(`Copied announcement link for "${item.title}"!`);
-                  } else {
-                    setEditItem(item);
-                  }
-                }}
+                onMore={() => setMoreModalItem(item)}
               />
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[10px] border border-slate-200 bg-white">
+          <div className="overflow-x-auto rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50">
-                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500">
-                  <th className="px-3 py-2 font-semibold">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <th className="px-3 py-2.5 font-semibold">
                     <input
                       type="checkbox"
                       checked={selectedIds.length === filtered.length && filtered.length > 0}
                       onChange={selectAllVisible}
-                      className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
                     />
                   </th>
-                  <th className="px-3 py-2 font-semibold">Title</th>
-                  <th className="px-3 py-2 font-semibold">Type</th>
-                  <th className="px-3 py-2 font-semibold">Status</th>
-                  <th className="px-3 py-2 font-semibold">Author</th>
-                  <th className="px-3 py-2 font-semibold">Updated</th>
-                  <th className="px-3 py-2 text-right font-semibold">Actions</th>
+                  <th className="px-3 py-2.5 font-semibold">Title</th>
+                  <th className="px-3 py-2.5 font-semibold">Type</th>
+                  <th className="px-3 py-2.5 font-semibold">Status</th>
+                  <th className="px-3 py-2.5 font-semibold">Author</th>
+                  <th className="px-3 py-2.5 font-semibold">Updated</th>
+                  <th className="px-3 py-2.5 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filtered.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50">
-                    <td className="px-3 py-2">
+                  <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="px-3 py-2.5">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(item.id)}
                         onChange={() => toggleSelected(item.id)}
-                        className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
                       />
                     </td>
-                    <td className="px-3 py-2">
-                      <div className="font-semibold text-slate-900">{item.title}</div>
-                      <div className="mt-0.5 text-[10px] text-slate-500">{item.excerpt?.slice(0, 80)}</div>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        {item.pinned && <Pin className="h-3 w-3 text-amber-500 shrink-0" />}
+                        <span className="font-semibold text-slate-900 dark:text-white line-clamp-1">{item.title}</span>
+                      </div>
+                      <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">{item.excerpt?.slice(0, 90)}</div>
                     </td>
-                    <td className="px-3 py-2 text-xs uppercase text-slate-500">{item.type}</td>
-                    <td className="px-3 py-2 text-xs">{item.status}</td>
-                    <td className="px-3 py-2 text-xs text-slate-500">{item.author}</td>
-                    <td className="px-3 py-2 text-xs text-slate-500">{item.updatedAt}</td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2.5 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{item.type}</td>
+                    <td className="px-3 py-2.5 text-xs">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                        item.status === 'Published' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' :
+                        item.status === 'Draft' ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' :
+                        item.status === 'Scheduled' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' :
+                        item.status === 'Needs Review' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{item.author || 'Content Manager'}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{item.updatedAt || 'Recently'}</td>
+                    <td className="px-3 py-2.5">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
                           onClick={() => setPreviewItem(item)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                           title="Preview"
                         >
                           <Eye className="h-3.5 w-3.5" />
@@ -505,15 +554,34 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => setEditItem(item)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                           title="Edit"
+                        >
+                          <Edit3 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDuplicate(item)}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
+                          title="Duplicate / Copy"
                         >
                           <Copy className="h-3.5 w-3.5" />
                         </button>
                         <button
                           type="button"
+                          onClick={() => {
+                            updateItem(item.id, { pinned: !item.pinned });
+                            toast.success(item.pinned ? 'Unpinned' : 'Pinned');
+                          }}
+                          className={`inline-flex h-7 w-7 items-center justify-center rounded-md border cursor-pointer ${item.pinned ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40'}`}
+                          title={item.pinned ? 'Unpin' : 'Pin'}
+                        >
+                          <Pin className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => openScheduleFor(item.id)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                           title="Schedule"
                         >
                           <Calendar className="h-3.5 w-3.5" />
@@ -521,14 +589,24 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => {
-                            contentService.deleteItem(item.id);
-                            setItems(contentService.getItems());
-                            toast.success(`"${item.title}" deleted`);
+                            if (window.confirm(`Delete "${item.title}"? This cannot be undone.`)) {
+                              contentService.deleteItem(item.id);
+                              setItems(contentService.getItems());
+                              toast.success(`"${item.title}" deleted`);
+                            }
                           }}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-100"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMoreModalItem(item)}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                          title="More Options"
+                        >
+                          <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
@@ -537,7 +615,7 @@ export default function ContentList() {
               </tbody>
             </table>
             {filtered.length === 0 && (
-              <div className="py-12 text-center text-sm text-slate-500">No content matches your filters.</div>
+              <div className="py-12 text-center text-sm text-slate-500 dark:text-slate-400">No content matches your filters.</div>
             )}
           </div>
         )}
@@ -815,6 +893,128 @@ export default function ContentList() {
                 />
                 Featured Card
               </label>
+            </div>
+          </div>
+        )}
+      </AdminModal>
+
+      {/* More Options Modal */}
+      <AdminModal
+        open={!!moreModalItem}
+        onClose={() => setMoreModalItem(null)}
+        title={moreModalItem ? `Options: ${moreModalItem.title}` : 'Options'}
+        size="sm"
+      >
+        {moreModalItem && (
+          <div className="space-y-3 py-1">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <p className="text-xs font-bold text-slate-800 line-clamp-1">{moreModalItem.title}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px] uppercase font-bold text-slate-500">{moreModalItem.type}</span>
+                <span className="text-[10px] text-slate-400">·</span>
+                <span className="text-[10px] font-semibold text-emerald-600">{moreModalItem.status}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  handleDuplicate(moreModalItem);
+                  setMoreModalItem(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <Copy className="h-4 w-4 text-indigo-600" /> Duplicate as New Draft
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const slug = moreModalItem.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                  const url = `${window.location.origin}/announcements/${slug}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('Public URL copied to clipboard!');
+                  setMoreModalItem(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <ExternalLink className="h-4 w-4 text-blue-600" /> Copy Public Portal URL
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  updateItem(moreModalItem.id, { pinned: !moreModalItem.pinned });
+                  toast.success(moreModalItem.pinned ? 'Item unpinned' : 'Item pinned to top');
+                  setMoreModalItem(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <Pin className="h-4 w-4 text-amber-600" /> {moreModalItem.pinned ? 'Unpin from Top' : 'Pin Notice to Top'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  updateItem(moreModalItem.id, { featured: !moreModalItem.featured });
+                  toast.success(moreModalItem.featured ? 'Removed from featured' : 'Marked as Featured Story');
+                  setMoreModalItem(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <Sparkles className="h-4 w-4 text-purple-600" /> {moreModalItem.featured ? 'Remove from Featured' : 'Mark as Featured Card'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditItem(moreModalItem);
+                  setMoreModalItem(null);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <Edit3 className="h-4 w-4 text-slate-600" /> Edit Full Details...
+              </button>
+
+              <div className="pt-2 border-t border-slate-100">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1">Quick Status Change</p>
+                <div className="grid grid-cols-2 gap-1 px-1">
+                  {(['Published', 'Draft', 'Needs Review', 'Archived'] as ContentStatus[]).map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => {
+                        updateItem(moreModalItem.id, { status: st });
+                        toast.success(`Status set to ${st}`);
+                        setMoreModalItem(null);
+                      }}
+                      className={`text-left px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${
+                        moreModalItem.status === st ? 'bg-[#003580] text-white' : 'hover:bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Permanently delete "${moreModalItem.title}"?`)) {
+                      contentService.deleteItem(moreModalItem.id);
+                      setItems(contentService.getItems());
+                      toast.success(`"${moreModalItem.title}" deleted`);
+                      setMoreModalItem(null);
+                    }
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                >
+                  <Trash2 className="h-4 w-4 text-rose-600" /> Delete Content
+                </button>
+              </div>
             </div>
           </div>
         )}
