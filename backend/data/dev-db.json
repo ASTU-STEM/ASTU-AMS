@@ -814,6 +814,14 @@
       "id": "dev-notif-1788531074713",
       "createdAt": "2026-09-04T14:11:14.713Z",
       "isRead": false
+    },
+    {
+      "userId": "user-admin-1",
+      "title": "New Message from ALUMNI_OFFICE User",
+      "content": "hi",
+      "id": "dev-notif-1789076302195",
+      "createdAt": "2026-09-10T21:38:22.195Z",
+      "isRead": false
     }
   ],
   "documentRequests": [],
@@ -2490,7 +2498,7 @@
           "sessions": 380
         }
       },
-      "updatedAt": "2026-09-10T21:01:13.287Z",
+      "updatedAt": "2026-09-10T21:39:08.507Z",
       "updatedBy": "CMS Admin"
     }
   ],
@@ -2698,6 +2706,22 @@
       "updatedAt": "1 day ago",
       "publishedAt": "May 25, 2026",
       "createdAt": "2026-09-09T13:37:16.636Z"
+    }
+  ],
+  "directMessages": [
+    {
+      "senderId": "user-cms-1",
+      "receiverId": "user-admin-1",
+      "sender": "ALUMNI_OFFICE",
+      "receiverRole": "ADMIN",
+      "text": "hi",
+      "fileUrl": null,
+      "fileType": null,
+      "alumniId": null,
+      "employerId": null,
+      "id": "msg-1789076302163",
+      "isRead": false,
+      "createdAt": "2026-09-10T21:38:22.163Z"
     }
   ]
 }
