@@ -51,19 +51,19 @@ export default function AdminModal({
         @keyframes scaleUp { from { transform: scale(0.95) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         .modal-panel { animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
       `}</style>
-      <div className={["modal-panel w-full overflow-hidden rounded-[12px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.12)]", sizeClasses[size]].join(' ')}>
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+      <div className={["modal-panel w-full overflow-hidden rounded-[12px] border border-slate-200 bg-white shadow-[0_16px_48px_rgba(0,0,0,0.12)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)]", sizeClasses[size]].join(' ')}>
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-6 py-5 text-sm text-slate-600">{children}</div>
-        {footer && <div className="border-t border-slate-200 px-6 py-4 bg-slate-50/50">{footer}</div>}
+        <div className="px-6 py-5 text-sm text-slate-600 dark:text-slate-300">{children}</div>
+        {footer && <div className="border-t border-slate-200 px-6 py-4 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">{footer}</div>}
       </div>
     </div>
   );
