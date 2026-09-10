@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
@@ -77,8 +77,32 @@ const AlumniDashboard = () => {
   const [visiblePostsCount, setVisiblePostsCount] = useState<number>(5);
   const [attachedImageUrl, setAttachedImageUrl] = useState<string>('');
   const [attachedLinkUrl, setAttachedLinkUrl] = useState<string>('');
+  const [likingPosts, setLikingPosts] = useState<Record<string, boolean>>({});
 
   const [chatTarget, setChatTarget] = useState<any>(null);
+  const [pendingCallId, setPendingCallId] = useState<string | null>(null);
+
+  // ── Auto-join meeting from invitation link (?callId=ASTU-MEET-xxx) ──
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callId = params.get('callId');
+    if (callId) {
+      // Extract participant info from the callId
+      const meetId = callId.replace('ASTU-MEET-', '');
+      setPendingCallId(callId);
+      setChatTarget({
+        id: meetId,
+        userId: meetId,
+        name: 'Meeting Participant',
+        roleLabel: 'Video Call Invitation',
+      });
+      setActiveTab('messages');
+      toast.success('🎥 Joining meeting room...');
+      // Clean the URL so refreshing doesn't re-trigger
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, []);
 
   const profileCompletion = profile ? calculateCompletion(profile) : (statsData?.profileCompletion || 0);
   const pendingSurveysCount = realPendingSurveysCount;
@@ -308,12 +332,43 @@ const AlumniDashboard = () => {
   };
 
   const handleToggleLike = async (postId: string) => {
+    if (likingPosts[postId]) return;
+
+    setLikingPosts(prev => ({ ...prev, [postId]: true }));
+
+    // Optimistic update
+    setForumPosts(prev => prev.map(p => {
+      if (p.id === postId) {
+        const nextLiked = !p.liked;
+        return {
+          ...p,
+          liked: nextLiked,
+          likes: Math.max(0, (p.likes || 0) + (nextLiked ? 1 : -1))
+        };
+      }
+      return p;
+    }));
+
     try {
       const res: any = await alumniService.toggleForumLike(postId);
-      const liked = res.liked;
-      setForumPosts(forumPosts.map(p => p.id === postId ? { ...p, likes: p.likes + (liked ? 1 : -1), liked } : p));
+      if (res && typeof res.liked === 'boolean') {
+        setForumPosts(prev => prev.map(p => p.id === postId ? { ...p, liked: res.liked } : p));
+      }
     } catch (err) {
+      setForumPosts(prev => prev.map(p => {
+        if (p.id === postId) {
+          const revertLiked = !p.liked;
+          return {
+            ...p,
+            liked: revertLiked,
+            likes: Math.max(0, (p.likes || 0) + (revertLiked ? 1 : -1))
+          };
+        }
+        return p;
+      }));
       toast.error('Failed to update like status');
+    } finally {
+      setLikingPosts(prev => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -1141,9 +1196,23 @@ const AlumniDashboard = () => {
               )}
               {activeTab === 'surveys' && <SurveysTab />}
               {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={handleViewJob} onToggleSaveJob={handleToggleSaveJob} />}
-              {activeTab === 'mentorship' && <MentorshipTab mentors={mentors} onRequestMentorship={handleRequestMentorship} onScheduleSession={handleScheduleSession} />}
+              {activeTab === 'mentorship' && (
+                <MentorshipTab
+                  mentors={mentors}
+                  onRequestMentorship={handleRequestMentorship}
+                  onScheduleSession={handleScheduleSession}
+                  onStartVideoCall={(m) => {
+                    setChatTarget({
+                      name: m.name,
+                      roleLabel: m.role || 'Senior ASTU Mentor'
+                    });
+                    setActiveTab('messages');
+                    toast.success(`Joining HD Video Meeting with ${m.name}...`);
+                  }}
+                />
+              )}
               {activeTab === 'documents' && <DocumentServicesTab documentRequests={documents} onRequestDocument={handleRequestDocument} />}
-              {activeTab === 'messages' && <MessagingTab darkMode={darkMode} userId={(profile as any)?.userId} initialTarget={chatTarget} />}
+              {activeTab === 'messages' && <MessagingTab darkMode={darkMode} userId={(profile as any)?.userId} initialTarget={chatTarget} initialCallId={pendingCallId} />}
               {activeTab === 'settings' && <SettingsTab preferences={preferences as any} onSavePreferences={handleSavePreferences} />}
               {activeTab === 'forum' && (
                 <div className="space-y-4 sm:space-y-6 p-1 sm:p-4 md:p-6 max-w-7xl mx-auto">
@@ -1566,11 +1635,12 @@ const AlumniDashboard = () => {
                                             <div className="pt-3 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-[11px]">
                                               <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                                                 <button
+                                                  disabled={likingPosts[post.id]}
                                                   onClick={() => post.id && handleToggleLike(post.id)}
                                                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${post.liked
                                                       ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 font-extrabold shadow-xs'
                                                       : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 font-semibold'
-                                                    }`}
+                                                    } ${likingPosts[post.id] ? 'opacity-60 cursor-not-allowed' : ''}`}
                                                 >
                                                   <svg className="w-4 h-4" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />

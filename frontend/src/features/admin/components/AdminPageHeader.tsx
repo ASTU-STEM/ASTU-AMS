@@ -64,7 +64,7 @@ export default function AdminPageHeader({
             
             <div className="flex-shrink-0 flex items-center gap-4 self-start md:self-auto">
               {actions && <div className="flex items-center gap-3">{actions}</div>}
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 border border-white/20 shadow-inner backdrop-blur-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 border border-white/20 shadow-inner backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:border-white/30 hover:scale-105 active:scale-95 cursor-pointer" title={`${title} Module Icon`}>
                 <Icon className="h-6 w-6 text-[#FFCC00]" />
               </div>
             </div>

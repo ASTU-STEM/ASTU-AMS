@@ -133,7 +133,7 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <Toaster position="top-right" />
+      <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
       <RegistrationProvider>
         <AppContent />
       </RegistrationProvider>

@@ -16,6 +16,7 @@ interface MentorshipTabProps {
   mentors: Mentor[];
   onRequestMentorship: (mentorId: number) => void;
   onScheduleSession: (mentorId: number, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => void;
+  onStartVideoCall?: (mentor: Mentor) => void;
 }
 
 const defaultReviews: MentorReview[] = [
@@ -28,7 +29,8 @@ const defaultReviews: MentorReview[] = [
 export const MentorshipTab: React.FC<MentorshipTabProps> = ({
   mentors,
   onRequestMentorship,
-  onScheduleSession
+  onScheduleSession,
+  onStartVideoCall
 }) => {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
   const [searchQuery, setSearchQuery] = useState('');
@@ -423,17 +425,34 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                         </span>
                       </div>
 
-                      {sess.meetLink && (
-                        <a
-                          href={sess.meetLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="w-full py-1.5 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm text-center block"
+                      <div className="flex gap-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onStartVideoCall) {
+                              onStartVideoCall(m);
+                            } else {
+                              toast.success(`Launching 1-on-1 WebRTC Video Session with ${m.name}...`);
+                            }
+                          }}
+                          className="flex-1 py-1.5 text-white rounded-lg text-[10px] font-extrabold transition-all shadow-sm text-center flex items-center justify-center gap-1 hover:opacity-90"
                           style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
                         >
-                          Join Meet
-                        </a>
-                      )}
+                          <span className="material-symbols-outlined text-xs">videocam</span>
+                          Join HD Video Call
+                        </button>
+                        {sess.meetLink && (
+                          <a
+                            href={sess.meetLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold transition-all text-center flex items-center justify-center gap-1 hover:bg-slate-200"
+                          >
+                            <span className="material-symbols-outlined text-xs">link</span>
+                            Link
+                          </a>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}

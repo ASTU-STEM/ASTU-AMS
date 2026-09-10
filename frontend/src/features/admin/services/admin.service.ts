@@ -126,9 +126,9 @@ export const adminService = {
     }
   },
 
-  async getDashboardMetrics(): Promise<ApiResult<any>> {
+  async getDashboardMetrics(range?: string): Promise<ApiResult<any>> {
     try {
-      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/dashboard/metrics');
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/dashboard/metrics', { params: { range } });
       return { ok: true, data: response.data.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'GET_METRICS_ERROR', message: error.response?.data?.message || 'Failed to fetch metrics' };
@@ -144,7 +144,7 @@ export const adminService = {
     }
   },
 
-  async createUser(data: { name: string; email: string; role: string; department: string; studentId?: string; phone?: string; password?: string }): Promise<ApiResult<{ success: boolean; user: any }>> {
+  async createUser(data: Record<string, any>): Promise<ApiResult<{ success: boolean; user: any }>> {
     try {
       const response = await apiClient.post<{ success: boolean; user: any }>('/admin/users', data);
       return { ok: true, data: response.data };
