@@ -67,6 +67,19 @@ export const eventsService = {
     }
   },
 
+  async updateEvent(eventId: string, eventData: Partial<ApiEvent>): Promise<ApiEvent | null> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: ApiEvent }>(`/events/${eventId}`, eventData);
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return null;
+    } catch (error) {
+      console.warn('Error updating event via API:', error);
+      return null;
+    }
+  },
+
   async deleteEvent(eventId: string): Promise<boolean> {
     try {
       const response = await apiClient.delete<{ success: boolean }>(`/events/${eventId}`);
