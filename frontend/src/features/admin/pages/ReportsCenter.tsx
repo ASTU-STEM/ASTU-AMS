@@ -56,23 +56,23 @@ export default function ReportsCenter() {
         ].map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.label} className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <div key={metric.label} className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
               <Icon className="h-6 w-6 text-[#003580]" />
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{metric.label}</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{metric.value}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{metric.label}</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{metric.value}</p>
             </div>
           );
         })}
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[300px_1fr]">
-        <div className="rounded-[10px] border border-slate-200 bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           {areas.map((item) => (
             <button
               key={item}
               type="button"
               onClick={() => setArea(item)}
-              className={`flex w-full items-center justify-between rounded-[8px] px-3 py-3 text-left text-sm font-semibold ${area === item ? 'bg-[#003580] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`flex w-full items-center justify-between rounded-[8px] px-3 py-3 text-left text-sm font-semibold ${area === item ? 'bg-[#003580] text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
             >
               {item}
               <span>{reports.filter((report) => report.area === item).length}</span>
@@ -80,11 +80,11 @@ export default function ReportsCenter() {
           ))}
         </div>
 
-        <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">{area} Report Library</h2>
-              <p className="mt-1 text-xs text-slate-500">Filter, generate, download, and audit each official report package.</p>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{area} Report Library</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Filter, generate, download, and audit each official report package.</p>
             </div>
             <button className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white">
               <LineChart className="h-4 w-4" />
@@ -95,17 +95,17 @@ export default function ReportsCenter() {
             {filteredReports.map((report) => {
               const Icon = report.icon;
               return (
-                <article key={report.title} className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+                <article key={report.title} className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] bg-white text-[#003580]">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] bg-white dark:bg-slate-900 text-[#003580]">
                       <Icon className="h-5 w-5" />
                     </span>
-                    <button className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 bg-white text-slate-600" aria-label={`Download ${report.title}`}>
+                    <button className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300" aria-label={`Download ${report.title}`}>
                       <Download className="h-4 w-4" />
                     </button>
                   </div>
-                  <h3 className="mt-4 text-sm font-semibold text-slate-900">{report.title}</h3>
-                  <p className="mt-1 text-xs text-slate-500">{report.owner} · {report.cadence}</p>
+                  <h3 className="mt-4 text-sm font-semibold text-slate-900 dark:text-white">{report.title}</h3>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{report.owner} · {report.cadence}</p>
                 </article>
               );
             })}

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   User, Shield, KeyRound, Mail, Phone, Building2, 
   BadgeCheck, Clock, CheckCircle2, ShieldCheck, 
-  MapPin, Calendar, Lock, AlertCircle
+  MapPin, Calendar, Lock, AlertCircle, Sparkles
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
@@ -17,15 +17,74 @@ export default function AdminProfile() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('personal');
   
+  const userRole = user?.role || 'CMS_MANAGER';
+
+  // Role metadata derived strictly from ASTU-AMS SRS specification
+  const roleMeta = useMemo(() => {
+    switch (userRole) {
+      case 'CMS_MANAGER':
+        return {
+          roleTitle: 'Content Management Specialist',
+          roleBadge: 'CMS Manager',
+          department: 'Corporate Communications & Public Relations Directorate',
+          employeeId: user?.id ? `ASTU-CMS-${String(user.id).slice(-4)}` : 'ASTU-CMS-042',
+          bio: 'Authorizes, moderates, and manages public portal content, announcements, dynamic hero sections, and university digital assets for ASTU.',
+          scope: 'Public Portal, News & Media Assets',
+          permissions: [
+            { name: 'Homepage Content Architecture', desc: 'Deploy and order dynamic hero banners, partner showcases, campus highlights, and impact statistics.' },
+            { name: 'Public Announcements & News', desc: 'Author, edit, schedule, and publish official university news releases and student bulletins.' },
+            { name: 'Media Library Governance', desc: 'Manage institutional photography albums, campus event media, PDFs, and high-resolution assets.' },
+            { name: 'Editorial Review & Moderation', desc: 'Review pending draft submissions, approve official publications, and enforce portal guidelines.' },
+            { name: 'Event & Workshop Calendars', desc: 'Publish academic ceremonies, hackathons, conferences, and career fairs to the public portal.' },
+            { name: 'SEO & Canonical Metadata', desc: 'Configure search indexing parameters, institutional keywords, open graph tags, and sitemaps.' },
+          ],
+        };
+      case 'ALUMNI_OFFICE':
+        return {
+          roleTitle: 'Alumni Relations & Career Development Officer',
+          roleBadge: 'Alumni Office',
+          department: 'Alumni Relations & Career Guidance Center',
+          employeeId: user?.id ? `ASTU-ALO-${String(user.id).slice(-4)}` : 'ASTU-ALO-018',
+          bio: 'Oversees alumni directory verification, annual tracer study campaigns, graduate spotlights, and corporate career development partnerships.',
+          scope: 'Alumni Relations & Tracer Studies',
+          permissions: [
+            { name: 'Alumni Directory & Verification', desc: 'Validate graduation batch records, national IDs, and account credentials for verified alumni.' },
+            { name: 'Tracer Study Campaign Monitoring', desc: 'Distribute tracer study survey waves, track employment status KPIs, and analyze market trends.' },
+            { name: 'Success Story & Spotlight Curation', desc: 'Publish distinguished alumni career spotlights, entrepreneurship awards, and faculty interviews.' },
+            { name: 'Alumni Chapters & Reunions', desc: 'Organize regional homecoming events, mentorship circles, and networking conferences.' },
+            { name: 'Institutional Communications', desc: 'Broadcast career opportunities, fellowship openings, and campus developments to alumni.' },
+            { name: 'Donations & Project Giving', desc: 'Monitor alumni donations, scholarship funds, and student innovation sponsorship campaigns.' },
+          ],
+        };
+      default: // ADMIN / SUPER_ADMIN
+        return {
+          roleTitle: 'System Administrator',
+          roleBadge: 'Super Admin',
+          department: 'ICT Directorate & Systems Administration',
+          employeeId: user?.id ? `ASTU-ADM-${String(user.id).slice(-4)}` : 'ASTU-ADM-001',
+          bio: 'Oversees overarching digital infrastructure, identity access management (IAM), data security, and audit trails for ASTU-AMS.',
+          scope: 'Ecosystem-Wide Administration',
+          permissions: [
+            { name: 'User & Identity Management', desc: 'Provision, activate, suspend, and audit user accounts across all university roles.' },
+            { name: 'Role-Based Access Control (RBAC)', desc: 'Define operational privileges, permission boundaries, and access tiers per institutional policy.' },
+            { name: 'System Auditing & Security Logs', desc: 'Monitor real-time access logs, authentication attempts, API activity, and audit trails.' },
+            { name: 'Database & Backup Governance', desc: 'Trigger automated database backups, verify replication states, and manage disaster recovery.' },
+            { name: 'System Integrations & API Control', desc: 'Configure SMS/email gateways, national ID verification APIs, and core endpoints.' },
+            { name: 'Module Architecture Configuration', desc: 'Enable and configure ecosystem subsystems and institutional service workflows.' },
+          ],
+        };
+    }
+  }, [userRole, user?.id]);
+
   // Personal Info Form State
   const [personalForm, setPersonalForm] = useState({
-    firstName: user?.firstName || 'System',
-    lastName: user?.lastName || 'Administrator',
-    email: user?.email || 'admin@astu.edu.et',
-    phone: '+251 911 234 567',
-    department: 'ICT Directorate',
-    employeeId: 'EMP-ASTU-001',
-    bio: 'Overseeing the overall digital infrastructure, alumni tracking system, and API integrations for Adama Science and Technology University.',
+    firstName: user?.firstName || (userRole === 'ALUMNI_OFFICE' ? 'Alumni' : userRole === 'CMS_MANAGER' ? 'Content' : 'System'),
+    lastName: user?.lastName || (userRole === 'ALUMNI_OFFICE' ? 'Office' : userRole === 'CMS_MANAGER' ? 'Manager' : 'Admin'),
+    email: user?.email || (userRole === 'ALUMNI_OFFICE' ? 'alumnioffice@astu.edu.et' : userRole === 'CMS_MANAGER' ? 'cms@astu.edu.et' : 'admin@astu.edu.et'),
+    phone: (user as any)?.phone || '+251 221 110 400',
+    department: roleMeta.department,
+    employeeId: roleMeta.employeeId,
+    bio: roleMeta.bio,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -203,8 +262,8 @@ export default function AdminProfile() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <AdminPageHeader
         title="My Profile"
-        subtitle="Manage your personal credentials, system permissions, and security settings."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Profile' }]}
+        subtitle="Manage your personal credentials, SRS operational permissions, and security settings."
+        breadcrumbs={[{ label: userRole === 'ADMIN' ? 'Admin' : 'CMS' }, { label: 'Profile' }]}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -217,7 +276,7 @@ export default function AdminProfile() {
             
             <div className="relative mt-4 mb-4 inline-block">
               <div className="h-24 w-24 rounded-full bg-gradient-to-br from-[#003366] to-[#004080] flex items-center justify-center text-3xl font-bold text-white mx-auto ring-4 ring-slate-100 shadow-md">
-                {personalForm.firstName[0]}{personalForm.lastName[0]}
+                {(personalForm.firstName[0] || 'U')}{(personalForm.lastName[0] || 'M')}
               </div>
               <span className="absolute bottom-0 right-1 bg-emerald-500 border-2 border-white rounded-full h-4.5 w-4.5 animate-pulse" />
             </div>
@@ -226,15 +285,15 @@ export default function AdminProfile() {
               {personalForm.firstName} {personalForm.lastName}
             </h3>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-1">
-              Super Admin
+              {roleMeta.roleTitle}
             </p>
             
-            <div className="mt-4 flex justify-center gap-1.5">
-              <AdminBadge variant="success" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
-                Root Active
+            <div className="mt-4 flex justify-center gap-1.5 flex-wrap">
+              <AdminBadge variant="info" className="bg-[#003366]/10 text-[#003366] border-[#003366]/20">
+                {roleMeta.roleBadge}
               </AdminBadge>
-              <AdminBadge variant="neutral" className="bg-slate-100 text-slate-600 border-slate-200">
-                System Staff
+              <AdminBadge variant="success" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
+                Active Verified
               </AdminBadge>
             </div>
 
@@ -245,26 +304,40 @@ export default function AdminProfile() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Building2 className="h-4.5 w-4.5 text-slate-400 shrink-0" />
-                <span>{personalForm.department}</span>
+                <span className="truncate">{personalForm.department || roleMeta.department}</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <BadgeCheck className="h-4.5 w-4.5 text-slate-400 shrink-0" />
+                <span className="font-mono text-xs font-semibold text-slate-700">{personalForm.employeeId || roleMeta.employeeId}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Calendar className="h-4.5 w-4.5 text-slate-400 shrink-0" />
-                <span>Joined January 2025</span>
+                <span>Academic Year 2025/2026</span>
               </div>
             </div>
           </div>
 
           {/* Quick Stats Widget */}
           <div className="admin-card rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)]">
-            <h4 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 mb-4">Account Analytics</h4>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-3 bg-slate-50 rounded-xl">
-                <p className="text-2xl font-bold text-[#003366]">100%</p>
-                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-1">Uptime SLA</p>
+            <h4 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 mb-4">Identity & Access Summary</h4>
+            <div className="space-y-2.5 text-xs">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                <span className="text-slate-500 font-medium">Assigned Role</span>
+                <span className="font-bold text-slate-800">{roleMeta.roleBadge}</span>
               </div>
-              <div className="p-3 bg-slate-50 rounded-xl">
-                <p className="text-2xl font-bold text-[#003366]">6</p>
-                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-1">Permissions</p>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                <span className="text-slate-500 font-medium">Verified SRS Grants</span>
+                <span className="font-bold text-[#003366]">{roleMeta.permissions.length} Privileges</span>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                <span className="text-slate-500 font-medium">2FA Protection</span>
+                <span className={`font-bold ${isAdmin2FAEnabled ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {isAdmin2FAEnabled ? 'Active' : 'Unconfigured'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                <span className="text-slate-500 font-medium">Operational Scope</span>
+                <span className="font-semibold text-slate-700 truncate max-w-[130px]">{roleMeta.scope}</span>
               </div>
             </div>
           </div>
@@ -515,15 +588,15 @@ export default function AdminProfile() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                    <span className="text-sm font-semibold text-slate-800">RBAC Level: Super System Administrator</span>
+                    <span className="text-sm font-semibold text-slate-800">SRS RBAC Tier: {roleMeta.roleTitle}</span>
                   </div>
                   
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    Your role is bound to root access control. Below are the verified permissions assigned to your user account:
+                    Operational privileges established by the ASTU-AMS Software Requirements Specification (SRS). Below are the verified operational capabilities assigned to your account:
                   </p>
 
                   <div className="grid gap-3 sm:grid-cols-2 mt-4">
-                    {adminPermissions.map((perm) => (
+                    {roleMeta.permissions.map((perm) => (
                       <div key={perm.name} className="flex gap-3 border border-slate-100 bg-slate-50/50 rounded-xl p-4 transition-all duration-200 hover:shadow-sm hover:border-slate-200">
                         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100">
                           <BadgeCheck className="h-4.5 w-4.5" />

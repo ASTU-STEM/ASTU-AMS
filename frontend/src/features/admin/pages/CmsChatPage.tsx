@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TelegramChat } from '../../../components/TelegramChat';
 
 export default function CmsChatPage() {
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -12,7 +22,7 @@ export default function CmsChatPage() {
           </p>
         </div>
       </div>
-      <TelegramChat darkMode={false} />
+      <TelegramChat darkMode={isDark} />
     </div>
   );
 }
