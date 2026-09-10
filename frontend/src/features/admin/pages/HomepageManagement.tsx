@@ -238,19 +238,19 @@ function InlineEditor<T extends { id: string; active: boolean }>({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{items.filter(i => i.active).length} active of {items.length} total</span>
-        <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 px-2.5 py-1.5 text-[10px] font-semibold text-[#003580] hover:bg-[#003580]/20 transition-all"><Plus className="h-3 w-3" /> Add</button>
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{items.filter(i => i.active).length} active of {items.length} total</span>
+        <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 dark:bg-sky-500/20 px-2.5 py-1.5 text-[10px] font-semibold text-[#003580] dark:text-sky-400 hover:bg-[#003580]/20 transition-all cursor-pointer"><Plus className="h-3 w-3" /> Add</button>
       </div>
       {items.map((item, idx) => (
-        <div key={item.id} className="group flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 hover:border-[#003580]/20 transition-all">
+        <div key={item.id} className="group flex items-start gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 hover:border-[#003580]/20 dark:hover:border-sky-500/30 transition-all">
           <div className="min-w-0 flex-1">{renderItem(item, idx)}</div>
           <div className="flex shrink-0 items-center gap-1">
             <button onClick={() => setItems(prev => prev.map(i => i.id === item.id ? { ...i, active: !i.active } : i))}
-              className={`rounded p-1 transition-all ${item.active ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-300 hover:bg-slate-100'}`} title={item.active ? 'Deactivate' : 'Activate'}>
+              className={`rounded p-1 transition-all ${item.active ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'}`} title={item.active ? 'Deactivate' : 'Activate'}>
               <CheckCircle2 className="h-3.5 w-3.5" />
             </button>
             <button onClick={() => { setItems(prev => prev.filter(i => i.id !== item.id)); toast.success('Item removed'); }}
-              className="rounded p-1 text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-all" title="Delete">
+              className="rounded p-1 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 transition-all cursor-pointer" title="Delete">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -458,101 +458,101 @@ export default function HomepageManagement() {
           <SectionPanel title="Proposal-Specific Features" subtitle="Content modules derived from the ASTU-AMS project proposal (Tracer Study, Employer Feedback, Mentorship, Newsletter)." icon={Zap}>
             <div className="space-y-6">
               {/* Tracer Study Spotlight */}
-              <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-700"><FileText className="h-5 w-5" /></span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-sky-400"><FileText className="h-5 w-5" /></span>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900">Tracer Study Spotlight</h3>
-                      <p className="text-xs text-slate-500">CTA banner for the tracer survey campaign on the homepage.</p>
+                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">Tracer Study Spotlight</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">CTA banner for the tracer survey campaign on the homepage.</p>
                     </div>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input type="checkbox" checked={tracerSpotlight.enabled} onChange={e => setTracerSpotlight(p => ({ ...p, enabled: e.target.checked }))} className="peer sr-only" />
-                    <span className="h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] peer-checked:after:translate-x-full" />
+                    <span className="h-5 w-9 rounded-full bg-slate-200 dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
                   </label>
                 </div>
                 {tracerSpotlight.enabled && (
-                  <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+                  <div className="mt-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={tracerSpotlight.title} onChange={e => setTracerSpotlight(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500">Target Batch</label><input value={tracerSpotlight.targetBatch} onChange={e => setTracerSpotlight(p => ({ ...p, targetBatch: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Title</label><input value={tracerSpotlight.title} onChange={e => setTracerSpotlight(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Target Batch</label><input value={tracerSpotlight.targetBatch} onChange={e => setTracerSpotlight(p => ({ ...p, targetBatch: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
-                    <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={tracerSpotlight.description} onChange={e => setTracerSpotlight(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+                    <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Description</label><textarea value={tracerSpotlight.description} onChange={e => setTracerSpotlight(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500 resize-none" /></div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500">Response Rate</label><input value={tracerSpotlight.responseRate} onChange={e => setTracerSpotlight(p => ({ ...p, responseRate: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500">Deadline</label><input value={tracerSpotlight.deadline} onChange={e => setTracerSpotlight(p => ({ ...p, deadline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Response Rate</label><input value={tracerSpotlight.responseRate} onChange={e => setTracerSpotlight(p => ({ ...p, responseRate: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Deadline</label><input value={tracerSpotlight.deadline} onChange={e => setTracerSpotlight(p => ({ ...p, deadline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Employer Feedback Portal */}
-              <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-700"><Handshake className="h-5 w-5" /></span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"><Handshake className="h-5 w-5" /></span>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900">Employer Feedback Portal</h3>
-                      <p className="text-xs text-slate-500">Employer competency ratings and skill-gap analytics module.</p>
+                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">Employer Feedback Portal</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Employer competency ratings and skill-gap analytics module.</p>
                     </div>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input type="checkbox" checked={employerFeedback.enabled} onChange={e => setEmployerFeedback(p => ({ ...p, enabled: e.target.checked }))} className="peer sr-only" />
-                    <span className="h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] peer-checked:after:translate-x-full" />
+                    <span className="h-5 w-9 rounded-full bg-slate-200 dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
                   </label>
                 </div>
                 {employerFeedback.enabled && (
-                  <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
-                    <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={employerFeedback.title} onChange={e => setEmployerFeedback(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                    <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={employerFeedback.description} onChange={e => setEmployerFeedback(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+                  <div className="mt-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+                    <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Title</label><input value={employerFeedback.title} onChange={e => setEmployerFeedback(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                    <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Description</label><textarea value={employerFeedback.description} onChange={e => setEmployerFeedback(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500 resize-none" /></div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500">Total Submissions</label><input type="number" value={employerFeedback.submissions} onChange={e => setEmployerFeedback(p => ({ ...p, submissions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500">Participating Companies</label><input type="number" value={employerFeedback.companies} onChange={e => setEmployerFeedback(p => ({ ...p, companies: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Submissions</label><input type="number" value={employerFeedback.submissions} onChange={e => setEmployerFeedback(p => ({ ...p, submissions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Participating Companies</label><input type="number" value={employerFeedback.companies} onChange={e => setEmployerFeedback(p => ({ ...p, companies: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Mentorship Program Stats */}
-              <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-700"><GraduationCap className="h-5 w-5" /></span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-emerald-950/60 text-green-700 dark:text-emerald-400"><GraduationCap className="h-5 w-5" /></span>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900">Mentorship Program Stats</h3>
-                      <p className="text-xs text-slate-500">Live counters for the alumni mentorship initiative.</p>
+                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">Mentorship Program Stats</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Live counters for the alumni mentorship initiative.</p>
                     </div>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input type="checkbox" checked={mentorshipStats.enabled} onChange={e => setMentorshipStats(p => ({ ...p, enabled: e.target.checked }))} className="peer sr-only" />
-                    <span className="h-5 w-9 rounded-full bg-slate-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] peer-checked:after:translate-x-full" />
+                    <span className="h-5 w-9 rounded-full bg-slate-200 dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
                   </label>
                 </div>
                 {mentorshipStats.enabled && (
-                  <div className="mt-4 border-t border-slate-100 pt-4">
+                  <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
                     <div className="grid grid-cols-3 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500">Mentors</label><input type="number" value={mentorshipStats.mentors} onChange={e => setMentorshipStats(p => ({ ...p, mentors: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500">Mentees</label><input type="number" value={mentorshipStats.mentees} onChange={e => setMentorshipStats(p => ({ ...p, mentees: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500">Sessions</label><input type="number" value={mentorshipStats.sessions} onChange={e => setMentorshipStats(p => ({ ...p, sessions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mentors</label><input type="number" value={mentorshipStats.mentors} onChange={e => setMentorshipStats(p => ({ ...p, mentors: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mentees</label><input type="number" value={mentorshipStats.mentees} onChange={e => setMentorshipStats(p => ({ ...p, mentees: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Sessions</label><input type="number" value={mentorshipStats.sessions} onChange={e => setMentorshipStats(p => ({ ...p, sessions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Newsletter Subscribers */}
-              <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-700"><Mail className="h-5 w-5" /></span>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400"><Mail className="h-5 w-5" /></span>
                   <div>
-                    <h3 className="text-base font-semibold text-slate-900">Newsletter Subscribers</h3>
-                    <p className="text-xs text-slate-500">{newsletterEmails.length} subscribed emails (tracked from homepage footer form).</p>
+                    <h3 className="text-base font-semibold text-slate-900 dark:text-white">Newsletter Subscribers</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{newsletterEmails.length} subscribed emails (tracked from homepage footer form).</p>
                   </div>
                 </div>
                 <div className="mt-4 space-y-2 max-h-40 overflow-y-auto">
                   {newsletterEmails.map((email, idx) => (
-                    <div key={idx} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm">
-                      <span className="text-slate-700">{email}</span>
+                    <div key={idx} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm">
+                      <span className="text-slate-700 dark:text-slate-200">{email}</span>
                       <button onClick={() => { setNewsletterEmails(prev => prev.filter((_, i) => i !== idx)); toast.success('Email removed'); }}
                         className="text-rose-400 hover:text-rose-600"><X className="h-3.5 w-3.5" /></button>
                     </div>
@@ -561,8 +561,8 @@ export default function HomepageManagement() {
               </div>
 
               {/* Quick links to existing dedicated pages */}
-              <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5">
-                <h3 className="text-sm font-semibold text-amber-800 flex items-center gap-2"><ExternalLink className="h-4 w-4" /> Related Management Pages</h3>
+              <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-5">
+                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-400 flex items-center gap-2"><ExternalLink className="h-4 w-4" /> Related Management Pages</h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {[
                     { label: 'Tracer Survey Builder', path: '/cms/surveys' },
@@ -575,7 +575,7 @@ export default function HomepageManagement() {
                     { label: 'Footer Settings', path: '/cms/footer' },
                   ].map(link => (
                     <a key={link.label} href={link.path}
-                      className="flex items-center gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition-all">
+                      className="flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-all">
                       <ArrowRight className="h-3 w-3" /> {link.label}
                     </a>
                   ))}
@@ -619,18 +619,18 @@ export default function HomepageManagement() {
       {/* Stats Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Items', value: totalSections, icon: Globe, tone: 'text-[#003580]', bg: 'bg-[#003580]/10' },
-          { label: 'Active', value: totalActive, icon: CheckCircle2, tone: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Content Tabs', value: tabConfig.length, icon: FileText, tone: 'text-slate-600', bg: 'bg-slate-100' },
-          { label: 'Sections Managed', value: Object.keys({ heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq }).length, icon: BarChart3, tone: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Total Items', value: totalSections, icon: Globe, tone: 'text-[#003580] dark:text-sky-400', bg: 'bg-[#003580]/10 dark:bg-sky-950/40' },
+          { label: 'Active', value: totalActive, icon: CheckCircle2, tone: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
+          { label: 'Content Tabs', value: tabConfig.length, icon: FileText, tone: 'text-slate-600 dark:text-slate-300', bg: 'bg-slate-100 dark:bg-slate-800' },
+          { label: 'Sections Managed', value: Object.keys({ heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq }).length, icon: BarChart3, tone: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40' },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="fade-up rounded-[10px] border border-slate-200 bg-white p-4 shadow-sm flex items-center gap-3" style={{ animationDelay: `${idx * 0.05}s` }}>
+            <div key={stat.label} className="fade-up rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm flex items-center gap-3" style={{ animationDelay: `${idx * 0.05}s` }}>
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.bg} ${stat.tone}`}><Icon className="h-5 w-5" /></div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">{stat.label}</p>
-                <p className="text-xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{stat.label}</p>
+                <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{stat.value}</p>
               </div>
             </div>
           );
@@ -638,30 +638,30 @@ export default function HomepageManagement() {
       </div>
 
       {/* Welcome Message */}
-      <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <MessageSquareText className="h-4 w-4 text-slate-500" />
-            <h2 className="text-sm font-semibold text-slate-900">Homepage Welcome Message</h2>
+            <MessageSquareText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Homepage Welcome Message</h2>
           </div>
           <button onClick={saveWelcome}
-            className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all shadow-sm ${welcomeSaved ? 'bg-emerald-500 text-white' : 'bg-[#1D9E75] text-white hover:brightness-110'}`}>
+            className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all shadow-sm cursor-pointer ${welcomeSaved ? 'bg-emerald-500 text-white' : 'bg-[#1D9E75] text-white hover:brightness-110'}`}>
             <Save className="h-3.5 w-3.5" /> {welcomeSaved ? 'Saved!' : 'Save'}
           </button>
         </div>
         <textarea value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)}
-          className="mt-3 min-h-20 w-full rounded-[8px] border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 resize-none" />
+          className="mt-3 min-h-20 w-full rounded-[8px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3 text-sm text-slate-700 dark:text-slate-200 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10 resize-none" />
       </div>
 
       {/* Tab Navigation */}
-      <div className="overflow-x-auto hide-scrollbar rounded-[12px] border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto hide-scrollbar rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <nav className="flex gap-1 p-1.5 min-w-max">
           {tabConfig.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all ${isActive ? 'tab-active bg-[#003580]/5 text-[#003580]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}>
+                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive ? 'tab-active bg-[#003580]/5 dark:bg-sky-500/15 text-[#003580] dark:text-sky-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'}`}>
                 <Icon className="h-3.5 w-3.5" /> {tab.label}
               </button>
             );
@@ -680,14 +680,14 @@ export default function HomepageManagement() {
 /* ─── Section Panel Wrapper ─── */
 function SectionPanel({ title, subtitle, icon: Icon, children }: { title: string; subtitle: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <section className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#003580]/10 text-[#003580]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#003580]/10 dark:bg-sky-500/10 text-[#003580] dark:text-sky-400">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-          <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h2>
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
         </div>
       </div>
       <div className="mt-5">{children}</div>
