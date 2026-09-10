@@ -81,10 +81,15 @@ export class UnifiedChatController {
   static async getThreads(req: Request, res: Response, next: NextFunction) {
     try {
       const currentUserId = (req as any).user?.userId;
+      if (!currentUserId) {
+        return sendSuccess(res, 'Chat threads loaded successfully.', []);
+      }
 
-      // Find profiles for current user if any
-      const alumniProfile = await prisma.alumniProfile.findUnique({ where: { userId: currentUserId } }).catch(() => null);
-      const employerProfile = await prisma.employerProfile.findUnique({ where: { userId: currentUserId } }).catch(() => null);
+      // 1. Parallel fetch current user's alumni and employer profiles
+      const [alumniProfile, employerProfile] = await Promise.all([
+        prisma.alumniProfile.findUnique({ where: { userId: currentUserId } }).catch(() => null),
+        prisma.employerProfile.findUnique({ where: { userId: currentUserId } }).catch(() => null)
+      ]);
 
       const myIds = Array.from(new Set([
         currentUserId,
@@ -92,22 +97,35 @@ export class UnifiedChatController {
         employerProfile?.id
       ].filter(Boolean))) as string[];
 
-      // Query DirectMessages where sender or receiver is in myIds
-      const messages = await (prisma.directMessage as any).findMany({
-        where: {
-          OR: [
-            { senderId: { in: myIds } },
-            { receiverId: { in: myIds } },
-            { alumniId: { in: myIds } },
-            { employerId: { in: myIds } }
-          ],
-          isDeleted: false,
-          NOT: {
-            deletedBy: { hasSome: myIds }
-          }
-        },
-        orderBy: { createdAt: 'asc' }
-      });
+      // 2. Parallel fetch messages and relevant job application partner IDs
+      const [messages, employerApps, alumniApps] = await Promise.all([
+        (prisma.directMessage as any).findMany({
+          take: 500,
+          where: {
+            OR: [
+              { senderId: { in: myIds } },
+              { receiverId: { in: myIds } },
+              { alumniId: { in: myIds } },
+              { employerId: { in: myIds } }
+            ],
+            isDeleted: false,
+            NOT: {
+              deletedBy: { hasSome: myIds }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        }).catch(() => []),
+        employerProfile ? prisma.jobApplication.findMany({
+          take: 100,
+          where: { job: { employerId: employerProfile.id } },
+          select: { alumniId: true, alumni: { select: { userId: true } } }
+        }).catch(() => []) : Promise.resolve([]),
+        alumniProfile ? prisma.jobApplication.findMany({
+          take: 100,
+          where: { alumniId: alumniProfile.id },
+          select: { job: { select: { employerId: true, employer: { select: { userId: true } } } } }
+        }).catch(() => []) : Promise.resolve([])
+      ]);
 
       // Collect all partner user/profile IDs
       const partnerIdSet = new Set<string>();
@@ -118,28 +136,15 @@ export class UnifiedChatController {
         if (m.employerId && !myIds.includes(m.employerId)) partnerIdSet.add(m.employerId);
       });
 
-      // Also include job applicants for employer or applied jobs for alumni
-      if (employerProfile) {
-        const apps = await prisma.jobApplication.findMany({
-          where: { job: { employerId: employerProfile.id } },
-          select: { alumniId: true, alumni: { select: { userId: true } } }
-        });
-        apps.forEach((a: any) => {
-          if (a.alumniId) partnerIdSet.add(a.alumniId);
-          if (a.alumni?.userId) partnerIdSet.add(a.alumni.userId);
-        });
-      }
+      (employerApps || []).forEach((a: any) => {
+        if (a.alumniId) partnerIdSet.add(a.alumniId);
+        if (a.alumni?.userId) partnerIdSet.add(a.alumni.userId);
+      });
 
-      if (alumniProfile) {
-        const apps = await prisma.jobApplication.findMany({
-          where: { alumniId: alumniProfile.id },
-          select: { job: { select: { employerId: true, employer: { select: { userId: true } } } } }
-        });
-        apps.forEach((a: any) => {
-          if (a.job?.employerId) partnerIdSet.add(a.job.employerId);
-          if (a.job?.employer?.userId) partnerIdSet.add(a.job.employer.userId);
-        });
-      }
+      (alumniApps || []).forEach((a: any) => {
+        if (a.job?.employerId) partnerIdSet.add(a.job.employerId);
+        if (a.job?.employer?.userId) partnerIdSet.add(a.job.employer.userId);
+      });
 
       const partnerIds = Array.from(partnerIdSet);
 
@@ -295,7 +300,13 @@ export class UnifiedChatController {
         }
       });
 
-      const threads = Array.from(threadMap.values());
+      const onlineUserIds = SocketServer.getOnlineUserIds();
+      const threads = Array.from(threadMap.values()).map(t => {
+        const isOnline = onlineUserIds.some(id =>
+          id === t.userId || id === t.partnerId || id === t.alumniId || id === t.employerId
+        );
+        return { ...t, online: isOnline };
+      });
       return sendSuccess(res, 'Conversation threads fetched successfully.', threads);
     } catch (err) { next(err); }
   }
@@ -632,6 +643,122 @@ export class UnifiedChatController {
       }
 
       return sendSuccess(res, `CV request sent successfully to ${candidateName}.`, { message });
+    } catch (err) { next(err); }
+  }
+
+  // ── 7. Send Video Meeting Invitation Email ─────────────────────────────
+  static async sendMeetingInvite(req: Request, res: Response, next: NextFunction) {
+    try {
+      const currentUserId = (req as any).user?.userId;
+      const { recipientEmail, meetingLink, callId } = req.body;
+
+      if (!recipientEmail) {
+        return res.status(400).json({ success: false, message: 'Recipient email or username is required.' });
+      }
+
+      // Resolve sender name
+      let senderName = 'ASTU Alumni';
+      try {
+        const senderUser = await prisma.user.findUnique({
+          where: { id: currentUserId },
+          include: { alumniProfile: true, employerProfile: true }
+        });
+        if (senderUser) {
+          senderName = senderUser.alumniProfile?.fullName
+            || senderUser.employerProfile?.companyName
+            || senderUser.email?.split('@')[0]
+            || 'ASTU Alumni';
+        }
+      } catch (_) { }
+
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const joinLink = meetingLink || `${frontendUrl}/alumni/dashboard?callId=${callId || 'ASTU-MEET-' + Date.now()}`;
+      const meetingId = callId || `ASTU-MEET-${Date.now()}`;
+
+      const emailHtml = `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background-color: #ffffff;">
+          <div style="background: linear-gradient(135deg, #003366 0%, #004d99 50%, #1d9e75 100%); padding: 32px 24px; text-align: center;">
+            <div style="display: inline-block; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 8px 16px; margin-bottom: 12px;">
+              <span style="color: #ffffff; font-size: 24px;">🎥</span>
+            </div>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700;">Video Meeting Invitation</h1>
+            <p style="color: rgba(255,255,255,0.85); font-size: 14px; margin-top: 8px;">ASTU Alumni Mentorship Platform</p>
+          </div>
+
+          <div style="padding: 28px 24px;">
+            <p style="color: #334155; font-size: 15px; line-height: 1.7;">Hello,</p>
+            <p style="color: #334155; font-size: 15px; line-height: 1.7;">
+              <strong>${senderName}</strong> has invited you to join an HD Video Meeting on the ASTU Alumni & Mentorship Collaboration Platform.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 20px; margin: 24px 0;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b; font-size: 13px; font-weight: 600;">Meeting ID:</td>
+                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700; font-family: monospace;">${meetingId}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b; font-size: 13px; font-weight: 600;">Host:</td>
+                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700;">${senderName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b; font-size: 13px; font-weight: 600;">Platform:</td>
+                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700;">ASTU-AMS HD Video</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${joinLink}" style="background: linear-gradient(135deg, #003366, #1d9e75); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 14px rgba(0,77,153,0.3);">
+                🎥 Join Video Meeting Now
+              </a>
+            </div>
+
+            <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 8px;">
+              Or copy this link: <a href="${joinLink}" style="color: #3b82f6; word-break: break-all;">${joinLink}</a>
+            </p>
+          </div>
+
+          <div style="background-color: #f8fafc; padding: 16px 24px; border-top: 1px solid #e2e8f0;">
+            <p style="color: #94a3b8; font-size: 11px; text-align: center; margin: 0;">
+              This invitation was sent via the ASTU Alumni Management System. If you did not expect this, you can safely ignore it.
+            </p>
+          </div>
+        </div>
+      `;
+
+      const emailText = `${senderName} has invited you to join a video meeting on ASTU Alumni Portal.\n\nMeeting ID: ${meetingId}\nHost: ${senderName}\n\nJoin here: ${joinLink}\n\n— ASTU Alumni Management System`;
+
+      const emailService = new EmailService();
+      await emailService.sendMail({
+        to: recipientEmail,
+        subject: `🎥 Video Meeting Invitation from ${senderName} — ASTU Alumni Platform`,
+        text: emailText,
+        html: emailHtml,
+      });
+
+      // Also create an in-app notification if recipient exists in DB
+      try {
+        const recipientUser = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: recipientEmail },
+              { alumniProfile: { email: recipientEmail } }
+            ]
+          }
+        });
+        if (recipientUser) {
+          await prisma.notification.create({
+            data: {
+              userId: recipientUser.id,
+              title: `🎥 Video Meeting Invitation from ${senderName}`,
+              content: `You've been invited to join a video meeting. Click to join: ${joinLink}`,
+            }
+          });
+        }
+      } catch (_) { }
+
+      return sendSuccess(res, `Meeting invitation sent to ${recipientEmail} successfully.`, { recipientEmail, meetingId, joinLink });
     } catch (err) { next(err); }
   }
 }

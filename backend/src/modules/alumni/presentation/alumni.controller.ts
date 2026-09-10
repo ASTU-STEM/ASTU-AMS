@@ -801,12 +801,26 @@ export class AlumniController {
       });
 
       if (existing) {
-        await prisma.forumLike.delete({ where: { id: existing.id } });
-        await prisma.forumPost.update({ where: { id: postId }, data: { likesCount: { decrement: 1 } } });
+        try {
+          await prisma.forumLike.delete({ where: { id: existing.id } });
+          await prisma.forumPost.update({
+            where: { id: postId },
+            data: { likesCount: { decrement: 1 } }
+          }).catch(() => {});
+        } catch (e: any) {
+          if (e.code !== 'P2025') throw e;
+        }
         return sendSuccess(res, 'Like removed', { liked: false });
       } else {
-        await prisma.forumLike.create({ data: { postId, alumniId } });
-        await prisma.forumPost.update({ where: { id: postId }, data: { likesCount: { increment: 1 } } });
+        try {
+          await prisma.forumLike.create({ data: { postId, alumniId } });
+          await prisma.forumPost.update({
+            where: { id: postId },
+            data: { likesCount: { increment: 1 } }
+          }).catch(() => {});
+        } catch (e: any) {
+          if (e.code !== 'P2002') throw e;
+        }
         return sendSuccess(res, 'Like added', { liked: true });
       }
     } catch (err) { next(err); }

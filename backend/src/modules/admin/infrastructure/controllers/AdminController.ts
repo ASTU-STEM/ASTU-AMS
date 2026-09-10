@@ -62,7 +62,8 @@ export class AdminController {
 
   async getDashboardMetrics(req: Request, res: Response) {
     try {
-      const result = await getDashboardMetricsUseCase.execute();
+      const range = (req.query.range as string) || '30d';
+      const result = await getDashboardMetricsUseCase.execute(range);
       res.json({ success: true, data: result });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
