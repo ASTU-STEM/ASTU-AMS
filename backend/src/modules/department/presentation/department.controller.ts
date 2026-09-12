@@ -5,7 +5,7 @@ import { PrismaDepartmentRepository } from '../infrastructure/repositories/Prism
 import { PrismaDepartmentHeadRepository } from '../infrastructure/repositories/PrismaDepartmentHeadRepository';
 import { PrismaAlumniDepartmentRepository } from '../infrastructure/repositories/PrismaAlumniDepartmentRepository';
 
-import { GetDepartmentStats, GetDepartmentAlumni } from '../application/use-cases/DepartmentLookups';
+import { GetDepartmentStats, GetDepartmentAlumni, GetMyDepartment } from '../application/use-cases/DepartmentLookups';
 
 const deptRepo = new PrismaDepartmentRepository();
 const headRepo = new PrismaDepartmentHeadRepository();
@@ -17,6 +17,15 @@ export class DepartmentController {
     try {
       const depts = await deptRepo.findAll();
       return sendSuccess(res, 'Departments list retrieved.', depts);
+    } catch (err) { next(err); }
+  }
+
+  static async getMyDepartment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?.userId;
+      const useCase = new GetMyDepartment(headRepo, deptRepo);
+      const dept = await useCase.execute(userId);
+      return sendSuccess(res, 'My department retrieved.', dept);
     } catch (err) { next(err); }
   }
 

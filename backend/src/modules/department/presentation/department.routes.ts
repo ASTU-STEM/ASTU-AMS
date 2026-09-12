@@ -14,6 +14,7 @@ router.get('/', asyncHandler(DepartmentController.listDepartments));
 router.use(authenticateJWT);
 router.use(requireRoles([Role.DEPARTMENT_HEAD]));
 
+router.get('/my-department', asyncHandler(DepartmentController.getMyDepartment));
 router.get('/my-stats', asyncHandler(DepartmentController.getMyDepartmentStats));
 router.get('/my-alumni', asyncHandler(DepartmentController.getMyDepartmentAlumni));
 

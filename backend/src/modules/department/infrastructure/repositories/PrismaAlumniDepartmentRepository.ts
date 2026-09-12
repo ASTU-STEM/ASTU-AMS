@@ -6,16 +6,35 @@ export class PrismaAlumniDepartmentRepository implements IAlumniDepartmentReposi
     const alumni = await prisma.alumniProfile.findMany({
       where: { departmentId },
       include: {
-        user: true, // Assuming we need user data for fullName or similar. Actually, name might be on profile or user.
+        user: true,
+        experiences: {
+          orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }],
+        },
       },
     });
 
-    return alumni.map((a: any) => ({
-      id: a.id,
-      userId: a.userId,
-      fullName: a.fullName || a.user?.email || 'Unknown', // Using email fallback since User doesn't have fullName
-      graduationYear: a.graduationYear,
-      employmentStatus: a.employmentStatus,
-    }));
+    return alumni.map((a: any) => {
+      const experiences: any[] = Array.isArray(a?.experiences) ? a.experiences : [];
+      // Prefer the current role, otherwise the most recent one.
+      const currentJob = experiences.find((xp) => xp.isCurrent) || experiences[0] || null;
+
+      return {
+        id: a.id,
+        userId: a.userId || null,
+        studentId: a.studentId,
+        fullName: a.fullName || a.user?.email || 'Unknown',
+        email: a.email || a.user?.email || null,
+        phone: a.phone || null,
+        graduationYear: a.graduationYear,
+        employmentStatus: a.employmentStatus || 'UNEMPLOYED',
+        salary: typeof a.salary === 'number' ? a.salary : null,
+        skills: Array.isArray(a.skills) ? a.skills : [],
+        company: currentJob?.companyName || null,
+        jobTitle: currentJob?.position || null,
+        industry: currentJob?.industry || null,
+        location: currentJob?.location || null,
+        isVerified: !!a.isVerified,
+      };
+    });
   }
 }

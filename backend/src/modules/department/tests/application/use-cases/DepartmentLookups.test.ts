@@ -1,4 +1,4 @@
-import { GetDepartmentStats, GetDepartmentAlumni } from '../../../application/use-cases/DepartmentLookups';
+import { GetDepartmentStats, GetDepartmentAlumni, GetMyDepartment } from '../../../application/use-cases/DepartmentLookups';
 import { IDepartmentHeadRepository } from '../../../application/ports/IDepartmentHeadRepository';
 import { IAlumniDepartmentRepository } from '../../../application/ports/IAlumniDepartmentRepository';
 import { IDepartmentRepository } from '../../../application/ports/IDepartmentRepository';
@@ -13,8 +13,18 @@ describe('Department Lookups Use Cases', () => {
   const mockHead = new DepartmentHeadProfile('head1', 'user1', 'dept1');
   const mockDept = new Department('dept1', 'Software Eng', 'SWE');
   const mockAlumniList = [
-    { id: 'al1', userId: 'usrA', fullName: 'Alice', graduationYear: 2020, employmentStatus: 'EMPLOYED' },
-    { id: 'al2', userId: 'usrB', fullName: 'Bob', graduationYear: 2021, employmentStatus: 'UNEMPLOYED' }
+    {
+      id: 'al1', userId: 'usrA', studentId: 'ASTU/0001', fullName: 'Alice',
+      email: 'alice@astu.edu.et', phone: '0911', graduationYear: 2020,
+      employmentStatus: 'EMPLOYED', salary: 50000, skills: ['JS'],
+      company: 'ACME', jobTitle: 'Engineer', industry: 'Tech', location: 'Addis', isVerified: true,
+    },
+    {
+      id: 'al2', userId: 'usrB', studentId: 'ASTU/0002', fullName: 'Bob',
+      email: 'bob@astu.edu.et', phone: '0922', graduationYear: 2021,
+      employmentStatus: 'UNEMPLOYED', salary: null, skills: [],
+      company: null, jobTitle: null, industry: null, location: null, isVerified: false,
+    }
   ];
 
   beforeEach(() => {
@@ -33,7 +43,10 @@ describe('Department Lookups Use Cases', () => {
 
       expect(stats.totalAlumni).toBe(2);
       expect(stats.employedAlumni).toBe(1);
+      expect(stats.selfEmployedAlumni).toBe(0);
+      expect(stats.unemployedAlumni).toBe(1);
       expect(stats.employmentRate).toBe(50); // 1/2 * 100
+      expect(stats.averageSalary).toBe(50000);
     });
 
     it('should throw if user is not a department head', async () => {
@@ -53,6 +66,24 @@ describe('Department Lookups Use Cases', () => {
 
       expect(alumni).toHaveLength(2);
       expect(alumni[0].fullName).toBe('Alice');
+    });
+  });
+
+  describe('GetMyDepartment', () => {
+    it('should return the department for a department head', async () => {
+      mockHeadRepo.findByUserId.mockResolvedValue(mockHead);
+      mockDeptRepo.findById.mockResolvedValue(mockDept);
+
+      const useCase = new GetMyDepartment(mockHeadRepo, mockDeptRepo);
+      const dept = await useCase.execute('user1');
+
+      expect(dept).toEqual(mockDept);
+    });
+
+    it('should throw if user is not a department head', async () => {
+      mockHeadRepo.findByUserId.mockResolvedValue(null);
+      const useCase = new GetMyDepartment(mockHeadRepo, mockDeptRepo);
+      await expect(useCase.execute('user1')).rejects.toThrow(UnauthorizedDepartmentActionError);
     });
   });
 });
