@@ -90,6 +90,15 @@ export const adminService = {
     }
   },
 
+  async updateUser(id: string, data: any): Promise<ApiResult<{ success: boolean }>> {
+    try {
+      const response = await apiClient.put<{ success: boolean }>(`/admin/users/${id}`, data);
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_USER_ERROR', message: error.response?.data?.message || 'Failed to update user' };
+    }
+  },
+
   async getJobs(params: { page?: number; limit?: number; query?: string; status?: string }): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.get<{ success: boolean; data: any }>('/admin/jobs', { params });

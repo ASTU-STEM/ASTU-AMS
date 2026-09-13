@@ -13,6 +13,8 @@ import { GetGraduateRecord, VerifyStudentId } from '../application/use-cases/Gra
 import { ManageAlumniStatus } from '../application/use-cases/ManageAlumniStatus';
 import { FetchGraduatesByAPI } from '../application/use-cases/FetchGraduatesByAPI';
 import { ManageUsers } from '../../admin/application/use-cases/ManageUsers';
+import { EmailService } from '../../../core/services/EmailService';
+import bcrypt from 'bcryptjs';
 
 import { updateAlumniStatusSchema } from './registrar.validation';
 // We will mock CSV parsing here since it's just a controller representation
@@ -405,6 +407,162 @@ export class RegistrarController {
         orderBy: { importedAt: 'desc' }
       });
       return sendSuccess(res, 'Fetched SIS records.', records);
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  // Create Single SIS Graduate Record & Provision Alumni Account
+  static async createSisRecord(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        studentId,
+        fullName,
+        email,
+        phone,
+        nationality,
+        dateOfBirth,
+        department,
+        graduationYear,
+        cgpa,
+        password,
+        status,
+        isVerified
+      } = req.body;
+      
+      if (!studentId || !fullName) {
+        return sendError(res, 'Student ID and Full Name are required', null, 400);
+      }
+
+      const cleanStudentId = String(studentId).trim().toUpperCase();
+      const existing = await prisma.registrarStudent.findUnique({
+        where: { studentId: cleanStudentId }
+      });
+
+      if (existing) {
+        return sendError(res, `SIS record with Student ID ${cleanStudentId} already exists`, null, 400);
+      }
+
+      const deptStr = String(department || 'Computer Science and Engineering').trim();
+      const deptCode = deptStr.substring(0, 4).toUpperCase();
+      const parsedGradYear = parseInt(String(graduationYear), 10) || new Date().getFullYear();
+      const parsedCgpa = parseFloat(String(cgpa)) || 3.0;
+
+      let parsedDob: Date | null = null;
+      if (dateOfBirth) {
+        const d = new Date(dateOfBirth);
+        if (!isNaN(d.getTime())) parsedDob = d;
+      }
+
+      // 1. Store SIS Master Record in RegistrarStudent table
+      const sisRecord = await prisma.registrarStudent.create({
+        data: {
+          studentId: cleanStudentId,
+          fullName: String(fullName).trim(),
+          department: deptStr,
+          departmentCode: deptCode,
+          cgpa: parsedCgpa,
+          graduationYear: parsedGradYear,
+          email: email ? String(email).trim() : null,
+          phone: phone ? String(phone).trim() : null,
+          nationality: nationality ? String(nationality).trim() : 'Ethiopian',
+          dateOfBirth: parsedDob,
+          source: 'REGISTRAR_MANUAL_ENTRY'
+        }
+      });
+
+      const accountStatus = status || 'Active';
+      const isVerifiedFinal = isVerified !== undefined ? Boolean(isVerified) : accountStatus === 'Active';
+      const isAccountActive = accountStatus === 'Active';
+
+      // 2. If Initial Account Status is Active (or Verified), create full user login account & send email credentials!
+      if (isAccountActive || isVerifiedFinal) {
+        const targetEmail = email ? String(email).trim().toLowerCase() : `${cleanStudentId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}@alumni.astu.edu.et`;
+        const tempPassword = (password && String(password).trim()) ? String(password).trim() : `ASTU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+        const manageUsers = new ManageUsers();
+        try {
+          await manageUsers.createUser({
+            name: String(fullName).trim(),
+            email: targetEmail,
+            role: 'Alumni',
+            studentId: cleanStudentId,
+            department: deptStr,
+            graduationYear: parsedGradYear,
+            cgpa: parsedCgpa,
+            dateOfBirth: parsedDob ? parsedDob.toISOString().slice(0, 10) : undefined,
+            nationality: nationality || 'Ethiopian',
+            phone: phone || undefined,
+            password: tempPassword,
+            status: accountStatus,
+            isVerified: isVerifiedFinal
+          });
+        } catch (err: any) {
+          if (err.message && err.message.includes('already exists')) {
+            const existingUser = await prisma.user.findUnique({ where: { email: targetEmail } });
+            if (existingUser) {
+              const hashedPassword = await bcrypt.hash(tempPassword, 10);
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { password: hashedPassword, isActive: isAccountActive }
+              });
+
+              await prisma.alumniProfile.updateMany({
+                where: { studentId: cleanStudentId },
+                data: {
+                  fullName: String(fullName).trim(),
+                  email: targetEmail,
+                  phone: phone || undefined,
+                  graduationYear: parsedGradYear,
+                  cgpa: parsedCgpa,
+                  status: isAccountActive ? 'ACTIVE' : 'INACTIVE',
+                  isVerified: isVerifiedFinal
+                }
+              });
+
+              const emailService = new EmailService();
+              await emailService.sendTemporaryPassword(targetEmail, tempPassword, 'Alumni');
+            }
+          } else {
+            throw err;
+          }
+        }
+        return sendSuccess(res, `Alumni account provisioned as Active & Verified. Login credentials sent to ${targetEmail}.`, sisRecord);
+      } else {
+        // 3. If initially Inactive / Pending / Unverified:
+        // Seed initial INACTIVE AlumniProfile so student can claim & register later.
+        // DO NOT send credentials email!
+        const existingProfile = await prisma.alumniProfile.findUnique({
+          where: { studentId: cleanStudentId }
+        });
+
+        if (!existingProfile) {
+          let dept = await prisma.department.findFirst({
+            where: { OR: [{ name: { contains: deptStr, mode: 'insensitive' } }, { code: deptCode }] }
+          });
+          if (!dept) {
+            dept = await prisma.department.findFirst();
+          }
+
+          if (dept) {
+            await prisma.alumniProfile.create({
+              data: {
+                studentId: cleanStudentId,
+                fullName: String(fullName).trim(),
+                email: email ? String(email).trim() : null,
+                phone: phone ? String(phone).trim() : null,
+                gender: 'Unknown',
+                cgpa: parsedCgpa,
+                graduationYear: parsedGradYear,
+                departmentId: dept.id,
+                status: 'INACTIVE',
+                isVerified: false
+              }
+            });
+          }
+        }
+        return sendSuccess(res, 'SIS Graduate Record saved as Inactive/Unverified. Awaiting student registration.', sisRecord);
+      }
     } catch (err: any) {
       next(err);
     }

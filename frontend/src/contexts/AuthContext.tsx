@@ -45,11 +45,20 @@ const readStoredUser = (): User | null => {
       const role = normalizeRole(parsed.role);
       if (role) {
         const mock = MOCK_USERS[role];
+        const rawName = parsed.name || parsed.fullName || '';
+        const firstName = parsed.firstName !== undefined && parsed.firstName !== '' 
+          ? parsed.firstName 
+          : (rawName ? rawName.split(' ')[0] : (mock?.firstName ?? ''));
+        const lastName = parsed.lastName !== undefined && parsed.lastName !== ''
+          ? parsed.lastName 
+          : (rawName ? rawName.split(' ').slice(1).join(' ') : (mock?.lastName ?? ''));
+        
         return {
           id: String(parsed.id ?? mock?.id ?? ''),
           email: String(parsed.email ?? mock?.email ?? ''),
-          firstName: String(parsed.firstName ?? parsed.fullName?.split(' ')[0] ?? parsed.name ?? mock?.firstName ?? ''),
-          lastName: String(parsed.lastName ?? parsed.fullName?.split(' ').slice(1).join(' ') ?? mock?.lastName ?? ''),
+          firstName: String(firstName),
+          lastName: String(lastName),
+          name: String(rawName || `${firstName} ${lastName}`.trim()),
           role,
           isActive: true,
           createdAt: parsed.createdAt ?? '2024-01-01',

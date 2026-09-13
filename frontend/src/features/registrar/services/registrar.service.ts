@@ -47,6 +47,16 @@ export const registrarService = {
     }
   },
 
+  async createSisRecord(recordData: any): Promise<any> {
+    try {
+      const response = await post<{ data: any }>('/registrar/sis-records', recordData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating SIS record:', error);
+      throw error;
+    }
+  },
+
   // All Registered Alumni Accounts
   async getAllRegisteredAlumni(): Promise<any[]> {
     try {

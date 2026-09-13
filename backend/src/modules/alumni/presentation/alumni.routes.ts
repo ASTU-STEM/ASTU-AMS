@@ -21,7 +21,7 @@ router.put('/experiences/:id', asyncHandler(AlumniController.updateExperience));
 router.delete('/experiences/:id', asyncHandler(AlumniController.deleteExperience));
 
 // Files
-router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
+router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
 router.post('/upload-certificate', uploadMiddleware.single('certificateImage'), asyncHandler(AlumniController.uploadCertificate));
 router.post('/upload-document-file', uploadMiddleware.single('documentFile'), asyncHandler(AlumniController.uploadDocumentFile));
 

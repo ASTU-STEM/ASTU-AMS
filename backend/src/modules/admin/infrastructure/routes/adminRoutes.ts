@@ -18,8 +18,10 @@ router.get('/sidebar-stats', adminController.getSidebarStats);
 router.get('/roles/stats', adminController.getRoleStats);
 router.get('/users', adminController.getUsers);
 router.post('/users', adminController.createUser);
+router.put('/users/:id', adminController.updateUser);
 router.put('/users/bulk/status', adminController.bulkUpdateStatus);
 router.put('/users/:id/status', adminController.updateUserStatus);
+router.put('/users/:id/notes', adminController.updateUserNotes);
 router.delete('/users/:id', adminController.deleteUser);
 
 // Department Routes
