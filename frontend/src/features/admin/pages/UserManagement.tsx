@@ -42,6 +42,7 @@ import {
   Link,
   Award,
   Save,
+  ShieldCheck,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
@@ -50,7 +51,7 @@ import AdminBadge from '../components/AdminBadge';
 import { toast } from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
 
-type Role = 'Alumni' | 'Employer' | 'Department Head' | 'DepartmentHead' | 'Faculty' | 'Registrar' | 'RegistrarStaff' | 'CMS Manager' | 'Admin' | 'SuperAdmin';
+type Role = 'Alumni' | 'Employer' | 'Department Head' | 'DepartmentHead' | 'Faculty' | 'Registrar' | 'RegistrarStaff' | 'CMS Manager' | 'Admin' | 'Super Admin' | 'SuperAdmin';
 type Status = 'Active' | 'Inactive' | 'Suspended' | 'Pending Verification';
 type SortKey = 'name' | 'studentId' | 'role' | 'department' | 'batch' | 'status' | 'lastLogin';
 
@@ -178,7 +179,7 @@ const getUserAvatarUrl = (user: any): string | null => {
 };
 
 
-const roles: Array<'All Roles' | Role> = ['All Roles', 'Alumni', 'Employer', 'Department Head', 'Registrar', 'CMS Manager', 'Admin'];
+const roles: Array<'All Roles' | Role> = ['All Roles', 'Alumni', 'Employer', 'Department Head', 'Registrar', 'CMS Manager', 'Super Admin', 'Admin'];
 const statuses: Array<'All' | Status> = ['All', 'Active', 'Inactive', 'Suspended', 'Pending Verification'];
 const departments = ['All Departments', 'Computer Science', 'Software Engineering', 'Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Chemical Engineering', 'Information Engineering', 'Registrar Office'];
 const pageSize = 25;
@@ -193,6 +194,7 @@ const roleTone: Record<Role, 'default' | 'warning' | 'danger' | 'success' | 'neu
   RegistrarStaff: 'success',
   'CMS Manager': 'neutral',
   Admin: 'danger',
+  'Super Admin': 'danger',
   SuperAdmin: 'danger',
 };
 
@@ -213,7 +215,8 @@ const roleColorClass: Record<Role, string> = {
   RegistrarStaff: 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15',
   'CMS Manager': 'bg-teal-100 text-teal-800 border-teal-200',
   Admin: 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15',
-  SuperAdmin: 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15',
+  'Super Admin': 'bg-purple-100 text-purple-800 border-purple-200',
+  SuperAdmin: 'bg-purple-100 text-purple-800 border-purple-200',
 };
 
 const statusColorClass: Record<Status, string> = {
@@ -613,6 +616,72 @@ export default function UserManagement() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [form, setForm] = useState<UserFormState>(createDefaultForm());
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+  // Reset Password & Change Role Modal States
+  const [resetPasswordModalUser, setResetPasswordModalUser] = useState<UserRow | null>(null);
+  const [resetPasswordInputValue, setResetPasswordInputValue] = useState<string>('');
+  const [resetPasswordSubmitting, setResetPasswordSubmitting] = useState<boolean>(false);
+
+  const [changeRoleModalUser, setChangeRoleModalUser] = useState<UserRow | null>(null);
+  const [selectedRoleForChange, setSelectedRoleForChange] = useState<Role>('Alumni');
+  const [changeRoleSubmitting, setChangeRoleSubmitting] = useState<boolean>(false);
+
+  const openResetPasswordModal = (user: UserRow) => {
+    setResetPasswordModalUser(user);
+    setResetPasswordInputValue(generatePassword());
+  };
+
+  const handleExecuteResetPassword = async () => {
+    if (!resetPasswordModalUser) return;
+    setResetPasswordSubmitting(true);
+    try {
+      const { adminService } = await import('../services/admin.service');
+      const { default: toast } = await import('react-hot-toast');
+      const res = await adminService.resetUserPassword(resetPasswordModalUser.id, resetPasswordInputValue.trim());
+      if (res.ok) {
+        toast.success(`Password reset for ${resetPasswordModalUser.name}! Temp Pass: ${resetPasswordInputValue.trim()}`, { duration: 8000 });
+        setResetPasswordModalUser(null);
+      } else {
+        toast.error(res.message || 'Failed to reset password');
+      }
+    } catch (err: any) {
+      const { default: toast } = await import('react-hot-toast');
+      toast.error(err?.message || 'Error resetting password');
+    } finally {
+      setResetPasswordSubmitting(false);
+    }
+  };
+
+  const openChangeRoleModal = (user: UserRow) => {
+    setChangeRoleModalUser(user);
+    setSelectedRoleForChange(user.role);
+  };
+
+  const handleExecuteChangeRole = async () => {
+    if (!changeRoleModalUser) return;
+    setChangeRoleSubmitting(true);
+    try {
+      const { adminService } = await import('../services/admin.service');
+      const { default: toast } = await import('react-hot-toast');
+      const res = await adminService.updateUser(changeRoleModalUser.id, { role: selectedRoleForChange });
+      if (res.ok) {
+        toast.success(`Role for ${changeRoleModalUser.name} changed to ${selectedRoleForChange}`);
+        const updated = { ...changeRoleModalUser, role: selectedRoleForChange };
+        setUsers(prev => prev.map(u => u.id === changeRoleModalUser.id ? updated : u));
+        if (activeUser?.id === changeRoleModalUser.id) {
+          setActiveUser(updated);
+        }
+        setChangeRoleModalUser(null);
+      } else {
+        toast.error(res.message || 'Failed to change role');
+      }
+    } catch (err: any) {
+      const { default: toast } = await import('react-hot-toast');
+      toast.error(err?.message || 'Error changing user role');
+    } finally {
+      setChangeRoleSubmitting(false);
+    }
+  };
   const [searchFocused, setSearchFocused] = useState(false);
   const [dbDepartments, setDbDepartments] = useState<Array<{ id: string; name: string; code: string }>>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -1666,14 +1735,25 @@ export default function UserManagement() {
     const { default: toast } = await import('react-hot-toast');
     
     if (action === 'Suspend') {
-      const result = await adminService.updateUserStatus(user.id, 'suspend');
-      if (result.ok) { toast.success(`User ${user.name} suspended`); fetchUsers(); }
-      else toast.error(result.message || 'Error suspending user');
+      const isCurrentlyActive = user.status === 'Active';
+      const apiAction = isCurrentlyActive ? 'suspend' : 'activate';
+      const result = await adminService.updateUserStatus(user.id, apiAction);
+      if (result.ok) {
+        const nextStatus = isCurrentlyActive ? 'Suspended' : 'Active';
+        toast.success(`User ${user.name} status updated to ${nextStatus}`);
+        const updated = { ...user, status: nextStatus as Status };
+        setUsers(prev => prev.map(u => u.id === user.id ? updated : u));
+        if (activeUser?.id === user.id) setActiveUser(updated);
+        fetchUsers();
+      } else {
+        toast.error(result.message || 'Error updating user status');
+      }
     } else if (action === 'Delete') {
       if (window.confirm(`Are you sure you want to delete user ${user.name}? This action cannot be undone.`)) {
         const result = await adminService.deleteUser(user.id);
         if (result.ok) {
           toast.success(`User ${user.name} deleted successfully`);
+          setUsers(prev => prev.filter(u => u.id !== user.id));
           if (activeUser?.id === user.id) setActiveUser(null);
           fetchUsers();
         } else {
@@ -1681,18 +1761,23 @@ export default function UserManagement() {
         }
       }
     } else if (action === 'Reset Password') {
-      const newPass = generatePassword();
-      toast.success(`Temporary password for ${user.name}: ${newPass}`, { duration: 6000 });
+      openResetPasswordModal(user);
+    } else if (action === 'Change Role') {
+      openChangeRoleModal(user);
+    } else if (action === 'Edit Profile' || action === 'Edit') {
+      openEditModal(user);
+    } else if (action === 'View Profile') {
+      setActiveUser(user);
     }
   };
 
-  const rowActions = [
-    { label: 'View Profile', icon: Eye, onClick: (user: UserRow) => setActiveUser(user) },
-    { label: 'Edit', icon: PencilLine, onClick: openEditModal },
-    { label: 'Reset Password', icon: KeyRound, onClick: () => {} },
-    { label: 'Change Role', icon: Shield, onClick: () => {} },
-    { label: 'Suspend', icon: UserRound, onClick: (user: UserRow) => handleRowAction(user, 'Suspend') },
-    { label: 'Delete', icon: Trash2, onClick: (user: UserRow) => handleRowAction(user, 'Delete') },
+  const getRowActions = (user: UserRow) => [
+    { label: 'View Profile', icon: Eye, onClick: () => setActiveUser(user) },
+    { label: 'Edit Profile', icon: PencilLine, onClick: () => openEditModal(user) },
+    { label: 'Reset Password', icon: KeyRound, onClick: () => openResetPasswordModal(user) },
+    { label: 'Change Role', icon: Shield, onClick: () => openChangeRoleModal(user) },
+    { label: user.status === 'Active' ? 'Suspend Account' : 'Activate Account', icon: UserRound, onClick: () => handleRowAction(user, 'Suspend') },
+    { label: 'Delete User', icon: Trash2, onClick: () => handleRowAction(user, 'Delete') },
   ];
 
   const totalCountNum = globalStats.total || totalCount || 45;
@@ -2277,7 +2362,7 @@ export default function UserManagement() {
 
                       {menuUserId === user.id && (
                         <div className="absolute right-0 top-10 z-20 w-48 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-                          {rowActions.map((action) => {
+                          {getRowActions(user).map((action) => {
                             const Icon = action.icon;
                             return (
                               <button
@@ -2285,10 +2370,10 @@ export default function UserManagement() {
                                 type="button"
                                 onClick={() => {
                                   setMenuUserId(null);
-                                  action.onClick(user);
+                                  action.onClick();
                                 }}
                                 className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
-                                  action.label === 'Delete'
+                                  action.label.includes('Delete')
                                     ? 'text-[#E24B4A] hover:bg-rose-50 font-medium'
                                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
@@ -2394,7 +2479,8 @@ export default function UserManagement() {
                 { role: 'Registrar', desc: 'Records', icon: BookOpen },
                 { role: 'Department Head', desc: 'Faculty', icon: Users },
                 { role: 'CMS Manager', desc: 'Media & News', icon: Newspaper },
-                { role: 'Admin', desc: 'System Admin', icon: Shield },
+                { role: 'Super Admin', desc: 'Root Executive', icon: ShieldCheck },
+                { role: 'Admin', desc: 'ICT Specialist', icon: Shield },
               ] as const).map(({ role: r, desc, icon: RoleIcon }) => {
                 const isSelected = form.role === r;
 
@@ -2953,6 +3039,15 @@ export default function UserManagement() {
                 >
                   <KeyRound className="h-3.5 w-3.5 text-indigo-600" />
                   <span>Reset Password</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleRowAction(activeUser, 'Change Role')}
+                  className="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <Shield className="h-3.5 w-3.5 text-purple-600" />
+                  <span>Change Role</span>
                 </button>
 
                 <button
@@ -6122,6 +6217,134 @@ export default function UserManagement() {
           </div>
         </div>
       </AdminModal>
+
+      {/* Dedicated Reset Password Modal */}
+      {resetPasswordModalUser && (
+        <AdminModal
+          open={Boolean(resetPasswordModalUser)}
+          onClose={() => setResetPasswordModalUser(null)}
+          title={`Reset Account Password — ${resetPasswordModalUser.name}`}
+        >
+          <div className="space-y-4 p-2">
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-3">
+              <KeyRound className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block font-bold mb-0.5">Password Security Notice</strong>
+                Resetting the password will update the user's password in the system, generate a secure credential, and send a notification to <strong>{resetPasswordModalUser.email}</strong>.
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-600">
+                New Temporary Password
+              </label>
+              <div className="relative flex items-center">
+                <Lock className="absolute left-3.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={resetPasswordInputValue}
+                  onChange={(e) => setResetPasswordInputValue(e.target.value)}
+                  placeholder="Enter custom password or click generate"
+                  className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                />
+                <button
+                  type="button"
+                  onClick={() => setResetPasswordInputValue(generatePassword())}
+                  className="absolute right-2 px-2.5 py-1 text-[10px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="h-3 w-3 text-amber-500" />
+                  Auto-Gen
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setResetPasswordModalUser(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={resetPasswordSubmitting || !resetPasswordInputValue.trim()}
+                onClick={handleExecuteResetPassword}
+                className="px-4 py-2 rounded-xl bg-[#001F4D] hover:bg-indigo-900 text-xs font-bold text-white shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {resetPasswordSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                <span>Reset &amp; Save Password</span>
+              </button>
+            </div>
+          </div>
+        </AdminModal>
+      )}
+
+      {/* Dedicated Change Role Modal */}
+      {changeRoleModalUser && (
+        <AdminModal
+          open={Boolean(changeRoleModalUser)}
+          onClose={() => setChangeRoleModalUser(null)}
+          title={`Change System Role — ${changeRoleModalUser.name}`}
+        >
+          <div className="space-y-4 p-2">
+            <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-center gap-3">
+              <Shield className="h-5 w-5 text-[#003580] shrink-0" />
+              <div>
+                Current Account Role: <strong className="font-extrabold uppercase">{changeRoleModalUser.role}</strong> ({changeRoleModalUser.department})
+              </div>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[
+                { role: 'Alumni', label: '🎓 Alumni Portal', desc: 'Graduates, tracer surveys & alumni services' },
+                { role: 'Employer', label: '🏢 Employer Portal', desc: 'Corporate partners, job postings & hiring' },
+                { role: 'Department Head', label: '🎓 Department Head', desc: 'Faculty leadership & department survey dispatches' },
+                { role: 'Registrar', label: '🏛️ Registrar Office', desc: 'SIS record sync, student data & verification' },
+                { role: 'CMS Manager', label: '📰 CMS Manager', desc: 'Alumni Office news, events & portal content' },
+                { role: 'Admin', label: '⚡ ICT Technical Admin', desc: 'System infrastructure & technical ops' },
+                { role: 'Super Admin', label: '👑 Super Admin', desc: 'Root executive governance & full permissions' },
+              ].map((item) => {
+                const isSelected = selectedRoleForChange === item.role;
+                return (
+                  <button
+                    key={item.role}
+                    type="button"
+                    onClick={() => setSelectedRoleForChange(item.role as Role)}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-[#003580] bg-[#003580]/10 ring-2 ring-[#003580]/30 font-bold text-[#003580]'
+                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                    }`}
+                  >
+                    <div className="text-xs font-bold">{item.label}</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5">{item.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setChangeRoleModalUser(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={changeRoleSubmitting}
+                onClick={handleExecuteChangeRole}
+                className="px-4 py-2 rounded-xl bg-[#001F4D] hover:bg-indigo-900 text-xs font-bold text-white shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {changeRoleSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                <span>Update User Role</span>
+              </button>
+            </div>
+          </div>
+        </AdminModal>
+      )}
     </div>
   );
 }

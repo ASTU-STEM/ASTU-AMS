@@ -166,6 +166,17 @@ export class AdminController {
     }
   }
 
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body || {};
+      const result = await manageUsersUseCase.resetPassword(id, newPassword);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
   // --- Department Management ---
   async getDepartments(req: Request, res: Response) {
     try {
@@ -220,11 +231,85 @@ export class AdminController {
     }
   }
 
+  async getJobApplications(req: Request, res: Response) {
+    try {
+      const { page, limit, query, status } = req.query;
+      const result = await manageJobsUseCase.getApplications({
+        page: page ? Number(page) : undefined,
+        limit: limit ? Number(limit) : undefined,
+        query: query ? String(query) : undefined,
+        status: status ? String(status) : undefined,
+      });
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getJobAnalytics(req: Request, res: Response) {
+    try {
+      const result = await manageJobsUseCase.getJobAnalytics();
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async createJob(req: Request, res: Response) {
+    try {
+      const result = await manageJobsUseCase.createJob(req.body);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateJobDetails(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const result = await manageJobsUseCase.updateJobDetails(id, req.body);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
   async updateJobStatus(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { status } = req.body;
       const result = await manageJobsUseCase.updateJobStatus(id, status);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async deleteJob(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const result = await manageJobsUseCase.deleteJob(id);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateJobApplicationStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const result = await manageJobsUseCase.updateApplicationStatus(id, status);
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async bulkUpdateJobApplicationStatus(req: Request, res: Response) {
+    try {
+      const { ids, status } = req.body;
+      const result = await manageJobsUseCase.bulkUpdateApplicationStatus(ids, status);
       res.json({ success: true, data: result });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -460,6 +545,43 @@ export class AdminController {
         orderBy: { createdAt: 'desc' },
       });
       res.json({ success: true, data: donations });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  // --- Role Permissions Matrix ---
+  async getRolePermissions(req: Request, res: Response) {
+    try {
+      const setting = await prisma.systemSetting.findUnique({
+        where: { key: 'ROLE_PERMISSIONS' },
+      });
+      if (setting && setting.value) {
+        return res.json({ success: true, data: setting.value });
+      }
+      res.json({ success: true, data: null });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateRolePermissions(req: Request, res: Response) {
+    try {
+      const { permissions } = req.body;
+      const setting = await prisma.systemSetting.upsert({
+        where: { key: 'ROLE_PERMISSIONS' },
+        update: { value: permissions, updatedAt: new Date() },
+        create: { key: 'ROLE_PERMISSIONS', value: permissions },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          action: 'UPDATE_ROLE_PERMISSIONS',
+          details: 'Updated role-based permission matrix policies in System Settings',
+        },
+      });
+
+      res.json({ success: true, data: setting.value, message: 'Role permissions saved successfully to database' });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }

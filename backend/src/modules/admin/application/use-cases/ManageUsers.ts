@@ -39,13 +39,15 @@ export class ManageUsers {
 
     if (params.role && params.role !== 'All Roles') {
       const roleMap: Record<string, Role> = {
+        'Super Admin': Role.SUPER_ADMIN,
+        'Admin': Role.ADMIN,
+        'ICT Admin': Role.ADMIN,
         'Alumni': Role.ALUMNI,
         'Employer': Role.EMPLOYER,
         'Department Head': Role.DEPARTMENT_HEAD,
         'Registrar': Role.REGISTRAR,
         'CMS Manager': Role.ALUMNI_OFFICE,
         'CMS Mgr': Role.ALUMNI_OFFICE,
-        'Admin': Role.ADMIN,
       };
       if (roleMap[params.role]) {
         where.role = roleMap[params.role];
@@ -145,24 +147,43 @@ export class ManageUsers {
       } else if (user.adminProfile) {
         const full = `${user.adminProfile.firstName || ''} ${user.adminProfile.lastName || ''}`.trim();
         name = full || user.email.split('@')[0];
-        department = user.adminProfile.department || 'System Office';
+        department = user.adminProfile.department || (String(user.role) === 'SUPER_ADMIN' ? 'Executive Directorate' : 'System Office');
         phone = user.adminProfile.phone || '';
         status = user.isActive ? 'Active' : 'Inactive';
       } else {
         name = user.email.split('@')[0];
-        department = 'System Office';
+        department = String(user.role) === 'SUPER_ADMIN' ? 'Executive Directorate' : 'System Office';
         status = user.isActive ? 'Active' : 'Inactive';
       }
 
       // Map Prisma Role to Frontend Role String
       let displayRole = 'Admin';
-      switch (user.role) {
-        case Role.ALUMNI: displayRole = 'Alumni'; break;
-        case Role.EMPLOYER: displayRole = 'Employer'; break;
-        case Role.DEPARTMENT_HEAD: displayRole = 'Department Head'; break;
-        case Role.REGISTRAR: displayRole = 'Registrar'; break;
-        case Role.ALUMNI_OFFICE: displayRole = 'CMS Manager'; break;
-        case Role.ADMIN: displayRole = 'Admin'; break;
+      switch (String(user.role)) {
+        case 'SUPER_ADMIN':
+          displayRole = 'Super Admin';
+          break;
+        case 'ADMIN':
+          displayRole = 'Admin';
+          break;
+        case 'ALUMNI':
+          displayRole = 'Alumni';
+          break;
+        case 'EMPLOYER':
+          displayRole = 'Employer';
+          break;
+        case 'DEPARTMENT_HEAD':
+          displayRole = 'Department Head';
+          break;
+        case 'REGISTRAR':
+          displayRole = 'Registrar';
+          break;
+        case 'ALUMNI_OFFICE':
+        case 'CMS_MANAGER':
+          displayRole = 'CMS Manager';
+          break;
+        default:
+          displayRole = 'Admin';
+          break;
       }
 
       // Additional database profile attributes
@@ -364,14 +385,21 @@ export class ManageUsers {
     hrContact?: string;
   }) {
     let roleEnum: Role = Role.ALUMNI;
-    switch (data.role) {
-      case 'Alumni': roleEnum = Role.ALUMNI; break;
-      case 'Employer': roleEnum = Role.EMPLOYER; break;
-      case 'Department Head': roleEnum = Role.DEPARTMENT_HEAD; break;
-      case 'Registrar': roleEnum = Role.REGISTRAR; break;
-      case 'CMS Manager':
-      case 'CMS Mgr': roleEnum = Role.ALUMNI_OFFICE; break;
-      case 'Admin': roleEnum = Role.ADMIN; break;
+    const rLower = (data.role || '').toLowerCase().trim();
+    if (rLower === 'super admin' || rLower === 'super_admin' || rLower === 'superadmin') {
+      roleEnum = Role.SUPER_ADMIN;
+    } else if (rLower === 'admin' || rLower === 'ict admin' || rLower === 'ict_admin') {
+      roleEnum = Role.ADMIN;
+    } else if (rLower === 'alumni') {
+      roleEnum = Role.ALUMNI;
+    } else if (rLower === 'employer') {
+      roleEnum = Role.EMPLOYER;
+    } else if (rLower === 'department head' || rLower === 'department_head' || rLower === 'dept head') {
+      roleEnum = Role.DEPARTMENT_HEAD;
+    } else if (rLower === 'registrar') {
+      roleEnum = Role.REGISTRAR;
+    } else if (rLower === 'cms manager' || rLower === 'cms mgr' || rLower === 'alumni_office' || rLower === 'alumni office') {
+      roleEnum = Role.ALUMNI_OFFICE;
     }
 
     // Check for existing user by email
@@ -667,15 +695,23 @@ export class ManageUsers {
     }
     if (data.role) {
       let roleEnum: Role | null = null;
-      switch (data.role) {
-        case 'Alumni': roleEnum = Role.ALUMNI; break;
-        case 'Employer': roleEnum = Role.EMPLOYER; break;
-        case 'Department Head': roleEnum = Role.DEPARTMENT_HEAD; break;
-        case 'Registrar': roleEnum = Role.REGISTRAR; break;
-        case 'CMS Manager':
-        case 'CMS Mgr': roleEnum = Role.ALUMNI_OFFICE; break;
-        case 'Admin': roleEnum = Role.ADMIN; break;
+      const rLower = (data.role || '').toLowerCase().trim();
+      if (rLower === 'super admin' || rLower === 'super_admin' || rLower === 'superadmin') {
+        roleEnum = Role.SUPER_ADMIN;
+      } else if (rLower === 'admin' || rLower === 'ict admin' || rLower === 'ict_admin') {
+        roleEnum = Role.ADMIN;
+      } else if (rLower === 'alumni') {
+        roleEnum = Role.ALUMNI;
+      } else if (rLower === 'employer') {
+        roleEnum = Role.EMPLOYER;
+      } else if (rLower === 'department head' || rLower === 'department_head' || rLower === 'dept head') {
+        roleEnum = Role.DEPARTMENT_HEAD;
+      } else if (rLower === 'registrar') {
+        roleEnum = Role.REGISTRAR;
+      } else if (rLower === 'cms manager' || rLower === 'cms mgr' || rLower === 'alumni_office' || rLower === 'alumni office') {
+        roleEnum = Role.ALUMNI_OFFICE;
       }
+
       if (roleEnum) {
         userUpdate.role = roleEnum;
       }
@@ -790,9 +826,14 @@ export class ManageUsers {
   }
 
   async deleteUser(id: string) {
-    // Check if it's the last admin
+    // Check if it's the last admin/super admin
     const user = await prisma.user.findUnique({ where: { id } });
-    if (user?.role === Role.ADMIN) {
+    if (user?.role === Role.SUPER_ADMIN) {
+      const superAdminCount = await prisma.user.count({ where: { role: Role.SUPER_ADMIN } });
+      if (superAdminCount <= 1) {
+        throw new Error('Cannot delete the last Super Admin user.');
+      }
+    } else if (user?.role === Role.ADMIN) {
       const adminCount = await prisma.user.count({ where: { role: Role.ADMIN } });
       if (adminCount <= 1) {
         throw new Error('Cannot delete the last admin user.');
@@ -814,4 +855,36 @@ export class ManageUsers {
 
     return { success: true, adminNotes: (updatedUser as any).adminNotes };
   }
+
+  async resetPassword(id: string, newPassword?: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new Error('User not found');
+
+    const tempPassword = newPassword || `ASTU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword }
+    });
+
+    try {
+      let displayRole = 'User';
+      switch (user.role) {
+        case Role.ALUMNI: displayRole = 'Alumni'; break;
+        case Role.EMPLOYER: displayRole = 'Employer'; break;
+        case Role.DEPARTMENT_HEAD: displayRole = 'Department Head'; break;
+        case Role.REGISTRAR: displayRole = 'Registrar'; break;
+        case Role.ALUMNI_OFFICE: displayRole = 'CMS Manager'; break;
+        case Role.ADMIN: displayRole = 'Admin'; break;
+        case Role.SUPER_ADMIN: displayRole = 'Super Admin'; break;
+      }
+      await emailService.sendTemporaryPassword(user.email, tempPassword, displayRole);
+    } catch (err) {
+      console.error('Failed to send password reset email:', err);
+    }
+
+    return { success: true, newPassword: tempPassword, email: user.email };
+  }
 }
+

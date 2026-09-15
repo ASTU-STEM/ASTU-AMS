@@ -36,5 +36,6 @@ router.post('/tickets', upload.any(), SupportController.submitTicket);
 router.get('/tickets', SupportController.getTickets);
 router.get('/tickets/:id', SupportController.getTicketById);
 router.put('/tickets/:id/status', SupportController.updateTicketStatus);
+router.post('/tickets/:id/escalate', SupportController.escalateToIct);
 
 export default router;

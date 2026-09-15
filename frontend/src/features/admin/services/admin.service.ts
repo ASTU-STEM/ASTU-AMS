@@ -108,6 +108,60 @@ export const adminService = {
     }
   },
 
+  async getJobApplications(params: { page?: number; limit?: number; query?: string; status?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/jobs/applications', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_JOB_APPS_ERROR', message: error.response?.data?.message || 'Failed to fetch job applications' };
+    }
+  },
+
+  async updateApplicationStatus(id: string, status: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any }>(`/admin/jobs/applications/${id}/status`, { status });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_APP_STATUS_ERROR', message: error.response?.data?.message || 'Failed to update application status' };
+    }
+  },
+
+  async bulkUpdateApplicationStatus(ids: string[], status: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any }>('/admin/jobs/applications/bulk-status', { ids, status });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'BULK_UPDATE_APP_STATUS_ERROR', message: error.response?.data?.message || 'Failed to bulk update application statuses' };
+    }
+  },
+
+  async getJobAnalytics(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/jobs/analytics');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_JOB_ANALYTICS_ERROR', message: error.response?.data?.message || 'Failed to fetch job analytics' };
+    }
+  },
+
+  async createJob(data: any): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any }>('/admin/jobs', data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'CREATE_JOB_ERROR', message: error.response?.data?.message || 'Failed to create job' };
+    }
+  },
+
+  async updateJob(id: string, data: any): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any }>(`/admin/jobs/${id}`, data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_JOB_ERROR', message: error.response?.data?.message || 'Failed to update job' };
+    }
+  },
+
   async updateJobStatus(id: string, status: string): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.put<{ success: boolean; data: any }>(`/admin/jobs/${id}/status`, { status });
@@ -117,12 +171,39 @@ export const adminService = {
     }
   },
 
+  async deleteJob(id: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.delete<{ success: boolean; data: any }>(`/admin/jobs/${id}`);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'DELETE_JOB_ERROR', message: error.response?.data?.message || 'Failed to delete job' };
+    }
+  },
+
   async getRoleStats(): Promise<ApiResult<Record<string, number>>> {
     try {
       const response = await apiClient.get<{ success: boolean; data: Record<string, number> }>('/admin/roles/stats');
       return { ok: true, data: response.data.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'GET_ROLE_STATS_ERROR', message: error.response?.data?.message || 'Failed to fetch role stats' };
+    }
+  },
+
+  async getRolePermissions(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/roles/permissions');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_ROLE_PERMISSIONS_ERROR', message: error.response?.data?.message || 'Failed to fetch role permissions' };
+    }
+  },
+
+  async updateRolePermissions(permissions: any): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any; message: string }>('/admin/roles/permissions', { permissions });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_ROLE_PERMISSIONS_ERROR', message: error.response?.data?.message || 'Failed to update role permissions' };
     }
   },
 
@@ -168,6 +249,15 @@ export const adminService = {
       return { ok: true, data: response.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'UPDATE_STATUS_ERROR', message: error.response?.data?.message || 'Failed to update user status' };
+    }
+  },
+
+  async resetUserPassword(id: string, newPassword?: string): Promise<ApiResult<{ success: boolean; data: any }>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any }>(`/admin/users/${id}/reset-password`, { newPassword });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'RESET_PASSWORD_ERROR', message: error.response?.data?.message || 'Failed to reset user password' };
     }
   },
 

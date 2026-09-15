@@ -33,6 +33,7 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
+import IctRoutes from "./routes/ictRoutes";
 import CmsRoutes from "./routes/cmsRoutes";
 import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
@@ -107,11 +108,20 @@ function AppContent() {
           }
         />
         <Route
+          path="/ict/*"
+          element={
+            <ProtectedRoute
+              element={<IctRoutes />}
+              allowedRoles={["ADMIN", "SUPER_ADMIN"]}
+            />
+          }
+        />
+        <Route
           path="/admin/*"
           element={
             <ProtectedRoute
               element={<AdminRoutes />}
-              allowedRoles={["ADMIN"]}
+              allowedRoles={["SUPER_ADMIN"]}
             />
           }
         />

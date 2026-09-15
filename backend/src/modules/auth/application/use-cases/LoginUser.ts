@@ -133,8 +133,10 @@ export class LoginUser {
       displayName = employerProfile.companyName;
     } else if (adminProfile?.firstName) {
       displayName = `${adminProfile.firstName} ${adminProfile.lastName}`.trim();
+    } else if (user.role === Role.SUPER_ADMIN) {
+      displayName = 'Super Admin';
     } else if (user.role === Role.ADMIN) {
-      displayName = 'System Admin';
+      displayName = 'ICT Administrator';
     } else if (user.role === Role.REGISTRAR) {
       displayName = 'Office of Registrar';
     } else if (user.role === Role.DEPARTMENT_HEAD) {
