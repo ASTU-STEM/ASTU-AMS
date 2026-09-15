@@ -822,13 +822,15 @@ function getFallback(): FakePrisma {
 
 function isConnectionError(err: any): boolean {
   const code = err?.code;
-  // P1001 = can't reach server, P2024 = connection pool timeout, P1008 = operation timed out
-  return code === 'P1001' || code === 'P2024' || code === 'P1008'
-    || (err?.message && (
-      err.message.includes("Can't reach database server")
-      || err.message.includes('Timed out fetching a new connection')
-      || err.message.includes('connection pool')
-    ));
+  const msg = (err?.message || String(err || '')).toLowerCase();
+  return code === 'P1001' || code === 'P2024' || code === 'P1008' || code === 'ECONNRESET' || code === 'ETIMEDOUT'
+    || msg.includes("can't reach database server")
+    || msg.includes('timed out fetching a new connection')
+    || msg.includes('connection pool')
+    || msg.includes('connectionreset')
+    || msg.includes('forcibly closed')
+    || msg.includes('10054')
+    || msg.includes('socket');
 }
 
 function switchToFallback() {
@@ -851,35 +853,41 @@ function wrapModel(modelName: string, realModel: any): any {
       if (typeof original !== 'function') return original;
 
       return async (...args: any[]) => {
-        try {
-          return await original.apply(target, args);
-        } catch (err: any) {
-          if (isConnectionError(err)) {
-            // Attempt 1-second auto-reconnect retry to handle Neon Postgres cold start
-            try {
-              await new Promise(r => setTimeout(r, 1000));
+        let attempts = 0;
+        const maxAttempts = 3;
+        while (attempts < maxAttempts) {
+          try {
+            return await original.apply(target, args);
+          } catch (err: any) {
+            attempts++;
+            if (isConnectionError(err) && attempts < maxAttempts) {
+              const backoffMs = attempts * 1000;
+              Logger.warn(`⚠️ Neon database cold-start / connection pause on ${modelName}.${methodName}. Retrying in ${backoffMs}ms (attempt ${attempts}/${maxAttempts})...`);
+              await new Promise(r => setTimeout(r, backoffMs));
               if (client && typeof (client as any).$connect === 'function') {
-                await (client as any).$connect();
+                try {
+                  await (client as any).$connect();
+                } catch {
+                  /* ignore reconnect error on retry */
+                }
               }
-              return await original.apply(target, args);
-            } catch (retryErr) {
-              Logger.warn(`⚠️ Reconnect retry failed for ${modelName}.${methodName}: ${(retryErr as any)?.message}`);
+              continue;
             }
-
-            switchToFallback();
-            // Retry on fallback
-            const fb = getFallback();
-            const fbModel = (fb as any)[modelName];
-            if (fbModel && typeof fbModel[methodName] === 'function') {
-              return fbModel[methodName](...args);
+            if (isConnectionError(err) && attempts >= maxAttempts) {
+              Logger.error(`❌ Neon database connection lost after ${maxAttempts} attempts for ${modelName}.${methodName}`);
+              switchToFallback();
+              const fb = getFallback();
+              const fbModel = (fb as any)[modelName];
+              if (fbModel && typeof fbModel[methodName] === 'function') {
+                return fbModel[methodName](...args);
+              }
+              if (methodName === 'findMany') return [];
+              if (methodName === 'count') return 0;
+              if (methodName === 'findUnique' || methodName === 'findFirst') return null;
+              return null;
             }
-            // If fallback doesn't have this model/method, return safe defaults
-            if (methodName === 'findMany') return [];
-            if (methodName === 'count') return 0;
-            if (methodName === 'findUnique' || methodName === 'findFirst') return null;
-            return null;
+            throw err;
           }
-          throw err; // Re-throw non-connection errors
         }
       };
     },
@@ -889,9 +897,22 @@ function wrapModel(modelName: string, realModel: any): any {
 export const initPrisma = async () => {
   if (initialized && client) return client;
 
+  const rawUrl = process.env.DATABASE_URL || '';
+  let dbUrl = rawUrl;
+  if (dbUrl) {
+    const params: string[] = [];
+    if (!dbUrl.includes('connect_timeout')) params.push('connect_timeout=30');
+    if (!dbUrl.includes('pool_timeout')) params.push('pool_timeout=60');
+    if (!dbUrl.includes('connection_limit')) params.push('connection_limit=50');
+    if (params.length > 0) {
+      dbUrl += (dbUrl.includes('?') ? '&' : '?') + params.join('&');
+    }
+  }
+
   try {
     const real = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      datasources: dbUrl ? { db: { url: dbUrl } } : undefined,
+      log: ['error'],
     });
     await real.$connect();
     client = real;
@@ -906,27 +927,7 @@ export const initPrisma = async () => {
       return client;
     }
     Logger.error(`❌ Neon PostgreSQL connection failed: ${e.message}`, e);
-    // Try alternate Neon connection strings if ssl/pooler params fail
-    const rawUrl = process.env.DATABASE_URL || '';
-    if (rawUrl.includes('.c-7.')) {
-      const fixedUrl = rawUrl.replace('.c-7.', '.');
-      try {
-        Logger.info(`Retrying connection with fixed Neon host: ${fixedUrl}`);
-        const realFixed = new PrismaClient({
-          datasources: { db: { url: fixedUrl } },
-          log: ['error', 'warn'],
-        });
-        await realFixed.$connect();
-        client = realFixed;
-        usingFallback = false;
-        Logger.info('✅ Connected to Neon Postgres database via fixed URL.');
-        initialized = true;
-        return client;
-      } catch (err2: any) {
-        Logger.error(`❌ Fixed Neon URL attempt failed: ${err2.message}`);
-      }
-    }
-    Logger.warn('⚠️ Could not reach remote Neon database. Falling back to local dev JSON database.');
+    Logger.warn('⚠️ Could not reach remote Neon database on startup. Falling back to local dev JSON database.');
     client = getFallback();
     usingFallback = true;
     initialized = true;
@@ -936,6 +937,7 @@ export const initPrisma = async () => {
   initialized = true;
   return client;
 };
+
 
 // Proxy that forwards to actual client after initialization, with auto-fallback
 const proxy = new Proxy({}, {

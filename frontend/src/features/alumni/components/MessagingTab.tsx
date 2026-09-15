@@ -5,8 +5,9 @@ interface MessagingTabProps {
   darkMode: boolean;
   userId?: string;
   initialTarget?: any;
+  initialCallId?: string | null;
 }
 
-export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, initialTarget }) => {
-  return <TelegramChat darkMode={darkMode} initialTarget={initialTarget} />;
+export const MessagingTab: React.FC<MessagingTabProps> = ({ darkMode, initialTarget, initialCallId }) => {
+  return <TelegramChat darkMode={darkMode} initialTarget={initialTarget} initialCallId={initialCallId} />;
 };

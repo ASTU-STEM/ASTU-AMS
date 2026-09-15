@@ -19,6 +19,7 @@ import {
   Shield,
   ShieldCheck,
   Sparkles,
+  Terminal,
   Users,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
@@ -293,7 +294,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                   <p className="truncate text-xs font-bold text-slate-900">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">Root Admin</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">{user?.role === 'SUPER_ADMIN' ? 'Root Admin' : 'ICT Administrator'}</span>
                   </div>
                 </div>
               </div>

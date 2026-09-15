@@ -58,7 +58,7 @@ export class EmailService {
 
         if (emailsSet.size === 0) {
           const admins = await prisma.user.findMany({
-            where: { role: 'ADMIN' },
+            where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
             select: { email: true }
           });
           admins.forEach((u: any) => {
@@ -279,24 +279,46 @@ export class EmailService {
   }
 
   async sendTemporaryPassword(email: string, temporaryPassword: string, role: string) {
+    const loginUrl = `${env.FRONTEND_URL || 'http://localhost:5173'}/login`;
     const subject = 'Welcome to ASTU Management System - Your Account Credentials';
-    const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nAn administrator has successfully created an account for you with the role of ${role}.\n\nYour login credentials are as follows:\nEmail: ${email}\nTemporary Password: ${temporaryPassword}\n\nFor security reasons, please ensure that you change this temporary password immediately after your first login.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;
+    const text = `Dear User,\n\nWelcome to the Adama Science and Technology University (ASTU) Management System.\n\nAn administrator has successfully created an account for you with the role of ${role}.\n\nYour login credentials are as follows:\nEmail: ${email}\nTemporary Password: ${temporaryPassword}\n\nLogin Link: ${loginUrl}\n\nFor security reasons, please ensure that you change this temporary password immediately after logging in for the first time.\n\nWe are thrilled to have you on board!\n\nBest regards,\nASTU Management System Team`;
     const html = `
-      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <h2 style="color: #003366;">Welcome to ASTU Management System</h2>
-        <p>Dear User,</p>
-        <p>Welcome to the Adama Science and Technology University (ASTU) Management System.</p>
-        <p>An administrator has successfully created an account for you with the designated role of <strong>${role}</strong>.</p>
-        <div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #E8A020; margin: 20px 0;">
-          <p style="margin: 0;"><strong>Email:</strong> ${email}</p>
-          <p style="margin: 5px 0 0 0;"><strong>Temporary Password:</strong> ${temporaryPassword}</p>
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #003366; color: #ffffff; padding: 20px; text-align: center;">
+          <h2 style="margin: 0; color: #ffffff; font-size: 22px;">Welcome to ASTU Management System</h2>
+          <p style="margin: 5px 0 0 0; color: #cbd5e1; font-size: 13px;">Adama Science & Technology University</p>
         </div>
-        <p>For security purposes, please ensure that you change this temporary password immediately after logging in for the first time.</p>
-        <p>We are thrilled to have you on board!</p>
-        <br/>
-        <p>Best regards,<br/><strong>ASTU Management System Team</strong></p>
+        <div style="padding: 24px;">
+          <p style="margin-top: 0;">Dear User,</p>
+          <p>Welcome to the Adama Science and Technology University (ASTU) Management System.</p>
+          <p>An administrator has successfully created an account for you with the designated role of <strong>${role}</strong>.</p>
+          
+          <div style="background-color: #f8fafc; padding: 16px; border-left: 4px solid #E8A020; border-radius: 4px; margin: 20px 0;">
+            <p style="margin: 0 0 8px 0;"><strong>Email Address:</strong> <a href="mailto:${email}" style="color: #003366;">${email}</a></p>
+            <p style="margin: 0;"><strong>Temporary Password:</strong> <code style="background-color: #e2e8f0; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 14px; color: #0f172a; font-weight: bold;">${temporaryPassword}</code></p>
+          </div>
+
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="${loginUrl}" target="_blank" style="background-color: #003580; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(0,53,128,0.25);">
+              🔑 Log In to ASTU Portal
+            </a>
+          </div>
+
+          <p style="font-size: 13px; color: #64748b; margin-top: 20px;">Or copy and paste this link into your browser:<br/>
+            <a href="${loginUrl}" style="color: #003580; word-break: break-all;">${loginUrl}</a>
+          </p>
+
+          <p style="margin-top: 20px;">For security purposes, please ensure that you change this temporary password immediately after logging in for the first time.</p>
+          <p>We are thrilled to have you on board!</p>
+          <br/>
+          <p style="margin-bottom: 0;">Best regards,<br/><strong>ASTU Management System Team</strong></p>
+        </div>
       </div>
     `;
+    console.log(`\n================================`);
+    console.log(`[USER PROVISIONED CREDENTIALS] Email: ${email} | Password: ${temporaryPassword} | Role: ${role}`);
+    console.log(`================================\n`);
+
     return this.sendMail({ to: email, subject, text, html });
   }
 

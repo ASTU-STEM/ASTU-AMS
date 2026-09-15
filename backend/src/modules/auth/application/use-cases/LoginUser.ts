@@ -107,6 +107,11 @@ export class LoginUser {
       }
     }
 
+    // 4. Admin Profile
+    const adminProfile = await prisma.adminProfile.findUnique({
+      where: { userId: user.id }
+    }).catch(() => null);
+
     const payload = { userId: user.id, email: user.email, role: user.role as Role };
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
@@ -118,8 +123,43 @@ export class LoginUser {
       ipAddress,
     });
 
+    let displayName = (user as any).firstName
+      ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim()
+      : user.email.split('@')[0];
+
+    if (alumniProfile?.fullName) {
+      displayName = alumniProfile.fullName;
+    } else if (employerProfile?.companyName) {
+      displayName = employerProfile.companyName;
+    } else if (adminProfile?.firstName) {
+      displayName = `${adminProfile.firstName} ${adminProfile.lastName}`.trim();
+    } else if (user.role === Role.SUPER_ADMIN) {
+      displayName = 'Super Admin';
+    } else if (user.role === Role.ADMIN) {
+      displayName = 'ICT Administrator';
+    } else if (user.role === Role.REGISTRAR) {
+      displayName = 'Office of Registrar';
+    } else if (user.role === Role.DEPARTMENT_HEAD) {
+      displayName = 'Department Head';
+    } else if (user.role === Role.ALUMNI_OFFICE) {
+      displayName = 'CMS Manager';
+    }
+
+    const firstName = adminProfile?.firstName || (user as any).firstName || (displayName ? displayName.split(' ')[0] : undefined);
+    const lastName = adminProfile?.lastName || (user as any).lastName || (displayName ? displayName.split(' ').slice(1).join(' ') : undefined);
+
     return {
-      user: { id: user.id, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: displayName,
+        fullName: displayName,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        alumniProfile: alumniProfile ? { id: alumniProfile.id, fullName: alumniProfile.fullName } : undefined,
+        employerProfile: employerProfile ? { id: employerProfile.id, companyName: employerProfile.companyName } : undefined,
+      },
       token: accessToken,
       refreshToken,
     };

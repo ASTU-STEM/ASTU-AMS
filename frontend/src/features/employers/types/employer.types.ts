@@ -106,6 +106,7 @@ export interface EmployerDashboardSummary {
   totalApplications: number;
   pendingApplications: number;
   shortlistedApplications: number;
+  hiredApplications?: number;
   feedbackReports: number;
   totalViews: number;
   shortlistRate: number;

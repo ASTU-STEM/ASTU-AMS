@@ -32,7 +32,7 @@ const RegistrarDashboard = () => {
    const registrarName = useMemo(() => {
      if (user) {
        const full = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-       if (full) return full.startsWith('Dr.') || full.startsWith('Prof.') ? full : `Dr. ${full}`;
+       if (full) return full;
        if ((user as any).name) return (user as any).name;
        if (user.email) return user.email.split('@')[0];
      }
@@ -41,11 +41,11 @@ const RegistrarDashboard = () => {
        try {
          const parsed = JSON.parse(storedUser);
          const full = `${parsed.firstName || ''} ${parsed.lastName || ''}`.trim();
-         if (full) return full.startsWith('Dr.') || full.startsWith('Prof.') ? full : `Dr. ${full}`;
+         if (full) return full;
          if (parsed.name) return parsed.name;
        } catch (e) {}
      }
-     return 'Dr. Abebe Assefa';
+     return 'Office of Registrar';
    }, [user]);
 
    const registrarTitle = useMemo(() => {
@@ -525,9 +525,18 @@ const RegistrarDashboard = () => {
   ];
 
   // Callbacks
-  const handleAddGraduate = async (newGradDetails: Omit<GraduateRecord, 'id' | 'identityVerified' | 'status'>) => {
-    // In a real app, this would hit POST /api/registrar/sis-records
-    toast.success('Added new graduate (Mock UI Update)');
+  const handleAddGraduate = async (newGradDetails: any) => {
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      await registrarService.createSisRecord(newGradDetails);
+      toast.success('Graduate profile added to SIS database!');
+      const updatedGrads = await registrarService.getGraduates();
+      if (Array.isArray(updatedGrads)) {
+        setGraduates(updatedGrads);
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || 'Failed to add graduate record');
+    }
   };
 
   const handleEditGraduate = async (updatedGrad: any) => {

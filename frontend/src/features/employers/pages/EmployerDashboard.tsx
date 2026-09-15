@@ -64,6 +64,7 @@ const EmployerDashboard = () => {
   const activeJobsCount = jobs.filter(j => j.status === 'Open').length;
   const pendingApplicationsCount = applications.filter(a => a.status === 'Pending').length;
   const shortlistedApplicationsCount = applications.filter(a => a.status === 'Shortlisted').length;
+  const hiredApplicationsCount = applications.filter(a => a.status === 'Hired' || a.status === 'Accepted' || (a.status || '').toLowerCase().includes('hire')).length;
   const totalApplicationsCount = applications.length;
 
   const stats = [
@@ -102,6 +103,17 @@ const EmployerDashboard = () => {
     },
     {
       id: 4,
+      label: 'Graduates Hired',
+      value: `${hiredApplicationsCount}`,
+      color: 'emerald-600',
+      icon: 'verified',
+      bgGradient: 'from-emerald-50 to-teal-50',
+      trend: `${hiredApplicationsCount} confirmed placement${hiredApplicationsCount === 1 ? '' : 's'}`,
+      trendIcon: 'emoji_events',
+      trendColor: 'astu-green'
+    },
+    {
+      id: 5,
       label: 'Total Feedback Audits',
       value: `${feedbacks.length}`,
       color: 'purple-600',
@@ -253,6 +265,7 @@ const EmployerDashboard = () => {
   const employerCommandSignals = [
     { label: 'Open requisitions', value: activeJobsCount.toString(), icon: 'work_history', tab: 'post_job', tone: 'text-astu-green' },
     { label: 'Pending reviews', value: pendingApplicationsCount.toString(), icon: 'rate_review', tab: 'candidates', tone: 'text-astu-red' },
+    { label: 'Confirmed hires', value: hiredApplicationsCount.toString(), icon: 'verified', tab: 'candidates', tone: 'text-emerald-600' },
     { label: 'Shortlist rate', value: `${shortlistRate}%`, icon: 'social_leaderboard', tab: 'candidates', tone: 'text-[#8A5CF6]' },
     { label: 'Feedback files', value: feedbacks.length.toString(), icon: 'fact_check', tab: 'feedback', tone: 'text-astu-navy' },
   ];
@@ -261,6 +274,7 @@ const EmployerDashboard = () => {
     { label: 'Views captured', value: jobs.reduce((sum, job) => sum + job.viewsCount, 0).toLocaleString(), icon: 'visibility', helper: 'Across active and archived postings' },
     { label: 'Applications received', value: totalApplicationsCount.toString(), icon: 'inbox', helper: `${pendingApplicationsCount} still need a decision` },
     { label: 'Candidates shortlisted', value: shortlistedApplicationsCount.toString(), icon: 'how_to_reg', helper: 'Ready for interviews or offer review' },
+    { label: 'Graduates hired', value: hiredApplicationsCount.toString(), icon: 'verified', helper: `${hiredApplicationsCount} confirmed placement${hiredApplicationsCount === 1 ? '' : 's'}` },
   ];
 
   // Callback triggers
@@ -1187,7 +1201,7 @@ const EmployerDashboard = () => {
                         <h4 className="text-sm font-bold">Hiring Pipeline Health</h4>
                         <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Live</span>
                       </div>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                         {hiringPipeline.map((item) => (
                           <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
                             <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
@@ -1202,7 +1216,7 @@ const EmployerDashboard = () => {
                 </section>
 
                 {/* Stats Counters Grid */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                   {stats.map((stat) => (
                     <div
                       key={stat.id}
@@ -1211,7 +1225,9 @@ const EmployerDashboard = () => {
                       onClick={() => {
                         if (stat.id === 1) setActiveTab('post_job');
                         if (stat.id === 2) setActiveTab('candidates');
-                        if (stat.id === 4) setActiveTab('feedback');
+                        if (stat.id === 3) setActiveTab('candidates');
+                        if (stat.id === 4) setActiveTab('candidates');
+                        if (stat.id === 5) setActiveTab('feedback');
                       }}
                       className={`group relative cursor-pointer overflow-hidden rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
                         } ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}

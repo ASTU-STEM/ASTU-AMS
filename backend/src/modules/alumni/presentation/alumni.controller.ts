@@ -117,6 +117,9 @@ export class AlumniController {
         if (filesMap['profilePicture'] && filesMap['profilePicture'][0]) {
           updateData.profilePicture = `/uploads/profiles/${filesMap['profilePicture'][0].filename}`;
         }
+        if (filesMap['avatar'] && filesMap['avatar'][0]) {
+          updateData.profilePicture = `/uploads/profiles/${filesMap['avatar'][0].filename}`;
+        }
       }
 
       const useCase = new UploadAlumniFiles(alumniRepo);
@@ -801,12 +804,26 @@ export class AlumniController {
       });
 
       if (existing) {
-        await prisma.forumLike.delete({ where: { id: existing.id } });
-        await prisma.forumPost.update({ where: { id: postId }, data: { likesCount: { decrement: 1 } } });
+        try {
+          await prisma.forumLike.delete({ where: { id: existing.id } });
+          await prisma.forumPost.update({
+            where: { id: postId },
+            data: { likesCount: { decrement: 1 } }
+          }).catch(() => {});
+        } catch (e: any) {
+          if (e.code !== 'P2025') throw e;
+        }
         return sendSuccess(res, 'Like removed', { liked: false });
       } else {
-        await prisma.forumLike.create({ data: { postId, alumniId } });
-        await prisma.forumPost.update({ where: { id: postId }, data: { likesCount: { increment: 1 } } });
+        try {
+          await prisma.forumLike.create({ data: { postId, alumniId } });
+          await prisma.forumPost.update({
+            where: { id: postId },
+            data: { likesCount: { increment: 1 } }
+          }).catch(() => {});
+        } catch (e: any) {
+          if (e.code !== 'P2002') throw e;
+        }
         return sendSuccess(res, 'Like added', { liked: true });
       }
     } catch (err) { next(err); }
@@ -1243,10 +1260,14 @@ export class AlumniController {
 
       const currentPrefs = (existingProfile.preferences as any) || {};
       const updatedPrefs = { ...AlumniController.DEFAULT_PREFERENCES, ...currentPrefs, ...req.body };
+      const isCgpaPublic = updatedPrefs.shareCgpaToEmployers !== false;
 
       const profile = await prisma.alumniProfile.update({
         where: { userId },
-        data: { preferences: updatedPrefs }
+        data: {
+          preferences: updatedPrefs,
+          isCgpaPublic: isCgpaPublic,
+        }
       });
 
       return sendSuccess(res, 'Preferences updated', profile.preferences);
