@@ -58,7 +58,7 @@ export class EmailService {
 
         if (emailsSet.size === 0) {
           const admins = await prisma.user.findMany({
-            where: { role: 'ADMIN' },
+            where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
             select: { email: true }
           });
           admins.forEach((u: any) => {

@@ -47,6 +47,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
         gitHubUrl: profile.gitHubUrl || profile.gitHub || (profile as any).gitHub || prev.gitHubUrl || '',
         portfolioUrl: profile.portfolioUrl || profile.portfolio || (profile as any).portfolio || prev.portfolioUrl || '',
         twitterUrl: profile.twitterUrl || (profile as any).twitterUrl || prev.twitterUrl || '',
+        workLocation: profile.workLocation || profile.location || (profile as any).workLocation || (profile as any).preferences?.workLocation || (profile as any).preferences?.location || prev.workLocation || '',
+        location: profile.location || profile.workLocation || (profile as any).location || (profile as any).preferences?.location || (profile as any).preferences?.workLocation || prev.location || '',
+        industry: (() => {
+          const rawInd = profile.industry || (profile as any).industry || (profile as any).preferences?.industry || prev.industry || '';
+          if (!rawInd || rawInd.toLowerCase().includes('bachelor') || rawInd.toLowerCase().includes('degree')) {
+            const comp = (profile.company || (profile as any).company || '').toLowerCase();
+            if (comp.includes('insa') || comp.includes('security')) return 'Cybersecurity & Defense Intelligence';
+            if (comp.includes('safaricom') || comp.includes('telecom')) return 'Telecommunications & Digital Services';
+            if (comp.includes('bank') || comp.includes('chapa') || comp.includes('cbe')) return 'Banking & Digital Financial Services';
+            return 'Software & Artificial Intelligence';
+          }
+          return rawInd;
+        })(),
+        employmentStatus: profile.employmentStatus || (profile as any).employmentStatus || (profile as any).preferences?.employmentStatus || prev.employmentStatus || 'EMPLOYED',
         resume: resumeObj
       }));
     }
@@ -58,6 +72,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEmploymentBlurOrChange = async (updatedData?: Partial<AlumniProfile>) => {
+    const nextForm = { ...formData, ...updatedData };
+    setFormData(nextForm);
+    try {
+      await alumniService.updateProfile({
+        company: nextForm.company,
+        currentRole: nextForm.currentRole,
+        workLocation: nextForm.workLocation || nextForm.location,
+        location: nextForm.workLocation || nextForm.location,
+        industry: nextForm.industry,
+        salaryRange: nextForm.salaryRange,
+        employmentStatus: nextForm.employmentStatus,
+      });
+      if (onSave) onSave(nextForm);
+    } catch (_) {}
   };
 
   const handleAddSkill = async (e: React.FormEvent) => {
@@ -362,13 +393,28 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     toast.success('Profile saving...');
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const tempUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, avatarUrl: tempUrl }));
-      toast.success('Profile photo selected for upload!');
+    if (!file) return;
+
+    setAvatarFile(file);
+    const tempUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, avatarUrl: tempUrl, profilePicture: tempUrl }));
+    toast.loading('Uploading & saving profile photo...', { id: 'avatar-upload' });
+
+    try {
+      const res = await alumniService.uploadAvatar(file);
+      const serverUrl = res.profilePicture || res.avatarUrl;
+      if (serverUrl) {
+        setFormData((prev) => ({ ...prev, profilePicture: serverUrl, avatarUrl: serverUrl }));
+        if (onSave) {
+          onSave({ ...formData, profilePicture: serverUrl, avatarUrl: serverUrl });
+        }
+      }
+      toast.success('Profile photo uploaded & saved successfully!', { id: 'avatar-upload' });
+    } catch (err) {
+      console.error('Failed to upload profile photo:', err);
+      toast.error('Failed to save profile photo. Please try again.', { id: 'avatar-upload' });
     }
   };
 
@@ -662,20 +708,87 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div>
                 <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Employment Details</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your current professional role and compensation details.</p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your employment status, workplace, company location, role title, and compensation.</p>
               </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Role / Title</label>
-                  <input type="text" name="currentRole" value={formData.currentRole} onChange={handleInputChange} className={inputClass} placeholder="e.g. Junior Frontend Dev" />
+                  <label className={labelClass}>Employment Status</label>
+                  <select
+                    name="employmentStatus"
+                    value={formData.employmentStatus || 'EMPLOYED'}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      handleEmploymentBlurOrChange({ employmentStatus: e.target.value });
+                    }}
+                    className={inputClass}
+                  >
+                    <option value="EMPLOYED">Employed (Full-Time / Part-Time / Contract)</option>
+                    <option value="UNEMPLOYED">Unemployed / Actively Seeking Placement</option>
+                    <option value="SELF_EMPLOYED">Self-Employed / Entrepreneur / Freelancer</option>
+                  </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Company Name</label>
-                  <input type="text" name="company" value={formData.company} onChange={handleInputChange} className={inputClass} placeholder="e.g. Chapa Financials" />
+                  <label className={labelClass}>Role / Title</label>
+                  <input
+                    type="text"
+                    name="currentRole"
+                    value={formData.currentRole || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Junior Frontend Dev / Senior Software Engineer"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Company / Employer Name</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Safaricom Ethiopia PLC / Chapa Financials"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Work Location / Company Place</label>
+                  <input
+                    type="text"
+                    name="workLocation"
+                    value={formData.workLocation || formData.location || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData(prev => ({ ...prev, workLocation: val, location: val }));
+                    }}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Addis Ababa HQ (Hybrid), Hawassa Branch, Remote"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Industry Sector</label>
+                  <input
+                    type="text"
+                    name="industry"
+                    value={formData.industry || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Telecommunications & Digital Services, Software"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Salary Range</label>
-                  <select name="salaryRange" value={formData.salaryRange || 'Competitive Salary'} onChange={handleInputChange} className={inputClass}>
+                  <select
+                    name="salaryRange"
+                    value={formData.salaryRange || 'Competitive Salary'}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      handleEmploymentBlurOrChange({ salaryRange: e.target.value });
+                    }}
+                    className={inputClass}
+                  >
                     <option value="Under 15,000 ETB">Under 15,000 ETB</option>
                     <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
                     <option value="30,001 - 60,000 ETB">30,001 - 60,000 ETB</option>

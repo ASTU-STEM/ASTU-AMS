@@ -112,6 +112,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
                   { stage: 'Total Applications', value: stats?.totalApplications || 0, max: Math.max(stats?.totalApplications || 1, 50), color: 'bg-emerald-500' },
                   { stage: 'Pending Review', value: stats?.pendingApplications || 0, max: Math.max(stats?.totalApplications || 1, 50), color: 'bg-amber-500' },
                   { stage: 'Shortlisted', value: stats?.shortlistedApplications || 0, max: Math.max(stats?.totalApplications || 1, 50), color: 'bg-blue-500' },
+                  { stage: 'Graduates Hired', value: stats?.hiredApplications || 0, max: Math.max(stats?.totalApplications || 1, 50), color: 'bg-emerald-600' },
                   { stage: 'Feedback Reports', value: stats?.feedbackReports || 0, max: Math.max(stats?.feedbackReports || 1, 20), color: 'bg-purple-500' },
                 ].map(item => (
                   <div key={item.stage} className="space-y-1">

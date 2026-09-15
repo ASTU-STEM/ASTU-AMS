@@ -37,10 +37,33 @@ async function main() {
   console.log('Creating system users...');
   const defaultPassword = await bcrypt.hash('astu_ams_pass123', 10);
 
-  // Admin Account
-  await prisma.user.upsert({
+  // Root Super Admin Account (Tolosa Abebe Badho)
+  const superAdmin = await prisma.user.upsert({
+    where: { email: 'admin@astust.edu.et' },
+    update: { role: Role.SUPER_ADMIN, isActive: true },
+    create: {
+      email: 'admin@astust.edu.et',
+      password: defaultPassword,
+      role: Role.SUPER_ADMIN,
+      isActive: true,
+    },
+  });
+
+  await prisma.adminProfile.upsert({
+    where: { userId: superAdmin.id },
+    update: { firstName: 'Tolosa Abebe', lastName: 'Badho', department: 'Executive Directorate' },
+    create: {
+      userId: superAdmin.id,
+      firstName: 'Tolosa Abebe',
+      lastName: 'Badho',
+      department: 'Executive Directorate',
+    }
+  }).catch(() => null);
+
+  // Standard Admin / ICT Technical Admin Account
+  const ictAdmin = await prisma.user.upsert({
     where: { email: 'admin@astu.edu.et' },
-    update: {},
+    update: { role: Role.ADMIN, isActive: true },
     create: {
       email: 'admin@astu.edu.et',
       password: defaultPassword,
@@ -48,6 +71,17 @@ async function main() {
       isActive: true,
     },
   });
+
+  await prisma.adminProfile.upsert({
+    where: { userId: ictAdmin.id },
+    update: { firstName: 'ICT System', lastName: 'Administrator', department: 'ICT Directorate' },
+    create: {
+      userId: ictAdmin.id,
+      firstName: 'ICT System',
+      lastName: 'Administrator',
+      department: 'ICT Directorate',
+    }
+  }).catch(() => null);
 
   // Registrar Account
   await prisma.user.upsert({

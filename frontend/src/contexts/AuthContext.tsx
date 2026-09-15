@@ -19,6 +19,7 @@ const MOCK_USERS: Record<string, User> = {
   REGISTRAR: { id: 'reg-001', email: 'registrar@astu.edu.et', firstName: 'Abebe', lastName: 'Assefa', role: 'REGISTRAR', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
   DEPARTMENT_HEAD: { id: 'dept-001', email: 'cs.head@astu.edu.et', firstName: 'Meseret', lastName: 'Alemu', role: 'DEPARTMENT_HEAD', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
   ADMIN: { id: 'adm-001', email: 'admin@astu.edu.et', firstName: 'System', lastName: 'Administrator', role: 'ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
+  SUPER_ADMIN: { id: 'super-adm-001', email: 'admin@astust.edu.et', firstName: 'Tolosa Abebe', lastName: 'Badho', role: 'SUPER_ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
   CMS_MANAGER: { id: 'cms-mgr-001', email: 'cms@astu.edu.et', firstName: 'Content', lastName: 'Manager', role: 'CMS_MANAGER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
 };
 
@@ -45,11 +46,20 @@ const readStoredUser = (): User | null => {
       const role = normalizeRole(parsed.role);
       if (role) {
         const mock = MOCK_USERS[role];
+        const rawName = parsed.name || parsed.fullName || '';
+        const firstName = parsed.firstName !== undefined && parsed.firstName !== '' 
+          ? parsed.firstName 
+          : (rawName ? rawName.split(' ')[0] : (mock?.firstName ?? ''));
+        const lastName = parsed.lastName !== undefined && parsed.lastName !== ''
+          ? parsed.lastName 
+          : (rawName ? rawName.split(' ').slice(1).join(' ') : (mock?.lastName ?? ''));
+        
         return {
           id: String(parsed.id ?? mock?.id ?? ''),
           email: String(parsed.email ?? mock?.email ?? ''),
-          firstName: String(parsed.firstName ?? parsed.fullName?.split(' ')[0] ?? parsed.name ?? mock?.firstName ?? ''),
-          lastName: String(parsed.lastName ?? parsed.fullName?.split(' ').slice(1).join(' ') ?? mock?.lastName ?? ''),
+          firstName: String(firstName),
+          lastName: String(lastName),
+          name: String(rawName || `${firstName} ${lastName}`.trim()),
           role,
           isActive: true,
           createdAt: parsed.createdAt ?? '2024-01-01',

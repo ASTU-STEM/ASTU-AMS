@@ -47,6 +47,10 @@ export interface AlumniProfile {
   currentRole: string;
   company: string;
   salaryRange: string;
+  employmentStatus?: string;
+  workLocation?: string;
+  location?: string;
+  industry?: string;
   bio: string;
   avatarUrl: string;
   profilePicture?: string;

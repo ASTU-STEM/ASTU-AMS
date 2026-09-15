@@ -33,6 +33,15 @@ export const alumniService = {
     return unwrap(await apiClient.put('/alumni/me', data));
   },
 
+  async uploadAvatar(file: File): Promise<{ profilePicture?: string; avatarUrl?: string }> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('profilePicture', file);
+    return unwrap(await apiClient.post('/alumni/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }));
+  },
+
   async uploadCertificate(file: File): Promise<{ imageUrl: string }> {
     const formData = new FormData();
     formData.append('certificateImage', file);

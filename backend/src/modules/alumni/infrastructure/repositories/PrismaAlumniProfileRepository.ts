@@ -32,6 +32,32 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
     const resolvedCompany = prefs.company || hiredApp?.job?.employer?.companyName || currentExp?.companyName || (isHired ? 'ASTU Corporate Partner' : 'ASTU Alumnus');
     const resolvedRole = prefs.currentRole || hiredApp?.job?.title || currentExp?.position || (isHired ? 'Hired Graduate' : 'Not Employed');
     const resolvedSalary = prefs.salaryRange || hiredApp?.job?.salary || currentExp?.salaryRange || (data.salary ? `${data.salary} ETB` : (isHired ? 'Competitive Salary' : 'Seeking Opportunities'));
+    const resolvedWorkLocation = prefs.workLocation || prefs.location || currentExp?.location || (hiredApp as any)?.job?.location || '';
+    const isInvalidIndustry = (val?: string | null) => {
+      if (!val) return true;
+      const lower = val.toLowerCase().trim();
+      return lower.includes('bachelor') || lower.includes('degree') || lower === 'student' || lower === 'n/a' || lower === 'none' || lower === 'null';
+    };
+
+    let resolvedIndustry = prefs.industry || currentExp?.industry || hiredApp?.job?.employer?.industry || '';
+    if (isInvalidIndustry(resolvedIndustry)) {
+      const comp = (resolvedCompany || '').toLowerCase();
+      if (comp.includes('insa') || comp.includes('security') || comp.includes('cyber')) {
+        resolvedIndustry = 'Cybersecurity & Defense Intelligence';
+      } else if (comp.includes('safaricom') || comp.includes('ethio telecom') || comp.includes('telecom')) {
+        resolvedIndustry = 'Telecommunications & Digital Services';
+      } else if (comp.includes('bank') || comp.includes('chapa') || comp.includes('cbe') || comp.includes('financial')) {
+        resolvedIndustry = 'Banking & Digital Financial Services';
+      } else if (comp.includes('ai') || comp.includes('tech') || comp.includes('software') || comp.includes('corporation') || comp.includes('coporation')) {
+        resolvedIndustry = 'Software & Artificial Intelligence';
+      } else if (isHired) {
+        resolvedIndustry = 'Technology & Engineering';
+      } else {
+        resolvedIndustry = '';
+      }
+    }
+
+    const resolvedStatus = data.employmentStatus || prefs.employmentStatus || (isHired ? 'EMPLOYED' : 'UNEMPLOYED');
     const resolvedBatch = data.batch || (data.graduationYear ? `${data.graduationYear}` : '2024');
 
     return {
@@ -40,7 +66,10 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
       company: resolvedCompany,
       currentRole: resolvedRole,
       salaryRange: resolvedSalary,
-      employmentStatus: isHired ? 'EMPLOYED' : data.employmentStatus,
+      workLocation: resolvedWorkLocation,
+      location: resolvedWorkLocation,
+      industry: resolvedIndustry,
+      employmentStatus: resolvedStatus,
       linkedInUrl: data.linkedIn || data.linkedInUrl,
       gitHubUrl: data.gitHub || data.gitHubUrl,
       portfolioUrl: data.portfolio || data.portfolioUrl,
@@ -131,8 +160,16 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
       }
     }
 
-    // Persist Employment Details (company, currentRole, salaryRange) to preferences JSON
-    if (updateData.company !== undefined || updateData.currentRole !== undefined || updateData.salaryRange !== undefined) {
+    // Persist Employment Details (company, currentRole, salaryRange, workLocation, location, industry, employmentStatus) to preferences JSON
+    if (
+      updateData.company !== undefined ||
+      updateData.currentRole !== undefined ||
+      updateData.salaryRange !== undefined ||
+      updateData.workLocation !== undefined ||
+      updateData.location !== undefined ||
+      updateData.industry !== undefined ||
+      updateData.employmentStatus !== undefined
+    ) {
       const existingProfile = await prisma.alumniProfile.findUnique({ where: { userId } }).catch(() => null);
       const currentPrefs = (existingProfile?.preferences as any) || {};
 
@@ -141,10 +178,57 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
         ...(updateData.company !== undefined ? { company: updateData.company } : {}),
         ...(updateData.currentRole !== undefined ? { currentRole: updateData.currentRole } : {}),
         ...(updateData.salaryRange !== undefined ? { salaryRange: updateData.salaryRange } : {}),
+        ...(updateData.workLocation !== undefined ? { workLocation: updateData.workLocation } : {}),
+        ...(updateData.location !== undefined ? { location: updateData.location } : {}),
+        ...(updateData.industry !== undefined ? { industry: updateData.industry } : {}),
+        ...(updateData.employmentStatus !== undefined ? { employmentStatus: updateData.employmentStatus } : {}),
       };
 
-      if (updateData.company || updateData.currentRole) {
+      if (updateData.employmentStatus === 'EMPLOYED' || updateData.employmentStatus === 'UNEMPLOYED' || updateData.employmentStatus === 'SELF_EMPLOYED') {
+        dataToUpdate.employmentStatus = updateData.employmentStatus;
+      } else if (updateData.company || updateData.currentRole) {
         dataToUpdate.employmentStatus = 'EMPLOYED';
+      }
+
+      if (existingProfile) {
+        const targetCompany = updateData.company !== undefined ? updateData.company : currentPrefs.company;
+        const targetRole = updateData.currentRole !== undefined ? updateData.currentRole : currentPrefs.currentRole;
+        const targetLocation = updateData.workLocation !== undefined ? updateData.workLocation : (updateData.location !== undefined ? updateData.location : (currentPrefs.workLocation || currentPrefs.location));
+        const targetIndustry = updateData.industry !== undefined ? updateData.industry : currentPrefs.industry;
+        const targetSalary = updateData.salaryRange !== undefined ? updateData.salaryRange : currentPrefs.salaryRange;
+
+        if (targetCompany || targetRole) {
+          const latestExp = await prisma.workExperience.findFirst({
+            where: { alumniId: existingProfile.id },
+            orderBy: { startDate: 'desc' },
+          }).catch(() => null);
+
+          if (latestExp) {
+            await prisma.workExperience.update({
+              where: { id: latestExp.id },
+              data: {
+                ...(targetCompany ? { companyName: targetCompany } : {}),
+                ...(targetRole ? { position: targetRole } : {}),
+                ...(targetLocation !== undefined ? { location: targetLocation } : {}),
+                ...(targetIndustry ? { industry: targetIndustry } : {}),
+                ...(targetSalary ? { salaryRange: targetSalary } : {}),
+              }
+            }).catch(() => null);
+          } else if (targetCompany && targetRole) {
+            await prisma.workExperience.create({
+              data: {
+                alumniId: existingProfile.id,
+                companyName: targetCompany,
+                position: targetRole,
+                industry: targetIndustry || 'Technology',
+                location: targetLocation || null,
+                salaryRange: targetSalary || null,
+                isCurrent: true,
+                startDate: new Date(),
+              }
+            }).catch(() => null);
+          }
+        }
       }
     }
 

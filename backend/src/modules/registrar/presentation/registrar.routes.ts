@@ -60,6 +60,7 @@ router.post('/registration-issues/:id/create-account', asyncHandler(RegistrarCon
 
 // SIS Records & Batch Import
 router.get('/sis-records', asyncHandler(RegistrarController.getSisRecords));
+router.post('/sis-records', asyncHandler(RegistrarController.createSisRecord));
 router.post('/batch-import', asyncHandler(RegistrarController.batchImport));
 
 // Dashboard Stats

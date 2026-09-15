@@ -117,6 +117,9 @@ export class AlumniController {
         if (filesMap['profilePicture'] && filesMap['profilePicture'][0]) {
           updateData.profilePicture = `/uploads/profiles/${filesMap['profilePicture'][0].filename}`;
         }
+        if (filesMap['avatar'] && filesMap['avatar'][0]) {
+          updateData.profilePicture = `/uploads/profiles/${filesMap['avatar'][0].filename}`;
+        }
       }
 
       const useCase = new UploadAlumniFiles(alumniRepo);
@@ -1257,10 +1260,14 @@ export class AlumniController {
 
       const currentPrefs = (existingProfile.preferences as any) || {};
       const updatedPrefs = { ...AlumniController.DEFAULT_PREFERENCES, ...currentPrefs, ...req.body };
+      const isCgpaPublic = updatedPrefs.shareCgpaToEmployers !== false;
 
       const profile = await prisma.alumniProfile.update({
         where: { userId },
-        data: { preferences: updatedPrefs }
+        data: {
+          preferences: updatedPrefs,
+          isCgpaPublic: isCgpaPublic,
+        }
       });
 
       return sendSuccess(res, 'Preferences updated', profile.preferences);
