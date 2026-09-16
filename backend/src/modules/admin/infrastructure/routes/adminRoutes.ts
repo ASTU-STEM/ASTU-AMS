@@ -33,6 +33,9 @@ router.delete('/users/:id', requirePermission('suspend_users'), adminController.
 
 // Technical Operations & System Controls (ICT Admin Portal)
 router.get('/technical-ops/telemetry', techOpsController.getTelemetry);
+router.get('/technical-ops/telemetry/live', techOpsController.getLiveTelemetry);
+router.get('/technical-ops/security-governance', techOpsController.getSecurityGovernance);
+router.put('/technical-ops/security-governance', techOpsController.updateSecurityGovernance);
 router.get('/technical-ops/security', techOpsController.getSecurityStatus);
 router.get('/technical-ops/load-balancer', techOpsController.getLoadBalancer);
 router.get('/technical-ops/api-gateway', techOpsController.getApiGateway);
@@ -41,6 +44,8 @@ router.post('/technical-ops/action', techOpsController.executeAction);
 
 // Department Routes
 router.get('/departments', adminController.getDepartments);
+router.get('/departments/analysis', adminController.getDepartmentAnalysis);
+router.get('/departments/:id', adminController.getDepartmentDetails);
 router.post('/departments', adminController.createDepartment);
 router.put('/departments/:id', adminController.updateDepartment);
 router.delete('/departments/:id', adminController.deleteDepartment);
@@ -77,5 +82,9 @@ router.post('/donations/campaigns', adminController.createDonationCampaign);
 router.put('/donations/campaigns/:id', adminController.updateDonationCampaign);
 router.delete('/donations/campaigns/:id', adminController.deleteDonationCampaign);
 router.get('/donations/donors', adminController.getDonorsList);
+
+// Module Governance Settings
+router.get('/modules/governance', adminController.getModuleGovernance);
+router.put('/modules/governance', adminController.updateModuleGovernance);
 
 export default router;
