@@ -549,6 +549,34 @@ export const adminService = {
     } catch (error: any) {
       return { ok: false, errorCode: 'UPDATE_SEC_GOV_ERROR', message: error.response?.data?.message || 'Failed to save security governance' };
     }
+  },
+
+  // --- Institutional Reports Center ---
+  async getReportsMetrics(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/reports/metrics');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_REPORT_METRICS_ERROR', message: error.response?.data?.message || 'Failed to fetch report metrics' };
+    }
+  },
+
+  async getReportData(params: { reportType: string; departmentId?: string; timeframe?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/reports/data', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_REPORT_DATA_ERROR', message: error.response?.data?.message || 'Failed to fetch report data' };
+    }
+  },
+
+  async recordReportExport(data: { reportTitle: string; format: string; scope?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any }>('/admin/reports/export', data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'RECORD_EXPORT_ERROR', message: error.response?.data?.message || 'Failed to record report export' };
+    }
   }
 };
 

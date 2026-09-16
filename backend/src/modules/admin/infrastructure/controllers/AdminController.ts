@@ -8,6 +8,7 @@ import { ManageNotifications } from '../../application/use-cases/ManageNotificat
 import { ManageSettings } from '../../application/use-cases/ManageSettings';
 import { GetSidebarStats } from '../../application/use-cases/GetSidebarStats';
 import { ManageAdminProfile } from '../../application/use-cases/ManageAdminProfile';
+import { ManageReports } from '../../application/use-cases/ManageReports';
 import { EmailService } from '../../../../core/services/EmailService';
 import prisma from '../../../../core/config/db';
 
@@ -19,6 +20,7 @@ const manageLogsUseCase = new ManageLogs();
 const manageNotificationsUseCase = new ManageNotifications();
 const manageSettingsUseCase = new ManageSettings();
 const getSidebarStatsUseCase = new GetSidebarStats();
+const manageReportsUseCase = new ManageReports();
 
 export class AdminController {
   async getProfile(req: Request, res: Response) {
@@ -676,6 +678,46 @@ export class AdminController {
       } catch (_) {}
 
       res.json({ success: true, data: setting.value, message: 'Module governance saved successfully to database' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  // --- Institutional Reports Center ---
+  async getReportsMetrics(req: Request, res: Response) {
+    try {
+      const result = await manageReportsUseCase.getReportsMetrics();
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getReportData(req: Request, res: Response) {
+    try {
+      const { reportType, departmentId, timeframe } = req.query;
+      const result = await manageReportsUseCase.getReportData(
+        String(reportType || 'Employment Rate Reports'),
+        departmentId ? String(departmentId) : undefined,
+        timeframe ? String(timeframe) : undefined
+      );
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async recordReportExport(req: Request, res: Response) {
+    try {
+      const { reportTitle, format, scope } = req.body;
+      const adminUserId = (req as any).user?.userId;
+      const result = await manageReportsUseCase.recordExport(
+        String(reportTitle || 'Institutional Report'),
+        String(format || 'PDF'),
+        scope ? String(scope) : undefined,
+        adminUserId
+      );
+      res.json({ success: true, data: result });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }

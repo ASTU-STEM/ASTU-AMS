@@ -87,4 +87,9 @@ router.get('/donations/donors', adminController.getDonorsList);
 router.get('/modules/governance', adminController.getModuleGovernance);
 router.put('/modules/governance', adminController.updateModuleGovernance);
 
+// Institutional Reports Center
+router.get('/reports/metrics', adminController.getReportsMetrics);
+router.get('/reports/data', adminController.getReportData);
+router.post('/reports/export', adminController.recordReportExport);
+
 export default router;
