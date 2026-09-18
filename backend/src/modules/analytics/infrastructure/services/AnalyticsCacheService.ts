@@ -11,7 +11,7 @@ export class AnalyticsCacheService {
 
       if (new Date() > new Date(cached.expiresAt)) {
         // Cache expired, delete and return null
-        await prisma.analyticsCache.delete({ where: { key } }).catch(() => {});
+        await prisma.analyticsCache.deleteMany({ where: { key } }).catch(() => {});
         return null;
       }
 
@@ -45,7 +45,7 @@ export class AnalyticsCacheService {
 
   static async clear(key: string): Promise<void> {
     try {
-      await prisma.analyticsCache.delete({ where: { key } }).catch(() => {});
+      await prisma.analyticsCache.deleteMany({ where: { key } }).catch(() => {});
     } catch (error) {
       console.error('AnalyticsCache clear error:', error);
     }
