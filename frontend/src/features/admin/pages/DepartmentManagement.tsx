@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -303,51 +303,9 @@ export default function DepartmentManagement() {
 
   // Department Analytics payload state
   const [deptAnalyticsData, setDeptAnalyticsData] = useState<any>(null);
-
-  useEffect(() => {
-    loadDepartments();
-    loadAnalyticsData();
-  }, []);
-
-  const openViewDetailsModal = (dept: DepartmentRecord) => {
-    setSelectedDetailDept(dept);
-    setModalTab('overview');
-    setDetailModalOpen(true);
-    loadDepartmentDetails(dept.id);
-  };
-
-  const closeDetailModal = () => {
-    setDetailModalOpen(false);
-    setSelectedDetailDept(null);
-    if (params.id) {
-      navigate('/admin/departments');
-    }
-  };
-
-  useEffect(() => {
-    if (params.id && departments.length > 0) {
-      const found = departments.find((d) => d.id === params.id);
-      if (found) {
-        setSelectedDetailDept(found);
-        setModalTab('overview');
-        setDetailModalOpen(true);
-        loadDepartmentDetails(found.id);
-      }
-    }
-  }, [params.id, departments]);
-
-  const loadDepartmentDetails = async (id: string) => {
-    setDetailLoading(true);
-    const res = await adminService.getDepartmentDetails(id);
-    if (res.ok && res.data) {
-      setDeptDetailData(res.data);
-    }
-    setDetailLoading(false);
-  };
-
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
-  const loadAnalyticsData = async (batchOverride?: string) => {
+  const loadAnalyticsData = useCallback(async (batchOverride?: string) => {
     setAnalyticsLoading(true);
     const activeBatch = batchOverride !== undefined ? batchOverride : analyticsBatchFilter;
     const res = await adminService.getComprehensiveDepartmentAnalysis(activeBatch);
@@ -355,14 +313,9 @@ export default function DepartmentManagement() {
       setDeptAnalyticsData(res.data);
     }
     setAnalyticsLoading(false);
-  };
+  }, [analyticsBatchFilter]);
 
-  const handleBatchFilterChange = (batch: string) => {
-    setAnalyticsBatchFilter(batch);
-    loadAnalyticsData(batch);
-  };
-
-  const loadDepartments = async () => {
+  const loadDepartments = useCallback(async () => {
     setIsLoading(true);
     const res = await adminService.getDepartments();
     if (res.ok && res.data) {
@@ -406,6 +359,52 @@ export default function DepartmentManagement() {
       toast.error(res.message || 'Failed to fetch departments list');
     }
     setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadDepartments();
+    loadAnalyticsData();
+  }, [loadDepartments, loadAnalyticsData]);
+
+  const openViewDetailsModal = (dept: DepartmentRecord) => {
+    setSelectedDetailDept(dept);
+    setModalTab('overview');
+    setDetailModalOpen(true);
+    loadDepartmentDetails(dept.id);
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalOpen(false);
+    setSelectedDetailDept(null);
+    if (params.id) {
+      navigate('/admin/departments');
+    }
+  };
+
+  useEffect(() => {
+    if (params.id && departments.length > 0) {
+      const found = departments.find((d) => d.id === params.id);
+      if (found) {
+        setSelectedDetailDept(found);
+        setModalTab('overview');
+        setDetailModalOpen(true);
+        loadDepartmentDetails(found.id);
+      }
+    }
+  }, [params.id, departments]);
+
+  const loadDepartmentDetails = async (id: string) => {
+    setDetailLoading(true);
+    const res = await adminService.getDepartmentDetails(id);
+    if (res.ok && res.data) {
+      setDeptDetailData(res.data);
+    }
+    setDetailLoading(false);
+  };
+
+  const handleBatchFilterChange = (batch: string) => {
+    setAnalyticsBatchFilter(batch);
+    loadAnalyticsData(batch);
   };
 
   const selectedDepartment = useMemo(() => {

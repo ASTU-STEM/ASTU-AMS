@@ -328,8 +328,8 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       donationCategories[cat] = (donationCategories[cat] || 0) + (d.amount || 0);
     }
     const communityGiving = {
-      totalDonated: totalDonations._sum.amount || 0,
-      totalDonors: typeof totalDonations._count === 'number' ? totalDonations._count : ((totalDonations._count as any)?.id || 0),
+      totalDonated: totalDonations?._sum?.amount || 0,
+      totalDonors: typeof totalDonations?._count === 'number' ? totalDonations._count : ((totalDonations?._count as any)?.id || 0),
       categories: Object.entries(donationCategories).map(([category, amount]) => ({ category, amount })),
     };
 
@@ -1415,7 +1415,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
 
     const companySalaries: Record<string, { totalSalary: number; count: number }> = {};
     for (const a of alumni) {
-      const currentJob = a.experiences[0];
+      const currentJob = a.experiences?.[0];
       if (currentJob && a.salary) {
         const name = currentJob.companyName;
         if (!companySalaries[name]) companySalaries[name] = { totalSalary: 0, count: 0 };
