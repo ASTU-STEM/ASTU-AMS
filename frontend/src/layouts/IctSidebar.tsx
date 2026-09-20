@@ -22,6 +22,7 @@ import {
   Terminal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSystemSettings } from '../context/SystemSettingsContext';
 
 interface IctSidebarProps {
   onLogout: () => void;
@@ -73,6 +74,7 @@ export default function IctSidebar({
 }: IctSidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
+  const { settings } = useSystemSettings();
 
   const getSectionItems = (sectionKey: string) =>
     navItems.filter((item) => item.section === sectionKey);
@@ -83,27 +85,27 @@ export default function IctSidebar({
         collapsed ? 'w-20' : 'w-64'
       } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
-      {/* Header Logo */}
-      <div className="relative px-4 py-4 border-b border-slate-100">
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-          <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
-            <img
-              src="/images/astu-seal-logo.png"
-              alt="ASTU Seal"
-              className="h-full w-full object-contain scale-110"
-            />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight flex items-center gap-1.5">
-                <span>ASTU ICT</span>
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-blue-50 text-[#003580] border border-blue-200/60 rounded">PORTAL</span>
-              </div>
-              <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Systems Directorate</p>
+        {/* Header Logo */}
+        <div className="relative px-4 py-4 border-b border-slate-100">
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+            <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
+              <img
+                src={settings.appearance?.logoUrl || '/images/astu-seal-logo.png'}
+                alt={`${settings.general?.abbreviation || 'ASTU'} Seal`}
+                className="h-full w-full object-contain scale-110"
+              />
             </div>
-          )}
+            {!collapsed && (
+              <div className="min-w-0">
+                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight flex items-center gap-1.5">
+                  <span>{settings.general?.abbreviation || 'ASTU'} ICT</span>
+                  <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-blue-50 text-[#003580] border border-blue-200/60 rounded">PORTAL</span>
+                </div>
+                <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Systems Directorate</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
       {/* Navigation */}
       <nav className="relative flex-1 overflow-y-auto px-3 py-4 scrollbar-thin space-y-4">

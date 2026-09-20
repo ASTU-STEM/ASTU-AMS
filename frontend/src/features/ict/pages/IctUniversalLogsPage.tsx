@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Activity,
   AlertTriangle,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Code,
   Download,
@@ -145,6 +147,57 @@ const mockLogs: LogItem[] = [
   },
 ];
 
+function PaginationFooter({
+  currentPage,
+  totalPages,
+  totalItems,
+  itemsPerPage,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalItems <= itemsPerPage) return null;
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-400">
+      <div>
+        Showing <span className="font-semibold text-slate-800 dark:text-white">{startItem}</span> to{' '}
+        <span className="font-semibold text-slate-800 dark:text-white">{endItem}</span> of{' '}
+        <span className="font-semibold text-slate-800 dark:text-white">{totalItems}</span> log entries
+      </div>
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          disabled={currentPage <= 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Prev
+        </button>
+        <span className="px-2 font-medium text-slate-500 dark:text-slate-400">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          type="button"
+          disabled={currentPage >= totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Next
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function IctUniversalLogsPage() {
   const [logs] = useState<LogItem[]>(mockLogs);
   const [selectedPortal, setSelectedPortal] = useState<string>('ALL');
@@ -152,6 +205,10 @@ export default function IctUniversalLogsPage() {
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDiffLog, setSelectedDiffLog] = useState<LogItem | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const LOGS_PER_PAGE = 10;
 
   const filteredLogs = logs.filter((log) => {
     if (selectedPortal !== 'ALL' && log.portal !== selectedPortal) return false;
@@ -168,6 +225,20 @@ export default function IctUniversalLogsPage() {
     }
     return true;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedPortal, selectedCategory, selectedSeverity, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOGS_PER_PAGE));
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * LOGS_PER_PAGE;
+    return filteredLogs.slice(start, start + LOGS_PER_PAGE);
+  }, [filteredLogs, currentPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
 
   const getPortalBadge = (portal: LogItem['portal']) => {
     const map = {
@@ -318,10 +389,10 @@ export default function IctUniversalLogsPage() {
 
       {/* Logs Table */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="max-h-[520px] overflow-x-auto overflow-y-auto">
           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/50 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
+            <thead className="sticky top-0 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-xs shadow-xs z-10">
+              <tr className="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:text-slate-400">
                 <th className="px-4 py-3.5">Timestamp</th>
                 <th className="px-4 py-3.5">Portal</th>
                 <th className="px-4 py-3.5">Category</th>
@@ -332,14 +403,14 @@ export default function IctUniversalLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
-              {filteredLogs.length === 0 ? (
+              {paginatedLogs.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
                     No system logs found matching your filter criteria.
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => {
+                paginatedLogs.map((log) => {
                   const portalMeta = getPortalBadge(log.portal);
                   return (
                     <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
@@ -398,6 +469,13 @@ export default function IctUniversalLogsPage() {
             </tbody>
           </table>
         </div>
+        <PaginationFooter
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredLogs.length}
+          itemsPerPage={LOGS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* State Diff Modal */}

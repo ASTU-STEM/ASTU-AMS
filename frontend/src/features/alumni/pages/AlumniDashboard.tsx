@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, X, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
 import TelebirrDonationModal from '../../../components/TelebirrDonationModal';
 import { surveyService } from '../../surveys/services/survey.service';
@@ -65,6 +65,8 @@ const AlumniDashboard = () => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [donationCampaign, setDonationCampaign] = useState<{ title: string; category: string } | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [selectedNotificationDetail, setSelectedNotificationDetail] = useState<any | null>(null);
+  const [showAllNotificationsModal, setShowAllNotificationsModal] = useState<boolean>(false);
   const [editingPost, setEditingPost] = useState<{ id: string; textContent: string; imageAttachment: string; linkAttachment: string } | null>(null);
   const [activeCommentsPostId, setActiveCommentsPostId] = useState<string | null>(null);
   const [newCommentText, setNewCommentText] = useState<{ [postId: string]: string }>({});
@@ -728,9 +730,17 @@ const AlumniDashboard = () => {
         const safeNotifications = Array.isArray(data) ? data : [];
         setNotifications(safeNotifications.map((n: any) => ({
           id: n.id,
-          text: n.content || 'Notification',
+          title: n.title || 'ASTU Broadcast Notice',
+          content: n.content || n.message || n.text || '',
+          text: n.content || n.title || 'Notification',
           unread: !n.isRead,
-          time: n.createdAt && !isNaN(new Date(n.createdAt).getTime()) ? new Date(n.createdAt).toLocaleDateString() : 'Recently'
+          time: n.createdAt && !isNaN(new Date(n.createdAt).getTime()) ? new Date(n.createdAt).toLocaleString() : 'Recently',
+          type: n.type || 'In-App',
+          priority: n.priority || 'Normal',
+          category: n.category || 'General',
+          imageUrl: n.imageUrl,
+          ctaLink: n.ctaLink,
+          ctaText: n.ctaText
         })));
       } catch (err) {
         console.error('Failed to load notifications', err);
@@ -1062,25 +1072,15 @@ const AlumniDashboard = () => {
                             await handleClearNotification(n.id);
                           }
                           setNotificationOpen(false);
-                          const lower = (n.text || '').toLowerCase();
-                          if (lower.includes('job')) {
-                            setActiveTab('jobs');
-                          } else if (lower.includes('survey')) {
-                            setActiveTab('surveys');
-                          } else if (lower.includes('mentor')) {
-                            setActiveTab('mentorship');
-                          } else if (lower.includes('document')) {
-                            setActiveTab('documents');
-                          } else {
-                            setActiveTab('jobs');
-                          }
+                          setSelectedNotificationDetail(n);
                         }}
                         className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
                       >
                         <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm text-[var(--text-primary)]">{n.text}</p>
-                          <p className="text-xs text-[var(--text-secondary)]">{n.time}</p>
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">{n.title || 'Notification'}</p>
+                          <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{n.text}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{n.time}</p>
                         </div>
                         <button
                           type="button"
@@ -1101,7 +1101,7 @@ const AlumniDashboard = () => {
                       type="button"
                       onClick={() => {
                         setNotificationOpen(false);
-                        setActiveTab('jobs');
+                        setShowAllNotificationsModal(true);
                       }}
                       className="text-sm font-semibold text-[#003580] hover:underline"
                     >
@@ -2029,6 +2029,262 @@ const AlumniDashboard = () => {
         campaign={donationCampaign}
         onSuccess={handleRefreshCampaigns}
       />
+
+      {/* Notification Detail Modal */}
+      {selectedNotificationDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-2xl transition-all">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
+                  <Bell className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Notification Detail</h3>
+                  <p className="text-[11px] font-medium text-slate-500">ASTU AMS Official Broadcast</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedNotificationDetail(null)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="max-h-[75vh] overflow-y-auto p-5 space-y-4">
+              {/* Badges Bar */}
+              <div className="flex flex-wrap items-center gap-2">
+                {selectedNotificationDetail.type && (
+                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-[#003580] border border-blue-200">
+                    {selectedNotificationDetail.type}
+                  </span>
+                )}
+                {selectedNotificationDetail.priority && (
+                  <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${
+                    selectedNotificationDetail.priority === 'Urgent'
+                      ? 'bg-rose-50 text-rose-700 border-rose-200'
+                      : selectedNotificationDetail.priority === 'High'
+                      ? 'bg-amber-50 text-amber-700 border-amber-200'
+                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                  }`}>
+                    {selectedNotificationDetail.priority} Priority
+                  </span>
+                )}
+                {selectedNotificationDetail.category && (
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                    {selectedNotificationDetail.category}
+                  </span>
+                )}
+                <span className="text-[11px] text-slate-400 font-medium ml-auto">
+                  {selectedNotificationDetail.time}
+                </span>
+              </div>
+
+              {/* Hero Image Banner (if exists) */}
+              {selectedNotificationDetail.imageUrl && (
+                <div className="overflow-hidden rounded-xl border border-slate-200 shadow-xs">
+                  <img
+                    src={selectedNotificationDetail.imageUrl}
+                    alt="Notification Banner"
+                    className="max-h-52 w-full object-cover"
+                  />
+                </div>
+              )}
+
+              {/* Title */}
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Subject</p>
+                <h2 className="mt-1 text-base font-bold text-slate-900 leading-snug">
+                  {selectedNotificationDetail.title || selectedNotificationDetail.subject || 'ASTU Broadcast Notice'}
+                </h2>
+              </div>
+
+              {/* Message Content */}
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Message Content</p>
+                <div className="mt-1.5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-xs leading-6 text-slate-800 whitespace-pre-wrap">
+                  {selectedNotificationDetail.content || selectedNotificationDetail.text || 'No additional message details.'}
+                </div>
+              </div>
+
+              {/* Action Link Button / Tab Navigation CTA */}
+              {(() => {
+                const link = selectedNotificationDetail.ctaLink;
+                const fullText = (
+                  (selectedNotificationDetail.title || '') + ' ' + 
+                  (selectedNotificationDetail.content || '') + ' ' + 
+                  (selectedNotificationDetail.text || '')
+                ).toLowerCase();
+
+                let targetTab: string | null = null;
+                let buttonLabel = selectedNotificationDetail.ctaText || 'Take Action';
+
+                if (link) {
+                  if (link.includes('survey') || link.includes('tracer')) targetTab = 'surveys';
+                  else if (link.includes('job') || link.includes('career')) targetTab = 'jobs';
+                  else if (link.includes('event')) targetTab = 'events';
+                  else if (link.includes('document') || link.includes('clearance')) targetTab = 'documents';
+                  else if (link.includes('mentor')) targetTab = 'mentorship';
+                }
+
+                if (!targetTab) {
+                  if (fullText.includes('survey') || fullText.includes('tracer')) {
+                    targetTab = 'surveys';
+                    if (!selectedNotificationDetail.ctaText) buttonLabel = 'Go to Surveys & Complete Submission';
+                  } else if (fullText.includes('job') || fullText.includes('career') || fullText.includes('placement')) {
+                    targetTab = 'jobs';
+                    if (!selectedNotificationDetail.ctaText) buttonLabel = 'View Career Placement Board';
+                  } else if (fullText.includes('mentor')) {
+                    targetTab = 'mentorship';
+                    if (!selectedNotificationDetail.ctaText) buttonLabel = 'Open Mentorship Network';
+                  } else if (fullText.includes('document') || fullText.includes('transcript') || fullText.includes('clearance')) {
+                    targetTab = 'documents';
+                    if (!selectedNotificationDetail.ctaText) buttonLabel = 'Open Document Center';
+                  } else if (fullText.includes('event') || fullText.includes('homecoming') || fullText.includes('meetup')) {
+                    targetTab = 'events';
+                    if (!selectedNotificationDetail.ctaText) buttonLabel = 'View Events & Register';
+                  }
+                }
+
+                if (!link && !targetTab) return null;
+
+                return (
+                  <div className="pt-2 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedNotificationDetail(null);
+                        if (targetTab) {
+                          setActiveTab(targetTab);
+                        } else if (link && (link.startsWith('http://') || link.startsWith('https://'))) {
+                          window.open(link, '_blank');
+                        }
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#003580] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#002560] transition-all"
+                    >
+                      <span>{buttonLabel}</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs">
+              <span className="text-slate-400 font-medium">Adama Science & Technology University</span>
+              <button
+                type="button"
+                onClick={() => setSelectedNotificationDetail(null)}
+                className="rounded-lg bg-slate-200 px-4 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-300 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* All Notifications Center Modal */}
+      {showAllNotificationsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-2xl overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-2xl transition-all">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
+                  <Bell className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Notifications Center</h3>
+                  <p className="text-[11px] font-medium text-slate-500">All announcements, survey alerts, and updates</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAllNotificationsModal(false)}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
+              <span className="text-xs text-slate-600 font-medium">
+                Total: <strong>{notifications.length}</strong> notifications ({unreadNotificationsCount} unread)
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleMarkNotificationsRead();
+                  toast.success('All notifications marked as read.');
+                }}
+                className="text-xs font-semibold text-rose-600 hover:underline"
+              >
+                Mark All as Read
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto p-4 space-y-2.5">
+              {notifications.length > 0 ? (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={async () => {
+                      if (n.unread) {
+                        await handleClearNotification(n.id);
+                      }
+                      setShowAllNotificationsModal(false);
+                      setSelectedNotificationDetail(n);
+                    }}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all ${
+                      n.unread
+                        ? 'border-blue-200 bg-blue-50/40 hover:bg-blue-50/80'
+                        : 'border-slate-100 bg-white hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-slate-300'}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-xs font-bold text-slate-900 truncate">{n.title || 'Notification'}</h4>
+                        <span className="text-[10px] font-medium text-slate-400 shrink-0">{n.time}</span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-600 line-clamp-2">{n.text}</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        {n.category && (
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-600">
+                            {n.category}
+                          </span>
+                        )}
+                        {n.ctaLink && (
+                          <span className="text-[10px] font-bold text-[#003580]">
+                            Action Required &rarr;
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="py-12 text-center text-xs text-slate-500">No notifications found.</p>
+              )}
+            </div>
+
+            <div className="flex justify-end border-t border-slate-100 bg-slate-50/50 px-5 py-3">
+              <button
+                type="button"
+                onClick={() => setShowAllNotificationsModal(false)}
+                className="rounded-lg bg-slate-200 px-4 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

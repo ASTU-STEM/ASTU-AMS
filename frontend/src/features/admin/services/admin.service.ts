@@ -280,16 +280,34 @@ export const adminService = {
   },
 
   // --- Department Management ---
-  async getDepartments(): Promise<ApiResult<any[]>> {
+  async getDepartments(): Promise<ApiResult<any>> {
     try {
-      const response = await apiClient.get<{ success: boolean; data: any[] }>('/admin/departments');
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/departments');
       return { ok: true, data: response.data.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'GET_DEPARTMENTS_ERROR', message: error.response?.data?.message || 'Failed to fetch departments' };
     }
   },
 
-  async createDepartment(data: { name: string; code: string }): Promise<ApiResult<any>> {
+  async getDepartmentDetails(id: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>(`/admin/departments/${id}`);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_DEPT_DETAILS_ERROR', message: error.response?.data?.message || 'Failed to fetch department details' };
+    }
+  },
+
+  async createDepartment(data: {
+    name: string;
+    code: string;
+    contactEmail?: string;
+    headName?: string;
+    school?: string;
+    location?: string;
+    status?: string;
+    description?: string;
+  }): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.post<{ success: boolean; data: any }>('/admin/departments', data);
       return { ok: true, data: response.data.data };
@@ -298,7 +316,19 @@ export const adminService = {
     }
   },
 
-  async updateDepartment(id: string, data: { name?: string; code?: string }): Promise<ApiResult<any>> {
+  async updateDepartment(
+    id: string,
+    data: {
+      name?: string;
+      code?: string;
+      contactEmail?: string;
+      headName?: string;
+      school?: string;
+      location?: string;
+      status?: string;
+      description?: string;
+    }
+  ): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.put<{ success: boolean; data: any }>(`/admin/departments/${id}`, data);
       return { ok: true, data: response.data.data };
@@ -313,6 +343,43 @@ export const adminService = {
       return { ok: true, data: response.data };
     } catch (error: any) {
       return { ok: false, errorCode: 'DELETE_DEPT_ERROR', message: error.response?.data?.message || 'Failed to delete department' };
+    }
+  },
+
+  async getDepartmentAnalytics(params?: { academicYear?: string; department?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/analytics/departments', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_DEPT_ANALYTICS_ERROR', message: error.response?.data?.message || 'Failed to fetch department analytics' };
+    }
+  },
+
+  async getComprehensiveDepartmentAnalysis(graduationYear?: number | string): Promise<ApiResult<any>> {
+    try {
+      const params = graduationYear && graduationYear !== 'All' ? { graduationYear } : undefined;
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/departments/analysis', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_COMPREHENSIVE_DEPT_ANALYTICS_ERROR', message: error.response?.data?.message || 'Failed to fetch comprehensive department analysis' };
+    }
+  },
+
+  async getSkillAnalytics(params?: { academicYear?: string; department?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/analytics/skills', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_SKILL_ANALYTICS_ERROR', message: error.response?.data?.message || 'Failed to fetch skill analytics' };
+    }
+  },
+
+  async getEmployerAnalytics(params?: { academicYear?: string; department?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/analytics/employers', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_EMPLOYER_ANALYTICS_ERROR', message: error.response?.data?.message || 'Failed to fetch employer analytics' };
     }
   },
 
@@ -344,8 +411,25 @@ export const adminService = {
     }
   },
 
+  async importData(payload: { records: any[]; fileName: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string; data: any }>('/admin/data-import', payload);
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'IMPORT_DATA_ERROR', message: error.response?.data?.message || 'Failed to import data' };
+    }
+  },
+
   // --- Notifications ---
-  async getNotifications(params: { page?: number; limit?: number; query?: string }): Promise<ApiResult<any>> {
+  async getNotifications(params: {
+    page?: number;
+    limit?: number;
+    query?: string;
+    type?: string;
+    status?: string;
+    priority?: string;
+    category?: string;
+  }): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.get<{ success: boolean; data: any }>('/admin/notifications', { params });
       return { ok: true, data: response.data.data };
@@ -363,7 +447,25 @@ export const adminService = {
     }
   },
 
-  async sendNotification(data: { title: string; content: string; targetRole?: string; targetUserIds?: string[] }): Promise<ApiResult<any>> {
+  async sendNotification(data: {
+    title: string;
+    content: string;
+    type?: string;
+    targetRole?: string;
+    targetUserIds?: string[];
+    departmentName?: string;
+    departmentId?: string;
+    graduationYear?: number;
+    employmentStatus?: string;
+    scheduleDate?: string;
+    scheduleTime?: string;
+    sendMode?: string;
+    priority?: string;
+    category?: string;
+    imageUrl?: string;
+    ctaLink?: string;
+    ctaText?: string;
+  }): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.post<{ success: boolean; data: any }>('/admin/notifications/send', data);
       return { ok: true, data: response.data.data };
@@ -435,6 +537,189 @@ export const adminService = {
     } catch (error: any) {
       return { ok: false, errorCode: 'GET_DONORS_ERROR', message: error.response?.data?.message || 'Failed to fetch donors' };
     }
+  },
+
+  // --- Module Governance Settings ---
+  async getModuleGovernance(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/modules/governance');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_GOVERNANCE_ERROR', message: error.response?.data?.message || 'Failed to fetch governance data' };
+    }
+  },
+
+  async updateModuleGovernance(data: { configs?: any; security?: any }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any }>('/admin/modules/governance', data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_GOVERNANCE_ERROR', message: error.response?.data?.message || 'Failed to save governance data' };
+    }
+  },
+
+  // --- Real System Telemetry & Security Governance ---
+  async getLiveTelemetry(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/technical-ops/telemetry/live');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_TELEMETRY_ERROR', message: error.response?.data?.message || 'Failed to fetch telemetry' };
+    }
+  },
+
+  async getSecurityGovernance(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/technical-ops/security-governance');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_SEC_GOV_ERROR', message: error.response?.data?.message || 'Failed to fetch security governance' };
+    }
+  },
+
+  async updateSecurityGovernance(data: { mfa?: boolean; exportAudit?: boolean; keyRot?: boolean }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any }>('/admin/technical-ops/security-governance', data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_SEC_GOV_ERROR', message: error.response?.data?.message || 'Failed to save security governance' };
+    }
+  },
+
+  // --- Institutional Reports Center ---
+  async getReportsMetrics(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/reports/metrics');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_REPORT_METRICS_ERROR', message: error.response?.data?.message || 'Failed to fetch report metrics' };
+    }
+  },
+
+  async getReportData(params: { reportType: string; departmentId?: string; timeframe?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/reports/data', { params });
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_REPORT_DATA_ERROR', message: error.response?.data?.message || 'Failed to fetch report data' };
+    }
+  },
+
+  async recordReportExport(data: { reportTitle: string; format: string; scope?: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any }>('/admin/reports/export', data);
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'RECORD_EXPORT_ERROR', message: error.response?.data?.message || 'Failed to record report export' };
+    }
+  },
+
+  async testIntegration(type: string, config?: any): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string; latency?: number }>('/admin/settings/test-integration', { type, config });
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'TEST_INTEGRATION_ERROR', message: error.response?.data?.message || 'Connection test failed' };
+    }
+  },
+
+  // --- Backup & Security ---
+  async getBackupSecurity(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: any }>('/admin/backup-security');
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'GET_BACKUP_SEC_ERROR', message: error.response?.data?.message || 'Failed to fetch backup & security data' };
+    }
+  },
+
+  async runDatabaseBackup(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any; message: string }>('/admin/backup-security/run-backup');
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'RUN_BACKUP_ERROR', message: error.response?.data?.message || 'Failed to run database backup' };
+    }
+  },
+
+  async restoreDatabaseBackup(file?: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; message: string }>('/admin/backup-security/restore', { file });
+      return { ok: true, data: response.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'RESTORE_BACKUP_ERROR', message: error.response?.data?.message || 'Failed to restore database backup' };
+    }
+  },
+
+  async downloadDatabaseBackup(file?: string): Promise<void> {
+    const filename = file || 'astu_database_backup.sql';
+    const response = await apiClient.get('/admin/backup-security/download', {
+      params: { file: filename },
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
+  async revokeSession(userEmail: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any; message: string }>('/admin/backup-security/session/revoke', { user: userEmail });
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'REVOKE_SESSION_ERROR', message: error.response?.data?.message || 'Failed to revoke session' };
+    }
+  },
+
+  async revokeAllSessions(): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any; message: string }>('/admin/backup-security/session/revoke-all');
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'REVOKE_ALL_SESSIONS_ERROR', message: error.response?.data?.message || 'Failed to revoke all sessions' };
+    }
+  },
+
+  async createApiKey(name: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post<{ success: boolean; data: any; message: string }>('/admin/backup-security/api-key', { name });
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'CREATE_API_KEY_ERROR', message: error.response?.data?.message || 'Failed to generate API Key' };
+    }
+  },
+
+  async revokeApiKey(name: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any; message: string }>('/admin/backup-security/api-key/revoke', { name });
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'REVOKE_API_KEY_ERROR', message: error.response?.data?.message || 'Failed to revoke API Key' };
+    }
+  },
+
+  async updateWhitelist(whitelist: string[]): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any; message: string }>('/admin/backup-security/whitelist', { whitelist });
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_WHITELIST_ERROR', message: error.response?.data?.message || 'Failed to update IP Whitelist' };
+    }
+  },
+
+  async updateBackupSecurityConfig(data: { schedule?: string; time?: string; rateLimit?: number }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: any; message: string }>('/admin/backup-security/config', data);
+      return { ok: true, data: response.data.data, message: response.data.message };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'UPDATE_BACKUP_CONFIG_ERROR', message: error.response?.data?.message || 'Failed to save security preferences' };
+    }
   }
 };
+
+
 

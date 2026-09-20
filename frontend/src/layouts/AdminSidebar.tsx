@@ -26,6 +26,7 @@ import type { AdminNavItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import { adminService } from '../features/admin/services/admin.service';
 import { useAuth } from '../contexts/AuthContext';
+import { useSystemSettings } from '../context/SystemSettingsContext';
 
 interface AdminSidebarProps {
   onLogout: () => void;
@@ -70,6 +71,7 @@ const sections = [
 export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse, onOpenAiAssistant }: AdminSidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
+  const { settings } = useSystemSettings();
 
   const [stats, setStats] = React.useState({
     users: 0,
@@ -181,15 +183,23 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
               <img
-                src="/images/astu-seal-logo.png"
-                alt="ASTU Logo"
-                className="h-full w-full object-contain scale-110"
+                src={
+                  settings.appearance?.logoUrl && !settings.appearance.logoUrl.includes('googleusercontent')
+                    ? settings.appearance.logoUrl
+                    : '/images/astu-seal-logo.png'
+                }
+                alt={`${settings.general?.abbreviation || 'ASTU'} Logo`}
+                className="h-full w-full object-contain scale-105"
               />
             </div>
             {!collapsed && (
               <div>
-                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">ASTU Admin</div>
-                <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Management System</p>
+                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">
+                  {settings.general?.abbreviation || 'ASTU'} Admin
+                </div>
+                <p className="text-[9.5px] text-[#003580] uppercase tracking-wider font-extrabold leading-snug">
+                  {(settings.general?.portalTitle || 'Alumni Management System').replace(/^ASTU\s+/i, '')}
+                </p>
               </div>
             )}
           </div>
