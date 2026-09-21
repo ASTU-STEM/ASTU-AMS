@@ -15,7 +15,7 @@ export default function IctFeatureFlagsPage() {
   const [environment, setEnvironment] = useState<'Production' | 'Staging' | 'Sandbox'>('Production');
 
   const [features, setFeatures] = useState([
-    { id: 'f-1', name: 'ASTU AI Copilot & Assistant', enabled: true, rolloutPct: 100, target: 'All Users' },
+    { id: 'f-1', name: 'ASTU AI & Assistant', enabled: true, rolloutPct: 100, target: 'All Users' },
     { id: 'f-2', name: 'AI Job Matching Engine', enabled: true, rolloutPct: 25, target: '25% of Alumni' },
     { id: 'f-3', name: 'Employer Talent Pipeline', enabled: true, rolloutPct: 100, target: 'All Employers' },
     { id: 'f-4', name: 'Tracer Study Multi-Channel Notifications', enabled: true, rolloutPct: 100, target: 'All Batches' },

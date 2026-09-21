@@ -40,7 +40,7 @@ export const DEFAULT_SETTINGS = {
       regApiKey: process.env.REGISTRAR_API_KEY || 'astu_erp_live_sec_key',
 
       openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
-      openRouterModel: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1:free',
+      openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
 
       chapaSecretKey: process.env.CHAPA_SECRET_KEY || 'CHAPA_TEST_PRIV_UwuQ_bQaixYr3gDHWSXUzeYJIwUFbNe83EZLUsCf',
       chapaPublicKey: process.env.CHAPA_PUBLIC_KEY || 'CHAPA_TEST_PUB_QtTbDIJUG_SdCp8zYvikvL3NyAcrALjfVKeO7K3e',
@@ -106,6 +106,16 @@ export class ManageSettings {
       }).catch(() => {});
     }
 
+    // Auto-migrate legacy unavailable OpenRouter model slug if stored in DB
+    if (settingsObj.integrations && (settingsObj.integrations.openRouterModel === 'deepseek/deepseek-r1:free' || !settingsObj.integrations.openRouterModel)) {
+      settingsObj.integrations.openRouterModel = 'meta-llama/llama-3.3-70b-instruct:free';
+      await prisma.systemSetting.upsert({
+        where: { key: 'integrations' },
+        update: { value: settingsObj.integrations },
+        create: { key: 'integrations', value: settingsObj.integrations },
+      }).catch(() => {});
+    }
+
     // Auto-migrate any existing DB records containing old placeholder mock strings to real .env values
     const envEmail = DEFAULT_SETTINGS.email;
     if (settingsObj.email) {
@@ -137,7 +147,8 @@ export class ManageSettings {
       if (
         !i.regApiEndpoint || i.regApiEndpoint.includes('api.astu.edu.et') ||
         i.regApiKey === 'astu_erp_xxxxx' ||
-        !i.openRouterApiKey
+        !i.openRouterApiKey ||
+        i.openRouterModel === 'deepseek/deepseek-r1:free'
       ) {
         settingsObj.integrations = {
           ...envIntegrations,
@@ -145,7 +156,7 @@ export class ManageSettings {
           regApiEndpoint: envIntegrations.regApiEndpoint,
           regApiKey: i.regApiKey && i.regApiKey !== 'astu_erp_xxxxx' ? i.regApiKey : envIntegrations.regApiKey,
           openRouterApiKey: i.openRouterApiKey || envIntegrations.openRouterApiKey,
-          openRouterModel: i.openRouterModel || envIntegrations.openRouterModel,
+          openRouterModel: (i.openRouterModel && i.openRouterModel !== 'deepseek/deepseek-r1:free') ? i.openRouterModel : envIntegrations.openRouterModel,
           chapaSecretKey: i.chapaSecretKey || envIntegrations.chapaSecretKey,
           chapaPublicKey: i.chapaPublicKey || envIntegrations.chapaPublicKey,
           diditApiKey: i.diditApiKey || envIntegrations.diditApiKey,

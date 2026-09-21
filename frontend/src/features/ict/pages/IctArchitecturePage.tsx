@@ -16,14 +16,14 @@ export default function IctArchitecturePage() {
   const [selectedNode, setSelectedNode] = useState<string | null>('PostgreSQL Database');
   const [copilotPrompt, setCopilotPrompt] = useState('');
   const [copilotResponse, setCopilotResponse] = useState<string | null>(
-    '👋 Hello ICT Administrator! I am the ASTU ICT AI Copilot. Ask me questions like "Why is the system slow?", "Show failed API requests", or "Perform root cause analysis".'
+    '👋 Hello ICT Administrator! I am ASTU AI. Ask me questions like "Why is the system slow?", "Show failed API requests", or "Perform root cause analysis".'
   );
   const [loadingCopilot, setLoadingCopilot] = useState(false);
 
   const architectureNodes = [
     { id: 'node-1', name: 'ASTU-AMS Frontend', type: 'Vite React App', status: 'HEALTHY', latency: '2ms', detail: 'Edge UI Delivery & State Management' },
     { id: 'node-2', name: 'API Gateway Server', type: 'Express API Server', status: 'HEALTHY', latency: '18ms', detail: 'JWT Middleware, Rate Limiters & Router' },
-    { id: 'node-3', name: 'DeepMind AI Copilot Engine', type: 'LangChain / Graph', status: 'HEALTHY', latency: '120ms', detail: 'Tracer Analytics & Root Cause Agent' },
+    { id: 'node-3', name: 'ASTU AI Multi-Agent Engine', type: 'LangChain / Graph', status: 'HEALTHY', latency: '120ms', detail: 'Tracer Analytics & Root Cause Agent' },
     { id: 'node-4', name: 'Prisma ORM Client', type: 'Database Abstraction', status: 'HEALTHY', latency: '3.8ms', detail: 'Type-safe SQL query generator' },
     { id: 'node-5', name: 'Redis Cache & Queue', type: 'In-Memory Cache', status: 'HEALTHY', latency: '0.7ms', detail: 'Session tokens & async tracer queues' },
     { id: 'node-6', name: 'PostgreSQL Database', type: 'Neon Postgres DB', status: 'HEALTHY', latency: '3.8ms', detail: 'Primary relational data store' },
@@ -39,7 +39,7 @@ export default function IctArchitecturePage() {
     setCopilotPrompt('');
 
     setTimeout(() => {
-      let ans = `🤖 ASTU ICT Copilot: I analyzed telemetry and traces for "${userQ}". `;
+      let ans = `🤖 ASTU AI: I analyzed telemetry and traces for "${userQ}". `;
       if (userQ.toLowerCase().includes('slow') || userQ.toLowerCase().includes('latency')) {
         ans += 'The primary latency bottleneck is the Registrar SIS API endpoint (P95 response time 145ms) and a PostgreSQL query on AlumniProfile. Target index recommendation: CREATE INDEX idx_alumni_search ON "AlumniProfile"("fullName", "graduationYear").';
       } else if (userQ.toLowerCase().includes('failed') || userQ.toLowerCase().includes('error')) {
@@ -59,10 +59,10 @@ export default function IctArchitecturePage() {
         <div>
           <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <Layers className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            System Architecture Map &amp; AI ICT Copilot
+            System Architecture Map &amp; ASTU AI
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Interactive system architecture visualizer node map and ASTU ICT AI Copilot diagnostics engine.
+            Interactive system architecture visualizer node map and ASTU AI diagnostics engine.
           </p>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function IctArchitecturePage() {
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
           <h2 className="text-base font-extrabold uppercase tracking-wider">
-            ASTU ICT AI Copilot &amp; Root Cause Inspector
+            ASTU AI &amp; Root Cause Inspector
           </h2>
         </div>
 
@@ -122,7 +122,7 @@ export default function IctArchitecturePage() {
             type="text"
             value={copilotPrompt}
             onChange={(e) => setCopilotPrompt(e.target.value)}
-            placeholder="Ask AI Copilot (e.g. 'Why is the system slow?', 'Show failed API calls', 'Perform root cause analysis')..."
+            placeholder="Ask ASTU AI (e.g. 'Why is the system slow?', 'Show failed API calls', 'Perform root cause analysis')..."
             className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500"
           />
           <button
@@ -130,7 +130,7 @@ export default function IctArchitecturePage() {
             disabled={loadingCopilot}
             className="px-5 py-2.5 rounded-xl bg-blue-600 text-xs font-bold text-white shadow-md hover:bg-blue-700 cursor-pointer disabled:opacity-50"
           >
-            {loadingCopilot ? 'Analyzing...' : 'Ask Copilot'}
+            {loadingCopilot ? 'Analyzing...' : 'Ask ASTU AI'}
           </button>
         </form>
       </div>

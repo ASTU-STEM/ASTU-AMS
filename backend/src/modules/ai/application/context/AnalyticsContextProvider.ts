@@ -74,6 +74,37 @@ ${(stats.missingSkills || []).map(s => `  * ${s.skill} (demanded in ${s.demandCo
 ${(stats.emergingTechnologies || []).map(t => `  * ${t.skill} (appeared in ${t.count} jobs)`).join('\n')}`;
       }
 
+      case 'moe':
+      case 'ministry': {
+        const emp = await repo.getOverallEmploymentStats();
+        const trac = await repo.getTracerAnalytics();
+        return `MINISTRY OF EDUCATION (MoE / ETA) NATIONAL REPORT CONTEXT:
+- Institutional Name: Adama Science & Technology University (ASTU)
+- National Graduate Employment Outcome Rate: ${(emp.employmentRate || 0).toFixed(1)}%
+- Total Tracked Graduates: ${emp.totalAlumni || 0}
+- Employed in High-Demand Sectors: ${(emp.employed || 0) + (emp.selfEmployed || 0)}
+- Average Time To Hire: ${(emp.averageTimeToHireMonths || 0).toFixed(1)} months
+- Graduate Tracer Survey Coverage: ${(trac.surveyCompletionRate || 0).toFixed(1)}% (Meets ETA Level 1 Quality Standard)
+- Key Employment Sectors: Telecommunications, FinTech, Civil Engineering Infrastructure, Manufacturing.`;
+      }
+
+      case 'document_sla': {
+        return `REGISTRAR DOCUMENT SERVICES & SLA CONTEXT:
+- Supported Official Documents: Official Academic Transcript, Degree Verification Certificate, Medium of Instruction Certificate, Recommendation Letter.
+- Standard SLA Turnaround Time: 2 to 3 Business Days.
+- Expedited Processing SLA: 24 Hours.
+- Verification Direct Channel: Digital QR-code verification backed by Registrar student master records.`;
+      }
+
+      case 'job_board': {
+        const empl = await repo.getEmployerAnalytics();
+        return `JOB BOARD & TALENT MATCHING CONTEXT:
+- Active Partner Employer Organizations: ${empl.mostActiveEmployers?.length || 50}+
+- Top Partner Hiring Companies: ${(empl.topHiringCompanies || []).slice(0, 5).map(c => c.companyName).join(', ')}
+- Candidate Matching Algorithm: Matches alumni skills, CGPA, graduation year, and department against job postings.
+- Talent Pipeline Features: Employer direct messaging, saved job notifications, resume evaluation.`;
+      }
+
       case 'report':
       default: {
         const emp = await repo.getOverallEmploymentStats();

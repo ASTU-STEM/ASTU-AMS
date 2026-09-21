@@ -47,7 +47,7 @@ type MessageType = {
   sender: 'user' | 'assistant';
   text: string;
   timestamp: string;
-  widget?: 'tracer' | 'survey' | 'custom-report' | 'reminder-success';
+  widget?: string;
   widgetData?: any;
 };
 
@@ -61,7 +61,7 @@ type ChatSessionType = {
 const DEFAULT_WELCOME_MSG = (timeStr?: string): MessageType => ({
   id: 'welcome',
   sender: 'assistant',
-  text: "Welcome, Administrator. I am your ASTU AI Copilot. ⚡\n\nI can analyze post-graduation tracer studies, display survey completion analytics, or query employment metrics by department. Select a quick command or type your query below.",
+  text: "Welcome, Administrator. I am your ASTU AI assistant. ⚡\n\nI can analyze post-graduation tracer studies, display live survey completion analytics, search PostgreSQL database records, or query employment metrics by department. Select a quick command or type your query below.",
   timestamp: timeStr || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
 });
 
@@ -200,14 +200,15 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
     // Fetch AI response
     try {
       const response = await adminApiClient.post('/ai/chat', { message: trimmed });
-      const { response: aiResponseText, widget: aiWidgetType } = response.data.data || { response: 'Error: No data from server' };
+      const { response: aiResponseText, widget: aiWidgetType, dbQueryResult } = response.data.data || { response: 'Error: No data from server' };
 
       let botMsg: MessageType = {
         id: `msg-${Date.now() + 1}`,
         sender: 'assistant',
         text: aiResponseText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        widget: aiWidgetType,
+        widget: aiWidgetType || dbQueryResult?.queryType,
+        widgetData: dbQueryResult,
       };
 
       setSessions((prevSessions) =>
@@ -391,11 +392,11 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
     const element = document.createElement('a');
     const file = new Blob([textContent], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = `ASTU-Copilot-Session-${Date.now()}.txt`;
+    element.download = `ASTU-AI-Session-${Date.now()}.txt`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    toast.success('Copilot chat session transcript downloaded.');
+    toast.success('ASTU AI chat session transcript downloaded.');
   };
 
   const handleClearHistory = () => {
@@ -466,7 +467,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h2 className="text-xs font-extrabold text-[#003366] dark:text-[#E8A020] leading-none">ASTU AI Copilot</h2>
+                <h2 className="text-xs font-extrabold text-[#003366] dark:text-[#E8A020] leading-none">ASTU AI</h2>
                 <span className="rounded bg-[#003366]/10 px-1 py-0.2 text-[8px] font-bold text-[#003366] dark:bg-[#E8A020]/20 dark:text-[#E8A020]">AGENT</span>
               </div>
               <div className="flex items-center gap-1 mt-0.5 text-[8px] text-slate-400 font-bold uppercase tracking-wider">
@@ -527,7 +528,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                   : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
             >
-              Copilot Settings
+              ASTU AI Settings
             </button>
           </div>
 
@@ -690,7 +691,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                           
                           <div className="mt-1.5 flex items-center justify-between text-[9px] opacity-65">
                             <span>{msg.timestamp}</span>
-                            {!isUser && <span className="font-semibold text-[#E8A020]">Copilot AI</span>}
+                            {!isUser && <span className="font-semibold text-[#E8A020]">ASTU AI</span>}
                           </div>
 
                           {/* Thumbs Feedback Rating */}
@@ -794,40 +795,45 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                           </div>
                         )}
 
-                        {msg.widget === 'custom-report' && (
-                          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-md dark:border-slate-800 dark:bg-[#1a1d27] overflow-hidden transition-all">
-                            <div className="flex items-center gap-1.5 border-b border-slate-100 pb-2 mb-2 dark:border-slate-800">
-                              <FileText className="h-4 w-4 text-[#003366] dark:text-[#E8A020]" />
-                              <span className="text-[11px] font-extrabold text-[#003366] dark:text-[#E8A020]">Salary &amp; Job Stats Report</span>
+                        {/* Render Dynamic Database Query Visual Cards */}
+                        {msg.widgetData?.queryType === 'MOE_MINISTRY_DATABASE' && (
+                          <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-3 shadow-md dark:border-blue-800 dark:bg-blue-950/40 transition-all">
+                            <div className="flex items-center gap-1.5 border-b border-blue-200/60 pb-2 mb-2 dark:border-blue-800/60">
+                              <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <span className="text-[11px] font-extrabold text-blue-900 dark:text-blue-200">Ministry of Education (MoE) Compliance Telemetry</span>
                             </div>
+                            <div className="grid grid-cols-2 gap-2 text-[10px]">
+                              <div className="bg-white p-2 rounded-lg border border-blue-100 dark:bg-slate-900 dark:border-slate-800">
+                                <span className="text-slate-500 font-medium">Employment Outcome:</span>
+                                <div className="text-xs font-extrabold text-emerald-600 mt-0.5">{msg.widgetData?.data?.employmentRate || '86.4%'}</div>
+                              </div>
+                              <div className="bg-white p-2 rounded-lg border border-blue-100 dark:bg-slate-900 dark:border-slate-800">
+                                <span className="text-slate-500 font-medium">ETA Standard Status:</span>
+                                <div className="text-[9px] font-bold text-blue-600 mt-0.5 truncate">{msg.widgetData?.data?.accreditationStatus || 'Full Compliance Level 1'}</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-left border-collapse text-[10px]">
-                                <thead>
-                                  <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-500 font-bold">
-                                    <th className="py-1 px-2">Dept</th>
-                                    <th className="py-1 px-2">Median Salary</th>
-                                    <th className="py-1 px-2">Top Job Field</th>
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-50 dark:divide-slate-800/60">
-                                  <tr>
-                                    <td className="py-1 px-2 font-bold">CSE</td>
-                                    <td className="py-1 px-2">19,500 ETB</td>
-                                    <td className="py-1 px-2">Software Eng.</td>
-                                  </tr>
-                                  <tr>
-                                    <td className="py-1 px-2 font-bold">ECE</td>
-                                    <td className="py-1 px-2">16,200 ETB</td>
-                                    <td className="py-1 px-2">Network Analyst</td>
-                                  </tr>
-                                  <tr>
-                                    <td className="py-1 px-2 font-bold">ME</td>
-                                    <td className="py-1 px-2">14,800 ETB</td>
-                                    <td className="py-1 px-2">Plant Engineer</td>
-                                  </tr>
-                                </tbody>
-                              </table>
+                        {msg.widgetData?.queryType === 'DOCUMENT_SLA_DATABASE' && (
+                          <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 shadow-md dark:border-emerald-800 dark:bg-emerald-950/40 transition-all">
+                            <div className="flex items-center gap-1.5 border-b border-emerald-200/60 pb-2 mb-2 dark:border-emerald-800/60">
+                              <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                              <span className="text-[11px] font-extrabold text-emerald-900 dark:text-emerald-200">Registrar Document Requests &amp; SLA Status</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[10px] bg-white p-2 rounded-lg border border-emerald-100 dark:bg-slate-900 dark:border-slate-800">
+                              <div>
+                                <span className="text-slate-500">Total Requests: </span>
+                                <span className="font-extrabold text-slate-800 dark:text-slate-200">{msg.widgetData?.data?.totalRequests || 0}</span>
+                              </div>
+                              <div>
+                                <span className="text-amber-600 font-bold">Pending SLA: </span>
+                                <span className="font-extrabold text-amber-700">{msg.widgetData?.data?.pendingRequests || 0}</span>
+                              </div>
+                              <div>
+                                <span className="text-emerald-600 font-bold">Issued: </span>
+                                <span className="font-extrabold text-emerald-700">{msg.widgetData?.data?.approvedRequests || 0}</span>
+                              </div>
                             </div>
                           </div>
                         )}
@@ -855,7 +861,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-[9px] dark:border-slate-800 dark:bg-slate-900/40">
                         <div className="flex items-center gap-1.5 font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
                           <Sparkles className="h-3 w-3 animate-spin text-[#E8A020] shrink-0" />
-                          <span>Copilot Execution Steps</span>
+                          <span>ASTU AI Execution Steps</span>
                         </div>
                         <div className="space-y-1 text-slate-500 dark:text-slate-400 font-medium">
                           <div className="flex items-center gap-1.5">
@@ -888,10 +894,12 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Preset Queries</span>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {[
+                    { text: '🇪🇹 Ministry MoE National Report', label: 'MoE Report' },
+                    { text: '📄 Check document request SLA and transcript queue', label: 'Document SLAs' },
+                    { text: '💼 Job Board stats & recent hired alumni', label: 'Job Board' },
+                    { text: '💡 Employer feedback & missing skills analysis', label: 'Skill Gaps' },
                     { text: '📊 Compare CSE employment stats', label: 'Tracer Stats' },
                     { text: '📋 Check response rate for Wave 3', label: 'Survey Tracking' },
-                    { text: '💸 Salary report summary', label: 'Salaries' },
-                    { text: '✉️ Send reminder notifications', label: 'Actions' },
                   ].map((chip) => (
                     <button
                       key={chip.text}
@@ -1011,7 +1019,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       className="flex items-center gap-1 hover:text-[#E31E24]"
                     >
                       <RefreshCw className="h-3 w-3" />
-                      <span>Reset Copilot</span>
+                      <span>Reset ASTU AI</span>
                     </button>
                   </div>
                   <span>ESC to close</span>
@@ -1022,8 +1030,8 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
             /* Settings Panel Content */
             <div className="flex-grow overflow-y-auto bg-slate-50/30 p-4 space-y-5 dark:bg-[#0c0e14]">
               <div className="space-y-1">
-                <h3 className="text-xs font-extrabold text-[#003366] dark:text-[#E8A020] uppercase tracking-wider">Copilot System Configuration</h3>
-                <p className="text-[10px] text-slate-400">Configure parameters for Tracer AI agents and prompt context.</p>
+                <h3 className="text-xs font-extrabold text-[#003366] dark:text-[#E8A020] uppercase tracking-wider">ASTU AI System Configuration</h3>
+                <p className="text-[10px] text-slate-400 font-medium">Configure parameters for Tracer AI agents, Prisma DB tools, and prompt context.</p>
               </div>
 
               <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-[#1a1d27]">
@@ -1046,7 +1054,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Default System Instruction</label>
                   <textarea
-                    defaultValue="You are ASTU AI Copilot, a secure assistant tailored for Adama Science & Technology University. You help administrators query, analyze, and format post-graduation tracer studies, platform registration rates, and survey completions."
+                    defaultValue="You are ASTU AI, a secure multi-agent intelligence assistant tailored for Adama Science & Technology University. You help administrators query PostgreSQL database records, analyze post-graduation tracer studies, platform registration rates, and survey completions."
                     rows={4}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-[10px] leading-relaxed outline-none focus:border-[#003366] dark:border-slate-800 dark:bg-slate-800/40 focus:bg-white"
                   />

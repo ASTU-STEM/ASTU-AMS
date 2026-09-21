@@ -21,6 +21,7 @@ export class AIController {
         query: result.query,
         intent: result.intent,
         response: result.response,
+        dbQueryResult: result.dbQueryResult || null,
       });
     } catch (err) { next(err); }
   }
@@ -73,6 +74,15 @@ ${context}`;
       const reportText = await ReportAgent.execute('curriculum', context);
       
       PDFReportGenerator.generateReportPDF(res, 'Curriculum Improvement Recommendations Report', reportText, 'curriculum_report.pdf');
+    } catch (err) { next(err); }
+  }
+
+  static async generateMoeReport(req: Request, res: Response, next: NextFunction) {
+    try {
+      const context = await AnalyticsContextProvider.getContextForIntent('moe');
+      const reportText = await ReportAgent.execute('moe_national', context);
+      
+      PDFReportGenerator.generateReportPDF(res, 'Ministry of Education (MoE) National Graduate Outcomes Report', reportText, 'moe_national_report.pdf');
     } catch (err) { next(err); }
   }
 }

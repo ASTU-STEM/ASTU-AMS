@@ -18,5 +18,6 @@ router.post('/reports/executive', asyncHandler(AIController.generateExecutiveRep
 router.post('/reports/tracer', asyncHandler(AIController.generateTracerReport));
 router.post('/reports/accreditation', asyncHandler(AIController.generateAccreditationReport));
 router.post('/reports/curriculum', asyncHandler(AIController.generateCurriculumReport));
+router.post('/reports/moe', asyncHandler(AIController.generateMoeReport));
 
 export default router;

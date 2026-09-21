@@ -1,13 +1,13 @@
 import { OpenRouterService } from '../../infrastructure/services/OpenRouterService';
 
 export class EmploymentAgent {
-  static async execute(query: string, context: string): Promise<string> {
-    const systemInstruction = `You are the specialized ASTU Employment AI Agent. Your role is to analyze graduate employment trends, rates, salaries, and time-to-hire.
+  static async execute(query: string, context: string, dbDataSummary?: string): Promise<string> {
+    const systemInstruction = `You are the specialized ASTU AI Employment & Placement Agent. Your role is to analyze graduate employment trends, velocity rates, salary distributions, and time-to-hire metrics.
 Always base your responses on the provided database context.
-Do NOT calculate raw metrics yourself. Highlight insights, summarize outcomes, and make predictions based on graduation year patterns.
-Write in a professional, consulting tone. Use bullet points where appropriate.`;
+Do NOT fabricate raw metrics. Highlight insights, summarize outcomes, and provide data-driven predictions.
+Write in a professional executive tone using clear Markdown formatting.`;
 
-    const prompt = `DATABASE CONTEXT:
+    const prompt = `${dbDataSummary ? `LIVE DATABASE QUERY SUMMARY:\n${dbDataSummary}\n\n` : ''}INSTITUTIONAL RAG CONTEXT:
 ${context}
 
 USER QUESTION:

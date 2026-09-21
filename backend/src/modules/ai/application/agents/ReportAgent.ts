@@ -7,6 +7,8 @@ Supported Report Types:
 - EXECUTIVE: Consolidates employment, departments, curriculum relevance, and employer satisfaction.
 - TRACER: Analyzes tracer survey response rates, participation rates, and longitudinal survey results.
 - ACCREDITATION: Outlines tracer outcomes, employment rates, and quality of hands-on training to meet ETA standards.
+- MOE_NATIONAL: Formal Ministry of Education (MoE) national university benchmarking and graduate outcome compliance.
+- REGISTRAR_SLA: Evaluates official document requests, transcript turnaround SLA processing, and verification bottlenecks.
 - CURRICULUM: Outlines skill gaps, emerging technical demands, and concrete course recommendations.
 - EMPLOYER: Summarizes hiring patterns, demand forecasting, and company feedback.
 - DEPARTMENT: Benchmarks department outcomes, average salaries, and cgpas.

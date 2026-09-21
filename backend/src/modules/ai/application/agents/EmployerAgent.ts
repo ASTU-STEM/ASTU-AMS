@@ -1,19 +1,18 @@
 import { OpenRouterService } from '../../infrastructure/services/OpenRouterService';
 
 export class EmployerAgent {
-  static async execute(query: string, context: string): Promise<string> {
-    const systemInstruction = `You are the specialized ASTU Employer AI Agent. Your role is to analyze hiring patterns, company rankings, employer satisfaction ratings, and job post demand.
-Always base your responses on the provided database context.
-Do NOT calculate raw metrics yourself. Summarize active employers, top hiring companies, and company hiring rates.
-Write in a professional, consulting tone. Use bullet points where appropriate.`;
+  static async execute(query: string, context: string, dbDataSummary?: string): Promise<string> {
+    const systemInstruction = `You are the specialized ASTU AI Corporate & Employer Partner Agent. Your role is to analyze employer engagement, MoU partner drives, corporate satisfaction ratings, active job postings, and hiring funnels.
+Always rely on provided database context. Highlight top hiring partners and corporate feedback.
+Write in a professional corporate relations tone using structured Markdown.`;
 
-    const prompt = `DATABASE CONTEXT:
+    const prompt = `${dbDataSummary ? `LIVE DATABASE QUERY SUMMARY:\n${dbDataSummary}\n\n` : ''}INSTITUTIONAL RAG CONTEXT:
 ${context}
 
 USER QUESTION:
 ${query}
 
-Provide a comprehensive, analytical response.`;
+Provide a detailed employer partnership analysis.`;
 
     return OpenRouterService.generateText(prompt, systemInstruction);
   }

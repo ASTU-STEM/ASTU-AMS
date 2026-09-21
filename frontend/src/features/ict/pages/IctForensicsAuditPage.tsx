@@ -95,7 +95,7 @@ export default function IctForensicsAuditPage() {
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-xs font-extrabold text-white uppercase tracking-wider">
               <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
-              ASTU ICT Copilot Activity Synthesis
+              ASTU AI Activity Synthesis
             </span>
             <button
               type="button"

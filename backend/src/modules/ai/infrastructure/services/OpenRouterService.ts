@@ -22,84 +22,118 @@ export class OpenRouterService {
       if (setting && setting.value) {
         const val = setting.value as any;
         if (val.openRouterModel && val.openRouterModel.trim() !== '') {
-          return val.openRouterModel.trim();
+          let m = val.openRouterModel.trim();
+          if (m === 'deepseek/deepseek-r1:free') m = 'deepseek/deepseek-r1';
+          return m;
         }
       }
     } catch (_) {}
-    return process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1:free';
+    let envModel = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
+    if (envModel === 'deepseek/deepseek-r1:free') envModel = 'deepseek/deepseek-r1';
+    return envModel;
   }
 
   static async generateText(prompt: string, systemInstruction?: string): Promise<string> {
     const apiKey = await this.getApiKey();
-    const model = await this.getModel();
+    const primaryModel = await this.getModel();
     if (!apiKey) {
       console.warn('OPENROUTER_API_KEY not configured. Falling back to Mock LLM response.');
       return this.generateMockResponse(prompt, systemInstruction);
     }
 
-    try {
-      const response = await axios.post(
-        'https://openrouter.ai/api/v1/chat/completions',
-        {
-          model: model,
-          max_tokens: 4000,
-          messages: [
-            ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
-            { role: 'user', content: prompt },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'HTTP-Referer': 'https://github.com/astu-ams',
-            'Content-Type': 'application/json',
-          },
-          timeout: 30000,
-        }
-      );
+    const candidateModels = Array.from(new Set([
+      primaryModel,
+      'deepseek/deepseek-chat',
+      'deepseek/deepseek-r1',
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'google/gemini-2.0-flash-exp:free',
+      'openai/gpt-3.5-turbo',
+    ]));
 
-      return response.data.choices[0].message.content || '';
-    } catch (error: any) {
-      console.error('OpenRouter API call failed:', error.response?.data || error.message);
-      throw new Error(`AI generation failed: ${error.message}`);
+    for (const currentModel of candidateModels) {
+      try {
+        const response = await axios.post(
+          'https://openrouter.ai/api/v1/chat/completions',
+          {
+            model: currentModel,
+            max_tokens: 4000,
+            messages: [
+              ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
+              { role: 'user', content: prompt },
+            ],
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              'HTTP-Referer': 'https://github.com/astu-ams',
+              'Content-Type': 'application/json',
+            },
+            timeout: 25000,
+          }
+        );
+
+        if (response.data?.choices?.[0]?.message?.content) {
+          return response.data.choices[0].message.content;
+        }
+      } catch (error: any) {
+        console.warn(`OpenRouter model [${currentModel}] call failed:`, error.response?.data?.error?.message || error.message);
+      }
     }
+
+    console.warn('All OpenRouter model candidates failed. Falling back to institutional mock intelligence.');
+    return this.generateMockResponse(prompt, systemInstruction);
   }
 
   static async generateJson<T>(prompt: string, systemInstruction?: string): Promise<T> {
     const apiKey = await this.getApiKey();
-    const model = await this.getModel();
+    const primaryModel = await this.getModel();
     if (!apiKey) {
       console.warn('OPENROUTER_API_KEY not configured. Falling back to Mock LLM JSON response.');
       return this.generateMockJsonResponse<T>(prompt);
     }
 
-    try {
-      const response = await axios.post(
-        'https://openrouter.ai/api/v1/chat/completions',
-        {
-          model: model,
-          max_tokens: 4000,
-          response_format: { type: 'json_object' },
-          messages: [
-            ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
-            { role: 'user', content: prompt + '\nReturn your response strictly in valid JSON format.' },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          timeout: 30000,
-        }
-      );
+    const candidateModels = Array.from(new Set([
+      primaryModel,
+      'deepseek/deepseek-chat',
+      'deepseek/deepseek-r1',
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'google/gemini-2.0-flash-exp:free',
+      'openai/gpt-3.5-turbo',
+    ]));
 
-      const content = response.data.choices[0].message.content || '{}';
-      return JSON.parse(content) as T;
-    } catch (error: any) {
-      console.error('OpenRouter JSON API call failed:', error.response?.data || error.message);
-      throw new Error(`AI JSON generation failed: ${error.message}`);
+    for (const currentModel of candidateModels) {
+      try {
+        const response = await axios.post(
+          'https://openrouter.ai/api/v1/chat/completions',
+          {
+            model: currentModel,
+            max_tokens: 4000,
+            response_format: { type: 'json_object' },
+            messages: [
+              ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
+              { role: 'user', content: prompt + '\nReturn your response strictly in valid JSON format.' },
+            ],
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: 25000,
+          }
+        );
+
+        const content = response.data?.choices?.[0]?.message?.content;
+        if (content) {
+          return JSON.parse(content) as T;
+        }
+      } catch (error: any) {
+        console.warn(`OpenRouter JSON model [${currentModel}] call failed:`, error.response?.data?.error?.message || error.message);
+      }
     }
+
+    console.warn('All OpenRouter JSON model candidates failed. Falling back to mock JSON response.');
+    return this.generateMockJsonResponse<T>(prompt);
   }
 
   private static generateMockResponse(prompt: string, systemInstruction?: string): string {

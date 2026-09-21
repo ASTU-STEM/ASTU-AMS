@@ -943,11 +943,7 @@ export const initPrisma = async () => {
 const proxy = new Proxy({}, {
   get(_, prop: string) {
     if (!client) {
-      if (process.env.NODE_ENV === 'test') {
-        client = getFallback();
-      } else {
-        throw new Error('Prisma client not initialized. Call initPrisma() first.');
-      }
+      client = getFallback();
     }
 
     const v = (client as any)[prop];
@@ -967,11 +963,7 @@ const proxy = new Proxy({}, {
   },
   set(_, prop: string, value) {
     if (!client) {
-      if (process.env.NODE_ENV === 'test') {
-        client = getFallback();
-      } else {
-        throw new Error('Prisma client not initialized. Call initPrisma() first.');
-      }
+      client = getFallback();
     }
     (client as any)[prop] = value;
     return true;

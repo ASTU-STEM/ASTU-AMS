@@ -913,7 +913,7 @@ export default function SystemSettings() {
               <div>
                 <IntegrationItem
                   title="OpenRouter AI Engine"
-                  description="Powers ASTU AI Copilot, Tracer Study analytics, and predictive outcomes."
+                  description="Powers ASTU AI, Tracer Study analytics, and predictive outcomes."
                   status={openRouterToggle ? 'Connected' : 'Disconnected'}
                   toggleActive={openRouterToggle}
                   testing={testingType === 'openrouter'}
