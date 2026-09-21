@@ -148,6 +148,7 @@ export class ManageSettings {
         !i.regApiEndpoint || i.regApiEndpoint.includes('api.astu.edu.et') ||
         i.regApiKey === 'astu_erp_xxxxx' ||
         !i.openRouterApiKey ||
+        (process.env.OPENROUTER_API_KEY && i.openRouterApiKey !== process.env.OPENROUTER_API_KEY) ||
         i.openRouterModel === 'deepseek/deepseek-r1:free'
       ) {
         settingsObj.integrations = {
@@ -155,7 +156,7 @@ export class ManageSettings {
           ...i,
           regApiEndpoint: envIntegrations.regApiEndpoint,
           regApiKey: i.regApiKey && i.regApiKey !== 'astu_erp_xxxxx' ? i.regApiKey : envIntegrations.regApiKey,
-          openRouterApiKey: i.openRouterApiKey || envIntegrations.openRouterApiKey,
+          openRouterApiKey: process.env.OPENROUTER_API_KEY || i.openRouterApiKey || envIntegrations.openRouterApiKey,
           openRouterModel: (i.openRouterModel && i.openRouterModel !== 'deepseek/deepseek-r1:free') ? i.openRouterModel : envIntegrations.openRouterModel,
           chapaSecretKey: i.chapaSecretKey || envIntegrations.chapaSecretKey,
           chapaPublicKey: i.chapaPublicKey || envIntegrations.chapaPublicKey,
