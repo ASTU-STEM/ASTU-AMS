@@ -431,9 +431,13 @@ interface TelegramChatProps {
     department?: string;
   } | null;
   initialCallId?: string | null;
+  /** Hide demo/simulated meeting tools (whiteboard, code sandbox, AI summarizer,
+   *  live polls, Q&A queue, virtual backgrounds, breakout rooms). */
+  clean?: boolean;
 }
 
-export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTarget, initialCallId }) => {
+export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTarget, initialCallId, clean = false }) => {
+  const showDemoMeetingTools = !clean;
   const [threads, setThreads] = useState<ConversationThread[]>(() => {
     try {
       const cached = localStorage.getItem('astuchat_threads_cache');
@@ -3155,6 +3159,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 </button>
 
                 {/* 13. Interactive Virtual Whiteboard */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowWhiteboardModal(!showWhiteboardModal)}
@@ -3165,8 +3170,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 >
                   <span className="material-symbols-outlined">draw</span>
                 </button>
+                )}
 
                 {/* 14. Pair Programming Sandbox */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowCodeSandboxModal(!showCodeSandboxModal)}
@@ -3177,8 +3184,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 >
                   <span className="material-symbols-outlined">code</span>
                 </button>
+                )}
 
                 {/* 15. AI Meeting Summarizer */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowAiSummarizerModal(!showAiSummarizerModal)}
@@ -3189,8 +3198,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 >
                   <span className="material-symbols-outlined">auto_awesome</span>
                 </button>
+                )}
 
                 {/* 16. Live Polls */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowPollsModal(!showPollsModal)}
@@ -3201,8 +3212,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 >
                   <span className="material-symbols-outlined">poll</span>
                 </button>
+                )}
 
                 {/* 17. Ranked Q&A Queue */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowQaDrawer(!showQaDrawer)}
@@ -3218,8 +3231,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                     </span>
                   )}
                 </button>
+                )}
 
                 {/* 18. Virtual Background Wallpapers */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowVirtualBgModal(!showVirtualBgModal)}
@@ -3230,8 +3245,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 >
                   <span className="material-symbols-outlined">wallpaper</span>
                 </button>
+                )}
 
                 {/* 19. Breakout Rooms */}
+                {showDemoMeetingTools && (
                 <button
                   type="button"
                   onClick={() => setShowBreakoutModal(!showBreakoutModal)}
@@ -3242,6 +3259,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 >
                   <span className="material-symbols-outlined">meeting_room</span>
                 </button>
+                )}
 
                 {/* 20. Low-Bandwidth Eco Data-Saver Mode */}
                 <button
@@ -3557,7 +3575,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 1. Overlay Modal: Interactive Virtual Whiteboard ─────────────── */}
-              {showWhiteboardModal && (
+              {showDemoMeetingTools && showWhiteboardModal && (
                 <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col p-4">
                   <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl flex-1 flex flex-col overflow-hidden shadow-2xl">
                     <div className="p-4 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
@@ -3687,7 +3705,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 2. Overlay Modal: Pair Programming Code Sandbox ───────────── */}
-              {showCodeSandboxModal && (
+              {showDemoMeetingTools && showCodeSandboxModal && (
                 <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col p-4">
                   <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl flex-1 flex flex-col overflow-hidden shadow-2xl">
                     <div className="p-4 bg-slate-850 border-b border-slate-800 flex items-center justify-between">
@@ -3766,7 +3784,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 3. Overlay Modal: AI Meeting Auto-Summarizer ──────────────────── */}
-              {showAiSummarizerModal && (
+              {showDemoMeetingTools && showAiSummarizerModal && (
                 <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
                   <div className="w-full max-w-lg bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 shadow-2xl space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -3823,7 +3841,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 4. Overlay Modal: Live Meeting Polls ──────────────────────────── */}
-              {showPollsModal && (
+              {showDemoMeetingTools && showPollsModal && (
                 <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
                   <div className="w-full max-w-md bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 shadow-2xl space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -3884,7 +3902,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 5. Overlay Modal: Ranked Q&A Question Queue ──────────────────── */}
-              {showQaDrawer && (
+              {showDemoMeetingTools && showQaDrawer && (
                 <div className="absolute top-0 right-0 bottom-0 z-40 w-80 sm:w-96 bg-slate-900/95 border-l border-slate-800 backdrop-blur-xl flex flex-col p-4 shadow-2xl">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                     <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
@@ -3991,7 +4009,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 6. Overlay Modal: Virtual Background Wallpapers ───────────────── */}
-              {showVirtualBgModal && (
+              {showDemoMeetingTools && showVirtualBgModal && (
                 <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
                   <div className="w-full max-w-lg bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 shadow-2xl space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -4047,7 +4065,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               )}
 
               {/* ── 7. Overlay Modal: Breakout Rooms Manager ────────────────────── */}
-              {showBreakoutModal && (
+              {showDemoMeetingTools && showBreakoutModal && (
                 <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
                   <div className="w-full max-w-md bg-slate-900 border border-slate-800 text-white rounded-3xl p-6 shadow-2xl space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">

@@ -157,6 +157,78 @@ const sections: HelpSection[] = [
   },
 ];
 
+const departmentSections: HelpSection[] = [
+  {
+    title: "Department Portal",
+    icon: MdSchool,
+    faqs: [
+      {
+        question: "What data can I see as a department head?",
+        answer:
+          "The portal loads live data for your assigned department only: alumni directory, employment stats, insights derived from alumni profiles, and surveys you create or institutional milestones you can dispatch.",
+      },
+      {
+        question: "Why is my dashboard empty?",
+        answer:
+          "Empty charts mean no alumni are linked to your department yet, or your account is not assigned a Department Head profile. Contact an administrator to assign your department.",
+      },
+      {
+        question: "I forgot my password. What should I do?",
+        answer:
+          'On the login page, click "Forgot Password" and enter your registered email. Use the reset link from your inbox (check spam if needed).',
+      },
+    ],
+  },
+  {
+    title: "Graduates & Employment",
+    icon: MdWork,
+    faqs: [
+      {
+        question: "How do I export graduate lists?",
+        answer:
+          "Open Graduates or Employment, apply filters if needed, then use Export to download a CSV of the current filtered results from the live department alumni API.",
+      },
+      {
+        question: "Where do employment rates come from?",
+        answer:
+          "Rates and filters are computed from your department alumni records returned by /departments/my-alumni and /departments/my-stats — not demo numbers.",
+      },
+    ],
+  },
+  {
+    title: "Surveys",
+    icon: MdQuiz,
+    faqs: [
+      {
+        question: "Who receives surveys I dispatch?",
+        answer:
+          "Dispatch targets eligible alumni in your department. The preview shows department alumni; the final count may be lower if some are already assigned or not yet eligible.",
+      },
+      {
+        question: "Can I edit institutional milestone surveys?",
+        answer:
+          "You can view and dispatch 6/12/18/24-month milestones to your alumni. Creating, editing, or archiving those templates is reserved for Admin/Registrar. You fully manage your own custom department surveys.",
+      },
+    ],
+  },
+  {
+    title: "Technical Support",
+    icon: MdFeedback,
+    faqs: [
+      {
+        question: "The website is not loading properly. What should I do?",
+        answer:
+          "Clear your browser cache, try Chrome or Firefox, and confirm you are signed in with a real department-head account (not a demo session).",
+      },
+      {
+        question: "How do I report a bug?",
+        answer:
+          "Email support@astu.edu.et with the page, steps to reproduce, and screenshots. Include your department code if known.",
+      },
+    ],
+  },
+];
+
 const quickLinks = [
   { label: "Registration Guide", icon: MdBookOnline, desc: "Step-by-step registration" },
   { label: "Job Search Tips", icon: MdWork, desc: "Optimize your job hunt" },
@@ -165,36 +237,49 @@ const quickLinks = [
   { label: "FAQ", icon: FaQuestionCircle, desc: "Common questions answered" },
 ];
 
+const departmentQuickLinks = [
+  { label: "Dashboard", icon: MdBookOnline, desc: "Live department outcomes" },
+  { label: "Graduates", icon: MdSchool, desc: "Search and export alumni" },
+  { label: "Employment", icon: MdWork, desc: "Placement analytics" },
+  { label: "Surveys", icon: MdQuiz, desc: "Create and dispatch surveys" },
+  { label: "FAQ", icon: FaQuestionCircle, desc: "Department help topics" },
+];
+
 export default function HelpCenter({
   isOpen,
   onClose,
   darkMode = false,
+  audience = "default",
 }: {
   isOpen: boolean;
   onClose: () => void;
   darkMode?: boolean;
+  audience?: "default" | "department";
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
+  const activeSections = audience === "department" ? departmentSections : sections;
+  const activeQuickLinks = audience === "department" ? departmentQuickLinks : quickLinks;
+
   const toggleSection = (title: string) => {
     setOpenSection(openSection === title ? null : title);
   };
 
   const filteredSections = searchQuery.trim()
-    ? sections
-      .map((s) => ({
-        ...s,
-        faqs: s.faqs.filter(
-          (f) =>
-            f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            f.answer.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-      }))
-      .filter((s) => s.faqs.length > 0)
-    : sections;
+    ? activeSections
+        .map((s) => ({
+          ...s,
+          faqs: s.faqs.filter(
+            (f) =>
+              f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              f.answer.toLowerCase().includes(searchQuery.toLowerCase())
+          ),
+        }))
+        .filter((s) => s.faqs.length > 0)
+    : activeSections;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-12 pb-8 px-4">
@@ -257,7 +342,7 @@ export default function HelpCenter({
               Quick Links
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {quickLinks.map((link) => {
+              {activeQuickLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <button

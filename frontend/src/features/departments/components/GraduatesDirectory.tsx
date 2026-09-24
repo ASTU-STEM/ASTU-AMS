@@ -21,7 +21,7 @@ import {
   Briefcase,
   type LucideIcon,
 } from 'lucide-react';
-import { StatusBadge, formatSalary, STATUS_CONFIG, statusConfig, STATUS_ORDER } from './employmentStatus';
+import { StatusBadge, formatSalary, statusConfig, STATUS_ORDER, normalizeEmploymentStatus } from './employmentStatus';
 import type { DepartmentDerivedData } from '../hooks/useDepartmentData';
 import type { DepartmentAlumniRecord } from '../services/department.service';
 
@@ -31,6 +31,7 @@ interface GraduatesDirectoryProps {
   error?: string | null;
   darkMode?: boolean;
   initialSearch?: string;
+  onRefresh?: () => Promise<void>;
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
@@ -63,6 +64,7 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
   error = null,
   darkMode = false,
   initialSearch = '',
+  onRefresh,
 }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [yearFilter, setYearFilter] = useState('All');
@@ -86,9 +88,10 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
   }, [data?.alumni]);
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    (data?.alumni ?? []).forEach((a) => {
-      const key = STATUS_CONFIG[a.employmentStatus] ? a.employmentStatus : 'UNKNOWN';
+    const alumni = data?.alumni ?? [];
+    const counts: Record<string, number> = { All: alumni.length };
+    alumni.forEach((a) => {
+      const key = normalizeEmploymentStatus(a.employmentStatus);
       counts[key] = (counts[key] ?? 0) + 1;
     });
     return counts;
@@ -125,7 +128,8 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
         (record.company || '').toLowerCase().includes(q) ||
         (record.jobTitle || '').toLowerCase().includes(q);
       const matchesYear = yearFilter === 'All' || String(record.graduationYear) === yearFilter;
-      const matchesStatus = statusFilter === 'All' || record.employmentStatus === statusFilter;
+      const matchesStatus =
+        statusFilter === 'All' || normalizeEmploymentStatus(record.employmentStatus) === statusFilter;
       return matchesSearch && matchesYear && matchesStatus;
     });
   }, [data?.alumni, searchTerm, yearFilter, statusFilter]);
@@ -153,10 +157,10 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
   };
 
   const handleRefresh = async () => {
-    if (!data?.refetch || refreshing) return;
+    if (!onRefresh || refreshing) return;
     setRefreshing(true);
     try {
-      await data.refetch();
+      await onRefresh();
     } finally {
       setRefreshing(false);
     }

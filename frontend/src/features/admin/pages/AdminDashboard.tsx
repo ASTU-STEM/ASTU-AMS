@@ -82,6 +82,20 @@ function TrendChip({ text, tone }: { text: string; tone: TrendTone }) {
   return <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold ${classes}`}>{text}</span>;
 }
 
+function StatusDot({ status }: { status: string }) {
+  const classes: Record<string, string> = {
+    healthy: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    critical: 'bg-red-500',
+  };
+  return (
+    <span
+      className={`inline-block h-2 w-2 shrink-0 rounded-full ${classes[status] || 'bg-slate-400'}`}
+      aria-hidden="true"
+    />
+  );
+}
+
 function ChartCard({
   title,
   subtitle,

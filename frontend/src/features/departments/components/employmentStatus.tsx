@@ -40,6 +40,10 @@ export const STATUS_ORDER: string[] = ['EMPLOYED', 'SELF_EMPLOYED', 'UNEMPLOYED'
 export const statusConfig = (status: string): StatusConfig =>
   STATUS_CONFIG[status] ?? STATUS_CONFIG.UNKNOWN;
 
+/** Map any employment status string to a known filter key. */
+export const normalizeEmploymentStatus = (status: string | null | undefined): string =>
+  status && STATUS_CONFIG[status] ? status : 'UNKNOWN';
+
 export const formatSalary = (salary: number | null | undefined): string =>
   salary == null ? '—' : `ETB ${salary.toLocaleString('en-US')}`;
 

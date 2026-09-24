@@ -8,11 +8,13 @@ import { DashboardOverview } from '../components/DashboardOverview';
 import { EmploymentAnalytics } from '../components/EmploymentAnalytics';
 import { GraduatesDirectory } from '../components/GraduatesDirectory';
 import { DepartmentSurveyCenter } from '../components/DepartmentSurveyCenter';
+import { DepartmentInsights } from '../components/DepartmentInsights';
 import { TelegramChat } from '../../../components/TelegramChat';
 import { NotificationBell } from '../components/NotificationBell';
 import { useDepartmentData } from '../hooks/useDepartmentData';
+import { useDepartmentLiveCounts } from '../hooks/useDepartmentLiveCounts';
 
-type DepartmentTab = 'dashboard' | 'graduates' | 'employment' | 'surveys' | 'messages';
+type DepartmentTab = 'dashboard' | 'graduates' | 'employment' | 'insights' | 'surveys' | 'messages';
 
 const NAV_GROUPS: Array<{
   sectionKey: string;
@@ -26,6 +28,7 @@ const NAV_GROUPS: Array<{
       { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', tooltip: 'Graduate outcomes overview' },
       { id: 'graduates', label: 'Graduates', icon: 'groups', tooltip: 'Department alumni directory' },
       { id: 'employment', label: 'Employment', icon: 'trending_up', tooltip: 'Employment analytics' },
+      { id: 'insights', label: 'Insights', icon: 'lightbulb', tooltip: 'Skill gaps, curriculum, tracer, employers' },
     ],
   },
   {
@@ -42,6 +45,7 @@ const TAB_TITLES: Record<DepartmentTab, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Live graduate outcomes for your department' },
   graduates: { title: 'Graduates', subtitle: 'Search and export department alumni' },
   employment: { title: 'Employment', subtitle: 'Placement trends, employers, and locations' },
+  insights: { title: 'Insights', subtitle: 'Skill gaps, curriculum, tracer, and employer signals' },
   surveys: { title: 'Surveys', subtitle: 'Create and dispatch surveys to your alumni' },
   messages: { title: 'Messages', subtitle: 'Direct messages with alumni and staff' },
 };
@@ -49,7 +53,8 @@ const TAB_TITLES: Record<DepartmentTab, { title: string; subtitle: string }> = {
 const DepartmentDashboard = () => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  const { data: departmentData, isLoading, error } = useDepartmentData();
+  const { data: departmentData, isLoading, error, refetch, lastUpdated } = useDepartmentData();
+  const liveCounts = useDepartmentLiveCounts();
 
   const userFullName = user ? `${user.firstName} ${user.lastName}`.trim() || user.email : 'Department Head';
   const userInitials = user
@@ -60,7 +65,7 @@ const DepartmentDashboard = () => {
     if (departmentData.department) {
       return `${departmentData.department.code} · ${departmentData.department.name}`;
     }
-    return user?.role === 'ADMIN' ? 'Department Access (Admin)' : 'Department Head';
+    return 'Department Head';
   }, [departmentData.department, user?.role]);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
@@ -93,6 +98,13 @@ const DepartmentDashboard = () => {
   }, [activeTab]);
 
   useEffect(() => {
+    if (activeTab === 'surveys' || activeTab === 'messages') {
+      liveCounts.refresh(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('[data-dept-menu]')) setMenuOpen(false);
@@ -119,7 +131,9 @@ const DepartmentDashboard = () => {
             data={departmentData}
             isLoading={isLoading}
             error={error}
+            onRefresh={refetch}
             onNavigate={(tab) => goToTab(tab as DepartmentTab)}
+            lastUpdated={lastUpdated}
           />
         );
       case 'graduates':
@@ -129,6 +143,7 @@ const DepartmentDashboard = () => {
             data={departmentData}
             isLoading={isLoading}
             error={error}
+            onRefresh={refetch}
             initialSearch={graduateSearchSeed}
           />
         );
@@ -139,6 +154,17 @@ const DepartmentDashboard = () => {
             data={departmentData}
             isLoading={isLoading}
             error={error}
+            onRefresh={refetch}
+          />
+        );
+      case 'insights':
+        return (
+          <DepartmentInsights
+            darkMode={darkMode}
+            data={departmentData}
+            isLoading={isLoading}
+            error={error}
+            onRefresh={refetch}
           />
         );
       case 'surveys':
@@ -146,15 +172,7 @@ const DepartmentDashboard = () => {
       case 'messages':
         return (
           <div className="space-y-4">
-            <div>
-              <h2 className={`text-xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                Messages
-              </h2>
-              <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                Direct messaging with alumni, employers, and ASTU staff.
-              </p>
-            </div>
-            <TelegramChat darkMode={darkMode} />
+            <TelegramChat darkMode={darkMode} clean />
           </div>
         );
       default:
@@ -163,6 +181,12 @@ const DepartmentDashboard = () => {
   };
 
   const tabMeta = TAB_TITLES[activeTab];
+
+  const navCounts: Partial<Record<DepartmentTab, number>> = {
+    graduates: departmentData.alumni.length > 0 ? departmentData.alumni.length : undefined,
+    surveys: liveCounts.surveys > 0 ? liveCounts.surveys : undefined,
+    messages: liveCounts.messages > 0 ? liveCounts.messages : undefined,
+  };
 
   return (
     <>
@@ -224,7 +248,9 @@ const DepartmentDashboard = () => {
                         sidebarCollapsed ? 'justify-center' : 'gap-3.5'
                       } ${
                         activeTab === item.id
-                          ? 'bg-[#003580]/10 font-bold text-[#003580] ring-1 ring-[#003580]/20'
+                          ? darkMode
+                            ? 'bg-blue-500/15 font-bold text-blue-300 ring-1 ring-blue-400/30'
+                            : 'bg-[#003580]/10 font-bold text-[#003580] ring-1 ring-[#003580]/20'
                           : darkMode ? 'text-slate-300 hover:bg-white/5' : 'text-slate-600 hover:bg-slate-50 hover:text-[#003580]'
                       }`}
                     >
@@ -240,8 +266,20 @@ const DepartmentDashboard = () => {
                       {!sidebarCollapsed && (
                         <span className="flex-1 truncate text-sm font-semibold">{item.label}</span>
                       )}
+                      {!sidebarCollapsed && typeof navCounts[item.id] === 'number' && (
+                        <span
+                          className={`ml-1 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
+                            darkMode
+                              ? 'bg-slate-700 text-slate-200'
+                              : 'bg-slate-200 text-slate-600'
+                          }`}
+                          title={`${item.label} count`}
+                        >
+                          {(navCounts[item.id] as number) > 99 ? '99+' : navCounts[item.id]}
+                        </span>
+                      )}
                       {activeTab === item.id && !sidebarCollapsed && (
-                        <div className="ml-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#003580]" />
+                        <div className={`ml-1 h-1.5 w-1.5 shrink-0 rounded-full ${darkMode ? 'bg-blue-400' : 'bg-[#003580]'}`} />
                       )}
                     </button>
                   ))}
@@ -401,9 +439,13 @@ const DepartmentDashboard = () => {
                   />
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-gray-200 bg-white p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:border-gray-700 dark:bg-gray-900">
+                  <div
+                    className={`absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)] ${
+                      darkMode ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-white'
+                    }`}
+                  >
                     <div className="px-3 py-3">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white">{userFullName}</div>
+                      <div className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{userFullName}</div>
                       <div className="mt-1">
                         <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${darkMode ? 'border-blue-800 bg-blue-950 text-blue-300' : 'border-blue-200 bg-blue-50 text-[#003580]'}`}>
                           {departmentLabel}
@@ -437,11 +479,13 @@ const DepartmentDashboard = () => {
             </div>
           </header>
 
-          <div className="flex-grow p-4 sm:p-6 md:p-8">{renderSection()}</div>
+          <div className="mx-auto w-full max-w-[1400px] flex-grow p-4 sm:p-6 md:p-8">
+            <div key={activeTab} className="animate-slide-up">{renderSection()}</div>
+          </div>
         </main>
       </div>
 
-      <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} darkMode={darkMode} />
+      <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} darkMode={darkMode} audience="department" />
     </>
   );
 };

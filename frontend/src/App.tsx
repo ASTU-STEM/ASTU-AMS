@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { store } from "./store";
@@ -101,11 +101,15 @@ function AppContent() {
           }
         />
         <Route
+          path="/department"
+          element={<Navigate to="/department/dashboard" replace />}
+        />
+        <Route
           path="/department/dashboard"
           element={
             <ProtectedRoute
               element={<DepartmentDashboard />}
-              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
+              allowedRoles={["DEPARTMENT_HEAD"]}
             />
           }
         />

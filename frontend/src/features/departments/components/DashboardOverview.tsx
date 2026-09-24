@@ -26,11 +26,25 @@ interface DashboardOverviewProps {
   error?: string | null;
   darkMode?: boolean;
   onNavigate?: (tab: string) => void;
+  onRefresh?: () => Promise<void>;
+  lastUpdated?: number | null;
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
   <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
 );
+
+function formatLastUpdated(timestamp: number): string {
+  const diffMs = Date.now() - timestamp;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return 'just now';
+  if (minutes === 1) return '1 minute ago';
+  if (minutes < 60) return `${minutes} minutes ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours === 1) return '1 hour ago';
+  if (hours < 24) return `${hours} hours ago`;
+  return new Date(timestamp).toLocaleString();
+}
 
 const Card = ({
   darkMode,
@@ -103,14 +117,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   error = null,
   darkMode = false,
   onNavigate,
+  onRefresh,
+  lastUpdated = null,
 }) => {
   const [refreshing, setRefreshing] = React.useState(false);
 
   const handleRefresh = async () => {
-    if (!data?.refetch || refreshing) return;
+    if (!onRefresh || refreshing) return;
     setRefreshing(true);
     try {
-      await data.refetch();
+      await onRefresh();
     } finally {
       setRefreshing(false);
     }
@@ -233,6 +249,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               Live employment outcomes, average salary, cohort trends, and skills from verified alumni records.
               Your department's data supports accreditation and tracer reporting.
             </p>
+            {lastUpdated && (
+              <p className={`mt-3 inline-flex items-center gap-1.5 text-xs font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                <span className={`h-1.5 w-1.5 rounded-full bg-emerald-500 ${refreshing ? 'animate-pulse' : ''}`} />
+                Data refreshed {formatLastUpdated(lastUpdated)}
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             <button
@@ -287,7 +309,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className={`rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+            <div key={kpi.label} className={`card-hover rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
               <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
                 <Icon className="h-5 w-5" />
               </div>

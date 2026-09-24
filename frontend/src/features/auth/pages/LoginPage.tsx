@@ -9,9 +9,6 @@ import AuthCheckbox from '../components/AuthCheckbox';
 import AuthFooterLink from '../components/AuthFooterLink';
 import { loginSchema, type LoginFormData } from '../schemas/auth.schema';
 import authService from '../services/auth.service';
-import { useAuth } from '../../../contexts/AuthContext';
-
-
 
 const roleRoutes: Record<string, string> = {
   ALUMNI: '/alumni/dashboard',
@@ -26,7 +23,6 @@ const roleRoutes: Record<string, string> = {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [show2FAChallenge, setShow2FAChallenge] = useState(false);

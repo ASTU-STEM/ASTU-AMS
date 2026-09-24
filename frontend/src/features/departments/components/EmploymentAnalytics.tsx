@@ -22,7 +22,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
-import { StatusBadge, formatSalary, STATUS_CONFIG, statusConfig, STATUS_ORDER } from './employmentStatus';
+import { StatusBadge, formatSalary, statusConfig, STATUS_ORDER, normalizeEmploymentStatus } from './employmentStatus';
 import type { DepartmentDerivedData } from '../hooks/useDepartmentData';
 
 interface EmploymentAnalyticsProps {
@@ -30,6 +30,7 @@ interface EmploymentAnalyticsProps {
   isLoading?: boolean;
   error?: string | null;
   darkMode?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
@@ -61,6 +62,7 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
   isLoading = false,
   error = null,
   darkMode = false,
+  onRefresh,
 }) => {
   const stats = data?.stats;
   const [batch, setBatch] = useState('All');
@@ -79,9 +81,10 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
   }, [data?.alumni]);
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    (data?.alumni ?? []).forEach((a) => {
-      const key = STATUS_CONFIG[a.employmentStatus] ? a.employmentStatus : 'UNKNOWN';
+    const alumni = data?.alumni ?? [];
+    const counts: Record<string, number> = { All: alumni.length };
+    alumni.forEach((a) => {
+      const key = normalizeEmploymentStatus(a.employmentStatus);
       counts[key] = (counts[key] ?? 0) + 1;
     });
     return counts;
@@ -102,7 +105,8 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
         (record.company || '').toLowerCase().includes(q) ||
         (record.jobTitle || '').toLowerCase().includes(q);
       const matchesBatch = batch === 'All' || String(record.graduationYear) === batch;
-      const matchesStatus = employmentStatus === 'All' || record.employmentStatus === employmentStatus;
+      const matchesStatus =
+        employmentStatus === 'All' || normalizeEmploymentStatus(record.employmentStatus) === employmentStatus;
       return matchesSearch && matchesBatch && matchesStatus;
     });
   }, [data?.alumni, searchTerm, batch, employmentStatus]);
@@ -124,6 +128,59 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
     };
   }, [filteredAlumni]);
 
+  const filteredCharts = useMemo(() => {
+    const yearMap: Record<number, { employed: number; total: number }> = {};
+    const statusMap: Record<string, number> = {};
+    const companyMap: Record<string, number> = {};
+    const locationMap: Record<string, number> = {};
+
+    for (const a of filteredAlumni) {
+      const year = a.graduationYear;
+      if (year) {
+        if (!yearMap[year]) yearMap[year] = { employed: 0, total: 0 };
+        yearMap[year].total += 1;
+        if (a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED') {
+          yearMap[year].employed += 1;
+        }
+      }
+      const statusKey = statusConfig(normalizeEmploymentStatus(a.employmentStatus)).label;
+      statusMap[statusKey] = (statusMap[statusKey] || 0) + 1;
+      const company = (a.company || '').trim();
+      if (company) companyMap[company] = (companyMap[company] || 0) + 1;
+      const location = (a.location || '').trim();
+      if (location) locationMap[location] = (locationMap[location] || 0) + 1;
+    }
+
+    const total = filteredAlumni.length || 1;
+    const toNamed = (map: Record<string, number>, limit = 8) =>
+      Object.entries(map)
+        .map(([name, count]) => ({ name, count, percentage: (count / total) * 100 }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+
+    return {
+      employmentTrend: Object.keys(yearMap)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((yearStr) => {
+          const year = Number(yearStr);
+          const { employed, total: grads } = yearMap[year];
+          return {
+            year: String(year),
+            graduates: grads,
+            employed,
+            employmentRate: grads > 0 ? (employed / grads) * 100 : 0,
+          };
+        }),
+      statusDistribution: Object.entries(statusMap).map(([status, count]) => ({
+        status,
+        count,
+        percentage: total > 0 ? (count / total) * 100 : 0,
+      })),
+      topCompanies: toNamed(companyMap),
+      locations: toNamed(locationMap),
+    };
+  }, [filteredAlumni]);
+
   const salarySummary = useMemo(() => {
     const salaries = filteredAlumni
       .map((a) => a.salary)
@@ -139,10 +196,10 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
   }, [filteredAlumni]);
 
   const handleRefresh = async () => {
-    if (!data?.refetch || refreshing) return;
+    if (!onRefresh || refreshing) return;
     setRefreshing(true);
     try {
-      await data.refetch();
+      await onRefresh();
     } finally {
       setRefreshing(false);
     }
@@ -341,21 +398,21 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <AnalyticsChart
           type="line"
-          data={(data?.employmentTrend ?? []) as any}
+          data={filteredCharts.employmentTrend as any}
           xKey="year"
           series={[{ key: 'employmentRate', label: 'Employment Rate (%)', color: '#003580' }]}
           title="Employment Trend"
-          subtitle="Placement rate by graduation year"
+          subtitle="Placement rate by graduation year (filtered view)"
           height={280}
           darkMode={darkMode}
         />
         <AnalyticsChart
           type="pie"
-          data={(data?.employmentStatusDistribution ?? []) as any}
+          data={filteredCharts.statusDistribution as any}
           xKey="status"
           series={[{ key: 'count', label: 'Graduates' }]}
           title="Status Distribution"
-          subtitle="Current employment status"
+          subtitle="Current employment status (filtered view)"
           height={280}
           darkMode={darkMode}
         />
@@ -367,11 +424,11 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
             <Building2 className="h-4 w-4 text-[#003580]" />
             <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Top Employers</h3>
           </div>
-          {(data?.topCompanies ?? []).length === 0 ? (
+          {filteredCharts.topCompanies.length === 0 ? (
             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No employer data reported yet.</p>
           ) : (
             <ul className="space-y-3">
-              {(data?.topCompanies ?? []).map((item) => (
+              {filteredCharts.topCompanies.map((item) => (
                 <li key={item.name} className="flex items-center justify-between text-sm">
                   <span className={darkMode ? 'text-slate-200' : 'text-slate-800'}>{item.name}</span>
                   <span className={darkMode ? 'text-slate-400' : 'text-slate-500'}>{item.count}</span>
@@ -385,11 +442,11 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
             <MapPin className="h-4 w-4 text-[#003580]" />
             <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Locations</h3>
           </div>
-          {(data?.locations ?? []).length === 0 ? (
+          {filteredCharts.locations.length === 0 ? (
             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No location data reported yet.</p>
           ) : (
             <ul className="space-y-3">
-              {(data?.locations ?? []).map((item) => (
+              {filteredCharts.locations.map((item) => (
                 <li key={item.name} className="flex items-center justify-between text-sm">
                   <span className={darkMode ? 'text-slate-200' : 'text-slate-800'}>{item.name}</span>
                   <span className={darkMode ? 'text-slate-400' : 'text-slate-500'}>{item.count}</span>

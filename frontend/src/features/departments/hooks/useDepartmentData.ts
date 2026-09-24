@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import departmentService, {
   DepartmentAlumniRecord,
+  DepartmentAnalytics,
   DepartmentProfile,
   DepartmentStats,
 } from '../services/department.service';
@@ -40,7 +41,6 @@ export interface DepartmentDerivedData {
   salaryCount: number;
   verifiedCount: number;
   unverifiedCount: number;
-  refetch?: () => Promise<void>;
 }
 
 const EMPTY: DepartmentDerivedData = {
@@ -93,6 +93,7 @@ function topCounts(values: Array<string | null | undefined>, total: number, limi
 function derive(
   alumni: DepartmentAlumniRecord[] = [],
   stats?: Partial<DepartmentStats> | null,
+  analytics?: DepartmentAnalytics | null,
   department: DepartmentProfile | null = null
 ): DepartmentDerivedData {
   const list = Array.isArray(alumni) ? alumni : [];
@@ -100,6 +101,32 @@ function derive(
   for (const record of list) {
     const key = record?.employmentStatus || 'UNKNOWN';
     countByStatus[key] = (countByStatus[key] || 0) + 1;
+  }
+
+  if (analytics) {
+    return {
+      department,
+      stats: {
+        totalAlumni: analytics.totalAlumni,
+        employed: analytics.employed,
+        unemployed: analytics.unemployed,
+        selfEmployed: analytics.selfEmployed,
+        employmentRate: analytics.employmentRate,
+        unemploymentRate: analytics.unemploymentRate,
+        selfEmploymentRate: analytics.selfEmploymentRate,
+      },
+      alumni: list,
+      employmentTrend: analytics.employmentTrend ?? [],
+      employmentStatusDistribution: analytics.employmentStatusDistribution ?? [],
+      topCompanies: analytics.topCompanies ?? [],
+      topIndustries: analytics.topIndustries ?? [],
+      topSkills: analytics.topSkills ?? [],
+      locations: analytics.locations ?? [],
+      averageSalary: analytics.averageSalary,
+      salaryCount: analytics.salaryCount,
+      verifiedCount: analytics.verifiedCount,
+      unverifiedCount: analytics.unverifiedCount,
+    };
   }
 
   const totalAlumni = stats?.totalAlumni ?? list.length;
@@ -151,7 +178,11 @@ function derive(
     .map((a) => a?.salary)
     .filter((s): s is number => typeof s === 'number' && !Number.isNaN(s) && s > 0);
   const averageSalary =
-    salaries.length > 0 ? Math.round(salaries.reduce((sum, s) => sum + s, 0) / salaries.length) : null;
+    typeof stats?.averageSalary === 'number' && stats.averageSalary > 0
+      ? Math.round(stats.averageSalary)
+      : salaries.length > 0
+        ? Math.round(salaries.reduce((sum, s) => sum + s, 0) / salaries.length)
+        : null;
 
   const verifiedCount = list.filter((a) => a?.isVerified).length;
 
@@ -184,15 +215,30 @@ export function useDepartmentData() {
   const [data, setData] = useState<DepartmentDerivedData>(EMPTY);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [stats, alumni] = await Promise.all([
+      const [analyticsRes, statsRes, alumniRes] = await Promise.allSettled([
+        departmentService.getDepartmentAnalytics(),
         departmentService.getDepartmentStats(),
         departmentService.getDepartmentAlumni(),
       ]);
+
+      if (alumniRes.status === 'rejected') {
+        throw alumniRes.reason;
+      }
+
+      let analytics: DepartmentAnalytics | null = null;
+      if (analyticsRes.status === 'fulfilled') {
+        analytics = analyticsRes.value;
+      } else if (statsRes.status === 'rejected') {
+        // Neither the analytics endpoint nor the stats endpoint responded.
+        throw analyticsRes.reason;
+      }
+      const stats = statsRes.status === 'fulfilled' ? statsRes.value : null;
 
       let department: DepartmentProfile | null = null;
       try {
@@ -201,9 +247,8 @@ export function useDepartmentData() {
         // Optional profile fetch fallback
       }
 
-      const derived = derive(alumni, stats, department);
-      derived.refetch = load;
-      setData(derived);
+      setData(derive(alumniRes.value, stats, analytics, department));
+      setLastUpdated(Date.now());
     } catch (err: unknown) {
       let message = err instanceof Error ? err.message : 'Failed to load department data.';
       const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
@@ -216,6 +261,8 @@ export function useDepartmentData() {
         message = apiMessage;
       }
       setError(message);
+      setData(EMPTY);
+      setLastUpdated(null);
     } finally {
       setIsLoading(false);
     }
@@ -225,5 +272,5 @@ export function useDepartmentData() {
     load();
   }, [load]);
 
-  return { data, isLoading, error, refetch: load };
+  return { data, isLoading, error, refetch: load, lastUpdated };
 }

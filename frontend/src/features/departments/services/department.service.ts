@@ -33,6 +33,26 @@ export interface DepartmentProfile {
   name: string;
 }
 
+export interface DepartmentAnalytics {
+  totalAlumni: number;
+  employed: number;
+  selfEmployed: number;
+  unemployed: number;
+  employmentRate: number;
+  unemploymentRate: number;
+  selfEmploymentRate: number;
+  averageSalary: number | null;
+  salaryCount: number;
+  verifiedCount: number;
+  unverifiedCount: number;
+  employmentTrend: { year: string; graduates: number; employed: number; employmentRate: number }[];
+  employmentStatusDistribution: { status: string; count: number; percentage: number }[];
+  topCompanies: { name: string; count: number; percentage: number }[];
+  topIndustries: { name: string; count: number; percentage: number }[];
+  topSkills: { name: string; count: number; percentage: number }[];
+  locations: { name: string; count: number; percentage: number }[];
+}
+
 interface ApiEnvelope<T> {
   success: boolean;
   message: string;
@@ -55,6 +75,12 @@ export const departmentService = {
   // Department-scoped alumni records with employment status (my-alumni)
   async getDepartmentAlumni(): Promise<DepartmentAlumniRecord[]> {
     const response = await api.get<ApiEnvelope<DepartmentAlumniRecord[]>>('/departments/my-alumni');
+    return response.data.data;
+  },
+
+  // Server-aggregated analytics for the authenticated department head (my-analytics)
+  async getDepartmentAnalytics(): Promise<DepartmentAnalytics> {
+    const response = await api.get<ApiEnvelope<DepartmentAnalytics>>('/departments/my-analytics');
     return response.data.data;
   },
 
