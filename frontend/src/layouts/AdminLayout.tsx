@@ -45,7 +45,9 @@ class AdminRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/admin/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Admin' }, { label: 'Dashboard' }] },
+  '/admin/ict-portal': { title: 'ICT Technical Portal', breadcrumb: [{ label: 'Admin' }, { label: 'ICT Portal' }] },
   '/admin/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
+  '/admin/support-tickets': { title: 'Support Desk', breadcrumb: [{ label: 'Admin' }, { label: 'Support Desk' }] },
   '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
   '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },
@@ -209,8 +211,11 @@ export default function AdminLayout() {
       <div className="px-3 py-3">
         <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
         <div className="mt-2">
-          <AdminBadge variant="danger" className="bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15">
-            Super Admin
+          <AdminBadge
+            variant={user?.role === 'SUPER_ADMIN' ? 'danger' : 'neutral'}
+            className={user?.role === 'SUPER_ADMIN' ? 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15' : 'bg-[#003580]/10 text-[#003580] border-[#003580]/15'}
+          >
+            {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}
           </AdminBadge>
         </div>
       </div>
@@ -433,7 +438,7 @@ export default function AdminLayout() {
                 </div>
                 <div className="hidden text-left sm:block">
                   <div className="text-sm font-medium text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
-                  <div className="text-[11px] text-[var(--text-secondary)]">Super Admin</div>
+                  <div className="text-[11px] text-[var(--text-secondary)]">{user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}</div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-slate-400" />
               </button>

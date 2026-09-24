@@ -21,7 +21,9 @@ router.put('/experiences/:id', asyncHandler(AlumniController.updateExperience));
 router.delete('/experiences/:id', asyncHandler(AlumniController.deleteExperience));
 
 // Files
-router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
+router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
+router.post('/upload-certificate', uploadMiddleware.single('certificateImage'), asyncHandler(AlumniController.uploadCertificate));
+router.post('/upload-document-file', uploadMiddleware.single('documentFile'), asyncHandler(AlumniController.uploadDocumentFile));
 
 // Documents & Chapa Payment
 router.post('/document-requests', asyncHandler(AlumniController.requestDocument));
@@ -34,6 +36,9 @@ router.get('/dashboard-stats', asyncHandler(AlumniController.getDashboardStats))
 
 // Mentors
 router.get('/mentors', asyncHandler(AlumniController.getMentorProfiles));
+router.get('/mentors/my-status', asyncHandler(AlumniController.getMentorStatus));
+router.post('/mentors/register', asyncHandler(AlumniController.registerAsMentor));
+router.post('/mentors/toggle', asyncHandler(AlumniController.toggleMentorStatus));
 router.post('/mentorship-sessions', asyncHandler(AlumniController.scheduleSession));
 
 // Settings Preferences
@@ -51,6 +56,8 @@ router.delete('/account', asyncHandler(AlumniController.deleteAccount));
 // Forum
 router.get('/forum', asyncHandler(AlumniController.getForumPosts));
 router.post('/forum', asyncHandler(AlumniController.createForumPost));
+router.put('/forum/:id', asyncHandler(AlumniController.updateForumPost));
+router.delete('/forum/:id', asyncHandler(AlumniController.deleteForumPost));
 router.post('/forum/:id/like', asyncHandler(AlumniController.toggleForumLike));
 router.post('/forum/:id/comment', asyncHandler(AlumniController.addForumComment));
 

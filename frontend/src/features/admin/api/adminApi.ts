@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { adminMockData } from './mockData';
 
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 export const adminApiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
@@ -24,8 +24,8 @@ export const adminApi = {
     if (USE_MOCK) {
       return Promise.resolve(adminMockData.dashboardOverview);
     }
-    const response = await adminApiClient.get('/admin/overview');
-    return response.data;
+    const response = await adminApiClient.get('/admin/dashboard/metrics');
+    return response.data.data;
   },
 
   async listUsers() {
@@ -33,15 +33,15 @@ export const adminApi = {
       return Promise.resolve(adminMockData.alumniUsers);
     }
     const response = await adminApiClient.get('/admin/users');
-    return response.data;
+    return response.data.data;
   },
 
   async listSurveys() {
     if (USE_MOCK) {
       return Promise.resolve(adminMockData.surveyManagement.surveys);
     }
-    const response = await adminApiClient.get('/admin/surveys');
-    return response.data;
+    const response = await adminApiClient.get('/surveys');
+    return response.data.data;
   },
 
   async listDepartments() {
@@ -49,7 +49,7 @@ export const adminApi = {
       return Promise.resolve(adminMockData.departments);
     }
     const response = await adminApiClient.get('/admin/departments');
-    return response.data;
+    return response.data.data;
   },
 
   async listJobs() {
@@ -57,7 +57,7 @@ export const adminApi = {
       return Promise.resolve(adminMockData.jobPostings);
     }
     const response = await adminApiClient.get('/admin/jobs');
-    return response.data;
+    return response.data.data;
   },
 
   async listLogs() {
@@ -65,15 +65,15 @@ export const adminApi = {
       return Promise.resolve(adminMockData.systemLogs);
     }
     const response = await adminApiClient.get('/admin/logs');
-    return response.data;
+    return response.data.data;
   },
 
   async getAnalyticsOverview() {
     if (USE_MOCK) {
       return Promise.resolve(adminMockData.analyticsOverview);
     }
-    const response = await adminApiClient.get('/admin/analytics');
-    return response.data;
+    const response = await adminApiClient.get('/admin/dashboard/metrics');
+    return response.data.data;
   },
 };
 

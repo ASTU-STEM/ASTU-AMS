@@ -3,6 +3,8 @@ import { AlumniProfile, Certification, Project, Achievement } from '../types/alu
 import { alumniService } from '../services/alumni.service';
 import toast from 'react-hot-toast';
 
+import { calculateProfileCompletion, getProfileCompletionBreakdown } from '../utils/profileCompletion';
+
 interface ProfileTabProps {
   profile: AlumniProfile;
   onSave: (updatedProfile: AlumniProfile) => void;
@@ -16,11 +18,18 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
   const [newSkill, setNewSkill] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [activeSection, setActiveSection] = useState('personal');
+  const [showScoreModal, setShowScoreModal] = useState(false);
   const [newCertification, setNewCertification] = useState<Partial<Certification>>({});
   const [newProject, setNewProject] = useState<Partial<Project>>({});
   const [newTechnology, setNewTechnology] = useState('');
   const [showCertForm, setShowCertForm] = useState(false);
+  const [editingCertId, setEditingCertId] = useState<string | number | null>(null);
+  const [certUploading, setCertUploading] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<string | number | null>(null);
+  const [newAchievement, setNewAchievement] = useState<Partial<Achievement>>({});
+  const [showAchievementForm, setShowAchievementForm] = useState(false);
+  const [editingAchievementId, setEditingAchievementId] = useState<string | number | null>(null);
   const [savedCoverLetter, setSavedCoverLetter] = useState(() => localStorage.getItem('astu_saved_cover_letter') || profile.bio || '');
 
   useEffect(() => {
@@ -34,42 +43,290 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
       setFormData(prev => ({
         ...prev,
         ...profile,
+        linkedInUrl: profile.linkedInUrl || profile.linkedIn || (profile as any).linkedIn || prev.linkedInUrl || '',
+        gitHubUrl: profile.gitHubUrl || profile.gitHub || (profile as any).gitHub || prev.gitHubUrl || '',
+        portfolioUrl: profile.portfolioUrl || profile.portfolio || (profile as any).portfolio || prev.portfolioUrl || '',
+        twitterUrl: profile.twitterUrl || (profile as any).twitterUrl || prev.twitterUrl || '',
+        workLocation: profile.workLocation || profile.location || (profile as any).workLocation || (profile as any).preferences?.workLocation || (profile as any).preferences?.location || prev.workLocation || '',
+        location: profile.location || profile.workLocation || (profile as any).location || (profile as any).preferences?.location || (profile as any).preferences?.workLocation || prev.location || '',
+        industry: (() => {
+          const rawInd = profile.industry || (profile as any).industry || (profile as any).preferences?.industry || prev.industry || '';
+          if (!rawInd || rawInd.toLowerCase().includes('bachelor') || rawInd.toLowerCase().includes('degree')) {
+            const comp = (profile.company || (profile as any).company || '').toLowerCase();
+            if (comp.includes('insa') || comp.includes('security')) return 'Cybersecurity & Defense Intelligence';
+            if (comp.includes('safaricom') || comp.includes('telecom')) return 'Telecommunications & Digital Services';
+            if (comp.includes('bank') || comp.includes('chapa') || comp.includes('cbe')) return 'Banking & Digital Financial Services';
+            return 'Software & Artificial Intelligence';
+          }
+          return rawInd;
+        })(),
+        employmentStatus: profile.employmentStatus || (profile as any).employmentStatus || (profile as any).preferences?.employmentStatus || prev.employmentStatus || 'EMPLOYED',
         resume: resumeObj
       }));
     }
   }, [profile]);
 
-  const profileScore = Math.min(100, 
-    30 + 
-    formData.skills.length * 3 + 
-    (formData.resume || formData.resumeUrl ? 10 : 0) + 
-    (formData.linkedInUrl ? 5 : 0) + 
-    (formData.gitHubUrl ? 5 : 0) + 
-    (formData.portfolioUrl ? 5 : 0) +
-    (formData.certifications?.length ? Math.min(formData.certifications.length * 5, 15) : 0) +
-    (formData.projects?.length ? Math.min(formData.projects.length * 5, 15) : 0) +
-    (formData.achievements?.length ? Math.min(formData.achievements.length * 3, 10) : 0) +
-    (formData.languages?.length ? 5 : 0)
-  );
+  const profileScore = calculateProfileCompletion(formData);
+  const breakdown = getProfileCompletionBreakdown(formData);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddSkill = (e: React.FormEvent) => {
+  const handleEmploymentBlurOrChange = async (updatedData?: Partial<AlumniProfile>) => {
+    const nextForm = { ...formData, ...updatedData };
+    setFormData(nextForm);
+    try {
+      await alumniService.updateProfile({
+        company: nextForm.company,
+        currentRole: nextForm.currentRole,
+        workLocation: nextForm.workLocation || nextForm.location,
+        location: nextForm.workLocation || nextForm.location,
+        industry: nextForm.industry,
+        salaryRange: nextForm.salaryRange,
+        employmentStatus: nextForm.employmentStatus,
+      });
+      if (onSave) onSave(nextForm);
+    } catch (_) {}
+  };
+
+  const handleAddSkill = async (e: React.FormEvent) => {
     e.preventDefault();
     const skillTrimmed = newSkill.trim();
     if (skillTrimmed && !formData.skills.includes(skillTrimmed)) {
-      setFormData((prev) => ({ ...prev, skills: [...prev.skills, skillTrimmed] }));
+      const updatedSkills = [...formData.skills, skillTrimmed];
+      const updatedProfile = { ...formData, skills: updatedSkills };
+      setFormData(updatedProfile);
       setNewSkill('');
-      toast.success(`Added skill: ${skillTrimmed}`);
+      toast.loading('Saving skill...', { id: 'save-skill' });
+      try {
+        await alumniService.updateProfile({ skills: updatedSkills });
+        if (onSave) onSave(updatedProfile);
+        toast.success(`Added & saved skill: ${skillTrimmed}`, { id: 'save-skill' });
+      } catch (err) {
+        toast.error('Failed to save skill.', { id: 'save-skill' });
+      }
     }
   };
 
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setFormData((prev) => ({ ...prev, skills: prev.skills.filter((skill) => skill !== skillToRemove) }));
-    toast.success(`Removed skill: ${skillToRemove}`);
+  const handleRemoveSkill = async (skillToRemove: string) => {
+    const updatedSkills = formData.skills.filter((skill) => skill !== skillToRemove);
+    const updatedProfile = { ...formData, skills: updatedSkills };
+    setFormData(updatedProfile);
+    toast.loading('Updating skills...', { id: 'save-skill' });
+    try {
+      await alumniService.updateProfile({ skills: updatedSkills });
+      if (onSave) onSave(updatedProfile);
+      toast.success(`Removed skill: ${skillToRemove}`, { id: 'save-skill' });
+    } catch (err) {
+      toast.error('Failed to update skills.', { id: 'save-skill' });
+    }
+  };
+
+  const handleCertImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCertUploading(true);
+    toast.loading('Uploading certificate file...', { id: 'cert-upload' });
+    try {
+      const res = await alumniService.uploadCertificate(file);
+      setNewCertification(p => ({ ...p, imageUrl: res.imageUrl }));
+      toast.success('Certificate file attached!', { id: 'cert-upload' });
+    } catch (err) {
+      toast.error('Failed to upload certificate file.', { id: 'cert-upload' });
+    } finally {
+      setCertUploading(false);
+    }
+  };
+
+  const handleEditCertification = (cert: Certification) => {
+    setEditingCertId(cert.id);
+    setNewCertification({ ...cert });
+    setShowCertForm(true);
+  };
+
+  const handleSaveCertification = async () => {
+    if (!newCertification.name || !newCertification.issuer) {
+      toast.error('Certification name and issuer are required.');
+      return;
+    }
+
+    const certId = editingCertId !== null ? editingCertId : (newCertification.id || Date.now());
+
+    const cert: Certification = {
+      id: certId as any,
+      name: newCertification.name!,
+      issuer: newCertification.issuer!,
+      issueDate: newCertification.issueDate || 'Present',
+      expiryDate: newCertification.expiryDate || '',
+      credentialUrl: newCertification.credentialUrl || '',
+      imageUrl: newCertification.imageUrl || '',
+      description: newCertification.description || '',
+    };
+
+    let updatedCerts: Certification[];
+    if (editingCertId !== null) {
+      updatedCerts = (formData.certifications || []).map(c => String(c.id) === String(editingCertId) ? cert : c);
+    } else {
+      updatedCerts = [...(formData.certifications || []), cert];
+    }
+
+    const updatedProfile = { ...formData, certifications: updatedCerts };
+    setFormData(updatedProfile);
+    setNewCertification({});
+    setEditingCertId(null);
+    setShowCertForm(false);
+
+    toast.loading('Saving certification...', { id: 'save-cert' });
+    try {
+      await alumniService.updateProfile({ certifications: updatedCerts });
+      if (onSave) onSave(updatedProfile);
+      toast.success(editingCertId !== null ? 'Certification updated in database!' : 'Certification saved to database!', { id: 'save-cert' });
+    } catch (err) {
+      toast.error('Failed to save certification.', { id: 'save-cert' });
+    }
+  };
+
+  const handleDeleteCertification = async (certId: any) => {
+    const updatedCerts = formData.certifications?.filter(c => String(c.id) !== String(certId)) || [];
+    const updatedProfile = { ...formData, certifications: updatedCerts };
+    setFormData(updatedProfile);
+
+    toast.loading('Removing certification...', { id: 'delete-cert' });
+    try {
+      await alumniService.updateProfile({ certifications: updatedCerts });
+      if (onSave) onSave(updatedProfile);
+      toast.success('Certification removed from database.', { id: 'delete-cert' });
+    } catch (err) {
+      toast.error('Failed to remove certification.', { id: 'delete-cert' });
+    }
+  };
+
+  const handleEditProject = (proj: Project) => {
+    setEditingProjectId(proj.id);
+    setNewProject({ ...proj });
+    setShowProjectForm(true);
+  };
+
+  const handleSaveProject = async () => {
+    if (!newProject.title) {
+      toast.error('Project title is required.');
+      return;
+    }
+
+    const projId = editingProjectId !== null ? editingProjectId : (newProject.id || Date.now());
+
+    const project: Project = {
+      id: projId as any,
+      title: newProject.title!,
+      description: newProject.description || '',
+      technologies: newProject.technologies || [],
+      role: newProject.role || '',
+      startDate: newProject.startDate || '',
+      endDate: newProject.endDate || '',
+      url: newProject.url || '',
+      imageUrl: newProject.imageUrl || '',
+    };
+
+    let updatedProjects: Project[];
+    if (editingProjectId !== null) {
+      updatedProjects = (formData.projects || []).map(p => String(p.id) === String(editingProjectId) ? project : p);
+    } else {
+      updatedProjects = [...(formData.projects || []), project];
+    }
+
+    const updatedProfile = { ...formData, projects: updatedProjects };
+    setFormData(updatedProfile);
+    setNewProject({});
+    setNewTechnology('');
+    setEditingProjectId(null);
+    setShowProjectForm(false);
+
+    toast.loading('Saving project...', { id: 'save-proj' });
+    try {
+      await alumniService.updateProfile({ projects: updatedProjects });
+      if (onSave) onSave(updatedProfile);
+      toast.success(editingProjectId !== null ? 'Project updated in database!' : 'Project saved to database!', { id: 'save-proj' });
+    } catch (err) {
+      toast.error('Failed to save project.', { id: 'save-proj' });
+    }
+  };
+
+  const handleDeleteProject = async (projId: any) => {
+    const updatedProjects = formData.projects?.filter(p => String(p.id) !== String(projId)) || [];
+    const updatedProfile = { ...formData, projects: updatedProjects };
+    setFormData(updatedProfile);
+
+    toast.loading('Removing project...', { id: 'delete-proj' });
+    try {
+      await alumniService.updateProfile({ projects: updatedProjects });
+      if (onSave) onSave(updatedProfile);
+      toast.success('Project removed from database.', { id: 'delete-proj' });
+    } catch (err) {
+      toast.error('Failed to remove project.', { id: 'delete-proj' });
+    }
+  };
+
+  const handleEditAchievement = (ach: Achievement) => {
+    setEditingAchievementId(ach.id);
+    setNewAchievement({ ...ach });
+    setShowAchievementForm(true);
+  };
+
+  const handleSaveAchievement = async () => {
+    if (!newAchievement.title) {
+      toast.error('Achievement title is required.');
+      return;
+    }
+
+    const achId = editingAchievementId !== null ? editingAchievementId : (newAchievement.id || Date.now());
+
+    const achievement: Achievement = {
+      id: achId as any,
+      title: newAchievement.title!,
+      description: newAchievement.description || '',
+      date: newAchievement.date || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      type: (newAchievement.type || 'recognition') as any,
+    };
+
+    let updatedAchievements: Achievement[];
+    if (editingAchievementId !== null) {
+      updatedAchievements = (formData.achievements || []).map(a => String(a.id) === String(editingAchievementId) ? achievement : a);
+    } else {
+      updatedAchievements = [...(formData.achievements || []), achievement];
+    }
+
+    const updatedProfile = { ...formData, achievements: updatedAchievements };
+    setFormData(updatedProfile);
+    setNewAchievement({});
+    setEditingAchievementId(null);
+    setShowAchievementForm(false);
+
+    toast.loading('Saving achievement...', { id: 'save-ach' });
+    try {
+      await alumniService.updateProfile({ achievements: updatedAchievements });
+      if (onSave) onSave(updatedProfile);
+      toast.success(editingAchievementId !== null ? 'Achievement updated in database!' : 'Achievement saved to database!', { id: 'save-ach' });
+    } catch (err) {
+      toast.error('Failed to save achievement.', { id: 'save-ach' });
+    }
+  };
+
+  const handleDeleteAchievement = async (achId: any) => {
+    const updatedAchievements = formData.achievements?.filter(a => String(a.id) !== String(achId)) || [];
+    const updatedProfile = { ...formData, achievements: updatedAchievements };
+    setFormData(updatedProfile);
+
+    toast.loading('Removing achievement...', { id: 'delete-ach' });
+    try {
+      await alumniService.updateProfile({ achievements: updatedAchievements });
+      if (onSave) onSave(updatedProfile);
+      toast.success('Achievement removed from database.', { id: 'delete-ach' });
+    } catch (err) {
+      toast.error('Failed to remove achievement.', { id: 'delete-ach' });
+    }
   };
 
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,13 +393,28 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     toast.success('Profile saving...');
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const tempUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, avatarUrl: tempUrl }));
-      toast.success('Profile photo selected for upload!');
+    if (!file) return;
+
+    setAvatarFile(file);
+    const tempUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, avatarUrl: tempUrl, profilePicture: tempUrl }));
+    toast.loading('Uploading & saving profile photo...', { id: 'avatar-upload' });
+
+    try {
+      const res = await alumniService.uploadAvatar(file);
+      const serverUrl = res.profilePicture || res.avatarUrl;
+      if (serverUrl) {
+        setFormData((prev) => ({ ...prev, profilePicture: serverUrl, avatarUrl: serverUrl }));
+        if (onSave) {
+          onSave({ ...formData, profilePicture: serverUrl, avatarUrl: serverUrl });
+        }
+      }
+      toast.success('Profile photo uploaded & saved successfully!', { id: 'avatar-upload' });
+    } catch (err) {
+      console.error('Failed to upload profile photo:', err);
+      toast.error('Failed to save profile photo. Please try again.', { id: 'avatar-upload' });
     }
   };
 
@@ -198,12 +470,19 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getScoreColor()} flex items-center justify-center mx-auto`}>
+              <button
+                type="button"
+                onClick={() => setShowScoreModal(true)}
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10 transition-all cursor-pointer group"
+                title="Click to view profile completeness breakdown"
+              >
+                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getScoreColor()} flex items-center justify-center mx-auto group-hover:scale-105 transition-transform`}>
                   <span className="text-sm font-extrabold text-white">{profileScore}%</span>
                 </div>
-                <p className="text-[9px] text-white/60 font-bold uppercase tracking-wider mt-1.5">Profile Score</p>
-              </div>
+                <p className="text-[9px] text-white/80 font-bold uppercase tracking-wider mt-1.5 flex items-center justify-center gap-1">
+                  Profile Score <span>🔍</span>
+                </p>
+              </button>
               <button
                 onClick={handleSubmit}
                 className="px-5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 border border-white/15 shadow-lg hover:shadow-xl"
@@ -218,12 +497,18 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
       {/* Profile Completion Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: 'verified', label: 'Identity', value: 'Verified', color: 'emerald' },
-          { icon: 'analytics', label: 'Completeness', value: `${profileScore}%`, color: 'blue' },
-          { icon: 'work', label: 'Resume', value: (formData.resume || formData.resumeUrl) ? 'Uploaded' : 'Missing', color: (formData.resume || formData.resumeUrl) ? 'emerald' : 'amber' },
-          { icon: 'link', label: 'LinkedIn', value: formData.linkedInUrl ? 'Connected' : 'Not set', color: formData.linkedInUrl ? 'emerald' : 'amber' },
+          { icon: 'verified', label: 'Identity', value: 'Verified', color: 'emerald', isClickable: false },
+          { icon: 'analytics', label: 'Completeness', value: `${profileScore}% (Click to view)`, color: 'blue', isClickable: true },
+          { icon: 'work', label: 'Resume', value: (formData.resume || formData.resumeUrl) ? 'Uploaded' : 'Missing', color: (formData.resume || formData.resumeUrl) ? 'emerald' : 'amber', isClickable: false },
+          { icon: 'link', label: 'LinkedIn', value: formData.linkedInUrl ? 'Connected' : 'Not set', color: formData.linkedInUrl ? 'emerald' : 'amber', isClickable: false },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-3.5 shadow-sm hover:shadow-md transition-all duration-200">
+          <div
+            key={idx}
+            onClick={() => stat.isClickable && setShowScoreModal(true)}
+            className={`bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-3.5 shadow-sm hover:shadow-md transition-all duration-200 ${
+              stat.isClickable ? 'cursor-pointer hover:border-[#003366]/40 ring-1 ring-blue-500/20' : ''
+            }`}
+          >
             <div className="flex items-center gap-2 mb-2">
               <span className="material-symbols-outlined text-base">{stat.icon}</span>
               <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded ${
@@ -266,8 +551,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Full Name</label>
-                  <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} className={inputClass} required />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Full Name</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input type="text" name="fullName" value={formData.fullName} className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`} readOnly disabled title="Full Name is synced from ASTU Registrar and cannot be edited in portal" />
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Email Address</label>
@@ -275,11 +563,14 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Phone Number</label>
-                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className={inputClass} />
+                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className={inputClass} placeholder="+251 9..." />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Student ID / Batch No.</label>
-                  <input type="text" name="studentId" value={formData.studentId} onChange={handleInputChange} className={`${inputClass} opacity-60 cursor-not-allowed`} readOnly />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Student ID / Batch No.</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input type="text" name="studentId" value={formData.studentId} className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`} readOnly disabled title="Student ID is synced from ASTU Registrar and cannot be edited in portal" />
                 </div>
               </div>
                   <div className="space-y-1.5">
@@ -298,8 +589,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       <input type="text" name="nationality" value={formData.nationality || ''} onChange={handleInputChange} className={inputClass} placeholder="e.g. Ethiopian" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Date of Birth</label>
-                      <input type="date" name="dateOfBirth" value={formData.dateOfBirth?.split('T')[0] || ''} onChange={(e) => setFormData(p => ({ ...p, dateOfBirth: e.target.value }))} className={inputClass} />
+                      <div className="flex items-center justify-between">
+                        <label className={labelClass}>Date of Birth</label>
+                        <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                      </div>
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={
+                          formData.dateOfBirth
+                            ? new Date(formData.dateOfBirth).toISOString().split('T')[0]
+                            : ''
+                        }
+                        className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                        readOnly
+                        disabled
+                        title="Date of Birth is synced from ASTU Registrar record and cannot be edited in portal"
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Gender</label>
@@ -345,26 +651,53 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div>
                 <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Academic Record</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Your ASTU academic information synced from the student information system.</p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Your ASTU official academic information synced from the Registrar Student Information System.</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Department</label>
-                  <select name="department" value={typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department} onChange={handleInputChange} className={inputClass}>
-                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                    <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
-                    <option value="Chemical Engineering">Chemical Engineering</option>
-                  </select>
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Department</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="department"
+                    value={typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department}
+                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    readOnly
+                    disabled
+                    title="Department is synced from ASTU Registrar and cannot be edited in portal"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Graduation Batch</label>
-                  <input type="text" name="batch" value={formData.batch} onChange={handleInputChange} className={inputClass} />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Graduation Batch</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="batch"
+                    value={formData.batch || (formData.graduationYear ? `${formData.graduationYear}` : '')}
+                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    readOnly
+                    disabled
+                    title="Graduation Batch is synced from ASTU Registrar and cannot be edited in portal"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Final CGPA</label>
-                  <input type="text" name="cgpa" value={formData.cgpa} onChange={handleInputChange} className={inputClass} placeholder="e.g. 3.75" />
+                  <div className="flex items-center justify-between">
+                    <label className={labelClass}>Final CGPA</label>
+                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="cgpa"
+                    value={formData.cgpa}
+                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    readOnly
+                    disabled
+                    title="Final CGPA is synced from ASTU Registrar and cannot be edited in portal"
+                  />
                 </div>
               </div>
             </div>
@@ -375,25 +708,94 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div>
                 <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Employment Details</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your current professional role and compensation details.</p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your employment status, workplace, company location, role title, and compensation.</p>
               </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Role / Title</label>
-                  <input type="text" name="currentRole" value={formData.currentRole} onChange={handleInputChange} className={inputClass} placeholder="e.g. Junior Frontend Dev" />
+                  <label className={labelClass}>Employment Status</label>
+                  <select
+                    name="employmentStatus"
+                    value={formData.employmentStatus || 'EMPLOYED'}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      handleEmploymentBlurOrChange({ employmentStatus: e.target.value });
+                    }}
+                    className={inputClass}
+                  >
+                    <option value="EMPLOYED">Employed (Full-Time / Part-Time / Contract)</option>
+                    <option value="UNEMPLOYED">Unemployed / Actively Seeking Placement</option>
+                    <option value="SELF_EMPLOYED">Self-Employed / Entrepreneur / Freelancer</option>
+                  </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Company Name</label>
-                  <input type="text" name="company" value={formData.company} onChange={handleInputChange} className={inputClass} placeholder="e.g. Chapa Financials" />
+                  <label className={labelClass}>Role / Title</label>
+                  <input
+                    type="text"
+                    name="currentRole"
+                    value={formData.currentRole || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Junior Frontend Dev / Senior Software Engineer"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Company / Employer Name</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Safaricom Ethiopia PLC / Chapa Financials"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Work Location / Company Place</label>
+                  <input
+                    type="text"
+                    name="workLocation"
+                    value={formData.workLocation || formData.location || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData(prev => ({ ...prev, workLocation: val, location: val }));
+                    }}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Addis Ababa HQ (Hybrid), Hawassa Branch, Remote"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Industry Sector</label>
+                  <input
+                    type="text"
+                    name="industry"
+                    value={formData.industry || ''}
+                    onChange={handleInputChange}
+                    onBlur={() => handleEmploymentBlurOrChange()}
+                    className={inputClass}
+                    placeholder="e.g. Telecommunications & Digital Services, Software"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Salary Range</label>
-                  <select name="salaryRange" value={formData.salaryRange} onChange={handleInputChange} className={inputClass}>
+                  <select
+                    name="salaryRange"
+                    value={formData.salaryRange || 'Competitive Salary'}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      handleEmploymentBlurOrChange({ salaryRange: e.target.value });
+                    }}
+                    className={inputClass}
+                  >
                     <option value="Under 15,000 ETB">Under 15,000 ETB</option>
                     <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
                     <option value="30,001 - 60,000 ETB">30,001 - 60,000 ETB</option>
                     <option value="60,001 - 100,000 ETB">60,001 - 100,000 ETB</option>
                     <option value="Over 100,000 ETB">Over 100,000 ETB</option>
+                    <option value="Competitive Salary">Competitive Salary</option>
+                    <option value="Seeking Opportunities">Seeking Opportunities</option>
                   </select>
                 </div>
               </div>
@@ -590,7 +992,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Professional Certifications</h3>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your verified credentials and certificates.</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your verified credentials, upload certificate files, and link credential URLs.</p>
                 </div>
                 <button onClick={() => setShowCertForm(!showCertForm)} className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
                   <span>{showCertForm ? '✕' : '+'}</span> {showCertForm ? 'Cancel' : 'Add Certification'}
@@ -598,14 +1000,14 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               </div>
 
               {showCertForm && (
-                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Certification Name</label>
-                      <input type="text" value={newCertification.name || ''} onChange={(e) => setNewCertification(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="e.g. AWS Certified Cloud Practitioner" />
+                      <label className={labelClass}>Certification Name *</label>
+                      <input type="text" value={newCertification.name || ''} onChange={(e) => setNewCertification(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="e.g. AWS Certified Solutions Architect" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Issuing Organization</label>
+                      <label className={labelClass}>Issuing Organization *</label>
                       <input type="text" value={newCertification.issuer || ''} onChange={(e) => setNewCertification(p => ({ ...p, issuer: e.target.value }))} className={inputClass} placeholder="e.g. Amazon Web Services" />
                     </div>
                     <div className="space-y-1.5">
@@ -613,52 +1015,143 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       <input type="text" value={newCertification.issueDate || ''} onChange={(e) => setNewCertification(p => ({ ...p, issueDate: e.target.value }))} className={inputClass} placeholder="e.g. Jan 2025" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Credential URL</label>
-                      <input type="url" value={newCertification.credentialUrl || ''} onChange={(e) => setNewCertification(p => ({ ...p, credentialUrl: e.target.value }))} className={inputClass} placeholder="https://example.com/verify" />
+                      <label className={labelClass}>Expiry Date</label>
+                      <input type="text" value={newCertification.expiryDate || ''} onChange={(e) => setNewCertification(p => ({ ...p, expiryDate: e.target.value }))} className={inputClass} placeholder="e.g. Jan 2028 (Optional)" />
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (!newCertification.name || !newCertification.issuer) { toast.error('Name and issuer required.'); return; }
-                      const cert: Certification = { id: Date.now(), name: newCertification.name!, issuer: newCertification.issuer!, issueDate: newCertification.issueDate || 'Present', credentialUrl: newCertification.credentialUrl };
-                      setFormData(p => ({ ...p, certifications: [...(p.certifications || []), cert] }));
-                      setNewCertification({});
-                      setShowCertForm(false);
-                      toast.success('Certification added!');
-                    }}
-                    className="px-4 py-2 bg-[#003366] text-white rounded-xl text-xs font-bold hover:bg-[#002244] transition-all"
-                  >
-                    Save Certification
-                  </button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Credential URL</label>
+                      <input type="url" value={newCertification.credentialUrl || ''} onChange={(e) => setNewCertification(p => ({ ...p, credentialUrl: e.target.value }))} className={inputClass} placeholder="https://credly.com/badges/your-badge" />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Upload Certificate File / Image</label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="file"
+                          id="cert-file-input"
+                          accept="image/*,.pdf"
+                          onChange={handleCertImageUpload}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => document.getElementById('cert-file-input')?.click()}
+                          disabled={certUploading}
+                          className="px-4 py-2.5 bg-white dark:bg-gray-800 border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-primary)] hover:border-[#003366] transition-all flex items-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-base text-[#003366]">upload_file</span>
+                          {certUploading ? 'Uploading...' : 'Choose Certificate File'}
+                        </button>
+                        {newCertification.imageUrl && (
+                          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl text-[10px] font-extrabold">
+                            <span>✅ Attached</span>
+                            <a
+                              href={newCertification.imageUrl.startsWith('/uploads') ? `${UPLOAD_BASE}${newCertification.imageUrl}` : newCertification.imageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline text-emerald-800"
+                            >
+                              Preview
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Description / Notes</label>
+                    <textarea
+                      value={newCertification.description || ''}
+                      onChange={(e) => setNewCertification(p => ({ ...p, description: e.target.value }))}
+                      className={`${inputClass} h-20 resize-none`}
+                      placeholder="Optional notes or details about skills covered..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowCertForm(false)}
+                      className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveCertification}
+                      className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
+                    >
+                      💾 Save & Persist Certification
+                    </button>
+                  </div>
                 </div>
               )}
 
               {formData.certifications && formData.certifications.length > 0 ? (
                 <div className="space-y-3">
                   {formData.certifications.map((cert) => (
-                    <div key={cert.id} className="flex items-start justify-between p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all">
+                    <div key={cert.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all gap-4">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
-                          <span className="material-symbols-outlined text-lg">verified</span>
-                        </div>
+                        {cert.imageUrl ? (
+                          <img
+                            src={cert.imageUrl.startsWith('/uploads') ? `${UPLOAD_BASE}${cert.imageUrl}` : cert.imageUrl}
+                            alt={cert.name}
+                            className="w-12 h-12 rounded-xl object-cover border border-[var(--border-color)] shadow-sm flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                            <span className="material-symbols-outlined text-xl">verified</span>
+                          </div>
+                        )}
                         <div>
                           <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{cert.name}</h4>
                           <p className="text-[10px] text-[var(--text-secondary)] font-bold mt-0.5">{cert.issuer}</p>
                           <p className="text-[9px] text-[var(--text-muted)] mt-0.5">Issued: {cert.issueDate}{cert.expiryDate ? ` · Expires: ${cert.expiryDate}` : ''}</p>
+                          {cert.description && <p className="text-[10px] text-[var(--text-secondary)] mt-1">{cert.description}</p>}
                         </div>
                       </div>
-                      <div className="flex gap-1">
+
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        {cert.imageUrl && (
+                          <a
+                            href={cert.imageUrl.startsWith('/uploads') ? `${UPLOAD_BASE}${cert.imageUrl}` : cert.imageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-[10px] font-extrabold hover:bg-emerald-100 transition-all"
+                          >
+                            <span className="material-symbols-outlined text-xs">visibility</span>
+                            View File
+                          </a>
+                        )}
                         {cert.credentialUrl && (
-                          <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-[#003366] transition-all">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                          <a
+                            href={cert.credentialUrl.startsWith('http') ? cert.credentialUrl : (cert.credentialUrl.startsWith('/') ? `${UPLOAD_BASE}${cert.credentialUrl}` : `${UPLOAD_BASE}/${cert.credentialUrl}`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-[10px] font-extrabold hover:bg-blue-100 transition-all"
+                          >
+                            <span className="material-symbols-outlined text-xs">open_in_new</span>
+                            Credential Link
                           </a>
                         )}
                         <button
-                          onClick={() => {
-                            setFormData(p => ({ ...p, certifications: p.certifications?.filter(c => c.id !== cert.id) }));
-                            toast.success('Certification removed.');
-                          }}
+                          type="button"
+                          onClick={() => handleEditCertification(cert)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 rounded-lg text-[10px] font-extrabold transition-all"
+                          title="Edit certification"
+                        >
+                          <span className="material-symbols-outlined text-xs">edit</span>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCertification(cert.id)}
                           className="p-2 rounded-lg hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 transition-all"
+                          title="Remove certification"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
@@ -682,72 +1175,91 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Projects & Portfolio</h3>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your technical projects and open source contributions.</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your technical projects, portfolio items, and open source contributions.</p>
                 </div>
-                <button onClick={() => setShowProjectForm(!showProjectForm)} className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
+                <button
+                  onClick={() => {
+                    if (showProjectForm) {
+                      setShowProjectForm(false);
+                      setEditingProjectId(null);
+                      setNewProject({});
+                    } else {
+                      setShowProjectForm(true);
+                    }
+                  }}
+                  className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all"
+                >
                   <span>{showProjectForm ? '✕' : '+'}</span> {showProjectForm ? 'Cancel' : 'Add Project'}
                 </button>
               </div>
 
               {showProjectForm && (
-                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Project Title</label>
+                      <label className={labelClass}>Project Title *</label>
                       <input type="text" value={newProject.title || ''} onChange={(e) => setNewProject(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="e.g. E-commerce Platform" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Role</label>
-                      <input type="text" value={newProject.role || ''} onChange={(e) => setNewProject(p => ({ ...p, role: e.target.value }))} className={inputClass} placeholder="e.g. Lead Developer" />
+                      <label className={labelClass}>Role / Contribution</label>
+                      <input type="text" value={newProject.role || ''} onChange={(e) => setNewProject(p => ({ ...p, role: e.target.value }))} className={inputClass} placeholder="e.g. Lead Full-Stack Developer" />
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
                       <label className={labelClass}>Description</label>
-                      <textarea value={newProject.description || ''} onChange={(e) => setNewProject(p => ({ ...p, description: e.target.value }))} className={`${inputClass} h-20 resize-none`} placeholder="Brief description of the project..." />
+                      <textarea value={newProject.description || ''} onChange={(e) => setNewProject(p => ({ ...p, description: e.target.value }))} className={`${inputClass} h-24 resize-none`} placeholder="Describe project goals, features, and key achievements..." />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Project URL</label>
-                      <input type="url" value={newProject.url || ''} onChange={(e) => setNewProject(p => ({ ...p, url: e.target.value }))} className={inputClass} placeholder="https://github.com/..." />
+                      <label className={labelClass}>Project URL / Live Demo</label>
+                      <input type="url" value={newProject.url || ''} onChange={(e) => setNewProject(p => ({ ...p, url: e.target.value }))} className={inputClass} placeholder="https://github.com/username/project" />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Technologies Used</label>
                       <div className="flex gap-2">
-                        <input type="text" value={newTechnology} onChange={(e) => setNewTechnology(e.target.value)} className={inputClass} placeholder="e.g. React" />
+                        <input type="text" value={newTechnology} onChange={(e) => setNewTechnology(e.target.value)} className={inputClass} placeholder="e.g. React, Node.js, PostgreSQL" />
                         <button
+                          type="button"
                           onClick={() => {
                             if (newTechnology.trim() && !(newProject.technologies || []).includes(newTechnology.trim())) {
                               setNewProject(p => ({ ...p, technologies: [...(p.technologies || []), newTechnology.trim()] }));
                               setNewTechnology('');
                             }
                           }}
-                          className="px-3 py-2 bg-gray-200 text-gray-700 rounded-xl text-xs font-bold hover:bg-gray-300"
+                          className="px-4 py-2 bg-[#003366]/10 text-[#003366] rounded-xl text-xs font-bold hover:bg-[#003366]/20 transition-all"
                         >
-                          +
+                          + Add
                         </button>
                       </div>
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {newProject.technologies?.map((tech, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-[#003366]/5 text-[#003366] text-[9px] font-bold rounded-full flex items-center gap-1">
+                          <span key={i} className="px-2.5 py-1 bg-[#003366]/10 text-[#003366] text-[10px] font-bold rounded-lg flex items-center gap-1.5">
                             {tech}
-                            <button onClick={() => setNewProject(p => ({ ...p, technologies: p.technologies?.filter((_, j) => j !== i) }))} className="hover:text-red-500">x</button>
+                            <button type="button" onClick={() => setNewProject(p => ({ ...p, technologies: p.technologies?.filter((_, j) => j !== i) }))} className="hover:text-red-500 font-extrabold">✕</button>
                           </span>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      if (!newProject.title) { toast.error('Project title is required.'); return; }
-                      const project: Project = { id: Date.now(), title: newProject.title!, description: newProject.description || '', technologies: newProject.technologies || [], role: newProject.role || '', startDate: '', url: newProject.url };
-                      setFormData(p => ({ ...p, projects: [...(p.projects || []), project] }));
-                      setNewProject({});
-                      setNewTechnology('');
-                      setShowProjectForm(false);
-                      toast.success('Project added!');
-                    }}
-                    className="px-4 py-2 bg-[#003366] text-white rounded-xl text-xs font-bold hover:bg-[#002244] transition-all"
-                  >
-                    Save Project
-                  </button>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowProjectForm(false);
+                        setEditingProjectId(null);
+                        setNewProject({});
+                      }}
+                      className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveProject}
+                      className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
+                    >
+                      💾 Save & Persist Project
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -762,25 +1274,37 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                           </div>
                           <div>
                             <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{proj.title}</h4>
-                            <p className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5">Role: {proj.role}</p>
+                            {proj.role && <p className="text-[9px] text-[var(--text-muted)] font-bold mt-0.5">Role: {proj.role}</p>}
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setFormData(p => ({ ...p, projects: p.projects?.filter(pr => pr.id !== proj.id) }));
-                            toast.success('Project removed.');
-                          }}
-                          className="p-2 rounded-lg hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 transition-all"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditProject(proj)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 rounded-lg text-[10px] font-extrabold transition-all"
+                            title="Edit project"
+                          >
+                            <span className="material-symbols-outlined text-xs">edit</span>
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(proj.id)}
+                            className="p-2 rounded-lg hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 transition-all"
+                            title="Remove project"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-[10px] text-[var(--text-secondary)] mt-2 leading-relaxed">{proj.description}</p>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {proj.technologies.map((tech, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-[#003366]/5 text-[#003366] text-[9px] font-bold rounded-md">{tech}</span>
-                        ))}
-                      </div>
+                      {proj.description && <p className="text-[10px] text-[var(--text-secondary)] mt-2 leading-relaxed">{proj.description}</p>}
+                      {proj.technologies && proj.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {proj.technologies.map((tech, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-[#003366]/5 text-[#003366] text-[9px] font-bold rounded-md">{tech}</span>
+                          ))}
+                        </div>
+                      )}
                       {proj.url && (
                         <a href={proj.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-[#003366] hover:underline">
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -803,10 +1327,76 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           {/* Achievements Section */}
           {activeSection === 'achievements' && (
             <div className="space-y-5">
-              <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Achievements & Recognition</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Awards, publications, and professional recognitions.</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Achievements & Recognition</h3>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Awards, research publications, patents, and professional honors.</p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (showAchievementForm) {
+                      setShowAchievementForm(false);
+                      setEditingAchievementId(null);
+                      setNewAchievement({});
+                    } else {
+                      setShowAchievementForm(true);
+                    }
+                  }}
+                  className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all"
+                >
+                  <span>{showAchievementForm ? '✕' : '+'}</span> {showAchievementForm ? 'Cancel' : 'Add Achievement'}
+                </button>
               </div>
+
+              {showAchievementForm && (
+                <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-4 shadow-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className={labelClass}>Achievement Title *</label>
+                      <input type="text" value={newAchievement.title || ''} onChange={(e) => setNewAchievement(a => ({ ...a, title: e.target.value }))} className={inputClass} placeholder="e.g. National AI Research Excellence Award" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Category Type</label>
+                      <select value={newAchievement.type || 'award'} onChange={(e) => setNewAchievement(a => ({ ...a, type: e.target.value as any }))} className={inputClass}>
+                        <option value="award">🏆 Award / Honor</option>
+                        <option value="publication">📖 Research Publication</option>
+                        <option value="patent">📜 Patent / Innovation</option>
+                        <option value="recognition">🌟 Professional Recognition</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Date Received / Published</label>
+                      <input type="text" value={newAchievement.date || ''} onChange={(e) => setNewAchievement(a => ({ ...a, date: e.target.value }))} className={inputClass} placeholder="e.g. Feb 2025" />
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className={labelClass}>Description / Links</label>
+                      <input type="text" value={newAchievement.description || ''} onChange={(e) => setNewAchievement(a => ({ ...a, description: e.target.value }))} className={inputClass} placeholder="Brief summary, journal link, or award presenter details..." />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAchievementForm(false);
+                        setEditingAchievementId(null);
+                        setNewAchievement({});
+                      }}
+                      className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveAchievement}
+                      className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
+                    >
+                      💾 Save & Persist Achievement
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {formData.achievements && formData.achievements.length > 0 ? (
                 <div className="space-y-3">
                   {formData.achievements.map((ach) => (
@@ -827,17 +1417,27 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                             <h4 className="text-xs font-extrabold text-[var(--text-primary)]">{ach.title}</h4>
                             <p className="text-[9px] text-[var(--text-muted)] font-bold uppercase mt-0.5">{ach.type} · {ach.date}</p>
                           </div>
-                          <button
-                            onClick={() => {
-                              setFormData(p => ({ ...p, achievements: p.achievements?.filter(a => a.id !== ach.id) }));
-                              toast.success('Achievement removed.');
-                            }}
-                            className="p-1 rounded hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500"
-                          >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                          </button>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleEditAchievement(ach)}
+                              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 rounded-md text-[10px] font-extrabold transition-all flex items-center gap-1"
+                              title="Edit achievement"
+                            >
+                              <span className="material-symbols-outlined text-[12px]">edit</span>
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAchievement(ach.id)}
+                              className="p-1 rounded hover:bg-red-50 text-[var(--text-muted)] hover:text-red-500 transition-all"
+                              title="Remove achievement"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-[var(--text-secondary)] mt-1 leading-relaxed">{ach.description}</p>
+                        {ach.description && <p className="text-[10px] text-[var(--text-secondary)] mt-1 leading-relaxed">{ach.description}</p>}
                       </div>
                     </div>
                   ))}
@@ -846,7 +1446,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 <div className="text-center py-8 text-[var(--text-muted)]">
                   <span className="text-3xl block mb-2">🏆</span>
                   <p className="text-xs font-bold">No achievements added yet.</p>
-                  <p className="text-[10px] mt-1">Share your awards and recognitions.</p>
+                  <p className="text-[10px] mt-1">Share your awards, publications, and recognitions to build prestige.</p>
                 </div>
               )}
             </div>
@@ -937,6 +1537,115 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           )}
         </div>
       </div>
+
+      {/* Profile Score Breakdown Modal */}
+      {showScoreModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[var(--border-color)] max-w-lg w-full p-6 shadow-2xl space-y-5 relative overflow-hidden">
+            <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getScoreColor()} flex items-center justify-center text-white font-extrabold text-lg shadow-md`}>
+                  {breakdown.score}%
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)]">Profile Completeness Breakdown</h3>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    {breakdown.missing.length === 0
+                      ? '🎉 Congratulations! Your profile is 100% complete.'
+                      : `Complete ${breakdown.missing.length} missing item(s) to reach 100%!`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowScoreModal(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)]">
+                <span>Completion Score</span>
+                <span className="text-[#003366] font-extrabold">{breakdown.score}% Complete</span>
+              </div>
+              <div className="w-full h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5 border border-gray-200 dark:border-gray-700">
+                <div
+                  className={`h-full rounded-full bg-gradient-to-r ${getScoreColor()} transition-all duration-500`}
+                  style={{ width: `${breakdown.score}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Missing Items Section */}
+            {breakdown.missing.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base">warning</span>
+                  Missing Profile Items ({breakdown.missing.length})
+                </h4>
+                <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                  {breakdown.missing.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-3 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{item.title}</p>
+                          <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">+{item.weight.toFixed(1)}% score boost</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowScoreModal(false);
+                          setActiveSection(item.sectionId);
+                          toast.success(`Switched tab to complete: ${item.title}`);
+                        }}
+                        className="px-3 py-1.5 bg-[#003366] text-white rounded-lg text-[10px] font-extrabold hover:bg-[#002244] transition-all shadow-xs flex items-center gap-1"
+                      >
+                        {item.actionText} ➔
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Completed Items Section */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">check_circle</span>
+                Completed Sections ({breakdown.completed.length})
+              </h4>
+              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+                {breakdown.completed.map((item) => (
+                  <span
+                    key={item.id}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-lg text-[10px] font-bold"
+                  >
+                    ✓ {item.title} (+{item.weight.toFixed(1)}%)
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowScoreModal(false)}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold hover:bg-gray-200 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

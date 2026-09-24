@@ -1,16 +1,37 @@
 import axios from 'axios';
 
 export class OpenRouterService {
-  private static getApiKey(): string | null {
+  private static async getApiKey(): Promise<string | null> {
+    try {
+      const prisma = require('../../../../core/config/db').default;
+      const setting = await prisma.systemSetting.findUnique({ where: { key: 'integrations' } });
+      if (setting && setting.value) {
+        const val = setting.value as any;
+        if (val.openRouterApiKey && val.openRouterApiKey.trim() !== '') {
+          return val.openRouterApiKey.trim();
+        }
+      }
+    } catch (_) {}
     return process.env.OPENROUTER_API_KEY || null;
   }
 
-  private static getModel(): string {
-    return process.env.OPENROUTER_MODEL || 'google/gemini-2.5-flash';
+  private static async getModel(): Promise<string> {
+    try {
+      const prisma = require('../../../../core/config/db').default;
+      const setting = await prisma.systemSetting.findUnique({ where: { key: 'integrations' } });
+      if (setting && setting.value) {
+        const val = setting.value as any;
+        if (val.openRouterModel && val.openRouterModel.trim() !== '') {
+          return val.openRouterModel.trim();
+        }
+      }
+    } catch (_) {}
+    return process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1:free';
   }
 
   static async generateText(prompt: string, systemInstruction?: string): Promise<string> {
-    const apiKey = this.getApiKey();
+    const apiKey = await this.getApiKey();
+    const model = await this.getModel();
     if (!apiKey) {
       console.warn('OPENROUTER_API_KEY not configured. Falling back to Mock LLM response.');
       return this.generateMockResponse(prompt, systemInstruction);
@@ -20,7 +41,7 @@ export class OpenRouterService {
       const response = await axios.post(
         'https://openrouter.ai/api/v1/chat/completions',
         {
-          model: this.getModel(),
+          model: model,
           max_tokens: 4000,
           messages: [
             ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
@@ -45,7 +66,8 @@ export class OpenRouterService {
   }
 
   static async generateJson<T>(prompt: string, systemInstruction?: string): Promise<T> {
-    const apiKey = this.getApiKey();
+    const apiKey = await this.getApiKey();
+    const model = await this.getModel();
     if (!apiKey) {
       console.warn('OPENROUTER_API_KEY not configured. Falling back to Mock LLM JSON response.');
       return this.generateMockJsonResponse<T>(prompt);
@@ -55,7 +77,7 @@ export class OpenRouterService {
       const response = await axios.post(
         'https://openrouter.ai/api/v1/chat/completions',
         {
-          model: this.getModel(),
+          model: model,
           max_tokens: 4000,
           response_format: { type: 'json_object' },
           messages: [

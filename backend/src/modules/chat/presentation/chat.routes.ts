@@ -11,6 +11,7 @@ router.get('/contacts', asyncHandler(UnifiedChatController.getContacts));
 router.get('/threads', asyncHandler(UnifiedChatController.getThreads));
 router.post('/send', asyncHandler(UnifiedChatController.sendMessage));
 router.post('/request-cv', asyncHandler(UnifiedChatController.requestCv));
+router.post('/meeting-invite', asyncHandler(UnifiedChatController.sendMeetingInvite));
 router.post('/read', asyncHandler(UnifiedChatController.markAsRead));
 router.delete('/message/:messageId', asyncHandler(UnifiedChatController.deleteMessage));
 router.delete('/thread/:partnerId', asyncHandler(UnifiedChatController.deleteThread));

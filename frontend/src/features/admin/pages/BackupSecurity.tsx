@@ -1,8 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Download,
   Globe2,
@@ -20,6 +22,7 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
 import { toast } from 'react-hot-toast';
+import { adminService } from '../services/admin.service';
 
 type BackupFrequency = 'Daily' | 'Weekly' | 'Monthly';
 type BackupStatus = 'Success' | 'Failed' | 'In Progress';
@@ -45,22 +48,6 @@ type ApiKeyRecord = {
   lastUsed: string;
   status: 'Active' | 'Revoked';
 };
-
-const initialBackupHistory: BackupRecord[] = [
-  { date: '2026-05-29 03:00 AM', size: '2.4 GB', status: 'Success', file: 'backup-2026-05-29.sql.gz' },
-  { date: '2026-05-28 03:00 AM', size: '2.2 GB', status: 'Success', file: 'backup-2026-05-28.sql.gz' },
-  { date: '2026-05-27 03:00 AM', size: '2.3 GB', status: 'Failed', file: 'backup-2026-05-27.sql.gz' },
-];
-
-const initialActiveSessions: SessionRecord[] = [
-  { user: 'admin@astu.edu.et', ip: '154.78.22.14', device: 'Chrome / Windows', location: 'Addis Ababa', loginTime: new Date().toLocaleString() },
-];
-
-const initialApiKeys: ApiKeyRecord[] = [
-  { name: 'Production API Key', created: '2026-01-12', lastUsed: new Date().toLocaleDateString(), status: 'Active' },
-];
-
-const whitelistSeeds = ['154.78.22.14', '154.78.22.18', '10.0.2.15'];
 
 function backupStatusClass(status: BackupStatus) {
   switch (status) {
@@ -117,86 +104,257 @@ function miniStat({ label, value, icon: Icon }: { label: string; value: string; 
   );
 }
 
+function PaginationFooter({
+  currentPage,
+  totalPages,
+  totalItems,
+  itemsPerPage,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalItems <= itemsPerPage) return null;
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-2 text-xs text-slate-600">
+      <div>
+        Showing <span className="font-semibold text-slate-800">{startItem}</span> to{' '}
+        <span className="font-semibold text-slate-800">{endItem}</span> of{' '}
+        <span className="font-semibold text-slate-800">{totalItems}</span> entries
+      </div>
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          disabled={currentPage <= 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Prev
+        </button>
+        <span className="px-2 font-medium text-slate-500">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          type="button"
+          disabled={currentPage >= totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function BackupSecurity() {
   const [schedule, setSchedule] = useState<BackupFrequency>('Daily');
   const [time, setTime] = useState('03:00');
+  const [rateLimit, setRateLimit] = useState(120);
+  const [whitelist, setWhitelist] = useState<string[]>([]);
+  const [ipInput, setIpInput] = useState('');
+
+  const [backupHistory, setBackupHistory] = useState<BackupRecord[]>([]);
+  const [activeSessions, setActiveSessions] = useState<SessionRecord[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
+
+  // Pagination state
+  const [backupPage, setBackupPage] = useState(1);
+  const [sessionPage, setSessionPage] = useState(1);
+  const [apiKeyPage, setApiKeyPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [revokeAllOpen, setRevokeAllOpen] = useState(false);
   const [generateKeyOpen, setGenerateKeyOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('Reporting API Key');
-  const [rateLimit, setRateLimit] = useState(120);
-  const [whitelist, setWhitelist] = useState<string[]>(whitelistSeeds);
-  const [ipInput, setIpInput] = useState('');
-  
-  const [backupHistory, setBackupHistory] = useState(initialBackupHistory);
-  const [activeSessions, setActiveSessions] = useState(initialActiveSessions);
-  const [apiKeys, setApiKeys] = useState(initialApiKeys);
+  const [loading, setLoading] = useState(true);
 
-  const backupSummary = 'Today, 03:00 AM — 2.4 GB — ✅ Success';
-  const lastBackupTime = backupHistory[0];
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await adminService.getBackupSecurity();
+        if (res.ok && res.data) {
+          if (res.data.backups) setBackupHistory(res.data.backups);
+          if (res.data.activeSessions) setActiveSessions(res.data.activeSessions);
+          if (res.data.apiKeys) setApiKeys(res.data.apiKeys);
+          if (res.data.whitelist) setWhitelist(res.data.whitelist);
+          if (res.data.schedule) setSchedule(res.data.schedule);
+          if (res.data.time) setTime(res.data.time);
+          if (res.data.rateLimit) setRateLimit(res.data.rateLimit);
+        }
+      } catch (_) {}
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const totalBackupPages = Math.max(1, Math.ceil(backupHistory.length / ITEMS_PER_PAGE));
+  const paginatedBackups = useMemo(() => {
+    const start = (backupPage - 1) * ITEMS_PER_PAGE;
+    return backupHistory.slice(start, start + ITEMS_PER_PAGE);
+  }, [backupHistory, backupPage]);
+
+  const totalSessionPages = Math.max(1, Math.ceil(activeSessions.length / ITEMS_PER_PAGE));
+  const paginatedSessions = useMemo(() => {
+    const start = (sessionPage - 1) * ITEMS_PER_PAGE;
+    return activeSessions.slice(start, start + ITEMS_PER_PAGE);
+  }, [activeSessions, sessionPage]);
+
+  const totalApiKeyPages = Math.max(1, Math.ceil(apiKeys.length / ITEMS_PER_PAGE));
+  const paginatedApiKeys = useMemo(() => {
+    const start = (apiKeyPage - 1) * ITEMS_PER_PAGE;
+    return apiKeys.slice(start, start + ITEMS_PER_PAGE);
+  }, [apiKeys, apiKeyPage]);
+
+  useEffect(() => {
+    if (backupPage > totalBackupPages) setBackupPage(totalBackupPages);
+  }, [totalBackupPages, backupPage]);
+
+  useEffect(() => {
+    if (sessionPage > totalSessionPages) setSessionPage(totalSessionPages);
+  }, [totalSessionPages, sessionPage]);
+
+  useEffect(() => {
+    if (apiKeyPage > totalApiKeyPages) setApiKeyPage(totalApiKeyPages);
+  }, [totalApiKeyPages, apiKeyPage]);
+
+  const lastBackupTime = backupHistory[0] || { date: 'None', size: '0 GB', status: 'Success', file: '' };
+  const backupSummary = backupHistory.length > 0
+    ? `${lastBackupTime.date} — ${lastBackupTime.size} — ✅ ${lastBackupTime.status}`
+    : 'No backups recorded yet';
 
   const backupStats = useMemo(() => {
     return [
-      { label: 'Database Backups', value: '4', icon: UploadCloud },
-      { label: 'Active Sessions', value: `${activeSessions.length}`, icon: Laptop2 },
-      { label: 'API Keys', value: `${apiKeys.length}`, icon: KeyRound },
-      { label: 'Whitelisted IPs', value: `${whitelist.length}`, icon: Globe2 },
+      { label: 'Database Backups', value: loading ? '...' : `${backupHistory.length}`, icon: UploadCloud },
+      { label: 'Active Sessions', value: loading ? '...' : `${activeSessions.length}`, icon: Laptop2 },
+      { label: 'API Keys', value: loading ? '...' : `${apiKeys.length}`, icon: KeyRound },
+      { label: 'Whitelisted IPs', value: loading ? '...' : `${whitelist.length}`, icon: Globe2 },
     ];
-  }, [activeSessions.length, apiKeys.length, whitelist.length]);
+  }, [loading, backupHistory.length, activeSessions.length, apiKeys.length, whitelist.length]);
 
-  const runBackup = () => {
+  const runBackup = async () => {
     setConfirmOpen(false);
-    const newBackup: BackupRecord = {
-      date: new Date().toLocaleString(),
-      size: '2.4 GB',
-      status: 'Success',
-      file: `backup-${new Date().toISOString().split('T')[0]}.sql.gz`
-    };
-    setBackupHistory(prev => [newBackup, ...prev]);
-    toast.success('Backup completed successfully.');
+    const res = await adminService.runDatabaseBackup();
+    if (res.ok && res.data) {
+      setBackupHistory(res.data);
+      toast.success(res.message || 'Backup completed successfully.');
+    } else {
+      toast.error(res.message || 'Failed to trigger backup.');
+    }
   };
 
-  const revokeAllSessions = () => {
+  const handleDownloadBackup = async (file: string) => {
+    try {
+      await adminService.downloadDatabaseBackup(file);
+      toast.success(`Downloaded backup file: ${file}`);
+    } catch (_) {
+      toast.error('Failed to download backup file.');
+    }
+  };
+
+  const handleRestoreBackup = async (file: string) => {
+    const res = await adminService.restoreDatabaseBackup(file);
+    if (res.ok) {
+      toast.success(res.message || `Restored database from ${file}`);
+    } else {
+      toast.error(res.message || 'Failed to restore database.');
+    }
+  };
+
+  const revokeAllSessions = async () => {
     setRevokeAllOpen(false);
-    setActiveSessions([]);
-    toast.success('All sessions revoked successfully.');
+    const res = await adminService.revokeAllSessions();
+    if (res.ok && res.data) {
+      setActiveSessions(res.data);
+      toast.success(res.message || 'All sessions revoked successfully.');
+    } else {
+      toast.error(res.message || 'Failed to revoke sessions.');
+    }
   };
 
-  const createApiKey = () => {
+  const createApiKey = async () => {
     if (!newKeyName.trim()) {
       toast.error('Key name is required');
       return;
     }
     setGenerateKeyOpen(false);
-    const newKey: ApiKeyRecord = {
-      name: newKeyName,
-      created: new Date().toLocaleDateString(),
-      lastUsed: 'Never',
-      status: 'Active'
-    };
-    setApiKeys(prev => [newKey, ...prev]);
-    setNewKeyName('');
-    toast.success(`API key "${newKey.name}" created successfully.`);
+    const res = await adminService.createApiKey(newKeyName.trim());
+    if (res.ok && res.data) {
+      setApiKeys(res.data);
+      setNewKeyName('');
+      toast.success(res.message || 'API key created successfully.');
+    } else {
+      toast.error(res.message || 'Failed to create API key.');
+    }
   };
 
-  const revokeSession = (user: string) => {
-    setActiveSessions(prev => prev.filter(s => s.user !== user));
-    toast.success(`Session for ${user} revoked.`);
+  const revokeSession = async (user: string) => {
+    const res = await adminService.revokeSession(user);
+    if (res.ok && res.data) {
+      setActiveSessions(res.data);
+      toast.success(`Session for ${user} revoked.`);
+    } else {
+      toast.error(res.message || 'Failed to revoke session.');
+    }
   };
 
-  const revokeApiKey = (name: string) => {
-    setApiKeys(prev => prev.map(k => k.name === name ? { ...k, status: 'Revoked' } : k));
-    toast.success(`API key "${name}" revoked.`);
+  const revokeApiKey = async (name: string) => {
+    const res = await adminService.revokeApiKey(name);
+    if (res.ok && res.data) {
+      setApiKeys(res.data);
+      toast.success(`API key "${name}" revoked.`);
+    } else {
+      toast.error(res.message || 'Failed to revoke API key.');
+    }
   };
 
-  const addWhitelistIp = () => {
+  const addWhitelistIp = async () => {
     if (!ipInput.trim()) return;
-    setWhitelist((current) => Array.from(new Set([...current, ipInput.trim()])));
-    setIpInput('');
+    const newWhitelist = Array.from(new Set([...whitelist, ipInput.trim()]));
+    const res = await adminService.updateWhitelist(newWhitelist);
+    if (res.ok) {
+      setWhitelist(newWhitelist);
+      setIpInput('');
+      toast.success(`IP "${ipInput.trim()}" added to whitelist.`);
+    } else {
+      toast.error(res.message || 'Failed to update whitelist.');
+    }
   };
 
-  const removeWhitelistIp = (ip: string) => {
-    setWhitelist((current) => current.filter((item) => item !== ip));
+  const removeWhitelistIp = async (ip: string) => {
+    const newWhitelist = whitelist.filter((item) => item !== ip);
+    const res = await adminService.updateWhitelist(newWhitelist);
+    if (res.ok) {
+      setWhitelist(newWhitelist);
+      toast.success(`IP "${ip}" removed from whitelist.`);
+    } else {
+      toast.error(res.message || 'Failed to update whitelist.');
+    }
+  };
+
+  const handleScheduleChange = async (newSchedule: BackupFrequency) => {
+    setSchedule(newSchedule);
+    await adminService.updateBackupSecurityConfig({ schedule: newSchedule, time, rateLimit });
+  };
+
+  const handleTimeChange = async (newTime: string) => {
+    setTime(newTime);
+    await adminService.updateBackupSecurityConfig({ schedule, time: newTime, rateLimit });
+  };
+
+  const handleRateLimitChange = async (newRateLimit: number) => {
+    setRateLimit(newRateLimit);
+    await adminService.updateBackupSecurityConfig({ schedule, time, rateLimit: newRateLimit });
   };
 
   return (
@@ -232,7 +390,7 @@ export default function BackupSecurity() {
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Schedule</span>
                 <select
                   value={schedule}
-                  onChange={(event) => setSchedule(event.target.value as BackupFrequency)}
+                  onChange={(event) => handleScheduleChange(event.target.value as BackupFrequency)}
                   className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
                 >
                   {['Daily', 'Weekly', 'Monthly'].map((item) => (
@@ -248,16 +406,16 @@ export default function BackupSecurity() {
                 <input
                   type="time"
                   value={time}
-                  onChange={(event) => setTime(event.target.value)}
+                  onChange={(event) => handleTimeChange(event.target.value)}
                   className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
                 />
               </label>
             </div>
 
             <div className="overflow-hidden rounded-[10px] border border-slate-200">
-              <div className="overflow-x-auto">
+              <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="sticky top-0 bg-slate-50 shadow-sm">
                     <tr>
                       {['Date', 'Size', 'Status', 'Download', 'Restore'].map((head) => (
                         <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -267,32 +425,55 @@ export default function BackupSecurity() {
                     </tr>
                   </thead>
                   <tbody>
-                    {backupHistory.map((backup) => (
-                      <tr key={backup.file} className="border-t border-slate-100 hover:bg-slate-50/70">
-                        <td className="px-4 py-3 text-slate-600">{backup.date}</td>
-                        <td className="px-4 py-3 text-slate-600">{backup.size}</td>
-                        <td className="px-4 py-3">
-                          <AdminBadge variant="success" className={backupStatusClass(backup.status)}>
-                            {backup.status}
-                          </AdminBadge>
-                        </td>
-                        <td className="px-4 py-3">
-                          <button type="button" className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-                            <Download className="h-4 w-4" />
-                            Download
-                          </button>
-                        </td>
-                        <td className="px-4 py-3">
-                          <button type="button" className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 px-3 py-2 text-xs font-semibold text-[#003580] hover:bg-[#003580]/5">
-                            <RotateCcw className="h-4 w-4" />
-                            Restore
-                          </button>
+                    {paginatedBackups.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-500">
+                          No database backups recorded.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      paginatedBackups.map((backup) => (
+                        <tr key={backup.file} className="border-t border-slate-100 hover:bg-slate-50/70">
+                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{backup.date}</td>
+                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{backup.size}</td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <AdminBadge variant="success" className={backupStatusClass(backup.status)}>
+                              {backup.status}
+                            </AdminBadge>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadBackup(backup.file)}
+                              className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              Download
+                            </button>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => handleRestoreBackup(backup.file)}
+                              className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 px-3 py-1.5 text-xs font-semibold text-[#003580] hover:bg-[#003580]/5"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                              Restore
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
+              <PaginationFooter
+                currentPage={backupPage}
+                totalPages={totalBackupPages}
+                totalItems={backupHistory.length}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setBackupPage}
+              />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
@@ -319,15 +500,15 @@ export default function BackupSecurity() {
                 <button
                   type="button"
                   onClick={() => setRevokeAllOpen(true)}
-                  className="rounded-[8px] border border-[#E24B4A]/20 px-4 py-2 text-sm font-semibold text-[#E24B4A] hover:bg-rose-50"
+                  className="rounded-[8px] border border-[#E24B4A]/20 px-3 py-1.5 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50"
                 >
                   Revoke All Sessions
                 </button>
               </div>
               <div className="mt-3 overflow-hidden rounded-[10px] border border-slate-200">
-                <div className="overflow-x-auto">
+                <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-slate-50">
+                    <thead className="sticky top-0 bg-slate-50 shadow-sm">
                       <tr>
                         {['User', 'IP', 'Device', 'Location', 'Login Time', ''].map((head) => (
                           <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -337,23 +518,46 @@ export default function BackupSecurity() {
                       </tr>
                     </thead>
                     <tbody>
-                      {activeSessions.map((session) => (
-                        <tr key={`${session.user}-${session.ip}`} className="border-t border-slate-100 hover:bg-slate-50/70">
-                          <td className="px-3 py-3 text-slate-700">{session.user}</td>
-                          <td className="px-3 py-3 text-slate-600">{session.ip}</td>
-                          <td className="px-3 py-3 text-slate-600">{session.device}</td>
-                          <td className="px-3 py-3 text-slate-600">{session.location}</td>
-                          <td className="px-3 py-3 text-slate-600">{session.loginTime}</td>
-                          <td className="px-3 py-3">
-                            <button type="button" className="rounded-[8px] border border-[#E24B4A]/20 px-3 py-2 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50">
-                              Revoke
-                            </button>
+                      {paginatedSessions.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-xs text-slate-500">
+                            No active sessions found.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        paginatedSessions.map((session) => (
+                          <tr key={`${session.user}-${session.ip}`} className="border-t border-slate-100 hover:bg-slate-50/70">
+                            <td className="px-3 py-3 text-slate-700 whitespace-nowrap max-w-[180px] truncate" title={session.user}>
+                              {session.user}
+                            </td>
+                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{session.ip}</td>
+                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap max-w-[150px] truncate" title={session.device}>
+                              {session.device}
+                            </td>
+                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{session.location}</td>
+                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{session.loginTime}</td>
+                            <td className="px-3 py-3 whitespace-nowrap text-right">
+                              <button
+                                type="button"
+                                onClick={() => revokeSession(session.user)}
+                                className="rounded-[8px] border border-[#E24B4A]/20 px-2.5 py-1 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50"
+                              >
+                                Revoke
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
+                <PaginationFooter
+                  currentPage={sessionPage}
+                  totalPages={totalSessionPages}
+                  totalItems={activeSessions.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setSessionPage}
+                />
               </div>
             </div>
 
@@ -363,16 +567,16 @@ export default function BackupSecurity() {
                 <button
                   type="button"
                   onClick={() => setGenerateKeyOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                  className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3.5 w-3.5" />
                   Generate New API Key
                 </button>
               </div>
               <div className="mt-3 overflow-hidden rounded-[10px] border border-slate-200">
-                <div className="overflow-x-auto">
+                <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-slate-50">
+                    <thead className="sticky top-0 bg-slate-50 shadow-sm">
                       <tr>
                         {['Key Name', 'Created', 'Last Used', 'Status', ''].map((head) => (
                           <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -382,26 +586,45 @@ export default function BackupSecurity() {
                       </tr>
                     </thead>
                     <tbody>
-                      {apiKeys.map((key) => (
-                        <tr key={key.name} className="border-t border-slate-100 hover:bg-slate-50/70">
-                          <td className="px-3 py-3 text-slate-700">{key.name}</td>
-                          <td className="px-3 py-3 text-slate-600">{key.created}</td>
-                          <td className="px-3 py-3 text-slate-600">{key.lastUsed}</td>
-                          <td className="px-3 py-3">
-                            <AdminBadge variant="success" className={apiStatusClass(key.status)}>
-                              {key.status}
-                            </AdminBadge>
-                          </td>
-                          <td className="px-3 py-3">
-                            <button type="button" className="rounded-[8px] border border-[#E24B4A]/20 px-3 py-2 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50">
-                              Revoke
-                            </button>
+                      {paginatedApiKeys.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-500">
+                            No API keys generated.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        paginatedApiKeys.map((key) => (
+                          <tr key={key.name} className="border-t border-slate-100 hover:bg-slate-50/70">
+                            <td className="px-3 py-3 text-slate-700 whitespace-nowrap">{key.name}</td>
+                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{key.created}</td>
+                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{key.lastUsed}</td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <AdminBadge variant="success" className={apiStatusClass(key.status)}>
+                                {key.status}
+                              </AdminBadge>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap text-right">
+                              <button
+                                type="button"
+                                onClick={() => revokeApiKey(key.name)}
+                                className="rounded-[8px] border border-[#E24B4A]/20 px-2.5 py-1 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50"
+                              >
+                                Revoke
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
+                <PaginationFooter
+                  currentPage={apiKeyPage}
+                  totalPages={totalApiKeyPages}
+                  totalItems={apiKeys.length}
+                  itemsPerPage={ITEMS_PER_PAGE}
+                  onPageChange={setApiKeyPage}
+                />
               </div>
             </div>
 
@@ -417,7 +640,7 @@ export default function BackupSecurity() {
                     <input
                       type="number"
                       value={rateLimit}
-                      onChange={(event) => setRateLimit(Number(event.target.value))}
+                      onChange={(event) => handleRateLimitChange(Number(event.target.value))}
                       className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </label>
@@ -444,18 +667,22 @@ export default function BackupSecurity() {
                     Add
                   </button>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {whitelist.map((ip) => (
-                    <button
-                      key={ip}
-                      type="button"
-                      onClick={() => removeWhitelistIp(ip)}
-                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                    >
-                      {ip}
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  ))}
+                <div className="mt-3 max-h-[140px] overflow-y-auto flex flex-wrap gap-2 pr-1">
+                  {whitelist.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-1">No IP addresses whitelisted.</p>
+                  ) : (
+                    whitelist.map((ip) => (
+                      <button
+                        key={ip}
+                        type="button"
+                        onClick={() => removeWhitelistIp(ip)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        {ip}
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -554,3 +781,4 @@ export default function BackupSecurity() {
     </div>
   );
 }
+

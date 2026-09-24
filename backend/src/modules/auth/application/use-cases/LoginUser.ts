@@ -3,8 +3,9 @@ import { IAuditLogRepository } from '../ports/IAuditLogRepository';
 import { InvalidCredentialsError, AccountPendingApprovalError } from '../../domain/errors/AuthErrors';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken } from '../../../../core/utils/jwt.utils';
+import { verifyTOTP, verifyEmail2FAOTP, storeEmail2FAOTP } from '../../../../core/utils/totp.utils';
 import { Role, PrismaClient } from '@prisma/client';
-
+import { EmailService } from '../../../../core/services/EmailService';
 import prisma from '../../../../core/config/db';
 
 export class LoginUser {
@@ -46,14 +47,70 @@ export class LoginUser {
       throw new AccountPendingApprovalError();
     }
 
-    // Employers now use the same login page as others, so no strict isEmployerLoginFlow check is needed.
-    let isPasswordValid = await bcrypt.compare(data.password, user.password as string);
-    if (!isPasswordValid && (data.password === 'Test@123' || data.password === 'Test@1234')) {
-      isPasswordValid = true;
-    }
+    // Password verification
+    const isPasswordValid = await bcrypt.compare(data.password, user.password as string);
     if (!isPasswordValid) {
       throw new InvalidCredentialsError();
     }
+
+    // Check 2FA enablement across all profiles & roles
+    let is2FAEnabled = false;
+
+    // 1. Alumni Profile
+    const alumniProfile = await prisma.alumniProfile.findUnique({
+      where: { userId: user.id }
+    }).catch(() => null);
+
+    if (alumniProfile) {
+      const prefs = (alumniProfile.preferences as any) || {};
+      if (prefs.twoFactorEnabled) is2FAEnabled = true;
+    }
+
+    // 2. Employer Profile
+    const employerProfile = await prisma.employerProfile.findUnique({
+      where: { userId: user.id }
+    }).catch(() => null);
+
+    if (employerProfile) {
+      if ((employerProfile as any).twoFactorEnabled || (employerProfile as any).is2FAEnabled) {
+        is2FAEnabled = true;
+      }
+    }
+
+    // 3. User model / Global 2FA flag
+    if ((user as any).twoFactorEnabled) {
+      is2FAEnabled = true;
+    }
+
+    if (is2FAEnabled) {
+      const emailService = new EmailService();
+      const deliveryEmail = await emailService.resolveUserDeliveryEmail(user.id);
+      const targetEmail = deliveryEmail || user.email;
+
+      if (!data.twoFactorCode) {
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        storeEmail2FAOTP(targetEmail, otpCode);
+        await emailService.send2FAVerificationCode(targetEmail, otpCode);
+
+        return {
+          requires2FA: true,
+          email: targetEmail,
+          message: 'Two-Factor Authentication required. Verification code sent to your email.',
+        };
+      }
+
+      const isTotpValid = verifyTOTP(data.twoFactorCode);
+      const isEmailOtpValid = verifyEmail2FAOTP(targetEmail, data.twoFactorCode);
+
+      if (!isTotpValid && !isEmailOtpValid) {
+        throw new InvalidCredentialsError();
+      }
+    }
+
+    // 4. Admin Profile
+    const adminProfile = await prisma.adminProfile.findUnique({
+      where: { userId: user.id }
+    }).catch(() => null);
 
     const payload = { userId: user.id, email: user.email, role: user.role as Role };
     const accessToken = generateAccessToken(payload);
@@ -66,8 +123,43 @@ export class LoginUser {
       ipAddress,
     });
 
+    let displayName = (user as any).firstName
+      ? `${(user as any).firstName} ${(user as any).lastName || ''}`.trim()
+      : user.email.split('@')[0];
+
+    if (alumniProfile?.fullName) {
+      displayName = alumniProfile.fullName;
+    } else if (employerProfile?.companyName) {
+      displayName = employerProfile.companyName;
+    } else if (adminProfile?.firstName) {
+      displayName = `${adminProfile.firstName} ${adminProfile.lastName}`.trim();
+    } else if (user.role === Role.SUPER_ADMIN) {
+      displayName = 'Super Admin';
+    } else if (user.role === Role.ADMIN) {
+      displayName = 'ICT Administrator';
+    } else if (user.role === Role.REGISTRAR) {
+      displayName = 'Office of Registrar';
+    } else if (user.role === Role.DEPARTMENT_HEAD) {
+      displayName = 'Department Head';
+    } else if (user.role === Role.ALUMNI_OFFICE) {
+      displayName = 'CMS Manager';
+    }
+
+    const firstName = adminProfile?.firstName || (user as any).firstName || (displayName ? displayName.split(' ')[0] : undefined);
+    const lastName = adminProfile?.lastName || (user as any).lastName || (displayName ? displayName.split(' ').slice(1).join(' ') : undefined);
+
     return {
-      user: { id: user.id, email: user.email, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: displayName,
+        fullName: displayName,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        alumniProfile: alumniProfile ? { id: alumniProfile.id, fullName: alumniProfile.fullName } : undefined,
+        employerProfile: employerProfile ? { id: employerProfile.id, companyName: employerProfile.companyName } : undefined,
+      },
       token: accessToken,
       refreshToken,
     };

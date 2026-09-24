@@ -7,7 +7,14 @@ export interface GraduateRecord {
   graduationYear: string;
   cgpa: string;
   identityVerified: boolean;
-  status: 'Active' | 'Archived';
+  status: 'Active' | 'Archived' | 'INACTIVE' | 'Inactive' | string;
+  phone?: string;
+  nationality?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  source?: string;
+  employmentStatus?: string;
+  createdAt?: string;
 }
 
 export interface VerificationRequest {
@@ -42,6 +49,13 @@ export interface DocumentProcessingRequest {
     graduationYear?: number;
     email?: string;
     phone?: string;
+    cgpa?: number | string;
+    bio?: string;
+    department?: { name: string } | string;
+    experiences?: any[];
+    certifications?: any[];
+    projects?: any[];
+    achievements?: any[];
   };
 }
 

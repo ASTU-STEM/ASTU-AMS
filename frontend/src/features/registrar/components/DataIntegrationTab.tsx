@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { registrarService } from '../services/registrar.service';
 
 interface DataIntegrationTabProps {
   onBatchInsert: (records: any[]) => void;
 }
 
 interface ImportHistoryEntry {
-  id: number;
+  id: string | number;
   timestamp: string;
   fileName: string;
   totalRecords: number;
@@ -17,6 +18,7 @@ interface ImportHistoryEntry {
 
 export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchInsert }) => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string>('');
   const [isValidating, setIsValidating] = useState(false);
   const [validationReport, setValidationReport] = useState<{
     total: number;
@@ -26,13 +28,182 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
     records: any[];
   } | null>(null);
 
+  const [selectedBatchFilter, setSelectedBatchFilter] = useState<string>('ALL');
+
+  // Import mode & API sync states
+  const [importMethod, setImportMethod] = useState<'file' | 'api'>('file');
+  const [apiBatchYear, setApiBatchYear] = useState<string>('2024');
+  const [isFetchingApi, setIsFetchingApi] = useState<boolean>(false);
+  const [sisStatus, setSisStatus] = useState<{ status: string; mode?: string } | null>(null);
+
+  // Direct SIS API Fetch & Synchronization handler
+  const handleFetchFromSisApi = async () => {
+    setIsFetchingApi(true);
+    setProcessingStatus('processing');
+    toast.loading(`Connecting to ASTU SIS API server (${apiBatchYear})...`, { id: 'sis-api-toast' });
+
+    try {
+      // Call real backend API endpoint /api/registrar/fetch-graduates/:year
+      const res = await registrarService.syncFromSisApi(apiBatchYear);
+
+      // Extract records returned from backend API
+      const fetchedRecords: any[] = (res && Array.isArray(res.graduates)) ? res.graduates : [];
+
+      if (fetchedRecords.length === 0) {
+        toast.error('No graduate records returned from SIS API for the selected batch year.', { id: 'sis-api-toast' });
+        setProcessingStatus('idle');
+        setIsFetchingApi(false);
+        return;
+      }
+
+      toast.success(`Successfully fetched ${fetchedRecords.length} graduate roster records from ASTU SIS API!`, { id: 'sis-api-toast' });
+
+      // Fetch existing graduates from DB to validate duplicates
+      const existingGraduates = await registrarService.getGraduates();
+      const existingIds = new Set((existingGraduates || []).map((g: any) => String(g.studentId || '').trim()));
+
+      let validCount = 0;
+      let dupCount = 0;
+      const errorsList: string[] = [];
+
+      const validated = fetchedRecords.map((r: any, idx: number) => {
+        const cleanId = String(r.studentId || '').trim();
+        const isDup = existingIds.has(cleanId);
+        if (isDup) {
+          dupCount++;
+          errorsList.push(`Record ${idx + 1}: Student ID "${cleanId}" already exists in DB.`);
+        } else {
+          validCount++;
+        }
+        return {
+          studentId: cleanId,
+          fullName: r.fullName,
+          email: r.email || undefined,
+          phone: r.phone || undefined,
+          department: r.department,
+          departmentCode: r.departmentCode,
+          graduationYear: r.graduationYear || (apiBatchYear === 'ALL' ? new Date().getFullYear() : Number(apiBatchYear)),
+          cgpa: r.cgpa || 3.0,
+          isValid: !isDup,
+          isDuplicate: isDup,
+          rowNum: idx + 1
+        };
+      });
+
+      setValidationReport({
+        total: fetchedRecords.length,
+        valid: validCount,
+        duplicates: dupCount,
+        errors: errorsList,
+        records: validated
+      });
+
+      setCsvFile(new File([''], `ASTU_SIS_API_Batch_${apiBatchYear}.json`));
+      setActiveStep('validate');
+      setProcessingStatus('idle');
+      setIsFetchingApi(false);
+    } catch (err: any) {
+      console.error('SIS API Fetch error:', err);
+      toast.error(err.message || 'Failed to fetch roster from ASTU SIS API server', { id: 'sis-api-toast' });
+      setProcessingStatus('idle');
+      setIsFetchingApi(false);
+    }
+  };
+
+  const getBatchBreakdown = (records: any[]) => {
+    const groups: { [batchYear: string]: number } = {};
+    records.forEach(r => {
+      const year = String(r.graduationYear || 'Unspecified').trim();
+      groups[year] = (groups[year] || 0) + 1;
+    });
+    return groups;
+  };
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'done'>('idle');
   const [activeStep, setActiveStep] = useState<'upload' | 'validate' | 'import'>('upload');
-  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([
-    { id: 3, timestamp: '2026-05-28 14:30', fileName: 'graduates_batch_2024_v2.csv', totalRecords: 124, importedRecords: 118, duplicates: 6, status: 'Partial' },
-    { id: 2, timestamp: '2026-05-15 09:15', fileName: 'cse_graduates_2024.xlsx', totalRecords: 87, importedRecords: 87, duplicates: 0, status: 'Success' },
-    { id: 1, timestamp: '2026-04-30 11:00', fileName: 'ece_batch_2023.csv', totalRecords: 52, importedRecords: 48, duplicates: 4, status: 'Partial' },
-  ]);
+  const [importHistory, setImportHistory] = useState<ImportHistoryEntry[]>([]);
+
+  // Fetch real import history logs from DB
+  const loadImportHistory = async () => {
+    try {
+      const logs = await registrarService.getLogs();
+      if (Array.isArray(logs)) {
+        const formatted = logs.map((log: any) => ({
+          id: log.id,
+          timestamp: log.syncedAt ? new Date(log.syncedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent',
+          fileName: log.fileName || 'sis_batch_import.csv',
+          totalRecords: log.total || log.recordsCount || 0,
+          importedRecords: log.imported || log.recordsCount || 0,
+          duplicates: log.duplicates || 0,
+          status: (log.status === 'SUCCESS' ? 'Success' : log.status === 'PARTIAL' ? 'Partial' : 'Failed') as any
+        }));
+        setImportHistory(formatted);
+      }
+    } catch (e) {
+      console.error('Failed to load import history logs:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadImportHistory();
+    registrarService.getSisStatus().then(status => setSisStatus(status)).catch(() => setSisStatus({ status: 'OFFLINE' }));
+  }, []);
+
+  const runValidationEngine = async (text: string, fileObj: File) => {
+    if (!text) return;
+    setIsValidating(true);
+
+    try {
+      const existingGraduates = await registrarService.getGraduates();
+      const existingIds = new Set((existingGraduates || []).map((g: any) => String(g.studentId || '').trim()));
+
+      const parsedRecords = parseCsvContent(text);
+      const errorsList: string[] = [];
+
+      let validCount = 0;
+      let dupCount = 0;
+
+      const validatedRecords = parsedRecords.map((r, index) => {
+        const cleanId = String(r.studentId || '').trim();
+        const isDuplicate = existingIds.has(cleanId);
+        const missingFields = [];
+        if (!r.studentId) missingFields.push('StudentID');
+        if (!r.fullName) missingFields.push('FullName');
+        if (!r.department) missingFields.push('Department');
+
+        if (missingFields.length > 0) {
+          errorsList.push(`Row ${index + 1}: Missing required field(s) (${missingFields.join(', ')})`);
+        }
+        if (isDuplicate) {
+          dupCount++;
+          errorsList.push(`Row ${index + 1}: Student ID "${r.studentId}" already exists in ASTU-SIS database (Duplicate Detected).`);
+        } else if (missingFields.length === 0) {
+          validCount++;
+        }
+
+        return {
+          ...r,
+          isDuplicate,
+          isValid: !isDuplicate && missingFields.length === 0
+        };
+      });
+
+      setValidationReport({
+        total: parsedRecords.length,
+        valid: validCount,
+        duplicates: dupCount,
+        errors: errorsList,
+        records: validatedRecords
+      });
+
+      setActiveStep('validate');
+      toast.success(`SIS Validation complete: ${validCount} valid, ${dupCount} duplicates.`);
+    } catch (e) {
+      console.error('Validation engine error:', e);
+      toast.error('Failed to execute SIS validation checks');
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,14 +212,22 @@ export const DataIntegrationTab: React.FC<DataIntegrationTabProps> = ({ onBatchI
       setValidationReport(null);
       setProcessingStatus('idle');
       setActiveStep('validate');
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const content = (event.target?.result as string) || '';
+        setFileContent(content);
+        await runValidationEngine(content, file);
+      };
+      reader.readAsText(file);
       toast.success(`Loaded file: ${file.name}`);
     }
   };
 
   const handleDownloadTemplate = () => {
-    const template = `StudentID,FullName,Email,Department,GraduationYear,CGPA
-UG/12345/14,John Doe,john.doe@astu.edu.et,Computer Science and Engineering,2024,3.50
-UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineering,2024,3.75`;
+    const template = `StudentID,FullName,Email,Phone,Nationality,DateOfBirth,Department,GraduationYear,CGPA
+UG/12345/14,John Doe,john.doe@gmail.com,+251911223344,Ethiopian,1999-05-14,Computer Science and Engineering,2024,3.50
+UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,Electrical and Computer Engineering,2024,3.75`;
     const blob = new Blob([template], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -56,65 +235,89 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
     a.download = 'sis_import_template.csv';
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Template downloaded.');
+    toast.success('Template containing all 9 Registrar fields downloaded.');
   };
 
-  const handleRunValidation = () => {
-    if (!csvFile) return;
-    setIsValidating(true);
+  const parseCsvContent = (text: string) => {
+    const lines = text.split(/\r\n|\n/).filter(line => line.trim().length > 0);
+    if (lines.length === 0) return [];
 
-    setTimeout(() => {
-      const mockRecords = [
-        { studentId: 'UG/19082/14', fullName: 'Solomon Kebede', email: 'solomon.k@astu.edu.et', department: 'Computer Science and Engineering', graduationYear: '2024', cgpa: '3.72' },
-        { studentId: 'UG/12839/14', fullName: 'Abebe Bikila', email: 'abebe.b@gmail.com', department: 'Computer Science and Engineering', graduationYear: '2024', cgpa: '3.78' },
-        { studentId: 'UG/14299/14', fullName: 'Hiwot Tadesse', email: 'hiwot.t@astu.edu.et', department: 'Electrical and Computer Engineering', graduationYear: '2024', cgpa: '3.95' },
-        { studentId: 'UG/18029/14', fullName: 'Mered Girma', email: 'mered.g@astu.edu.et', department: 'Chemical Engineering', graduationYear: '2024', cgpa: '2.40' },
-      ];
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    const records: any[] = [];
 
-      setValidationReport({
-        total: 4,
-        valid: 3,
-        duplicates: 1,
-        errors: ['Row 2 Error: Student ID "UG/12839/14" already exists in ASTU-SIS database (Duplicate Detected).'],
-        records: mockRecords
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+      if (values.length < 2) continue;
+
+      const row: any = {};
+      headers.forEach((h, idx) => {
+        const key = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const val = values[idx] || '';
+        if (key.includes('student') || key.includes('id')) row.studentId = val;
+        else if (key.includes('fullname') || key.includes('name')) row.fullName = val;
+        else if (key.includes('email')) row.email = val;
+        else if (key.includes('phone')) row.phone = val;
+        else if (key.includes('nationality')) row.nationality = val;
+        else if (key.includes('dob') || key.includes('birth')) row.dateOfBirth = val;
+        else if (key.includes('dept') || key.includes('department')) row.department = val;
+        else if (key.includes('year') || key.includes('batch') || key.includes('grad')) row.graduationYear = val;
+        else if (key.includes('cgpa') || key.includes('gpa')) row.cgpa = val;
       });
-      setIsValidating(false);
-      setActiveStep('import');
-      toast.success('SIS validation engine check complete.');
-    }, 1500);
+
+      if (!row.studentId && values[0]) row.studentId = values[0];
+      if (!row.fullName && values[1]) row.fullName = values[1];
+      if (!row.department && values[3]) row.department = values[3];
+      if (!row.graduationYear && values[4]) row.graduationYear = values[4];
+      if (!row.cgpa && values[5]) row.cgpa = values[5];
+
+      if (row.studentId || row.fullName) {
+        records.push(row);
+      }
+    }
+    return records;
   };
 
-  const handleProcessBatch = () => {
-    if (!validationReport) return;
+  const handleRunValidation = async () => {
+    if (!csvFile || !fileContent) return;
+    await runValidationEngine(fileContent, csvFile);
+  };
+
+  const handleProcessBatch = async () => {
+    if (!validationReport || !csvFile) return;
+    setActiveStep('import');
     setProcessingStatus('processing');
 
-    setTimeout(() => {
-      const validToInsert = validationReport.records.filter(r => r.studentId !== 'UG/12839/14');
-      onBatchInsert(validToInsert.map(r => ({
-        studentId: r.studentId,
-        fullName: r.fullName,
-        email: r.email,
-        department: r.department,
-        graduationYear: r.graduationYear,
-        cgpa: r.cgpa
-      })));
+    try {
+      const validRecords = validationReport.records
+        .filter(r => r.isValid)
+        .map(r => ({
+          studentId: r.studentId,
+          fullName: r.fullName,
+          email: r.email || undefined,
+          phone: r.phone || undefined,
+          nationality: r.nationality || undefined,
+          dateOfBirth: r.dateOfBirth || undefined,
+          department: r.department,
+          graduationYear: r.graduationYear || new Date().getFullYear(),
+          cgpa: r.cgpa || 3.0
+        }));
+
+      await registrarService.importBatch(validRecords, csvFile.name);
+      onBatchInsert(validRecords);
 
       setProcessingStatus('done');
-      setImportHistory(prev => [{
-        id: Date.now(),
-        timestamp: new Date().toLocaleString(),
-        fileName: csvFile?.name || 'unknown',
-        totalRecords: validationReport.total,
-        importedRecords: validToInsert.length,
-        duplicates: validationReport.duplicates,
-        status: validationReport.duplicates > 0 ? 'Partial' : 'Success'
-      }, ...prev]);
-      toast.success(`Successfully registered ${validToInsert.length} alumni accounts and generated activation emails!`);
-    }, 2000);
+      await loadImportHistory();
+      toast.success(`Successfully registered ${validRecords.length} SIS graduate records to database!`);
+    } catch (e) {
+      console.error('Failed to commit batch import:', e);
+      toast.error('Failed to process batch import');
+      setProcessingStatus('idle');
+    }
   };
 
   const handleReset = () => {
     setCsvFile(null);
+    setFileContent('');
     setValidationReport(null);
     setProcessingStatus('idle');
     setActiveStep('upload');
@@ -170,24 +373,120 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
 
       {/* Upload Area */}
       {activeStep === 'upload' && (
-        <section className="bg-white border border-gray-200/60 rounded-3xl p-8 shadow-sm">
-          <div className="text-center max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-astu-navy/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-3xl text-astu-navy">cloud_upload</span>
-            </div>
-            <h3 className="text-lg font-bold mb-2">Upload Graduate Roster</h3>
-            <p className="text-sm text-gray-500 mb-6">Select an Excel (.xlsx) or CSV file exported from the university SIS system.</p>
-            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 relative group hover:border-astu-navy/50 transition-colors cursor-pointer bg-gray-50/50">
-              <input type="file" accept=".csv,.xlsx" onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-              <div className="space-y-2">
-                <span className="material-symbols-outlined text-4xl text-gray-300 group-hover:text-astu-navy/50 transition-colors">upload</span>
-                <p className="text-sm font-bold text-gray-900">Drop your file here or click to browse</p>
-                <p className="text-xs text-gray-400">Supports: .csv, .xlsx (max 10MB)</p>
-              </div>
-            </div>
+        <div className="space-y-6">
+          {/* Method Selection Tabs */}
+          <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-2xl max-w-md">
+            <button
+              onClick={() => setImportMethod('file')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all ${
+                importMethod === 'file'
+                  ? 'bg-white text-astu-navy shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm">upload_file</span>
+              Upload File (.csv / .xlsx)
+            </button>
+            <button
+              onClick={() => setImportMethod('api')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all ${
+                importMethod === 'api'
+                  ? 'bg-white text-astu-navy shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm text-emerald-600">sync_alt</span>
+              Fetch via SIS API
+              <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-extrabold rounded-md uppercase">
+                Live
+              </span>
+            </button>
           </div>
-        </section>
+
+          {importMethod === 'file' ? (
+            <section className="bg-white border border-gray-200/60 rounded-3xl p-8 shadow-sm">
+              <div className="text-center max-w-lg mx-auto">
+                <div className="w-16 h-16 bg-astu-navy/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="material-symbols-outlined text-3xl text-astu-navy">cloud_upload</span>
+                </div>
+                <h3 className="text-lg font-bold mb-2">Upload Graduate Roster</h3>
+                <p className="text-sm text-gray-500 mb-6">Select an Excel (.xlsx) or CSV file exported from the university SIS system.</p>
+                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 relative group hover:border-astu-navy/50 transition-colors cursor-pointer bg-gray-50/50">
+                  <input type="file" accept=".csv,.xlsx" onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div className="space-y-2">
+                    <span className="material-symbols-outlined text-4xl text-gray-300 group-hover:text-astu-navy/50 transition-colors">upload</span>
+                    <p className="text-sm font-bold text-gray-900">Drop your file here or click to browse</p>
+                    <p className="text-xs text-gray-400">Supports: .csv, .xlsx (max 10MB)</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section className="bg-white border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <span className="material-symbols-outlined text-2xl">api</span>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-gray-900">ASTU University SIS API Server Integration</h3>
+                    <p className="text-xs text-gray-500">Fetch & synchronize graduate rosters directly from your university SIS database via API</p>
+                  </div>
+                </div>
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold self-start sm:self-auto ${
+                  sisStatus?.status === 'ONLINE' 
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${sisStatus?.status === 'ONLINE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500 animate-pulse'}`} />
+                  {sisStatus?.status === 'ONLINE' ? 'SIS Server Online' : 'SIS Server Offline'}
+                </div>
+              </div>
+
+              <div className="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-5 md:p-6 space-y-4">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div className="flex-1 max-w-xl">
+                    <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-astu-navy">school</span>
+                      Select Graduation Batch Year
+                    </label>
+                    <select
+                      value={apiBatchYear}
+                      onChange={(e) => setApiBatchYear(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-astu-navy shadow-sm"
+                    >
+                      <option value="2026">Class of 2026 (Upcoming Roster)</option>
+                      <option value="2025">Class of 2025 (Latest Graduated)</option>
+                      <option value="2024">Class of 2024</option>
+                      <option value="2023">Class of 2023</option>
+                      <option value="2022">Class of 2022</option>
+                      <option value="ALL">All Recent Batches (Current & Previous Year)</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={handleFetchFromSisApi}
+                    disabled={isFetchingApi}
+                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-astu-navy to-emerald-700 hover:from-astu-navy/95 hover:to-emerald-800 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer h-[46px]"
+                  >
+                    {isFetchingApi ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Fetching Roster...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-sm">sync_alt</span>
+                        <span>Sync & Fetch Roster from SIS API</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
       )}
 
       {/* Validation Step */}
@@ -230,6 +529,45 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
                 </div>
               </div>
 
+              {/* Automatic Batch Categorization Breakdown Banner */}
+              {validationReport.records.length > 0 && (
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-astu-navy">auto_awesome</span>
+                      Automatic Batch Categorization Breakdown
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-semibold">Categorized by Graduation Year</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setSelectedBatchFilter('ALL')}
+                      className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                        selectedBatchFilter === 'ALL'
+                          ? 'bg-astu-navy text-white shadow-sm'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      All Batches ({validationReport.records.length})
+                    </button>
+                    {Object.entries(getBatchBreakdown(validationReport.records)).map(([batchYear, count]) => (
+                      <button
+                        key={batchYear}
+                        onClick={() => setSelectedBatchFilter(batchYear)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          selectedBatchFilter === batchYear
+                            ? 'bg-astu-navy text-white shadow-sm'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>🎓 Batch {batchYear}</span>
+                        <span className="px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full text-[10px]">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {validationReport.errors.length > 0 && (
                 <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
                   <p className="font-bold text-red-700 flex items-center gap-1.5 text-xs mb-2">
@@ -250,26 +588,30 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
                       <th className="p-3">Student ID</th>
                       <th className="p-3">Full Name</th>
                       <th className="p-3">Department</th>
+                      <th className="p-3">Batch</th>
                       <th className="p-3">CGPA</th>
                       <th className="p-3">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {validationReport.records.map((r, i) => (
-                      <tr key={i} className={r.studentId === 'UG/12839/14' ? 'bg-red-50/50' : 'hover:bg-gray-50/50'}>
-                        <td className="p-3 font-mono font-bold">{r.studentId}</td>
-                        <td className="p-3 font-medium">{r.fullName}</td>
-                        <td className="p-3 text-gray-600">{r.department}</td>
-                        <td className="p-3 font-semibold">{r.cgpa}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
-                            r.studentId === 'UG/12839/14' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
-                          }`}>
-                            {r.studentId === 'UG/12839/14' ? 'Duplicate' : 'Valid'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {validationReport.records
+                      .filter(r => selectedBatchFilter === 'ALL' || String(r.graduationYear || 'Unspecified').trim() === selectedBatchFilter)
+                      .map((r, i) => (
+                        <tr key={i} className={r.isDuplicate ? 'bg-red-50/50' : 'hover:bg-gray-50/50'}>
+                          <td className="p-3 font-mono font-bold">{r.studentId}</td>
+                          <td className="p-3 font-medium">{r.fullName}</td>
+                          <td className="p-3 text-gray-600">{r.department}</td>
+                          <td className="p-3 text-gray-600 font-semibold">{r.graduationYear || '2024'}</td>
+                          <td className="p-3 font-semibold">{r.cgpa}</td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                              r.isDuplicate ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
+                            }`}>
+                              {r.isDuplicate ? 'Duplicate' : 'Valid'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -290,7 +632,7 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
                     {processingStatus === 'processing' ? (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-                        Processing batch import and generating activation emails...
+                        Processing batch import and saving to database...
                       </>
                     ) : (
                       <>
@@ -342,24 +684,30 @@ UG/12346/14,Jane Smith,jane.smith@astu.edu.et,Electrical and Computer Engineerin
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {importHistory.map(entry => (
-                <tr key={entry.id} className="hover:bg-gray-50/50">
-                  <td className="py-3 pr-2 text-gray-500">{entry.timestamp}</td>
-                  <td className="py-3 pr-2 font-medium text-gray-800">{entry.fileName}</td>
-                  <td className="py-3 pr-2 font-semibold">{entry.totalRecords}</td>
-                  <td className="py-3 pr-2 text-emerald-600 font-bold">{entry.importedRecords}</td>
-                  <td className="py-3 pr-2 text-amber-600 font-bold">{entry.duplicates}</td>
-                  <td className="py-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                      entry.status === 'Success' ? 'bg-emerald-100 text-emerald-700' :
-                      entry.status === 'Partial' ? 'bg-amber-100 text-amber-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {entry.status}
-                    </span>
-                  </td>
+              {importHistory.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-6 text-center text-gray-400 italic">No previous import logs found in database.</td>
                 </tr>
-              ))}
+              ) : (
+                importHistory.map(entry => (
+                  <tr key={entry.id} className="hover:bg-gray-50/50">
+                    <td className="py-3 pr-2 text-gray-500">{entry.timestamp}</td>
+                    <td className="py-3 pr-2 font-medium text-gray-800">{entry.fileName}</td>
+                    <td className="py-3 pr-2 font-semibold">{entry.totalRecords}</td>
+                    <td className="py-3 pr-2 text-emerald-600 font-bold">{entry.importedRecords}</td>
+                    <td className="py-3 pr-2 text-amber-600 font-bold">{entry.duplicates}</td>
+                    <td className="py-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                        entry.status === 'Success' ? 'bg-emerald-100 text-emerald-700' :
+                        entry.status === 'Partial' ? 'bg-amber-100 text-amber-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {entry.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

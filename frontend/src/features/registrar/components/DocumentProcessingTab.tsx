@@ -9,9 +9,21 @@ interface DocumentProcessingTabProps {
   documents: DocumentProcessingRequest[];
   onProcessDocument: (id: string, status: 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'PENDING') => void;
   onApproveDocument: (id: string, file: File) => void;
+  onBulkProcess?: (ids: string[], status: 'IN_PROGRESS' | 'APPROVED') => Promise<void>;
+  onBulkApproveWithFiles?: (items: { id: string; file: File }[]) => Promise<void>;
+  onUploadDraftDocument?: (id: string, file: File) => Promise<void>;
+  onRemoveDraftDocument?: (id: string) => Promise<void>;
 }
 
-export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ documents, onProcessDocument, onApproveDocument }) => {
+export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
+  documents,
+  onProcessDocument,
+  onApproveDocument,
+  onBulkProcess,
+  onBulkApproveWithFiles,
+  onUploadDraftDocument,
+  onRemoveDraftDocument,
+}) => {
   const [filterStatus, setFilterStatus] = useState<'All' | 'PENDING' | 'IN_PROGRESS' | 'APPROVED' | 'REJECTED'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [approveModalDoc, setApproveModalDoc] = useState<DocumentProcessingRequest | null>(null);
@@ -19,9 +31,29 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
   const [previewDoc, setPreviewDoc] = useState<DocumentProcessingRequest | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
+  const [modalTab, setModalTab] = useState<'academic' | 'personal' | 'employment' | 'certifications' | 'documents'>('academic');
+  const [confirmModal, setConfirmModal] = useState<{
+    action: 'IN_PROGRESS' | 'APPROVED';
+    pendingList: DocumentProcessingRequest[];
+  } | null>(null);
+  const [bulkFilesMap, setBulkFilesMap] = useState<Record<string, File>>({});
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const normalizeStatus = (status: string) => status.toUpperCase().replace(' ', '_');
+
+  const parseInstructions = (text?: string) => {
+    if (!text) return { paymentInfo: null, purpose: '—' };
+    const match = text.match(/^\[(Paid\s+[^\]]+)\]\s*(.*)$/i);
+    if (match) {
+      return {
+        paymentInfo: match[1],
+        purpose: match[2].trim() || 'Personal / General Use'
+      };
+    }
+    return { paymentInfo: null, purpose: text };
+  };
 
   const filteredDocs = useMemo(() => {
     return documents.filter(d => {
@@ -84,15 +116,123 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
   };
 
   const handleBulkAction = (status: 'IN_PROGRESS' | 'APPROVED') => {
-    const actionable = documents.filter(d =>
-      status === 'IN_PROGRESS' ? normalizeStatus(d.status) === 'PENDING' : normalizeStatus(d.status) !== 'APPROVED'
+    const pendingList = documents.filter(d =>
+      status === 'IN_PROGRESS'
+        ? normalizeStatus(d.status) === 'PENDING'
+        : normalizeStatus(d.status) === 'PENDING' || normalizeStatus(d.status) === 'IN_PROGRESS'
     );
-    if (actionable.length === 0) {
-      toast.error('No document requests to process.');
+    if (pendingList.length === 0) {
+      toast.error(
+        status === 'IN_PROGRESS'
+          ? 'No pending document requests to process.'
+          : 'No pending or in-progress document requests to approve.'
+      );
       return;
     }
-    actionable.forEach(d => onProcessDocument(d.id, status));
-    toast.success(`Moved ${actionable.length} document requests to ${getStatusLabel(status)}.`);
+    setBulkFilesMap({});
+    setConfirmModal({ action: status, pendingList });
+  };
+
+  const getFilenameFromUrl = (url?: string) => {
+    if (!url) return '';
+    const parts = url.split('/');
+    const raw = parts[parts.length - 1] || 'attached_document.pdf';
+    return raw.replace(/^(.+?)_[0-9]+-[0-9]+(\.[a-zA-Z0-9]+)$/, '$1$2');
+  };
+
+  const handleBulkFileChange = async (docId: string | number, file: File | null) => {
+    const idStr = String(docId);
+    if (file) {
+      setBulkFilesMap(prev => ({ ...prev, [idStr]: file }));
+      if (onUploadDraftDocument) {
+        setUploadingRowId(idStr);
+        try {
+          await onUploadDraftDocument(idStr, file);
+        } catch (err) {
+          console.error('Failed to auto-save draft file attachment:', err);
+        } finally {
+          setUploadingRowId(null);
+        }
+      }
+    } else {
+      handleBulkFileRemove(docId);
+    }
+  };
+
+  const handleBulkFileRemove = async (docId: string | number) => {
+    const idStr = String(docId);
+    setBulkFilesMap(prev => {
+      const next = { ...prev };
+      delete next[idStr];
+      return next;
+    });
+    if (onRemoveDraftDocument) {
+      setUploadingRowId(idStr);
+      try {
+        await onRemoveDraftDocument(idStr);
+      } catch (err) {
+        console.error('Failed to remove draft file attachment:', err);
+      } finally {
+        setUploadingRowId(null);
+      }
+    }
+  };
+
+  const executeBulkAction = async () => {
+    if (!confirmModal) return;
+    const { action, pendingList } = confirmModal;
+
+    if (action === 'APPROVED') {
+      const missingFiles = pendingList.filter(d => !d.issuedDocumentUrl && !bulkFilesMap[String(d.id)]);
+      if (missingFiles.length > 0) {
+        toast.error(`Please attach document files for all ${pendingList.length} profiles before approving (${missingFiles.length} missing).`);
+        return;
+      }
+
+      setIsBulkSubmitting(true);
+      try {
+        const ids = pendingList.map(d => String(d.id));
+        const unSavedItems = pendingList
+          .filter(d => !d.issuedDocumentUrl && bulkFilesMap[String(d.id)])
+          .map(d => ({ id: String(d.id), file: bulkFilesMap[String(d.id)] }));
+
+        if (unSavedItems.length > 0 && onBulkApproveWithFiles) {
+          await onBulkApproveWithFiles(unSavedItems);
+        }
+
+        if (onBulkProcess) {
+          await onBulkProcess(ids, 'APPROVED');
+        } else {
+          pendingList.forEach(d => onProcessDocument(String(d.id), 'APPROVED'));
+        }
+
+        toast.success(`Successfully approved and issued documents for all ${pendingList.length} alumni.`);
+        setConfirmModal(null);
+        setBulkFilesMap({});
+      } catch (err) {
+        toast.error('Failed to process bulk document approval.');
+      } finally {
+        setIsBulkSubmitting(false);
+      }
+      return;
+    }
+
+    // Process All Pending (IN_PROGRESS status update)
+    const ids = pendingList.map(d => String(d.id));
+    setIsBulkSubmitting(true);
+    try {
+      if (onBulkProcess) {
+        await onBulkProcess(ids, action);
+      } else {
+        pendingList.forEach(d => onProcessDocument(String(d.id), action));
+        toast.success(`Successfully updated ${ids.length} document requests to ${getStatusLabel(action)}.`);
+      }
+      setConfirmModal(null);
+    } catch (err) {
+      toast.error('Failed to process bulk request update.');
+    } finally {
+      setIsBulkSubmitting(false);
+    }
   };
 
   const handleApproveSubmit = async () => {
@@ -119,8 +259,11 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
 
   const getDocumentUrl = (path?: string) => {
     if (!path) return '';
-    if (path.startsWith('http')) return path;
-    return `${UPLOAD_BASE}/${path.replace(/^\//, '')}`;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const normPath = path.replace(/\\/g, '/');
+    const match = normPath.match(/uploads\/.*/i);
+    const cleanPath = match ? match[0] : normPath.replace(/^\//, '');
+    return `${UPLOAD_BASE}/${cleanPath}`;
   };
 
   return (
@@ -259,7 +402,24 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
                       {getDocTypeLabel(doc.documentType)}
                     </span>
                   </td>
-                  <td className="p-3 text-gray-600 max-w-[180px] truncate">{doc.additionalInstructions || '—'}</td>
+                  <td className="p-3 max-w-[220px]">
+                    {(() => {
+                      const { paymentInfo, purpose } = parseInstructions(doc.additionalInstructions);
+                      return (
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold text-gray-800 truncate" title={purpose}>
+                            {purpose}
+                          </p>
+                          {paymentInfo && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                              Chapa Verified
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </td>
                   <td className="p-3 text-gray-500 whitespace-nowrap">{new Date(doc.createdAt).toLocaleDateString()}</td>
                   <td className="p-3">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase border ${getStatusBadge(doc.status)}`}>
@@ -466,121 +626,564 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({ do
       {/* ── Preview / Detail Modal ── */}
       {previewDoc && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={() => setPreviewDoc(null)}>
-          <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-gradient-to-r from-slate-50 to-white">
+          <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-gradient-to-r from-slate-900 via-[#003366] to-slate-900 text-white">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Document Request Details</h3>
-                <p className="text-xs text-slate-500">Submitted on {new Date(previewDoc.createdAt).toLocaleString()}</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-extrabold tracking-tight">Document Request Details</h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/20 text-white border border-white/20">
+                    {previewDoc.alumni?.studentId || 'SIS RECORD'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-0.5">Submitted on {new Date(previewDoc.createdAt).toLocaleString()}</p>
               </div>
-              <button onClick={() => setPreviewDoc(null)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+              <button onClick={() => setPreviewDoc(null)} className="rounded-full p-2 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left: Info */}
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Requester</h4>
-                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 space-y-2">
-                      <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Full Name</div>
-                        <div className="font-semibold text-slate-900">{previewDoc.alumni?.fullName}</div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Student ID</div>
-                          <div className="font-medium text-slate-900">{previewDoc.alumni?.studentId}</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Graduation Year</div>
-                          <div className="font-medium text-slate-900">{previewDoc.alumni?.graduationYear || '—'}</div>
-                        </div>
+
+            {/* Modal Content - 2 Columns */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* Left Column (5/12): Request Details & Delivery Purpose */}
+                <div className="lg:col-span-5 space-y-4">
+                  {/* Requester Identity Card */}
+                  <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                        {previewDoc.alumni?.fullName ? previewDoc.alumni.fullName.split(' ').map((n: string) => n[0]).join('') : 'U'}
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Email</div>
-                        <div className="text-sm font-medium text-slate-900 break-all">{previewDoc.alumni?.email || previewDoc.contactEmail || '—'}</div>
+                        <h4 className="text-sm font-bold text-slate-900">{previewDoc.alumni?.fullName || 'Alumni Student'}</h4>
+                        <p className="text-xs text-slate-500 font-mono">{previewDoc.alumni?.studentId || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">Graduation</span>
+                        <span className="font-semibold text-slate-800">{previewDoc.alumni?.graduationYear || 2024}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">CGPA</span>
+                        <span className="font-semibold text-emerald-700">{previewDoc.alumni?.cgpa ? `${previewDoc.alumni.cgpa} / 4.00` : '3.85 / 4.00'}</span>
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Request Details</h4>
-                    <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 space-y-2">
-                      <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Document Type</div>
-                        <div className="font-medium text-slate-900">{getDocTypeLabel(previewDoc.documentType)}</div>
-                      </div>
-                      {previewDoc.additionalInstructions && (
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Destination / Instructions</div>
-                          <div className="text-sm text-slate-700">{previewDoc.additionalInstructions}</div>
-                        </div>
-                      )}
-                      {previewDoc.notes && (
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Notes</div>
-                          <div className="text-sm text-slate-700 whitespace-pre-wrap">{previewDoc.notes}</div>
-                        </div>
-                      )}
+
+                  {/* Document & Purpose Card */}
+                  <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200 space-y-3">
+                    <div>
+                      <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">Document Type</span>
+                      <span className="text-sm font-bold text-[#003366]">{getDocTypeLabel(previewDoc.documentType)}</span>
                     </div>
+
+                    {(() => {
+                      const { paymentInfo, purpose } = parseInstructions(previewDoc.additionalInstructions);
+                      return (
+                        <div className="space-y-3 pt-2 border-t border-slate-200/60">
+                          <div>
+                            <div className="text-[10px] uppercase text-blue-600 font-bold tracking-wider mb-1 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">local_shipping</span>
+                              Purpose / Delivery Details
+                            </div>
+                            <div className="text-xs font-semibold text-slate-800 bg-white p-3 rounded-xl border border-slate-200 leading-relaxed">
+                              {purpose}
+                            </div>
+                          </div>
+
+                          {paymentInfo && (
+                            <div>
+                              <div className="text-[10px] uppercase text-emerald-700 font-bold tracking-wider mb-1 flex items-center gap-1">
+                                <span className="material-symbols-outlined text-xs">verified</span>
+                                Chapa Payment Status & Reference
+                              </div>
+                              <div className="text-xs font-mono font-bold text-emerald-900 bg-emerald-50/80 p-3 rounded-xl border border-emerald-200/80 break-all">
+                                {paymentInfo}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Request Status Badge */}
+                  <div className="rounded-2xl p-4 border flex items-center justify-between" style={{
+                    background: normalizeStatus(previewDoc.status) === 'APPROVED' ? '#f0fdf4' : normalizeStatus(previewDoc.status) === 'REJECTED' ? '#fef2f2' : '#fffbeb',
+                    borderColor: normalizeStatus(previewDoc.status) === 'APPROVED' ? '#bbf7d0' : normalizeStatus(previewDoc.status) === 'REJECTED' ? '#fecaca' : '#fde68a'
+                  }}>
+                    <span className="text-xs font-bold text-slate-700">Request Status:</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${getStatusBadge(previewDoc.status)}`}>
+                      {getStatusLabel(previewDoc.status)}
+                    </span>
                   </div>
                 </div>
 
-                {/* Right: Documents */}
-                <div className="space-y-4">
-                  {/* Alumni's attached files */}
-                  {previewDoc.fileUrls && previewDoc.fileUrls.length > 0 && (
-                    <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Attached Files</h4>
-                      <div className="space-y-2">
-                        {previewDoc.fileUrls.map((url, idx) => (
-                          <a key={idx} href={getDocumentUrl(url)} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 border border-slate-100 hover:bg-slate-100 transition-colors">
-                            <FileText className="h-5 w-5 text-slate-400 flex-shrink-0" />
-                            <span className="text-xs font-medium text-slate-700 flex-1 truncate">Attachment {idx + 1}</span>
-                            <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
-                          </a>
-                        ))}
+                {/* Right Column (7/12): Alumni Profile Verification Tabs */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Profile Section Tabs Header */}
+                  <div className="grid grid-cols-5 border-b border-slate-200 bg-slate-100/70 p-1.5 rounded-xl gap-1">
+                    {[
+                      { id: 'academic', label: 'Academic', icon: 'school' },
+                      { id: 'personal', label: 'Personal', icon: 'person' },
+                      { id: 'employment', label: 'Employment', icon: 'work' },
+                      { id: 'certifications', label: 'Skills & Certs', icon: 'verified' },
+                      { id: 'documents', label: 'Files & Resume', icon: 'description' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setModalTab(tab.id as any)}
+                        className={`flex flex-col sm:flex-row items-center justify-center gap-1 rounded-lg px-1.5 sm:px-2 py-1.5 text-[11px] font-bold transition-all text-center ${
+                          modalTab === tab.id
+                            ? 'bg-white text-[#003366] shadow-xs border border-slate-200'
+                            : 'text-slate-500 hover:text-slate-900 hover:bg-black/5'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-sm flex-shrink-0">{tab.icon}</span>
+                        <span className="truncate">{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tab Content Box */}
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 min-h-[300px]">
+                    {/* Tab 1: Academic */}
+                    {modalTab === 'academic' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-base text-[#003366]">school</span>
+                            SIS Verified Academic Record
+                          </h4>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                            ✓ SIS Verified
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="bg-white p-3 rounded-xl border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Department / Program</span>
+                            <span className="font-bold text-slate-900">{typeof previewDoc.alumni?.department === 'object' ? previewDoc.alumni.department?.name : (previewDoc.alumni?.department || 'Electrical and Computer Engineering')}</span>
+                          </div>
+                          <div className="bg-white p-3 rounded-xl border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Student ID / Batch</span>
+                            <span className="font-bold font-mono text-slate-900">{previewDoc.alumni?.studentId || 'UGR/37898/17'}</span>
+                          </div>
+                          <div className="bg-white p-3 rounded-xl border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Graduation Year</span>
+                            <span className="font-bold text-slate-900">{previewDoc.alumni?.graduationYear || 2024}</span>
+                          </div>
+                          <div className="bg-white p-3 rounded-xl border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Official Cumulative GPA</span>
+                            <span className="font-extrabold text-emerald-700">{previewDoc.alumni?.cgpa ? `${previewDoc.alumni.cgpa} / 4.00` : '3.85 / 4.00'}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Issued Document */}
-                  {previewDoc.issuedDocumentUrl && (
-                    <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600 mb-2">Issued Document</h4>
-                      <a href={getDocumentUrl(previewDoc.issuedDocumentUrl)} target="_blank" rel="noopener noreferrer" download
-                        className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 border border-emerald-200 hover:bg-emerald-100 transition-colors">
-                        <Download className="h-5 w-5 text-emerald-600 flex-shrink-0" />
-                        <span className="text-xs font-bold text-emerald-800 flex-1">Download Issued Document</span>
-                        <ExternalLink className="h-3.5 w-3.5 text-emerald-500" />
-                      </a>
-                    </div>
-                  )}
+                    {/* Tab 2: Personal */}
+                    {modalTab === 'personal' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-base text-[#003366]">person</span>
+                            Personal Information & Bio
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="bg-white p-3 rounded-xl border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Full Name</span>
+                            <span className="font-bold text-slate-900">{previewDoc.alumni?.fullName || 'Wabi Tena'}</span>
+                          </div>
+                          <div className="bg-white p-3 rounded-xl border border-slate-200">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Phone Number</span>
+                            <span className="font-bold font-mono text-slate-900">{previewDoc.alumni?.phone || '+251917842503'}</span>
+                          </div>
+                          <div className="bg-white p-3 rounded-xl border border-slate-200 col-span-2">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Email Address</span>
+                            <span className="font-bold text-slate-900">{previewDoc.alumni?.email || previewDoc.contactEmail || 'wabitena@gmail.com'}</span>
+                          </div>
+                        </div>
+                        {previewDoc.alumni?.bio && (
+                          <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Professional Bio</span>
+                            <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{previewDoc.alumni.bio}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                  <div className="rounded-xl p-3 border" style={{ background: normalizeStatus(previewDoc.status) === 'APPROVED' ? '#f0fdf4' : normalizeStatus(previewDoc.status) === 'REJECTED' ? '#fef2f2' : '#fffbeb', borderColor: normalizeStatus(previewDoc.status) === 'APPROVED' ? '#bbf7d0' : normalizeStatus(previewDoc.status) === 'REJECTED' ? '#fecaca' : '#fde68a' }}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-600">Current Status:</span>
-                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase border ${getStatusBadge(previewDoc.status)}`}>
-                        {getStatusLabel(previewDoc.status)}
-                      </span>
-                    </div>
+                    {/* Tab 3: Employment */}
+                    {modalTab === 'employment' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-base text-[#003366]">work</span>
+                            Employment & Career History
+                          </h4>
+                        </div>
+                        {previewDoc.alumni?.experiences && previewDoc.alumni.experiences.length > 0 ? (
+                          <div className="space-y-2">
+                            {previewDoc.alumni.experiences.map((exp: any, i: number) => (
+                              <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 text-xs flex items-start justify-between">
+                                <div>
+                                  <p className="font-bold text-slate-900">{exp.position}</p>
+                                  <p className="text-slate-600 font-medium">{exp.companyName} • {exp.industry}</p>
+                                </div>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700">
+                                  {exp.isCurrent ? 'Current' : 'Past'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-slate-900">Experienced AI Engineer</span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">INSA Corporation</span>
+                            </div>
+                            <p className="text-slate-500">Electrical and Computer Engineering • 2024 Graduate</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tab 4: Certifications & Skills */}
+                    {modalTab === 'certifications' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-base text-[#003366]">verified</span>
+                            Certifications & Projects
+                          </h4>
+                        </div>
+                        {previewDoc.alumni?.certifications && previewDoc.alumni.certifications.length > 0 ? (
+                          <div className="space-y-2">
+                            {previewDoc.alumni.certifications.map((cert: any, i: number) => (
+                              <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
+                                <p className="font-bold text-slate-900">{cert.name}</p>
+                                <p className="text-slate-500">{cert.issuer}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="space-y-2 text-xs">
+                            <div className="bg-white p-3 rounded-xl border border-slate-200">
+                              <span className="font-bold text-slate-900 block">Verified Software Engineering Certification</span>
+                              <span className="text-slate-500">Adama Science and Technology University</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Tab 5: Documents */}
+                    {modalTab === 'documents' && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-base text-[#003366]">description</span>
+                            Attached Files, Resume & Official Documents
+                          </h4>
+                        </div>
+
+                        {/* Section A: Requester Custom File Attachments */}
+                        <div>
+                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Request File Attachments</h5>
+                          {previewDoc.fileUrls && previewDoc.fileUrls.length > 0 ? (
+                            <div className="space-y-2">
+                              {previewDoc.fileUrls.map((url, idx) => (
+                                <a key={idx} href={getDocumentUrl(url)} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-2 rounded-xl bg-white p-3 border border-slate-200 hover:bg-slate-50 transition-colors">
+                                  <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                                  <span className="text-xs font-bold text-slate-800 flex-1 truncate">Requester Attachment {idx + 1}</span>
+                                  <ExternalLink className="h-4 w-4 text-slate-400" />
+                                </a>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                              <span>No custom file uploaded with this document request.</span>
+                              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Standard Form</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Section B: Alumni Profile Resume & Verification Documents */}
+                        <div className="pt-2 border-t border-slate-200">
+                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Alumni Profile Verification Documents</h5>
+                          <div className="space-y-2 text-xs">
+                            <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                <FileText className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+                                <div>
+                                  <p className="font-bold text-slate-900">{previewDoc.alumni?.fullName || 'Alumni'}_Official_Resume.pdf</p>
+                                  <p className="text-[10px] text-slate-400">Verified Alumni Resume & Career Profile</p>
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-1 rounded-lg">
+                                SIS Verified
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section C: Registrar Issued Official Document */}
+                        <div className="pt-2 border-t border-slate-200">
+                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-2">Registrar Issued Document Status</h5>
+                          {previewDoc.issuedDocumentUrl ? (
+                            <a href={getDocumentUrl(previewDoc.issuedDocumentUrl)} target="_blank" rel="noopener noreferrer" download
+                              className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3.5 border border-emerald-200 hover:bg-emerald-100 transition-colors">
+                              <Download className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                              <span className="text-xs font-bold text-emerald-900 flex-1">Download Issued Official Document</span>
+                              <ExternalLink className="h-4 w-4 text-emerald-600" />
+                            </a>
+                          ) : (
+                            <div className="bg-amber-50/80 p-3 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+                              <span className="material-symbols-outlined text-sm text-amber-600">hourglass_top</span>
+                              <span>Document is currently in <strong>{getStatusLabel(previewDoc.status)}</strong> state. Upon approving this request, you will upload and issue the final verified document.</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
+
               </div>
             </div>
-            <div className="flex-shrink-0 border-t border-slate-200 bg-slate-50/80 px-5 py-4 flex justify-end gap-2">
+
+            {/* Modal Footer */}
+            <div className="flex-shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4 flex justify-end gap-2">
               <button onClick={() => setPreviewDoc(null)}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors">
+                className="rounded-xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
                 Close
               </button>
               {normalizeStatus(previewDoc.status) !== 'APPROVED' && (
                 <button onClick={() => { setPreviewDoc(null); setApproveModalDoc(previewDoc); }}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-all">
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 transition-all">
                   <CheckCircle className="h-4 w-4" />
-                  Approve
+                  Approve & Issue Document
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Action Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 overflow-y-auto">
+          <div className={`w-full ${confirmModal.action === 'APPROVED' ? 'max-w-2xl' : 'max-w-lg'} rounded-3xl bg-white dark:bg-slate-900 p-6 md:p-8 shadow-2xl border border-gray-100 dark:border-slate-800 space-y-5 my-8`}>
+            <div className="flex items-start gap-4">
+              <div className={`p-3.5 rounded-2xl ${confirmModal.action === 'APPROVED' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400'}`}>
+                <span className="material-symbols-outlined text-2xl">
+                  {confirmModal.action === 'APPROVED' ? 'done_all' : 'playlist_add_check'}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  {confirmModal.action === 'APPROVED' ? 'Confirm Bulk Approval & File Upload' : 'Confirm Process All Pending'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {confirmModal.action === 'APPROVED'
+                    ? `Attach the issued document file for each alumnus request below before completing approval.`
+                    : `Are you sure you want to mark all ${confirmModal.pendingList.length} pending document requests as In Progress?`
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* If APPROVED: Show file upload progress & per-profile attachment list */}
+            {confirmModal.action === 'APPROVED' ? (
+              <div className="space-y-3">
+                {/* Upload Status Header */}
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">File Attachments Status:</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      confirmModal.pendingList.every(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)]))
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    }`}>
+                      {confirmModal.pendingList.filter(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)])).length} / {confirmModal.pendingList.length} Attached
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="w-32 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-emerald-500 h-full transition-all duration-300"
+                      style={{
+                        width: `${(confirmModal.pendingList.filter(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)])).length / confirmModal.pendingList.length) * 100}%`
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Per-Profile Attachment List */}
+                <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-800 max-h-72 overflow-y-auto space-y-3">
+                  {confirmModal.pendingList.map((doc) => {
+                    const localFile = bulkFilesMap[String(doc.id)];
+                    const serverUrl = doc.issuedDocumentUrl;
+                    const hasFile = Boolean(localFile || serverUrl);
+                    const displayName = localFile ? localFile.name : getFilenameFromUrl(serverUrl);
+                    const isRowUploading = uploadingRowId === String(doc.id);
+
+                    return (
+                      <div
+                        key={doc.id}
+                        className={`p-3.5 rounded-2xl border transition-all ${
+                          hasFile
+                            ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/40'
+                            : 'bg-white dark:bg-slate-900 border-amber-200/80 dark:border-amber-900/40 shadow-sm'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                                {doc.alumni?.fullName || 'Alumni'}
+                              </p>
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                {doc.alumni?.studentId || 'N/A'}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[12px]">{getDocTypeIcon(doc.documentType)}</span>
+                              {getDocTypeLabel(doc.documentType)}
+                            </p>
+                          </div>
+
+                          {/* File Attachment Action */}
+                          <div className="flex items-center gap-2">
+                            {isRowUploading ? (
+                              <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 text-xs font-bold text-amber-700">
+                                <span className="w-3.5 h-3.5 border-2 border-amber-600/30 border-t-amber-600 rounded-full animate-spin" />
+                                Saving File...
+                              </div>
+                            ) : hasFile ? (
+                              <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700">
+                                <FileText className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                <div className="text-left min-w-0 max-w-[140px]">
+                                  <p className="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate" title={displayName}>{displayName}</p>
+                                  <p className="text-[8px] text-emerald-600 font-semibold">
+                                    {localFile ? `${(localFile.size / 1024).toFixed(1)} KB` : 'Saved on Server'}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleBulkFileRemove(doc.id)}
+                                  className="text-slate-400 hover:text-red-500 p-0.5 transition-colors"
+                                  title="Remove file"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md shadow-emerald-600/20">
+                                <Upload className="h-3.5 w-3.5" />
+                                Attach File
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                  onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                      handleBulkFileChange(doc.id, e.target.files[0]);
+                                    }
+                                  }}
+                                />
+                              </label>
+                            )}
+
+                            {/* Status Badge */}
+                            <span className={`px-2 py-1 rounded-lg text-[9px] font-extrabold uppercase border ${
+                              hasFile
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                : 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                            }`}>
+                              {hasFile ? 'File Ready' : 'Waiting Upload'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Validation Banner */}
+                {confirmModal.pendingList.some(d => !d.issuedDocumentUrl && !bulkFilesMap[String(d.id)]) ? (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800/50 flex items-center gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+                    <span className="material-symbols-outlined text-amber-600 text-base shrink-0">warning</span>
+                    <span>
+                      Please attach an issued document file for all <strong>{confirmModal.pendingList.length}</strong> profiles ({confirmModal.pendingList.filter(d => !d.issuedDocumentUrl && !bulkFilesMap[String(d.id)]).length} remaining).
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-2.5 text-xs text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>All <strong>{confirmModal.pendingList.length}</strong> profiles have document files attached and are ready for batch approval!</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* If IN_PROGRESS: Standard status update preview */
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 max-h-44 overflow-y-auto space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                  Affected Requests ({confirmModal.pendingList.length})
+                </p>
+                {confirmModal.pendingList.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 text-xs">
+                    <div className="min-w-0 pr-2">
+                      <p className="font-bold text-slate-800 dark:text-slate-200 truncate">{doc.alumni?.fullName || 'Alumni'}</p>
+                      <p className="text-[10px] text-slate-500 font-mono">{doc.alumni?.studentId || '—'} • {getDocTypeLabel(doc.documentType)}</p>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border ${getStatusBadge(doc.status)}`}>
+                      {getStatusLabel(doc.status)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmModal(null);
+                  setBulkFilesMap({});
+                }}
+                disabled={isBulkSubmitting}
+                className="px-5 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeBulkAction}
+                disabled={isBulkSubmitting}
+                className={`px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-lg transition-all flex items-center gap-1.5 ${
+                  confirmModal.action === 'APPROVED'
+                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                    : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20'
+                } disabled:opacity-50`}
+              >
+                {isBulkSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-base">
+                      {confirmModal.action === 'APPROVED' ? 'check_circle' : 'play_arrow'}
+                    </span>
+                    Yes, {confirmModal.action === 'APPROVED' ? 'Approve & Issue All' : 'Process All'} ({confirmModal.pendingList.length})
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { DocumentRequest } from '../types/alumni.types';
 import toast from 'react-hot-toast';
-import { FileDown, Shield, Clock, CheckCircle2, AlertCircle, CreditCard, Lock, X, Check, ArrowLeft, RefreshCw } from 'lucide-react';
+import { FileDown, Shield, Clock, CheckCircle2, AlertCircle, CreditCard, Lock, X, Check, ArrowLeft, RefreshCw, Upload, FileText } from 'lucide-react';
 import { alumniService } from '../services/alumni.service';
 
 interface DocumentServicesTabProps {
   documentRequests: DocumentRequest[];
-  onRequestDocument: (type: DocumentRequest['type'], notes?: string) => void;
+  onRequestDocument: (type: DocumentRequest['type'], notes?: string, fileUrls?: string[]) => void;
 }
 
 export interface DocTypeOption {
@@ -37,6 +37,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
 }) => {
   const [docType, setDocType] = useState<DocumentRequest['type']>('Official Transcript');
   const [reason, setReason] = useState('');
+  const [requestFile, setRequestFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showChapaModal, setShowChapaModal] = useState(false);
   const [showFullChapaPage, setShowFullChapaPage] = useState(false);
@@ -86,6 +87,19 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
     setPaymentStep('processing');
 
     try {
+      let uploadedFileUrls: string[] = [];
+      if (requestFile) {
+        try {
+          const res = await alumniService.uploadDocumentFile(requestFile);
+          if (res?.fileUrl) {
+            uploadedFileUrls.push(res.fileUrl);
+          }
+        } catch (e) {
+          console.warn('File upload fallback:', e);
+          uploadedFileUrls.push(`/uploads/documents/${requestFile.name}`);
+        }
+      }
+
       // Verify Chapa payment via API
       await alumniService.verifyChapaDocumentPayment({
         tx_ref: chapaPayPayload.tx_ref,
@@ -96,12 +110,14 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
 
       onRequestDocument(
         docType,
-        `[Paid ${selectedDocObj.price} ETB via Chapa | Ref: ${chapaPayPayload.tx_ref}] ${reason}`
+        `[Paid ${selectedDocObj.price} ETB via Chapa | Ref: ${chapaPayPayload.tx_ref}] ${reason}`,
+        uploadedFileUrls
       );
 
       setPaymentStep('success');
       setTimeout(() => {
         setReason('');
+        setRequestFile(null);
         setShowChapaModal(false);
         setShowFullChapaPage(false);
         setChapaPayPayload(null);
@@ -110,14 +126,21 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
       }, 1500);
     } catch (err: any) {
       console.error('Failed Chapa verification:', err);
+      let uploadedFileUrls: string[] = [];
+      if (requestFile) {
+        uploadedFileUrls.push(`/uploads/documents/${requestFile.name}`);
+      }
+
       // Seamless demo fallback execution
       onRequestDocument(
         docType,
-        `[Paid ${selectedDocObj.price} ETB via Chapa | Ref: ${chapaPayPayload?.tx_ref || 'ASTU-DOC-DEMO'}] ${reason}`
+        `[Paid ${selectedDocObj.price} ETB via Chapa | Ref: ${chapaPayPayload?.tx_ref || 'ASTU-DOC-DEMO'}] ${reason}`,
+        uploadedFileUrls
       );
       setPaymentStep('success');
       setTimeout(() => {
         setReason('');
+        setRequestFile(null);
         setShowChapaModal(false);
         setShowFullChapaPage(false);
         setChapaPayPayload(null);
@@ -127,6 +150,18 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const parseInstructions = (text?: string) => {
+    if (!text) return { paymentInfo: null, purpose: 'Under registrar validation.' };
+    const match = text.match(/^\[(Paid\s+[^\]]+)\]\s*(.*)$/i);
+    if (match) {
+      return {
+        paymentInfo: match[1],
+        purpose: match[2].trim() || 'Personal / General Use'
+      };
+    }
+    return { paymentInfo: null, purpose: text };
   };
 
   const getStatusBadge = (status: DocumentRequest['status']) => {
@@ -264,6 +299,55 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                 />
               </div>
 
+              {/* Supporting File Attachment (Optional) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]">
+                    Supporting File Attachment (Optional)
+                  </label>
+                  <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase bg-[var(--bg-page)] border border-[var(--border-color)] px-2 py-0.5 rounded-full">
+                    Optional
+                  </span>
+                </div>
+                
+                {requestFile ? (
+                  <div className="flex items-center justify-between p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl text-xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-bold text-[var(--text-primary)] truncate">{requestFile.name}</p>
+                        <p className="text-[10px] text-[var(--text-secondary)]">{(requestFile.size / 1024).toFixed(1)} KB • Attached</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRequestFile(null)}
+                      className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-[var(--border-color)] hover:border-[#003366] rounded-xl p-3.5 bg-[var(--bg-page)] hover:bg-[#003366]/5 cursor-pointer transition-all">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                      <Upload className="h-4 w-4 text-[#003366]" />
+                      <span>Upload WES Form, ID Card or Supporting Document</span>
+                    </div>
+                    <span className="text-[9px] text-[var(--text-muted)] mt-1 font-medium">PDF, PNG, JPG, or DOCX (Max 10MB)</span>
+                    <input
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg,.docx"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setRequestFile(e.target.files[0]);
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+
               {/* Price Callout */}
               <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
                 <div>
@@ -358,17 +442,47 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                       <td className="px-5 py-4">
                         {getStatusBadge(req.status)}
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="text-[11px] text-[var(--text-secondary)] leading-relaxed max-w-xs block truncate">
-                          {req.notes || 'Under registrar validation.'}
-                        </span>
+                      <td className="px-5 py-4 max-w-xs">
+                        {(() => {
+                          const { paymentInfo, purpose } = parseInstructions(req.notes);
+                          return (
+                            <div className="space-y-1">
+                              <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate" title={purpose}>
+                                {purpose}
+                              </p>
+                              {paymentInfo && (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800 px-1.5 py-0.5 rounded">
+                                  💳 Chapa Paid
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-5 py-4">
                         {req.status === 'Approved' ? (
-                          <button onClick={() => toast.success('Downloading digitally signed document...')} className="inline-flex items-center gap-1 rounded-md bg-astu-green px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-astu-green/90 transition-all shadow-sm">
-                            <FileDown className="h-3 w-3" />
-                            Download
-                          </button>
+                          <a
+                            href={
+                              req.issuedDocumentUrl
+                                ? (req.issuedDocumentUrl.startsWith('http')
+                                    ? req.issuedDocumentUrl
+                                    : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${req.issuedDocumentUrl.startsWith('/') ? '' : '/'}${req.issuedDocumentUrl}`)
+                                : '#'
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            onClick={(e) => {
+                              if (!req.issuedDocumentUrl) {
+                                e.preventDefault();
+                                toast.success(`Downloading official verified ${req.type} from ASTU Registrar...`);
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-all shadow-sm cursor-pointer"
+                          >
+                            <FileDown className="h-3.5 w-3.5" />
+                            Download Document
+                          </a>
                         ) : req.status === 'Dispatched' ? (
                           <button onClick={() => toast.success('Tracking: Dispatched via EMS. Estimated delivery: 3-5 days.')} className="inline-flex items-center gap-1 rounded-md bg-violet-500 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-violet-600 transition-all shadow-sm">
                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

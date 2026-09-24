@@ -23,6 +23,7 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
@@ -32,9 +33,12 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
+import IctRoutes from "./routes/ictRoutes";
 import CmsRoutes from "./routes/cmsRoutes";
 import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
+
+import { SystemSettingsProvider } from "./context/SystemSettingsContext";
 
 function AppContent() {
   return (
@@ -56,6 +60,7 @@ function AppContent() {
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-2fa" element={<Verify2FAPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
 
@@ -105,11 +110,20 @@ function AppContent() {
           }
         />
         <Route
+          path="/ict/*"
+          element={
+            <ProtectedRoute
+              element={<IctRoutes />}
+              allowedRoles={["ADMIN", "SUPER_ADMIN"]}
+            />
+          }
+        />
+        <Route
           path="/admin/*"
           element={
             <ProtectedRoute
               element={<AdminRoutes />}
-              allowedRoles={["ADMIN"]}
+              allowedRoles={["SUPER_ADMIN"]}
             />
           }
         />
@@ -131,10 +145,12 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <Toaster position="top-right" />
-      <RegistrationProvider>
-        <AppContent />
-      </RegistrationProvider>
+      <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
+      <SystemSettingsProvider>
+        <RegistrationProvider>
+          <AppContent />
+        </RegistrationProvider>
+      </SystemSettingsProvider>
     </Provider>
   );
 }

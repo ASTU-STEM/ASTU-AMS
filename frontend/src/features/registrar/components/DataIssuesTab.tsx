@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, Download, ExternalLink, FileText, Filter, Search, UserPlus, XCircle, SearchX, X } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { AlertTriangle, CheckCircle, Clock, Download, ExternalLink, FileText, Filter, Search, UserPlus, XCircle, SearchX, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
@@ -19,6 +19,20 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+const getDocumentUrl = (filePath?: string) => {
+  if (!filePath) return '';
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) return filePath;
+  const normPath = filePath.replace(/\\/g, '/');
+  const match = normPath.match(/uploads\/.*/i);
+  const cleanPath = match ? match[0] : normPath.replace(/^\//, '');
+  return `${UPLOAD_BASE}/${cleanPath}`;
+};
+
+const isImageFile = (url?: string) => {
+  if (!url) return false;
+  return /\.(jpeg|jpg|gif|png|webp|bmp|svg)$/i.test(url);
+};
+
 interface RegistrationIssue {
   id: string;
   fullName: string;
@@ -32,7 +46,11 @@ interface RegistrationIssue {
   createdAt: string;
 }
 
-export function DataIssuesTab() {
+interface DataIssuesTabProps {
+  onIssuesChange?: (issues: RegistrationIssue[]) => void;
+}
+
+export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) => {
   const [issues, setIssues] = useState<RegistrationIssue[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,15 +58,50 @@ export function DataIssuesTab() {
   const [selectedIssue, setSelectedIssue] = useState<RegistrationIssue | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  const [editForm, setEditForm] = useState({
+    fullName: '',
+    studentId: '',
+    graduationYear: '',
+    department: 'Computer Science & Engineering',
+    email: '',
+    phone: '',
+    cgpa: '3.50',
+    nationality: 'Ethiopian',
+    dateOfBirth: '',
+  });
 
   useEffect(() => {
     fetchIssues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset image error state when a new issue is selected
+  // Sync edit form state when a new issue is selected
   useEffect(() => {
     setImgError(false);
-  }, [selectedIssue?.id]);
+    if (selectedIssue) {
+      let dept = 'Computer Science & Engineering';
+      if (selectedIssue.issueDescription) {
+        const match = selectedIssue.issueDescription.match(/Department:\s*([^\n\r;]+)/i);
+        if (match && match[1]) dept = match[1].trim();
+      }
+      setEditForm({
+        fullName: selectedIssue.fullName || '',
+        studentId: selectedIssue.studentId || '',
+        graduationYear: String(selectedIssue.graduationYear || '2024'),
+        department: dept,
+        email: selectedIssue.contactEmail || '',
+        phone: selectedIssue.phoneNumber || '',
+        cgpa: '3.50',
+        nationality: 'Ethiopian',
+        dateOfBirth: '',
+      });
+      setIsEditing(false);
+    }
+  }, [selectedIssue]);
 
   const fetchIssues = async () => {
     try {
@@ -56,6 +109,7 @@ export function DataIssuesTab() {
       const res = await apiClient.get<{ success: boolean; data: RegistrationIssue[] }>('/registrar/registration-issues');
       if (res.data.success) {
         setIssues(res.data.data);
+        onIssuesChange?.(res.data.data);
       }
     } catch (error) {
       toast.error('Failed to load data correction requests');
@@ -67,10 +121,21 @@ export function DataIssuesTab() {
   const handleResolveIssue = async (id: string, status: 'RESOLVED' | 'REJECTED') => {
     try {
       setActionLoading(true);
-      const res = await apiClient.put<{ success: boolean }>(`/registrar/registration-issues/${id}/resolve`, { status });
+      const res = await apiClient.put<{ success: boolean }>(`/registrar/registration-issues/${id}/resolve`, {
+        status,
+        fullName: editForm.fullName,
+        studentId: editForm.studentId,
+        graduationYear: editForm.graduationYear,
+        email: editForm.email,
+        phone: editForm.phone,
+      });
       if (res.data.success) {
         toast.success(`Request marked as ${status.toLowerCase()}`);
-        setIssues((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
+        setIssues((prev) => {
+          const next: RegistrationIssue[] = prev.map((i) => (i.id === id ? { ...i, status } : i));
+          onIssuesChange?.(next);
+          return next;
+        });
         setSelectedIssue(null);
       }
     } catch (error) {
@@ -83,10 +148,28 @@ export function DataIssuesTab() {
   const handleCreateAccount = async (id: string) => {
     try {
       setActionLoading(true);
-      const res = await apiClient.post<{ success: boolean; message?: string }>(`/registrar/registration-issues/${id}/create-account`);
+      const payload = {
+        fullName: editForm.fullName,
+        studentId: editForm.studentId,
+        graduationYear: editForm.graduationYear,
+        department: editForm.department,
+        email: editForm.email,
+        phone: editForm.phone,
+        cgpa: editForm.cgpa,
+        nationality: editForm.nationality,
+        dateOfBirth: editForm.dateOfBirth,
+      };
+      const res = await apiClient.post<{ success: boolean; message?: string }>(
+        `/registrar/registration-issues/${id}/create-account`,
+        payload
+      );
       if (res.data.success) {
-        toast.success('Account created and activated! Credentials sent via email.');
-        setIssues((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'RESOLVED' } : i)));
+        toast.success('Account created with Registrar verified data! Credentials sent via email.');
+        setIssues((prev) => {
+          const next: RegistrationIssue[] = prev.map((i) => (i.id === id ? { ...i, status: 'RESOLVED' } : i));
+          onIssuesChange?.(next);
+          return next;
+        });
         setSelectedIssue(null);
       }
     } catch (error: any) {
@@ -96,14 +179,27 @@ export function DataIssuesTab() {
     }
   };
 
-  const filteredIssues = issues.filter((issue) => {
-    const matchesSearch =
-      issue.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.contactEmail.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || issue.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredIssues = useMemo(() => {
+    return issues.filter((issue) => {
+      const matchesSearch =
+        issue.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        issue.contactEmail.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'ALL' || issue.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [issues, searchQuery, statusFilter]);
+
+  const totalPages = Math.ceil(filteredIssues.length / pageSize) || 1;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const paginatedIssues = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredIssues.slice(start, start + pageSize);
+  }, [filteredIssues, currentPage, pageSize]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -116,18 +212,6 @@ export function DataIssuesTab() {
       default:
         return null;
     }
-  };
-
-  const getDocumentUrl = (path: string) => {
-    if (!path) return '';
-    // Handle absolute URLs
-    if (path.startsWith('http')) return path;
-    // Handle relative paths
-    return `${UPLOAD_BASE}/${path.replace(/^\//, '')}`;
-  };
-
-  const isImageFile = (url: string) => {
-    return /\.(jpeg|jpg|gif|png|webp|bmp|svg)$/i.test(url);
   };
 
   if (loading) {
@@ -201,7 +285,7 @@ export function DataIssuesTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-              {filteredIssues.map((issue) => (
+              {paginatedIssues.map((issue) => (
                 <tr key={issue.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-semibold text-slate-900 dark:text-white">{issue.fullName}</div>
@@ -246,6 +330,34 @@ export function DataIssuesTab() {
               )}
             </tbody>
           </table>
+        </div>
+        
+        {/* Pagination Bar */}
+        <div className="border-t border-slate-200 px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/50 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
+          <div>
+            Showing <span className="font-semibold text-slate-700 dark:text-slate-200">{filteredIssues.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-semibold text-slate-700 dark:text-slate-200">{Math.min(currentPage * pageSize, filteredIssues.length)}</span> of <span className="font-semibold text-slate-700 dark:text-slate-200">{filteredIssues.length}</span> entries
+          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-all"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" /> Previous
+              </button>
+              <span className="px-2 font-semibold text-slate-700 dark:text-slate-200">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-all"
+              >
+                Next <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -313,36 +425,162 @@ export function DataIssuesTab() {
             {/* Modal Body – scrollable */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column: Info */}
+                {/* Left Column: Info & Registrar Correction Inputs */}
                 <div className="space-y-5">
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">Reported Information</h4>
-                    <div className="space-y-3 rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-700/50 dark:border-slate-600">
-                      <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Full Name</div>
-                        <div className="font-semibold text-slate-900 dark:text-white">{selectedIssue.fullName}</div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Student ID</div>
-                          <div className="font-medium text-slate-900 dark:text-white">{selectedIssue.studentId}</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Graduation Year</div>
-                          <div className="font-medium text-slate-900 dark:text-white">{selectedIssue.graduationYear}</div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Email</div>
-                          <div className="text-sm font-medium text-slate-900 break-all dark:text-white">{selectedIssue.contactEmail}</div>
-                        </div>
-                        <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Phone</div>
-                          <div className="text-sm font-medium text-slate-900 dark:text-white">{selectedIssue.phoneNumber}</div>
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                        {isEditing ? '✏️ Edit & Correct Graduate Info' : 'Reported Information'}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(!isEditing)}
+                        className="text-[11px] font-bold text-astu-navy hover:underline flex items-center gap-1 bg-astu-navy/10 px-2.5 py-1 rounded-lg transition-all"
+                      >
+                        {isEditing ? '🔒 Lock Editing' : '✏️ Edit / Correct Fields'}
+                      </button>
                     </div>
+
+                    {isEditing ? (
+                      <div className="space-y-3 rounded-xl bg-slate-50 p-4 border border-slate-200 dark:bg-slate-700/50 dark:border-slate-600 text-xs">
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Full Name</label>
+                          <input
+                            type="text"
+                            value={editForm.fullName}
+                            onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                            className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-semibold focus:outline-none focus:border-astu-navy"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Student ID</label>
+                            <input
+                              type="text"
+                              value={editForm.studentId}
+                              onChange={(e) => setEditForm({ ...editForm, studentId: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-mono focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Graduation Year</label>
+                            <input
+                              type="text"
+                              value={editForm.graduationYear}
+                              onChange={(e) => setEditForm({ ...editForm, graduationYear: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Department / Program</label>
+                          <select
+                            value={editForm.department}
+                            onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                            className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-semibold focus:outline-none focus:border-astu-navy"
+                          >
+                            <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                            <option value="Electrical & Computer Engineering">Electrical & Computer Engineering</option>
+                            <option value="Civil Engineering">Civil Engineering</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Chemical Engineering">Chemical Engineering</option>
+                            <option value="Applied Geology">Applied Geology</option>
+                            <option value="Pharmacy">Pharmacy</option>
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Email</label>
+                            <input
+                              type="email"
+                              value={editForm.email}
+                              onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Phone</label>
+                            <input
+                              type="text"
+                              value={editForm.phone}
+                              onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Final CGPA</label>
+                            <input
+                              type="text"
+                              value={editForm.cgpa}
+                              onChange={(e) => setEditForm({ ...editForm, cgpa: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-mono focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nationality</label>
+                            <input
+                              type="text"
+                              value={editForm.nationality}
+                              onChange={(e) => setEditForm({ ...editForm, nationality: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Date of Birth</label>
+                            <input
+                              type="date"
+                              value={editForm.dateOfBirth}
+                              onChange={(e) => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
+                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-700/50 dark:border-slate-600">
+                        <div>
+                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Full Name</div>
+                          <div className="font-semibold text-slate-900 dark:text-white">{editForm.fullName || selectedIssue.fullName}</div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Student ID</div>
+                            <div className="font-medium text-slate-900 dark:text-white">{editForm.studentId || selectedIssue.studentId}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Graduation Year</div>
+                            <div className="font-medium text-slate-900 dark:text-white">{editForm.graduationYear || selectedIssue.graduationYear}</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Email</div>
+                            <div className="text-sm font-medium text-slate-900 break-all dark:text-white">{editForm.email || selectedIssue.contactEmail}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Phone</div>
+                            <div className="text-sm font-medium text-slate-900 dark:text-white">{editForm.phone || selectedIssue.phoneNumber}</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/60">
+                          <div>
+                            <div className="text-[9px] uppercase text-slate-400 font-semibold">CGPA</div>
+                            <div className="text-xs font-bold text-slate-800">{editForm.cgpa}</div>
+                          </div>
+                          <div>
+                            <div className="text-[9px] uppercase text-slate-400 font-semibold">Nationality</div>
+                            <div className="text-xs font-bold text-slate-800">{editForm.nationality}</div>
+                          </div>
+                          <div>
+                            <div className="text-[9px] uppercase text-slate-400 font-semibold">DOB</div>
+                            <div className="text-xs font-bold text-slate-800">{editForm.dateOfBirth || 'N/A'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>

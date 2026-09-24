@@ -29,8 +29,13 @@ const upload = multer({
   },
 });
 
-// We accept up to 2 attachments (as frontend limits it to 2)
-// Frontend sends `attachment_0`, `attachment_1` etc. So we use `upload.any()` or mapped fields.
+// Public / User ticket creation
 router.post('/tickets', upload.any(), SupportController.submitTicket);
+
+// Admin Ticket Management endpoints
+router.get('/tickets', SupportController.getTickets);
+router.get('/tickets/:id', SupportController.getTicketById);
+router.put('/tickets/:id/status', SupportController.updateTicketStatus);
+router.post('/tickets/:id/escalate', SupportController.escalateToIct);
 
 export default router;

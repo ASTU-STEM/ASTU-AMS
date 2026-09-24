@@ -8,6 +8,7 @@ generator client {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   ALUMNI
   EMPLOYER
@@ -75,6 +76,7 @@ enum VerificationRequestStatus {
 enum SupportTicketStatus {
   OPEN
   IN_PROGRESS
+  PENDING_ICT_ADMIN
   RESOLVED
   CLOSED
 }
@@ -85,6 +87,8 @@ model User {
   password         String
   role             Role
   isActive         Boolean           @default(false)
+  twoFactorEnabled Boolean           @default(false)
+  adminNotes       String?           @db.Text
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   alumniProfile         AlumniProfile?
@@ -213,6 +217,7 @@ model Certification {
   issueDate       String?
   expiryDate      String?
   credentialUrl   String?
+  imageUrl        String?
   description     String?
   createdAt       DateTime      @default(now())
 }
@@ -225,6 +230,7 @@ model Project {
   description     String?
   technologies    String[]
   url             String?
+  imageUrl        String?
   role            String?
   startDate       String?
   endDate         String?
@@ -542,6 +548,8 @@ model RegistrarStudent {
   graduationYear Int
   email          String?
   phone          String?
+  nationality    String?
+  dateOfBirth    DateTime?
   source         String
   importedAt     DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -550,13 +558,21 @@ model RegistrarStudent {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  content   String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  content     String    @db.Text
+  type        String    @default("In-App")
+  status      String    @default("Sent")
+  priority    String    @default("Normal")
+  category    String    @default("General")
+  imageUrl    String?
+  ctaLink     String?
+  ctaText     String?
+  scheduledAt DateTime?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 }
 
 model AuditLog {
@@ -705,10 +721,14 @@ model SupportTicket {
   attachments    String[]
   status         SupportTicketStatus @default(OPEN)
   
-  // Optional metadata from frontend
-  route          String?
-  lastErrorCode  String?
-  sessionId      String?
+  // Optional metadata & admin resolution response
+  route           String?
+  lastErrorCode   String?
+  sessionId       String?
+  responseNotes   String?
+  escalationNotes String?
+  assignedToRole  String?
+  resolvedByRole  String?
   
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
@@ -876,3 +896,26 @@ model RegistrationIssue {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
+
+model ExportLog {
+  id          String   @id @default(uuid())
+  reportName  String
+  format      String   // "PDF" | "Excel" | "Stata" | "CSV"
+  exportedBy  String   @default("Registrar Admin")
+  recordCount Int      @default(0)
+  fileSize    String   @default("0 KB")
+  createdAt   DateTime @default(now())
+}
+
+model ScheduledReport {
+  id        String   @id @default(uuid())
+  title     String
+  format    String   // "PDF" | "Excel" | "CSV"
+  schedule  String   // "Every 1st of month" | "Every Monday" | "Quarterly"
+  nextRun   String   // e.g. "Jun 1, 2026"
+  status    String   @default("Active") // "Active" | "Paused" | "Completed"
+  createdBy String   @default("Registrar Admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

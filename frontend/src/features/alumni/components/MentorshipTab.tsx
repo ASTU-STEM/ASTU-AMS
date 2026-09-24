@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mentor, MentorshipSession } from '../types/alumni.types';
+import { alumniService } from '../services/alumni.service';
 import toast from 'react-hot-toast';
 
 interface MentorReview {
@@ -15,6 +16,7 @@ interface MentorshipTabProps {
   mentors: Mentor[];
   onRequestMentorship: (mentorId: number) => void;
   onScheduleSession: (mentorId: number, session: Omit<MentorshipSession, 'id' | 'status' | 'meetLink'>) => void;
+  onStartVideoCall?: (mentor: Mentor) => void;
 }
 
 const defaultReviews: MentorReview[] = [
@@ -27,7 +29,8 @@ const defaultReviews: MentorReview[] = [
 export const MentorshipTab: React.FC<MentorshipTabProps> = ({
   mentors,
   onRequestMentorship,
-  onScheduleSession
+  onScheduleSession,
+  onStartVideoCall
 }) => {
   const [activeTab, setActiveTab] = useState<'find' | 'become'>('find');
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +40,60 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
   const [requestMessage, setRequestMessage] = useState('');
   const [selectedMentorForReviews, setSelectedMentorForReviews] = useState<number | null>(null);
   const [reviews] = useState<MentorReview[]>(defaultReviews);
+
+  const [mentorProfileForm, setMentorProfileForm] = useState({
+    expertise: 'System Architecture, AI/ML, Career Guidance',
+    yearsExperience: '5',
+    availability: 'Available 2h/week for 1-on-1s'
+  });
+
+  useEffect(() => {
+    const fetchMentorStatus = async () => {
+      try {
+        const res: any = await alumniService.getMyMentorStatus();
+        if (res) {
+          setIsAvailableAsMentor(Boolean(res.isMentor));
+          if (res.profile) {
+            setMentorProfileForm({
+              expertise: Array.isArray(res.profile.expertise) ? res.profile.expertise.join(', ') : 'System Architecture, AI/ML',
+              yearsExperience: String(res.profile.yearsExperience || 5),
+              availability: res.profile.availability || 'Available 2h/week for 1-on-1s'
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load mentor status', err);
+      }
+    };
+    fetchMentorStatus();
+  }, []);
+
+  const handleToggleMentorStatus = async () => {
+    try {
+      const res: any = await alumniService.toggleMentorStatus();
+      const newStatus = res?.status === 'AVAILABLE';
+      setIsAvailableAsMentor(newStatus);
+      toast.success(newStatus ? 'Now active and visible in Senior Mentor Network!' : 'Mentor status paused.');
+    } catch (err) {
+      toast.error('Failed to update mentor status.');
+    }
+  };
+
+  const handleSaveMentorProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const expertiseArr = mentorProfileForm.expertise.split(',').map(s => s.trim()).filter(Boolean);
+      await alumniService.registerAsMentor({
+        expertise: expertiseArr,
+        yearsExperience: Number(mentorProfileForm.yearsExperience) || 5,
+        availability: mentorProfileForm.availability,
+        status: isAvailableAsMentor ? 'AVAILABLE' : 'UNAVAILABLE'
+      });
+      toast.success('Mentor Profile saved to database!');
+    } catch (err) {
+      toast.error('Failed to save mentor profile.');
+    }
+  };
 
   const [sessionForm, setSessionForm] = useState({
     date: '',
@@ -225,9 +282,12 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <img
-                        src={mentor.avatarUrl}
+                        src={mentor.avatarUrl && !mentor.avatarUrl.includes('undefined') && !mentor.avatarUrl.includes('null') ? mentor.avatarUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || 'ASTU Mentor')}&background=003366&color=ffffff&bold=true`}
+                        onError={(e) => {
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || 'ASTU Mentor')}&background=003366&color=ffffff&bold=true`;
+                        }}
                         alt={mentor.name}
-                        className="w-14 h-14 rounded-full object-cover border-2 border-[#003366]/15 shadow-sm"
+                        className="w-14 h-14 rounded-full object-cover border-2 border-[#003366]/15 shadow-sm shrink-0"
                       />
                       <div>
                         <h4 className="font-bold text-gray-900 text-sm">{mentor.name}</h4>
@@ -365,17 +425,34 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                         </span>
                       </div>
 
-                      {sess.meetLink && (
-                        <a
-                          href={sess.meetLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="w-full py-1.5 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm text-center block"
+                      <div className="flex gap-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onStartVideoCall) {
+                              onStartVideoCall(m);
+                            } else {
+                              toast.success(`Launching 1-on-1 WebRTC Video Session with ${m.name}...`);
+                            }
+                          }}
+                          className="flex-1 py-1.5 text-white rounded-lg text-[10px] font-extrabold transition-all shadow-sm text-center flex items-center justify-center gap-1 hover:opacity-90"
                           style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
                         >
-                          Join Meet
-                        </a>
-                      )}
+                          <span className="material-symbols-outlined text-xs">videocam</span>
+                          Join HD Video Call
+                        </button>
+                        {sess.meetLink && (
+                          <a
+                            href={sess.meetLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold transition-all text-center flex items-center justify-center gap-1 hover:bg-slate-200"
+                          >
+                            <span className="material-symbols-outlined text-xs">link</span>
+                            Link
+                          </a>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}
@@ -393,24 +470,24 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
       ) : (
         /* ── BECOME A MENTOR TAB ── */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
             <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-4">
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                 <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold material-symbols-outlined" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>school</span>
                 Mentorship Status
               </h3>
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                Enable mentor status to let ASTU senior students view your bio and submit guidance requests.
+                Enable mentor status to let ASTU senior students and junior alumni view your bio and submit guidance requests.
               </p>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl">
-                <span className="text-xs font-bold text-gray-900">Accepting Students</span>
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-100 rounded-xl">
+                <div>
+                  <span className="text-xs font-bold text-gray-900 block">Accepting Students</span>
+                  <span className="text-[10px] text-gray-500 font-medium">{isAvailableAsMentor ? 'Active & Visible' : 'Inactive'}</span>
+                </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsAvailableAsMentor(!isAvailableAsMentor);
-                    toast.success(isAvailableAsMentor ? 'No longer visible as a mentor.' : 'Now accepting mentorship requests!');
-                  }}
+                  onClick={handleToggleMentorStatus}
                   className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 ${
                     isAvailableAsMentor ? 'bg-[#003366]' : 'bg-gray-300'
                   }`}
@@ -421,6 +498,51 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Mentor Profile Setup Form */}
+            <form onSubmit={handleSaveMentorProfile} className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-3.5">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#003366]">Mentor Profile Details</h4>
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-600 uppercase">Expertise Topics (Comma Separated)</label>
+                <input
+                  type="text"
+                  value={mentorProfileForm.expertise}
+                  onChange={(e) => setMentorProfileForm(p => ({ ...p, expertise: e.target.value }))}
+                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  placeholder="e.g. System Design, AI Research, Full-Stack"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-600 uppercase">Years of Experience</label>
+                <input
+                  type="number"
+                  value={mentorProfileForm.yearsExperience}
+                  onChange={(e) => setMentorProfileForm(p => ({ ...p, yearsExperience: e.target.value }))}
+                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  placeholder="e.g. 5"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-600 uppercase">Availability Schedule</label>
+                <input
+                  type="text"
+                  value={mentorProfileForm.availability}
+                  onChange={(e) => setMentorProfileForm(p => ({ ...p, availability: e.target.value }))}
+                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  placeholder="e.g. Available 2h/week on weekends"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
+              >
+                💾 Save & Register Mentor Profile
+              </button>
+            </form>
           </div>
 
           <div className="lg:col-span-2">

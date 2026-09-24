@@ -45,22 +45,95 @@ export type ApiResult<T> =
   | { ok: false; errorCode: string; message: string };
 
 export const authService = {
+  /**
+   * Universal 3-Tier 2FA Email Resolution across all 5 portals:
+   * Tier 1: Primary contact/notification email entered in component form
+   * Tier 2: Profile/Domain email stored in database (Alumni, Employer, Staff, Admin)
+   * Tier 3: Account registration email used during sign-in (from localStorage 'user' or session)
+   */
+  resolveTarget2FAEmail(formEmail?: string, profileEmail?: string): string {
+    if (formEmail && typeof formEmail === 'string' && formEmail.trim()) return formEmail.trim();
+    if (profileEmail && typeof profileEmail === 'string' && profileEmail.trim()) return profileEmail.trim();
+
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        if (parsed.email && typeof parsed.email === 'string' && parsed.email.trim()) {
+          return parsed.email.trim();
+        }
+      }
+    } catch {}
+
+    try {
+      const storedAuth = localStorage.getItem('astu_auth');
+      if (storedAuth) {
+        const parsed = JSON.parse(storedAuth);
+        if (parsed.user?.email) return parsed.user.email.trim();
+      }
+    } catch {}
+
+    return '';
+  },
+
+  // ==================== CHANGE PASSWORD ====================
+  async changePassword(data: { currentPassword?: string; newPassword: string }): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put('/auth/change-password', data);
+      return { ok: true, data: response.data, message: response.data?.message || 'Password changed successfully!' };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'CHANGE_PWD_FAILED', message: error.response?.data?.message || 'Failed to update password.' };
+    }
+  },
+
+  // ==================== TOGGLE 2FA ====================
+  async toggle2FA(enabled: boolean): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.put('/auth/toggle-2fa', { enabled });
+      return { ok: true, data: response.data, message: response.data?.message || '2FA status updated' };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'TOGGLE_2FA_FAILED', message: error.response?.data?.message || 'Failed to update 2FA status.' };
+    }
+  },
+
+  // ==================== SEND 2FA OTP ====================
+  async send2FAOTP(email: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post('/auth/send-2fa-otp', { email });
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'OTP_ERROR', message: error.response?.data?.message || 'Failed to send OTP email.' };
+    }
+  },
+
+  // ==================== VERIFY 2FA CODE ====================
+  async verify2FACode(code: string, email: string): Promise<ApiResult<any>> {
+    try {
+      const response = await apiClient.post('/auth/verify-2fa-code', { code, email });
+      return { ok: true, data: response.data };
+    } catch (error: any) {
+      return { ok: false, errorCode: 'VERIFY_ERROR', message: error.response?.data?.message || 'Invalid 2FA verification code.' };
+    }
+  },
+
   // ==================== LOGIN ====================
   async login(credentials: LoginCredentials): Promise<ApiResult<AuthResponse['data']>> {
     try {
       const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
       const { data } = response;
 
-      if (data.success && data.data?.token) {
-        localStorage.setItem('authToken', data.data.token);
-        if (data.data.refreshToken) {
-          localStorage.setItem('refreshToken', data.data.refreshToken);
+      if (data.success && (data.data?.token || (data.data as any)?.requires2FA)) {
+        if (data.data?.token) {
+          localStorage.setItem('authToken', data.data.token);
+          if (data.data.refreshToken) {
+            localStorage.setItem('refreshToken', data.data.refreshToken);
+          }
+          if (data.data.user) {
+            localStorage.setItem('user', JSON.stringify(data.data.user));
+            localStorage.setItem('astu_ams_user_role', data.data.user.role);
+          }
+          window.dispatchEvent(new Event('astu-auth-changed'));
         }
-        if (data.data.user) {
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-          localStorage.setItem('astu_ams_user_role', data.data.user.role);
-        }
-        window.dispatchEvent(new Event('astu-auth-changed'));
         return { ok: true, data: data.data };
       }
 

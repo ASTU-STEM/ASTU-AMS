@@ -5,8 +5,27 @@ import { requireRoles } from '../../../core/middleware/role.middleware';
 import { Role } from '@prisma/client';
 import { asyncHandler } from '../../../core/utils/asyncHandler';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
-const upload = multer({ dest: 'uploads/' });
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (_req: any, _file: any, cb: any) => {
+    cb(null, UPLOADS_DIR);
+  },
+  filename: (_req: any, file: Express.Multer.File, cb: any) => {
+    const ext = path.extname(file.originalname) || '.pdf';
+    const cleanName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e4);
+    cb(null, `${cleanName}_${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({ storage });
 const router = Router();
 
 // Public verification route for registration
@@ -18,6 +37,7 @@ router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 
 router.post('/import', upload.single('file'), asyncHandler(RegistrarController.importFile));
 router.get('/logs', asyncHandler(RegistrarController.getLogs));
+router.get('/sis-status', asyncHandler(RegistrarController.getSisStatus));
 router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));
 router.post('/fetch-graduates/current-and-previous', asyncHandler(RegistrarController.fetchCurrentAndPreviousGraduates));
 
@@ -40,6 +60,7 @@ router.post('/registration-issues/:id/create-account', asyncHandler(RegistrarCon
 
 // SIS Records & Batch Import
 router.get('/sis-records', asyncHandler(RegistrarController.getSisRecords));
+router.post('/sis-records', asyncHandler(RegistrarController.createSisRecord));
 router.post('/batch-import', asyncHandler(RegistrarController.batchImport));
 
 // Dashboard Stats
@@ -47,10 +68,26 @@ router.get('/dashboard-stats', asyncHandler(RegistrarController.getDashboardStat
 
 // Verifications
 router.get('/verifications', asyncHandler(RegistrarController.getVerifications));
+router.post('/verifications/bulk-status', asyncHandler(RegistrarController.bulkUpdateVerificationStatus));
 router.patch('/verifications/:id/status', asyncHandler(RegistrarController.updateVerificationStatus));
 
 // Document Status Update
+router.post('/document-requests/bulk-status', asyncHandler(RegistrarController.bulkUpdateDocumentStatus));
+router.post('/document-requests/bulk-approve', upload.any(), asyncHandler(RegistrarController.bulkApproveDocumentRequests));
+router.post('/document-requests/:id/upload-draft', upload.single('document'), asyncHandler(RegistrarController.uploadDraftDocumentRequest));
+router.delete('/document-requests/:id/remove-draft', asyncHandler(RegistrarController.removeDraftDocumentRequest));
 router.patch('/document-requests/:id/status', asyncHandler(RegistrarController.updateDocumentStatus));
 router.post('/document-requests/:id/approve', upload.single('document'), asyncHandler(RegistrarController.approveDocumentRequest));
+
+// Trigger Pending Task Reminder
+router.post('/trigger-pending-reminder', asyncHandler(RegistrarController.triggerPendingTaskReminder));
+
+// Export Logs & Scheduled Reports
+router.get('/export-logs', asyncHandler(RegistrarController.getExportLogs));
+router.post('/export-logs', asyncHandler(RegistrarController.createExportLog));
+router.get('/scheduled-reports', asyncHandler(RegistrarController.getScheduledReports));
+router.post('/scheduled-reports', asyncHandler(RegistrarController.createScheduledReport));
+router.patch('/scheduled-reports/:id/status', asyncHandler(RegistrarController.toggleScheduledReportStatus));
+router.delete('/scheduled-reports/:id', asyncHandler(RegistrarController.deleteScheduledReport));
 
 export default router;

@@ -13,7 +13,12 @@ export class EmployerProfile {
     public readonly companySize?: string | null,
     public readonly contactPerson?: string | null,
     public readonly contactEmail?: string | null,
-    public readonly phone?: string | null
+    public readonly phone?: string | null,
+    public readonly tin?: string | null,
+    public readonly isPremium?: boolean,
+    public readonly partnerships?: string[],
+    public readonly verificationStatus?: string,
+    public readonly ndaSigned?: boolean
   ) {}
 }
 

@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Heart,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   MessageSquareText,
   PanelLeftClose,
@@ -18,12 +19,14 @@ import {
   Shield,
   ShieldCheck,
   Sparkles,
+  Terminal,
   Users,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import { adminService } from '../features/admin/services/admin.service';
 import { useAuth } from '../contexts/AuthContext';
+import { useSystemSettings } from '../context/SystemSettingsContext';
 
 interface AdminSidebarProps {
   onLogout: () => void;
@@ -43,6 +46,7 @@ interface EnhancedNavItem extends AdminNavItem {
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard, exact: true, section: 'main', tooltip: 'Operational command center' },
   { label: 'Messages', path: '/admin/messages', icon: MessageSquareText, section: 'main', tooltip: 'ASTU_AMS direct messaging hub' },
+  { label: 'Support Desk', path: '/admin/support-tickets', icon: LifeBuoy, section: 'system', tooltip: 'User support tickets & help desk' },
   { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield, section: 'system', tooltip: 'Advanced system modules' },
   { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart, section: 'system', tooltip: 'Generate & export reports' },
   { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', tooltip: 'Pending verifications' },
@@ -67,6 +71,7 @@ const sections = [
 export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse, onOpenAiAssistant }: AdminSidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
+  const { settings } = useSystemSettings();
 
   const [stats, setStats] = React.useState({
     users: 0,
@@ -178,15 +183,23 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
               <img
-                src="/images/astu-seal-logo.png"
-                alt="ASTU Logo"
-                className="h-full w-full object-contain scale-110"
+                src={
+                  settings.appearance?.logoUrl && !settings.appearance.logoUrl.includes('googleusercontent')
+                    ? settings.appearance.logoUrl
+                    : '/images/astu-seal-logo.png'
+                }
+                alt={`${settings.general?.abbreviation || 'ASTU'} Logo`}
+                className="h-full w-full object-contain scale-105"
               />
             </div>
             {!collapsed && (
               <div>
-                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">ASTU Admin</div>
-                <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Management System</p>
+                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">
+                  {settings.general?.abbreviation || 'ASTU'} Admin
+                </div>
+                <p className="text-[9.5px] text-[#003580] uppercase tracking-wider font-extrabold leading-snug">
+                  {(settings.general?.portalTitle || 'Alumni Management System').replace(/^ASTU\s+/i, '')}
+                </p>
               </div>
             )}
           </div>
@@ -291,7 +304,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                   <p className="truncate text-xs font-bold text-slate-900">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">Root Admin</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">{user?.role === 'SUPER_ADMIN' ? 'Root Admin' : 'ICT Administrator'}</span>
                   </div>
                 </div>
               </div>
