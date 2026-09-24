@@ -36,7 +36,9 @@ export class Survey {
     public readonly isActive: boolean,
     public readonly isArchived: boolean,
     public readonly sections?: SurveySection[],
-    public readonly questions?: SurveyQuestion[]
+    public readonly questions?: SurveyQuestion[],
+    public readonly departmentId?: string | null,
+    public readonly createdByUserId?: string | null
   ) {}
 }
 

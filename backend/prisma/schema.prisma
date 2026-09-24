@@ -106,6 +106,7 @@ model Department {
   code                  String                  @unique // e.g. SWE, MEG, ECE
   alumniProfiles        AlumniProfile[]
   departmentHeadProfiles DepartmentHeadProfile[]
+  surveys               Survey[]
   createdAt             DateTime                @default(now())
 }
 
@@ -383,12 +384,19 @@ model Survey {
   scheduledAt     DateTime?
   isActive        Boolean              @default(true)
   isArchived      Boolean              @default(false)
+  /// Null = institutional (admin/registrar). Set for department-owned templates.
+  departmentId    String?
+  department      Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  createdByUserId String?
   sections        SurveySection[]
   questions       SurveyQuestion[]
   assignments     SurveyAssignment[]
   responses       SurveyResponse[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
+
+  @@index([departmentId])
+  @@index([createdByUserId])
 }
 
 model SurveySection {

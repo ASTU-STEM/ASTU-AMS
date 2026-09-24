@@ -288,7 +288,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
           id: a.id,
           name: a.fullName,
           studentId: a.studentId,
-          status: 'Active',
+          status: a.employmentStatus || 'UNKNOWN',
         })),
       });
     } catch (err: unknown) {
@@ -1161,21 +1161,24 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                 <div className={`rounded-xl border p-4 text-center ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                   <p className="text-2xl font-bold tabular-nums">{preview.alumniCount}</p>
                   <p className={`mt-0.5 text-[11px] font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Active alumni
+                    Department alumni
                   </p>
                 </div>
                 <div className={`rounded-xl border p-4 text-center ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                   <p className="text-2xl font-bold tabular-nums">{preview.totalTargeted}</p>
                   <p className={`mt-0.5 text-[11px] font-semibold uppercase tracking-wide ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Total recipients
+                    Preview recipients
                   </p>
                 </div>
               </div>
+              <p className={`mt-3 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                Final dispatch count may be lower if some alumni are already assigned or not yet eligible for this survey.
+              </p>
 
               {preview.alumniCount === 0 ? (
                 <div className={`mt-4 rounded-xl border border-dashed p-4 text-center ${darkMode ? 'border-slate-700' : 'border-amber-200 bg-amber-50/50'}`}>
                   <AlertCircle className={`mx-auto h-6 w-6 ${darkMode ? 'text-amber-400' : 'text-amber-500'}`} />
-                  <p className={`mt-2 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>No active alumni to notify yet</p>
+                  <p className={`mt-2 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>No alumni to notify yet</p>
                   <p className={`mt-1 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                     Nothing will be assigned. Add or sync graduates first, then dispatch again.
                   </p>
@@ -1193,7 +1196,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                         </span>
                         <span className="min-w-0 truncate font-medium">{a.name}</span>
                         <span className={`ml-auto shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-                          {a.status}
+                          {a.status.replace(/_/g, ' ')}
                         </span>
                       </li>
                     ))}
