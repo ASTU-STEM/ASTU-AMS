@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import authService from "../features/auth/services/auth.service";
 import AnnouncementPanel from "./AnnouncementPanel";
 import astuLogo from "../assets/logos/astu-icon.jpeg";
+import { useSystemSettings } from "../context/SystemSettingsContext";
 
 interface MegaMenuItem {
   label: string;
@@ -94,6 +95,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const searchWrapRef = useRef<HTMLDivElement>(null);
+  const { settings } = useSystemSettings();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -196,15 +198,15 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
       <div className="hidden bg-astu-navy text-white md:block">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
-          <div className="flex items-center gap-4 text-[13px] text-white/80">
+          <div className="flex items-center gap-4 text-xs text-white/80">
             <a
-              href="mailto:irccd@astu.edu.et"
+              href={`mailto:${settings.general?.contactEmail || 'admin@astu.edu.et'}`}
               className="hover:text-white transition-colors font-medium"
             >
-              irccd@astu.edu.et
+              {settings.general?.contactEmail || 'admin@astu.edu.et'}
             </a>
             <span className="text-white/20">|</span>
-            <span className="font-medium">+251-221-110000</span>
+            <span className="font-medium">{settings.general?.phoneNumber || '+251-221-110000'}</span>
           </div>
           <div className="flex items-center gap-3 text-[13px]">
             <Link
@@ -228,16 +230,16 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-3 py-3 group">
           <div className="flex items-center gap-2.5">
             <img
-              src="/images/astu-seal-logo.png"
-              alt="ASTU Logo"
+              src={settings.appearance?.logoUrl || "/images/astu-seal-logo.png"}
+              alt={`${settings.general?.abbreviation || 'ASTU'} Logo`}
               className="h-10 w-10 object-contain scale-110 shrink-0"
             />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-astu-navy leading-tight">
-                ASTU-AMS
+                {settings.general?.abbreviation || 'ASTU'}-AMS
               </p>
               <p className="text-[9px] uppercase tracking-[0.2em] text-astu-green font-semibold">
-                Alumni Management System
+                {settings.general?.portalTitle || 'Alumni Management System'}
               </p>
             </div>
           </div>

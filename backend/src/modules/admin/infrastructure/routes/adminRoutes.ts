@@ -33,6 +33,9 @@ router.delete('/users/:id', requirePermission('suspend_users'), adminController.
 
 // Technical Operations & System Controls (ICT Admin Portal)
 router.get('/technical-ops/telemetry', techOpsController.getTelemetry);
+router.get('/technical-ops/telemetry/live', techOpsController.getLiveTelemetry);
+router.get('/technical-ops/security-governance', techOpsController.getSecurityGovernance);
+router.put('/technical-ops/security-governance', techOpsController.updateSecurityGovernance);
 router.get('/technical-ops/security', techOpsController.getSecurityStatus);
 router.get('/technical-ops/load-balancer', techOpsController.getLoadBalancer);
 router.get('/technical-ops/api-gateway', techOpsController.getApiGateway);
@@ -41,6 +44,8 @@ router.post('/technical-ops/action', techOpsController.executeAction);
 
 // Department Routes
 router.get('/departments', adminController.getDepartments);
+router.get('/departments/analysis', adminController.getDepartmentAnalysis);
+router.get('/departments/:id', adminController.getDepartmentDetails);
 router.post('/departments', adminController.createDepartment);
 router.put('/departments/:id', adminController.updateDepartment);
 router.delete('/departments/:id', adminController.deleteDepartment);
@@ -64,12 +69,29 @@ router.get('/notifications', adminController.getNotifications);
 router.get('/notifications/stats', adminController.getNotificationStats);
 router.post('/notifications/send', adminController.sendNotification);
 
-// Sync Logs (for Settings import history)
+// Sync Logs & Data Import (for Settings import history)
 router.get('/sync-logs', adminController.getSyncLogs);
+router.post('/data-import', requirePermission('edit_system_settings'), adminController.importData);
 
 // System Settings
+router.get('/settings/public', adminController.getPublicSettings);
 router.get('/settings', requirePermission('view_system_settings'), adminController.getSettings);
 router.put('/settings', requirePermission('edit_system_settings'), adminController.updateSettings);
+router.post('/settings/test-integration', requirePermission('edit_system_settings'), adminController.testIntegration);
+
+// Backup & Security Routes
+router.get('/backup-security', adminController.getBackupSecurity);
+router.post('/backup-security/run-backup', adminController.runDatabaseBackup);
+router.post('/backup-security/session/revoke', adminController.revokeSession);
+router.post('/backup-security/session/revoke-all', adminController.revokeAllSessions);
+router.post('/backup-security/restore', adminController.restoreDatabaseBackup);
+router.get('/backup-security/download', adminController.downloadDatabaseBackupFile);
+router.post('/backup-security/api-key', adminController.createApiKey);
+router.put('/backup-security/api-key/revoke', adminController.revokeApiKey);
+router.put('/backup-security/whitelist', adminController.updateWhitelist);
+router.put('/backup-security/config', adminController.updateBackupSecurityConfig);
+
+
 
 // Donations & Campaign Management
 router.get('/donations/campaigns', adminController.getDonationCampaigns);
@@ -77,5 +99,14 @@ router.post('/donations/campaigns', adminController.createDonationCampaign);
 router.put('/donations/campaigns/:id', adminController.updateDonationCampaign);
 router.delete('/donations/campaigns/:id', adminController.deleteDonationCampaign);
 router.get('/donations/donors', adminController.getDonorsList);
+
+// Module Governance Settings
+router.get('/modules/governance', adminController.getModuleGovernance);
+router.put('/modules/governance', adminController.updateModuleGovernance);
+
+// Institutional Reports Center
+router.get('/reports/metrics', adminController.getReportsMetrics);
+router.get('/reports/data', adminController.getReportData);
+router.post('/reports/export', adminController.recordReportExport);
 
 export default router;

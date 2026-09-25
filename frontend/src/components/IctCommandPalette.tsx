@@ -58,7 +58,7 @@ export default function IctCommandPalette({ isOpen, onClose }: IctCommandPalette
     { label: 'Integrations & Registrar Sync', icon: Database, category: 'Navigation', action: () => { navigate('/ict/integrations'); onClose(); } },
     { label: 'Feature Flags & Release Control', icon: Sliders, category: 'Navigation', action: () => { navigate('/ict/feature-flags'); onClose(); } },
     { label: 'Security Policies & Active Sessions', icon: Key, category: 'Navigation', action: () => { navigate('/ict/policies'); onClose(); } },
-    { label: 'System Architecture & AI Copilot', icon: Bot, category: 'Navigation', action: () => { navigate('/ict/architecture'); onClose(); } },
+    { label: 'System Architecture & ASTU AI', icon: Bot, category: 'Navigation', action: () => { navigate('/ict/architecture'); onClose(); } },
     { label: 'Run Full System Diagnostics', icon: Zap, category: 'Quick Action', action: () => { toast.success('Running 37 system diagnostic checks...'); onClose(); navigate('/ict/dashboard'); } },
     { label: 'Trigger Registrar Data Sync', icon: RefreshCw, category: 'Quick Action', action: () => { toast.success('Registrar synchronization initialized'); onClose(); navigate('/ict/integrations'); } },
   ];

@@ -22,6 +22,7 @@ import {
   Terminal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSystemSettings } from '../context/SystemSettingsContext';
 
 interface IctSidebarProps {
   onLogout: () => void;
@@ -55,7 +56,7 @@ const navItems: NavItem[] = [
   { label: 'Integrations & Sync', path: '/ict/integrations', icon: Layers, section: 'governance', tooltip: 'Registrar Sync & Data Quality' },
   { label: 'Feature Flags & Sandbox', path: '/ict/feature-flags', icon: Sliders, section: 'governance', tooltip: 'Rollouts & Release Rollback' },
   { label: 'Policies & Sessions', path: '/ict/policies', icon: Key, section: 'governance', tooltip: 'Active Sessions & Red Button' },
-  { label: 'Architecture & AI Copilot', path: '/ict/architecture', icon: Sparkles, section: 'governance', tooltip: 'Interactive Topology & AI' },
+  { label: 'Architecture & ASTU AI', path: '/ict/architecture', icon: Sparkles, section: 'governance', tooltip: 'Interactive Topology & AI' },
 ];
 
 const sections = [
@@ -73,6 +74,7 @@ export default function IctSidebar({
 }: IctSidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
+  const { settings } = useSystemSettings();
 
   const getSectionItems = (sectionKey: string) =>
     navItems.filter((item) => item.section === sectionKey);
@@ -83,27 +85,27 @@ export default function IctSidebar({
         collapsed ? 'w-20' : 'w-64'
       } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
-      {/* Header Logo */}
-      <div className="relative px-4 py-4 border-b border-slate-100">
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-          <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
-            <img
-              src="/images/astu-seal-logo.png"
-              alt="ASTU Seal"
-              className="h-full w-full object-contain scale-110"
-            />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0">
-              <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight flex items-center gap-1.5">
-                <span>ASTU ICT</span>
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-blue-50 text-[#003580] border border-blue-200/60 rounded">PORTAL</span>
-              </div>
-              <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Systems Directorate</p>
+        {/* Header Logo */}
+        <div className="relative px-4 py-4 border-b border-slate-100">
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+            <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
+              <img
+                src={settings.appearance?.logoUrl || '/images/astu-seal-logo.png'}
+                alt={`${settings.general?.abbreviation || 'ASTU'} Seal`}
+                className="h-full w-full object-contain scale-110"
+              />
             </div>
-          )}
+            {!collapsed && (
+              <div className="min-w-0">
+                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight flex items-center gap-1.5">
+                  <span>{settings.general?.abbreviation || 'ASTU'} ICT</span>
+                  <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-blue-50 text-[#003580] border border-blue-200/60 rounded">PORTAL</span>
+                </div>
+                <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Systems Directorate</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
       {/* Navigation */}
       <nav className="relative flex-1 overflow-y-auto px-3 py-4 scrollbar-thin space-y-4">
@@ -181,7 +183,7 @@ export default function IctSidebar({
               <Sparkles className="h-4.5 w-4.5 text-blue-600 animate-pulse shrink-0" />
               <div className="text-left flex-1 min-w-0">
                 <div className="text-xs font-extrabold uppercase tracking-wider text-blue-800">ICT AI Assistant</div>
-                <div className="text-[9px] text-blue-700/80 truncate">Diagnostics &amp; Security Copilot</div>
+                <div className="text-[9px] text-blue-700/80 truncate">Diagnostics &amp; Security ASTU AI</div>
               </div>
             </button>
 

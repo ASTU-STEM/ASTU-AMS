@@ -147,14 +147,17 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
         // Open PDF print report window
         const printWin = window.open('', '_blank');
         if (printWin) {
+          const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
           printWin.document.write(`
             <html>
               <head>
                 <title>ASTU Executive Summary Report - ${scope}</title>
                 <style>
                   body { font-family: Arial, sans-serif; padding: 20px; color: #1e293b; }
-                  h1 { color: #002b5e; border-bottom: 2px solid #002b5e; padding-bottom: 8px; margin-bottom: 4px; }
-                  h2 { color: #475569; font-size: 16px; margin-top: 0; }
+                  .header-banner { display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #002b5e; padding-bottom: 12px; margin-bottom: 15px; }
+                  .logo-img { height: 60px; width: 60px; object-fit: contain; }
+                  h1 { color: #002b5e; font-size: 20px; margin: 0 0 4px 0; }
+                  h2 { color: #475569; font-size: 14px; margin: 0; }
                   table { width: 100%; border-collapse: collapse; margin-top: 15px; }
                   th, td { border: 1px solid #cbd5e1; padding: 8px; font-size: 12px; text-align: left; }
                   th { background: #f1f5f9; color: #002b5e; }
@@ -162,8 +165,13 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                 </style>
               </head>
               <body>
-                <h1>Adama Science and Technology University</h1>
-                <h2>Institutional Executive Summary Report</h2>
+                <div class="header-banner">
+                  <img src="${logoUrl}" alt="ASTU Seal Logo" class="logo-img" />
+                  <div>
+                    <h1>Adama Science and Technology University</h1>
+                    <h2>Institutional Executive Summary Report</h2>
+                  </div>
+                </div>
                 <div class="meta">
                   <strong>Report Scope:</strong> ${scope}<br>
                   <strong>Generated On:</strong> ${new Date().toLocaleString()}<br>

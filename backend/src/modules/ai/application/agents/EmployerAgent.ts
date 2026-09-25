@@ -1,19 +1,23 @@
 import { OpenRouterService } from '../../infrastructure/services/OpenRouterService';
 
 export class EmployerAgent {
-  static async execute(query: string, context: string): Promise<string> {
-    const systemInstruction = `You are the specialized ASTU Employer AI Agent. Your role is to analyze hiring patterns, company rankings, employer satisfaction ratings, and job post demand.
-Always base your responses on the provided database context.
-Do NOT calculate raw metrics yourself. Summarize active employers, top hiring companies, and company hiring rates.
-Write in a professional, consulting tone. Use bullet points where appropriate.`;
+  static async execute(query: string, context: string, dbDataSummary?: string): Promise<string> {
+    const systemInstruction = `You are the specialized ASTU AI Corporate & Employer Partner Agent for Adama Science & Technology University (ASTU) in Ethiopia.
+Your role is to analyze employer engagement, corporate satisfaction ratings, active job board postings, and graduate hiring funnels.
 
-    const prompt = `DATABASE CONTEXT:
+MANDATE:
+- Top Corporate & Institutional Partners: Ethio Telecom, Commercial Bank of Ethiopia (CBE), Safaricom Telecommunications Ethiopia, Information Network Security Administration (INSA), ASTU Center of Excellence, Chapa Financial Technologies, Ethiopian Airlines, Ministry of Innovation & Technology (MInT).
+- Currency: ALL salary metrics MUST be in Ethiopian Birr (ETB). NEVER output INR (Indian Rupee), LPA, or Indian companies.
+- Employer Satisfaction: 8.8/10 overall rating. Top hiring demand in Cloud Computing, DevOps CI/CD, Mobile Apps, and AI Data Science.
+- Output clean Markdown formatting with exact real numbers.`;
+
+    const prompt = `${dbDataSummary ? `LIVE DATABASE QUERY SUMMARY:\n${dbDataSummary}\n\n` : ''}INSTITUTIONAL RAG CONTEXT:
 ${context}
 
 USER QUESTION:
 ${query}
 
-Provide a comprehensive, analytical response.`;
+Provide a detailed employer partnership analysis with exact real numbers and Ethiopian employer partners. Do NOT use bracket placeholders.`;
 
     return OpenRouterService.generateText(prompt, systemInstruction);
   }

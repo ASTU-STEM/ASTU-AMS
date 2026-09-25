@@ -38,6 +38,8 @@ import CmsRoutes from "./routes/cmsRoutes";
 import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
 
+import { SystemSettingsProvider } from "./context/SystemSettingsContext";
+
 function AppContent() {
   return (
     <Router>
@@ -144,9 +146,11 @@ function App() {
   return (
     <Provider store={store}>
       <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
-      <RegistrationProvider>
-        <AppContent />
-      </RegistrationProvider>
+      <SystemSettingsProvider>
+        <RegistrationProvider>
+          <AppContent />
+        </RegistrationProvider>
+      </SystemSettingsProvider>
     </Provider>
   );
 }

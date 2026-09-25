@@ -37,7 +37,7 @@ export default function IctCommandCenterPage() {
     { name: 'Frontend React Server', status: 'healthy', latency: '2ms', note: 'Vite edge routing' },
     { name: 'Employer Job Board', status: 'healthy', latency: '14ms', note: 'All jobs indexable' },
     { name: 'Tracer Study Engine', status: 'healthy', latency: '22ms', note: 'Cron triggers scheduled' },
-    { name: 'AI Services (Copilot & Matching)', status: 'healthy', latency: '120ms', note: 'LangChain node active' },
+    { name: 'ASTU AI Services & Matching', status: 'healthy', latency: '120ms', note: 'LangChain node active' },
     { name: 'Notification Service', status: 'healthy', latency: '10ms', note: 'In-app websockets live' },
     { name: 'Chapa Payment Gateway', status: 'healthy', latency: '95ms', note: 'Webhook listener ready' },
     { name: 'University ERP Connector', status: 'degraded', latency: '210ms', note: 'Sync queue pending' },

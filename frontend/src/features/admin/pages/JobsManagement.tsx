@@ -185,6 +185,12 @@ export default function JobsManagement() {
   const [editingJob, setEditingJob] = useState<JobRecord | null>(null);
   const [selectedAppModal, setSelectedAppModal] = useState<ApplicationRecord | null>(null);
 
+  // Pagination States for Jobs & Applications
+  const [jobsPage, setJobsPage] = useState(1);
+  const [jobsLimit, setJobsLimit] = useState<'10' | '25' | '50' | '100' | 'all'>('10');
+  const [appsPage, setAppsPage] = useState(1);
+  const [appsLimit, setAppsLimit] = useState<'10' | '25' | '50' | '100' | 'all'>('10');
+
   // Messaging state
   const [messagingApp, setMessagingApp] = useState<ApplicationRecord | null>(null);
   const [msgTitle, setMsgTitle] = useState('');
@@ -404,6 +410,40 @@ export default function JobsManagement() {
       return matchesQuery && matchesStatus && matchesSource;
     });
   }, [applicationRows, query, selectedApplicantStatus, selectedSource, isEmployerSelfPosted]);
+
+  useEffect(() => {
+    setJobsPage(1);
+  }, [query, selectedJobStatus, selectedEmployer, selectedJobType, selectedSource]);
+
+  useEffect(() => {
+    setAppsPage(1);
+  }, [query, selectedApplicantStatus, selectedSource]);
+
+  const paginatedJobs = useMemo(() => {
+    if (jobsLimit === 'all') return filteredJobs;
+    const limitNum = parseInt(jobsLimit, 10);
+    const start = (jobsPage - 1) * limitNum;
+    return filteredJobs.slice(start, start + limitNum);
+  }, [filteredJobs, jobsPage, jobsLimit]);
+
+  const totalJobPages = useMemo(() => {
+    if (jobsLimit === 'all') return 1;
+    const limitNum = parseInt(jobsLimit, 10);
+    return Math.ceil(filteredJobs.length / limitNum) || 1;
+  }, [filteredJobs.length, jobsLimit]);
+
+  const paginatedApplications = useMemo(() => {
+    if (appsLimit === 'all') return filteredApplications;
+    const limitNum = parseInt(appsLimit, 10);
+    const start = (appsPage - 1) * limitNum;
+    return filteredApplications.slice(start, start + limitNum);
+  }, [filteredApplications, appsPage, appsLimit]);
+
+  const totalAppPages = useMemo(() => {
+    if (appsLimit === 'all') return 1;
+    const limitNum = parseInt(appsLimit, 10);
+    return Math.ceil(filteredApplications.length / limitNum) || 1;
+  }, [filteredApplications.length, appsLimit]);
 
   const jobSourceCounts = useMemo(() => {
     const astu = jobs.filter(j => isEmployerSelfPosted(j.employer)).length;
@@ -753,7 +793,34 @@ export default function JobsManagement() {
             )}
           </section>
 
-          <SectionCard title="All Jobs" subtitle={`Showing ${filteredJobs.length} of ${jobs.length} employer job listings.`}>
+          <SectionCard
+            title="All Jobs"
+            subtitle={`Showing ${filteredJobs.length} of ${jobs.length} employer job listings.`}
+          >
+            <div className="flex items-center justify-between mb-3 text-xs">
+              <div className="text-slate-500 font-medium">
+                Showing {filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0} to{' '}
+                {jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)} of {filteredJobs.length} jobs
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <select
+                  value={jobsLimit}
+                  onChange={(e) => {
+                    setJobsLimit(e.target.value as any);
+                    setJobsPage(1);
+                  }}
+                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-[#003580] outline-none"
+                >
+                  <option value="10">10 per page</option>
+                  <option value="25">25 per page</option>
+                  <option value="50">50 per page</option>
+                  <option value="100">100 per page</option>
+                  <option value="all">All ({filteredJobs.length} jobs)</option>
+                </select>
+              </div>
+            </div>
+
             <div className="overflow-hidden rounded-[10px] border border-slate-200">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
@@ -767,7 +834,7 @@ export default function JobsManagement() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredJobs.map((job) => {
+                    {paginatedJobs.map((job) => {
                       const selfPosted = isEmployerSelfPosted(job.employer);
                       return (
                         <tr key={job.id} className="hover:bg-slate-50/70">
@@ -827,13 +894,45 @@ export default function JobsManagement() {
                         </tr>
                       );
                     })}
-                    {filteredJobs.length === 0 && (
+                    {paginatedJobs.length === 0 && (
                       <tr>
                         <td colSpan={8} className="py-12 text-center text-slate-400 italic">No job listings found matching active filter options.</td>
                       </tr>
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Jobs Table Pagination Footer */}
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+                <div>
+                  Showing <span className="font-bold text-slate-900">{filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-slate-900">{jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)}</span> of{' '}
+                  <span className="font-bold text-slate-900">{filteredJobs.length}</span> listings
+                </div>
+                {jobsLimit !== 'all' && totalJobPages > 1 && (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={jobsPage === 1}
+                      onClick={() => setJobsPage((p) => Math.max(1, p - 1))}
+                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-2 font-bold text-slate-800">
+                      Page {jobsPage} of {totalJobPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={jobsPage >= totalJobPages}
+                      onClick={() => setJobsPage((p) => Math.min(totalJobPages, p + 1))}
+                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </SectionCard>
@@ -985,6 +1084,30 @@ export default function JobsManagement() {
           </section>
 
           <SectionCard title="Applications" subtitle={`Showing ${filteredApplications.length} of ${applicationRows.length} applicant reviews.`}>
+            <div className="flex items-center justify-between mb-3 text-xs">
+              <div className="text-slate-500 font-medium">
+                Showing {filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0} to{' '}
+                {appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)} of {filteredApplications.length} applications
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <select
+                  value={appsLimit}
+                  onChange={(e) => {
+                    setAppsLimit(e.target.value as any);
+                    setAppsPage(1);
+                  }}
+                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-[#003580] outline-none"
+                >
+                  <option value="10">10 per page</option>
+                  <option value="25">25 per page</option>
+                  <option value="50">50 per page</option>
+                  <option value="100">100 per page</option>
+                  <option value="all">All ({filteredApplications.length} applications)</option>
+                </select>
+              </div>
+            </div>
+
             <div className="overflow-hidden rounded-[10px] border border-slate-200">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
@@ -1006,7 +1129,7 @@ export default function JobsManagement() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredApplications.map((application) => {
+                    {paginatedApplications.map((application) => {
                       const selfPosted = isAppSelfPosted(application);
                       return (
                         <tr key={application.id} className="hover:bg-slate-50/70">
@@ -1096,6 +1219,38 @@ export default function JobsManagement() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Applications Table Pagination Footer */}
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+                <div>
+                  Showing <span className="font-bold text-slate-900">{filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-slate-900">{appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)}</span> of{' '}
+                  <span className="font-bold text-slate-900">{filteredApplications.length}</span> applications
+                </div>
+                {appsLimit !== 'all' && totalAppPages > 1 && (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={appsPage === 1}
+                      onClick={() => setAppsPage((p) => Math.max(1, p - 1))}
+                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-2 font-bold text-slate-800">
+                      Page {appsPage} of {totalAppPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={appsPage >= totalAppPages}
+                      onClick={() => setAppsPage((p) => Math.min(totalAppPages, p + 1))}
+                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </SectionCard>

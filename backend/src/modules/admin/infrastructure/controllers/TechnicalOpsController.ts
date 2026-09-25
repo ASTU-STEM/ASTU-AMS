@@ -13,6 +13,34 @@ export class TechnicalOpsController {
     }
   }
 
+  async getLiveTelemetry(req: Request, res: Response) {
+    try {
+      const data = await manageTechnicalOpsUseCase.getLiveTelemetry();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getSecurityGovernance(req: Request, res: Response) {
+    try {
+      const data = await manageTechnicalOpsUseCase.getSecurityGovernance();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateSecurityGovernance(req: Request, res: Response) {
+    try {
+      const { mfa, exportAudit, keyRot } = req.body;
+      const data = await manageTechnicalOpsUseCase.updateSecurityGovernance({ mfa, exportAudit, keyRot });
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
   async getSecurityStatus(req: Request, res: Response) {
     try {
       const data = await manageTechnicalOpsUseCase.getDdosAndSecurityStatus();
