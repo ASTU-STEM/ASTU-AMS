@@ -291,7 +291,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
               >
                 <Sparkles className="h-4.5 w-4.5 text-amber-600 animate-pulse shrink-0" />
                 <div className="text-left flex-1 min-w-0">
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700">ASTU AI Copilot</div>
+                  <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700">ASTU AI</div>
                   <div className="text-[9px] text-amber-600/80 truncate">Tracer &amp; Analytics Assistant</div>
                 </div>
               </button>
@@ -322,7 +322,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                 type="button"
                 onClick={onOpenAiAssistant}
                 className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 border border-amber-200 text-amber-700 hover:bg-amber-200 transition-all group relative shrink-0 shadow-xs"
-                title="ASTU AI Copilot"
+                title="ASTU AI"
               >
                 <Sparkles className="h-4.5 w-4.5 text-amber-600 animate-pulse" />
               </button>

@@ -55,7 +55,7 @@ const routeMeta: Record<string, { title: string; subtitle: string }> = {
   '/ict/integrations': { title: 'Integrations & Data Sync', subtitle: 'Registrar SIS sync & institutional data quality' },
   '/ict/feature-flags': { title: 'Feature Flags & Releases', subtitle: 'Percentage feature rollouts & release rollback' },
   '/ict/policies': { title: 'Policies & Active Sessions', subtitle: 'Security policies, session revocation & Red Button' },
-  '/ict/architecture': { title: 'Architecture & AI Copilot', subtitle: 'Interactive node topology & ICT Copilot' },
+  '/ict/architecture': { title: 'Architecture & ASTU AI', subtitle: 'Interactive node topology & ICT ASTU AI' },
 };
 
 export default function IctLayout() {

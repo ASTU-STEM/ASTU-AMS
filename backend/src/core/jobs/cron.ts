@@ -11,7 +11,7 @@ export function initCronJobs() {
   // 1. Run every minute: Server-side automatic content scheduler
   cron.schedule('* * * * *', async () => {
     try {
-      const setting = await (prisma as any).systemSetting.findUnique({ where: { key: 'cms_content_items' } });
+      const setting = await (prisma as any).systemSetting.findUnique({ where: { key: 'cms_content_items' } }).catch(() => null);
       if (!setting || !setting.value || !Array.isArray(setting.value)) return;
 
       const items: any[] = setting.value;

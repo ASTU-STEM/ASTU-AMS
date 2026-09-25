@@ -853,41 +853,23 @@ function wrapModel(modelName: string, realModel: any): any {
       if (typeof original !== 'function') return original;
 
       return async (...args: any[]) => {
-        let attempts = 0;
-        const maxAttempts = 3;
-        while (attempts < maxAttempts) {
-          try {
-            return await original.apply(target, args);
-          } catch (err: any) {
-            attempts++;
-            if (isConnectionError(err) && attempts < maxAttempts) {
-              const backoffMs = attempts * 1000;
-              Logger.warn(`⚠️ Neon database cold-start / connection pause on ${modelName}.${methodName}. Retrying in ${backoffMs}ms (attempt ${attempts}/${maxAttempts})...`);
-              await new Promise(r => setTimeout(r, backoffMs));
-              if (client && typeof (client as any).$connect === 'function') {
-                try {
-                  await (client as any).$connect();
-                } catch {
-                  /* ignore reconnect error on retry */
-                }
-              }
-              continue;
+        try {
+          return await original.apply(target, args);
+        } catch (err: any) {
+          if (isConnectionError(err)) {
+            Logger.warn(`⚠️ Neon database connection reset on ${modelName}.${methodName}. Switching instantly to local fallback.`);
+            switchToFallback();
+            const fb = getFallback();
+            const fbModel = (fb as any)[modelName];
+            if (fbModel && typeof fbModel[methodName] === 'function') {
+              return fbModel[methodName](...args);
             }
-            if (isConnectionError(err) && attempts >= maxAttempts) {
-              Logger.error(`❌ Neon database connection lost after ${maxAttempts} attempts for ${modelName}.${methodName}`);
-              switchToFallback();
-              const fb = getFallback();
-              const fbModel = (fb as any)[modelName];
-              if (fbModel && typeof fbModel[methodName] === 'function') {
-                return fbModel[methodName](...args);
-              }
-              if (methodName === 'findMany') return [];
-              if (methodName === 'count') return 0;
-              if (methodName === 'findUnique' || methodName === 'findFirst') return null;
-              return null;
-            }
-            throw err;
+            if (methodName === 'findMany') return [];
+            if (methodName === 'count') return 0;
+            if (methodName === 'findUnique' || methodName === 'findFirst') return null;
+            return null;
           }
+          throw err;
         }
       };
     },
@@ -943,11 +925,7 @@ export const initPrisma = async () => {
 const proxy = new Proxy({}, {
   get(_, prop: string) {
     if (!client) {
-      if (process.env.NODE_ENV === 'test') {
-        client = getFallback();
-      } else {
-        throw new Error('Prisma client not initialized. Call initPrisma() first.');
-      }
+      client = getFallback();
     }
 
     const v = (client as any)[prop];
@@ -967,11 +945,7 @@ const proxy = new Proxy({}, {
   },
   set(_, prop: string, value) {
     if (!client) {
-      if (process.env.NODE_ENV === 'test') {
-        client = getFallback();
-      } else {
-        throw new Error('Prisma client not initialized. Call initPrisma() first.');
-      }
+      client = getFallback();
     }
     (client as any)[prop] = value;
     return true;

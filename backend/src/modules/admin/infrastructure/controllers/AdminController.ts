@@ -664,33 +664,64 @@ export class AdminController {
 
       if (type === 'openrouter') {
         const apiKey = config?.openRouterApiKey || process.env.OPENROUTER_API_KEY;
-        const model = config?.openRouterModel || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-r1:free';
+        const model = config?.openRouterModel || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
         if (!apiKey) {
           return res.status(400).json({ success: false, message: 'OpenRouter API Key is missing. Please enter a valid key.' });
         }
         const axios = require('axios');
-        const response = await axios.post(
-          'https://openrouter.ai/api/v1/chat/completions',
-          {
-            model: model,
-            max_tokens: 10,
-            messages: [{ role: 'user', content: 'Ping' }],
-          },
-          {
+        
+        // 1. Try official OpenRouter API key verification endpoint
+        try {
+          const keyCheck = await axios.get('https://openrouter.ai/api/v1/auth/key', {
             headers: {
-              Authorization: `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey.trim()}`,
             },
-            timeout: 10000,
-          }
-        );
-        const latency = Date.now() - startTime;
-        if (response.data && response.data.choices) {
+            timeout: 8000,
+          });
+
+          const latency = Date.now() - startTime;
+          const keyInfo = keyCheck.data?.data;
+          const label = keyInfo?.label ? ` (${keyInfo.label})` : '';
           return res.json({
             success: true,
-            message: `OpenRouter AI Engine connected successfully (${latency}ms). Model: ${model}`,
+            message: `OpenRouter AI Engine connected successfully${label} (${latency}ms). API Key is active.`,
             latency,
           });
+        } catch (keyErr: any) {
+          // 2. If /auth/key endpoint is restricted or fails, test chat completion with fallback models
+          const testModels = [model, 'deepseek/deepseek-chat', 'meta-llama/llama-3.3-70b-instruct:free', 'openai/gpt-3.5-turbo'];
+          let lastErr = keyErr;
+
+          for (const m of testModels) {
+            try {
+              const response = await axios.post(
+                'https://openrouter.ai/api/v1/chat/completions',
+                {
+                  model: m,
+                  max_tokens: 10,
+                  messages: [{ role: 'user', content: 'Ping' }],
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${apiKey.trim()}`,
+                    'Content-Type': 'application/json',
+                  },
+                  timeout: 8000,
+                }
+              );
+              const latency = Date.now() - startTime;
+              if (response.data && response.data.choices) {
+                return res.json({
+                  success: true,
+                  message: `OpenRouter AI Engine connected successfully (${latency}ms). Model: ${m}`,
+                  latency,
+                });
+              }
+            } catch (err: any) {
+              lastErr = err;
+            }
+          }
+          throw lastErr;
         }
       } else if (type === 'registrar') {
         const endpoint = config?.regApiEndpoint || process.env.REGISTRAR_API_URL || 'https://registrar.astu.edu.et/api/v1';
