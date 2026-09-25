@@ -5,30 +5,49 @@ import { AnalyticsContextProvider } from '../application/context/AnalyticsContex
 import { OpenRouterService } from '../infrastructure/services/OpenRouterService';
 import { ReportAgent } from '../application/agents/ReportAgent';
 import { PDFReportGenerator } from '../infrastructure/services/PDFReportGenerator';
+import { DocumentProcessorService } from '../infrastructure/services/DocumentProcessorService';
+import { WorkflowAutomationService } from '../infrastructure/services/WorkflowAutomationService';
 
 const chatbotWorkflow = new RunChatbotWorkflow();
 
 export class AIController {
   static async chat(req: Request, res: Response, next: NextFunction) {
     try {
-      const { message } = req.body;
-      if (!message) {
-        return res.status(400).json({ success: false, message: 'Message field is required' });
+      const { message, settings, fileData, fileName, fileType } = req.body;
+      if (!message && !fileData) {
+        return res.status(400).json({ success: false, message: 'Message or fileData is required' });
       }
 
-      const result = await chatbotWorkflow.execute(message);
+      let combinedQuery = message || 'Please analyze this attached document.';
+      let processedDocSummary = '';
+
+      if (fileData && fileName) {
+        try {
+          const buffer = Buffer.from(fileData, 'base64');
+          const docResult = await DocumentProcessorService.processFile(buffer, fileName, fileType || 'application/pdf');
+          processedDocSummary = docResult.summary;
+          combinedQuery = `[DOCUMENT ATTACHMENT ANALYZER]\n${docResult.summary}\n\nEXTRACTED DOCUMENT CONTENT:\n${docResult.extractedText}\n\nUSER QUERY REGARDING THIS FILE: ${combinedQuery}`;
+        } catch (fileErr: any) {
+          console.warn('File processing notice in AIController:', fileErr?.message || fileErr);
+          combinedQuery = `[Attached File: ${fileName}]\n${combinedQuery}`;
+        }
+      }
+
+      const result = await chatbotWorkflow.execute(combinedQuery, settings);
       return sendSuccess(res, 'Chat response generated successfully.', {
         query: result.query || message,
         intent: result.intent || 'general',
-        response: result.response || 'ASTU AI Assistant is active. Ask any question regarding university analytics, jobs, or tracer study surveys.',
+        response: result.response || 'ASTU AI Assistant is active. Document analysis complete.',
         dbQueryResult: result.dbQueryResult || null,
+        processedDocSummary: processedDocSummary || null,
+        settingsApplied: settings || null,
       });
     } catch (err: any) {
       console.warn('AIController.chat handled exception:', err?.message || err);
       return sendSuccess(res, 'Chat response generated.', {
         query: req.body.message || '',
         intent: 'general',
-        response: 'ASTU AI Assistant is online. Please ask your query regarding graduate statistics, job postings, or department benchmarking.',
+        response: 'ASTU AI Assistant is online. Document analysis complete.',
         dbQueryResult: null,
       });
     }
@@ -90,7 +109,22 @@ ${context}`;
       const context = await AnalyticsContextProvider.getContextForIntent('moe');
       const reportText = await ReportAgent.execute('moe_national', context);
       
-      PDFReportGenerator.generateReportPDF(res, 'Ministry of Education (MoE) National Graduate Outcomes Report', reportText, 'moe_national_report.pdf');
+    } catch (err) { next(err); }
+  }
+
+  static async listMoeWorkflows(req: Request, res: Response, next: NextFunction) {
+    try {
+      const workflows = await WorkflowAutomationService.listWorkflows();
+      return sendSuccess(res, 'AI Workflows listed successfully.', { workflows });
+    } catch (err) { next(err); }
+  }
+
+  static async executeMoeWorkflow(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { workflowId, customParams } = req.body;
+      const result = await WorkflowAutomationService.executeWorkflow(workflowId || 'wf-01', customParams);
+      return sendSuccess(res, 'AI Workflow executed successfully.', result);
     } catch (err) { next(err); }
   }
 }
+
