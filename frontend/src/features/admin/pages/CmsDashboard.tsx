@@ -1,729 +1,805 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  AlertTriangle,
   ArrowRight,
   ArrowUpRight,
-  Calendar,
-  CalendarDays,
   CheckCircle2,
-  ChevronRight,
   Clock,
   Edit3,
   Eye,
   FileText,
+  Filter,
   GalleryHorizontal,
   Globe,
   Layers3,
-  MessageSquareText,
   Newspaper,
   Plus,
+  RefreshCw,
+  Search,
   Send,
   ShieldCheck,
-  Sparkles,
-  TrendingUp,
-  Zap,
+  Trash2,
+  WifiOff,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import contentService from '../services/content.service';
 import eventsService from '../services/events.service';
 import homepageCmsService from '../services/homepageCms.service';
+import AdminModal from '../components/AdminModal';
+import AdminPageHeader from '../components/AdminPageHeader';
+import { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
 
+// ─── Types ───────────────────────────────────────────────────────────────────
 type PublishState = 'Published' | 'Draft' | 'Scheduled' | 'Needs Review';
 
-type ContentItem = {
-  id: string;
-  title: string;
-  type: 'page' | 'announcement' | 'gallery' | 'event' | 'post' | 'template';
-  status: PublishState;
-  updated: string;
-  createdAtRaw?: Date;
-  author: string;
-  views?: number;
-  scheduledFor?: string;
-  priority?: 'Low' | 'Normal' | 'High' | 'Urgent';
+// ─── Styles ──────────────────────────────────────────────────────────────────
+const STATUS_PILL: Record<PublishState, string> = {
+  Published:    'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  Draft:        'bg-slate-100  text-slate-600  border border-slate-200',
+  Scheduled:    'bg-blue-50    text-blue-700   border border-blue-200',
+  'Needs Review': 'bg-amber-50 text-amber-700  border border-amber-200',
 };
 
-const statusStyles: Record<PublishState, string> = {
-  Published: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Draft: 'bg-slate-100 text-slate-500 border-slate-200',
-  Scheduled: 'bg-blue-50 text-blue-700 border-blue-200',
-  'Needs Review': 'bg-orange-50 text-orange-700 border-orange-200',
+const TYPE_BADGE: Record<ContentType, string> = {
+  page:         'bg-blue-50   text-blue-700   border border-blue-200',
+  announcement: 'bg-amber-50  text-amber-700  border border-amber-200',
+  gallery:      'bg-purple-50 text-purple-700 border border-purple-200',
+  event:        'bg-rose-50   text-rose-700   border border-rose-200',
+  post:         'bg-teal-50   text-teal-700   border border-teal-200',
+  template:     'bg-slate-50  text-slate-700  border border-slate-200',
 };
 
-const typeColors: Record<ContentItem['type'], string> = {
-  page: 'bg-blue-100 text-blue-700',
-  announcement: 'bg-amber-100 text-amber-700',
-  gallery: 'bg-purple-100 text-purple-700',
-  event: 'bg-rose-100 text-rose-700',
-  post: 'bg-teal-100 text-teal-700',
-  template: 'bg-slate-100 text-slate-700',
-};
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const priorityStyles: Record<NonNullable<ContentItem['priority']>, string> = {
-  Low: 'bg-slate-100 text-slate-500',
-  Normal: 'bg-blue-50 text-blue-600',
-  High: 'bg-amber-50 text-amber-600',
-  Urgent: 'bg-rose-50 text-rose-600',
-};
-
-function formatDate() {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date());
+async function checkApiHealth(): Promise<boolean> {
+  try {
+    const res = await axios.get(`${API_BASE}/content`, { timeout: 3000 });
+    return res.status === 200;
+  } catch {
+    return false;
+  }
 }
 
+// ─── Component ───────────────────────────────────────────────────────────────
 export default function CmsDashboard() {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = useState<'all' | PublishState>('all');
-  const [dbContent, setDbContent] = useState<ContentItem[]>([]);
-  const [dbEventsCount, setDbEventsCount] = useState(0);
-  const [dbWorkshopsCount, setDbWorkshopsCount] = useState(0);
-  const [dbHeroSlidesCount, setDbHeroSlidesCount] = useState(0);
-  const [dbGalleryCount, setDbGalleryCount] = useState(0);
-  const [dbPartnersCount, setDbPartnersCount] = useState(0);
 
-  const refreshAllData = async () => {
+  // Live data
+  const [items, setItems]               = useState<ContentCardItem[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [refreshing, setRefreshing]     = useState(false);
+  const [apiOnline, setApiOnline]       = useState<boolean | null>(null);
+
+  // Filter state
+  const [selectedTab, setSelectedTab]   = useState<'all' | PublishState>('all');
+  const [typeFilter, setTypeFilter]     = useState<'all' | ContentType>('all');
+  const [searchQuery, setSearchQuery]   = useState('');
+
+  // Module counts from backend
+  const [heroSlidesCount, setHeroSlidesCount] = useState(0);
+  const [partnersCount, setPartnersCount]     = useState(0);
+  const [mediaCount, setMediaCount]           = useState(0);
+  const [eventsCount, setEventsCount]         = useState(0);
+  const [lastSyncTime, setLastSyncTime]       = useState('');
+
+  // Create content modal
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [newTitle, setNewTitle]               = useState('');
+  const [newType, setNewType]                 = useState<ContentType>('announcement');
+  const [newStatus, setNewStatus]             = useState<ContentStatus>('Draft');
+  const [newExcerpt, setNewExcerpt]           = useState('');
+  const [newTags, setNewTags]                 = useState('');
+  const [submitting, setSubmitting]           = useState(false);
+
+  // ─── Data Fetching ───────────────────────────────────────────────────────
+  const refreshAllData = useCallback(async (showToast = false) => {
     try {
-      // 1. Fetch real content items from backend DB or localStorage
-      const items = (await contentService.fetchItemsFromApi()) || contentService.getItems();
-      const mapped: ContentItem[] = (items || [])
-        .filter((i) => i.title !== 'Homepage CMS Configuration')
-        .map((i) => ({
-          id: i.id,
-          title: i.title,
-          type: (i.type?.toLowerCase().includes('announc')
-            ? 'announcement'
-            : i.type?.toLowerCase().includes('post')
-            ? 'post'
-            : 'page') as ContentItem['type'],
-          status: (i.status || (i.publishedAt ? 'Published' : 'Draft')) as PublishState,
-          updated: i.updatedAt || 'Recently',
-          author: i.author || 'Content Manager',
-          views: i.views || 0,
-          priority: i.featured ? 'High' : 'Normal',
-        }));
+      showToast ? setRefreshing(true) : setLoading(true);
 
-      // 2. Fetch real events & workshops from backend DB
-      const events = await eventsService.getAllEvents();
-      const eventsCount = events.filter((e) => e.type !== 'Workshop' && e.type !== 'WORKSHOP').length;
-      const workshopsCount = events.filter((e) => e.type === 'Workshop' || e.type === 'WORKSHOP').length;
-      setDbEventsCount(eventsCount);
-      setDbWorkshopsCount(workshopsCount);
+      // Check API health
+      const online = await checkApiHealth();
+      setApiOnline(online);
 
-      const eventContent: ContentItem[] = events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        type: 'event',
-        status: 'Published',
-        updated: typeof e.date === 'string' ? e.date.split('T')[0] : 'Scheduled',
-        author: e.createdBy || 'Alumni Office',
-        views: e.rsvps?.length ? e.rsvps.length * 12 : 35,
-        priority: 'High',
-      }));
+      // 1. Content items
+      const list = await contentService.fetchItemsFromApi();
+      setItems((list || []).filter((i) => i.title !== 'Homepage CMS Configuration'));
 
-      // Combine real content + real events without duplicates
-      const existingIds = new Set(mapped.map((p) => p.id));
-      const mergedContent = [...mapped, ...eventContent.filter((f) => !existingIds.has(f.id))];
-      setDbContent(mergedContent);
-
-      // 3. Fetch real homepage settings
-      const cms = homepageCmsService.getSettings();
-      if (cms) {
-        if (cms.heroSlides) setDbHeroSlidesCount(cms.heroSlides.filter((s: any) => s.active !== false).length);
-        if (cms.partners) setDbPartnersCount(cms.partners.filter((p: any) => p.active !== false).length);
-      }
-
-      // 4. Fetch real media library count
+      // 2. Homepage config (hero slides + partners)
       try {
-        const storedMedia = localStorage.getItem('astu_cms_media_library');
-        if (storedMedia) {
-          const parsed = JSON.parse(storedMedia);
-          if (Array.isArray(parsed)) setDbGalleryCount(parsed.length);
+        const cfg = await homepageCmsService.fetchFromApi();
+        if (cfg) {
+          setHeroSlidesCount(Array.isArray(cfg.heroSlides) ? cfg.heroSlides.filter((s: any) => s.active !== false).length : 0);
+          setPartnersCount(Array.isArray(cfg.partners) ? cfg.partners.filter((p: any) => p.active !== false).length : 0);
         }
-      } catch {}
+      } catch { /* ignore */ }
+
+      // 3. Media count
+      try {
+        const mediaRes = await axios.get(`${API_BASE}/content/media`, { timeout: 3000 });
+        if (mediaRes.data?.success && Array.isArray(mediaRes.data?.data)) {
+          setMediaCount(mediaRes.data.data.length);
+        }
+      } catch { /* ignore */ }
+
+      // 4. Events count
+      try {
+        const evs = await eventsService.getAllEvents();
+        if (Array.isArray(evs)) setEventsCount(evs.length);
+      } catch { /* ignore */ }
+
+      setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      if (showToast) toast.success('Dashboard refreshed');
     } catch (err) {
-      console.warn('Error refreshing CMS Dashboard data:', err);
+      console.warn('CMS Dashboard refresh error:', err);
+      if (showToast) toast.error('Failed to refresh data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     refreshAllData();
-    window.addEventListener('astu-cms-content-changed', refreshAllData);
-    window.addEventListener('astu-cms-homepage-updated', refreshAllData);
-    return () => {
-      window.removeEventListener('astu-cms-content-changed', refreshAllData);
-      window.removeEventListener('astu-cms-homepage-updated', refreshAllData);
-    };
-  }, []);
+  }, [refreshAllData]);
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
-  const today = formatDate();
-
-  // 100% Dynamic Statistics calculated from real content
+  // ─── Derived Stats ───────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const published = dbContent.filter((i) => i.status === 'Published').length;
-    const draft = dbContent.filter((i) => i.status === 'Draft').length;
-    const scheduled = dbContent.filter((i) => i.status === 'Scheduled').length;
-    const needsReview = dbContent.filter((i) => i.status === 'Needs Review').length;
-    const totalViews = dbContent.reduce((sum, i) => sum + (i.views || 0), 0);
-    return { published, draft, scheduled, needsReview, totalViews, total: dbContent.length };
-  }, [dbContent]);
+    const published   = items.filter((i) => i.status === 'Published').length;
+    const draft       = items.filter((i) => i.status === 'Draft').length;
+    const scheduled   = items.filter((i) => i.status === 'Scheduled').length;
+    const needsReview = items.filter((i) => i.status === 'Needs Review').length;
+    const totalViews  = items.reduce((s, i) => s + (i.views || 0), 0);
+    return { published, draft, scheduled, needsReview, totalViews, total: items.length };
+  }, [items]);
 
   const filteredItems = useMemo(() => {
-    if (selectedTab === 'all') return dbContent;
-    return dbContent.filter((item) => item.status === selectedTab);
-  }, [selectedTab, dbContent]);
-
-  // Real Homepage Module Health with ZERO static additions
-  const moduleHealth = useMemo(
-    () => [
-      { name: 'Hero Slider', status: 'Published' as PublishState, updated: `${dbHeroSlidesCount} slides live`, icon: Eye, items: dbHeroSlidesCount },
-      { name: 'Events & Workshops', status: 'Published' as PublishState, updated: 'Live from DB', icon: CalendarDays, items: dbEventsCount + dbWorkshopsCount },
-      { name: 'Media Library', status: 'Published' as PublishState, updated: 'Live from DB', icon: GalleryHorizontal, items: dbGalleryCount },
-      { name: 'News & Announcements', status: 'Published' as PublishState, updated: 'Live from DB', icon: Newspaper, items: dbContent.filter((c) => c.type === 'announcement' || c.type === 'page' || c.type === 'post').length },
-      { name: 'Partner Companies', status: 'Published' as PublishState, updated: `${dbPartnersCount} active partners`, icon: TrendingUp, items: dbPartnersCount },
-    ],
-    [dbHeroSlidesCount, dbEventsCount, dbWorkshopsCount, dbGalleryCount, dbContent, dbPartnersCount]
-  );
-
-  // Dynamic Upcoming Schedule from real items
-  const upcomingSchedule = useMemo(() => {
-    return dbContent
-      .filter((item) => item.status === 'Scheduled' || item.type === 'event' || item.scheduledFor)
-      .slice(0, 5)
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        date: item.scheduledFor || item.updated,
-        type: item.type.toUpperCase(),
-        color: item.type === 'event' ? '#7C3AED' : item.type === 'announcement' ? '#F4B400' : '#003366',
-      }));
-  }, [dbContent]);
-
-  // Dynamic Review Queue showing ONLY items requiring review or in draft
-  const reviewQueue = useMemo(() => {
-    return dbContent.filter((c) => c.status === 'Needs Review' || c.status === 'Draft');
-  }, [dbContent]);
-
-  // Dynamic Weekly Traffic Distribution calculated from real item view counts
-  const trafficData = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const weights = [0.15, 0.2, 0.25, 0.18, 0.12, 0.06, 0.04];
-    return days.map((day, idx) => {
-      const views = Math.round(stats.totalViews * weights[idx]);
-      const engagement = Math.min(85, Math.max(30, Math.round((views / Math.max(stats.totalViews, 1)) * 300 + 40)));
-      return { day, views, engagement };
+    return items.filter((item) => {
+      const matchTab    = selectedTab === 'all' || item.status === selectedTab;
+      const matchType   = typeFilter === 'all' || item.type === typeFilter;
+      const q           = searchQuery.trim().toLowerCase();
+      const matchSearch = !q
+        || item.title.toLowerCase().includes(q)
+        || (item.excerpt || '').toLowerCase().includes(q)
+        || (item.author || '').toLowerCase().includes(q)
+        || (item.tags || []).some((t) => t.toLowerCase().includes(q));
+      return matchTab && matchType && matchSearch;
     });
-  }, [stats.totalViews]);
+  }, [items, selectedTab, typeFilter, searchQuery]);
 
-  const tabs: { key: 'all' | PublishState; label: string; count: number }[] = [
-    { key: 'all', label: 'All Content', count: stats.total },
-    { key: 'Published', label: 'Published', count: stats.published },
-    { key: 'Draft', label: 'Drafts', count: stats.draft },
-    { key: 'Scheduled', label: 'Scheduled', count: stats.scheduled },
-    { key: 'Needs Review', label: 'Review', count: stats.needsReview },
-  ];
+  // Only "Needs Review" items in the review queue (not drafts — those have separate lifecycle)
+  const reviewQueue = useMemo(() => items.filter((c) => c.status === 'Needs Review'), [items]);
 
-  const quickActions = [
-    { label: 'New Content', icon: Plus, path: '/cms/content', accent: '#003366' },
-    { label: 'Edit Homepage', icon: Eye, path: '/cms/homepage', accent: '#16A34A' },
-    { label: 'Upload Media', icon: GalleryHorizontal, path: '/cms/media', accent: '#F4B400' },
-    { label: 'Create Event', icon: CalendarDays, path: '/cms/events', accent: '#7C3AED' },
-    { label: 'SEO Audit', icon: Globe, path: '/cms/seo', accent: '#003366' },
-    { label: 'Templates', icon: Sparkles, path: '/cms/templates', accent: '#16A34A' },
-    { label: 'Review Queue', icon: ShieldCheck, path: '/cms/approvals', accent: '#EF4444' },
-    { label: 'Community', icon: MessageSquareText, path: '/cms/community', accent: '#7C3AED' },
-  ];
-
-  const maxViews = Math.max(...trafficData.map((d) => d.views), 1);
-
-  const handleApproveItem = (id: string, title: string) => {
-    contentService.updateItem(id, { status: 'Published' });
-    setDbContent((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'Published' } : item)));
-    toast.success(`"${title}" approved and published live!`);
+  // ─── Actions ─────────────────────────────────────────────────────────────
+  const handleTogglePublish = (item: ContentCardItem) => {
+    const next: ContentStatus = item.status === 'Published' ? 'Draft' : 'Published';
+    contentService.updateItem(item.id, { status: next });
+    setItems((prev) => prev.map((x) => (x.id === item.id ? { ...x, status: next } : x)));
+    toast.success(next === 'Published' ? `"${item.title}" is now live` : `"${item.title}" moved to drafts`);
   };
 
-  const handleRejectItem = (id: string, title: string) => {
-    contentService.updateItem(id, { status: 'Draft' });
-    setDbContent((prev) => prev.map((item) => (item.id === id ? { ...item, status: 'Draft' } : item)));
-    toast.error(`"${title}" returned to drafts`);
+  const handleDelete = (id: string, title: string) => {
+    if (!window.confirm(`Delete "${title}"? This action cannot be undone.`)) return;
+    contentService.deleteItem(id);
+    setItems((prev) => prev.filter((x) => x.id !== id));
+    toast.success(`"${title}" deleted`);
   };
 
+  const handleApprove = (item: ContentCardItem) => {
+    contentService.updateItem(item.id, { status: 'Published' });
+    setItems((prev) => prev.map((x) => (x.id === item.id ? { ...x, status: 'Published' } : x)));
+    toast.success(`"${item.title}" approved & published`);
+  };
+
+  const handleReject = (item: ContentCardItem) => {
+    contentService.updateItem(item.id, { status: 'Draft' });
+    setItems((prev) => prev.map((x) => (x.id === item.id ? { ...x, status: 'Draft' } : x)));
+    toast(`"${item.title}" returned to drafts`, { icon: '↩️' });
+  };
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) { toast.error('Title is required'); return; }
+    setSubmitting(true);
+    try {
+      const tagList = newTags.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+      const created = contentService.addItem({
+        title:       newTitle.trim(),
+        type:        newType,
+        status:      newStatus,
+        excerpt:     newExcerpt.trim() || '',
+        author:      'Content Manager',
+        updatedAt:   'Just now',
+        publishedAt: newStatus === 'Published' ? new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined,
+        tags:        tagList.length ? tagList : [newType, 'astu'],
+        pinned:      false,
+        featured:    false,
+        language:    'EN',
+      });
+      setItems((prev) => [created, ...prev]);
+      setNewTitle(''); setNewExcerpt(''); setNewTags(''); setCreateModalOpen(false);
+      toast.success(`"${created.title}" created successfully`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-8">
-      <style>{`
-        @keyframes card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .card-anim { animation: card-in 0.35s ease-out both; }
-      `}</style>
+    <div className="space-y-6">
 
-      {/* Greeting Banner */}
-      <section className="card-anim">
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#002855] via-[#003366] to-[#004b87] p-8 text-white shadow-sm">
-          <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-white/5 blur-2xl pointer-events-none" />
-          <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-emerald-300 backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                ASTU CONTENT ENGINE
-              </span>
-              <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                Welcome back, Content Administrator
-              </h2>
-              <p className="max-w-2xl text-xs text-white/80 leading-relaxed sm:text-sm">
-                Your live content repository has collected <span className="font-semibold text-emerald-300">{stats.total} content items</span> across pages, announcements, events, and media. Keep public sections updated.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={() => navigate('/cms/content')}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#F4B400] px-5 py-2.5 text-xs font-bold text-[#0B1A2E] shadow-sm hover:brightness-110 transition-all cursor-pointer"
-              >
-                <Plus className="h-4 w-4" /> Create Content
-              </button>
-              <button
-                onClick={() => window.open('/', '_blank')}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/20 transition-all cursor-pointer"
-              >
-                <Eye className="h-4 w-4" /> View Live Site
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CMS Command Center (Inspired by Employer Command Center) */}
-      <section className="card-anim rounded-2xl border border-slate-200/80 bg-white p-7 shadow-xs">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900">CMS Command Center</h3>
-            <p className="text-xs text-slate-500 mt-0.5">One clear snapshot for content publishing, review queues, and section health.</p>
-          </div>
-          <button
-            onClick={() => navigate('/cms/content')}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#003366] px-4 py-2 text-xs font-semibold text-white hover:bg-[#002855] transition-all cursor-pointer shadow-xs"
-          >
-            Open Content List <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100/70 text-emerald-700">
-                  <Globe className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">PUBLISHED PAGES</span>
-              </div>
-              <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">LIVE</span>
-            </div>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900">{stats.published}</p>
-            <p className="mt-1 text-[11px] text-slate-400">{stats.published} pages active on ASTU portal</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100/70 text-rose-700">
-                  <AlertTriangle className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">PENDING REVIEWS</span>
-              </div>
-              {stats.needsReview > 0 ? (
-                <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700">ACTION</span>
-              ) : (
-                <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">CLEAR</span>
-              )}
-            </div>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900">{stats.needsReview}</p>
-            <p className="mt-1 text-[11px] text-slate-400">{stats.needsReview > 0 ? 'Requires admin review' : 'Zero items pending approval'}</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/70 text-blue-700">
-                  <GalleryHorizontal className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">MEDIA FILES</span>
-              </div>
-              <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">ASSETS</span>
-            </div>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900">{dbGalleryCount}</p>
-            <p className="mt-1 text-[11px] text-slate-400">Total uploaded media assets</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5 transition-all hover:border-slate-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100/70 text-amber-700">
-                  <Layers3 className="h-4 w-4" />
-                </div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">ACTIVE MODULES</span>
-              </div>
-              <span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">HEALTHY</span>
-            </div>
-            <p className="mt-3 text-3xl font-extrabold text-slate-900">{moduleHealth.length}</p>
-            <p className="mt-1 text-[11px] text-slate-400">All 5 homepage sections configured</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Actions */}
-      <section className="card-anim rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
+      {/* ── Compact Hero Section (Matching other admin/cms pages) ──────── */}
+      <AdminPageHeader
+        title="CMS Overview"
+        subtitle="Manage ASTU public portal announcements, dynamic hero banners, and media assets."
+        breadcrumbs={[{ label: 'CMS' }, { label: 'Dashboard' }]}
+        actions={
           <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-[#F4B400]" />
-            <span className="text-base font-semibold text-slate-900">Quick Actions</span>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-white/10 hover:bg-white/20 text-white px-3 py-2 text-xs font-semibold backdrop-blur-sm border border-white/20 transition-all cursor-pointer"
+              title="View ASTU public homepage in new tab"
+            >
+              <Globe className="h-3.5 w-3.5 text-[#FFCC00]" />
+              <span>View Homepage</span>
+              <ArrowUpRight className="h-3 w-3 opacity-75" />
+            </a>
+            <button
+              type="button"
+              onClick={() => refreshAllData(true)}
+              disabled={refreshing || loading}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-white/10 hover:bg-white/20 text-white px-3 py-2 text-xs font-semibold backdrop-blur-sm border border-white/20 transition-all cursor-pointer disabled:opacity-50"
+              title="Refresh live data"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin text-[#FFCC00]' : ''}`} />
+              Refresh
+            </button>
+            <button
+              type="button"
+              onClick={() => { setNewTitle(''); setNewExcerpt(''); setNewTags(''); setNewStatus('Draft'); setCreateModalOpen(true); }}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#FFCC00] hover:bg-[#FFD633] text-[#003366] px-3.5 py-2 text-xs font-bold transition-all shadow-sm cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              New Content
+            </button>
           </div>
-          <span className="text-xs text-slate-400">Navigate to any module</span>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <button
-                key={action.label}
-                type="button"
-                onClick={() => navigate(action.path)}
-                className="group flex flex-col items-center gap-2.5 rounded-xl border border-slate-100 bg-white px-3 py-4 text-center transition-all hover:border-slate-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
-              >
-                <div
-                  className="flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110"
-                  style={{ backgroundColor: `${action.accent}12`, color: action.accent }}
-                >
-                  <Icon className="h-5.5 w-5.5" />
-                </div>
-                <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">{action.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+        }
+      />
 
-      {/* Content Pipeline + Schedule */}
-      <section className="grid gap-6 xl:grid-cols-3">
-        {/* Content Pipeline */}
-        <div className="card-anim xl:col-span-2 rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Content Pipeline</h3>
-              <p className="mt-1 text-sm text-slate-500">Real-time pages, posts, announcements, and events.</p>
+      {/* ── KPI Cards ──────────────────────────────────────────────────── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          label="Published Content"
+          value={loading ? '—' : stats.published}
+          sub={`${stats.total} total items`}
+          icon={<Newspaper className="h-4 w-4" />}
+          iconBg="bg-emerald-50 text-emerald-600"
+          onClick={() => { setSelectedTab('Published'); setTypeFilter('all'); }}
+        />
+        <KpiCard
+          label="Pending Review"
+          value={loading ? '—' : stats.needsReview}
+          sub={stats.needsReview > 0 ? 'Needs action' : 'Queue clear'}
+          subColor={stats.needsReview > 0 ? 'text-amber-600 font-semibold' : 'text-emerald-600 font-semibold'}
+          icon={<ShieldCheck className="h-4 w-4" />}
+          iconBg={stats.needsReview > 0 ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-400'}
+          onClick={() => { setSelectedTab('Needs Review'); setTypeFilter('all'); }}
+        />
+        <KpiCard
+          label="Homepage Slides"
+          value={loading ? '—' : heroSlidesCount}
+          sub={`${partnersCount} active partners`}
+          icon={<Layers3 className="h-4 w-4" />}
+          iconBg="bg-blue-50 text-blue-600"
+          onClick={() => navigate('/cms/homepage')}
+        />
+        <KpiCard
+          label="Media Assets"
+          value={loading ? '—' : mediaCount}
+          sub="in /uploads/cms"
+          icon={<GalleryHorizontal className="h-4 w-4" />}
+          iconBg="bg-purple-50 text-purple-600"
+          onClick={() => navigate('/cms/media')}
+        />
+      </div>
+
+      {/* ── Main Grid: Content Table + Sidebar ─────────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-3">
+
+        {/* Left: Content Repository Table (2/3 width) */}
+        <div className="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs overflow-hidden">
+
+          {/* Table Header */}
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Content Repository</h2>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">All articles, announcements, and pages</p>
+              </div>
+              {/* Search */}
+              <div className="relative w-full sm:w-60">
+                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search content…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 py-2 pl-8 pr-8 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-[#003366] dark:focus:border-sky-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setSelectedTab(tab.key)}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                    selectedTab === tab.key ? 'bg-[#003366] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {tab.label}
-                  <span
-                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
-                      selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+
+            {/* Status tabs + type filter */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-1 overflow-x-auto">
+                {([
+                  { key: 'all',          label: 'All',       count: stats.total },
+                  { key: 'Published',    label: 'Published', count: stats.published },
+                  { key: 'Draft',        label: 'Drafts',    count: stats.draft },
+                  { key: 'Needs Review', label: 'Review',    count: stats.needsReview },
+                  { key: 'Scheduled',    label: 'Scheduled', count: stats.scheduled },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setSelectedTab(tab.key)}
+                    className={`inline-flex items-center gap-1.5 shrink-0 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
+                      selectedTab === tab.key
+                        ? 'bg-[#003366] dark:bg-sky-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
-                    {tab.count}
-                  </span>
+                    {tab.label}
+                    <span className={`rounded px-1 text-[10px] font-bold ${selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Filter className="h-3.5 w-3.5 text-slate-400" />
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as any)}
+                  className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-200 focus:border-[#003366] dark:focus:border-sky-500 focus:outline-none cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  <option value="announcement">Announcement</option>
+                  <option value="post">News / Post</option>
+                  <option value="page">Page</option>
+                  <option value="event">Event</option>
+                  <option value="gallery">Gallery</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Table Body */}
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {loading ? (
+              <div className="p-12 text-center">
+                <RefreshCw className="mx-auto h-6 w-6 animate-spin text-[#003366] dark:text-[#FFCC00] mb-3" />
+                <p className="text-xs text-slate-400">Loading content items…</p>
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="p-12 text-center">
+                <FileText className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600 mb-2" />
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">No items found</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your filters or create new content</p>
+              </div>
+            ) : (
+              filteredItems.map((item) => (
+                <ContentRow
+                  key={item.id}
+                  item={item}
+                  onTogglePublish={handleTogglePublish}
+                  onDelete={handleDelete}
+                  onEdit={() => navigate('/cms/content')}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Table Footer */}
+          <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500 dark:text-slate-400">
+            <span>Showing {filteredItems.length} of {stats.total} items</span>
+            <button
+              onClick={() => navigate('/cms/content')}
+              className="inline-flex items-center gap-1 font-semibold text-[#003366] dark:text-sky-400 hover:underline cursor-pointer"
+            >
+              Open Full Editor <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Right: Sidebar (1/3 width) */}
+        <div className="space-y-5">
+
+          {/* Review Queue Card */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Review Queue</h3>
+              </div>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                reviewQueue.length > 0 ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300' : 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300'
+              }`}>
+                {reviewQueue.length} pending
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
+              {reviewQueue.length === 0 ? (
+                <div className="py-5 text-center">
+                  <CheckCircle2 className="mx-auto h-7 w-7 text-emerald-500 mb-2" />
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">All Clear</p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">No items awaiting review.</p>
+                </div>
+              ) : (
+                reviewQueue.slice(0, 4).map((item) => (
+                  <div key={item.id} className="rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${TYPE_BADGE[item.type] || 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                        {item.type}
+                      </span>
+                      <span className="text-[10px] text-slate-400 whitespace-nowrap">{item.updatedAt}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 line-clamp-2">{item.title}</p>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => handleApprove(item)}
+                        className="flex-1 rounded-md bg-emerald-600 hover:bg-emerald-700 px-2 py-1 text-[11px] font-semibold text-white transition-colors cursor-pointer"
+                      >
+                        Approve & Publish
+                      </button>
+                      <button
+                        onClick={() => handleReject(item)}
+                        className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+              {reviewQueue.length > 4 && (
+                <button
+                  onClick={() => { setSelectedTab('Needs Review'); setTypeFilter('all'); }}
+                  className="w-full rounded-lg border border-slate-200 dark:border-slate-800 py-1.5 text-center text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  +{reviewQueue.length - 4} more items
                 </button>
+              )}
+            </div>
+          </div>
+
+          {/* Homepage Sections Status Card */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <div className="flex items-center gap-2">
+                <Layers3 className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Homepage Sections</h3>
+              </div>
+              <button
+                onClick={() => navigate('/cms/homepage')}
+                className="text-[11px] font-semibold text-[#003366] dark:text-sky-400 hover:underline cursor-pointer"
+              >
+                Configure
+              </button>
+            </div>
+
+            <div className="space-y-2 text-[11px]">
+              {[
+                { label: 'Hero Banners',       value: `${heroSlidesCount} active slides`,   dot: heroSlidesCount > 0 ? 'bg-emerald-500' : 'bg-slate-300' },
+                { label: 'Announcements',      value: `${stats.published} published`,        dot: stats.published > 0 ? 'bg-emerald-500' : 'bg-slate-300' },
+                { label: 'Corporate Partners', value: `${partnersCount} active`,             dot: partnersCount > 0  ? 'bg-emerald-500' : 'bg-slate-300' },
+                { label: 'Media Assets',       value: `${mediaCount} files`,                 dot: mediaCount > 0     ? 'bg-emerald-500' : 'bg-slate-300' },
+                { label: 'Campus Events',      value: `${eventsCount} scheduled`,            dot: eventsCount > 0    ? 'bg-blue-500'    : 'bg-slate-300' },
+              ].map((row) => (
+                <div key={row.label} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${row.dot}`} />
+                    <span className="text-slate-600 dark:text-slate-400 font-medium">{row.label}</span>
+                  </div>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{row.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 flex items-center gap-2">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 py-2 text-[11px] font-semibold text-[#003366] dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors cursor-pointer text-center"
+              >
+                <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                View Live Site
+              </a>
+              <button
+                onClick={() => navigate('/cms/homepage')}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                Edit Homepage <ArrowUpRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Nav Card */}
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Quick Navigation</h3>
+            <div className="space-y-1.5">
+              {[
+                { label: 'Public Homepage',    path: '/',               icon: <Globe className="h-3.5 w-3.5 text-amber-500" />, external: true },
+                { label: 'Content Manager',    path: '/cms/content',    icon: <FileText className="h-3.5 w-3.5 text-blue-500" /> },
+                { label: 'Media Library',      path: '/cms/media',      icon: <GalleryHorizontal className="h-3.5 w-3.5 text-purple-500" /> },
+                { label: 'Homepage Builder',   path: '/cms/homepage',   icon: <Layers3 className="h-3.5 w-3.5 text-indigo-500" /> },
+                { label: 'Content Governance', path: '/cms/community', icon: <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> },
+              ].map((nav) => (
+                nav.external ? (
+                  <a
+                    key={nav.path}
+                    href={nav.path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#003366] dark:hover:text-white transition-all cursor-pointer group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{nav.icon}</span>
+                      {nav.label}
+                    </span>
+                    <ArrowUpRight className="h-3 w-3 text-slate-400 group-hover:text-[#003366] dark:group-hover:text-white transition-colors" />
+                  </a>
+                ) : (
+                  <button
+                    key={nav.path}
+                    onClick={() => navigate(nav.path)}
+                    className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-[#003366] dark:hover:text-white transition-all cursor-pointer group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{nav.icon}</span>
+                      {nav.label}
+                    </span>
+                    <ArrowRight className="h-3 w-3 text-slate-300 dark:text-slate-600 group-hover:text-[#003366] dark:group-hover:text-white transition-colors" />
+                  </button>
+                )
               ))}
             </div>
           </div>
-          <div className="mt-6 space-y-3">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="group flex flex-col gap-4 rounded-xl border border-slate-100 bg-white p-5 transition-all hover:border-slate-200 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {item.priority && (
-                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${priorityStyles[item.priority]}`}>
-                        {item.priority}
-                      </span>
-                    )}
-                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColors[item.type]}`}>
-                      {item.type}
-                    </span>
-                    <h4 className="text-sm font-semibold text-slate-800 truncate">{item.title}</h4>
-                    {item.views !== undefined && item.views > 0 && (
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5" />
-                        {item.views.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-2 flex items-center gap-3 text-xs text-slate-400">
-                    <span>{item.author}</span>
-                    <span className="h-1 w-1 rounded-full bg-slate-300" />
-                    <span>{item.updated}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusStyles[item.status]}`}>
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        item.status === 'Published'
-                          ? 'bg-emerald-500'
-                          : item.status === 'Draft'
-                          ? 'bg-slate-400'
-                          : item.status === 'Scheduled'
-                          ? 'bg-blue-500'
-                          : 'bg-orange-500'
-                      }`}
-                    />
-                    {item.status}
-                  </span>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button
-                      onClick={() => navigate('/cms/content')}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
-                      title="Manage Content"
-                    >
-                      <Edit3 className="h-4.5 w-4.5" />
-                    </button>
-                    {item.status !== 'Published' && (
-                      <button
-                        onClick={() => handleApproveItem(item.id, item.title)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-all"
-                        title="Publish Live"
-                      >
-                        <Send className="h-4.5 w-4.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {filteredItems.length === 0 && (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-sm text-slate-500">
-                No items currently match this status filter.
-              </div>
-            )}
-          </div>
-          <div className="mt-6 flex items-center justify-between pt-5 border-t border-slate-100">
-            <span className="text-xs text-slate-400">
-              Showing {filteredItems.length} of {stats.total} total items
-            </span>
-            <button
-              onClick={() => navigate('/cms/content')}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#003366] hover:text-[#002a55] transition-colors cursor-pointer"
-            >
-              View all content <ArrowUpRight className="h-4 w-4" />
-            </button>
-          </div>
         </div>
+      </div>
 
-        {/* Dynamic Upcoming Schedule */}
-        <div className="card-anim rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Upcoming Schedule</h3>
-              <p className="mt-1 text-sm text-slate-500">Events & queued content.</p>
-            </div>
-            <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-              {upcomingSchedule.length}
-            </span>
-          </div>
-          <div className="mt-6 space-y-3">
-            {upcomingSchedule.map((item) => (
-              <div
-                key={item.id}
-                className="group flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 transition-all hover:border-slate-200 hover:shadow-sm"
-              >
-                <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: `${item.color}10`, color: item.color }}
-                >
-                  <CalendarDays className="h-5.5 w-5.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: item.color }}>
-                    {item.type}
-                  </span>
-                  <p className="text-sm font-semibold text-slate-800 truncate mt-0.5">{item.title}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{item.date}</p>
-                </div>
-              </div>
-            ))}
-
-            {upcomingSchedule.length === 0 && (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-xs text-slate-500">
-                No upcoming events or scheduled content queued.
-              </div>
-            )}
-          </div>
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <button
-              onClick={() => navigate('/cms/events')}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#003366] hover:text-[#002a55] transition-colors cursor-pointer"
-            >
-              View events calendar <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Traffic + Review Queue */}
-      <section className="grid gap-6 xl:grid-cols-3">
-        {/* Content Performance */}
-        <div className="card-anim xl:col-span-2 rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Content Performance</h3>
-              <p className="mt-1 text-sm text-slate-500">Views & engagement calculated from live content data.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500 font-medium">
-                {trafficData.reduce((s, d) => s + d.views, 0).toLocaleString()} views
-              </span>
-            </div>
-          </div>
-          <div className="mt-6 flex h-48 items-end gap-2 sm:gap-4">
-            {trafficData.map((d) => (
-              <div key={d.day} className="flex flex-1 flex-col items-center gap-1.5">
-                <div className="flex w-full flex-1 items-end gap-1">
-                  <div
-                    className="flex-1 rounded-md bg-gradient-to-t from-[#003366] to-[#0055A5] transition-all hover:opacity-80"
-                    style={{ height: `${Math.max(8, (d.views / maxViews) * 100)}%` }}
-                    title={`${d.views} views`}
-                  />
-                  <div
-                    className="w-2 rounded-md bg-gradient-to-t from-[#F4B400] to-[#FFD580]"
-                    style={{ height: `${d.engagement}%` }}
-                    title={`${d.engagement}% engagement`}
-                  />
-                </div>
-                <span className="text-xs font-semibold text-slate-500">{d.day}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex items-center gap-5 text-xs text-slate-500">
-            <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-[#003366]" /> Page views
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-[#F4B400]" /> Engagement %
-            </span>
-          </div>
-        </div>
-
-        {/* Dynamic Review Queue */}
-        <div className="card-anim rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Review Queue</h3>
-              <p className="mt-1 text-sm text-slate-500">Drafts & items awaiting review.</p>
-            </div>
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
-                reviewQueue.length > 0 ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'
-              }`}
-            >
-              {reviewQueue.length} pending
-            </span>
-          </div>
-          <div className="mt-6 space-y-3">
-            {reviewQueue.slice(0, 4).map((item) => (
-              <div key={item.id} className="group rounded-xl border border-slate-100 bg-white p-4 transition-all hover:border-slate-200 hover:shadow-sm">
-                <div className="flex items-start gap-3">
-                  <span className={`mt-0.5 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${priorityStyles[item.priority || 'Normal']}`}>
-                    {item.priority || 'Normal'}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{item.title}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{item.author} · {item.updated}</p>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <button
-                    onClick={() => handleApproveItem(item.id, item.title)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-600 transition-all shadow-sm cursor-pointer"
-                  >
-                    <CheckCircle2 className="h-4 w-4" /> Approve
-                  </button>
-                  <button
-                    onClick={() => handleRejectItem(item.id, item.title)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-300 transition-all shadow-sm cursor-pointer"
-                  >
-                    Draft
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {reviewQueue.length === 0 && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-6 text-center space-y-2">
-                <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" />
-                <p className="text-sm font-bold text-emerald-900">All Content Reviewed!</p>
-                <p className="text-xs text-emerald-700">No items are currently waiting for moderation.</p>
-              </div>
-            )}
-          </div>
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <button
-              onClick={() => navigate('/cms/approvals')}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#003366] hover:text-[#002a55] transition-colors cursor-pointer"
-            >
-              Open approvals workflow <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Dynamic Homepage Module Health */}
-      <section className="card-anim rounded-xl border border-slate-200 bg-white p-7 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
+      {/* ── Create Content Modal ──────────────────────────────────────── */}
+      <AdminModal
+        open={createModalOpen}
+        title="Create New Content Item"
+        onClose={() => setCreateModalOpen(false)}
+        size="md"
+      >
+        <form onSubmit={handleCreateSubmit} className="space-y-4">
+          {/* Title */}
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">Homepage Module Health</h3>
-            <p className="mt-1 text-sm text-slate-500">Live item counts for each section of the public site.</p>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Title <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              autoFocus
+              placeholder="e.g., ASTU Tech Innovation Summit 2026"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#003366] focus:outline-none"
+            />
           </div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {moduleHealth.length} Modules Active
-            </span>
+
+          {/* Type + Status */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Content Type</label>
+              <select
+                value={newType}
+                onChange={(e) => setNewType(e.target.value as ContentType)}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#003366] focus:outline-none cursor-pointer"
+              >
+                <option value="announcement">Announcement</option>
+                <option value="post">News / Post</option>
+                <option value="page">Page</option>
+                <option value="event">Event</option>
+                <option value="gallery">Gallery</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Initial Status</label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value as ContentStatus)}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-[#003366] focus:outline-none cursor-pointer"
+              >
+                <option value="Draft">Draft</option>
+                <option value="Published">Published (Live)</option>
+                <option value="Needs Review">Needs Review</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Excerpt */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Excerpt <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Short summary displayed in public listings…"
+              value={newExcerpt}
+              onChange={(e) => setNewExcerpt(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#003366] focus:outline-none resize-none"
+            />
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Tags <span className="text-slate-400 font-normal">(comma-separated)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="alumni, campus, innovation"
+              value={newTags}
+              onChange={(e) => setNewTags(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-[#003366] focus:outline-none"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
             <button
-              onClick={() => navigate('/cms/homepage')}
-              className="text-sm font-semibold text-[#003366] hover:text-[#002a55] transition-colors cursor-pointer"
+              type="button"
+              onClick={() => setCreateModalOpen(false)}
+              className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              Manage
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#003366] dark:bg-sky-600 px-5 py-2 text-xs font-bold text-white hover:bg-[#002855] dark:hover:bg-sky-500 transition-colors shadow-sm cursor-pointer disabled:opacity-60"
+            >
+              {submitting ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+              {submitting ? 'Creating…' : 'Create Content'}
             </button>
           </div>
+        </form>
+      </AdminModal>
+    </div>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+interface KpiCardProps {
+  label:      string;
+  value:      string | number;
+  sub?:       string;
+  subColor?:  string;
+  icon:       React.ReactNode;
+  iconBg:     string;
+  onClick?:   () => void;
+}
+
+function KpiCard({ label, value, sub, subColor = 'text-slate-500 dark:text-slate-400', icon, iconBg, onClick }: KpiCardProps) {
+  return (
+    <div
+      onClick={onClick}
+      className={`rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs transition-all group ${onClick ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm' : ''}`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</span>
+        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${iconBg} group-hover:scale-105 transition-transform`}>
+          {icon}
         </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {moduleHealth.map((mod) => {
-            const Icon = mod.icon;
-            return (
-              <div
-                key={mod.name}
-                className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3.5 transition-all hover:border-slate-200 hover:shadow-sm cursor-pointer"
-                onClick={() => navigate('/cms/homepage')}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
-                  <Icon className="h-5 w-5 text-slate-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-semibold text-slate-700 truncate">{mod.name}</p>
-                    <span className="text-[10px] font-bold text-slate-500 shrink-0">({mod.items})</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{mod.updated}</p>
-                </div>
-              </div>
-            );
-          })}
+      </div>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</p>
+      {sub && <p className={`mt-0.5 text-[11px] ${subColor}`}>{sub}</p>}
+    </div>
+  );
+}
+
+interface ContentRowProps {
+  item:            ContentCardItem;
+  onTogglePublish: (item: ContentCardItem) => void;
+  onDelete:        (id: string, title: string) => void;
+  onEdit:          () => void;
+}
+
+function ContentRow({ item, onTogglePublish, onDelete, onEdit }: ContentRowProps) {
+  const typeBadge   = TYPE_BADGE[item.type]   || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
+  const statusPill  = STATUS_PILL[item.status as PublishState] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300';
+
+  return (
+    <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+      {/* Info */}
+      <div className="min-w-0 flex-1 pr-2">
+        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+          <span className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeBadge}`}>
+            {item.type}
+          </span>
+          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusPill}`}>
+            {item.status}
+          </span>
+          {item.views !== undefined && item.views > 0 && (
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-0.5">
+              <Eye className="h-3 w-3" /> {item.views.toLocaleString()}
+            </span>
+          )}
         </div>
-      </section>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white truncate">{item.title}</h3>
+        {item.excerpt && (
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5 max-w-lg">{item.excerpt}</p>
+        )}
+        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
+          <span>{item.author || 'Content Manager'}</span>
+          {(item.updatedAt || item.publishedAt) && (
+            <>
+              <span>·</span>
+              <span className="flex items-center gap-0.5">
+                <Clock className="h-2.5 w-2.5" />
+                {item.updatedAt || item.publishedAt}
+              </span>
+            </>
+          )}
+          {item.tags && item.tags.length > 0 && (
+            <>
+              <span>·</span>
+              <span>#{item.tags.slice(0, 2).join(', #')}</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          type="button"
+          onClick={() => onTogglePublish(item)}
+          className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all cursor-pointer ${
+            item.status === 'Published'
+              ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800'
+          }`}
+          title={item.status === 'Published' ? 'Move to Draft' : 'Publish Live'}
+        >
+          <Send className="h-3 w-3" />
+          {item.status === 'Published' ? 'Unpublish' : 'Publish'}
+        </button>
+
+        <button
+          type="button"
+          onClick={onEdit}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-white transition-all cursor-pointer"
+          title="Edit in content manager"
+        >
+          <Edit3 className="h-3.5 w-3.5" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onDelete(item.id, item.title)}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 transition-all cursor-pointer"
+          title="Delete item"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   );
 }

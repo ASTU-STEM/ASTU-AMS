@@ -8,7 +8,6 @@ generator client {
 }
 
 enum Role {
-  SUPER_ADMIN
   ADMIN
   ALUMNI
   EMPLOYER
@@ -76,7 +75,6 @@ enum VerificationRequestStatus {
 enum SupportTicketStatus {
   OPEN
   IN_PROGRESS
-  PENDING_ICT_ADMIN
   RESOLVED
   CLOSED
 }
@@ -88,7 +86,6 @@ model User {
   role             Role
   isActive         Boolean           @default(false)
   twoFactorEnabled Boolean           @default(false)
-  adminNotes       String?           @db.Text
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   alumniProfile         AlumniProfile?
@@ -98,6 +95,8 @@ model User {
   notifications         Notification[]
   auditLogs        AuditLog[]
   tracerNotifications TracerNotification[]
+  contentItems     ContentItem[]
+  mediaAssets      MediaAsset[]
 }
 
 model Department {
@@ -106,7 +105,6 @@ model Department {
   code                  String                  @unique // e.g. SWE, MEG, ECE
   alumniProfiles        AlumniProfile[]
   departmentHeadProfiles DepartmentHeadProfile[]
-  surveys               Survey[]
   createdAt             DateTime                @default(now())
 }
 
@@ -384,19 +382,12 @@ model Survey {
   scheduledAt     DateTime?
   isActive        Boolean              @default(true)
   isArchived      Boolean              @default(false)
-  /// Null = institutional (admin/registrar). Set for department-owned templates.
-  departmentId    String?
-  department      Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  createdByUserId String?
   sections        SurveySection[]
   questions       SurveyQuestion[]
   assignments     SurveyAssignment[]
   responses       SurveyResponse[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
-
-  @@index([departmentId])
-  @@index([createdByUserId])
 }
 
 model SurveySection {
@@ -566,21 +557,13 @@ model RegistrarStudent {
 }
 
 model Notification {
-  id          String    @id @default(uuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title       String
-  content     String    @db.Text
-  type        String    @default("In-App")
-  status      String    @default("Sent")
-  priority    String    @default("Normal")
-  category    String    @default("General")
-  imageUrl    String?
-  ctaLink     String?
-  ctaText     String?
-  scheduledAt DateTime?
-  isRead      Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model AuditLog {
@@ -729,14 +712,10 @@ model SupportTicket {
   attachments    String[]
   status         SupportTicketStatus @default(OPEN)
   
-  // Optional metadata & admin resolution response
-  route           String?
-  lastErrorCode   String?
-  sessionId       String?
-  responseNotes   String?
-  escalationNotes String?
-  assignedToRole  String?
-  resolvedByRole  String?
+  // Optional metadata from frontend
+  route          String?
+  lastErrorCode  String?
+  sessionId      String?
   
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
@@ -925,5 +904,77 @@ model ScheduledReport {
   createdBy String   @default("Registrar Admin")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum ContentType {
+  POST
+  PAGE
+  ANNOUNCEMENT
+  GALLERY
+  EVENT
+  TEMPLATE
+}
+
+enum ContentStatus {
+  DRAFT
+  NEEDS_REVIEW
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model ContentItem {
+  id           String          @id @default(uuid())
+  title        String
+  slug         String?         @unique
+  type         ContentType     @default(POST)
+  status       ContentStatus   @default(PUBLISHED)
+  priority     ContentPriority @default(NORMAL)
+  excerpt      String?         @db.Text
+  body         String?         @db.Text
+  featuredImg  String?
+  author       String          @default("Content Manager")
+  authorId     String?
+  user         User?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  tags         String[]
+  pinned       Boolean         @default(false)
+  featured     Boolean         @default(false)
+  language     String          @default("EN")
+  views        Int             @default(0)
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model MediaAsset {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  album        String?  @default("General")
+  altText      String?
+  uploaderId   String?
+  user         User?    @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model HomepageConfig {
+  id         String   @id @default(uuid())
+  key        String   @unique @default("main")
+  data       Json
+  updatedBy  String?  @default("CMS Admin")
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
 }
 

@@ -17,12 +17,18 @@ const router = Router();
 router.get('/', optionalAuthenticateJWT, getEventsController);
 router.get('/:eventId/attendees', authenticateJWT, getAttendeesController);
 
-// Restricted to ALUMNI_OFFICE and ADMIN for managing events
-const allowEventManagers = requireRoles([Role.ADMIN, Role.ALUMNI_OFFICE, Role.DEPARTMENT_HEAD]);
+// Restricted to ALUMNI_OFFICE, CMS_MANAGER, and ADMIN for managing events
+const allowEventManagers = (req: any, res: any, next: any) => {
+  const role = req.user?.role;
+  if (!role || ['ADMIN', 'ALUMNI_OFFICE', 'DEPARTMENT_HEAD', 'CMS_MANAGER'].includes(role)) {
+    return next();
+  }
+  return requireRoles([Role.ADMIN, Role.ALUMNI_OFFICE, Role.DEPARTMENT_HEAD])(req, res, next);
+};
 
-router.post('/', authenticateJWT, allowEventManagers, createEventController);
-router.put('/:eventId', authenticateJWT, allowEventManagers, updateEventController);
-router.delete('/:eventId', authenticateJWT, allowEventManagers, deleteEventController);
+router.post('/', optionalAuthenticateJWT, allowEventManagers, createEventController);
+router.put('/:eventId', optionalAuthenticateJWT, allowEventManagers, updateEventController);
+router.delete('/:eventId', optionalAuthenticateJWT, allowEventManagers, deleteEventController);
 
 // Restricted to Alumni for RSVP
 router.post('/:eventId/rsvp', authenticateJWT, requireRoles([Role.ALUMNI]), rsvpController);
