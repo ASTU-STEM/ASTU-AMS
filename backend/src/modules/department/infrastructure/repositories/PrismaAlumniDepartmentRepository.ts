@@ -26,7 +26,8 @@ export class PrismaAlumniDepartmentRepository implements IAlumniDepartmentReposi
         email: a.email || a.user?.email || null,
         phone: a.phone || null,
         graduationYear: a.graduationYear,
-        employmentStatus: a.employmentStatus || 'UNEMPLOYED',
+        // Preserve a missing status as null; do not invent UNEMPLOYED.
+        employmentStatus: a.employmentStatus ?? null,
         salary: typeof a.salary === 'number' ? a.salary : null,
         skills: Array.isArray(a.skills) ? a.skills : [],
         company: currentJob?.companyName || null,

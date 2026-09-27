@@ -16,7 +16,10 @@ function resolveOverride(req: Request): string | undefined {
   const user = (req as any).user;
   const queried = typeof req.query.departmentId === 'string' ? req.query.departmentId.trim() : '';
 
-  if (user?.role === 'ADMIN') {
+  // Both admin tiers may read any department. SUPER_ADMIN was previously
+  // excluded, which left the bootstrap super-admin account unable to read
+  // department analytics at all.
+  if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') {
     if (!queried) {
       throw new ApiError('Admins must provide ?departmentId= to access department-scoped data.', 400);
     }

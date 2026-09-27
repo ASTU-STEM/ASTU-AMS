@@ -23,6 +23,40 @@ export interface HomepageCmsConfig {
   tracerSpotlight?: any;
   employerFeedback?: any;
   mentorshipStats?: any;
+  /** Nested footer config edited via Footer Management / Homepage CMS */
+  footer?: any;
+  impactSection?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    ctaLabel?: string;
+    ctaRoute?: string;
+    image?: string;
+    active?: boolean;
+  };
+  careerCta?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    buttonLabel?: string;
+    route?: string;
+    active?: boolean;
+  };
+  bottomCta?: {
+    title?: string;
+    description?: string;
+    primaryLabel?: string;
+    primaryRoute?: string;
+    secondaryLabel?: string;
+    secondaryRoute?: string;
+    active?: boolean;
+  };
+  researchHighlights?: {
+    title?: string;
+    description?: string;
+    stats?: Array<{ label: string; value: string; icon?: string }>;
+    active?: boolean;
+  };
 }
 
 export const homepageCmsService = {

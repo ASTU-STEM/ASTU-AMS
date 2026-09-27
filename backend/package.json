@@ -2,15 +2,18 @@
   "name": "astu-ams-backend",
   "version": "1.0.0",
   "description": "Backend API Server for Adama Science and Technology University Alumni Management System",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "scripts": {
     "dev": "ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "test": "jest --runInBand",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed:demo": "ts-node prisma/seed-demo.ts",
+    "import:csv": "ts-node scripts/import-csv.ts",
+    "create:account": "ts-node scripts/create-account.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

@@ -176,30 +176,86 @@ Key modules:
 8. Notification Service (email + in-app)
 9. Document Request Workflow
 
-## 8. Registrar Data Import (Recommended MVP)
+## 8. Getting Real Data In (Registrar Import)
 
-### Import Strategy
-Use **CSV/Excel upload** first (practical for student project delivery).
+This project publishes placement, salary and tracer figures, so it must never
+contain invented people. The database is provisioned with **structure only** —
+no demo alumni, employers or jobs — and real records are loaded explicitly.
 
-### Import Pipeline
-```text
-Registrar Excel File
-      -> Data Validation
-      -> Duplicate Detection
-      -> Error Reporting
-      -> Persist to Database
-      -> Auto-create Alumni Accounts
-      -> Send Activation Notices
+### 8.1 Bootstrap (runs automatically with `prisma migrate dev`)
+
+`prisma/seed.ts` creates only what a real deployment needs:
+
+- the four ASTU departments (`SWE`, `MEG`, `ECE`, `CVE`)
+- the first super-admin account
+
+The admin password comes from `BOOTSTRAP_ADMIN_PASSWORD`. If that variable is
+unset a strong random password is generated and printed **once** — there is no
+shared hardcoded password in version control.
+
+```bash
+export BOOTSTRAP_ADMIN_EMAIL="admin@astust.edu.et"
+export BOOTSTRAP_ADMIN_PASSWORD="choose-a-long-unique-password"
+npx prisma migrate deploy     # schema + structure
+npm run prisma:seed           # departments + first admin
 ```
 
-### Expected Columns
-- Student ID
-- Full Name
-- Department
-- Graduation Year
-- Email
-- Phone
-- CGPA
+Re-running the seed is safe: it never overwrites an existing admin and never
+deletes data.
+
+### 8.2 Importing real records (CSV or Excel)
+
+```bash
+# 1. Always dry-run first. Nothing is written.
+npm run import:csv -- --file ./exports/alumni.xlsx --type alumni
+
+# 2. Review the report, fix the file, then commit.
+npm run import:csv -- --file ./exports/alumni.xlsx --type alumni --commit
+
+# Or import only the rows that pass validation.
+npm run import:csv -- --file ./exports/alumni.xlsx --type alumni --commit --skip-invalid
+```
+
+Supported `--type`: `alumni`, `employers`, `jobs`. `.csv`, `.xlsx` and `.xls`
+are all accepted.
+
+The importer:
+
+- **auto-maps columns** through an alias table, so `Student ID`, `student_id`
+  and `Registration No` all resolve to `studentId`. Override with
+  `--mapping '{"Your Header":"studentId"}'`.
+- **validates every row** and reports the spreadsheet row number for each
+  rejection (blank required fields, unparseable numbers, unknown departments,
+  duplicate student IDs both within the file and against the database).
+- **refuses to write** while any row is rejected unless `--skip-invalid` is
+  given. Re-running a file is safe: already-imported IDs are reported rather
+  than duplicated.
+- **never invents an employment status.** A blank or unrecognised cell becomes
+  `UNSPECIFIED` ("Status not reported"), which is excluded from the
+  unemployment rate. Free text is normalised, and the substring trap is handled
+  correctly: `"unemployed"` contains `"employed"`, so negative answers are
+  matched first.
+- **imports employers with a random password**, so employer accounts must use
+  "forgot password" to sign in.
+
+New profiles default to `employmentStatus = UNSPECIFIED`. Only a graduate
+explicitly recorded as `UNEMPLOYED` counts as unemployed.
+
+### 8.3 Demo data (local sandbox only)
+
+The old demo dataset — fabricated alumni, employers and jobs — is preserved in
+`prisma/seed-demo.ts` and is never automatic:
+
+```bash
+npm run prisma:seed:demo    # opt-in; do not run against a reported database
+```
+
+### 8.4 Local development without PostgreSQL
+
+If `DATABASE_URL` is unset the backend falls back to an in-memory JSON store at
+`backend/data/dev-db.json`. That file is a per-developer artifact: it is
+git-ignored, starts empty, and is never a source of truth. Tests always use the
+in-memory store, so `npm test` can never mutate a real database.
 
 ## 9. Backend Clean Architecture
 
@@ -267,11 +323,20 @@ src/modules/employer/
 ### Alumni
 - `GET /api/alumni/me`
 - `PUT /api/alumni/me`
-- `GET /api/alumni/jobs`
+
+### Jobs
+- `GET /api/jobs`
+- `GET /api/jobs/:id`
 
 ### Registrar
-- `POST /api/registrar/import`
-- `GET /api/registrar/graduates`
+- `POST /api/registrar/import` (multipart upload)
+- `GET /api/registrar/verify/:studentId`
+- `GET /api/registrar/logs`
+- `GET /api/registrar/students/:studentId`
+
+> The HTTP upload endpoint and the section 8 importer are separate paths. For
+> audited, reviewable bulk loading prefer the importer, which dry-runs and
+> reports rejected rows.
 
 ### Surveys
 - `GET /api/surveys`

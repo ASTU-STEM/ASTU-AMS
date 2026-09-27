@@ -87,10 +87,17 @@ interface Announcement {
   id: string; title: string; date: string; type: string; active: boolean;
 }
 interface SuccessStory {
-  id: string; name: string; role: string; text: string; image: string; active: boolean;
+  id: string;
+  name: string;
+  role: string;
+  company?: string;
+  text: string;
+  fullStory?: string;
+  image: string;
+  active: boolean;
 }
 interface Partner {
-  id: string; name: string; active: boolean;
+  id: string; name: string; logo?: string; active: boolean;
 }
 interface Testimonial {
   id: string; quote: string; by: string; active: boolean;
@@ -103,18 +110,11 @@ type SectionTab = 'hero' | 'stats' | 'portals' | 'campus-life' | 'campuses' | 'g
 
 /* ─── Initial Data (mirrors HomePage.tsx) ─── */
 const initialHeroSlides: HeroSlide[] = [
-  { id: 'HS-1', image: '/src/assets/imgs/astu-building.jpg', tagline: 'Quality Assurance & Accreditation', title: "Connecting ASTU's Excellence to the Global Industry", description: 'A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.', active: true },
-  { id: 'HS-2', image: '/src/assets/imgs/campus-2.jpeg', tagline: 'Enterprise Networking & Placement', title: 'Empowering ASTU Graduates in Modern Workspaces', description: 'Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.', active: true },
+  { id: 'HS-1', image: '/src/assets/imgs/astu-building.jpg', tagline: 'Quality Assurance & Accreditation', title: "Connecting ASTU's Excellence to the Global Industry", description: 'A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University.', active: true },
+  { id: 'HS-2', image: '/src/assets/imgs/campus-2.jpeg', tagline: 'Enterprise Networking & Placement', title: 'Empowering ASTU Graduates in Modern Workspaces', description: 'Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement.', active: true },
   { id: 'HS-3', image: 'https://images.unsplash.com/photo-1562774053-701939374585', tagline: 'Academic Innovation & Tracer Feedback', title: 'Coordinating Strategic Tracer Studies & Skill Gaps', description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.', active: true },
 ];
-
-const initialImpactStats: ImpactStat[] = [
-  { id: 'IS-1', label: 'Registered Alumni Members', value: '1,238', suffix: '+', detail: 'Registered in the alumni network', icon: 'Users', active: true },
-  { id: 'IS-2', label: 'Partner Organizations', value: '500', suffix: '+', detail: 'Hiring, internships, and feedback', icon: 'Building2', active: true },
-  { id: 'IS-3', label: 'Employment Rate', value: '87', suffix: '%', detail: 'Graduate employment rate', icon: 'LineChart', active: true },
-  { id: 'IS-4', label: 'Digital Requests', value: '6K', suffix: '+', detail: 'Transcript and certificate requests', icon: 'FileCheck2', active: true },
-  { id: 'IS-5', label: 'Engagement Hub', value: '24/7', suffix: '', detail: 'Always-on alumni engagement', icon: 'MessageSquareText', active: true },
-];
+const initialImpactStats: ImpactStat[] = [];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, GraduationCap, Zap,
@@ -179,9 +179,39 @@ const initialAnnouncements: Announcement[] = [
 ];
 
 const initialStories: SuccessStory[] = [
-  { id: 'SS-1', name: 'Abebe Yosef', role: 'Software Engineer', text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.', image: '/src/assets/images/State-M.jpg', active: true },
-  { id: 'SS-2', name: 'Bekele Kebede', role: 'Employer Partner', text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.', image: '/src/assets/images/gc7.jpg', active: true },
-  { id: 'SS-3', name: 'Helina Sileshi', role: 'Mentor & Alumni', text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!', image: '/src/assets/images/arc.jpg', active: true },
+  {
+    id: 'SS-1',
+    name: 'Abebe Yosef',
+    role: 'Software Engineer',
+    company: 'Safaricom Ethiopia',
+    text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.',
+    fullStory:
+      'My journey at ASTU laid the foundation for everything I have achieved in tech. Through ASTU-AMS mentorship and job matching I joined Safaricom Ethiopia as a Software Engineer.',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+    active: true,
+  },
+  {
+    id: 'SS-2',
+    name: 'Bekele Kebede',
+    role: 'Employer Partner',
+    company: 'GreenGrid Labs',
+    text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.',
+    fullStory:
+      'We partner with ASTU-AMS to recruit engineering graduates. Practical preparation and problem-solving skills from ASTU alumni are excellent.',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+    active: true,
+  },
+  {
+    id: 'SS-3',
+    name: 'Helina Sileshi',
+    role: 'Mentor & Alumni',
+    company: 'ASTU AI Research Center',
+    text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!',
+    fullStory:
+      'Through the ASTU-AMS mentorship framework I guide final-year students through research, career pathing, and professional growth.',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
+    active: true,
+  },
 ];
 
 const initialPartners: Partner[] = [
@@ -312,10 +342,10 @@ export default function HomepageManagement() {
     companies: 24,
   });
   const [mentorshipStats, setMentorshipStats] = useState({
-    enabled: true,
-    mentors: 45,
-    mentees: 210,
-    sessions: 380,
+    enabled: false,
+    mentors: 0,
+    mentees: 0,
+    sessions: 0,
   });
 
   const totalActive = useMemo(() => {
@@ -1160,22 +1190,55 @@ function AnnouncementsSection({ announcements, setAnnouncements }: { announcemen
 
 function StoriesSection({ stories, setStories }: { stories: SuccessStory[]; setStories: React.Dispatch<React.SetStateAction<SuccessStory[]>> }) {
   const modal = useModalState<SuccessStory>();
-  const [form, setForm] = useState({ name: '', role: '', text: '', image: '' });
-  const openAdd = useCallback(() => { setForm({ name: '', role: '', text: '', image: '' }); modal.openFor(); }, [modal]);
-  const openEdit = useCallback((item: SuccessStory) => { setForm({ name: item.name, role: item.role, text: item.text, image: item.image }); modal.openFor(item); }, [modal]);
+  const [form, setForm] = useState({ name: '', role: '', company: '', text: '', fullStory: '', image: '' });
+  const openAdd = useCallback(() => {
+    setForm({ name: '', role: '', company: '', text: '', fullStory: '', image: '' });
+    modal.openFor();
+  }, [modal]);
+  const openEdit = useCallback((item: SuccessStory) => {
+    setForm({
+      name: item.name,
+      role: item.role,
+      company: item.company || '',
+      text: item.text,
+      fullStory: item.fullStory || '',
+      image: item.image,
+    });
+    modal.openFor(item);
+  }, [modal]);
   const save = useCallback(() => {
     if (!form.name.trim()) { toast.error('Name is required'); return; }
-    if (modal.editing) { setStories(prev => prev.map(s => s.id === modal.editing!.id ? { ...s, ...form } : s)); toast.success('Story updated'); }
-    else { setStories(prev => [...prev, { id: `SS-${Date.now()}`, ...form, active: true }]); toast.success('Story created'); }
+    if (!form.text.trim()) { toast.error('Short story text is required'); return; }
+    if (modal.editing) {
+      setStories((prev) => prev.map((s) => (s.id === modal.editing!.id ? { ...s, ...form } : s)));
+      toast.success('Story updated');
+    } else {
+      setStories((prev) => [...prev, { id: `SS-${Date.now()}`, ...form, active: true }]);
+      toast.success('Story created');
+    }
     modal.close();
   }, [form, modal, setStories]);
   return (
-    <SectionPanel title="Success Stories" subtitle="Manage alumni success stories displayed on the homepage." icon={Star}>
+    <SectionPanel title="Success Stories" subtitle="Alumni stories shown on the public homepage. Upload a photo for each graduate." icon={Star}>
       <InlineEditor items={stories} setItems={setStories} title="Stories" onAdd={openAdd}
         renderItem={(story) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 overflow-hidden"><img src={story.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-            <div><p className="text-sm font-semibold text-slate-900">{story.name}</p><p className="text-xs text-slate-400">{story.role}</p></div>
+            <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 overflow-hidden">
+              {story.image ? (
+                <img
+                  src={story.image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              ) : null}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">{story.name}</p>
+              <p className="text-xs text-slate-400">
+                {story.role}{story.company ? ` · ${story.company}` : ''}
+              </p>
+            </div>
             <button onClick={() => openEdit(story)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
@@ -1186,7 +1249,9 @@ function StoriesSection({ stories, setStories }: { stories: SuccessStory[]; setS
             <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
             <div><label className="text-xs font-semibold text-slate-500">Role</label><input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           </div>
-          <div><label className="text-xs font-semibold text-slate-500">Story Text</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Company</label><input value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Safaricom Ethiopia" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Short excerpt (homepage card)</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-slate-500">Full story (detail page)</label><textarea value={form.fullStory} onChange={e => setForm(p => ({ ...p, fullStory: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
           <ImageUploader label="Upload Photo / Headshot" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
         </div>
         <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
@@ -1200,9 +1265,9 @@ function StoriesSection({ stories, setStories }: { stories: SuccessStory[]; setS
 
 function PartnersSection({ partners, setPartners }: { partners: Partner[]; setPartners: React.Dispatch<React.SetStateAction<Partner[]>> }) {
   const modal = useModalState<Partner>();
-  const [form, setForm] = useState({ name: '' });
-  const openAdd = useCallback(() => { setForm({ name: '' }); modal.openFor(); }, [modal]);
-  const openEdit = useCallback((item: Partner) => { setForm({ name: item.name }); modal.openFor(item); }, [modal]);
+  const [form, setForm] = useState({ name: '', logo: '' });
+  const openAdd = useCallback(() => { setForm({ name: '', logo: '' }); modal.openFor(); }, [modal]);
+  const openEdit = useCallback((item: Partner) => { setForm({ name: item.name, logo: item.logo || '' }); modal.openFor(item); }, [modal]);
   const save = useCallback(() => {
     if (!form.name.trim()) { toast.error('Name is required'); return; }
     if (modal.editing) { setPartners(prev => prev.map(p => p.id === modal.editing!.id ? { ...p, ...form } : p)); toast.success('Partner updated'); }
@@ -1210,11 +1275,15 @@ function PartnersSection({ partners, setPartners }: { partners: Partner[]; setPa
     modal.close();
   }, [form, modal, setPartners]);
   return (
-    <SectionPanel title="Partner Companies" subtitle="Manage the partner company logos scrolling on the homepage." icon={Handshake}>
+    <SectionPanel title="Partner Companies" subtitle="Manage partner names and logos shown on the homepage." icon={Handshake}>
       <InlineEditor items={partners} setItems={setPartners} title="Partners" onAdd={openAdd}
         renderItem={(partner) => (
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-navy text-white text-xs font-bold">{partner.name.slice(0, 2).toUpperCase()}</span>
+            {partner.logo ? (
+              <img src={partner.logo} alt="" className="h-8 w-8 rounded-lg object-contain bg-slate-50" />
+            ) : (
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-navy text-white text-xs font-bold">{partner.name.slice(0, 2).toUpperCase()}</span>
+            )}
             <p className="text-sm font-semibold text-slate-900">{partner.name}</p>
             <button onClick={() => openEdit(partner)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
@@ -1223,6 +1292,7 @@ function PartnersSection({ partners, setPartners }: { partners: Partner[]; setPa
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Partner' : 'Add Partner'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
           <div><label className="text-xs font-semibold text-slate-500">Company Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Ethio Telecom" /></div>
+          <ImageUploader label="Partner Logo" value={form.logo} onChange={url => setForm(p => ({ ...p, logo: url }))} />
         </div>
         <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
           <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>

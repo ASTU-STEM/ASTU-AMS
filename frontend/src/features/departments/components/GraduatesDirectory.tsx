@@ -19,6 +19,7 @@ import {
   MapPin,
   Sparkles,
   Briefcase,
+  MessageCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { StatusBadge, formatSalary, statusConfig, STATUS_ORDER, normalizeEmploymentStatus } from './employmentStatus';
@@ -32,6 +33,7 @@ interface GraduatesDirectoryProps {
   darkMode?: boolean;
   initialSearch?: string;
   onRefresh?: () => Promise<void>;
+  onMessageGraduate?: (alumni: DepartmentAlumniRecord) => void;
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
@@ -65,6 +67,7 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
   darkMode = false,
   initialSearch = '',
   onRefresh,
+  onMessageGraduate,
 }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [yearFilter, setYearFilter] = useState('All');
@@ -100,7 +103,6 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
   const statusTabs: Array<[string, string]> = [
     ['All', 'All'],
     ...STATUS_ORDER.map((s) => [s, statusConfig(s).label] as [string, string]),
-    ...(statusCounts.UNKNOWN ? [['UNKNOWN', 'Unknown'] as [string, string]] : []),
   ];
 
   const salarySummary = useMemo(() => {
@@ -241,11 +243,11 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
 
   return (
     <div className="space-y-5">
-      <div className={`rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+      <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className={`text-xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>Graduates</h2>
-            <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <h2 className={`text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>Graduates</h2>
+            <p className={`mt-1.5 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               {data?.department
                 ? `${data.department.name} (${data.department.code}) · ${data.alumni.length} alumni`
                 : `${data?.alumni.length ?? 0} alumni`}
@@ -331,20 +333,52 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
             );
           })}
         </div>
+        {(searchTerm || yearFilter !== 'All' || statusFilter !== 'All') && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearchTerm('');
+              setYearFilter('All');
+              setStatusFilter('All');
+            }}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#003580]"
+          >
+            <X className="h-4 w-4" /> Reset filters
+          </button>
+        )}
       </div>
 
-      <div className={`rounded-2xl border overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+      <div className={`overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
         {sorted.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center">
-            <Users className={`h-8 w-8 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`} />
-            <p className={`mt-3 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>No graduates found</p>
-            <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Try adjusting search or filters.
+            <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${darkMode ? 'bg-slate-800' : 'bg-[#003580]/8'}`}>
+              <Users className={`h-7 w-7 ${darkMode ? 'text-slate-400' : 'text-[#003580]'}`} />
+            </div>
+            <p className={`mt-4 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              {(data?.alumni.length ?? 0) === 0 ? 'No alumni linked yet' : 'No graduates match your filters'}
             </p>
+            <p className={`mt-1 max-w-sm text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              {(data?.alumni.length ?? 0) === 0
+                ? 'Graduate records will appear here once alumni are linked to your department.'
+                : 'Try clearing search or adjusting year and employment status filters.'}
+            </p>
+            {(searchTerm || yearFilter !== 'All' || statusFilter !== 'All') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setYearFilter('All');
+                  setStatusFilter('All');
+                }}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 text-xs font-semibold text-white"
+              >
+                <X className="h-3.5 w-3.5" /> Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[64rem] text-sm">
+            <table className="w-full min-w-[68rem] text-sm">
               <thead>
                 <tr className={`border-b ${darkMode ? 'border-slate-800 bg-slate-950/50' : 'border-slate-100 bg-slate-50/80'}`}>
                   <th className="w-10 px-2 py-3 text-left">
@@ -362,6 +396,9 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
                       </span>
                     </th>
                   ))}
+                  <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -399,12 +436,27 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
                         </td>
                         <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.company || '—'}</td>
                         <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.jobTitle || '—'}</td>
-                        <td className={`px-4 py-3 whitespace-nowrap tabular-nums ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{formatSalary(record.salary)}</td>
+                        <td className={`whitespace-nowrap px-4 py-3 tabular-nums ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{formatSalary(record.salary)}</td>
                         <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.location || '—'}</td>
+                        <td className="px-4 py-3">
+                          {onMessageGraduate && record.userId ? (
+                            <button
+                              type="button"
+                              onClick={() => onMessageGraduate(record)}
+                              title="Message graduate"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[#003580]/20 bg-[#003580]/5 px-2.5 py-1.5 text-xs font-semibold text-[#003580] transition hover:bg-[#003580] hover:text-white"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                              Message
+                            </button>
+                          ) : (
+                            <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>—</span>
+                          )}
+                        </td>
                       </tr>
                       {isOpen && (
                         <tr className={`${darkMode ? 'bg-slate-800/30' : 'bg-slate-50/60'}`}>
-                          <td colSpan={colSpan} className="px-5 py-4">
+                          <td colSpan={colSpan + 1} className="px-5 py-4">
                             <div className="grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
                               <DetailItem icon={Mail} label="Email" value={record.email ?? '—'} darkMode={darkMode} />
                               <DetailItem icon={Phone} label="Phone" value={record.phone ?? '—'} darkMode={darkMode} />

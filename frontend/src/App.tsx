@@ -109,7 +109,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<DepartmentDashboard />}
-              allowedRoles={["DEPARTMENT_HEAD"]}
+              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
             />
           }
         />
@@ -149,7 +149,20 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
+      <Toaster
+        position="top-center"
+        containerStyle={{ top: 72, zIndex: 999999 }}
+        toastOptions={{
+          duration: 2800,
+          style: {
+            zIndex: 999999,
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)",
+          },
+        }}
+      />
       <SystemSettingsProvider>
         <RegistrationProvider>
           <AppContent />

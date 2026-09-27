@@ -24,6 +24,7 @@ import {
 
 interface DepartmentSurveyCenterProps {
   darkMode?: boolean;
+  departmentId?: string | null;
 }
 
 type SurveyQuestion = {
@@ -124,7 +125,7 @@ const Skeleton = ({ className = '' }: { className?: string }) => (
   <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
 );
 
-export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ darkMode = false }) => {
+export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ darkMode = false, departmentId = null }) => {
   const [surveys, setSurveys] = useState<SurveyTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -273,8 +274,8 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
     setPreview(null);
     try {
       const [profile, alumni] = await Promise.all([
-        departmentService.getDepartmentProfile().catch(() => null),
-        departmentService.getDepartmentAlumni().catch(() => []),
+        departmentService.getDepartmentProfile(departmentId).catch(() => null),
+        departmentService.getDepartmentAlumni(departmentId).catch(() => []),
       ]);
       const recipients = Array.isArray(alumni) ? alumni : [];
       setPreview({
@@ -507,7 +508,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-[#003580]/15 bg-gradient-to-br from-[#003580] via-[#1a4a8a] to-[#0f5f9e] p-6 text-white shadow-sm">
+      <div className="rounded-[10px] border border-[#003580]/15 bg-gradient-to-br from-[#003580] via-[#1a4a8a] to-[#0f5f9e] p-6 text-white shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">Department Surveys</p>
@@ -566,7 +567,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
           <div className={`rounded-2xl border p-5 ${cardShell}`}>
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-bold">Tracer milestone templates</h3>
+                <h3 className="text-sm font-semibold">Tracer milestone templates</h3>
                 <p className={`mt-0.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Official 6 / 12 / 18 / 24-month surveys from the backend (one card per milestone).
                 </p>
@@ -613,7 +614,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
           <div className={`rounded-2xl border p-5 ${cardShell}`}>
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-bold">Your custom department surveys</h3>
+                <h3 className="text-sm font-semibold">Your custom department surveys</h3>
                 <p className={`mt-0.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   Surveys you create here are dispatched to alumni in your department.
                 </p>

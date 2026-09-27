@@ -434,9 +434,17 @@ interface TelegramChatProps {
   /** Hide demo/simulated meeting tools (whiteboard, code sandbox, AI summarizer,
    *  live polls, Q&A queue, virtual backgrounds, breakout rooms). */
   clean?: boolean;
+  /** Fill parent height instead of using viewport-based calc (dashboard embeds). */
+  embedded?: boolean;
 }
 
-export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTarget, initialCallId, clean = false }) => {
+export const TelegramChat: React.FC<TelegramChatProps> = ({
+  darkMode,
+  initialTarget,
+  initialCallId,
+  clean = false,
+  embedded = false,
+}) => {
   const showDemoMeetingTools = !clean;
   const [threads, setThreads] = useState<ConversationThread[]>(() => {
     try {
@@ -1969,33 +1977,64 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
   };
 
   return (
-    <div className={`flex flex-col md:flex-row rounded-2xl md:rounded-3xl border shadow-2xl overflow-hidden h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] min-h-[480px] sm:min-h-[560px] md:min-h-[640px] transition-all duration-300 ${
-      darkMode ? 'bg-slate-900 border-slate-800 text-white shadow-black/40' : 'bg-white border-slate-200/90 text-slate-900 shadow-slate-200/60'
+    <div className={`flex flex-col md:flex-row overflow-hidden transition-all duration-300 ${
+      embedded
+        ? 'h-full min-h-0 w-full rounded-none border-0 shadow-none'
+        : clean
+        ? 'h-[calc(100dvh-10rem)] min-h-[520px] rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+        : 'h-[calc(100vh-120px)] md:h-[calc(100vh-140px)] min-h-[480px] sm:min-h-[560px] md:min-h-[640px] rounded-2xl md:rounded-3xl border shadow-2xl'
+    } ${
+      darkMode
+        ? embedded
+          ? 'bg-transparent text-white'
+          : 'bg-slate-900 border-slate-800 text-white shadow-black/40'
+        : embedded
+          ? 'bg-transparent text-slate-900'
+          : 'bg-white border-slate-200/90 text-slate-900 shadow-slate-200/60'
     }`}>
 
       {/* ── Left Sidebar (Telegram Style) ────────────────────────────────────────── */}
-      <div className={`w-full md:w-[280px] md:min-w-[280px] md:max-w-[280px] lg:w-[320px] lg:min-w-[320px] lg:max-w-[320px] flex-shrink-0 border-b md:border-b-0 md:border-r flex flex-col ${activeThread ? 'hidden md:flex' : 'flex'} ${
-        darkMode ? 'border-slate-800 bg-slate-950/60' : 'border-slate-200/80 bg-slate-50/70'
+      <div className={`w-full md:w-[280px] md:min-w-[280px] md:max-w-[280px] lg:w-[300px] lg:min-w-[300px] lg:max-w-[300px] flex-shrink-0 border-b md:border-b-0 md:border-r flex flex-col ${activeThread ? 'hidden md:flex' : 'flex'} ${
+        darkMode ? 'border-slate-800 bg-slate-950/60' : clean || embedded ? 'border-gray-200/60 bg-slate-50/80' : 'border-slate-200/80 bg-slate-50/70'
       }`}>
 
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-slate-200/70 dark:border-slate-800/80 space-y-3 backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#003366] to-[#0055a5] text-white flex items-center justify-center font-bold text-base shadow-md shadow-blue-900/20">
-                ✈️
+        <div className={`border-b space-y-3 backdrop-blur-md ${clean || embedded ? 'p-3.5' : 'p-4'} ${
+          darkMode ? 'border-slate-800/80' : 'border-slate-200/70'
+        }`}>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className={`flex shrink-0 items-center justify-center rounded-xl bg-[#003580] text-white shadow-sm ${
+                clean || embedded ? 'h-9 w-9' : 'h-9 w-9 rounded-2xl bg-gradient-to-tr from-[#003366] to-[#0055a5] shadow-md shadow-blue-900/20'
+              }`}>
+                {clean || embedded ? (
+                  <span className="material-symbols-outlined text-[18px]">forum</span>
+                ) : (
+                  <span className="text-base font-bold">✈️</span>
+                )}
               </div>
-              <div>
-                <h3 className="font-extrabold text-base tracking-tight text-[#003366] dark:text-blue-400">ASTU_AMS Hub</h3>
-                <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-extrabold tracking-wide uppercase">● System Messenger</p>
+              <div className="min-w-0">
+                <h3 className={`truncate font-extrabold tracking-tight text-[#003580] dark:text-blue-400 ${
+                  clean || embedded ? 'text-sm' : 'text-base text-[#003366]'
+                }`}>
+                  {clean || embedded ? 'Messages' : 'ASTU_AMS Hub'}
+                </h3>
+                <p className="truncate text-[9px] font-extrabold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                  {clean || embedded ? 'Department inbox' : '● System Messenger'}
+                </p>
               </div>
             </div>
             <button
               onClick={() => setShowNewChatModal(true)}
-              className="px-3.5 py-2 bg-gradient-to-r from-[#003366] to-[#002244] hover:from-[#002244] hover:to-[#001122] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-95"
+              className={`shrink-0 rounded-xl bg-[#003580] text-xs font-extrabold text-white transition-all hover:bg-[#002a66] active:scale-95 ${
+                clean || embedded
+                  ? 'inline-flex h-9 items-center gap-1 px-3 shadow-sm'
+                  : 'flex items-center gap-1.5 bg-gradient-to-r from-[#003366] to-[#002244] px-3.5 py-2 shadow-md hover:from-[#002244] hover:to-[#001122] hover:shadow-lg'
+              }`}
               title="Start New Conversation"
             >
-              <span className="text-sm font-black">+</span> New Chat
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              <span className="hidden sm:inline">New</span>
             </button>
           </div>
 
@@ -2005,31 +2044,33 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations & contacts..."
-              className={`w-full text-xs pl-9 pr-3 py-2.5 rounded-2xl border transition-all focus:outline-none focus:ring-2 focus:ring-[#003366]/30 ${
-                darkMode ? 'bg-slate-800/90 border-slate-700 text-white placeholder-slate-400' : 'bg-white border-slate-200/90 text-slate-800 placeholder-slate-400 shadow-inner'
+              placeholder="Search conversations..."
+              className={`w-full rounded-xl border py-2.5 pl-9 pr-3 text-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#003580]/20 ${
+                darkMode
+                  ? 'border-slate-700 bg-slate-800/90 text-white placeholder-slate-400'
+                  : 'border-slate-200 bg-white text-slate-800 placeholder-slate-400'
               }`}
             />
-            <span className="material-symbols-outlined text-base absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-400">search</span>
           </div>
 
           {/* Filter Pills */}
           <div className="flex items-center gap-1 overflow-x-auto pt-0.5 no-scrollbar" style={{ scrollbarWidth: 'none' }}>
             {[
-              { id: 'ALL', label: 'All Chats' },
-              { id: 'RECRUITER', label: 'Recruiters' },
-              { id: 'ALUMNI', label: 'Candidates' },
-              { id: 'UNIVERSITY', label: 'Admin & Staff' },
+              { id: 'ALL', label: 'All' },
+              { id: 'RECRUITER', label: 'Employers' },
+              { id: 'ALUMNI', label: 'Alumni' },
+              { id: 'UNIVERSITY', label: 'Staff' },
             ].map(f => (
               <button
                 key={f.id}
                 onClick={() => setActiveFilter(f.id as any)}
-                className={`px-3 py-1.5 text-[10px] font-extrabold rounded-xl whitespace-nowrap transition-all ${
+                className={`whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[10px] font-extrabold transition-all ${
                   activeFilter === f.id
-                    ? 'bg-[#003366] text-white shadow-md shadow-blue-950/20'
+                    ? 'bg-[#003580] text-white shadow-sm'
                     : darkMode
                     ? 'bg-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-slate-200/70 text-slate-600 hover:bg-slate-200'
+                    : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
                 }`}
               >
                 {f.label}
@@ -2039,28 +2080,30 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         </div>
 
         {/* Thread List */}
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50 pb-8">
+        <div className={`flex-1 overflow-y-auto divide-y pb-4 ${
+          darkMode ? 'divide-slate-800/50' : 'divide-slate-100'
+        }`}>
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-16 px-4 space-y-3">
-              <div className="w-8 h-8 rounded-full border-4 border-[#003366] border-t-transparent animate-spin"></div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold animate-pulse">Loading messages...</p>
+            <div className="flex flex-col items-center justify-center space-y-3 px-4 py-16">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent" />
+              <p className="animate-pulse text-xs font-bold text-slate-500 dark:text-slate-400">Loading messages...</p>
             </div>
           ) : filteredThreads.length === 0 ? (
-            <div className="p-8 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#003366] dark:text-blue-400 flex items-center justify-center mx-auto text-xl font-bold shadow-inner">
-                💬
+            <div className="space-y-3 p-8 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#003580]/10 text-[#003580] dark:bg-slate-800 dark:text-blue-400">
+                <span className="material-symbols-outlined text-2xl">chat_bubble_outline</span>
               </div>
               <div>
-                <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">No active conversations</p>
-                <p className="text-[11px] text-slate-400 mt-1 max-w-[200px] mx-auto leading-relaxed">
-                  Click <strong>"+ New Chat"</strong> to connect directly with any applicant, employer, or admin.
+                <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">No conversations yet</p>
+                <p className="mx-auto mt-1 max-w-[200px] text-[11px] leading-relaxed text-slate-400">
+                  Start a chat with alumni, employers, or university staff.
                 </p>
               </div>
               <button
                 onClick={() => setShowNewChatModal(true)}
-                className="px-4 py-2 bg-[#003366] text-white text-xs font-bold rounded-xl shadow-md hover:bg-[#002244] transition-all active:scale-95"
+                className="rounded-xl bg-[#003580] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#002a66] active:scale-95"
               >
-                Find Contact
+                Find contact
               </button>
             </div>
           ) : (
@@ -2071,12 +2114,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                 <button
                   key={thread.partnerId}
                   onClick={() => handleSelectThread(thread)}
-                  className={`w-full p-3.5 flex items-center gap-3 text-left transition-all duration-200 ${
+                  className={`flex w-full items-center gap-3 p-3 text-left transition-all duration-200 ${
                     isActive
                       ? darkMode
-                        ? 'bg-slate-800/90 border-l-4 border-l-blue-400 shadow-md'
-                        : 'bg-blue-50/90 border-l-4 border-l-[#003366] shadow-sm'
-                      : 'hover:bg-blue-50/40 dark:hover:bg-slate-800/40'
+                        ? 'border-l-[3px] border-l-blue-400 bg-slate-800/90'
+                        : 'border-l-[3px] border-l-[#003580] bg-blue-50/70'
+                      : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/40'
                   }`}
                 >
                   <div className="relative flex-shrink-0">
@@ -2084,45 +2127,45 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
                       <img
                         src={avatarSrc}
                         alt=""
-                        className="w-12 h-12 rounded-2xl object-cover shadow-sm ring-2 ring-white dark:ring-slate-800"
+                        className="h-11 w-11 rounded-full object-cover ring-2 ring-white dark:ring-slate-800"
                         onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                       />
                     ) : null}
                     {(!avatarSrc) && (
-                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getAvatarGradient(thread.name)} text-white flex items-center justify-center font-extrabold text-sm shadow-md ring-2 ring-white dark:ring-slate-800`}>
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${getAvatarGradient(thread.name)} text-sm font-extrabold text-white ring-2 ring-white dark:ring-slate-800`}>
                         {getInitials(thread.name)}
                       </div>
                     )}
                     {isThreadOnline(thread) ? (
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm" title="Active now"></span>
+                      <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900" title="Active now" />
                     ) : (
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-slate-400 dark:bg-slate-600 rounded-full border-2 border-white dark:border-slate-900 shadow-xs opacity-75" title="Offline"></span>
+                      <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-slate-400 opacity-75 dark:border-slate-900 dark:bg-slate-600" title="Offline" />
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <p className={`text-xs font-extrabold truncate ${isActive ? 'text-[#003366] dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{thread.name}</p>
+                      <p className={`truncate text-xs font-extrabold ${isActive ? 'text-[#003580] dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{thread.name}</p>
                       {thread.lastMessageTime && (
-                        <span className="text-[9px] text-slate-400 dark:text-slate-500 flex-shrink-0 font-semibold">
+                        <span className="flex-shrink-0 text-[9px] font-semibold text-slate-400 dark:text-slate-500">
                           {formatMessageTime(thread.lastMessageTime)}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between mt-1 gap-1">
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[160px] font-medium">
+                    <div className="mt-0.5 flex items-center justify-between gap-1">
+                      <p className="max-w-[160px] truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
                         {thread.lastMessage}
                       </p>
                       {thread.unreadCount > 0 && (
-                        <span className="min-w-[18px] h-4.5 px-1.5 flex items-center justify-center rounded-full bg-gradient-to-r from-[#003366] to-[#0055a5] text-[9px] font-black text-white shadow-md ring-2 ring-blue-400/20 animate-pulse">
+                        <span className="flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#003580] px-1.5 text-[9px] font-black text-white">
                           {thread.unreadCount}
                         </span>
                       )}
                     </div>
-                    <span className={`inline-block mt-1 px-2 py-0.5 text-[8px] font-extrabold rounded-md ${
-                      thread.role === 'EMPLOYER' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300' :
-                      thread.role === 'ALUMNI' ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300' :
-                      'bg-blue-50 dark:bg-slate-800 text-[#003366] dark:text-blue-300'
+                    <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[8px] font-extrabold ${
+                      thread.role === 'EMPLOYER' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
+                      thread.role === 'ALUMNI' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300' :
+                      'bg-slate-100 text-[#003580] dark:bg-slate-800 dark:text-blue-300'
                     }`}>
                       {thread.roleLabel || thread.role}
                     </span>
@@ -2534,20 +2577,25 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
             </form>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-slate-800 text-[#003366] dark:text-blue-400 flex items-center justify-center mx-auto mb-4 text-3xl font-bold">
-                ✈️
+          <div className="flex flex-1 items-center justify-center p-8">
+            <div className="max-w-sm text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#003580]/10 text-[#003580] dark:bg-slate-800 dark:text-blue-400">
+                <span className="material-symbols-outlined text-3xl">forum</span>
               </div>
-              <h3 className="text-base font-extrabold text-gray-800 dark:text-white">ASTU_AMS Hub</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-                Select a contact from the left or click <strong>"+ New Chat"</strong> to start messaging across ASTU portals.
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                {clean || embedded ? 'Select a conversation' : 'ASTU_AMS Hub'}
+              </h3>
+              <p className="mx-auto mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                {clean || embedded
+                  ? 'Choose a contact on the left, or start a new chat with alumni, employers, or staff.'
+                  : <>Select a contact from the left or click <strong>"+ New Chat"</strong> to start messaging across ASTU portals.</>}
               </p>
               <button
                 onClick={() => setShowNewChatModal(true)}
-                className="mt-4 px-5 py-2.5 bg-[#003366] text-white text-xs font-bold rounded-xl shadow-lg hover:bg-[#002244] transition-all"
+                className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#002a66]"
               >
-                + Start New Conversation
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                Start new conversation
               </button>
             </div>
           </div>

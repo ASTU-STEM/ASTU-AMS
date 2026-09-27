@@ -9,6 +9,11 @@ generator client {
 
 enum Role {
   ADMIN
+  SUPER_ADMIN
+  /// Content-management staff. Referenced by content.routes.ts `cmsRoles` and
+  /// by the frontend /cms route guard, but previously absent from this enum,
+  /// so no CMS_MANAGER account could ever be created.
+  CMS_MANAGER
   ALUMNI
   EMPLOYER
   DEPARTMENT_HEAD
@@ -31,6 +36,9 @@ enum EmploymentStatus {
   EMPLOYED
   UNEMPLOYED
   SELF_EMPLOYED
+  // No status reported yet. Must never be folded into UNEMPLOYED: doing so
+  // inflates graduate unemployment with people the university never recorded.
+  UNSPECIFIED
 }
 
 enum ApplicationStatus {
@@ -74,6 +82,7 @@ enum VerificationRequestStatus {
 
 enum SupportTicketStatus {
   OPEN
+  PENDING_ICT_ADMIN
   IN_PROGRESS
   RESOLVED
   CLOSED
@@ -94,6 +103,8 @@ model User {
   adminProfile          AdminProfile?
   notifications         Notification[]
   auditLogs        AuditLog[]
+  revokedTokens    RevokedToken[]
+  createdSurveys   Survey[]
   tracerNotifications TracerNotification[]
   contentItems     ContentItem[]
   mediaAssets      MediaAsset[]
@@ -105,6 +116,7 @@ model Department {
   code                  String                  @unique // e.g. SWE, MEG, ECE
   alumniProfiles        AlumniProfile[]
   departmentHeadProfiles DepartmentHeadProfile[]
+  surveys               Survey[]
   createdAt             DateTime                @default(now())
 }
 
@@ -149,7 +161,7 @@ model AlumniProfile {
   registrarRecordId String?       @unique
   registrarRecord   RegistrarStudent? @relation(fields: [registrarRecordId], references: [id])
   status         AlumniStatus      @default(INACTIVE)
-  employmentStatus EmploymentStatus @default(UNEMPLOYED)
+  employmentStatus EmploymentStatus @default(UNSPECIFIED)
   salary         Float?
   isVerified     Boolean           @default(false)
   isCgpaPublic   Boolean           @default(true)
@@ -382,6 +394,12 @@ model Survey {
   scheduledAt     DateTime?
   isActive        Boolean              @default(true)
   isArchived      Boolean              @default(false)
+  /// Department scoping for surveys. NULL + a milestone type means a global
+  /// official template that every department can see.
+  departmentId    String?
+  department      Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  createdByUserId String?
+  createdBy       User?                @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
   sections        SurveySection[]
   questions       SurveyQuestion[]
   assignments     SurveyAssignment[]
@@ -563,6 +581,8 @@ model Notification {
   title     String
   content   String
   isRead    Boolean  @default(false)
+  /// Delivery state, e.g. "Sent" or "Scheduled".
+  status    String   @default("Sent")
   createdAt DateTime @default(now())
 }
 
@@ -574,6 +594,21 @@ model AuditLog {
   details   String
   ipAddress String?
   createdAt DateTime @default(now())
+}
+
+/// Access/refresh tokens that were explicitly invalidated (e.g. on logout).
+/// Stateless JWTs stay cryptographically valid until they expire, so logout
+/// needs a server-side denylist entry to actually cut off access.
+model RevokedToken {
+  id        String   @id @default(uuid())
+  jti       String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@index([userId])
 }
 
 model Event {
@@ -712,6 +747,9 @@ model SupportTicket {
   attachments    String[]
   status         SupportTicketStatus @default(OPEN)
   
+  /// Which staff role the ticket is currently routed to (e.g. "ICT_ADMIN").
+  assignedToRole String?
+
   // Optional metadata from frontend
   route          String?
   lastErrorCode  String?

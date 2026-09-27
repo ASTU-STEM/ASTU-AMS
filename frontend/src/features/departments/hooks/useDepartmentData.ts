@@ -26,6 +26,8 @@ export interface DepartmentDerivedData {
     employed: number;
     unemployed: number;
     selfEmployed: number;
+    /** Graduates with no reported status; excluded from the unemployment rate. */
+    unspecified: number;
     employmentRate: number;
     unemploymentRate: number;
     selfEmploymentRate: number;
@@ -38,7 +40,9 @@ export interface DepartmentDerivedData {
   topSkills: NamedCount[];
   locations: NamedCount[];
   averageSalary: number | null;
+  medianSalary: number | null;
   salaryCount: number;
+  salaryCoverage: number;
   verifiedCount: number;
   unverifiedCount: number;
 }
@@ -50,6 +54,7 @@ const EMPTY: DepartmentDerivedData = {
     employed: 0,
     unemployed: 0,
     selfEmployed: 0,
+    unspecified: 0,
     employmentRate: 0,
     unemploymentRate: 0,
     selfEmploymentRate: 0,
@@ -62,9 +67,19 @@ const EMPTY: DepartmentDerivedData = {
   topSkills: [],
   locations: [],
   averageSalary: null,
+  medianSalary: null,
   salaryCount: 0,
+  salaryCoverage: 0,
   verifiedCount: 0,
   unverifiedCount: 0,
+};
+
+const medianOf = (values: number[]): number => {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? Math.round((sorted[mid - 1] + sorted[mid]) / 2)
+    : Math.round(sorted[mid]);
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -99,7 +114,7 @@ function derive(
   const list = Array.isArray(alumni) ? alumni : [];
   const countByStatus: Record<string, number> = {};
   for (const record of list) {
-    const key = record?.employmentStatus || 'UNKNOWN';
+    const key = record?.employmentStatus || 'Unspecified';
     countByStatus[key] = (countByStatus[key] || 0) + 1;
   }
 
@@ -111,6 +126,7 @@ function derive(
         employed: analytics.employed,
         unemployed: analytics.unemployed,
         selfEmployed: analytics.selfEmployed,
+        unspecified: analytics.unspecified ?? 0,
         employmentRate: analytics.employmentRate,
         unemploymentRate: analytics.unemploymentRate,
         selfEmploymentRate: analytics.selfEmploymentRate,
@@ -123,7 +139,9 @@ function derive(
       topSkills: analytics.topSkills ?? [],
       locations: analytics.locations ?? [],
       averageSalary: analytics.averageSalary,
+      medianSalary: analytics.medianSalary ?? null,
       salaryCount: analytics.salaryCount,
+      salaryCoverage: analytics.salaryCoverage ?? 0,
       verifiedCount: analytics.verifiedCount,
       unverifiedCount: analytics.unverifiedCount,
     };
@@ -132,14 +150,18 @@ function derive(
   const totalAlumni = stats?.totalAlumni ?? list.length;
   const employed = stats?.employedAlumni ?? (countByStatus['EMPLOYED'] || 0);
   const selfEmployed = stats?.selfEmployedAlumni ?? countByStatus['SELF_EMPLOYED'] ?? 0;
-  const unemployed = stats?.unemployedAlumni ?? (totalAlumni > 0 ? Math.max(0, totalAlumni - employed - selfEmployed) : 0);
+  // Count only graduates explicitly marked UNEMPLOYED. Anyone without a status
+  // is reported as unspecified, never silently absorbed into unemployment.
+  const unemployed = stats?.unemployedAlumni ?? (countByStatus['UNEMPLOYED'] || 0);
+  const unspecified = Math.max(0, totalAlumni - employed - selfEmployed - unemployed);
   const employmentRate =
     typeof stats?.employmentRate === 'number'
       ? stats.employmentRate
       : totalAlumni > 0
         ? ((employed + selfEmployed) / totalAlumni) * 100
         : 0;
-  const unemploymentRate = totalAlumni > 0 ? (unemployed / totalAlumni) * 100 : 0;
+  const reported = totalAlumni - unspecified;
+  const unemploymentRate = reported > 0 ? (unemployed / reported) * 100 : 0;
   const selfEmploymentRate = totalAlumni > 0 ? (selfEmployed / totalAlumni) * 100 : 0;
 
   const employmentTrend: CohortTrend[] = [];
@@ -167,7 +189,7 @@ function derive(
   const employmentStatusDistribution = Object.keys(countByStatus)
     .filter((status) => countByStatus[status] > 0)
     .map((status) => ({
-      status: STATUS_LABELS[status] || status,
+      status: status === 'Unspecified' ? 'Unspecified' : STATUS_LABELS[status] || status,
       count: countByStatus[status],
       percentage: totalAlumni > 0 ? (countByStatus[status] / totalAlumni) * 100 : 0,
     }));
@@ -193,6 +215,7 @@ function derive(
       employed,
       unemployed,
       selfEmployed,
+      unspecified,
       employmentRate,
       unemploymentRate,
       selfEmploymentRate,
@@ -205,13 +228,15 @@ function derive(
     topSkills: topCounts(skillValues, list.length),
     locations: topCounts(list.map((a) => a?.location), list.length),
     averageSalary,
+    medianSalary: salaries.length > 0 ? medianOf(salaries) : null,
     salaryCount: salaries.length,
+    salaryCoverage: totalAlumni > 0 ? (salaries.length / totalAlumni) * 100 : 0,
     verifiedCount,
     unverifiedCount: Math.max(0, list.length - verifiedCount),
   };
 }
 
-export function useDepartmentData() {
+export function useDepartmentData(departmentId?: string | null, enabled = true) {
   const [data, setData] = useState<DepartmentDerivedData>(EMPTY);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -222,9 +247,9 @@ export function useDepartmentData() {
     setError(null);
     try {
       const [analyticsRes, statsRes, alumniRes] = await Promise.allSettled([
-        departmentService.getDepartmentAnalytics(),
-        departmentService.getDepartmentStats(),
-        departmentService.getDepartmentAlumni(),
+        departmentService.getDepartmentAnalytics(departmentId),
+        departmentService.getDepartmentStats(departmentId),
+        departmentService.getDepartmentAlumni(departmentId),
       ]);
 
       if (alumniRes.status === 'rejected') {
@@ -242,7 +267,7 @@ export function useDepartmentData() {
 
       let department: DepartmentProfile | null = null;
       try {
-        department = await departmentService.getDepartmentProfile();
+        department = await departmentService.getDepartmentProfile(departmentId);
       } catch {
         // Optional profile fetch fallback
       }
@@ -266,11 +291,17 @@ export function useDepartmentData() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [departmentId]);
 
   useEffect(() => {
+    // Admins get a 400 from the server until a department is picked, so hold the
+    // first request until the switcher has resolved one.
+    if (!enabled) {
+      setIsLoading(true);
+      return;
+    }
     load();
-  }, [load]);
+  }, [load, enabled]);
 
   return { data, isLoading, error, refetch: load, lastUpdated };
 }

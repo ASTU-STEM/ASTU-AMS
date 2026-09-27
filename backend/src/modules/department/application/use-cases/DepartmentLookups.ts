@@ -46,25 +46,23 @@ export class GetDepartmentStats {
     const alumni = await this.alumniRepo.findByDepartmentId(departmentId);
 
     const totalAlumni = alumni.length;
-    const employedAlumni = alumni.filter(a => a.employmentStatus === 'EMPLOYED').length;
-    const selfEmployedAlumni = alumni.filter(a => a.employmentStatus === 'SELF_EMPLOYED').length;
-    const unemployedAlumni = Math.max(0, totalAlumni - employedAlumni - selfEmployedAlumni);
-    const placedAlumni = employedAlumni + selfEmployedAlumni;
-    const employmentRate = totalAlumni > 0 ? (placedAlumni / totalAlumni) * 100 : 0;
-
-    const salaries = alumni
-      .map(a => a.salary)
-      .filter((s): s is number => typeof s === 'number' && !Number.isNaN(s) && s > 0);
+    const {
+      employed,
+      selfEmployed,
+      unemployed,
+      employmentRate,
+    } = summarisePlacement(alumni);
+    const salaries = collectSalaries(alumni);
     const averageSalary = salaries.length > 0
       ? Math.round(salaries.reduce((sum, s) => sum + s, 0) / salaries.length)
       : null;
 
     return new DepartmentStats(
       totalAlumni,
-      employedAlumni,
+      employed,
       employmentRate,
-      selfEmployedAlumni,
-      unemployedAlumni,
+      selfEmployed,
+      unemployed,
       averageSalary
     );
   }
@@ -108,11 +106,16 @@ export interface DepartmentAnalytics {
   employed: number;
   selfEmployed: number;
   unemployed: number;
+  /** Graduates who have never set a status. Excluded from the unemployment rate. */
+  unspecified: number;
   employmentRate: number;
   unemploymentRate: number;
   selfEmploymentRate: number;
   averageSalary: number | null;
+  medianSalary: number | null;
   salaryCount: number;
+  /** Share of the department that has actually reported a salary (0-100). */
+  salaryCoverage: number;
   verifiedCount: number;
   unverifiedCount: number;
   employmentTrend: CohortPoint[];
@@ -128,6 +131,59 @@ const STATUS_LABELS: Record<string, string> = {
   UNEMPLOYED: 'Unemployed',
   SELF_EMPLOYED: 'Self-Employed',
 };
+
+/**
+ * Statuses the platform actually recognises. Anything else — including a
+ * graduate who has simply never set their status — must be reported as
+ * "Unspecified" rather than silently folded into "Unemployed", which would
+ * overstate graduate unemployment in accreditation figures.
+ */
+const KNOWN_STATUSES = new Set(Object.keys(STATUS_LABELS));
+const UNSPECIFIED_LABEL = 'Unspecified';
+
+/**
+ * Derives the placement breakdown from real records.
+ *
+ * `unemployed` counts only graduates explicitly marked UNEMPLOYED. The
+ * remainder is reported as `unspecified`, so the three figures always
+ * reconcile to the department total instead of quietly inflating unemployment.
+ */
+function summarisePlacement(alumni: Array<{ employmentStatus?: string | null }>) {
+  const total = alumni.length;
+  const employed = alumni.filter((a) => a.employmentStatus === 'EMPLOYED').length;
+  const selfEmployed = alumni.filter((a) => a.employmentStatus === 'SELF_EMPLOYED').length;
+  const unemployed = alumni.filter((a) => a.employmentStatus === 'UNEMPLOYED').length;
+  const unspecified = total - employed - selfEmployed - unemployed;
+  const placed = employed + selfEmployed;
+  return {
+    total,
+    employed,
+    selfEmployed,
+    unemployed,
+    unspecified: Math.max(0, unspecified),
+    employmentRate: total > 0 ? (placed / total) * 100 : 0,
+    // Denominator excludes graduates who never reported a status, so the
+    // unemployment rate is not diluted by missing data.
+    unemploymentRate: total - unspecified > 0 ? (unemployed / (total - unspecified)) * 100 : 0,
+    selfEmploymentRate: total > 0 ? (selfEmployed / total) * 100 : 0,
+  };
+}
+
+/** Median is reported next to the mean because pay data is heavily skewed. */
+function medianSalary(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? Math.round((sorted[mid - 1] + sorted[mid]) / 2)
+    : Math.round(sorted[mid]);
+}
+
+function collectSalaries(alumni: Array<{ salary?: number | null }>): number[] {
+  return alumni
+    .map((a) => a.salary)
+    .filter((s): s is number => typeof s === 'number' && !Number.isNaN(s) && s > 0);
+}
 
 function topCounts(values: Array<string | null | undefined>, total: number, limit = 8): NamedRank[] {
   const map: Record<string, number> = {};
@@ -156,14 +212,16 @@ export class GetDepartmentAnalytics {
     const departmentId = await resolveDepartmentId(this.headRepo, userId, departmentIdOverride);
     const alumni = await this.alumniRepo.findByDepartmentId(departmentId);
 
-    const totalAlumni = alumni.length;
-    const employed = alumni.filter((a) => a.employmentStatus === 'EMPLOYED').length;
-    const selfEmployed = alumni.filter((a) => a.employmentStatus === 'SELF_EMPLOYED').length;
-    const unemployed = Math.max(0, totalAlumni - employed - selfEmployed);
-    const placedAlumni = employed + selfEmployed;
-    const employmentRate = totalAlumni > 0 ? (placedAlumni / totalAlumni) * 100 : 0;
-    const unemploymentRate = totalAlumni > 0 ? (unemployed / totalAlumni) * 100 : 0;
-    const selfEmploymentRate = totalAlumni > 0 ? (selfEmployed / totalAlumni) * 100 : 0;
+    const {
+      total: totalAlumni,
+      employed,
+      selfEmployed,
+      unemployed,
+      unspecified,
+      employmentRate,
+      unemploymentRate,
+      selfEmploymentRate,
+    } = summarisePlacement(alumni);
 
     // Employment trend by graduation year
     const yearMap: Record<number, { employed: number; total: number }> = {};
@@ -188,23 +246,23 @@ export class GetDepartmentAnalytics {
         };
       });
 
-    // Employment status distribution
+    // Employment status distribution. Unrecognised/missing statuses are
+    // reported honestly as "Unspecified" instead of being counted as unemployed.
     const countByStatus: Record<string, number> = {};
     for (const a of alumni) {
-      const key = a.employmentStatus || 'UNKNOWN';
+      const raw = a.employmentStatus;
+      const key = raw && KNOWN_STATUSES.has(raw) ? raw : UNSPECIFIED_LABEL;
       countByStatus[key] = (countByStatus[key] || 0) + 1;
     }
     const employmentStatusDistribution: StatusDistribution[] = Object.keys(countByStatus)
       .filter((status) => countByStatus[status] > 0)
       .map((status) => ({
-        status: STATUS_LABELS[status] || status,
+        status: status === UNSPECIFIED_LABEL ? UNSPECIFIED_LABEL : STATUS_LABELS[status] || status,
         count: countByStatus[status],
         percentage: totalAlumni > 0 ? (countByStatus[status] / totalAlumni) * 100 : 0,
       }));
 
-    const salaries = alumni
-      .map((a) => a.salary)
-      .filter((s): s is number => typeof s === 'number' && !Number.isNaN(s) && s > 0);
+    const salaries = collectSalaries(alumni);
     const averageSalary = salaries.length > 0
       ? Math.round(salaries.reduce((sum, s) => sum + s, 0) / salaries.length)
       : null;
@@ -217,11 +275,14 @@ export class GetDepartmentAnalytics {
       employed,
       selfEmployed,
       unemployed,
+      unspecified,
       employmentRate,
       unemploymentRate,
       selfEmploymentRate,
       averageSalary,
+      medianSalary: medianSalary(salaries),
       salaryCount: salaries.length,
+      salaryCoverage: totalAlumni > 0 ? (salaries.length / totalAlumni) * 100 : 0,
       verifiedCount,
       unverifiedCount: Math.max(0, totalAlumni - verifiedCount),
       employmentTrend,

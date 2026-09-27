@@ -1096,7 +1096,7 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       const cgpaScore = (avgCgpa / 4.0) * 100;
       const employabilityScore = totalAlumni > 0 ? Math.round(cgpaScore * 0.4 + employmentRate * 0.6) : 0;
 
-      const statuses = ['EMPLOYED', 'UNEMPLOYED', 'SELF_EMPLOYED'];
+      const statuses = ['EMPLOYED', 'UNEMPLOYED', 'SELF_EMPLOYED', 'UNSPECIFIED'];
       const statusDistribution = statuses.map(st => ({
         status: st,
         count: profiles.filter((a: any) => a.employmentStatus === st).length,

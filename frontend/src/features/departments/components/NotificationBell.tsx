@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import {
+  Bell,
+  Briefcase,
+  ClipboardCheck,
+  FileText,
+  MessageSquare,
+  Sparkles,
+  type LucideIcon,
+} from 'lucide-react';
 import { notificationService } from '../../notifications/services/notification.service';
 
 interface DepartmentNotification {
@@ -15,7 +24,7 @@ interface NotificationBellProps {
   onNavigate?: (tab: string) => void;
 }
 
-const NEUTRAL = { bg: '#334155', text: '#e2e8f0', icon: 'notifications', tint: '#cbd5e1' };
+const NEUTRAL = { bg: '#334155', text: '#e2e8f0', icon: Bell, tint: '#cbd5e1' };
 
 function guessTab(title: string): string | null {
   const t = (title || '').toLowerCase();
@@ -29,20 +38,20 @@ function guessTab(title: string): string | null {
 function guessKind(title: string): {
   bg: string;
   text: string;
-  icon: string;
+  icon: LucideIcon;
   tint: string;
 } {
   const t = (title || '').toLowerCase();
   if (t.includes('survey') || t.includes('questionnaire') || t.includes('tracer') || t.includes('feedback'))
-    return { bg: '#0d9488', text: '#ffffff', icon: 'description', tint: '#2dd4bf' };
+    return { bg: '#0d9488', text: '#ffffff', icon: FileText, tint: '#2dd4bf' };
   if (t.includes('message') || t.includes('chat') || t.includes('mention'))
-    return { bg: '#2563eb', text: '#ffffff', icon: 'forum', tint: '#60a5fa' };
+    return { bg: '#2563eb', text: '#ffffff', icon: MessageSquare, tint: '#60a5fa' };
   if (t.includes('job') || t.includes('hire') || t.includes('offer') || t.includes('internship'))
-    return { bg: '#7c3aed', text: '#ffffff', icon: 'work', tint: '#a78bfa' };
+    return { bg: '#7c3aed', text: '#ffffff', icon: Briefcase, tint: '#a78bfa' };
   if (t.includes('approve') || t.includes('reject') || t.includes('verify') || t.includes('accept') || t.includes('pending'))
-    return { bg: '#d97706', text: '#ffffff', icon: 'fact_check', tint: '#fbbf24' };
+    return { bg: '#d97706', text: '#ffffff', icon: ClipboardCheck, tint: '#fbbf24' };
   if (t.includes('await') || t.includes('coming') || t.includes('update') || t.includes('new'))
-    return { bg: '#e11d48', text: '#ffffff', icon: 'new_releases', tint: '#fb7185' };
+    return { bg: '#e11d48', text: '#ffffff', icon: Sparkles, tint: '#fb7185' };
   return NEUTRAL;
 }
 
@@ -59,7 +68,7 @@ function timeAgo(value: string | Date): string {
   return date.toLocaleDateString();
 }
 
-export function NotificationBell({ darkMode, onNavigate }: NotificationBellProps) {
+export function NotificationBell({ darkMode: _darkMode, onNavigate }: NotificationBellProps) {
   const [notifications, setNotifications] = useState<DepartmentNotification[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,7 +94,6 @@ export function NotificationBell({ darkMode, onNavigate }: NotificationBellProps
     load(true);
     const interval = setInterval(() => load(true), 30000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -130,34 +138,24 @@ export function NotificationBell({ darkMode, onNavigate }: NotificationBellProps
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`relative rounded-full p-2 transition ${darkMode ? 'text-slate-300 hover:bg-white/5' : 'text-slate-600 hover:bg-black/5'}`}
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
         title={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
         aria-label="Notifications"
       >
-        <span className={`material-symbols-outlined text-xl ${unreadCount > 0 ? 'animate-[bell_shake_1.6s_ease-in-out_infinite]' : ''}`}>
-          notifications
-        </span>
+        <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span
-            className={`absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white shadow ${
-              darkMode ? 'bg-amber-400 text-slate-900' : 'bg-[#E31E24]'
-            }`}
-          >
+          <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div
-          className={`absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-2xl border shadow-xl ${
-            darkMode ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-white'
-          }`}
-        >
-          <div className={`flex items-center justify-between border-b px-4 py-3 ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+        <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+          <div className="flex items-center justify-between border-b border-[var(--border-color)] px-4 py-3">
             <div className="min-w-0">
-              <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Notifications</p>
-              <p className={`text-[11px] font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Notifications</p>
+              <p className="text-xs text-[var(--text-secondary)]">
                 {unreadCount > 0 ? `${unreadCount} unread update${unreadCount === 1 ? '' : 's'}` : 'All caught up'}
               </p>
             </div>
@@ -165,66 +163,43 @@ export function NotificationBell({ darkMode, onNavigate }: NotificationBellProps
               <button
                 type="button"
                 onClick={markAllRead}
-                className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold transition ${
-                  darkMode
-                    ? 'text-amber-400 hover:bg-slate-800'
-                    : 'text-[#003580] hover:bg-blue-50'
-                }`}
+                className="shrink-0 text-xs font-semibold text-[#E24B4A] hover:underline"
               >
                 Mark all read
               </button>
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-80 space-y-1 overflow-y-auto p-2">
             {loading && recent.length === 0 ? (
-              <div className={`px-4 py-8 text-center text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                <span className="material-symbols-outlined mb-1 block animate-pulse text-2xl opacity-40">sync</span>
-                Loading…
-              </div>
+              <div className="px-2 py-8 text-center text-sm text-[var(--text-secondary)]">Loading…</div>
             ) : recent.length === 0 ? (
-              <div className={`px-4 py-10 text-center ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                <span className="material-symbols-outlined mb-2 block text-3xl text-slate-300 dark:text-slate-600">notifications_off</span>
-                <p className="text-xs font-medium">No notifications yet</p>
-                <p className="mt-1 text-[11px] opacity-70">Updates about surveys, messages and alumni will appear here.</p>
-              </div>
+              <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">No notifications yet</p>
             ) : (
               recent.map((n) => {
                 const kind = guessKind(n.title);
+                const Icon = kind.icon;
                 const isUnread = !n.isRead;
                 return (
                   <button
                     key={n.id}
                     type="button"
                     onClick={() => (isUnread ? markRead(n) : onNavigate && onNavigate(guessTab(n.title)))}
-                    className={`block w-full border-b px-4 py-3 text-left transition last:border-b-0 ${
-                      isUnread
-                        ? darkMode ? 'bg-slate-800/50' : 'bg-blue-50/50'
-                        : darkMode ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'
-                    }`}
+                    className="flex w-full items-start gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-black/5"
                   >
-                    <div className="flex items-start gap-3">
-                      <span
-                        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                        style={{ backgroundColor: kind.bg }}
-                      >
-                        <span className="material-symbols-outlined text-[16px]" style={{ color: kind.text }}>
-                          {kind.icon}
-                        </span>
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className={`truncate text-xs font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{n.title}</p>
-                          {isUnread && (
-                            <span
-                              className="h-1.5 w-1.5 shrink-0 rounded-full"
-                              style={{ backgroundColor: kind.tint }}
-                            />
-                          )}
-                        </div>
-                        <p className={`mt-0.5 line-clamp-2 text-xs leading-snug ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{n.content}</p>
-                        <p className={`mt-1 text-[10px] font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{timeAgo(n.createdAt)}</p>
+                    <span
+                      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                      style={{ backgroundColor: kind.bg }}
+                    >
+                      <Icon className="h-4 w-4" style={{ color: kind.text }} strokeWidth={2} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-xs font-bold text-[var(--text-primary)]">{n.title}</p>
+                        {isUnread && <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#003580]" />}
                       </div>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-[var(--text-secondary)]">{n.content}</p>
+                      <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">{timeAgo(n.createdAt)}</p>
                     </div>
                   </button>
                 );

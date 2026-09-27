@@ -7,7 +7,33 @@ import path from 'path';
 const DEV_DB_PATH = path.join(process.cwd(), 'data', 'dev-db.json');
 const CMS_CONTENT_PATH = path.join(process.cwd(), 'data', 'cms-content.json');
 
+/**
+ * Under test the dev store must never touch the real data/dev-db.json.
+ * Jest previously wrote its fixtures straight into that file, so running the
+ * suite replaced the developer's real dev data with test records.
+ */
+const IS_TEST_ENV = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+let testStore: any | null = null;
+
 function readDevDb(): any {
+  if (IS_TEST_ENV) {
+    if (!testStore) testStore = emptyDevStore();
+    return testStore;
+  }
+  return readDevDbFromDisk();
+}
+
+function emptyDevStore(): any {
+  return {
+    users: [], adminProfiles: [], alumniProfiles: [], employers: [], jobs: [],
+    jobApplications: [], interviews: [], contents: [], contentItems: [],
+    notifications: [], auditLogs: [], registrarStudents: [], registrarSyncLogs: [],
+    documentRequests: [], departments: [], surveys: [], surveyResponses: [],
+    events: [], homepageConfigs: [], feedback: [],
+  };
+}
+
+function readDevDbFromDisk(): any {
   let store: any = null;
   try {
     if (fs.existsSync(DEV_DB_PATH)) {
@@ -28,6 +54,7 @@ function readDevDb(): any {
       contentItems: [],
       mediaAssets: [],
       homepageConfigs: [],
+      revokedTokens: [],
     };
   }
 
@@ -62,6 +89,10 @@ function readDevDb(): any {
 }
 
 function writeDevDb(store: any) {
+  if (IS_TEST_ENV) {
+    testStore = store;
+    return;
+  }
   const dir = path.dirname(DEV_DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(DEV_DB_PATH, JSON.stringify(store, null, 2));
@@ -69,6 +100,14 @@ function writeDevDb(store: any) {
 
 // ─── Fake Prisma for dev fallback ───
 class FakePrisma {
+  /**
+   * Always re-reads, so reads see the current file. Mutating methods must NOT
+   * use this twice: `this.store` returning a fresh object each access meant
+   *     this.store.rows.push(rec);  // read #1 -> array A, push into A
+   *     writeDevDb(this.store);     // read #2 -> array B, writes B (change lost)
+   * and every write through the dev fallback was silently discarded.
+   * Mutating methods now snapshot once into a local `store` instead.
+   */
   private get store() {
     return readDevDb();
   }
@@ -102,24 +141,74 @@ class FakePrisma {
       return this.store.users.filter((u: any) => matchWhere(u, where)).length;
     },
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isActive: data.isActive ?? false };
-      this.store.users.push(rec);
-      writeDevDb(this.store);
+      (store.users || (store.users = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.users.findIndex((u: any) => u.id === where.id || u.email === where.email);
+      const store = this.store;
+      const idx = (store.users || []).findIndex((u: any) => u.id === where.id || u.email === where.email);
       if (idx === -1) throw new Error('User not found');
-      this.store.users[idx] = { ...this.store.users[idx], ...data, updatedAt: new Date().toISOString() };
-      writeDevDb(this.store);
-      return this.store.users[idx];
+      store.users[idx] = { ...store.users[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.users[idx];
     },
     delete: async ({ where }: any) => {
-      const idx = this.store.users.findIndex((u: any) => u.id === where.id);
+      const store = this.store;
+      const idx = (store.users || []).findIndex((u: any) => u.id === where.id);
       if (idx === -1) throw new Error('User not found');
-      const [removed] = this.store.users.splice(idx, 1);
-      writeDevDb(this.store);
+      const [removed] = store.users.splice(idx, 1);
+      writeDevDb(store);
       return removed;
+    },
+  };
+
+  adminProfile = {
+    findUnique: async ({ where }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      if (where?.userId) return rows.find((a: any) => a.userId === where.userId) || null;
+      if (where?.id) return rows.find((a: any) => a.id === where.id) || null;
+      return null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      const idx = where?.userId
+        ? rows.findIndex((a: any) => a.userId === where.userId)
+        : rows.findIndex((a: any) => a.id === where?.id);
+      if (idx === -1) {
+        const rec = { ...create, id: create.id || `dev-admin-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        rows.push(rec);
+        writeDevDb(store);
+        return rec;
+      }
+      rows[idx] = { ...rows[idx], ...update, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return rows[idx];
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      const rec = { ...data, id: data.id || `dev-admin-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      rows.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      const idx = where?.userId ? rows.findIndex((a: any) => a.userId === where.userId) : rows.findIndex((a: any) => a.id === where?.id);
+      if (idx === -1) throw new Error('AdminProfile not found');
+      rows[idx] = { ...rows[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return rows[idx];
+    },
+    findMany: async () => {
+      const store = readDevDb();
+      return store.adminProfiles || [];
     },
   };
 
@@ -158,8 +247,30 @@ class FakePrisma {
             out = { ...out, user: u || { email: a.email || 'alumni@astu.edu.et' } };
           }
           if (include?.experiences) {
-            let exps = Array.isArray(a.experiences) ? [...a.experiences] : [];
-            if (exps.length === 0 && a.employmentStatus && a.employmentStatus !== 'UNEMPLOYED' && a.employmentStatus !== 'SELF_EMPLOYED') {
+            // Work experiences live in their own store keyed by alumniId, not nested
+            // on the profile record, so hydrate them the way Prisma would.
+            let exps: any[] = Array.isArray(a.experiences) ? [...a.experiences] : [];
+            if (exps.length === 0) {
+              exps = (store.workExperiences || []).filter((e: any) => e?.alumniId === a.id);
+            }
+            // Honour `orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }]` style sorts.
+            for (const rule of include.experiences.orderBy || []) {
+              const [field, dir] = Array.isArray(rule) ? rule : [rule, 'asc'];
+              const sign = String(dir).toLowerCase() === 'desc' ? -1 : 1;
+              exps = [...exps].sort((x: any, y: any) => {
+                const xv = x?.[field] ?? '';
+                const yv = y?.[field] ?? '';
+                if (xv === yv) return 0;
+                return (xv > yv ? 1 : -1) * sign;
+              });
+            }
+            // Only backfill an experience for statuses that actually assert
+            // employment. UNSPECIFIED must stay experience-free or the dev
+            // fallback would invent an employer for a job seeker.
+            if (
+              exps.length === 0 &&
+              (a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED')
+            ) {
               exps.push({
                 id: `${a.id}-exp-dev`,
                 alumniId: a.id,
@@ -212,6 +323,19 @@ class FakePrisma {
       }
       return this.alumniProfile.create({ data: create });
     },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const idx = (store.alumniProfiles || []).findIndex((a: any) => {
+        if (where?.id) return a.id === where.id || a.userId === where.id;
+        if (where?.userId) return a.userId === where.userId;
+        if (where?.studentId) return a.studentId === where.studentId;
+        return false;
+      });
+      if (idx === -1) throw new Error('Alumni profile not found');
+      const [removed] = (store.alumniProfiles || []).splice(idx, 1);
+      writeDevDb(store);
+      return removed;
+    },
     deleteMany: async ({ where }: any = {}) => {
       const store = readDevDb();
       if (store.alumniProfiles) {
@@ -224,6 +348,48 @@ class FakePrisma {
         writeDevDb(store);
       }
       return { count: 1 };
+    },
+  };
+
+  revokedToken = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.revokedTokens || []).find((t: any) => t.jti === where?.jti) || null;
+    },
+    create: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      if (!store.revokedTokens) store.revokedTokens = [];
+      const rec = {
+        id: data.id || `dev-revoked-${Date.now()}-${store.revokedTokens.length}`,
+        jti: data.jti,
+        userId: data.userId ?? null,
+        expiresAt: data.expiresAt,
+        revokedAt: data.revokedAt || new Date().toISOString(),
+      };
+      store.revokedTokens.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    upsert: async ({ where, create, update }: any = {}) => {
+      const store = readDevDb();
+      const existing = (store.revokedTokens || []).find((t: any) => t.jti === where?.jti);
+      if (existing) {
+        Object.assign(existing, update || {});
+        writeDevDb(store);
+        return existing;
+      }
+      return this.revokedToken.create({ data: create });
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.revokedTokens || []).length;
+      store.revokedTokens = (store.revokedTokens || []).filter((t: any) => {
+        if (where?.jti && t.jti === where.jti) return false;
+        if (where?.expiresAt?.lt && new Date(t.expiresAt) >= new Date(where.expiresAt.lt)) return true;
+        return true;
+      });
+      writeDevDb(store);
+      return { count: before - store.revokedTokens.length };
     },
   };
 
@@ -305,39 +471,142 @@ class FakePrisma {
 
   department = {
     findUnique: async ({ where }: any) => {
-      if (where.code) return this.store.departments.find((d: any) => d.code === where.code) || null;
-      if (where.id) return this.store.departments.find((d: any) => d.id === where.id) || null;
+      const store = readDevDb();
+      const depts: any[] = store.departments || [];
+      if (where?.code) return depts.find((d: any) => d.code === where.code) || null;
+      if (where?.id) return depts.find((d: any) => d.id === where.id) || null;
       return null;
+    },
+    // Without these the proxy falls through to createSafeModel, whose store is a
+    // throwaway empty array, so listing departments returned [] and looking one up
+    // by name always missed.
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const depts: any[] = store.departments || [];
+      if (!where || Object.keys(where).length === 0) return depts[0] || null;
+      return depts.find((d: any) => matchWhere(d, where)) || null;
+    },
+    findMany: async ({ where, orderBy, include }: any = {}) => {
+      const store = readDevDb();
+      let depts: any[] = [...(store.departments || [])];
+      if (where && Object.keys(where).length > 0) {
+        depts = depts.filter((d: any) => matchWhere(d, where));
+      }      if (orderBy?.name) {
+        const dir = orderBy.name === 'desc' ? -1 : 1;
+        depts.sort((a: any, b: any) => String(a?.name ?? '').localeCompare(String(b?.name ?? '')) * dir);
+      }
+      if (!include) return depts;
+
+      const alumni: any[] = store.alumniProfiles || [];
+      const headProfiles: any[] = store.departmentHeadProfiles || [];
+      const users: any[] = store.users || [];
+
+      return depts.map((dept) => {
+        const row: any = { ...dept };
+        if (include._count?.select?.alumniProfiles) {
+          row._count = {
+            ...(row._count || {}),
+            alumniProfiles: alumni.filter((a) => a?.departmentId === dept.id).length,
+          };
+        }
+        if (include.departmentHeadProfiles) {
+          row.departmentHeadProfiles = headProfiles
+            .filter((p) => p?.departmentId === dept.id)
+            .map((p) => ({
+              ...p,
+              user: include.departmentHeadProfiles?.include?.user
+                ? users.find((u) => u?.id === p.userId) || null
+                : undefined,
+            }));
+        }
+        if (include.alumniProfiles) {
+          const nested = include.alumniProfiles;
+          let matched = alumni.filter((a) => a?.departmentId === dept.id);
+          if (nested.where && Object.keys(nested.where).length > 0) {
+            matched = matched.filter((a) => matchWhere(a, nested.where));
+          }
+          row.alumniProfiles = matched.map((a) => {
+            const hydrated: any = { ...a };
+            if (nested.include?.experiences) {
+              hydrated.experiences = (store.workExperiences || []).filter(
+                (e: any) => e?.alumniId === a.id || e?.alumni?.id === a.id
+              );
+            }
+            if (nested.include?.employerFeedback) {
+              hydrated.employerFeedback = (store.employerFeedbacks || []).filter(
+                (f: any) => f?.alumniId === a.id || f?.alumni?.id === a.id
+              );
+            }
+            return hydrated;
+          });
+        }
+        return row;
+      });
+    },
+    // Without this the proxy synthesises a `count` backed by a throwaway array,
+    // so every department count silently reported 0.
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const depts: any[] = store.departments || [];
+      if (where && Object.keys(where).length > 0) {
+        return depts.filter((d: any) => matchWhere(d, where)).length;
+      }
+      return depts.length;
     },
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-dept-${Date.now()}` };
-      this.store.departments.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      if (!store.departments) store.departments = [];
+      store.departments.push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
 
   departmentHeadProfile = {
     findUnique: async ({ where }: any) => {
-      if (where.userId) return this.store.departmentHeadProfiles?.find((p: any) => p.userId === where.userId) || null;
-      if (where.id) return this.store.departmentHeadProfiles?.find((p: any) => p.id === where.id) || null;
+      const profiles: any[] = readDevDb().departmentHeadProfiles || [];
+      if (where?.userId) return profiles.find((p: any) => p.userId === where.userId) || null;
+      if (where?.id) return profiles.find((p: any) => p.id === where.id) || null;
+      if (where?.departmentId) return profiles.find((p: any) => p.departmentId === where.departmentId) || null;
       return null;
     },
     findFirst: async ({ where }: any = {}) => {
-      if (where?.userId) return this.store.departmentHeadProfiles?.find((p: any) => p.userId === where.userId) || null;
-      return this.store.departmentHeadProfiles?.[0] || null;
+      const profiles: any[] = readDevDb().departmentHeadProfiles || [];
+      if (where && Object.keys(where).length > 0) {
+        return profiles.find((p: any) => matchWhere(p, where)) || null;
+      }
+      return profiles[0] || null;
+    },
+    findMany: async ({ where }: any = {}) => {
+      const profiles: any[] = readDevDb().departmentHeadProfiles || [];
+      if (where && Object.keys(where).length > 0) {
+        return profiles.filter((p: any) => matchWhere(p, where));
+      }
+      return profiles;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      if (!store.departmentHeadProfiles) store.departmentHeadProfiles = [];
+      const rec = { ...data, id: data?.id || `dev-depthead-${Date.now()}`, createdAt: new Date().toISOString() };
+      store.departmentHeadProfiles.push(rec);
+      writeDevDb(store);
+      return rec;
     },
     upsert: async ({ where, create, update }: any) => {
-      const existing = where?.userId ? this.store.departmentHeadProfiles?.find((p: any) => p.userId === where.userId) : null;
+      const store = readDevDb();
+      if (!store.departmentHeadProfiles) store.departmentHeadProfiles = [];
+      const existing = where?.userId
+        ? store.departmentHeadProfiles.find((p: any) => p.userId === where.userId)
+        : null;
       if (existing) {
         Object.assign(existing, update);
-        writeDevDb(this.store);
+        writeDevDb(store);
         return existing;
       }
-      const rec = { ...create, id: `dev-depthead-${Date.now()}` };
-      if (!this.store.departmentHeadProfiles) this.store.departmentHeadProfiles = [];
-      this.store.departmentHeadProfiles.push(rec);
-      writeDevDb(this.store);
+      const rec = { ...create, id: create?.id || `dev-depthead-${Date.now()}`, createdAt: new Date().toISOString() };
+      store.departmentHeadProfiles.push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
@@ -355,21 +624,23 @@ class FakePrisma {
       return this.store.registrarStudents.length;
     },
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-registrar-${Date.now()}`, importedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      this.store.registrarStudents.push(rec);
-      writeDevDb(this.store);
+      (store.registrarStudents || (store.registrarStudents = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.registrarStudents.findIndex((r: any) => r.studentId === where.studentId || r.id === where.id);
+      const store = this.store;
+      const idx = (store.registrarStudents || []).findIndex((r: any) => r.studentId === where.studentId || r.id === where.id);
       if (idx === -1) throw new Error('Registrar student record not found');
-      this.store.registrarStudents[idx] = {
-        ...this.store.registrarStudents[idx],
+      store.registrarStudents[idx] = {
+        ...store.registrarStudents[idx],
         ...data,
         updatedAt: new Date().toISOString(),
       };
-      writeDevDb(this.store);
-      return this.store.registrarStudents[idx];
+      writeDevDb(store);
+      return store.registrarStudents[idx];
     },
     upsert: async ({ where, create, update }: any) => {
       const existing = await this.registrarStudent.findUnique({ where });
@@ -382,9 +653,10 @@ class FakePrisma {
 
   registrarSyncLog = {
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-sync-${Date.now()}`, syncedAt: new Date().toISOString() };
-      this.store.registrarSyncLogs.push(rec);
-      writeDevDb(this.store);
+      (store.registrarSyncLogs || (store.registrarSyncLogs = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     findFirst: async ({ orderBy }: any = {}) => {
@@ -405,9 +677,10 @@ class FakePrisma {
 
   auditLog = {
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-log-${Date.now()}`, createdAt: new Date().toISOString() };
-      this.store.auditLogs.push(rec);
-      writeDevDb(this.store);
+      (store.auditLogs || (store.auditLogs = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     findMany: async ({ where }: any = {}) => {
@@ -522,10 +795,10 @@ class FakePrisma {
       return docs;
     },
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-doc-${Date.now()}`, createdAt: new Date().toISOString(), status: 'PENDING' };
-      if (!this.store.documentRequests) this.store.documentRequests = [];
-      this.store.documentRequests.push(rec);
-      writeDevDb(this.store);
+      (store.documentRequests || (store.documentRequests = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
@@ -750,6 +1023,8 @@ class FakePrisma {
         scheduledAt: data.scheduledAt ?? null,
         isActive: data.isActive ?? true,
         isArchived: data.isArchived ?? false,
+        departmentId: data.departmentId ?? null,
+        createdByUserId: data.createdByUserId ?? null,
         createdAt: now,
         updatedAt: now,
       };
@@ -1313,8 +1588,10 @@ function matchWhere(record: any, where: any): boolean {
     if (cond && typeof cond === 'object' && !Array.isArray(cond) && !(cond instanceof Date)) {
       for (const [op, opVal] of Object.entries(cond) as any) {
         if (op === 'in') { if (!(opVal || []).includes(val)) return false; }
+        else if (op === 'notIn') { if ((opVal || []).includes(val)) return false; }
         else if (op === 'not') { if (val === opVal) return false; }
         else if (op === 'contains') { if (!String(val ?? '').toLowerCase().includes(String(opVal).toLowerCase())) return false; }
+        else if (op === 'notContains') { if (String(val ?? '').toLowerCase().includes(String(opVal).toLowerCase())) return false; }
         else if (op === 'lte') { if (Number(val) > Number(opVal)) return false; }
         else if (op === 'gte') { if (Number(val) < Number(opVal)) return false; }
         else if (op === 'lt') { if (Number(val) >= Number(opVal)) return false; }
@@ -1322,7 +1599,10 @@ function matchWhere(record: any, where: any): boolean {
         else if (op === 'has') { const arr = val || []; if (!arr.includes(opVal)) return false; }
         else if (op === 'hasSome') { const arr = val || []; if (!(opVal || []).some((o: any) => arr.includes(o))) return false; }
       }
-    } else if (val !== cond) {
+    } else if ((val === undefined ? null : val) !== (cond === undefined ? null : cond)) {
+      // A missing key and an explicit null both mean SQL NULL, so they must compare equal.
+      // Without this, filters like { departmentId: null } silently drop records whose
+      // field was never written.
       return false;
     }
   }
@@ -1653,8 +1933,22 @@ function wrapModel(modelName: string, realModel: any): any {
   });
 }
 
+const isTestRun = (): boolean =>
+  process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+
 export const initPrisma = async () => {
   if (initialized && client) return client;
+
+  // Tests must never reach a real database. The suite creates and deletes
+  // users, alumni and jobs, so a live DATABASE_URL in .env would otherwise let
+  // `npm test` mutate the real dataset. Tests always use the in-memory store.
+  if (isTestRun()) {
+    Logger.warn('\u26a0\ufe0f Test run detected \u2014 using the in-memory store, never a real database.');
+    client = getFallback();
+    usingFallback = true;
+    initialized = true;
+    return client;
+  }
 
   const rawUrl = process.env.DATABASE_URL || '';
   let dbUrl = rawUrl;
@@ -1676,7 +1970,19 @@ export const initPrisma = async () => {
     await real.$connect();
     client = real;
     usingFallback = false;
-    Logger.info('✅ Connected to Neon Postgres database via Prisma.');
+    // Report the database we actually reached. Hardcoding a provider name here
+    // previously logged "Neon" even when pointed at a local database, which
+    // makes it impossible to tell from the logs which data is live.
+    const target = (() => {
+      try {
+        const u = new URL(dbUrl || process.env.DATABASE_URL || '');
+        const db = u.pathname.replace(/^\//, '') || '(default)';
+        return `${u.hostname}/${db}`;
+      } catch {
+        return '(url unavailable)';
+      }
+    })();
+    Logger.info(`✅ Connected to PostgreSQL via Prisma: ${target}`);
   } catch (e: any) {
     if (process.env.NODE_ENV === 'test') {
       Logger.warn('⚠️ Real PostgreSQL connection failed during tests. Falling back to FakePrisma.');

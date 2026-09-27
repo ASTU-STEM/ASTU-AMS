@@ -3,3 +3,7 @@
 .agent/
 .agents/
 
+
+# Local development fallback database (mutable, test-mutated, contains demo data).
+# Never commit: it is a per-developer artifact, not a source of truth.
+backend/data/dev-db.json

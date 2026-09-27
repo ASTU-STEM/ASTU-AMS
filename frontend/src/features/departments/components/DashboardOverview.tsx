@@ -14,9 +14,12 @@ import {
   Banknote,
   BadgeCheck,
   CalendarRange,
+  ClipboardList,
+  Lightbulb,
   UserCheck,
 } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { ActivityTimeline, type ActivityEntry } from '../../../components/ActivityTimeline';
 import { StatusBadge, formatSalary } from './employmentStatus';
 import type { DepartmentDerivedData } from '../hooks/useDepartmentData';
 
@@ -56,7 +59,7 @@ const Card = ({
   children: React.ReactNode;
 }) => (
   <div
-    className={`rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'} ${className}`}
+    className={`rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'} ${className}`}
   >
     {children}
   </div>
@@ -173,6 +176,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     employed: 0,
     unemployed: 0,
     selfEmployed: 0,
+    unspecified: 0,
     employmentRate: 0,
     unemploymentRate: 0,
     selfEmploymentRate: 0,
@@ -201,18 +205,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       icon: Briefcase,
     },
     {
-      label: 'Average Salary',
+      label: 'Average Monthly Salary',
       value: formatSalary(data?.averageSalary ?? null),
       hint:
         data && data.salaryCount > 0
-          ? `${data.salaryCount} salary report${data.salaryCount === 1 ? '' : 's'}`
+          ? `${data.salaryCount} of ${totalAlumni.toLocaleString()} reported (${(data.salaryCoverage ?? 0).toFixed(0)}%)`
           : 'No salary data reported',
       icon: Banknote,
     },
     {
       label: 'Unemployment Rate',
       value: `${(stats.unemploymentRate ?? 0).toFixed(1)}%`,
-      hint: `${(stats.unemployed ?? 0).toLocaleString()} graduates`,
+      hint:
+        (stats.unspecified ?? 0) > 0
+          ? `${(stats.unemployed ?? 0).toLocaleString()} of ${(totalAlumni - (stats.unspecified ?? 0)).toLocaleString()} reporting a status`
+          : `${(stats.unemployed ?? 0).toLocaleString()} graduates`,
       icon: TrendingDown,
     },
   ];
@@ -220,7 +227,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const quickActions = [
     { tab: 'graduates', label: 'Browse graduates', desc: 'Search the alumni directory', icon: Users },
     { tab: 'employment', label: 'Employment analytics', desc: 'Placement trends and employers', icon: Target },
-    { tab: 'surveys', label: 'Tracer surveys', desc: 'Dispatch surveys to alumni', icon: GraduationCap },
+    { tab: 'insights', label: 'Department insights', desc: 'Skills, curriculum & tracer', icon: Lightbulb },
+    { tab: 'surveys', label: 'Tracer surveys', desc: 'Dispatch surveys to alumni', icon: ClipboardList },
   ];
 
   const trendReversed = [...(data?.employmentTrend ?? [])].reverse();
@@ -233,52 +241,125 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     .slice(0, 6);
   const hasDistribution = (data?.employmentStatusDistribution ?? []).length > 0;
 
+  const activities = ((): ActivityEntry[] => {
+    const items: ActivityEntry[] = [];
+    let id = 1;
+    const deptName = data?.department?.name || 'Department';
+
+    if (totalAlumni > 0) {
+      items.push({
+        id: id++,
+        type: 'verification',
+        title: `${totalAlumni.toLocaleString()} alumni in directory`,
+        description: `${deptName} · ${(stats.employmentRate ?? 0).toFixed(1)}% employment rate`,
+        timestamp: lastUpdated ? formatLastUpdated(lastUpdated) : 'Live',
+        unread: false,
+      });
+    }
+
+    if ((data?.unverifiedCount ?? 0) > 0) {
+      items.push({
+        id: id++,
+        type: 'alert',
+        title: `${data!.unverifiedCount} profiles need verification`,
+        description: 'Unverified alumni profiles may affect tracer reporting accuracy.',
+        timestamp: 'Action needed',
+        unread: true,
+      });
+    }
+
+    recentGraduates.slice(0, 3).forEach((record) => {
+      items.push({
+        id: id++,
+        type: record.employmentStatus === 'EMPLOYED' || record.employmentStatus === 'SELF_EMPLOYED' ? 'job' : 'message',
+        title: record.fullName,
+        description: record.company
+          ? `${record.company}${record.jobTitle ? ` · ${record.jobTitle}` : ''}`
+          : `Class of ${record.graduationYear || '—'} · status pending`,
+        timestamp: record.graduationYear ? `Class of ${record.graduationYear}` : 'Recent',
+        unread: !record.isVerified,
+      });
+    });
+
+    (data?.topCompanies ?? []).slice(0, 2).forEach((company) => {
+      items.push({
+        id: id++,
+        type: 'job',
+        title: `Top employer: ${company.name}`,
+        description: `${company.count} graduate${company.count === 1 ? '' : 's'} placed (${company.percentage.toFixed(0)}%)`,
+        timestamp: 'Placement',
+      });
+    });
+
+    if (items.length === 0) {
+      items.push({
+        id: 1,
+        type: 'broadcast',
+        title: 'Department workspace ready',
+        description: 'Alumni outcomes and tracer activity will appear here as data syncs.',
+        timestamp: 'Just now',
+      });
+    }
+
+    return items;
+  })();
+
+  const deptTitle = data?.department
+    ? `${data.department.code} · ${data.department.name}`
+    : 'Department Dashboard';
+
   return (
-    <div className="space-y-6">
-      <section className={`relative overflow-hidden rounded-2xl border p-6 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(0,53,128,0.12),transparent_60%)]" />
-        <div className="relative flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-[10px] bg-gradient-to-br from-[#001F4D] via-[#003580] to-emerald-800 p-6 text-white shadow-lg md:p-8">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-16 -left-8 h-40 w-40 rounded-full bg-emerald-400/10" />
+        <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${darkMode ? 'text-slate-400' : 'text-[#003580]'}`}>
-              Graduate outcomes overview
-            </p>
-            <h2 className={`mt-2 text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-              Department Dashboard
-            </h2>
-            <p className={`mt-2 text-sm leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Live employment outcomes, average salary, cohort trends, and skills from verified alumni records.
-              Your department's data supports accreditation and tracer reporting.
+            <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300">
+              <span className={`h-1.5 w-1.5 rounded-full bg-emerald-400 ${refreshing ? 'animate-pulse' : ''}`} />
+              Department Analytics Hub
+            </div>
+            <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{deptTitle}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">
+              Live employment outcomes, cohort trends, and skills from verified alumni records — ready for accreditation and tracer reporting.
             </p>
             {lastUpdated && (
-              <p className={`mt-3 inline-flex items-center gap-1.5 text-xs font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                <span className={`h-1.5 w-1.5 rounded-full bg-emerald-500 ${refreshing ? 'animate-pulse' : ''}`} />
+              <p className="mt-3 text-xs font-medium text-white/60">
                 Data refreshed {formatLastUpdated(lastUpdated)}
               </p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleRefresh}
               disabled={refreshing}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium ${darkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/15 px-4 py-2 text-xs font-bold backdrop-blur-sm transition-all hover:bg-white/25"
             >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
               type="button"
               onClick={() => onNavigate?.('graduates')}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-4 py-2.5 text-sm font-medium text-white"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#003580] shadow-sm transition-all hover:bg-emerald-50"
             >
-              <GraduationCap className="h-4 w-4" />
+              <GraduationCap className="h-3.5 w-3.5" />
               View graduates
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate?.('surveys')}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/15 px-4 py-2 text-xs font-bold backdrop-blur-sm transition-all hover:bg-white/25"
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
+              Tracer surveys
             </button>
           </div>
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {quickActions.map((action) => {
           const Icon = action.icon;
           return (
@@ -286,13 +367,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               key={action.tab}
               type="button"
               onClick={() => onNavigate?.(action.tab)}
-              className={`group flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition ${
+              className={`group flex w-full items-center gap-3 rounded-[10px] border p-3.5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition ${
                 darkMode
                   ? 'border-slate-800 bg-slate-900 hover:bg-slate-800'
-                  : 'border-slate-200/80 bg-white hover:bg-slate-50'
+                  : 'border-gray-200/60 bg-white hover:bg-slate-50'
               }`}
             >
-              <span className={`shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
+              <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
                 <Icon className="h-4 w-4" />
               </span>
               <span className="min-w-0 flex-1">
@@ -309,7 +390,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className={`card-hover rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+            <div key={kpi.label} className={`card-hover rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
               <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
                 <Icon className="h-5 w-5" />
               </div>
@@ -321,26 +402,36 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <AnalyticsChart
-          type="pie"
-          data={(data?.employmentStatusDistribution ?? []) as any}
-          xKey="status"
-          series={[{ key: 'count', label: 'Graduates' }]}
-          title="Employment Status Distribution"
-          subtitle="Breakdown of graduate outcomes"
-          height={280}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <AnalyticsChart
+              type="pie"
+              data={(data?.employmentStatusDistribution ?? []) as any}
+              xKey="status"
+              series={[{ key: 'count', label: 'Graduates' }]}
+              title="Employment Status Distribution"
+              subtitle="Breakdown of graduate outcomes"
+              height={280}
+              darkMode={darkMode}
+            />
+            <AnalyticsChart
+              type="line"
+              data={(data?.employmentTrend ?? []) as any}
+              xKey="year"
+              series={[{ key: 'employmentRate', label: 'Employment Rate (%)', color: '#003580' }]}
+              title="Employment Trend by Cohort"
+              subtitle="Placement rate per graduation year"
+              height={280}
+              darkMode={darkMode}
+            />
+          </div>
+        </div>
+        <ActivityTimeline
+          activities={activities}
           darkMode={darkMode}
-        />
-        <AnalyticsChart
-          type="line"
-          data={(data?.employmentTrend ?? []) as any}
-          xKey="year"
-          series={[{ key: 'employmentRate', label: 'Employment Rate (%)', color: '#003580' }]}
-          title="Employment Trend by Cohort"
-          subtitle="Placement rate per graduation year"
-          height={280}
-          darkMode={darkMode}
+          onViewAll={() => onNavigate?.('graduates')}
+          maxItems={5}
         />
       </div>
 
@@ -386,7 +477,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 ))}
               </ul>
             )}
-            <p className={`mt-4 text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+            <p className={`mt-4 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               Employed graduates per graduation cohort (incl. self-employment)
             </p>
           </div>
@@ -468,7 +559,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             : 'No employer reported'}
                         </span>
                       </span>
-                      <span className={`hidden shrink-0 text-xs tabular-nums sm:block ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                      <span className={`hidden shrink-0 text-xs tabular-nums sm:block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                         {record.graduationYear || '—'}
                       </span>
                       <StatusBadge status={record.employmentStatus} />
@@ -496,10 +587,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               />
             </div>
             {data && data.unverifiedCount > 0 && (
-              <p className={`mt-4 rounded-xl p-3 text-xs ${darkMode ? 'bg-amber-500/10 text-amber-300' : 'bg-amber-50 text-amber-700'}`}>
-                {(data.unverifiedCount).toLocaleString()} graduate{data.unverifiedCount === 1 ? '' : 's'} still
-                need their alumni profile verified.
-              </p>
+              <div className={`mt-4 rounded-xl p-3 ${darkMode ? 'bg-amber-500/10' : 'bg-amber-50'}`}>
+                <p className={`text-xs ${darkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+                  {(data.unverifiedCount).toLocaleString()} graduate{data.unverifiedCount === 1 ? '' : 's'} still
+                  need their alumni profile verified.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.('graduates')}
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#003580] hover:underline"
+                >
+                  Review in Graduates <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
             )}
           </div>
         </Card>

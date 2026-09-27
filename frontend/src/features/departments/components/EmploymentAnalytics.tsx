@@ -53,9 +53,36 @@ const DetailItem = ({
       <Icon className="h-3.5 w-3.5" />
       {label}
     </div>
-    <div className={`mt-1 text-sm font-medium break-words ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{value}</div>
+    <div className={`mt-1 break-words text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{value}</div>
   </div>
 );
+
+const RankRow = ({
+  name,
+  count,
+  total,
+  darkMode,
+}: {
+  name: string;
+  count: number;
+  total: number;
+  darkMode: boolean;
+}) => {
+  const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <li>
+      <div className="flex items-center justify-between text-sm">
+        <span className={`truncate pr-3 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{name}</span>
+        <span className={`shrink-0 tabular-nums ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+          {count} · {percentage}%
+        </span>
+      </div>
+      <div className={`mt-1.5 h-1.5 w-full overflow-hidden rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+        <div className="h-full rounded-full bg-[#003580]" style={{ width: `${percentage}%` }} />
+      </div>
+    </li>
+  );
+};
 
 export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
   data,
@@ -116,14 +143,21 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
     const employed = filteredAlumni.filter((a) => a.employmentStatus === 'EMPLOYED').length;
     const selfEmployed = filteredAlumni.filter((a) => a.employmentStatus === 'SELF_EMPLOYED').length;
     const unemployed = filteredAlumni.filter((a) => a.employmentStatus === 'UNEMPLOYED').length;
+    const unspecified = filteredAlumni.filter(
+      (a) => normalizeEmploymentStatus(a.employmentStatus) === 'UNKNOWN'
+    ).length;
     const placed = employed + selfEmployed;
+    // Graduates who never reported a status are excluded from the
+    // unemployment denominator, matching the server-side analytics.
+    const reported = total - unspecified;
     return {
       total,
       employed,
       selfEmployed,
       unemployed,
       employmentRate: total > 0 ? (placed / total) * 100 : 0,
-      unemploymentRate: total > 0 ? (unemployed / total) * 100 : 0,
+      unspecified,
+      unemploymentRate: reported > 0 ? (unemployed / reported) * 100 : 0,
       selfEmploymentRate: total > 0 ? (selfEmployed / total) * 100 : 0,
     };
   }, [filteredAlumni]);
@@ -262,11 +296,19 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
 
   const kpis = [
     { label: 'Employment Rate', value: `${filteredStats.employmentRate.toFixed(1)}%`, hint: 'Employed + self-employed', icon: TrendingUp },
-    { label: 'Unemployment Rate', value: `${filteredStats.unemploymentRate.toFixed(1)}%`, hint: `${filteredStats.unemployed} graduates`, icon: TrendingDown },
+    {
+      label: 'Unemployment Rate',
+      value: `${filteredStats.unemploymentRate.toFixed(1)}%`,
+      hint:
+        filteredStats.unspecified > 0
+          ? `${filteredStats.unemployed} of ${filteredStats.total - filteredStats.unspecified} reporting`
+          : `${filteredStats.unemployed} graduates`,
+      icon: TrendingDown,
+    },
     { label: 'Self-Employment', value: `${filteredStats.selfEmploymentRate.toFixed(1)}%`, hint: `${filteredStats.selfEmployed} graduates`, icon: Briefcase },
     { label: 'In View', value: filteredStats.total.toLocaleString(), hint: stats ? `${stats.totalAlumni} total alumni` : 'Filtered alumni', icon: Target },
     {
-      label: 'Average Salary',
+      label: 'Average Monthly Salary',
       value: salarySummary ? formatSalary(salarySummary.avg) : 'N/A',
       hint: salarySummary
         ? `${salarySummary.count} salary reports · ${formatSalary(salarySummary.min)}–${formatSalary(salarySummary.max)}`
@@ -278,12 +320,12 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
   const hasFilters = batch !== 'All' || employmentStatus !== 'All' || searchTerm.trim() !== '';
 
   return (
-    <div className="space-y-6">
-      <div className={`rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+    <div className="space-y-5">
+      <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className={`text-xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>Employment Analytics</h2>
-            <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <h2 className={`text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>Employment Analytics</h2>
+            <p className={`mt-1.5 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               {data?.department
                 ? `${data.department.name} outcomes from live alumni records`
                 : 'Graduate employment performance from verified alumni data'}
@@ -383,7 +425,7 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className={`rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+            <div key={kpi.label} className={`card-hover rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
               <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
                 <Icon className="h-5 w-5" />
               </div>
@@ -419,7 +461,7 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className={`rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+        <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
           <div className="mb-4 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-[#003580]" />
             <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Top Employers</h3>
@@ -427,17 +469,20 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
           {filteredCharts.topCompanies.length === 0 ? (
             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No employer data reported yet.</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-3.5">
               {filteredCharts.topCompanies.map((item) => (
-                <li key={item.name} className="flex items-center justify-between text-sm">
-                  <span className={darkMode ? 'text-slate-200' : 'text-slate-800'}>{item.name}</span>
-                  <span className={darkMode ? 'text-slate-400' : 'text-slate-500'}>{item.count}</span>
-                </li>
+                <RankRow
+                  key={item.name}
+                  name={item.name}
+                  count={item.count}
+                  total={filteredStats.total}
+                  darkMode={darkMode}
+                />
               ))}
             </ul>
           )}
         </div>
-        <div className={`rounded-2xl border p-5 ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+        <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
           <div className="mb-4 flex items-center gap-2">
             <MapPin className="h-4 w-4 text-[#003580]" />
             <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Locations</h3>
@@ -445,21 +490,24 @@ export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
           {filteredCharts.locations.length === 0 ? (
             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No location data reported yet.</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-3.5">
               {filteredCharts.locations.map((item) => (
-                <li key={item.name} className="flex items-center justify-between text-sm">
-                  <span className={darkMode ? 'text-slate-200' : 'text-slate-800'}>{item.name}</span>
-                  <span className={darkMode ? 'text-slate-400' : 'text-slate-500'}>{item.count}</span>
-                </li>
+                <RankRow
+                  key={item.name}
+                  name={item.name}
+                  count={item.count}
+                  total={filteredStats.total}
+                  darkMode={darkMode}
+                />
               ))}
             </ul>
           )}
         </div>
       </div>
 
-      <div className={`rounded-2xl border overflow-hidden ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+      <div className={`overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
         <div className="px-5 py-4">
-          <h3 className={`text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Filtered employment records</h3>
+          <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Filtered employment records</h3>
           <p className={`mt-0.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
             {filteredAlumni.length} graduate(s)
           </p>

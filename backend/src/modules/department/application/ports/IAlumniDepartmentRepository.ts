@@ -8,7 +8,12 @@ export interface AlumniBasicInfo {
   email: string | null;
   phone: string | null;
   graduationYear: number;
-  employmentStatus: string;
+  /**
+   * Null when the graduate has never reported a status. Consumers must treat
+   * that as "unspecified" — defaulting it to UNEMPLOYED would invent graduate
+   * unemployment that the university never recorded.
+   */
+  employmentStatus: string | null;
   salary: number | null;
   skills: string[];
   company: string | null;

@@ -219,12 +219,30 @@ export const contentService = {
     return items[index];
   },
 
+  /**
+   * Upload an image to the backend CMS media store and return its stored URL
+   * (e.g. "/uploads/cms/<file>"). Images are served by the backend and are
+   * never inlined as base64 inside the config payload.
+   */
+  async uploadCmsImage(file: File): Promise<string> {
+    const form = new FormData();
+    form.append('file', file);
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const res = await axios.post(`${API_URL}/content/media/upload`, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    const url = res?.data?.data?.url;
+    if (!url) throw new Error('Upload succeeded but no media URL was returned');
+    return url;
+  },
+
   deleteItem(id: string): boolean {
     const items = this.getItems();
     const filtered = items.filter((i) => i.id !== id);
     if (filtered.length === items.length) return false;
-    
-    // Save updated list immediately to local storage and broadcast event
     this.saveItems(filtered);
 
     const token = localStorage.getItem('token') || localStorage.getItem('accessToken');

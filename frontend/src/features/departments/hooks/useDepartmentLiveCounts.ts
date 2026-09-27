@@ -45,6 +45,8 @@ export function useDepartmentLiveCounts(): DepartmentLiveCounts {
 
   useEffect(() => {
     refresh(true);
+    const interval = window.setInterval(() => refresh(true), 30000);
+    return () => window.clearInterval(interval);
   }, [refresh]);
 
   return { ...counts, refresh };

@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
+  BarChart3,
+  Banknote,
   AlertCircle,
   BookOpen,
   Briefcase,
@@ -15,6 +17,7 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react';
+import { normalizeEmploymentStatus } from './employmentStatus';
 import type { DepartmentDerivedData, NamedCount } from '../hooks/useDepartmentData';
 
 interface DepartmentInsightsProps {
@@ -23,6 +26,7 @@ interface DepartmentInsightsProps {
   error?: string | null;
   darkMode?: boolean;
   onRefresh?: () => Promise<void>;
+  onNavigate?: (tab: string) => void;
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
@@ -41,6 +45,9 @@ function skillEmploymentGaps(data: DepartmentDerivedData): Array<{
   for (const alum of data.alumni) {
     const skills = Array.isArray(alum.skills) ? alum.skills : [];
     const placed = alum.employmentStatus === 'EMPLOYED' || alum.employmentStatus === 'SELF_EMPLOYED';
+    // Only explicit UNEMPLOYED counts against a skill. Graduates who never
+    // reported a status are excluded rather than assumed to be job seekers.
+    if (!placed && normalizeEmploymentStatus(alum.employmentStatus) !== 'UNEMPLOYED') continue;
     const bucket = placed ? employedSkills : unemployedSkills;
     for (const raw of skills) {
       const skill = (raw || '').trim();
@@ -77,7 +84,10 @@ function downloadInsightsCsv(data: DepartmentDerivedData, gaps: ReturnType<typeo
     ['Overview', 'Total Alumni', String(data.stats.totalAlumni)],
     ['Overview', 'Employment Rate %', data.stats.employmentRate.toFixed(1)],
     ['Overview', 'Unemployed', String(data.stats.unemployed)],
-    ['Overview', 'Average Salary', data.averageSalary != null ? String(data.averageSalary) : ''],
+    ['Overview', 'Status Unspecified', String(data.stats.unspecified ?? 0)],
+    ['Overview', 'Avg Monthly Salary (ETB)', data.averageSalary != null ? String(data.averageSalary) : ''],
+    ['Overview', 'Median Monthly Salary (ETB)', data.medianSalary != null ? String(data.medianSalary) : ''],
+    ['Overview', 'Salary Reporting Coverage %', (data.salaryCoverage ?? 0).toFixed(1)],
     ...gaps.map((g) => [
       'Skill Gap',
       g.skill,
@@ -107,6 +117,7 @@ export function DepartmentInsights({
   error = null,
   darkMode = false,
   onRefresh,
+  onNavigate,
 }: DepartmentInsightsProps) {
   const [refreshing, setRefreshing] = useState(false);
   const safe = data;
@@ -116,7 +127,9 @@ export function DepartmentInsights({
     [safe, gaps]
   );
 
-  const card = darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80';
+  const card = darkMode
+    ? 'bg-slate-900 border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+    : 'bg-white border-gray-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.06)]';
   const muted = darkMode ? 'text-slate-400' : 'text-slate-500';
   const titleCls = darkMode ? 'text-white' : 'text-slate-900';
 
@@ -196,18 +209,40 @@ export function DepartmentInsights({
     {
       label: 'Unemployed alumni',
       value: String(safe.stats.unemployed),
-      hint: changeHint,
+      hint:
+        (safe.stats.unspecified ?? 0) > 0
+          ? `${changeHint} \u00b7 ${safe.stats.unspecified} status unreported`
+          : changeHint,
       icon: Target,
-      iconCls: darkMode ? 'text-slate-300' : 'text-[#7c3aed]',
-      chip: 'bg-violet-500/15',
+      iconCls: darkMode ? 'text-amber-300' : 'text-amber-700',
+      chip: 'bg-amber-500/15',
+    },
+    {
+      label: 'Median monthly salary',
+      value: safe.medianSalary != null ? `ETB ${safe.medianSalary.toLocaleString('en-US')}` : '\u2014',
+      hint:
+        safe.averageSalary != null
+          ? `mean ETB ${safe.averageSalary.toLocaleString('en-US')}`
+          : 'no salary reported',
+      icon: Banknote,
+      iconCls: darkMode ? 'text-emerald-400' : 'text-emerald-700',
+      chip: 'bg-emerald-500/15',
+    },
+    {
+      label: 'Salary coverage',
+      value: `${(safe.salaryCoverage ?? 0).toFixed(0)}%`,
+      hint: `${safe.salaryCount} of ${safe.stats.totalAlumni} reported salary`,
+      icon: BarChart3,
+      iconCls: darkMode ? 'text-sky-300' : 'text-sky-700',
+      chip: 'bg-sky-500/15',
     },
     {
       label: 'Tracked skills',
       value: String(safe.topSkills.length),
       hint: `from ${safe.stats.totalAlumni} alumni profiles`,
       icon: BookOpen,
-      iconCls: darkMode ? 'text-sky-400' : 'text-[#0369a1]',
-      chip: 'bg-sky-500/15',
+      iconCls: darkMode ? 'text-sky-300' : 'text-[#003580]',
+      chip: 'bg-[#003580]/10',
     },
     {
       label: 'Hiring employers',
@@ -220,22 +255,22 @@ export function DepartmentInsights({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className={`relative overflow-hidden rounded-2xl border p-6 ${card}`}>
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_right,rgba(0,53,128,0.12),transparent_60%)]" />
+      <section className={`relative overflow-hidden rounded-[10px] border p-5 md:p-6 ${card}`}>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,53,128,0.12),transparent_60%)]" />
         <div className="relative flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="max-w-2xl">
             <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${darkMode ? 'text-slate-400' : 'text-[#003580]'}`}>
               Intelligence & curriculum
             </p>
-            <h2 className={`mt-2 text-2xl font-bold tracking-tight ${titleCls}`}>Department Insights</h2>
-            <p className={`mt-2 text-sm leading-relaxed ${muted}`}>
+            <h2 className={`mt-1.5 text-2xl font-bold tracking-tight ${titleCls}`}>Department Insights</h2>
+            <p className={`mt-1.5 text-sm leading-relaxed ${muted}`}>
               Skill gaps, curriculum signals, tracer cohorts, and hiring employers for{' '}
               {safe.department?.name || 'your department'}.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleRefresh}
@@ -247,6 +282,17 @@ export function DepartmentInsights({
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
+            {onNavigate && (
+              <button
+                type="button"
+                onClick={() => onNavigate('surveys')}
+                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold ${
+                  darkMode ? 'border-slate-700 text-slate-200 hover:bg-slate-800' : 'border-slate-200 text-[#003580] hover:bg-slate-50'
+                }`}
+              >
+                <ClipboardList className="h-4 w-4" /> Dispatch tracer
+              </button>
+            )}
             <button
               type="button"
               onClick={() => downloadInsightsCsv(safe, gaps)}
@@ -263,7 +309,7 @@ export function DepartmentInsights({
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className={`card-hover rounded-2xl border p-5 ${card}`}>
+            <div key={kpi.label} className={`card-hover rounded-[10px] border p-5 ${card}`}>
               <div className="flex items-center justify-between">
                 <p className={`text-xs font-semibold uppercase tracking-wider ${muted}`}>{kpi.label}</p>
                 <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${kpi.chip}`}>
@@ -279,7 +325,7 @@ export function DepartmentInsights({
 
       {/* ── Skill gap report + curriculum ────────────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-5">
-        <section className={`rounded-2xl border p-5 lg:col-span-3 ${card}`}>
+        <section className={`rounded-[10px] border p-5 lg:col-span-3 ${card}`}>
           <div className="mb-4 flex items-center gap-2">
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${darkMode ? 'bg-slate-800 text-amber-400' : 'bg-amber-50 text-amber-600'}`}>
               <Target className="h-4 w-4" />
@@ -336,7 +382,7 @@ export function DepartmentInsights({
           )}
         </section>
 
-        <section className={`rounded-2xl border p-5 lg:col-span-2 ${card}`}>
+        <section className={`rounded-[10px] border p-5 lg:col-span-2 ${card}`}>
           <div className="mb-4 flex items-center gap-2">
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${darkMode ? 'bg-slate-800 text-violet-400' : 'bg-violet-50 text-violet-600'}`}>
               <GraduationCap className="h-4 w-4" />
@@ -404,7 +450,7 @@ export function DepartmentInsights({
 
       {/* ── Tracer cohort + hiring signals ─────────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-5">
-        <section className={`rounded-2xl border p-5 lg:col-span-3 ${card}`}>
+        <section className={`rounded-[10px] border p-5 lg:col-span-3 ${card}`}>
           <div className="mb-4 flex items-center gap-2">
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${darkMode ? 'bg-slate-800 text-sky-400' : 'bg-sky-50 text-sky-600'}`}>
               <ClipboardList className="h-4 w-4" />
@@ -458,7 +504,7 @@ export function DepartmentInsights({
           )}
         </section>
 
-        <section className={`rounded-2xl border p-5 lg:col-span-2 ${card}`}>
+        <section className={`rounded-[10px] border p-5 lg:col-span-2 ${card}`}>
           <div className="mb-4 flex items-center gap-2">
             <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${darkMode ? 'bg-slate-800 text-amber-400' : 'bg-amber-50 text-amber-600'}`}>
               <Briefcase className="h-4 w-4" />

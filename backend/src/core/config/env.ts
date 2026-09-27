@@ -21,6 +21,13 @@ const envSchema = z.object({
   SMTP_FROM: z.string().email().default('no-reply@astu.edu.et'),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   MAX_FILE_SIZE: z.coerce.number().default(5242880), // 5MB
+  NODE_ENV: z.string().default('development'),
+  // Security control: when the denylist cannot be consulted, a token must be
+  // rejected. Opting out is only ever acceptable on a developer machine.
+  REVOCATION_FAIL_OPEN: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 const parsed = envSchema.safeParse(process.env);

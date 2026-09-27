@@ -14,8 +14,65 @@ import {
 } from '../application/use-cases/ManageContent';
 import { createContentSchema, updateContentSchema } from './content.validation';
 import { sendSuccess } from '../../../core/utils/response.utils';
+import prisma from '../../../core/config/db';
 
 const repo = new PrismaContentRepository();
+
+/**
+ * Counts rows in a way that works on both the real Prisma client and the
+ * local JSON fallback used in development. The fallback does not implement
+ * `count` on every delegate, so fall back to findMany + length.
+ */
+const safeCount = async (delegate: any, where?: Record<string, unknown>): Promise<number> => {
+  if (!delegate) return 0;
+  try {
+    if (typeof delegate.count === 'function') {
+      return await delegate.count(where ? { where } : {});
+    }
+    if (typeof delegate.findMany === 'function') {
+      const rows = await delegate.findMany(where ? { where } : {});
+      return Array.isArray(rows) ? rows.length : 0;
+    }
+  } catch (error) {
+    console.warn('[public-stats] count failed:', (error as Error)?.message);
+  }
+  return 0;
+};
+
+/**
+ * Impact numbers for the public landing page.
+ *
+ * Every figure is computed from real rows — nothing here is typed by an admin
+ * or seeded as a claim. Only models implemented by both the Prisma client and
+ * the dev JSON fallback are counted, so local and production agree.
+ */
+export const getPublicStatsController = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const db = prisma as any;
+    const [alumni, employers, jobs, departments] = await Promise.all([
+      safeCount(db.alumniProfile, { status: 'ACTIVE' }),
+      safeCount(db.employerProfile, { isVerified: true }),
+      safeCount(db.job, { isActive: true, status: 'PUBLISHED' }),
+      safeCount(db.department),
+    ]);
+
+    const data = [
+      { key: 'alumni', value: alumni },
+      { key: 'employers', value: employers },
+      { key: 'jobs', value: jobs },
+      { key: 'departments', value: departments },
+    ].filter((s) => s.value > 0);
+
+    res.set('Cache-Control', 'public, max-age=300');
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getContentController = async (req: Request, res: Response, next: NextFunction) => {
   try {

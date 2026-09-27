@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { env } from './core/config/env';
 import path from 'path';
 import { globalErrorHandler } from './core/middleware/error.middleware';
 import { sendSuccess } from './core/utils/response.utils';
@@ -24,19 +25,48 @@ app.use(cors({
 }));
 
 // 3. API Rate Limiting
+// A general ceiling for the whole API surface...
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10000,
+  max: 1000,
   message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: () => true, // Always skip rate limiting during development
+  // Never disabled outright: `skip: () => true` left production with no
+  // throttling at all. Only relaxed outside production.
+  skip: () => env.NODE_ENV !== 'production',
 });
 app.use('/api', limiter);
 
-// 4. Request Body Parsers (Support large file attachments up to 50mb)
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Credential endpoints get a much tighter budget so passwords and OTPs cannot
+// be brute-forced even though the general limit is generous.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  skip: () => env.NODE_ENV !== 'production',
+});
+for (const p of [
+  '/api/auth/login',
+  '/api/auth/employer/login',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/send-2fa-otp',
+  '/api/auth/verify-2fa-code',
+  '/api/auth/verify-alumni-email',
+  '/api/auth/verify-alumni-national-id',
+]) {
+  app.use(p, authLimiter);
+}
+
+// 4. Request Body Parsers
+// JSON/urlencoded stay small; only the file-upload routes need a large ceiling,
+// and those enforce their own tighter limit (multer `limits.fileSize`).
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // 5. Static Files Route for Uploads (CVs, profile images)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {

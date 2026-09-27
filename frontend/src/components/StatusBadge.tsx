@@ -33,6 +33,9 @@ const STATUS_META: Record<string, StatusMeta> = {
   EMPLOYED: { label: 'Employed', tone: 'success', Icon: Briefcase },
   SELF_EMPLOYED: { label: 'Self-Employed', tone: 'info', Icon: Store },
   UNEMPLOYED: { label: 'Unemployed', tone: 'warning', Icon: Hourglass },
+  // No status reported. Never render this as "unemployed": a graduate who has
+  // not answered is not a job seeker, and the two must stay distinguishable.
+  UNSPECIFIED: { label: 'Status not reported', tone: 'neutral', Icon: UserX },
   UNKNOWN: { label: 'Unknown', tone: 'neutral', Icon: UserX },
 
   ACTIVE: { label: 'Active', tone: 'success', Icon: CheckCircle2 },
@@ -86,8 +89,12 @@ export interface ResolvedStatus {
   Icon: LucideIcon;
 }
 
-export function statusMeta(status: string): ResolvedStatus {
-  const raw = status.trim();
+export function statusMeta(status: string | null | undefined): ResolvedStatus {
+  const raw = (status ?? '').trim();
+  if (!raw) {
+    const tone = TONES.neutral;
+    return { label: 'Status not reported', badge: tone.badge, dot: tone.dot, Icon: UserX };
+  }
   const meta = META_LOOKUP[normalize(raw)] ?? { tone: 'neutral' as StatusTone };
   const tone = TONES[meta.tone];
   return {
@@ -103,7 +110,7 @@ export const StatusBadge = ({
   className = '',
   showIcon = true,
 }: {
-  status: string;
+  status: string | null | undefined;
   className?: string;
   showIcon?: boolean;
 }) => {

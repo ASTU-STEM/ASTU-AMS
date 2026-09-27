@@ -230,7 +230,10 @@ export const authService = {
   // ==================== LOGOUT ====================
   async logout(): Promise<void> {
     try {
-      await apiClient.post('/auth/logout');
+      // Send the refresh token so the server can revoke it too; clearing it
+      // client-side alone would still let it mint a fresh access token.
+      const refreshToken = localStorage.getItem('refreshToken');
+      await apiClient.post('/auth/logout', refreshToken ? { refreshToken } : {});
     } catch (error) {
       console.warn('Logout API call failed, proceeding with local cleanup:', error);
     } finally {

@@ -27,11 +27,23 @@ export interface ApiEvent {
   description?: string;
   date: string;
   location: string;
+  /** Delivery mode only: "ONLINE" | "IN_PERSON". Not an event category. */
   type: string;
   createdBy?: string;
   rsvps?: any[];
   createdAt?: string;
   updatedAt?: string;
+  /**
+   * Presentation-only fields. The Event model does not persist these, so the
+   * API omits them and callers must supply their own fallback.
+   */
+  slug?: string;
+  image?: string;
+  coverImage?: string;
+  bannerUrl?: string;
+  capacity?: number;
+  category?: string;
+  tags?: string[];
 }
 
 export const eventsService = {

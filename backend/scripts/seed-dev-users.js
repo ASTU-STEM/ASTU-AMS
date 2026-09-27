@@ -84,5 +84,33 @@ if (!db.departments || db.departments.length === 0) {
   ];
 }
 
+// The department head user is useless without a head profile: every /departments/my-*
+// and /surveys/templates call resolves the head's department through this record and
+// 403s without it. Resolve SWE by code so we never point at a department id that is
+// absent from the data file.
+const sweDepartment =
+  (db.departments || []).find((d) => d.code === 'SWE') ||
+  (db.departments || []).find((d) => /software/i.test(d.name || '')) ||
+  null;
+
+if (!sweDepartment) {
+  console.warn('No SWE department found; skipping departmentHeadProfile for user-dept-1.');
+} else {
+  if (!Array.isArray(db.departmentHeadProfiles)) db.departmentHeadProfiles = [];
+  const existing = db.departmentHeadProfiles.find((p) => p && p.userId === 'user-dept-1');
+  if (existing) {
+    existing.departmentId = sweDepartment.id;
+  } else {
+    db.departmentHeadProfiles.push({
+      id: 'dev-depthead-user-dept-1',
+      userId: 'user-dept-1',
+      departmentId: sweDepartment.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+  console.log('Assigned user-dept-1 as department head of', sweDepartment.code, '(' + sweDepartment.id + ')');
+}
+
 fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
 console.log('Successfully seeded users with bcrypt password astu_ams_pass123. Total users:', db.users.length);

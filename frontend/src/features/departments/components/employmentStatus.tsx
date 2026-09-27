@@ -27,6 +27,12 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
     dot: 'bg-amber-500',
     Icon: Hourglass,
   },
+  UNSPECIFIED: {
+    label: 'Status not reported',
+    badge: 'bg-slate-100 text-slate-700 ring-1 ring-slate-300',
+    dot: 'bg-slate-500',
+    Icon: UserX,
+  },
   UNKNOWN: {
     label: 'Unknown',
     badge: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
@@ -35,14 +41,14 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
   },
 };
 
-export const STATUS_ORDER: string[] = ['EMPLOYED', 'SELF_EMPLOYED', 'UNEMPLOYED'];
+export const STATUS_ORDER: string[] = ['EMPLOYED', 'SELF_EMPLOYED', 'UNEMPLOYED', 'UNSPECIFIED'];
 
 export const statusConfig = (status: string): StatusConfig =>
   STATUS_CONFIG[status] ?? STATUS_CONFIG.UNKNOWN;
 
 /** Map any employment status string to a known filter key. */
 export const normalizeEmploymentStatus = (status: string | null | undefined): string =>
-  status && STATUS_CONFIG[status] ? status : 'UNKNOWN';
+  status && STATUS_CONFIG[status] ? status : 'UNSPECIFIED';
 
 export const formatSalary = (salary: number | null | undefined): string =>
   salary == null ? '—' : `ETB ${salary.toLocaleString('en-US')}`;
