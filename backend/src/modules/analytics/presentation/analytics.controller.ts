@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../../../core/utils/response.utils';
+import { ApiError } from '../../../core/errors/ApiError';
+import prisma from '../../../core/config/db';
 import { PrismaAnalyticsRepository } from '../infrastructure/repositories/PrismaAnalyticsRepository';
 import { GetAnalyticsReport } from '../application/use-cases/GetAnalyticsReport';
 import { GetAlumniAnalytics } from '../application/use-cases/GetAlumniAnalytics';
@@ -15,7 +17,21 @@ const repo = new PrismaAnalyticsRepository();
 export class AnalyticsController {
   static async getDashboard(req: Request, res: Response, next: NextFunction) {
     try {
-      const { academicYear, department } = req.query;
+      const user = (req as any).user;
+      let { academicYear, department } = req.query;
+
+      // Department heads only see their own department analytics
+      if (user?.role === 'DEPARTMENT_HEAD') {
+        const head = await prisma.departmentHeadProfile.findUnique({
+          where: { userId: user.userId },
+          include: { department: true },
+        });
+        if (!head?.department) {
+          throw new ApiError('Department head profile not found.', 403);
+        }
+        department = head.department.name;
+      }
+
       const useCase = new GetAnalyticsReport(repo);
       const result = await useCase.execute({
         academicYear: academicYear as string,

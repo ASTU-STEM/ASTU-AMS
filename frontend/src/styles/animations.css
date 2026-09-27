@@ -101,3 +101,16 @@
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555b72;
 }
+
+/* Notification bell shake when there are unread items */
+@keyframes bell_shake {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-13deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(6deg); }
+  60% { transform: rotate(-4deg); }
+  70% { transform: rotate(2deg); }
+  80% { transform: rotate(0); }
+}

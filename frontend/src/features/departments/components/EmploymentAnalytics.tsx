@@ -1,456 +1,592 @@
-import React, { useState, useMemo } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import {
-  TrendingUp, TrendingDown, Briefcase, Clock, DollarSign, Globe, MapPin, Target,
-  RefreshCw, Download, ArrowUp, ArrowDown, Minus, Search, Filter, ChevronDown,
-  CheckCircle2, AlertTriangle, Info, XCircle
+  TrendingUp,
+  TrendingDown,
+  Briefcase,
+  Target,
+  RefreshCw,
+  Download,
+  Search,
+  X,
+  AlertCircle,
+  Building2,
+  MapPin,
+  Loader2,
+  ChevronDown,
+  Mail,
+  Phone,
+  IdCard,
+  GraduationCap,
+  Banknote,
+  CheckCircle2,
+  type LucideIcon,
 } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
-import {
-  EmploymentAnalyticsFilters,
-  EmploymentKPIMetric,
-  EmploymentTrendData,
-  EmploymentStatusData,
-  ProgramEmploymentData,
-  HiringIndustry,
-  HiringCompany,
-  GeographicDistribution,
-  GraduateEmploymentRecord,
-  TopEmployer,
-  EmploymentInsight
-} from '../types/employmentAnalytics.types';
-import {
-  mockEmploymentKPIMetrics,
-  mockEmploymentTrendData,
-  mockEmploymentStatusData,
-  mockProgramEmploymentData,
-  mockHiringIndustries,
-  mockHiringCompanies,
-  mockGeographicDistribution,
-  mockGraduateEmploymentRecords,
-  mockTopEmployers,
-  mockEmploymentInsights
-} from '../services/mockEmploymentAnalyticsData';
+import { StatusBadge, formatSalary, statusConfig, STATUS_ORDER, normalizeEmploymentStatus } from './employmentStatus';
+import type { DepartmentDerivedData } from '../hooks/useDepartmentData';
 
 interface EmploymentAnalyticsProps {
-  data?: any;
+  data?: DepartmentDerivedData;
+  isLoading?: boolean;
+  error?: string | null;
   darkMode?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
-export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({ data, darkMode = false }) => {
-  const [filters, setFilters] = useState<EmploymentAnalyticsFilters>({
-    department: 'Computer Science',
-    batch: '2024',
-    academicYear: '2024',
-    employmentStatus: 'All'
-  });
+const Skeleton = ({ className = '' }: { className?: string }) => (
+  <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
+);
 
+const DetailItem = ({
+  icon: Icon,
+  label,
+  value,
+  darkMode,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  darkMode: boolean;
+}) => (
+  <div>
+    <div className={`flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </div>
+    <div className={`mt-1 break-words text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{value}</div>
+  </div>
+);
+
+const RankRow = ({
+  name,
+  count,
+  total,
+  darkMode,
+}: {
+  name: string;
+  count: number;
+  total: number;
+  darkMode: boolean;
+}) => {
+  const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <li>
+      <div className="flex items-center justify-between text-sm">
+        <span className={`truncate pr-3 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{name}</span>
+        <span className={`shrink-0 tabular-nums ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+          {count} · {percentage}%
+        </span>
+      </div>
+      <div className={`mt-1.5 h-1.5 w-full overflow-hidden rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+        <div className="h-full rounded-full bg-[#003580]" style={{ width: `${percentage}%` }} />
+      </div>
+    </li>
+  );
+};
+
+export const EmploymentAnalytics: React.FC<EmploymentAnalyticsProps> = ({
+  data,
+  isLoading = false,
+  error = null,
+  darkMode = false,
+  onRefresh,
+}) => {
+  const stats = data?.stats;
+  const [batch, setBatch] = useState('All');
+  const [employmentStatus, setEmploymentStatus] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState('graduateName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [refreshing, setRefreshing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const handleRefresh = () => {
-    console.log('Refreshing employment analytics data...');
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    (data?.alumni ?? []).forEach((record) => {
+      if (record.graduationYear) years.add(String(record.graduationYear));
+    });
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [data?.alumni]);
+
+  const statusCounts = useMemo(() => {
+    const alumni = data?.alumni ?? [];
+    const counts: Record<string, number> = { All: alumni.length };
+    alumni.forEach((a) => {
+      const key = normalizeEmploymentStatus(a.employmentStatus);
+      counts[key] = (counts[key] ?? 0) + 1;
+    });
+    return counts;
+  }, [data?.alumni]);
+
+  const statusTabs: Array<[string, string]> = [
+    ['All', 'All'],
+    ...STATUS_ORDER.map((s) => [s, statusConfig(s).label] as [string, string]),
+    ...(statusCounts.UNKNOWN ? [['UNKNOWN', 'Unknown'] as [string, string]] : []),
+  ];
+
+  const filteredAlumni = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return (data?.alumni ?? []).filter((record) => {
+      const matchesSearch =
+        !q ||
+        record.fullName.toLowerCase().includes(q) ||
+        (record.company || '').toLowerCase().includes(q) ||
+        (record.jobTitle || '').toLowerCase().includes(q);
+      const matchesBatch = batch === 'All' || String(record.graduationYear) === batch;
+      const matchesStatus =
+        employmentStatus === 'All' || normalizeEmploymentStatus(record.employmentStatus) === employmentStatus;
+      return matchesSearch && matchesBatch && matchesStatus;
+    });
+  }, [data?.alumni, searchTerm, batch, employmentStatus]);
+
+  const filteredStats = useMemo(() => {
+    const total = filteredAlumni.length;
+    const employed = filteredAlumni.filter((a) => a.employmentStatus === 'EMPLOYED').length;
+    const selfEmployed = filteredAlumni.filter((a) => a.employmentStatus === 'SELF_EMPLOYED').length;
+    const unemployed = filteredAlumni.filter((a) => a.employmentStatus === 'UNEMPLOYED').length;
+    const unspecified = filteredAlumni.filter(
+      (a) => normalizeEmploymentStatus(a.employmentStatus) === 'UNKNOWN'
+    ).length;
+    const placed = employed + selfEmployed;
+    // Graduates who never reported a status are excluded from the
+    // unemployment denominator, matching the server-side analytics.
+    const reported = total - unspecified;
+    return {
+      total,
+      employed,
+      selfEmployed,
+      unemployed,
+      employmentRate: total > 0 ? (placed / total) * 100 : 0,
+      unspecified,
+      unemploymentRate: reported > 0 ? (unemployed / reported) * 100 : 0,
+      selfEmploymentRate: total > 0 ? (selfEmployed / total) * 100 : 0,
+    };
+  }, [filteredAlumni]);
+
+  const filteredCharts = useMemo(() => {
+    const yearMap: Record<number, { employed: number; total: number }> = {};
+    const statusMap: Record<string, number> = {};
+    const companyMap: Record<string, number> = {};
+    const locationMap: Record<string, number> = {};
+
+    for (const a of filteredAlumni) {
+      const year = a.graduationYear;
+      if (year) {
+        if (!yearMap[year]) yearMap[year] = { employed: 0, total: 0 };
+        yearMap[year].total += 1;
+        if (a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED') {
+          yearMap[year].employed += 1;
+        }
+      }
+      const statusKey = statusConfig(normalizeEmploymentStatus(a.employmentStatus)).label;
+      statusMap[statusKey] = (statusMap[statusKey] || 0) + 1;
+      const company = (a.company || '').trim();
+      if (company) companyMap[company] = (companyMap[company] || 0) + 1;
+      const location = (a.location || '').trim();
+      if (location) locationMap[location] = (locationMap[location] || 0) + 1;
+    }
+
+    const total = filteredAlumni.length || 1;
+    const toNamed = (map: Record<string, number>, limit = 8) =>
+      Object.entries(map)
+        .map(([name, count]) => ({ name, count, percentage: (count / total) * 100 }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
+
+    return {
+      employmentTrend: Object.keys(yearMap)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((yearStr) => {
+          const year = Number(yearStr);
+          const { employed, total: grads } = yearMap[year];
+          return {
+            year: String(year),
+            graduates: grads,
+            employed,
+            employmentRate: grads > 0 ? (employed / grads) * 100 : 0,
+          };
+        }),
+      statusDistribution: Object.entries(statusMap).map(([status, count]) => ({
+        status,
+        count,
+        percentage: total > 0 ? (count / total) * 100 : 0,
+      })),
+      topCompanies: toNamed(companyMap),
+      locations: toNamed(locationMap),
+    };
+  }, [filteredAlumni]);
+
+  const salarySummary = useMemo(() => {
+    const salaries = filteredAlumni
+      .map((a) => a.salary)
+      .filter((s): s is number => typeof s === 'number' && s > 0);
+    if (salaries.length === 0) return null;
+    const total = salaries.reduce((acc, s) => acc + s, 0);
+    return {
+      count: salaries.length,
+      avg: Math.round(total / salaries.length),
+      min: Math.min(...salaries),
+      max: Math.max(...salaries),
+    };
+  }, [filteredAlumni]);
+
+  const handleRefresh = async () => {
+    if (!onRefresh || refreshing) return;
+    setRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleExport = () => {
-    console.log('Exporting employment analytics...');
-  };
-
-  const getIcon = (iconName: string) => {
-    const iconMap: Record<string, React.ElementType> = {
-      'TrendingUp': TrendingUp,
-      'TrendingDown': TrendingDown,
-      'Briefcase': Briefcase,
-      'Clock': Clock,
-      'DollarSign': DollarSign,
-      'Globe': Globe,
-      'MapPin': MapPin,
-      'Target': Target
-    };
-    const Icon = iconMap[iconName] || TrendingUp;
-    return <Icon className="h-5 w-5" />;
-  };
-
-  const getTrendIcon = (direction: 'up' | 'down' | 'neutral') => {
-    switch (direction) {
-      case 'up':
-        return <ArrowUp className="h-4 w-4 text-astu-green" />;
-      case 'down':
-        return <ArrowDown className="h-4 w-4 text-astu-red" />;
-      default:
-        return <Minus className="h-4 w-4 text-gray-400" />;
+    if (filteredAlumni.length === 0 || exporting) return;
+    setExporting(true);
+    try {
+      const header = ['fullName', 'graduationYear', 'employmentStatus', 'company', 'jobTitle', 'industry', 'location', 'salary'];
+      const escape = (value: string | number | null | undefined) => {
+        const s = String(value ?? '');
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const csv = [
+        header.join(','),
+        ...filteredAlumni.map((r) =>
+          [r.fullName, r.graduationYear, r.employmentStatus, r.company, r.jobTitle, r.industry, r.location, r.salary]
+            .map(escape)
+            .join(',')
+        ),
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${(data?.department?.code || 'department').toLowerCase()}-employment.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } finally {
+      setExporting(false);
     }
   };
 
-  const getInsightIcon = (type: 'success' | 'warning' | 'info' | 'concern') => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle2 className="h-5 w-5 text-astu-green" />;
-      case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
-      case 'concern':
-        return <XCircle className="h-5 w-5 text-astu-red" />;
-      default:
-        return <Info className="h-5 w-5 text-blue-600" />;
-    }
-  };
-
-  const renderKPICard = (kpi: EmploymentKPIMetric) => (
-    <div className={`p-5 border rounded-xl hover:shadow-lg transition-all duration-300 group ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className={`p-2 rounded-lg group-hover:bg-gray-200 transition-colors ${darkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
-          <div className={kpi.color === 'astu-green' ? 'text-astu-green' : kpi.color === 'astu-navy' ? 'text-astu-navy' : kpi.color === 'astu-red' ? 'text-astu-red' : 'text-gray-600'}>
-            {getIcon(kpi.icon)}
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          {getTrendIcon(kpi.trendDirection)}
-          <span className={`text-xs font-semibold ${kpi.trendDirection === 'up' ? 'text-astu-green' : kpi.trendDirection === 'down' ? 'text-astu-red' : 'text-gray-400'}`}>
-            {Math.abs(kpi.trend)}%
-          </span>
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-36 w-full rounded-2xl" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
+          ))}
         </div>
       </div>
-      <p className={`text-xs uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{kpi.label}</p>
-      <p className={`text-2xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{kpi.value}</p>
-      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{kpi.comparison}</p>
-    </div>
-  );
+    );
+  }
 
-  const filteredRecords = useMemo(() => {
-    return mockGraduateEmploymentRecords.filter(record => {
-      const matchesSearch = searchTerm === '' || 
-        record.graduateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.company.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesSearch;
-    });
-  }, [searchTerm]);
+  if (error) {
+    return (
+      <div className={`flex flex-col items-center justify-center rounded-2xl border p-10 text-center ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+        <AlertCircle className={`h-8 w-8 ${darkMode ? 'text-red-400' : 'text-red-600'}`} />
+        <h3 className={`mt-4 text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Unable to load employment analytics</h3>
+        <p className={`mt-2 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{error}</p>
+        <button type="button" onClick={handleRefresh} disabled={refreshing} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#003580] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Try again
+        </button>
+      </div>
+    );
+  }
 
-  const sortedRecords = useMemo(() => {
-    return [...filteredRecords].sort((a, b) => {
-      const aValue = a[sortField as keyof GraduateEmploymentRecord];
-      const bValue = b[sortField as keyof GraduateEmploymentRecord];
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-      return 0;
-    });
-  }, [filteredRecords, sortField, sortDirection]);
+  const kpis = [
+    { label: 'Employment Rate', value: `${filteredStats.employmentRate.toFixed(1)}%`, hint: 'Employed + self-employed', icon: TrendingUp },
+    {
+      label: 'Unemployment Rate',
+      value: `${filteredStats.unemploymentRate.toFixed(1)}%`,
+      hint:
+        filteredStats.unspecified > 0
+          ? `${filteredStats.unemployed} of ${filteredStats.total - filteredStats.unspecified} reporting`
+          : `${filteredStats.unemployed} graduates`,
+      icon: TrendingDown,
+    },
+    { label: 'Self-Employment', value: `${filteredStats.selfEmploymentRate.toFixed(1)}%`, hint: `${filteredStats.selfEmployed} graduates`, icon: Briefcase },
+    { label: 'In View', value: filteredStats.total.toLocaleString(), hint: stats ? `${stats.totalAlumni} total alumni` : 'Filtered alumni', icon: Target },
+    {
+      label: 'Average Monthly Salary',
+      value: salarySummary ? formatSalary(salarySummary.avg) : 'N/A',
+      hint: salarySummary
+        ? `${salarySummary.count} salary reports · ${formatSalary(salarySummary.min)}–${formatSalary(salarySummary.max)}`
+        : 'No salary data reported',
+      icon: Banknote,
+    },
+  ];
 
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
+  const hasFilters = batch !== 'All' || employmentStatus !== 'All' || searchTerm.trim() !== '';
 
   return (
-    <div className="space-y-6">
-      {/* Header Area */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+    <div className="space-y-5">
+      <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Employment Analytics</h2>
-            <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Comprehensive graduate employment performance metrics</p>
+            <h2 className={`text-2xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>Employment Analytics</h2>
+            <p className={`mt-1.5 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              {data?.department
+                ? `${data.department.name} outcomes from live alumni records`
+                : 'Graduate employment performance from verified alumni data'}
+            </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleRefresh}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+              disabled={refreshing}
+              title="Reload employment records"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium disabled:opacity-60 ${darkMode ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-700'}`}
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
+              type="button"
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2.5 bg-astu-navy hover:bg-blue-900 text-white rounded-xl transition-all duration-300 font-medium text-sm"
+              disabled={exporting || filteredAlumni.length === 0}
+              title="Download current results as CSV"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
             >
-              <Download className="h-4 w-4" />
-              Export
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {exporting ? 'Exporting…' : 'Export'}
             </button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="relative md:col-span-2">
+            <Search className={`absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`} />
+            <input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search graduate, company, or role..."
+              className={`w-full rounded-xl border py-2.5 pl-10 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#003580]/30 ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200'}`}
+            />
+            {searchTerm && (
+              <button type="button" onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <select
-            value={filters.department}
-            onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
+            value={batch}
+            onChange={(e) => setBatch(e.target.value)}
+            className={`rounded-xl border px-3 py-2.5 text-sm ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200'}`}
           >
-            <option value="Computer Science">Computer Science</option>
-            <option value="Software Engineering">Software Engineering</option>
-            <option value="Electrical Engineering">Electrical Engineering</option>
-            <option value="Mechanical Engineering">Mechanical Engineering</option>
-          </select>
-          <select
-            value={filters.batch}
-            onChange={(e) => setFilters({ ...filters, batch: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-          </select>
-          <select
-            value={filters.academicYear}
-            onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-          </select>
-          <select
-            value={filters.employmentStatus}
-            onChange={(e) => setFilters({ ...filters, employmentStatus: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="All">All Status</option>
-            <option value="Employed">Employed</option>
-            <option value="Unemployed">Unemployed</option>
-            <option value="Self-Employed">Self-Employed</option>
-            <option value="Further Study">Further Study</option>
+            <option value="All">All cohorts</option>
+            {availableYears.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          {statusTabs.map(([key, label]) => {
+            const active = employmentStatus === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setEmploymentStatus(key)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  active
+                    ? 'bg-[#003580] text-white'
+                    : darkMode
+                      ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {label}
+                <span className={`rounded-full px-1.5 py-0.5 text-[10px] leading-none tabular-nums ${active ? 'bg-white/20' : darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}>
+                  {statusCounts[key] ?? 0}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={() => {
+              setBatch('All');
+              setEmploymentStatus('All');
+              setSearchTerm('');
+            }}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#003580]"
+          >
+            <X className="h-4 w-4" /> Reset filters
+          </button>
+        )}
       </div>
 
-      {/* KPI Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {mockEmploymentKPIMetrics.map(renderKPICard)}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {kpis.map((kpi) => {
+          const Icon = kpi.icon;
+          return (
+            <div key={kpi.label} className={`card-hover rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+              <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.label}</p>
+              <p className={`mt-1.5 text-3xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>{kpi.value}</p>
+              <p className={`mt-1.5 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.hint}</p>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Chart Section 1: Employment Trend & Status Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <AnalyticsChart
           type="line"
-          data={mockEmploymentTrendData as any}
+          data={filteredCharts.employmentTrend as any}
           xKey="year"
-          series={[
-            { key: 'employmentRate', label: 'Employment Rate (%)', color: '#008080' }
-          ]}
-          title="Employment Trend Over Time"
-          subtitle="Graduate employment rate by graduation year"
+          series={[{ key: 'employmentRate', label: 'Employment Rate (%)', color: '#003580' }]}
+          title="Employment Trend"
+          subtitle="Placement rate by graduation year (filtered view)"
           height={280}
+          darkMode={darkMode}
         />
         <AnalyticsChart
           type="pie"
-          data={mockEmploymentStatusData as any}
+          data={filteredCharts.statusDistribution as any}
           xKey="status"
-          series={[
-            { key: 'count', label: 'Graduates' }
-          ]}
-          title="Employment Status Distribution"
-          subtitle="Current employment status of graduates"
+          series={[{ key: 'count', label: 'Graduates' }]}
+          title="Status Distribution"
+          subtitle="Current employment status (filtered view)"
           height={280}
+          darkMode={darkMode}
         />
       </div>
 
-      {/* Chart Section 2: Program Performance & Top Industries */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AnalyticsChart
-          type="bar"
-          data={mockProgramEmploymentData as any}
-          xKey="program"
-          series={[
-            { key: 'employmentRate', label: 'Employment Rate (%)', color: '#002244' }
-          ]}
-          title="Employment Rate by Program"
-          subtitle="Program-level employment performance"
-          height={280}
-        />
-        <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-          <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Hiring Industries</h3>
-          <div className="space-y-3">
-            {mockHiringIndustries.map((industry, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{industry.name}</p>
-                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{industry.percentage}%</p>
-                </div>
-                <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-                  <div className="bg-astu-navy h-full rounded-full" style={{ width: `${industry.percentage}%` }}></div>
-                </div>
-              </div>
-            ))}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+          <div className="mb-4 flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-[#003580]" />
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Top Employers</h3>
           </div>
+          {filteredCharts.topCompanies.length === 0 ? (
+            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No employer data reported yet.</p>
+          ) : (
+            <ul className="space-y-3.5">
+              {filteredCharts.topCompanies.map((item) => (
+                <RankRow
+                  key={item.name}
+                  name={item.name}
+                  count={item.count}
+                  total={filteredStats.total}
+                  darkMode={darkMode}
+                />
+              ))}
+            </ul>
+          )}
         </div>
-      </div>
-
-      {/* Top Hiring Companies */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Hiring Companies</h3>
-        <div className="space-y-3">
-          {mockHiringCompanies.map((company, index) => (
-            <div key={index} className={`flex items-center justify-between p-3 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-astu-navy/10 rounded-lg flex items-center justify-center font-bold text-astu-navy text-sm">
-                  {index + 1}
-                </div>
-                <div>
-                  <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{company.name}</p>
-                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{company.industry}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{company.graduatesHired} hired</p>
-                  <div className="flex items-center gap-1">
-                    {getTrendIcon(company.changeDirection)}
-                    <span className={`text-xs font-semibold ${company.changeDirection === 'up' ? 'text-astu-green' : 'text-astu-red'}`}>
-                      {Math.abs(company.change)}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Geographic Distribution */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Geographic Distribution</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockGeographicDistribution.map((region, index) => (
-            <div key={index} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-              <p className={`text-sm font-semibold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{region.region}</p>
-              <div className="flex items-center justify-between mb-2">
-                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Graduates</p>
-                <p className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{region.count}</p>
-              </div>
-              <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
-                <div className="bg-astu-navy h-full rounded-full" style={{ width: `${region.percentage}%` }}></div>
-              </div>
-              <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{region.percentage}%</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Graduate Employment Records Table */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-          <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Graduate Employment Records</h3>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${darkMode ? 'text-gray-400' : 'text-gray-400'}`} />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-10 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all w-64 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-              />
-            </div>
+        <div className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+          <div className="mb-4 flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-[#003580]" />
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Locations</h3>
           </div>
+          {filteredCharts.locations.length === 0 ? (
+            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No location data reported yet.</p>
+          ) : (
+            <ul className="space-y-3.5">
+              {filteredCharts.locations.map((item) => (
+                <RankRow
+                  key={item.name}
+                  name={item.name}
+                  count={item.count}
+                  total={filteredStats.total}
+                  darkMode={darkMode}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div className={`overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+        <div className="px-5 py-4">
+          <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Filtered employment records</h3>
+          <p className={`mt-0.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            {filteredAlumni.length} graduate(s)
+          </p>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[60rem] text-sm">
             <thead>
-              <tr className={`${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'} border-b`}>
-                <th className={`px-4 py-3 text-left font-semibold cursor-pointer hover:bg-gray-100 ${darkMode ? 'text-white hover:bg-slate-600' : 'text-gray-900'}`} onClick={() => handleSort('studentId')}>
-                  Student ID
+              <tr className={`border-y ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-slate-100 bg-slate-50/80'}`}>
+                <th className="w-10 px-2 py-3 text-left">
+                  <span className="sr-only">Details</span>
                 </th>
-                <th className={`px-4 py-3 text-left font-semibold cursor-pointer hover:bg-gray-100 ${darkMode ? 'text-white hover:bg-slate-600' : 'text-gray-900'}`} onClick={() => handleSort('graduateName')}>
-                  Name
-                </th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Department</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Status</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Company</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Job Title</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Country</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Salary Range</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Time-to-Hire</th>
+                {['Name', 'Year', 'Status', 'Company', 'Role', 'Industry', 'Salary', 'Location'].map((label) => (
+                  <th key={label} className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                    {label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {sortedRecords.map((record) => (
-                <tr key={record.id} className={`border-b hover:bg-gray-50 ${darkMode ? 'border-slate-700 hover:bg-slate-700' : 'border-gray-100'}`}>
-                  <td className={`px-4 py-3 font-mono text-xs ${darkMode ? 'text-white' : 'text-gray-900'}`}>{record.studentId}</td>
-                  <td className={`px-4 py-3 font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{record.graduateName}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.department}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      record.employmentStatus === 'Employed' ? 'bg-emerald-100 text-emerald-700' :
-                      record.employmentStatus === 'Unemployed' ? 'bg-red-100 text-red-700' :
-                      record.employmentStatus === 'Self-Employed' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {record.employmentStatus}
-                    </span>
-                  </td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.company}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.jobTitle}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.country}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.salaryRange}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{record.timeToHire}</td>
-                </tr>
-              ))}
+              {filteredAlumni.map((record) => {
+                const isOpen = expandedId === record.id;
+                return (
+                  <Fragment key={record.id}>
+                    <tr className={`border-b last:border-0 ${darkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                      <td className="px-2 py-3">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedId(isOpen ? null : record.id)}
+                          aria-label={isOpen ? 'Hide details' : 'Show details'}
+                          aria-expanded={isOpen}
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-slate-500 hover:bg-slate-100'}`}
+                        >
+                          <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      </td>
+                      <td className={`px-4 py-3 font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>{record.fullName}</td>
+                      <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>{record.graduationYear || '—'}</td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={record.employmentStatus} />
+                      </td>
+                      <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.company || '—'}</td>
+                      <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.jobTitle || '—'}</td>
+                      <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.industry || '—'}</td>
+                      <td className={`px-4 py-3 whitespace-nowrap tabular-nums ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{formatSalary(record.salary)}</td>
+                      <td className={`px-4 py-3 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{record.location || '—'}</td>
+                    </tr>
+                    {isOpen && (
+                      <tr className={`${darkMode ? 'bg-slate-800/30' : 'bg-slate-50/60'}`}>
+                        <td colSpan={9} className="px-5 py-4">
+                          <div className="grid grid-cols-1 gap-x-6 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                            <DetailItem icon={Mail} label="Email" value={record.email ?? '—'} darkMode={darkMode} />
+                            <DetailItem icon={Phone} label="Phone" value={record.phone ?? '—'} darkMode={darkMode} />
+                            <DetailItem icon={IdCard} label="Student ID" value={record.studentId} darkMode={darkMode} />
+                            <DetailItem icon={GraduationCap} label="Graduation Year" value={record.graduationYear ? String(record.graduationYear) : '—'} darkMode={darkMode} />
+                            <DetailItem icon={Banknote} label="Salary" value={formatSalary(record.salary)} darkMode={darkMode} />
+                            <DetailItem icon={MapPin} label="Location" value={record.location ?? '—'} darkMode={darkMode} />
+                            <div>
+                              <div className={`flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                Verification
+                              </div>
+                              <div className={`mt-1 text-sm font-medium ${record.isVerified ? 'text-emerald-600' : darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                {record.isVerified ? 'Verified alumni' : 'Not verified'}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Top Employers Table */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Employers</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className={`${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-50 border-gray-200'} border-b`}>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Employer</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Graduates Hired</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Industry</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Average Salary</th>
-                <th className={`px-4 py-3 text-left font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Last Hire Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockTopEmployers.map((employer, index) => (
-                <tr key={index} className={`border-b hover:bg-gray-50 ${darkMode ? 'border-slate-700 hover:bg-slate-700' : 'border-gray-100'}`}>
-                  <td className={`px-4 py-3 font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{employer.employer}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{employer.graduatesHired}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{employer.industry}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{employer.averageSalary}</td>
-                  <td className={`px-4 py-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{employer.lastHireDate}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Insights Panel */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Executive Insights</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockEmploymentInsights.map((insight) => (
-            <div key={insight.id} className={`p-4 border rounded-xl ${
-              darkMode ? 'bg-slate-700 border-slate-600' :
-              insight.type === 'success' ? 'bg-emerald-50 border-emerald-200' :
-              insight.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-              insight.type === 'concern' ? 'bg-red-50 border-red-200' :
-              'bg-blue-50 border-blue-200'
-            }`}>
-              <div className="flex items-start gap-3 mb-2">
-                {getInsightIcon(insight.type)}
-                <div>
-                  <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{insight.title}</p>
-                  <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{insight.description}</p>
-                </div>
-              </div>
-              <div className={`flex items-center justify-between mt-3 pt-3 border-t ${darkMode ? 'border-slate-600' : 'border-gray-200/50'}`}>
-                <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{insight.metric}</span>
-                <span className={`text-xs font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{insight.value}</span>
-              </div>
-            </div>
-          ))}
+          {filteredAlumni.length === 0 && (
+            <p className={`px-5 py-10 text-center text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              No employment records match the current filters.
+            </p>
+          )}
         </div>
       </div>
     </div>

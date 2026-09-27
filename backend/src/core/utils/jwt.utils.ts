@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { env } from '../config/env';
 import { Role } from '@prisma/client';
 
@@ -6,16 +7,22 @@ export interface TokenPayload {
   userId: string;
   email: string;
   role: Role;
+  /** Unique token id. Required for server-side revocation on logout. */
+  jti?: string;
+  iat?: number;
+  exp?: number;
 }
 
+const newJti = (): string => crypto.randomUUID();
+
 export const generateAccessToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
+  return jwt.sign({ ...payload, jti: payload.jti || newJti() }, env.JWT_ACCESS_SECRET, {
     expiresIn: env.JWT_ACCESS_EXPIRY as any,
   });
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+  return jwt.sign({ ...payload, jti: payload.jti || newJti() }, env.JWT_REFRESH_SECRET, {
     expiresIn: env.JWT_REFRESH_EXPIRY as any,
   });
 };

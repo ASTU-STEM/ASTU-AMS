@@ -3,6 +3,12 @@ import prisma from '../../../core/config/db';
 import { sendSuccess } from '../../../core/utils/response.utils';
 import { SocketServer } from '../../../infrastructure/websocket/SocketServer';
 import { EmailService } from '../../../core/services/EmailService';
+import {
+  escapeHtml,
+  sanitizeExternalUrl,
+  sanitizeHeaderValue,
+  isValidEmail,
+} from '../../../core/utils/sanitize.utils';
 
 export class UnifiedChatController {
 
@@ -11,23 +17,58 @@ export class UnifiedChatController {
     try {
       const currentUserId = (req as any).user?.userId;
 
-      // Fetch users across system except current user
-      const users = await prisma.user.findMany({
-        where: { id: { not: currentUserId } },
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          alumniProfile: {
-            select: { id: true, fullName: true, profilePicture: true, department: { select: { name: true } } }
-          },
-          employerProfile: {
-            select: { id: true, companyName: true, logoUrl: true, industry: true }
-          }
+      // The contact list is derived from conversations the caller actually
+      // participates in. Returning every account in the system (as this
+      // previously did) handed any signed-in user the email, role, department and
+      // employer of every staff and administrator account on the platform.
+      const alumniProfile = await prisma.alumniProfile
+        .findUnique({ where: { userId: currentUserId } })
+        .catch(() => null);
+      const employerProfile = await prisma.employerProfile
+        .findUnique({ where: { userId: currentUserId } })
+        .catch(() => null);
+
+      const myIds: string[] = Array.from(
+        new Set([currentUserId, alumniProfile?.id, employerProfile?.id].filter(Boolean))
+      ) as string[];
+
+      const threads = await (prisma.directMessage as any).findMany({
+        where: {
+          OR: [{ senderId: { in: myIds } }, { receiverId: { in: myIds } }],
         },
-        orderBy: { createdAt: 'desc' },
-        take: 100
+        select: { senderId: true, receiverId: true },
+        take: 500,
       });
+
+      // Partner user ids are whatever in `myIds` is not on the other side.
+      const partnerUserIds = new Set<string>();
+      for (const t of threads) {
+        for (const id of [t.senderId, t.receiverId]) {
+          if (!myIds.includes(id)) partnerUserIds.add(id);
+        }
+      }
+      for (const id of [alumniProfile?.id, employerProfile?.id].filter(Boolean)) {
+        partnerUserIds.delete(id as string);
+      }
+      partnerUserIds.delete(currentUserId);
+
+      const users = partnerUserIds.size
+        ? await prisma.user.findMany({
+            where: { id: { in: Array.from(partnerUserIds) } },
+            select: {
+              id: true,
+              email: true,
+              role: true,
+              alumniProfile: {
+                select: { id: true, fullName: true, profilePicture: true, department: { select: { name: true } } }
+              },
+              employerProfile: {
+                select: { id: true, companyName: true, logoUrl: true, industry: true }
+              }
+            },
+            take: 100,
+          })
+        : [];
 
       const contacts = users.map((u: any) => {
         let name = u.email.split('@')[0];
@@ -447,15 +488,16 @@ export class UnifiedChatController {
 
       const result = await (prisma.directMessage as any).updateMany({
         where: {
+          // Every clause must name BOTH sides of the conversation. The previous
+          // first clause (`senderId in partnerIds` alone) matched messages the
+          // partner sent to unrelated third parties, so this endpoint could mark
+          // and count conversations the caller is not part of.
           OR: [
-            { senderId: { in: partnerIds } },
-            { receiverId: { in: myIds }, senderId: { in: partnerIds } },
-            { alumniId: { in: partnerIds } },
-            { employerId: { in: partnerIds } }
+            { senderId: { in: partnerIds }, receiverId: { in: myIds } },
+            { receiverId: { in: partnerIds }, senderId: { in: myIds } },
+            { senderId: { in: partnerIds }, alumniId: { in: myIds } },
+            { senderId: { in: partnerIds }, employerId: { in: myIds } },
           ],
-          NOT: {
-            senderId: { in: myIds }
-          },
           isRead: false
         },
         data: { isRead: true }
@@ -480,14 +522,33 @@ export class UnifiedChatController {
       const msg = await (prisma.directMessage as any).findUnique({ where: { id: messageId } });
       if (!msg) return res.status(404).json({ success: false, message: 'Message not found' });
 
-      const isSender = myIds.includes(msg.senderId) || (msg.sender === 'EMPLOYER' && employerProfile) || (msg.sender === 'ALUMNI' && alumniProfile);
+      // Identity must be checked against the message's own sender/receiver
+      // columns. The previous test also accepted "caller has any alumniProfile /
+      // employerProfile", which let every alumnus delete every other alumnus's
+      // messages, and let a total non-participant soft-hide them.
+      const isSender = myIds.includes(msg.senderId);
+      const isReceiver = myIds.includes(msg.receiverId);
+      const touchesMyProfile =
+        (!!msg.alumniId && myIds.includes(msg.alumniId)) ||
+        (!!msg.employerId && myIds.includes(msg.employerId));
 
-      if (deleteForEveryone && isSender) {
+      if (!isSender && !isReceiver && !touchesMyProfile) {
+        return res.status(403).json({ success: false, message: 'You are not a participant in this conversation.' });
+      }
+
+      if (deleteForEveryone) {
+        if (!isSender) {
+          return res.status(403).json({ success: false, message: 'Only the sender can delete a message for everyone.' });
+        }
         await (prisma.directMessage as any).update({
           where: { id: messageId },
           data: { isDeleted: true }
         });
       } else {
+        const alreadyHidden: string[] = Array.isArray(msg.deletedBy) ? msg.deletedBy : [];
+        if (alreadyHidden.includes(currentUserId)) {
+          return sendSuccess(res, 'Message deleted successfully', {});
+        }
         await (prisma.directMessage as any).update({
           where: { id: messageId },
           data: {
@@ -605,7 +666,10 @@ export class UnifiedChatController {
       if (recipientEmail) {
         const emailService = new EmailService();
         const chatLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/alumni/dashboard?tab=messages&target=${senderUserId}`;
-        const emailText = `Dear ${candidateName},\n\n${companyName} has requested your CV on ASTU Alumni Portal. Open ASTU_AMS Hub to reply: ${chatLink}`;
+        const safeCandidateName = escapeHtml(candidateName);
+        const safeCompanyName = escapeHtml(companyName);
+        const safeChatLink = escapeHtml(chatLink);
+        const emailText = `Dear ${sanitizeHeaderValue(candidateName)},\n\n${sanitizeHeaderValue(companyName)} has requested your CV on ASTU Alumni Portal. Open ASTU_AMS Hub to reply: ${chatLink}`;
         const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
             <div style="text-align: center; margin-bottom: 24px;">
@@ -613,17 +677,17 @@ export class UnifiedChatController {
               <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Recruiter CV Request Notice</p>
             </div>
             <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #003366; margin-bottom: 24px;">
-              <h3 style="margin-top: 0; color: #1e293b;">📄 CV Request from ${companyName}</h3>
-              <p style="color: #334155; font-size: 15px; line-height: 1.6;">Dear <strong>${candidateName}</strong>,</p>
+              <h3 style="margin-top: 0; color: #1e293b;">📄 CV Request from ${safeCompanyName}</h3>
+              <p style="color: #334155; font-size: 15px; line-height: 1.6;">Dear <strong>${safeCandidateName}</strong>,</p>
               <p style="color: #334155; font-size: 15px; line-height: 1.6;">
-                <strong>${companyName}</strong> has reviewed your verified graduate profile on the ASTU Alumni Portal and requested your CV for potential career opportunities!
+                <strong>${safeCompanyName}</strong> has reviewed your verified graduate profile on the ASTU Alumni Portal and requested your CV for potential career opportunities!
               </p>
               <p style="color: #334155; font-size: 15px; line-height: 1.6;">
                 Please log in to your account and send your CV document directly to the recruiter using the <strong>ASTU_AMS Hub</strong>.
               </p>
             </div>
             <div style="text-align: center; margin: 32px 0;">
-              <a href="${chatLink}" style="background-color: #003366; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <a href="${safeChatLink}" style="background-color: #003366; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                 Open Chat on ASTU_AMS Hub
               </a>
             </div>
@@ -636,7 +700,7 @@ export class UnifiedChatController {
 
         await emailService.sendMail({
           to: recipientEmail,
-          subject: `📄 CV Request from ${companyName} on ASTU_AMS`,
+          subject: `📄 CV Request from ${sanitizeHeaderValue(companyName)} on ASTU_AMS`,
           text: emailText,
           html: emailHtml
         }).catch((e: any) => console.error('CV Request email failed:', e));
@@ -655,6 +719,27 @@ export class UnifiedChatController {
       if (!recipientEmail) {
         return res.status(400).json({ success: false, message: 'Recipient email or username is required.' });
       }
+      if (!isValidEmail(recipientEmail)) {
+        return res.status(400).json({ success: false, message: 'A valid recipient email address is required.' });
+      }
+
+      // This endpoint sends branded mail from the platform's own domain, so it must
+      // not be usable as an open relay: only existing platform accounts may be
+      // invited. Resolve the recipient up front and reject unknown addresses.
+      const recipientUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: recipientEmail },
+            { alumniProfile: { email: recipientEmail } }
+          ]
+        }
+      });
+      if (!recipientUser) {
+        return res.status(404).json({ success: false, message: 'No platform user has that email address.' });
+      }
+      if (recipientUser.id === currentUserId) {
+        return res.status(400).json({ success: false, message: 'You cannot invite yourself.' });
+      }
 
       // Resolve sender name
       let senderName = 'ASTU Alumni';
@@ -672,8 +757,18 @@ export class UnifiedChatController {
       } catch (_) { }
 
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      const joinLink = meetingLink || `${frontendUrl}/alumni/dashboard?callId=${callId || 'ASTU-MEET-' + Date.now()}`;
-      const meetingId = callId || `ASTU-MEET-${Date.now()}`;
+      // Only an absolute http(s) URL is accepted; anything else falls back to a
+      // first-party link. This prevents a `javascript:` href or an attacker-
+      // controlled phishing domain from riding along in the invitation button.
+      const requestedLink = sanitizeExternalUrl(meetingLink);
+      const meetingId = sanitizeHeaderValue(callId || `ASTU-MEET-${Date.now()}`, 64);
+      const joinLink = requestedLink || `${frontendUrl}/alumni/dashboard?callId=${encodeURIComponent(meetingId)}`;
+
+      // Everything interpolated below is escaped: senderName comes from a
+      // user-editable profile field.
+      const safeSenderName = escapeHtml(senderName);
+      const safeMeetingId = escapeHtml(meetingId);
+      const safeJoinLink = escapeHtml(joinLink);
 
       const emailHtml = `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background-color: #ffffff;">
@@ -688,18 +783,18 @@ export class UnifiedChatController {
           <div style="padding: 28px 24px;">
             <p style="color: #334155; font-size: 15px; line-height: 1.7;">Hello,</p>
             <p style="color: #334155; font-size: 15px; line-height: 1.7;">
-              <strong>${senderName}</strong> has invited you to join an HD Video Meeting on the ASTU Alumni & Mentorship Collaboration Platform.
+              <strong>${safeSenderName}</strong> has invited you to join an HD Video Meeting on the ASTU Alumni & Mentorship Collaboration Platform.
             </p>
 
             <div style="background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 20px; margin: 24px 0;">
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 6px 0; color: #64748b; font-size: 13px; font-weight: 600;">Meeting ID:</td>
-                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700; font-family: monospace;">${meetingId}</td>
+                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700; font-family: monospace;">${safeMeetingId}</td>
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #64748b; font-size: 13px; font-weight: 600;">Host:</td>
-                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700;">${senderName}</td>
+                  <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 700;">${safeSenderName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #64748b; font-size: 13px; font-weight: 600;">Platform:</td>
@@ -709,13 +804,13 @@ export class UnifiedChatController {
             </div>
 
             <div style="text-align: center; margin: 32px 0;">
-              <a href="${joinLink}" style="background: linear-gradient(135deg, #003366, #1d9e75); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 14px rgba(0,77,153,0.3);">
+              <a href="${safeJoinLink}" style="background: linear-gradient(135deg, #003366, #1d9e75); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 14px rgba(0,77,153,0.3);">
                 🎥 Join Video Meeting Now
               </a>
             </div>
 
             <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 8px;">
-              Or copy this link: <a href="${joinLink}" style="color: #3b82f6; word-break: break-all;">${joinLink}</a>
+              Or copy this link: <a href="${joinLink}" style="color: #3b82f6; word-break: break-all;">${safeJoinLink}</a>
             </p>
           </div>
 
@@ -727,35 +822,26 @@ export class UnifiedChatController {
         </div>
       `;
 
-      const emailText = `${senderName} has invited you to join a video meeting on ASTU Alumni Portal.\n\nMeeting ID: ${meetingId}\nHost: ${senderName}\n\nJoin here: ${joinLink}\n\n— ASTU Alumni Management System`;
+      const emailText = `${sanitizeHeaderValue(senderName)} has invited you to join a video meeting on ASTU Alumni Portal.\n\nMeeting ID: ${meetingId}\nHost: ${senderName}\n\nJoin here: ${joinLink}\n\n— ASTU Alumni Management System`;
 
       const emailService = new EmailService();
       await emailService.sendMail({
         to: recipientEmail,
-        subject: `🎥 Video Meeting Invitation from ${senderName} — ASTU Alumni Platform`,
+        subject: `🎥 Video Meeting Invitation from ${sanitizeHeaderValue(senderName)} — ASTU Alumni Platform`,
         text: emailText,
         html: emailHtml,
       });
 
-      // Also create an in-app notification if recipient exists in DB
+      // The recipient was already resolved and validated above, so the
+      // notification is guaranteed to have a real user to attach to.
       try {
-        const recipientUser = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { email: recipientEmail },
-              { alumniProfile: { email: recipientEmail } }
-            ]
+        await prisma.notification.create({
+          data: {
+            userId: recipientUser.id,
+            title: `🎥 Video Meeting Invitation from ${sanitizeHeaderValue(senderName)}`,
+            content: `You've been invited to join a video meeting. Click to join: ${sanitizeHeaderValue(joinLink, 300)}`,
           }
         });
-        if (recipientUser) {
-          await prisma.notification.create({
-            data: {
-              userId: recipientUser.id,
-              title: `🎥 Video Meeting Invitation from ${senderName}`,
-              content: `You've been invited to join a video meeting. Click to join: ${joinLink}`,
-            }
-          });
-        }
       } catch (_) { }
 
       return sendSuccess(res, `Meeting invitation sent to ${recipientEmail} successfully.`, { recipientEmail, meetingId, joinLink });

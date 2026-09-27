@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, Users, Building2, CheckCircle, ArrowRight, Handshake, Search, MessageSquare, TrendingUp } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { partnerLogos } from '../components/PartnerLogos';
+import publicStatsService, { PublicStat } from '../features/public/services/publicStats.service';
 
 const benefits = [
   {
@@ -39,7 +40,7 @@ const benefits = [
 
 const features = [
   'TIN-verified employer accounts',
-  'Direct access to 1,238+ registered alumni',
+  'Direct access to our registered alumni network',
   'Curriculum-aligned skill matching',
   'Industry feedback integration',
   'Campus recruitment coordination',
@@ -55,7 +56,33 @@ const partners = [
   { name: 'Commercial Bank of Ethiopia' },
 ];
 
+const PARTNER_STAT_LABELS: Record<string, string> = {
+  alumni: 'Registered Alumni',
+  employers: 'Partner Organisations',
+  jobs: 'Open Roles',
+  departments: 'Departments',
+};
+
 export default function PartnersPage() {
+  const [stats, setStats] = useState<PublicStat[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    publicStatsService.getStats().then((res) => {
+      if (isMounted) setStats(res);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const partnerStats = useMemo(
+    () =>
+      stats
+        .filter((s) => PARTNER_STAT_LABELS[s.key])
+        .map((s) => ({ key: s.key, value: s.value, label: PARTNER_STAT_LABELS[s.key] })),
+    [stats]
+  );
   const navigate = useNavigate();
 
   return (
@@ -105,7 +132,7 @@ export default function PartnersPage() {
             Why Partner with ASTU?
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-on-surface-variant">
-            Join 500+ partner organizations already hiring from ASTU's talented graduate pool
+            Join the employer partners already hiring from ASTU's graduate pool
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -201,35 +228,23 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-24">
-        <div className="grid gap-8 md:grid-cols-4">
-          <div className="text-center">
-            <div className="mb-2 text-4xl font-bold text-astu-navy md:text-5xl">1,238+</div>
-            <div className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
-              Registered Alumni
-            </div>
+      {/* Stats Section — every figure is counted from real records */}
+      {partnerStats.length > 0 && (
+        <section className="mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-24">
+          <div className="grid gap-8 md:grid-cols-4">
+            {partnerStats.map((s) => (
+              <div key={s.key} className="text-center">
+                <div className="mb-2 text-4xl font-bold text-astu-navy md:text-5xl">
+                  {s.value.toLocaleString()}
+                </div>
+                <div className="text-sm font-medium uppercase tracking-wider text-on-surface-variant">
+                  {s.label}
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="text-center">
-            <div className="mb-2 text-4xl font-bold text-astu-navy md:text-5xl">500+</div>
-            <div className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
-              Partner Organizations
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="mb-2 text-4xl font-bold text-astu-navy md:text-5xl">87%</div>
-            <div className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
-              Employment Rate
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="mb-2 text-4xl font-bold text-astu-navy md:text-5xl">5</div>
-            <div className="text-sm font-medium text-on-surface-variant uppercase tracking-wider">
-              Fields of Study
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="bg-astu-navy">

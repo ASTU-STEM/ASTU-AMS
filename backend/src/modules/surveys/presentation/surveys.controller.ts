@@ -36,6 +36,11 @@ import { GetSurveyStatistics, GetCompletionReport } from '../application/use-cas
 import { SaveSurveyDraft } from '../application/use-cases/SaveSurveyDraft';
 import { SubmitAssignedSurvey } from '../application/use-cases/SubmitAssignedSurvey';
 import { TracerStudyService } from '../services/TracerStudyService';
+import {
+  assertDepartmentCanViewTemplate,
+  assertDepartmentOwnsTemplate,
+  resolveDepartmentHeadScope,
+} from './departmentScope.helper';
 
 const surveyRepo = new PrismaSurveyRepository();
 const responseRepo = new PrismaSurveyResponseRepository();
@@ -84,23 +89,19 @@ export class SurveysController {
         throw new ApiError('Fixed milestone survey templates (6/12/18/24-Month) are pre-configured system templates and cannot be re-created. You may edit existing milestone templates or create a Custom survey.', 400);
       }
 
+      const departmentId = await resolveDepartmentHeadScope(user);
+
       const useCase = new CreateSurveyTemplate(surveyRepo);
       const result = await useCase.execute({
         ...data,
         isActive: data.isActive ?? true,
         isArchived: false,
+        departmentId: departmentId ?? null,
+        createdByUserId: user?.userId ?? null,
       } as any);
 
-      let departmentId: string | undefined = undefined;
-      if (user.role === 'DEPARTMENT_HEAD') {
-        const deptHead = await prisma.departmentHeadProfile.findUnique({
-          where: { userId: user.userId },
-        });
-        departmentId = deptHead?.departmentId;
-      }
-
       if (data.sendInstantly || data.isActive !== false) {
-        await tracerService.dispatchSurveyInstantly(result.id, departmentId).catch(() => {});
+        await tracerService.dispatchSurveyInstantly(result.id, departmentId);
       }
 
       return sendSuccess(res, 'Survey template created and dispatched successfully.', result, 201);
@@ -109,32 +110,46 @@ export class SurveysController {
 
   static async listSurveyTemplates(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       await tracerService.ensureDefaultMilestoneTemplates().catch(() => {});
+      const departmentId = await resolveDepartmentHeadScope(user);
       const useCase = new GetSurveyTemplates(surveyRepo);
-      const result = await useCase.execute(false, false);
+      const result = await useCase.execute(false, false, departmentId);
       return sendSuccess(res, 'Survey templates retrieved.', result);
     } catch (err) { next(err); }
   }
 
   static async getSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+      const departmentId = await resolveDepartmentHeadScope(user);
       const useCase = new GetSurveyTemplateById(surveyRepo);
       const result = await useCase.execute(req.params.templateId);
+      if (!result) throw new ApiError('Survey template not found', 404);
+
+      assertDepartmentCanViewTemplate(departmentId, result as any);
+
       return sendSuccess(res, 'Survey template retrieved.', result);
     } catch (err) { next(err); }
   }
 
   static async updateSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
-      const userRole = (req as any).user?.role;
+      const user = (req as any).user;
+      const userRole = user?.role;
       const templateId = req.params.templateId;
+      const departmentId = await resolveDepartmentHeadScope(user);
+
+      const existingTemplate = await surveyRepo.findById(templateId);
+      if (!existingTemplate) throw new ApiError('Survey template not found', 404);
 
       if (userRole !== 'ADMIN') {
-        const existingTemplate = await surveyRepo.findById(templateId);
-        if (existingTemplate && ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(existingTemplate.type)) {
+        if (['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(existingTemplate.type)) {
           throw new ApiError('Fixed milestone survey templates (6/12/18/24-Month) can only be modified by system Administrators. Registrars can create and schedule custom surveys.', 403);
         }
       }
+
+      assertDepartmentOwnsTemplate(userRole, departmentId, existingTemplate as any);
 
       const data = updateSurveyTemplateSchema.parse(req.body);
       const useCase = new UpdateSurveyTemplate(surveyRepo);
@@ -145,15 +160,21 @@ export class SurveysController {
 
   static async archiveSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
-      const userRole = (req as any).user?.role;
+      const user = (req as any).user;
+      const userRole = user?.role;
       const templateId = req.params.templateId;
+      const departmentId = await resolveDepartmentHeadScope(user);
+
+      const existingTemplate = await surveyRepo.findById(templateId);
+      if (!existingTemplate) throw new ApiError('Survey template not found', 404);
 
       if (userRole !== 'ADMIN') {
-        const existingTemplate = await surveyRepo.findById(templateId);
-        if (existingTemplate && ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(existingTemplate.type)) {
+        if (['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(existingTemplate.type)) {
           throw new ApiError('Fixed milestone survey templates (6/12/18/24-Month) can only be modified by system Administrators.', 403);
         }
       }
+
+      assertDepartmentOwnsTemplate(userRole, departmentId, existingTemplate as any);
 
       const useCase = new ArchiveSurveyTemplate(surveyRepo);
       const result = await useCase.execute(templateId);
@@ -163,8 +184,25 @@ export class SurveysController {
 
   static async cloneSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+      const departmentId = await resolveDepartmentHeadScope(user);
+      const source = await surveyRepo.findById(req.params.templateId);
+      if (!source) throw new ApiError('Survey template not found', 404);
+
+      if (departmentId) {
+        const milestones = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'];
+        const owned = (source as any).departmentId === departmentId;
+        const isMilestone = milestones.includes(source.type);
+        if (!owned && !isMilestone) {
+          throw new ApiError('You can only clone templates visible to your department.', 403);
+        }
+      }
+
       const useCase = new CloneSurveyTemplate(surveyRepo);
-      const result = await useCase.execute(req.params.templateId);
+      const result = await useCase.execute(req.params.templateId, {
+        departmentId: departmentId ?? null,
+        createdByUserId: user?.userId ?? null,
+      });
       return sendSuccess(res, 'Survey template cloned successfully.', result, 201);
     } catch (err) { next(err); }
   }
@@ -354,10 +392,21 @@ export class SurveysController {
   // ─── Analysis endpoints ────────────────────────────────────────────────
   static async getSurveyAnalysis(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const { templateId } = req.params;
-      const responses = await responseRepo.findBySurveyId(templateId);
+      const departmentId = await resolveDepartmentHeadScope(user);
+
       const template = await surveyRepo.findById(templateId);
-      if (!template) return sendSuccess(res, 'Survey not found', null, 404);
+      if (!template) throw new ApiError('Survey not found', 404);
+
+      assertDepartmentCanViewTemplate(departmentId, template as any);
+
+      let responses = await responseRepo.findBySurveyId(templateId);
+      if (departmentId) {
+        responses = responses.filter(
+          (r: any) => r.alumni?.departmentId === departmentId || r.alumni?.department?.id === departmentId
+        );
+      }
 
       const allQuestions = [
         ...(template.questions ?? []),
@@ -429,13 +478,18 @@ export class SurveysController {
     try {
       const user = (req as any).user;
       const { templateId } = req.params;
-      let departmentId: string | undefined = undefined;
+      const departmentId = await resolveDepartmentHeadScope(user);
 
-      if (user?.role === 'DEPARTMENT_HEAD') {
-        const deptHead = await prisma.departmentHeadProfile.findUnique({
-          where: { userId: user.userId },
-        });
-        departmentId = deptHead?.departmentId;
+      const template = await surveyRepo.findById(templateId);
+      if (!template) throw new ApiError('Survey template not found', 404);
+
+      if (departmentId) {
+        const milestones = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'];
+        const owned = (template as any).departmentId === departmentId;
+        const isMilestone = milestones.includes(template.type);
+        if (!owned && !isMilestone) {
+          throw new ApiError('You can only dispatch templates visible to your department.', 403);
+        }
       }
 
       const result = await tracerService.dispatchSurveyInstantly(templateId, departmentId);
@@ -446,23 +500,26 @@ export class SurveysController {
   static async activateSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
       const user = (req as any).user;
-      let departmentId: string | undefined = undefined;
+      const departmentId = await resolveDepartmentHeadScope(user);
+      const existing = await surveyRepo.findById(req.params.templateId);
+      if (!existing) throw new ApiError('Survey template not found', 404);
 
-      if (user?.role === 'DEPARTMENT_HEAD') {
-        const deptHead = await prisma.departmentHeadProfile.findUnique({
-          where: { userId: user.userId },
-        });
-        departmentId = deptHead?.departmentId;
-      }
+      assertDepartmentOwnsTemplate(user?.role, departmentId, existing as any);
 
       const result = await surveyRepo.update(req.params.templateId, { isActive: true });
-      await tracerService.dispatchSurveyInstantly(req.params.templateId, departmentId).catch(() => {});
+      await tracerService.dispatchSurveyInstantly(req.params.templateId, departmentId);
       return sendSuccess(res, 'Survey template activated and dispatched.', result);
     } catch (err) { next(err); }
   }
 
   static async deactivateSurveyTemplate(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
+      const departmentId = await resolveDepartmentHeadScope(user);
+      const existing = await surveyRepo.findById(req.params.templateId);
+      if (!existing) throw new ApiError('Survey template not found', 404);
+      assertDepartmentOwnsTemplate(user?.role, departmentId, existing as any);
+
       const result = await surveyRepo.update(req.params.templateId, { isActive: false });
       return sendSuccess(res, 'Survey template deactivated.', result);
     } catch (err) { next(err); }
@@ -470,8 +527,22 @@ export class SurveysController {
 
   static async getResponsesBySurvey(req: Request, res: Response, next: NextFunction) {
     try {
+      const user = (req as any).user;
       const { templateId } = req.params;
-      const responses = await responseRepo.findBySurveyId(templateId);
+      const departmentId = await resolveDepartmentHeadScope(user);
+
+      const template = await surveyRepo.findById(templateId);
+      if (!template) throw new ApiError('Survey not found', 404);
+
+      assertDepartmentCanViewTemplate(departmentId, template as any);
+
+      let responses = await responseRepo.findBySurveyId(templateId);
+      if (departmentId) {
+        responses = responses.filter(
+          (r: any) => r.alumni?.departmentId === departmentId || r.alumni?.department?.id === departmentId
+        );
+      }
+
       return sendSuccess(res, 'Responses retrieved.', responses);
     } catch (err) { next(err); }
   }

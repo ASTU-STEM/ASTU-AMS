@@ -17,12 +17,14 @@ const router = Router();
 router.get('/', optionalAuthenticateJWT, getEventsController);
 router.get('/:eventId/attendees', authenticateJWT, getAttendeesController);
 
-// Restricted to ALUMNI_OFFICE and ADMIN for managing events
-const allowEventManagers = requireRoles([Role.ADMIN, Role.ALUMNI_OFFICE, Role.DEPARTMENT_HEAD]);
+// Restricted to ALUMNI_OFFICE, DEPARTMENT_HEAD, CMS_MANAGER, and ADMIN for managing events.
+// A session is mandatory: the previous check allowed the request through whenever
+// `req.user` was absent, which is exactly the anonymous case.
+const eventManagerRoles = [Role.ADMIN, Role.ALUMNI_OFFICE, Role.DEPARTMENT_HEAD, 'CMS_MANAGER'];
 
-router.post('/', authenticateJWT, allowEventManagers, createEventController);
-router.put('/:eventId', authenticateJWT, allowEventManagers, updateEventController);
-router.delete('/:eventId', authenticateJWT, allowEventManagers, deleteEventController);
+router.post('/', authenticateJWT, requireRoles(eventManagerRoles), createEventController);
+router.put('/:eventId', authenticateJWT, requireRoles(eventManagerRoles), updateEventController);
+router.delete('/:eventId', authenticateJWT, requireRoles(eventManagerRoles), deleteEventController);
 
 // Restricted to Alumni for RSVP
 router.post('/:eventId/rsvp', authenticateJWT, requireRoles([Role.ALUMNI]), rsvpController);

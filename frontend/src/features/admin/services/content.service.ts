@@ -118,12 +118,48 @@ export const contentService = {
     window.dispatchEvent(new Event('astu-cms-content-changed'));
   },
 
+  normalizeItem(i: any): ContentCardItem {
+    let status: any = 'Published';
+    const s = String(i.status || '').toUpperCase();
+    if (s === 'DRAFT') status = 'Draft';
+    else if (s === 'SCHEDULED') status = 'Scheduled';
+    else if (s === 'NEEDS_REVIEW' || s === 'NEEDS REVIEW') status = 'Needs Review';
+    else if (s === 'ARCHIVED') status = 'Archived';
+    else if (s === 'PUBLISHED') status = 'Published';
+
+    let type: any = 'post';
+    const t = String(i.type || '').toLowerCase();
+    if (t.includes('announc')) type = 'announcement';
+    else if (t.includes('page')) type = 'page';
+    else if (t.includes('gal')) type = 'gallery';
+    else if (t.includes('event')) type = 'event';
+    else if (t.includes('temp')) type = 'template';
+
+    return {
+      ...i,
+      id: i.id || `C-${Date.now()}`,
+      title: i.title || 'Untitled',
+      type,
+      status,
+      excerpt: i.excerpt || '',
+      author: i.author || 'Content Manager',
+      updatedAt: i.updatedAt || 'Recently',
+      views: i.views || 0,
+      tags: Array.isArray(i.tags) ? i.tags : [type, 'astu'],
+      pinned: Boolean(i.pinned),
+      featured: Boolean(i.featured),
+    };
+  },
+
   async fetchItemsFromApi(): Promise<ContentCardItem[]> {
     try {
       const res = await axios.get(`${API_URL}/content`);
       if (res.data && res.data.success && Array.isArray(res.data.data)) {
-        const cleaned = res.data.data.filter((i: any) => i.title !== 'Homepage CMS Configuration');
-        this.saveItems(cleaned);
+        const cleaned = res.data.data
+          .filter((i: any) => i.title !== 'Homepage CMS Configuration')
+          .map((i: any) => this.normalizeItem(i));
+        // ⚠️ Do NOT write to localStorage here — that would trigger
+        // storage events and cause infinite re-fetch loops in the dashboard.
         return cleaned;
       }
     } catch {
@@ -150,8 +186,14 @@ export const contentService = {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       })
       .then((res) => {
-        if (res.data && res.data.success) {
-          console.log('Successfully saved content item to backend DB:', newItem.title);
+        if (res.data && res.data.success && res.data.data) {
+          const syncedItem = this.normalizeItem(res.data.data);
+          const current = this.getItems();
+          const idx = current.findIndex((x) => x.id === newItem.id);
+          if (idx !== -1) {
+            current[idx] = syncedItem;
+            this.saveItems(current);
+          }
         }
       })
       .catch((err) => console.warn('Failed to sync content creation with DB:', err));
@@ -177,12 +219,30 @@ export const contentService = {
     return items[index];
   },
 
+  /**
+   * Upload an image to the backend CMS media store and return its stored URL
+   * (e.g. "/uploads/cms/<file>"). Images are served by the backend and are
+   * never inlined as base64 inside the config payload.
+   */
+  async uploadCmsImage(file: File): Promise<string> {
+    const form = new FormData();
+    form.append('file', file);
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const res = await axios.post(`${API_URL}/content/media/upload`, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    const url = res?.data?.data?.url;
+    if (!url) throw new Error('Upload succeeded but no media URL was returned');
+    return url;
+  },
+
   deleteItem(id: string): boolean {
     const items = this.getItems();
     const filtered = items.filter((i) => i.id !== id);
     if (filtered.length === items.length) return false;
-    
-    // Save updated list immediately to local storage and broadcast event
     this.saveItems(filtered);
 
     const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
@@ -198,7 +258,7 @@ export const contentService = {
   getPublishedNews(): { id: string; title: string; date: string; excerpt?: string }[] {
     const items = this.getItems();
     return items
-      .filter((i) => i.status === 'Published' && (i.type === 'post' || i.type === 'announcement'))
+      .filter((i) => String(i.status).toUpperCase() === 'PUBLISHED' && (String(i.type).toLowerCase() === 'post' || String(i.type).toLowerCase() === 'announcement'))
       .map((i) => ({
         id: i.id,
         title: i.title,
@@ -210,12 +270,12 @@ export const contentService = {
   getPublishedAnnouncements(): { id: string; title: string; date: string; type: string; excerpt?: string }[] {
     const items = this.getItems();
     return items
-      .filter((i) => i.status === 'Published')
+      .filter((i) => String(i.status).toUpperCase() === 'PUBLISHED')
       .map((i) => ({
         id: i.id,
         title: i.title,
         date: i.publishedAt || i.updatedAt || 'Just now',
-        type: i.type === 'announcement' ? 'Official Announcement' : `${i.type.toUpperCase()} Announcement`,
+        type: String(i.type).toLowerCase() === 'announcement' ? 'Official Announcement' : `${String(i.type).toUpperCase()} Announcement`,
         excerpt: i.excerpt,
       }));
   },
@@ -233,7 +293,6 @@ export const contentService = {
   },
 };
 
-// Initial API sync attempt
-contentService.fetchItemsFromApi().catch(() => {});
-
+// ⚠️ No module-level auto-fetch: doing so on import causes the dashboard to
+// receive a storage event before it is mounted, triggering blank re-renders.
 export default contentService;

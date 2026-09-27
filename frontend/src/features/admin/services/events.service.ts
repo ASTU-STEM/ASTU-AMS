@@ -27,11 +27,23 @@ export interface ApiEvent {
   description?: string;
   date: string;
   location: string;
+  /** Delivery mode only: "ONLINE" | "IN_PERSON". Not an event category. */
   type: string;
   createdBy?: string;
   rsvps?: any[];
   createdAt?: string;
   updatedAt?: string;
+  /**
+   * Presentation-only fields. The Event model does not persist these, so the
+   * API omits them and callers must supply their own fallback.
+   */
+  slug?: string;
+  image?: string;
+  coverImage?: string;
+  bannerUrl?: string;
+  capacity?: number;
+  category?: string;
+  tags?: string[];
 }
 
 export const eventsService = {
@@ -64,6 +76,19 @@ export const eventsService = {
     } catch (error) {
       console.error('Error creating event via API:', error);
       throw error;
+    }
+  },
+
+  async updateEvent(eventId: string, eventData: Partial<ApiEvent>): Promise<ApiEvent | null> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: ApiEvent }>(`/events/${eventId}`, eventData);
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return null;
+    } catch (error) {
+      console.warn('Error updating event via API:', error);
+      return null;
     }
   },
 
