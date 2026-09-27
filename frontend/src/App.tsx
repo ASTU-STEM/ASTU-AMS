@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { store } from "./store";
@@ -101,6 +101,10 @@ function AppContent() {
           }
         />
         <Route
+          path="/department"
+          element={<Navigate to="/department/dashboard" replace />}
+        />
+        <Route
           path="/department/dashboard"
           element={
             <ProtectedRoute
@@ -145,7 +149,20 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
+      <Toaster
+        position="top-center"
+        containerStyle={{ top: 72, zIndex: 999999 }}
+        toastOptions={{
+          duration: 2800,
+          style: {
+            zIndex: 999999,
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)",
+          },
+        }}
+      />
       <SystemSettingsProvider>
         <RegistrationProvider>
           <AppContent />

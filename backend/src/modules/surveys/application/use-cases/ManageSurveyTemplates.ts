@@ -13,8 +13,8 @@ export class CreateSurveyTemplate {
 export class GetSurveyTemplates {
   constructor(private readonly repo: ISurveyRepository) {}
 
-  async execute(activeOnly = false, includeArchived = false) {
-    return await this.repo.findAll(activeOnly, includeArchived);
+  async execute(activeOnly = false, includeArchived = false, departmentId?: string) {
+    return await this.repo.findAll(activeOnly, includeArchived, departmentId);
   }
 }
 
@@ -51,8 +51,10 @@ export class ArchiveSurveyTemplate {
 export class CloneSurveyTemplate {
   constructor(private readonly repo: ISurveyRepository) {}
 
-  async execute(id: string) {
-    const survey = await this.repo.clone(id);
-    return survey;
+  async execute(
+    id: string,
+    ownership?: { departmentId?: string | null; createdByUserId?: string | null }
+  ) {
+    return await this.repo.clone(id, ownership);
   }
 }

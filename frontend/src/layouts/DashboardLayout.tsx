@@ -751,59 +751,6 @@ function AdminPortal() {
 }
 
 // ==========================================
-// 7. PORTAL 4: DEPARTMENT ANALYTICS
-// ==========================================
-function DepartmentPortal() {
-  const navItems = [
-    { label: "Dashboard", path: "/department", icon: BarChart3 },
-    { label: "Graduate Outcome Analytics", path: "/department/outcome-analytics", icon: BarChart2 },
-    { label: "Curriculum Review", path: "/department/curriculum-review", icon: BookOpen },
-    { label: "Department Ranking", path: "/department/ranking", icon: Award },
-    { label: "Research Collaboration", path: "/department/research", icon: Zap },
-    { label: "Employability Reports", path: "/department/employability", icon: TrendingUp },
-    { label: "KPI Dashboard", path: "/department/kpi", icon: Activity },
-    { label: "Industry Partnership", path: "/department/partnership", icon: Handshake },
-    { label: "Employment Analytics", path: "/department/employment", icon: TrendingUp },
-    { label: "Skill Gap Reports", path: "/department/skill-gap", icon: GraduationCap },
-    { label: "Employer Feedback", path: "/department/employer-feedback", icon: FileText },
-    { label: "Tracer Reports", path: "/department/tracer", icon: FileText },
-    { label: "Curriculum Insights", path: "/department/curriculum", icon: FileText },
-    { label: "Accreditation Reports", path: "/department/accreditation", icon: FileText },
-    { label: "Settings", path: "/department/settings", icon: Settings }
-  ];
-
-  return (
-    <DashboardLayout title="Department Head Portal" role="Department Head" navItems={navItems}>
-      <Routes>
-        <Route path="/dashboard" element={<Navigate to="/department" replace />} />
-        <Route index element={
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
-              <h2 className="text-lg font-black text-[#003366] mb-4">Department Dashboard</h2>
-              <p className="text-sm text-slate-500">Select a module from the sidebar to view analytics.</p>
-            </div>
-          </div>
-        } />
-        <Route path="/outcome-analytics" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Outcome Analytics</h2><p className="text-sm text-slate-500">Track graduate employment outcomes.</p></div>} />
-        <Route path="/curriculum-review" element={<div className="p-6"><h2 className="text-lg font-bold">Curriculum Review Dashboard</h2><p className="text-sm text-slate-500">Review and suggest curriculum updates.</p></div>} />
-        <Route path="/ranking" element={<div className="p-6"><h2 className="text-lg font-bold">Department Ranking Dashboard</h2><p className="text-sm text-slate-500">View department performance rankings.</p></div>} />
-        <Route path="/research" element={<div className="p-6"><h2 className="text-lg font-bold">Research Collaboration Tracking</h2><p className="text-sm text-slate-500">Track research partnerships and outcomes.</p></div>} />
-        <Route path="/employability" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Employability Reports</h2><p className="text-sm text-slate-500">Generate employability analytics.</p></div>} />
-        <Route path="/kpi" element={<div className="p-6"><h2 className="text-lg font-bold">Department KPI Dashboard</h2><p className="text-sm text-slate-500">Key performance indicators for the department.</p></div>} />
-        <Route path="/partnership" element={<div className="p-6"><h2 className="text-lg font-bold">Industry Partnership Reports</h2><p className="text-sm text-slate-500">Manage and track industry partnerships.</p></div>} />
-        <Route path="/employment" element={<div className="p-6"><h2 className="text-lg font-bold">Employment Analytics</h2><p className="text-sm text-slate-500">Detailed employment statistics.</p></div>} />
-        <Route path="/skill-gap" element={<div className="p-6"><h2 className="text-lg font-bold">Skill Gap Reports</h2><p className="text-sm text-slate-500">Analyze skill gaps from employer feedback.</p></div>} />
-        <Route path="/employer-feedback" element={<div className="p-6"><h2 className="text-lg font-bold">Employer Feedback</h2><p className="text-sm text-slate-500">Review feedback from employers.</p></div>} />
-        <Route path="/tracer" element={<div className="p-6"><h2 className="text-lg font-bold">Tracer Reports</h2><p className="text-sm text-slate-500">Generate tracer study reports.</p></div>} />
-        <Route path="/curriculum" element={<div className="p-6"><h2 className="text-lg font-bold">Curriculum Insights</h2><p className="text-sm text-slate-500">View curriculum analytics.</p></div>} />
-        <Route path="/accreditation" element={<div className="p-6"><h2 className="text-lg font-bold">Accreditation Reports</h2><p className="text-sm text-slate-500">Accreditation-ready reports.</p></div>} />
-        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">Settings</h2><p className="text-sm text-slate-500">Manage department preferences.</p></div>} />
-      </Routes>
-    </DashboardLayout>
-  );
-}
-
-// ==========================================
 // 8. CORE APPLICATION EXPORT MODULE
 // ==========================================
 export default function App() {
@@ -817,7 +764,6 @@ export default function App() {
         <Route path="/alumni/*" element={<AlumniPortal />} />
         <Route path="/registrar/*" element={<RegistrarPortal />} />
         <Route path="/employer/*" element={<EmployerPortal />} />
-        <Route path="/department/*" element={<DepartmentPortal />} />
         <Route path="/admin/*" element={<AdminPortal />} />
       </Routes>
     </BrowserRouter>

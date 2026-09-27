@@ -60,12 +60,12 @@ const stakeholders = [
     title: "Departments",
     icon: LineChart,
     points: [
-      "Monitor graduate employment outcomes and metrics.",
-      "Identify skill gaps through employer analytics.",
-      "Generate accreditation-ready reports.",
+      "Monitor live graduate employment outcomes for your department.",
+      "Search alumni, export CSV reports, and review placement trends.",
+      "Create and dispatch department surveys to your graduates.",
     ],
     cta: "View Department Analytics",
-    route: "/department",
+    route: "/department/dashboard",
     tint: "text-astu-green bg-astu-green/10",
   },
   {
@@ -117,7 +117,7 @@ const searchItems = [
   { label: "Alumni Portal", type: "route", route: "/alumni" },
   { label: "Employer Portal", type: "route", route: "/employer" },
   { label: "Registrar Portal", type: "route", route: "/registrar" },
-  { label: "Department Portal", type: "route", route: "/department" },
+  { label: "Department Portal", type: "route", route: "/department/dashboard" },
   { label: "Admin Portal", type: "route", route: "/admin" },
 ];
 
@@ -503,7 +503,7 @@ export default function LandingPage() {
             </div>
             <button
               className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
-              onClick={() => navigate("/department")}
+              onClick={() => navigate("/department/dashboard")}
             >
               Explore Campus Life
             </button>
@@ -593,7 +593,7 @@ export default function LandingPage() {
                 </ul>
                 <button
                   className="mt-4 rounded-md border border-outline-variant px-3 py-1.5 text-xs hover:bg-surface-container-low"
-                  onClick={() => navigate("/department")}
+                  onClick={() => navigate("/department/dashboard")}
                 >
                   View Insights
                 </button>
@@ -627,7 +627,7 @@ export default function LandingPage() {
               </div>
               <button
                 className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
-                onClick={() => navigate("/department")}
+                onClick={() => navigate("/department/dashboard")}
               >
                 Participate in Impact Study
               </button>

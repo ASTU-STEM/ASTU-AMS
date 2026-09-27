@@ -24,10 +24,20 @@ export class PrismaSurveyRepository implements ISurveyRepository {
     return survey as any as Survey;
   }
 
-  async findAll(activeOnly = false, includeArchived = false): Promise<Survey[]> {
+  async findAll(activeOnly = false, includeArchived = false, departmentId?: string): Promise<Survey[]> {
     const filters: any = {};
     if (activeOnly) filters.isActive = true;
     if (!includeArchived) filters.isArchived = false;
+
+    if (departmentId) {
+      filters.OR = [
+        { departmentId },
+        {
+          departmentId: null,
+          type: { in: ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'] },
+        },
+      ];
+    }
 
     const surveys = await prisma.survey.findMany({
       where: Object.keys(filters).length ? filters : undefined,
@@ -52,6 +62,8 @@ export class PrismaSurveyRepository implements ISurveyRepository {
           scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
           isActive: data.isActive,
           isArchived: data.isArchived,
+          departmentId: (data as any).departmentId ?? null,
+          createdByUserId: (data as any).createdByUserId ?? null,
         }
       });
 
@@ -204,7 +216,10 @@ export class PrismaSurveyRepository implements ISurveyRepository {
     return survey as any as Survey;
   }
 
-  async clone(id: string): Promise<Survey> {
+  async clone(
+    id: string,
+    ownership?: { departmentId?: string | null; createdByUserId?: string | null }
+  ): Promise<Survey> {
     const source = await prisma.survey.findUnique({
       where: { id },
       include: {
@@ -219,11 +234,13 @@ export class PrismaSurveyRepository implements ISurveyRepository {
         data: {
           title: `Copy of ${source.title}`,
           description: source.description,
-          type: source.type,
-          milestoneMonths: source.milestoneMonths,
+          type: 'CUSTOM',
+          milestoneMonths: null,
           scheduledAt: source.scheduledAt,
           isActive: false,
           isArchived: false,
+          departmentId: ownership?.departmentId ?? source.departmentId ?? null,
+          createdByUserId: ownership?.createdByUserId ?? source.createdByUserId ?? null,
         }
       });
 

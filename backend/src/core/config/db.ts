@@ -5,27 +5,94 @@ import path from 'path';
 
 // ─── In-memory dev DB helpers ───
 const DEV_DB_PATH = path.join(process.cwd(), 'data', 'dev-db.json');
+const CMS_CONTENT_PATH = path.join(process.cwd(), 'data', 'cms-content.json');
+
+/**
+ * Under test the dev store must never touch the real data/dev-db.json.
+ * Jest previously wrote its fixtures straight into that file, so running the
+ * suite replaced the developer's real dev data with test records.
+ */
+const IS_TEST_ENV = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+let testStore: any | null = null;
 
 function readDevDb(): any {
-  try {
-    if (fs.existsSync(DEV_DB_PATH)) {
-      return JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
-    }
-  } catch { /* ignore */ }
+  if (IS_TEST_ENV) {
+    if (!testStore) testStore = emptyDevStore();
+    return testStore;
+  }
+  return readDevDbFromDisk();
+}
+
+function emptyDevStore(): any {
   return {
-    users: [],
-    alumniProfiles: [],
-    employerProfiles: [],
-    departments: [],
-    registrarStudents: [],
-    registrarSyncLogs: [],
-    auditLogs: [],
-    notifications: [],
-    documentRequests: [],
+    users: [], adminProfiles: [], alumniProfiles: [], employers: [], jobs: [],
+    jobApplications: [], interviews: [], contents: [], contentItems: [],
+    notifications: [], auditLogs: [], registrarStudents: [], registrarSyncLogs: [],
+    documentRequests: [], departments: [], surveys: [], surveyResponses: [],
+    events: [], homepageConfigs: [], feedback: [],
   };
 }
 
+function readDevDbFromDisk(): any {
+  let store: any = null;
+  try {
+    if (fs.existsSync(DEV_DB_PATH)) {
+      store = JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
+    }
+  } catch { /* ignore */ }
+  if (!store) {
+    store = {
+      users: [],
+      alumniProfiles: [],
+      employerProfiles: [],
+      departments: [],
+      registrarStudents: [],
+      registrarSyncLogs: [],
+      auditLogs: [],
+      notifications: [],
+      documentRequests: [],
+      contentItems: [],
+      mediaAssets: [],
+      homepageConfigs: [],
+      revokedTokens: [],
+    };
+  }
+
+  // Auto-bootstrap CMS items from cms-content.json if empty
+  if (!store.contentItems || store.contentItems.length === 0) {
+    try {
+      if (fs.existsSync(CMS_CONTENT_PATH)) {
+        const raw = JSON.parse(fs.readFileSync(CMS_CONTENT_PATH, 'utf-8'));
+        if (Array.isArray(raw)) {
+          const configItem = raw.find((i: any) => i.title === 'Homepage CMS Configuration');
+          if (configItem && configItem.excerpt) {
+            try {
+              const parsed = typeof configItem.excerpt === 'string' ? JSON.parse(configItem.excerpt) : configItem.excerpt;
+              store.homepageConfigs = [{ id: 'hc-main', key: 'main', data: parsed, updatedAt: new Date().toISOString() }];
+            } catch { /* ignore */ }
+          }
+          store.contentItems = raw
+            .filter((i: any) => i.title !== 'Homepage CMS Configuration')
+            .map((i: any) => ({
+              ...i,
+              type: i.type?.toUpperCase() || 'POST',
+              status: i.status === 'Published' ? 'PUBLISHED' : i.status === 'Draft' ? 'DRAFT' : i.status === 'Needs Review' ? 'NEEDS_REVIEW' : i.status?.toUpperCase() || 'PUBLISHED',
+              createdAt: i.createdAt || new Date().toISOString(),
+              updatedAt: i.updatedAt || new Date().toISOString(),
+            }));
+        }
+      }
+    } catch { /* ignore fallback error */ }
+  }
+
+  return store;
+}
+
 function writeDevDb(store: any) {
+  if (IS_TEST_ENV) {
+    testStore = store;
+    return;
+  }
   const dir = path.dirname(DEV_DB_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(DEV_DB_PATH, JSON.stringify(store, null, 2));
@@ -33,6 +100,14 @@ function writeDevDb(store: any) {
 
 // ─── Fake Prisma for dev fallback ───
 class FakePrisma {
+  /**
+   * Always re-reads, so reads see the current file. Mutating methods must NOT
+   * use this twice: `this.store` returning a fresh object each access meant
+   *     this.store.rows.push(rec);  // read #1 -> array A, push into A
+   *     writeDevDb(this.store);     // read #2 -> array B, writes B (change lost)
+   * and every write through the dev fallback was silently discarded.
+   * Mutating methods now snapshot once into a local `store` instead.
+   */
   private get store() {
     return readDevDb();
   }
@@ -51,37 +126,89 @@ class FakePrisma {
       if (where.email) return this.store.users.find((u: any) => u.email === where.email) || null;
       return null;
     },
-    findMany: async ({ where, skip, take }: any = {}) => {
-      let users = [...this.store.users];
-      if (where?.role) users = users.filter((u: any) => u.role === where.role);
+    findMany: async ({ where, skip, take, select }: any = {}) => {
+      let users = this.store.users.filter((u: any) => matchWhere(u, where));
+      if (select) users = users.map((u: any) => {
+        const out: any = {};
+        for (const key of Object.keys(select)) out[key] = u[key];
+        return out;
+      });
       if (skip) users = users.slice(skip);
       if (take) users = users.slice(0, take);
       return users;
     },
     count: async ({ where }: any = {}) => {
-      let users = this.store.users;
-      if (where?.role) users = users.filter((u: any) => u.role === where.role);
-      return users.length;
+      return this.store.users.filter((u: any) => matchWhere(u, where)).length;
     },
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isActive: data.isActive ?? false };
-      this.store.users.push(rec);
-      writeDevDb(this.store);
+      (store.users || (store.users = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.users.findIndex((u: any) => u.id === where.id || u.email === where.email);
+      const store = this.store;
+      const idx = (store.users || []).findIndex((u: any) => u.id === where.id || u.email === where.email);
       if (idx === -1) throw new Error('User not found');
-      this.store.users[idx] = { ...this.store.users[idx], ...data, updatedAt: new Date().toISOString() };
-      writeDevDb(this.store);
-      return this.store.users[idx];
+      store.users[idx] = { ...store.users[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.users[idx];
     },
     delete: async ({ where }: any) => {
-      const idx = this.store.users.findIndex((u: any) => u.id === where.id);
+      const store = this.store;
+      const idx = (store.users || []).findIndex((u: any) => u.id === where.id);
       if (idx === -1) throw new Error('User not found');
-      const [removed] = this.store.users.splice(idx, 1);
-      writeDevDb(this.store);
+      const [removed] = store.users.splice(idx, 1);
+      writeDevDb(store);
       return removed;
+    },
+  };
+
+  adminProfile = {
+    findUnique: async ({ where }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      if (where?.userId) return rows.find((a: any) => a.userId === where.userId) || null;
+      if (where?.id) return rows.find((a: any) => a.id === where.id) || null;
+      return null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      const idx = where?.userId
+        ? rows.findIndex((a: any) => a.userId === where.userId)
+        : rows.findIndex((a: any) => a.id === where?.id);
+      if (idx === -1) {
+        const rec = { ...create, id: create.id || `dev-admin-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        rows.push(rec);
+        writeDevDb(store);
+        return rec;
+      }
+      rows[idx] = { ...rows[idx], ...update, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return rows[idx];
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      const rec = { ...data, id: data.id || `dev-admin-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      rows.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const rows = store.adminProfiles || (store.adminProfiles = []);
+      const idx = where?.userId ? rows.findIndex((a: any) => a.userId === where.userId) : rows.findIndex((a: any) => a.id === where?.id);
+      if (idx === -1) throw new Error('AdminProfile not found');
+      rows[idx] = { ...rows[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return rows[idx];
+    },
+    findMany: async () => {
+      const store = readDevDb();
+      return store.adminProfiles || [];
     },
   };
 
@@ -101,24 +228,7 @@ class FakePrisma {
     },
     findFirst: async ({ where, include }: any = {}) => {
       const store = readDevDb();
-      const profiles = store.alumniProfiles || [];
-      let profile: any = null;
-      if (where?.userId) profile = profiles.find((a: any) => a.userId === where.userId) || null;
-      else if (where?.id) profile = profiles.find((a: any) => a.id === where.id || a.userId === where.id) || null;
-      else if (where?.OR && Array.isArray(where.OR)) {
-        for (const cond of where.OR) {
-          if (cond.id) {
-            const found = profiles.find((a: any) => a.id === cond.id || a.userId === cond.id);
-            if (found) { profile = found; break; }
-          }
-          if (cond.userId) {
-            const found = profiles.find((a: any) => a.userId === cond.userId);
-            if (found) { profile = found; break; }
-          }
-        }
-      } else if (!where || Object.keys(where).length === 0) {
-        profile = profiles[0] || null;
-      }
+      let profile: any = (store.alumniProfiles || []).find((a: any) => matchWhere(a, where)) || null;
 
       if (profile && include?.user && !profile.user) {
         const u = (store.users || []).find((user: any) => user.id === profile.userId || user.email === profile.email);
@@ -126,21 +236,57 @@ class FakePrisma {
       }
       return profile;
     },
-    findMany: async ({ where, skip, take }: any = {}) => {
+    findMany: async ({ where, skip, take, include }: any = {}) => {
       const store = readDevDb();
-      let profiles = [...(store.alumniProfiles || [])];
-      if (where?.departmentId) profiles = profiles.filter((a: any) => a.departmentId === where.departmentId);
-      if (where?.graduationYear) profiles = profiles.filter((a: any) => Number(a.graduationYear) === Number(where.graduationYear));
-      if (where?.cgpa?.gte) profiles = profiles.filter((a: any) => Number(a.cgpa) >= Number(where.cgpa.gte));
-      if (where?.OR && Array.isArray(where.OR)) {
-        const query = where.OR[0]?.fullName?.contains?.toLowerCase() || '';
-        if (query) {
-          profiles = profiles.filter((a: any) =>
-            (a.fullName || '').toLowerCase().includes(query) ||
-            (a.email || '').toLowerCase().includes(query) ||
-            (a.skills || []).some((s: string) => s.toLowerCase().includes(query))
-          );
-        }
+      let profiles = (store.alumniProfiles || []).filter((a: any) => matchWhere(a, where));
+      if (include) {
+        profiles = profiles.map((a: any) => {
+          let out = a;
+          if (include?.user) {
+            const u = (store.users || []).find((user: any) => user.id === a.userId || user.email === a.email);
+            out = { ...out, user: u || { email: a.email || 'alumni@astu.edu.et' } };
+          }
+          if (include?.experiences) {
+            // Work experiences live in their own store keyed by alumniId, not nested
+            // on the profile record, so hydrate them the way Prisma would.
+            let exps: any[] = Array.isArray(a.experiences) ? [...a.experiences] : [];
+            if (exps.length === 0) {
+              exps = (store.workExperiences || []).filter((e: any) => e?.alumniId === a.id);
+            }
+            // Honour `orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }]` style sorts.
+            for (const rule of include.experiences.orderBy || []) {
+              const [field, dir] = Array.isArray(rule) ? rule : [rule, 'asc'];
+              const sign = String(dir).toLowerCase() === 'desc' ? -1 : 1;
+              exps = [...exps].sort((x: any, y: any) => {
+                const xv = x?.[field] ?? '';
+                const yv = y?.[field] ?? '';
+                if (xv === yv) return 0;
+                return (xv > yv ? 1 : -1) * sign;
+              });
+            }
+            // Only backfill an experience for statuses that actually assert
+            // employment. UNSPECIFIED must stay experience-free or the dev
+            // fallback would invent an employer for a job seeker.
+            if (
+              exps.length === 0 &&
+              (a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED')
+            ) {
+              exps.push({
+                id: `${a.id}-exp-dev`,
+                alumniId: a.id,
+                companyName: a.company ?? null,
+                position: a.jobTitle ?? null,
+                salary: a.salary ?? null,
+                location: a.location ?? null,
+                isCurrent: true,
+                startDate: `${a.graduationYear || 2020}-09-01T00:00:00.000Z`,
+                endDate: null,
+              });
+            }
+            out = { ...out, experiences: exps };
+          }
+          return out;
+        });
       }
       if (skip) profiles = profiles.slice(skip);
       if (take) profiles = profiles.slice(0, take);
@@ -148,9 +294,7 @@ class FakePrisma {
     },
     count: async ({ where }: any = {}) => {
       const store = readDevDb();
-      let profiles = store.alumniProfiles || [];
-      if (where?.departmentId) profiles = profiles.filter((a: any) => a.departmentId === where.departmentId);
-      return profiles.length;
+      return (store.alumniProfiles || []).filter((a: any) => matchWhere(a, where)).length;
     },
     create: async ({ data }: any) => {
       const store = readDevDb();
@@ -179,6 +323,19 @@ class FakePrisma {
       }
       return this.alumniProfile.create({ data: create });
     },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const idx = (store.alumniProfiles || []).findIndex((a: any) => {
+        if (where?.id) return a.id === where.id || a.userId === where.id;
+        if (where?.userId) return a.userId === where.userId;
+        if (where?.studentId) return a.studentId === where.studentId;
+        return false;
+      });
+      if (idx === -1) throw new Error('Alumni profile not found');
+      const [removed] = (store.alumniProfiles || []).splice(idx, 1);
+      writeDevDb(store);
+      return removed;
+    },
     deleteMany: async ({ where }: any = {}) => {
       const store = readDevDb();
       if (store.alumniProfiles) {
@@ -194,12 +351,76 @@ class FakePrisma {
     },
   };
 
-  employerProfile = {
-    findUnique: async ({ where }: any) => {
+  revokedToken = {
+    findUnique: async ({ where }: any = {}) => {
       const store = readDevDb();
-      if (where?.userId) return (store.employerProfiles || []).find((e: any) => e.userId === where.userId) || null;
-      if (where?.id) return (store.employerProfiles || []).find((e: any) => e.id === where.id) || null;
-      return null;
+      return (store.revokedTokens || []).find((t: any) => t.jti === where?.jti) || null;
+    },
+    create: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      if (!store.revokedTokens) store.revokedTokens = [];
+      const rec = {
+        id: data.id || `dev-revoked-${Date.now()}-${store.revokedTokens.length}`,
+        jti: data.jti,
+        userId: data.userId ?? null,
+        expiresAt: data.expiresAt,
+        revokedAt: data.revokedAt || new Date().toISOString(),
+      };
+      store.revokedTokens.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    upsert: async ({ where, create, update }: any = {}) => {
+      const store = readDevDb();
+      const existing = (store.revokedTokens || []).find((t: any) => t.jti === where?.jti);
+      if (existing) {
+        Object.assign(existing, update || {});
+        writeDevDb(store);
+        return existing;
+      }
+      return this.revokedToken.create({ data: create });
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.revokedTokens || []).length;
+      store.revokedTokens = (store.revokedTokens || []).filter((t: any) => {
+        if (where?.jti && t.jti === where.jti) return false;
+        if (where?.expiresAt?.lt && new Date(t.expiresAt) >= new Date(where.expiresAt.lt)) return true;
+        return true;
+      });
+      writeDevDb(store);
+      return { count: before - store.revokedTokens.length };
+    },
+  };
+
+  employerProfile = {
+    findUnique: async ({ where, include }: any) => {
+      const store = readDevDb();
+      let e: any = null;
+      if (where?.userId) e = (store.employerProfiles || []).find((p: any) => p.userId === where.userId) || null;
+      else if (where?.id) e = (store.employerProfiles || []).find((p: any) => p.id === where.id) || null;
+      if (e && include?.user && !e.user) {
+        const u = (store.users || []).find((user: any) => user.id === e.userId);
+        e = { ...e, user: u || { email: e.contactEmail || 'employer@astu.edu.et' } };
+      }
+      return e;
+    },
+    findMany: async ({ where, include, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let list = (store.employerProfiles || []).filter((e: any) => matchWhere(e, where));
+      if (include?.user) {
+        list = list.map((e: any) => {
+          const u = (store.users || []).find((user: any) => user.id === e.userId);
+          return { ...e, user: u || { email: e.contactEmail || 'employer@astu.edu.et' } };
+        });
+      }
+      if (skip) list = list.slice(skip);
+      if (take) list = list.slice(0, take);
+      return list;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.employerProfiles || []).filter((e: any) => matchWhere(e, where)).length;
     },
     create: async ({ data }: any) => {
       const store = readDevDb();
@@ -250,14 +471,142 @@ class FakePrisma {
 
   department = {
     findUnique: async ({ where }: any) => {
-      if (where.code) return this.store.departments.find((d: any) => d.code === where.code) || null;
-      if (where.id) return this.store.departments.find((d: any) => d.id === where.id) || null;
+      const store = readDevDb();
+      const depts: any[] = store.departments || [];
+      if (where?.code) return depts.find((d: any) => d.code === where.code) || null;
+      if (where?.id) return depts.find((d: any) => d.id === where.id) || null;
       return null;
+    },
+    // Without these the proxy falls through to createSafeModel, whose store is a
+    // throwaway empty array, so listing departments returned [] and looking one up
+    // by name always missed.
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const depts: any[] = store.departments || [];
+      if (!where || Object.keys(where).length === 0) return depts[0] || null;
+      return depts.find((d: any) => matchWhere(d, where)) || null;
+    },
+    findMany: async ({ where, orderBy, include }: any = {}) => {
+      const store = readDevDb();
+      let depts: any[] = [...(store.departments || [])];
+      if (where && Object.keys(where).length > 0) {
+        depts = depts.filter((d: any) => matchWhere(d, where));
+      }      if (orderBy?.name) {
+        const dir = orderBy.name === 'desc' ? -1 : 1;
+        depts.sort((a: any, b: any) => String(a?.name ?? '').localeCompare(String(b?.name ?? '')) * dir);
+      }
+      if (!include) return depts;
+
+      const alumni: any[] = store.alumniProfiles || [];
+      const headProfiles: any[] = store.departmentHeadProfiles || [];
+      const users: any[] = store.users || [];
+
+      return depts.map((dept) => {
+        const row: any = { ...dept };
+        if (include._count?.select?.alumniProfiles) {
+          row._count = {
+            ...(row._count || {}),
+            alumniProfiles: alumni.filter((a) => a?.departmentId === dept.id).length,
+          };
+        }
+        if (include.departmentHeadProfiles) {
+          row.departmentHeadProfiles = headProfiles
+            .filter((p) => p?.departmentId === dept.id)
+            .map((p) => ({
+              ...p,
+              user: include.departmentHeadProfiles?.include?.user
+                ? users.find((u) => u?.id === p.userId) || null
+                : undefined,
+            }));
+        }
+        if (include.alumniProfiles) {
+          const nested = include.alumniProfiles;
+          let matched = alumni.filter((a) => a?.departmentId === dept.id);
+          if (nested.where && Object.keys(nested.where).length > 0) {
+            matched = matched.filter((a) => matchWhere(a, nested.where));
+          }
+          row.alumniProfiles = matched.map((a) => {
+            const hydrated: any = { ...a };
+            if (nested.include?.experiences) {
+              hydrated.experiences = (store.workExperiences || []).filter(
+                (e: any) => e?.alumniId === a.id || e?.alumni?.id === a.id
+              );
+            }
+            if (nested.include?.employerFeedback) {
+              hydrated.employerFeedback = (store.employerFeedbacks || []).filter(
+                (f: any) => f?.alumniId === a.id || f?.alumni?.id === a.id
+              );
+            }
+            return hydrated;
+          });
+        }
+        return row;
+      });
+    },
+    // Without this the proxy synthesises a `count` backed by a throwaway array,
+    // so every department count silently reported 0.
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const depts: any[] = store.departments || [];
+      if (where && Object.keys(where).length > 0) {
+        return depts.filter((d: any) => matchWhere(d, where)).length;
+      }
+      return depts.length;
     },
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-dept-${Date.now()}` };
-      this.store.departments.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      if (!store.departments) store.departments = [];
+      store.departments.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+  };
+
+  departmentHeadProfile = {
+    findUnique: async ({ where }: any) => {
+      const profiles: any[] = readDevDb().departmentHeadProfiles || [];
+      if (where?.userId) return profiles.find((p: any) => p.userId === where.userId) || null;
+      if (where?.id) return profiles.find((p: any) => p.id === where.id) || null;
+      if (where?.departmentId) return profiles.find((p: any) => p.departmentId === where.departmentId) || null;
+      return null;
+    },
+    findFirst: async ({ where }: any = {}) => {
+      const profiles: any[] = readDevDb().departmentHeadProfiles || [];
+      if (where && Object.keys(where).length > 0) {
+        return profiles.find((p: any) => matchWhere(p, where)) || null;
+      }
+      return profiles[0] || null;
+    },
+    findMany: async ({ where }: any = {}) => {
+      const profiles: any[] = readDevDb().departmentHeadProfiles || [];
+      if (where && Object.keys(where).length > 0) {
+        return profiles.filter((p: any) => matchWhere(p, where));
+      }
+      return profiles;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      if (!store.departmentHeadProfiles) store.departmentHeadProfiles = [];
+      const rec = { ...data, id: data?.id || `dev-depthead-${Date.now()}`, createdAt: new Date().toISOString() };
+      store.departmentHeadProfiles.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      if (!store.departmentHeadProfiles) store.departmentHeadProfiles = [];
+      const existing = where?.userId
+        ? store.departmentHeadProfiles.find((p: any) => p.userId === where.userId)
+        : null;
+      if (existing) {
+        Object.assign(existing, update);
+        writeDevDb(store);
+        return existing;
+      }
+      const rec = { ...create, id: create?.id || `dev-depthead-${Date.now()}`, createdAt: new Date().toISOString() };
+      store.departmentHeadProfiles.push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
@@ -275,21 +624,23 @@ class FakePrisma {
       return this.store.registrarStudents.length;
     },
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-registrar-${Date.now()}`, importedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      this.store.registrarStudents.push(rec);
-      writeDevDb(this.store);
+      (store.registrarStudents || (store.registrarStudents = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.registrarStudents.findIndex((r: any) => r.studentId === where.studentId || r.id === where.id);
+      const store = this.store;
+      const idx = (store.registrarStudents || []).findIndex((r: any) => r.studentId === where.studentId || r.id === where.id);
       if (idx === -1) throw new Error('Registrar student record not found');
-      this.store.registrarStudents[idx] = {
-        ...this.store.registrarStudents[idx],
+      store.registrarStudents[idx] = {
+        ...store.registrarStudents[idx],
         ...data,
         updatedAt: new Date().toISOString(),
       };
-      writeDevDb(this.store);
-      return this.store.registrarStudents[idx];
+      writeDevDb(store);
+      return store.registrarStudents[idx];
     },
     upsert: async ({ where, create, update }: any) => {
       const existing = await this.registrarStudent.findUnique({ where });
@@ -302,9 +653,10 @@ class FakePrisma {
 
   registrarSyncLog = {
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-sync-${Date.now()}`, syncedAt: new Date().toISOString() };
-      this.store.registrarSyncLogs.push(rec);
-      writeDevDb(this.store);
+      (store.registrarSyncLogs || (store.registrarSyncLogs = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     findFirst: async ({ orderBy }: any = {}) => {
@@ -325,9 +677,10 @@ class FakePrisma {
 
   auditLog = {
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-log-${Date.now()}`, createdAt: new Date().toISOString() };
-      this.store.auditLogs.push(rec);
-      writeDevDb(this.store);
+      (store.auditLogs || (store.auditLogs = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
     findMany: async ({ where }: any = {}) => {
@@ -340,11 +693,17 @@ class FakePrisma {
   notification = {
     create: async ({ data }: any) => {
       const store = readDevDb();
-      const rec = { ...data, id: `dev-notif-${Date.now()}`, createdAt: new Date().toISOString(), isRead: false };
+      const rec = { ...data, id: data.id || `dev-notif-${Date.now()}`, createdAt: new Date().toISOString(), isRead: false };
       if (!store.notifications) store.notifications = [];
       store.notifications.push(rec);
       writeDevDb(store);
       return rec;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const items = store.notifications || [];
+      if (where?.id) return items.find((n: any) => n.id === where.id) || null;
+      return null;
     },
     findMany: async ({ where, orderBy }: any = {}) => {
       const store = readDevDb();
@@ -370,10 +729,23 @@ class FakePrisma {
       return items.length;
     },
     update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const items = store.notifications || [];
+      const idx = items.findIndex((n: any) => n.id === where.id);
+      if (idx >= 0) { items[idx] = { ...items[idx], ...data }; writeDevDb(store); return items[idx]; }
       return { id: where.id, ...data };
     },
     updateMany: async ({ where, data }: any) => {
-      return { count: 0 };
+      const store = readDevDb();
+      let items = store.notifications || [];
+      if (where?.userId) items = items.filter((n: any) => n.userId === where.userId);
+      if (where?.isRead !== undefined) items = items.filter((n: any) => n.isRead === where.isRead);
+      if (items.length > 0 && store.notifications) {
+        const ids = new Set(items.map((n: any) => n.id));
+        store.notifications = store.notifications.map((n: any) => ids.has(n.id) ? { ...n, ...data } : n);
+        writeDevDb(store);
+      }
+      return { count: items.length };
     },
   };
 
@@ -423,10 +795,10 @@ class FakePrisma {
       return docs;
     },
     create: async ({ data }: any) => {
+      const store = this.store;
       const rec = { ...data, id: `dev-doc-${Date.now()}`, createdAt: new Date().toISOString(), status: 'PENDING' };
-      if (!this.store.documentRequests) this.store.documentRequests = [];
-      this.store.documentRequests.push(rec);
-      writeDevDb(this.store);
+      (store.documentRequests || (store.documentRequests = [])).push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
@@ -616,9 +988,357 @@ class FakePrisma {
     upsert: async ({ create }: any) => ({ ...create, id: `dev-view-${Date.now()}` }),
   };
 
+  survey = {
+    findUnique: async ({ where, include }: any = {}) => {
+      const store = readDevDb();
+      const s = (store.surveys || []).find((x: any) => x.id === where?.id) || null;
+      return s ? surveyDates(surveyWithRelations(s, include, store)) : null;
+    },
+    findFirst: async ({ where, include, orderBy }: any = {}) => {
+      const store = readDevDb();
+      const item = applyOrder((store.surveys || []).filter((x: any) => matchWhere(x, where)), orderBy)[0] || null;
+      return item ? surveyDates(surveyWithRelations(item, include, store)) : null;
+    },
+    findMany: async ({ where, include, orderBy, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let items = applyOrder((store.surveys || []).filter((x: any) => matchWhere(x, where)), orderBy);
+      if (skip) items = items.slice(skip);
+      if (take) items = items.slice(0, take);
+      return items.map((s: any) => surveyDates(surveyWithRelations(s, include, store)));
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.surveys || []).filter((x: any) => matchWhere(x, where)).length;
+    },
+    create: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const id = data.id || `dev-survey-${Date.now()}`;
+      const now = new Date().toISOString();
+      const rec = {
+        id,
+        title: data.title,
+        description: data.description ?? '',
+        type: data.type ?? 'CUSTOM',
+        milestoneMonths: data.milestoneMonths ?? null,
+        scheduledAt: data.scheduledAt ?? null,
+        isActive: data.isActive ?? true,
+        isArchived: data.isArchived ?? false,
+        departmentId: data.departmentId ?? null,
+        createdByUserId: data.createdByUserId ?? null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      if (!store.surveys) store.surveys = [];
+      store.surveys.push(rec);
+      if (data.questions?.create && Array.isArray(data.questions.create)) {
+        if (!store.surveyQuestions) store.surveyQuestions = [];
+        for (const q of data.questions.create) store.surveyQuestions.push(buildSurveyQuestion(id, null, q));
+      }
+      if (data.sections?.create && Array.isArray(data.sections.create)) {
+        if (!store.surveySections) store.surveySections = [];
+        data.sections.create.forEach((sec: any, i: number) => {
+          const srec = {
+            id: sec.id || `dev-ss-${Date.now()}-${i}`,
+            surveyId: id,
+            title: sec.title,
+            description: sec.description ?? null,
+            order: sec.order ?? i,
+            createdAt: now,
+            updatedAt: now,
+          };
+          store.surveySections.push(srec);
+          if (sec.questions?.create && Array.isArray(sec.questions.create)) {
+            if (!store.surveyQuestions) store.surveyQuestions = [];
+            for (const q of sec.questions.create) store.surveyQuestions.push(buildSurveyQuestion(id, srec.id, q));
+          }
+        });
+      }
+      writeDevDb(store);
+      return surveyDates(surveyWithRelations(rec, data.include ?? {}, store));
+    },
+    update: async ({ where, data, include }: any = {}) => {
+      const store = readDevDb();
+      const idx = (store.surveys || []).findIndex((x: any) => x.id === where?.id);
+      if (idx === -1) throw new Error('Survey not found');
+      const rec = { ...store.surveys[idx], ...data, updatedAt: new Date().toISOString() };
+      store.surveys[idx] = rec;
+      writeDevDb(store);
+      return surveyDates(surveyWithRelations(rec, include ?? {}, store));
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const idx = (store.surveys || []).findIndex((x: any) => x.id === where?.id);
+      if (idx === -1) return {};
+      const [removed] = store.surveys.splice(idx, 1);
+      store.surveyQuestions = (store.surveyQuestions || []).filter((q: any) => q.surveyId !== where.id);
+      store.surveySections = (store.surveySections || []).filter((s: any) => s.surveyId !== where.id);
+      const respIds = new Set((store.surveyResponses || []).filter((r: any) => r.surveyId === where.id).map((r: any) => r.id));
+      store.surveyAnswers = (store.surveyAnswers || []).filter((a: any) => !respIds.has(a.responseId));
+      store.surveyResponses = (store.surveyResponses || []).filter((r: any) => r.surveyId !== where.id);
+      store.surveyAssignments = (store.surveyAssignments || []).filter((a: any) => a.surveyId !== where.id);
+      writeDevDb(store);
+      return removed;
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const ids = new Set((store.surveys || []).filter((x: any) => matchWhere(x, where)).map((x: any) => x.id));
+      store.surveys = (store.surveys || []).filter((x: any) => !ids.has(x.id));
+      store.surveyQuestions = (store.surveyQuestions || []).filter((q: any) => !ids.has(q.surveyId));
+      store.surveySections = (store.surveySections || []).filter((s: any) => !ids.has(s.surveyId));
+      store.surveyResponses = (store.surveyResponses || []).filter((r: any) => !ids.has(r.surveyId));
+      store.surveyAssignments = (store.surveyAssignments || []).filter((a: any) => !ids.has(a.surveyId));
+      writeDevDb(store);
+      return { count: ids.size };
+    },
+  };
+
+  surveySection = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.surveySections || []).find((s: any) => s.id === where?.id) || null;
+    },
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      return applyOrder((store.surveySections || []).filter((s: any) => matchWhere(s, where)), orderBy);
+    },
+    create: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const rec = {
+        id: data.id || `dev-ss-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        surveyId: data.surveyId,
+        title: data.title,
+        description: data.description ?? null,
+        order: data.order ?? 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.surveySections) store.surveySections = [];
+      store.surveySections.push(rec);
+      if (data.questions?.create && Array.isArray(data.questions.create)) {
+        if (!store.surveyQuestions) store.surveyQuestions = [];
+        for (const q of data.questions.create) store.surveyQuestions.push(buildSurveyQuestion(data.surveyId, rec.id, q));
+      }
+      writeDevDb(store);
+      return rec;
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.surveySections || []).length;
+      store.surveySections = (store.surveySections || []).filter((s: any) => !matchWhere(s, where));
+      store.surveyQuestions = (store.surveyQuestions || []).filter((q: any) => !(store.surveySections || []).some((s: any) => s.id === q.sectionId) && q.sectionId);
+      writeDevDb(store);
+      return { count: before - (store.surveySections || []).length };
+    },
+  };
+
+  surveyQuestion = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.surveyQuestions || []).find((q: any) => q.id === where?.id) || null;
+    },
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      return applyOrder((store.surveyQuestions || []).filter((q: any) => matchWhere(q, where)), orderBy);
+    },
+    create: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const rec = buildSurveyQuestion(data.surveyId, data.sectionId ?? null, data);
+      if (!store.surveyQuestions) store.surveyQuestions = [];
+      store.surveyQuestions.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const items = Array.isArray(data) ? data : data?.create || data || [];
+      if (!store.surveyQuestions) store.surveyQuestions = [];
+      for (const q of items) store.surveyQuestions.push(buildSurveyQuestion(q.surveyId, q.sectionId ?? null, q));
+      writeDevDb(store);
+      return { count: items.length };
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.surveyQuestions || []).length;
+      store.surveyQuestions = (store.surveyQuestions || []).filter((q: any) => !matchWhere(q, where));
+      writeDevDb(store);
+      return { count: before - (store.surveyQuestions || []).length };
+    },
+  };
+
+  surveyAnswer = {
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.surveyAnswers || []).filter((a: any) => matchWhere(a, where));
+    },
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const items = Array.isArray(data) ? data : data?.create || [];
+      if (!store.surveyAnswers) store.surveyAnswers = [];
+      for (const a of items) {
+        store.surveyAnswers.push({
+          id: a.id || `dev-sa-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          responseId: a.responseId,
+          questionId: a.questionId,
+          answerText: a.answerText,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+      writeDevDb(store);
+      return { count: items.length };
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.surveyAnswers || []).length;
+      store.surveyAnswers = (store.surveyAnswers || []).filter((a: any) => !matchWhere(a, where));
+      writeDevDb(store);
+      return { count: before - (store.surveyAnswers || []).length };
+    },
+  };
+
+  surveyResponse = {
+    findUnique: async ({ where, include }: any = {}) => {
+      const store = readDevDb();
+      const r = (store.surveyResponses || []).find((x: any) => x.id === where?.id) || null;
+      return r ? responseWithRelations(r, include, store) : null;
+    },
+    findFirst: async ({ where, include, orderBy }: any = {}) => {
+      const store = readDevDb();
+      const r = applyOrder((store.surveyResponses || []).filter((x: any) => matchWhere(x, where)), orderBy)[0] || null;
+      return r ? responseWithRelations(r, include, store) : null;
+    },
+    findMany: async ({ where, include, orderBy }: any = {}) => {
+      const store = readDevDb();
+      return applyOrder((store.surveyResponses || []).filter((x: any) => matchWhere(x, where)), orderBy)
+        .map((r: any) => responseWithRelations(r, include, store));
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.surveyResponses || []).filter((x: any) => matchWhere(x, where)).length;
+    },
+    create: async ({ data, include }: any = {}) => {
+      const store = readDevDb();
+      const id = data.id || `dev-sr-${Date.now()}`;
+      const rec = {
+        id,
+        surveyId: data.surveyId,
+        alumniId: data.alumniId,
+        assignmentId: data.assignmentId ?? null,
+        isDraft: data.isDraft ?? false,
+        submittedAt: data.submittedAt ?? null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.surveyResponses) store.surveyResponses = [];
+      store.surveyResponses.push(rec);
+      if (data.answers?.create && Array.isArray(data.answers.create)) {
+        if (!store.surveyAnswers) store.surveyAnswers = [];
+        for (const a of data.answers.create) {
+          store.surveyAnswers.push({
+            id: `dev-sa-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            responseId: id,
+            questionId: a.questionId,
+            answerText: a.answerText,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+      writeDevDb(store);
+      return responseWithRelations(rec, include ?? { answers: true, survey: true }, store);
+    },
+    update: async ({ where, data, include }: any = {}) => {
+      const store = readDevDb();
+      const idx = (store.surveyResponses || []).findIndex((x: any) => x.id === where?.id);
+      if (idx === -1) throw new Error('Survey response not found');
+      const rec = { ...store.surveyResponses[idx], ...data, updatedAt: new Date().toISOString() };
+      store.surveyResponses[idx] = rec;
+      if (data.answers?.create && Array.isArray(data.answers.create)) {
+        store.surveyAnswers = (store.surveyAnswers || []).filter((a: any) => a.responseId !== where.id);
+        if (!store.surveyAnswers) store.surveyAnswers = [];
+        for (const a of data.answers.create) {
+          store.surveyAnswers.push({
+            id: `dev-sa-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            responseId: where.id,
+            questionId: a.questionId,
+            answerText: a.answerText,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+      writeDevDb(store);
+      return responseWithRelations(rec, include ?? { answers: true, survey: true }, store);
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.surveyResponses || []).length;
+      store.surveyResponses = (store.surveyResponses || []).filter((x: any) => !matchWhere(x, where));
+      writeDevDb(store);
+      return { count: before - (store.surveyResponses || []).length };
+    },
+  };
+
   surveyAssignment = {
-    count: async (_args?: any) => 0,
-    findMany: async (_args?: any) => [],
+    findUnique: async ({ where, include }: any = {}) => {
+      const store = readDevDb();
+      const a = (store.surveyAssignments || []).find((x: any) => x.id === where?.id) || null;
+      return a ? assignmentWithRelations(a, include, store) : null;
+    },
+    findFirst: async ({ where, include, orderBy }: any = {}) => {
+      const store = readDevDb();
+      const a = applyOrder((store.surveyAssignments || []).filter((x: any) => matchWhere(x, where)), orderBy)[0] || null;
+      return a ? assignmentWithRelations(a, include, store) : null;
+    },
+    findMany: async ({ where, include, orderBy }: any = {}) => {
+      const store = readDevDb();
+      return applyOrder((store.surveyAssignments || []).filter((x: any) => matchWhere(x, where)), orderBy)
+        .map((a: any) => assignmentWithRelations(a, include, store));
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.surveyAssignments || []).filter((x: any) => matchWhere(x, where)).length;
+    },
+    create: async ({ data, include }: any = {}) => {
+      const store = readDevDb();
+      const rec = {
+        id: data.id || `dev-sass-${Date.now()}`,
+        surveyId: data.surveyId,
+        alumniId: data.alumniId,
+        status: data.status ?? 'PENDING',
+        assignedAt: data.assignedAt ?? new Date().toISOString(),
+        dueDate: data.dueDate ?? new Date().toISOString(),
+        completedAt: data.completedAt ?? null,
+        sevenDayReminderSent: data.sevenDayReminderSent ?? false,
+        threeDayReminderSent: data.threeDayReminderSent ?? false,
+        overdueReminderSent: data.overdueReminderSent ?? false,
+        responseId: data.responseId ?? null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.surveyAssignments) store.surveyAssignments = [];
+      store.surveyAssignments.push(rec);
+      writeDevDb(store);
+      const defInclude = { survey: { include: { questions: true, sections: { include: { questions: true } } } }, alumni: true };
+      return assignmentWithRelations(rec, include ?? defInclude, store);
+    },
+    update: async ({ where, data, include }: any = {}) => {
+      const store = readDevDb();
+      const idx = (store.surveyAssignments || []).findIndex((x: any) => x.id === where?.id);
+      if (idx === -1) throw new Error('Survey assignment not found');
+      const rec = { ...store.surveyAssignments[idx], ...data, updatedAt: new Date().toISOString() };
+      store.surveyAssignments[idx] = rec;
+      writeDevDb(store);
+      const defInclude = { survey: { include: { questions: true, sections: { include: { questions: true } } } }, alumni: true };
+      return assignmentWithRelations(rec, include ?? defInclude, store);
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.surveyAssignments || []).length;
+      store.surveyAssignments = (store.surveyAssignments || []).filter((x: any) => !matchWhere(x, where));
+      writeDevDb(store);
+      return { count: before - (store.surveyAssignments || []).length };
+    },
   };
 
   eventRegistration = {
@@ -680,6 +1400,158 @@ class FakePrisma {
     },
   };
 
+  contentItem = {
+    findMany: async ({ where, orderBy, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let items = [...(store.contentItems || [])];
+      if (where?.status) items = items.filter((i: any) => i.status?.toUpperCase() === where.status?.toUpperCase());
+      if (where?.type) items = items.filter((i: any) => i.type?.toUpperCase() === where.type?.toUpperCase());
+      if (where?.featured !== undefined) items = items.filter((i: any) => i.featured === where.featured);
+      if (where?.pinned !== undefined) items = items.filter((i: any) => i.pinned === where.pinned);
+      if (where?.OR && Array.isArray(where.OR)) {
+        const query = (where.OR[0]?.title?.contains || where.OR[0]?.excerpt?.contains || '').toLowerCase();
+        if (query) {
+          items = items.filter((i: any) =>
+            (i.title || '').toLowerCase().includes(query) ||
+            (i.excerpt || '').toLowerCase().includes(query) ||
+            (i.tags || []).some((t: string) => t.toLowerCase().includes(query))
+          );
+        }
+      }
+      if (orderBy?.createdAt === 'desc') {
+        items.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      }
+      if (skip) items = items.slice(skip);
+      if (take) items = items.slice(0, take);
+      return items;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const items = store.contentItems || [];
+      if (where?.id) return items.find((i: any) => i.id === where.id) || null;
+      if (where?.slug) return items.find((i: any) => i.slug === where.slug) || null;
+      return null;
+    },
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const items = store.contentItems || [];
+      if (where?.id) return items.find((i: any) => i.id === where.id) || null;
+      if (where?.slug) return items.find((i: any) => i.slug === where.slug) || null;
+      return items[0] || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let items = store.contentItems || [];
+      if (where?.status) items = items.filter((i: any) => i.status?.toUpperCase() === where.status?.toUpperCase());
+      if (where?.type) items = items.filter((i: any) => i.type?.toUpperCase() === where.type?.toUpperCase());
+      return items.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = {
+        id: data.id || `C-${Date.now().toString().slice(-4)}`,
+        ...data,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.contentItems) store.contentItems = [];
+      store.contentItems.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const idx = (store.contentItems || []).findIndex((i: any) => i.id === where.id || i.slug === where.slug);
+      if (idx === -1) throw new Error('Content item not found');
+      store.contentItems[idx] = { ...store.contentItems[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.contentItems[idx];
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.contentItems) {
+        const idx = store.contentItems.findIndex((i: any) => i.id === where.id);
+        if (idx !== -1) {
+          const removed = store.contentItems.splice(idx, 1)[0];
+          writeDevDb(store);
+          return removed;
+        }
+      }
+      return {};
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      const existing = (store.contentItems || []).find((i: any) => i.id === where.id || i.slug === where.slug);
+      if (existing) {
+        return this.contentItem.update({ where, data: update });
+      }
+      return this.contentItem.create({ data: create });
+    },
+  };
+
+  mediaAsset = {
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let items = store.mediaAssets || [];
+      if (where?.album) items = items.filter((m: any) => m.album === where.album);
+      return items;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `media-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      if (!store.mediaAssets) store.mediaAssets = [];
+      store.mediaAssets.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.mediaAssets) {
+        store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
+        writeDevDb(store);
+      }
+      return {};
+    },
+  };
+
+  homepageConfig = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const configs = store.homepageConfigs || [];
+      return configs.find((c: any) => c.key === (where?.key || 'main')) || null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      if (!store.homepageConfigs) store.homepageConfigs = [];
+      const key = where?.key || 'main';
+      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
+      if (idx !== -1) {
+        store.homepageConfigs[idx] = { ...store.homepageConfigs[idx], ...update, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return store.homepageConfigs[idx];
+      }
+      const rec = { id: `hc-${Date.now()}`, key, ...create, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.homepageConfigs.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      if (!store.homepageConfigs) store.homepageConfigs = [];
+      const key = where?.key || 'main';
+      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
+      if (idx !== -1) {
+        store.homepageConfigs[idx] = { ...store.homepageConfigs[idx], ...data, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return store.homepageConfigs[idx];
+      }
+      const rec = { id: `hc-${Date.now()}`, key, ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.homepageConfigs.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+  };
+
   // Catch-all: for any model not explicitly defined, return safe no-ops
   [key: string]: any;
 
@@ -694,6 +1566,173 @@ let client: any = null;
 let initialized = false;
 let fallback: any = null;
 let usingFallback = false;
+
+// ─── Survey / relation helpers for FakePrisma ───
+const toDate = (v: any): any => (v == null || v instanceof Date ? v : new Date(v));
+
+function matchWhere(record: any, where: any): boolean {
+  if (!where || typeof where !== 'object') return true;
+  for (const [key, cond] of Object.entries(where) as any) {
+    if (key === 'OR' || key === 'AND') {
+      const pass = key === 'OR'
+        ? (cond || []).some((c: any) => matchWhere(record, c))
+        : (cond || []).every((c: any) => matchWhere(record, c));
+      if (!pass) return false;
+      continue;
+    }
+    if (key === 'NOT') {
+      if (matchWhere(record, cond)) return false;
+      continue;
+    }
+    const val = record[key];
+    if (cond && typeof cond === 'object' && !Array.isArray(cond) && !(cond instanceof Date)) {
+      for (const [op, opVal] of Object.entries(cond) as any) {
+        if (op === 'in') { if (!(opVal || []).includes(val)) return false; }
+        else if (op === 'notIn') { if ((opVal || []).includes(val)) return false; }
+        else if (op === 'not') { if (val === opVal) return false; }
+        else if (op === 'contains') { if (!String(val ?? '').toLowerCase().includes(String(opVal).toLowerCase())) return false; }
+        else if (op === 'notContains') { if (String(val ?? '').toLowerCase().includes(String(opVal).toLowerCase())) return false; }
+        else if (op === 'lte') { if (Number(val) > Number(opVal)) return false; }
+        else if (op === 'gte') { if (Number(val) < Number(opVal)) return false; }
+        else if (op === 'lt') { if (Number(val) >= Number(opVal)) return false; }
+        else if (op === 'gt') { if (Number(val) <= Number(opVal)) return false; }
+        else if (op === 'has') { const arr = val || []; if (!arr.includes(opVal)) return false; }
+        else if (op === 'hasSome') { const arr = val || []; if (!(opVal || []).some((o: any) => arr.includes(o))) return false; }
+      }
+    } else if ((val === undefined ? null : val) !== (cond === undefined ? null : cond)) {
+      // A missing key and an explicit null both mean SQL NULL, so they must compare equal.
+      // Without this, filters like { departmentId: null } silently drop records whose
+      // field was never written.
+      return false;
+    }
+  }
+  return true;
+}
+
+function applyOrder(items: any[], orderBy: any): any[] {
+  if (!orderBy) return items;
+  const rules = Array.isArray(orderBy) ? orderBy : [orderBy];
+  return [...items].sort((a, b) => {
+    for (const rule of rules) {
+      for (const [key, dir] of Object.entries(rule) as any) {
+        const av = a[key];
+        const bv = b[key];
+        if (av === bv) continue;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        const cmp = av > bv ? 1 : -1;
+        return typeof dir === 'string' && dir.toLowerCase() === 'desc' ? -cmp : cmp;
+      }
+    }
+    return 0;
+  });
+}
+
+const buildSurveyQuestion = (surveyId: string, sectionId: string | null, q: any) => ({
+  id: q.id || `dev-sq-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  surveyId,
+  sectionId: sectionId ?? null,
+  questionText: q.questionText,
+  questionType: q.questionType ?? 'TEXT',
+  required: q.required ?? false,
+  placeholder: q.placeholder ?? null,
+  helpText: q.helpText ?? null,
+  validationRules: q.validationRules ?? null,
+  options: q.options || [],
+  order: q.order ?? 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});
+
+function surveyWithRelations(survey: any, include: any, store: any) {
+  const out: any = { ...survey };
+  const inc: any = include?.include ?? include;
+  if (inc?.sections) {
+    out.sections = (store.surveySections || [])
+      .filter((s: any) => s.surveyId === survey.id)
+      .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+    if (inc.sections?.include?.questions) {
+      out.sections = out.sections.map((s: any) => ({
+        ...s,
+        questions: (store.surveyQuestions || [])
+          .filter((q: any) => q.sectionId === s.id)
+          .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)),
+      }));
+    }
+  }
+  if (inc?.questions) {
+    out.questions = (store.surveyQuestions || [])
+      .filter((q: any) => q.surveyId === survey.id && !q.sectionId)
+      .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+  }
+  if (inc?._count?.select) {
+    out._count = {
+      assignments: (store.surveyAssignments || []).filter((a: any) => a.surveyId === survey.id).length,
+      responses: (store.surveyResponses || []).filter((r: any) => r.surveyId === survey.id).length,
+    };
+  }
+  return out;
+}
+
+function surveyDates(s: any) {
+  return {
+    ...s,
+    createdAt: toDate(s.createdAt),
+    updatedAt: toDate(s.updatedAt),
+    scheduledAt: toDate(s.scheduledAt),
+  };
+}
+
+function assignmentWithRelations(ass: any, include: any, store: any) {
+  const out: any = { ...ass };
+  if (include?.survey) {
+    const survey = (store.surveys || []).find((s: any) => s.id === ass.surveyId);
+    out.survey = survey ? surveyDates(surveyWithRelations(survey, include.survey, store)) : null;
+  }
+  if (include?.alumni) {
+    out.alumni = (store.alumniProfiles || []).find((a: any) => a.id === ass.alumniId) || null;
+  }
+  return out;
+}
+
+function responseWithRelations(resp: any, include: any, store: any) {
+  const out: any = {
+    ...resp,
+    createdAt: toDate(resp.createdAt),
+    updatedAt: toDate(resp.updatedAt),
+    submittedAt: toDate(resp.submittedAt),
+  };
+  if (include?.answers) {
+    out.answers = (store.surveyAnswers || [])
+      .filter((a: any) => a.responseId === resp.id)
+      .map((a: any) => {
+        const rec: any = { ...a, createdAt: toDate(a.createdAt), updatedAt: toDate(a.updatedAt) };
+        if (include.answers?.include?.question) {
+          rec.question = (store.surveyQuestions || []).find((q: any) => q.id === a.questionId) || null;
+        }
+        return rec;
+      });
+  }
+  if (include?.survey) {
+    const survey = (store.surveys || []).find((s: any) => s.id === resp.surveyId);
+    out.survey = survey ? surveyDates({ ...survey }) : null;
+  }
+  if (include?.alumni) {
+    const prof = (store.alumniProfiles || []).find((a: any) => a.id === resp.alumniId);
+    if (prof) {
+      const al: any = { ...prof };
+      if (include.alumni?.include?.department) al.department = (store.departments || []).find((d: any) => d.id === prof.departmentId) || null;
+      if (include.alumni?.include?.user) {
+        const usr = (store.users || []).find((u: any) => u.id === prof.userId || u.email === prof.email);
+        al.user = usr || { email: prof.email || 'alumni@astu.edu.et' };
+      }
+      out.alumni = al;
+    } else {
+      out.alumni = null;
+    }
+  }
+  return out;
+}
 
 const createSafeModel = (name: string) => {
   const store: any[] = [];
@@ -876,8 +1915,22 @@ function wrapModel(modelName: string, realModel: any): any {
   });
 }
 
+const isTestRun = (): boolean =>
+  process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+
 export const initPrisma = async () => {
   if (initialized && client) return client;
+
+  // Tests must never reach a real database. The suite creates and deletes
+  // users, alumni and jobs, so a live DATABASE_URL in .env would otherwise let
+  // `npm test` mutate the real dataset. Tests always use the in-memory store.
+  if (isTestRun()) {
+    Logger.warn('\u26a0\ufe0f Test run detected \u2014 using the in-memory store, never a real database.');
+    client = getFallback();
+    usingFallback = true;
+    initialized = true;
+    return client;
+  }
 
   const rawUrl = process.env.DATABASE_URL || '';
   let dbUrl = rawUrl;
@@ -899,7 +1952,19 @@ export const initPrisma = async () => {
     await real.$connect();
     client = real;
     usingFallback = false;
-    Logger.info('✅ Connected to Neon Postgres database via Prisma.');
+    // Report the database we actually reached. Hardcoding a provider name here
+    // previously logged "Neon" even when pointed at a local database, which
+    // makes it impossible to tell from the logs which data is live.
+    const target = (() => {
+      try {
+        const u = new URL(dbUrl || process.env.DATABASE_URL || '');
+        const db = u.pathname.replace(/^\//, '') || '(default)';
+        return `${u.hostname}/${db}`;
+      } catch {
+        return '(url unavailable)';
+      }
+    })();
+    Logger.info(`✅ Connected to PostgreSQL via Prisma: ${target}`);
   } catch (e: any) {
     if (process.env.NODE_ENV === 'test') {
       Logger.warn('⚠️ Real PostgreSQL connection failed during tests. Falling back to FakePrisma.');

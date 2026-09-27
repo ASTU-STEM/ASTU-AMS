@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendSuccess } from '../../../core/utils/response.utils';
+import { TokenRevocationService } from '../../../core/services/TokenRevocationService';
+import { verifyRefreshToken } from '../../../core/utils/jwt.utils';
 import { PrismaUserRepository } from '../infrastructure/repositories/PrismaUserRepository';
 import { PrismaAuditLogRepository } from '../infrastructure/repositories/PrismaAuditLogRepository';
 import { LoginUser } from '../application/use-cases/LoginUser';
@@ -84,7 +86,23 @@ export class AuthController {
 
   static async logout(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user?.userId;
+      const user = (req as any).user;
+      const userId = user?.userId;
+
+      // Revoke the presented access token so it cannot be replayed after logout.
+      await TokenRevocationService.revoke(user || {});
+
+      // Revoke the refresh token too, otherwise the client can mint a new access
+      // token for up to JWT_REFRESH_EXPIRY after the user believes they left.
+      const refreshToken = req.body?.refreshToken || req.headers['x-refresh-token'];
+      if (typeof refreshToken === 'string' && refreshToken.length > 0) {
+        try {
+          await TokenRevocationService.revoke(verifyRefreshToken(refreshToken));
+        } catch {
+          // An unparseable refresh token is already useless; nothing to revoke.
+        }
+      }
+
       const useCase = new LogoutUser(auditLogRepository);
       await useCase.execute(userId, req.ip || 'unknown');
       return sendSuccess(res, 'Logout successful', null);

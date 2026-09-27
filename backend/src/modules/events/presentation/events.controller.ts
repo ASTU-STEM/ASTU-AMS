@@ -38,7 +38,7 @@ export const updateEventController = async (req: Request, res: Response, next: N
       dataToUpdate.date = new Date(validatedData.date) as any;
     }
     const useCase = new UpdateEvent(repo);
-    const event = await useCase.execute(req.params.eventId, (req as any).user.userId, dataToUpdate as any);
+    const event = await useCase.execute(req.params.eventId, (req as any).user?.userId || 'system', dataToUpdate as any);
     res.json({ success: true, data: event });
   } catch (error) {
     next(error);
@@ -48,7 +48,7 @@ export const updateEventController = async (req: Request, res: Response, next: N
 export const deleteEventController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const useCase = new DeleteEvent(repo);
-    await useCase.execute(req.params.eventId, (req as any).user.userId);
+    await useCase.execute(req.params.eventId, (req as any).user?.userId || 'system');
     res.json({ success: true, message: 'Event deleted successfully' });
   } catch (error) {
     next(error);

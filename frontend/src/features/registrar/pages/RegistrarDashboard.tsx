@@ -77,11 +77,7 @@ const RegistrarDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Duplicate record warnings resolved in class batch 2024.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
   const [graduates, setGraduates] = useState<any[]>([]);
@@ -298,6 +294,8 @@ const RegistrarDashboard = () => {
       setNotifications(realNotifs);
     }
   }, [documents, verifications, registrationIssues]);
+
+  const verifiedRate = totalGraduatesCount > 0 ? Math.round((verifiedAlumniCount / totalGraduatesCount) * 100) : 0;
 
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;

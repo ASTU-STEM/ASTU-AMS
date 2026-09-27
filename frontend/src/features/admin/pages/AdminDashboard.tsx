@@ -66,13 +66,6 @@ const quickActions = [
   { label: 'Analytics', icon: Activity, path: '/admin/analytics', accent: '#0284C7' },
 ];
 
-const systemHealthMetrics = [
-  { label: 'API Response Time', value: '124ms', status: 'healthy' as const, trend: '12ms ↓' },
-  { label: 'Database Queries', value: '2.4k/min', status: 'healthy' as const, trend: 'Stable' },
-  { label: 'Error Rate', value: '0.02%', status: 'healthy' as const, trend: '0.01% ↓' },
-  { label: 'Active Sessions', value: '156', status: 'healthy' as const, trend: '+8 today' },
-];
-
 const statToneClasses: Record<string, { circle: string; label: string; border: string }> = {
   '#003580': { circle: 'bg-[#003580]/10 text-[#003580]', label: 'text-[#003580]', border: 'border-[#003580]' },
   '#E8A020': { circle: 'bg-[#E8A020]/10 text-[#B87900]', label: 'text-[#B87900]', border: 'border-[#E8A020]' },
@@ -87,6 +80,20 @@ function TrendChip({ text, tone }: { text: string; tone: TrendTone }) {
       : 'bg-[#EF9F27]/10 text-[#B86D00] border-[#EF9F27]/15';
 
   return <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold ${classes}`}>{text}</span>;
+}
+
+function StatusDot({ status }: { status: string }) {
+  const classes: Record<string, string> = {
+    healthy: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    critical: 'bg-red-500',
+  };
+  return (
+    <span
+      className={`inline-block h-2 w-2 shrink-0 rounded-full ${classes[status] || 'bg-slate-400'}`}
+      aria-hidden="true"
+    />
+  );
 }
 
 function ChartCard({
@@ -111,18 +118,6 @@ function ChartCard({
       </div>
       <div className="mt-4">{children}</div>
     </div>
-  );
-}
-
-function StatusDot({ status }: { status: 'healthy' | 'warning' | 'critical' }) {
-  const colors = {
-    healthy: 'bg-emerald-400',
-    warning: 'bg-amber-400',
-    critical: 'bg-rose-400',
-  };
-
-  return (
-    <span className={`inline-block w-2 h-2 rounded-full ${colors[status]} shadow-lg ${status === 'healthy' ? 'animate-pulse' : ''}`} />
   );
 }
 
@@ -665,7 +660,7 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* System Health */}
+      {/* System Status */}
       <section className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="w-4 h-4 text-emerald-500" />
@@ -684,7 +679,7 @@ export default function AdminDashboard() {
           ].map((metric) => (
             <div key={metric.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition-all duration-200 hover:border-slate-200 hover:bg-white hover:shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">{metric.label}</span>
+                <span className={`text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400`}>{metric.label}</span>
                 <StatusDot status={metric.status} />
               </div>
               <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">{metric.value}</p>

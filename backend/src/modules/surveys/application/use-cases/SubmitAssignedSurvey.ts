@@ -1,4 +1,5 @@
 import { ISurveyAssignmentRepository } from '../ports/ISurveyAssignmentRepository';
+import { mapEmploymentStatusAnswer, type MappedEmploymentStatus } from '../../../../shared/employmentStatusText';
 import { ISurveyResponseRepository } from '../ports/ISurveyResponseRepository';
 import { ApiError } from '../../../../core/errors/ApiError';
 import { PrismaNotificationRepository } from '../../../notifications/infrastructure/repositories/PrismaNotificationRepository';
@@ -86,7 +87,7 @@ export class SubmitAssignedSurvey {
     });
 
     // Analyze answers to update AlumniProfile
-    let employmentStatus: 'EMPLOYED' | 'SELF_EMPLOYED' | 'UNEMPLOYED' | undefined;
+    let employmentStatus: MappedEmploymentStatus | undefined;
     let salary: number | undefined;
 
     for (const ans of validAnswers) {
@@ -94,10 +95,7 @@ export class SubmitAssignedSurvey {
       if (question) {
         const text = question.questionText.toLowerCase();
         if (text.includes('employment status')) {
-          const val = ans.answerText.toLowerCase();
-          if (val.includes('self-employed')) employmentStatus = 'SELF_EMPLOYED';
-          else if (val.includes('employed')) employmentStatus = 'EMPLOYED';
-          else employmentStatus = 'UNEMPLOYED';
+          employmentStatus = mapEmploymentStatusAnswer(ans.answerText);
         } else if (text.includes('monthly gross salary') || text.includes('monthly salary')) {
           const val = ans.answerText;
           if (val.includes('Under 10,000')) salary = 8000;

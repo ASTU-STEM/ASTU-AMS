@@ -225,7 +225,9 @@ export class ManageUsers {
 
         const resolvedWorkLocation = prefs.workLocation || prefs.location || (user.alumniProfile as any).workLocation || (user.alumniProfile as any).location || currentExp?.location || null;
         const resolvedSalaryRange = prefs.salaryRange || (user.alumniProfile as any).salaryRange || currentExp?.salaryRange || (user.alumniProfile.salary ? `${user.alumniProfile.salary} ETB/Month` : null);
-        const resolvedEmploymentStatus = user.alumniProfile.employmentStatus || prefs.employmentStatus || (resolvedCompany ? 'EMPLOYED' : 'UNEMPLOYED');
+        // Absent an employer, the graduate's status is simply unreported.
+        const resolvedEmploymentStatus =
+          user.alumniProfile.employmentStatus || prefs.employmentStatus || (resolvedCompany ? 'EMPLOYED' : 'UNSPECIFIED');
 
         alumniExtra = {
           cgpa: user.alumniProfile.cgpa,

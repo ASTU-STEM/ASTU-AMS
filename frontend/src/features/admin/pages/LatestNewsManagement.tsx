@@ -145,13 +145,13 @@ export default function LatestNewsManagement() {
         ].map(stat => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div key={stat.label} className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
               <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${stat.color}`}>
                 <Icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{stat.label}</p>
-                <p className="text-xl font-bold text-slate-900">{stat.value}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{stat.label}</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
               </div>
             </div>
           );
@@ -160,9 +160,9 @@ export default function LatestNewsManagement() {
 
       {/* Create Modal / Form Drawer */}
       {showCreate && (
-        <div className="rounded-xl border border-[#003580]/20 bg-[#003580]/5 p-5 fade-up">
+        <div className="rounded-xl border border-[#003580]/20 dark:border-[#003580]/40 bg-[#003580]/5 dark:bg-[#003580]/10 p-5 fade-up">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Megaphone className="h-4 w-4 text-[#003580]" /> Post New Announcement / News
             </h3>
             <button onClick={() => setShowCreate(false)} className="text-slate-400 hover:text-slate-600">
@@ -174,12 +174,12 @@ export default function LatestNewsManagement() {
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Title *</label>
               <input type="text" value={formTitle} onChange={e => setFormTitle(e.target.value)}
                 placeholder="e.g., ASTU AI Research Center Launch 2026"
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#003580]" />
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#003580]" />
             </div>
             <div>
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Category</label>
               <select value={formCategory} onChange={e => setFormCategory(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#003580]">
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#003580]">
                 {categories.filter(c => c !== 'All').map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
             </div>
@@ -187,7 +187,7 @@ export default function LatestNewsManagement() {
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Announcement Body / Summary *</label>
               <textarea rows={3} value={formSummary} onChange={e => setFormSummary(e.target.value)}
                 placeholder="Detailed announcement content..."
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#003580]" />
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#003580]" />
             </div>
           </div>
           <div className="flex items-center justify-end gap-2 mt-4">
@@ -206,13 +206,13 @@ export default function LatestNewsManagement() {
         <div className="relative flex-1 min-w-[200px] max-w-md">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search news and announcements..."
-            className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#003580]" />
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white pl-9 pr-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#003580]" />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           {categories.map(cat => (
             <button key={cat} onClick={() => setFilterCat(cat)}
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
-                filterCat === cat ? 'bg-[#003580] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                filterCat === cat ? 'bg-[#003580] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}>
               {cat}
             </button>
@@ -223,19 +223,19 @@ export default function LatestNewsManagement() {
       {/* List */}
       <div className="space-y-3">
         {filteredNews.map(n => (
-          <div key={n.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-[#003580]/30 transition-all">
+          <div key={n.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:border-[#003580]/30 transition-all">
             <div className="flex items-start gap-3 min-w-0">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580] font-bold text-xs">
                 {n.id}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{n.title}</h4>
-                  <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 uppercase tracking-wider">{n.category}</span>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{n.title}</h4>
+                  <span className="rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">{n.category}</span>
                   <AdminBadge variant={n.status === 'Published' ? 'success' : 'neutral'}>{n.status}</AdminBadge>
                 </div>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{n.summary}</p>
-                <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-400">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{n.summary}</p>
+                <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-400 dark:text-slate-500">
                   <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" /> {n.date}</span>
                   <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {n.views.toLocaleString()} views</span>
                 </div>
@@ -257,7 +257,7 @@ export default function LatestNewsManagement() {
         ))}
 
         {filteredNews.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center text-xs text-slate-500">
+          <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 py-12 text-center text-xs text-slate-500 dark:text-slate-400">
             No news or announcements match your search filters.
           </div>
         )}

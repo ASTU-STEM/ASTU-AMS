@@ -1,435 +1,615 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
-  GraduationCap, TrendingUp, Clock, DollarSign, FileCheck, Star,
-  Building2, Briefcase, RefreshCw, Download, ChevronRight,
-  ArrowUp, ArrowDown, Minus, FileText, MessageSquare, AlertCircle
+  Users,
+  Briefcase,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Building2,
+  MapPin,
+  GraduationCap,
+  ArrowRight,
+  AlertCircle,
+  RefreshCw,
+  Banknote,
+  BadgeCheck,
+  CalendarRange,
+  ClipboardList,
+  Lightbulb,
+  UserCheck,
 } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
-import {
-  DashboardOverviewFilters,
-  KPICard,
-  EmploymentTrendData,
-  TracerCompletionData,
-  TopHiringCompany,
-  TopIndustry,
-  SkillGapItem,
-  EmployerFeedbackScore,
-  CurriculumInsight,
-  RecentActivity
-} from '../types/dashboardOverview.types';
-import {
-  mockDashboardKPICards,
-  mockEmploymentTrendData,
-  mockTracerCompletionData,
-  mockTopHiringCompanies,
-  mockTopIndustries,
-  mockSkillGapItems,
-  mockEmployerFeedbackScores,
-  mockCurriculumInsights,
-  mockRecentActivities
-} from '../services/mockDashboardOverviewData';
+import { ActivityTimeline, type ActivityEntry } from '../../../components/ActivityTimeline';
+import { StatusBadge, formatSalary } from './employmentStatus';
+import type { DepartmentDerivedData } from '../hooks/useDepartmentData';
 
 interface DashboardOverviewProps {
+  data?: DepartmentDerivedData;
+  isLoading?: boolean;
+  error?: string | null;
   darkMode?: boolean;
+  onNavigate?: (tab: string) => void;
+  onRefresh?: () => Promise<void>;
+  lastUpdated?: number | null;
 }
 
-export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode = false }) => {
-  const [filters, setFilters] = useState<DashboardOverviewFilters>({
-    department: 'Computer Science',
-    academicYear: '2024',
-    tracerPeriod: '6-month'
-  });
+const Skeleton = ({ className = '' }: { className?: string }) => (
+  <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
+);
 
-  const handleRefresh = () => {
-    console.log('Refreshing data...');
-  };
+function formatLastUpdated(timestamp: number): string {
+  const diffMs = Date.now() - timestamp;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return 'just now';
+  if (minutes === 1) return '1 minute ago';
+  if (minutes < 60) return `${minutes} minutes ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours === 1) return '1 hour ago';
+  if (hours < 24) return `${hours} hours ago`;
+  return new Date(timestamp).toLocaleString();
+}
 
-  const handleExport = () => {
-    console.log('Exporting dashboard...');
-  };
+const Card = ({
+  darkMode,
+  className = '',
+  children,
+}: {
+  darkMode: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) => (
+  <div
+    className={`rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'} ${className}`}
+  >
+    {children}
+  </div>
+);
 
-  const getIcon = (iconName: string) => {
-    const iconMap: Record<string, React.ElementType> = {
-      'GraduationCap': GraduationCap,
-      'TrendingUp': TrendingUp,
-      'Clock': Clock,
-      'DollarSign': DollarSign,
-      'FileCheck': FileCheck,
-      'Star': Star,
-      'Building2': Building2,
-      'Briefcase': Briefcase,
-      'FileText': FileText,
-      'MessageSquare': MessageSquare,
-      'AlertCircle': AlertCircle
-    };
-    const Icon = iconMap[iconName] || TrendingUp;
-    return <Icon className="h-5 w-5" />;
-  };
+const PanelHeader = ({
+  icon: Icon,
+  title,
+  darkMode,
+}: {
+  icon: React.ElementType;
+  title: string;
+  darkMode: boolean;
+}) => (
+  <div className="mb-4 flex items-center gap-2">
+    <Icon className="h-4 w-4 text-[#003580]" />
+    <h3 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
+  </div>
+);
 
-  const getTrendIcon = (direction: 'up' | 'down' | 'neutral') => {
-    switch (direction) {
-      case 'up':
-        return <ArrowUp className="h-4 w-4 text-astu-green" />;
-      case 'down':
-        return <ArrowDown className="h-4 w-4 text-astu-red" />;
-      default:
-        return <Minus className="h-4 w-4 text-gray-400" />;
+const EmptyHint = ({ text, darkMode }: { text: string; darkMode: boolean }) => (
+  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{text}</p>
+);
+
+const RankRow = ({
+  name,
+  count,
+  total,
+  darkMode,
+}: {
+  name: string;
+  count: number;
+  total: number;
+  darkMode: boolean;
+}) => {
+  const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+  return (
+    <li>
+      <div className="flex items-center justify-between text-sm">
+        <span className={`truncate pr-3 ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>{name}</span>
+        <span className={`shrink-0 tabular-nums ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+          {count} · {percentage}%
+        </span>
+      </div>
+      <div className={`mt-1.5 h-1.5 w-full overflow-hidden rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+        <div
+          className="h-full rounded-full bg-[#003580]/80"
+          style={{ width: `${Math.min(100, percentage)}%` }}
+        />
+      </div>
+    </li>
+  );
+};
+
+export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
+  data,
+  isLoading = false,
+  error = null,
+  darkMode = false,
+  onNavigate,
+  onRefresh,
+  lastUpdated = null,
+}) => {
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const handleRefresh = async () => {
+    if (!onRefresh || refreshing) return;
+    setRefreshing(true);
+    try {
+      await onRefresh();
+    } finally {
+      setRefreshing(false);
     }
   };
 
-  const renderSparkline = (data: number[], color: string) => {
-    const max = Math.max(...data);
-    const min = Math.min(...data);
-    const range = max - min || 1;
-    
+  if (isLoading) {
     return (
-      <svg width="60" height="24" className="overflow-visible">
-        <polyline
-          points={data.map((value, index) => {
-            const x = (index / (data.length - 1)) * 60;
-            const y = 24 - ((value - min) / range) * 20;
-            return `${x},${y}`;
-          }).join(' ')}
-          fill="none"
-          stroke={color === 'astu-green' ? '#008080' : color === 'astu-navy' ? '#002244' : color === 'astu-red' ? '#B22222' : '#666'}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <div className="space-y-6">
+        <Skeleton className="h-40 w-full rounded-2xl" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Skeleton className="h-72 rounded-2xl" />
+          <Skeleton className="h-72 rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className={`flex flex-col items-center justify-center rounded-2xl border p-10 text-center ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+        <AlertCircle className={`h-8 w-8 ${darkMode ? 'text-red-400' : 'text-red-600'}`} />
+        <h3 className={`mt-4 text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Unable to load dashboard</h3>
+        <p className={`mt-2 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{error}</p>
+        <button type="button" onClick={handleRefresh} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#003580] px-5 py-2.5 text-sm font-semibold text-white">
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  const stats = data?.stats ?? {
+    totalAlumni: 0,
+    employed: 0,
+    unemployed: 0,
+    selfEmployed: 0,
+    unspecified: 0,
+    employmentRate: 0,
+    unemploymentRate: 0,
+    selfEmploymentRate: 0,
   };
 
-  const renderKPICard = (kpi: KPICard) => (
-    <div className={`p-5 border rounded-2xl hover:shadow-md transition-all duration-300 group ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200/80 shadow-xs'}`}>
-      <div className="flex items-start justify-between mb-3">
-        <div className={`p-2.5 rounded-xl transition-colors ${darkMode ? 'bg-slate-700 text-blue-400' : 'bg-[#003580]/10 text-[#003580]'}`}>
-          {getIcon(kpi.icon)}
-        </div>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-          {getTrendIcon(kpi.trendDirection)}
-          <span className={`text-[10px] font-extrabold ${kpi.trendDirection === 'up' ? 'text-emerald-600' : kpi.trendDirection === 'down' ? 'text-rose-600' : 'text-slate-500'}`}>
-            {Math.abs(kpi.trend)}%
-          </span>
-        </div>
-      </div>
-      <div className="flex items-center justify-between">
-        <p className={`text-[10px] uppercase font-extrabold tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.label}</p>
-        <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 uppercase">
-          VERIFIED
-        </span>
-      </div>
-      <p className={`text-2xl font-extrabold my-1 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{kpi.value}</p>
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-        <p className={`text-[11px] font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.comparison}</p>
-        {renderSparkline(kpi.sparkline, kpi.color)}
-      </div>
-    </div>
-  );
+  const alumni = data?.alumni ?? [];
+  const totalAlumni = stats.totalAlumni || alumni.length;
 
-  const renderSkillGapItem = (item: SkillGapItem) => (
-    <div key={item.skill} className={`p-4 border rounded-xl hover:shadow-md transition-all duration-300 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-      <div className="flex items-center justify-between mb-2">
-        <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{item.skill}</p>
-        <div className="flex items-center gap-1">
-          {getTrendIcon(item.trendDirection)}
-          <span className={`text-xs font-semibold ${item.trendDirection === 'up' ? 'text-astu-red' : 'text-astu-green'}`}>
-            {Math.abs(item.trend)}%
-          </span>
-        </div>
-      </div>
-      <div className="space-y-2">
-        <div>
-          <div className="flex justify-between text-xs mb-1">
-            <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Demand</span>
-            <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{item.demand}%</span>
-          </div>
-          <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-            <div className="bg-astu-navy h-full rounded-full" style={{ width: `${item.demand}%` }}></div>
-          </div>
-        </div>
-        <div>
-          <div className="flex justify-between text-xs mb-1">
-            <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Coverage</span>
-            <span className={`font-semibold ${item.coverage < 50 ? 'text-astu-red' : 'text-astu-green'}`}>{item.coverage}%</span>
-          </div>
-          <div className={`w-full h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-            <div className={`h-full rounded-full ${item.coverage < 50 ? 'bg-astu-red' : 'bg-astu-green'}`} style={{ width: `${item.coverage}%` }}></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const kpis = [
+    {
+      label: 'Total Alumni',
+      value: totalAlumni.toLocaleString(),
+      hint: `${alumni.length} in view`,
+      icon: GraduationCap,
+    },
+    {
+      label: 'Employment Rate',
+      value: `${(stats.employmentRate ?? 0).toFixed(1)}%`,
+      hint: 'Employed + self-employed',
+      icon: TrendingUp,
+    },
+    {
+      label: 'Employed',
+      value: (stats.employed ?? 0).toLocaleString(),
+      hint: `${(stats.selfEmployed ?? 0).toLocaleString()} self-employed`,
+      icon: Briefcase,
+    },
+    {
+      label: 'Average Monthly Salary',
+      value: formatSalary(data?.averageSalary ?? null),
+      hint:
+        data && data.salaryCount > 0
+          ? `${data.salaryCount} of ${totalAlumni.toLocaleString()} reported (${(data.salaryCoverage ?? 0).toFixed(0)}%)`
+          : 'No salary data reported',
+      icon: Banknote,
+    },
+    {
+      label: 'Unemployment Rate',
+      value: `${(stats.unemploymentRate ?? 0).toFixed(1)}%`,
+      hint:
+        (stats.unspecified ?? 0) > 0
+          ? `${(stats.unemployed ?? 0).toLocaleString()} of ${(totalAlumni - (stats.unspecified ?? 0)).toLocaleString()} reporting a status`
+          : `${(stats.unemployed ?? 0).toLocaleString()} graduates`,
+      icon: TrendingDown,
+    },
+  ];
 
-  const renderFeedbackScore = (scoreData: EmployerFeedbackScore) => (
-    <div key={scoreData.category} className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-      <p className={`text-xs uppercase tracking-wider mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{scoreData.category}</p>
-      <div className="flex items-center justify-between">
-        <p className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{scoreData.score}</p>
-        <div className="flex items-center gap-1">
-          {getTrendIcon(scoreData.trendDirection)}
-          <span className={`text-xs font-semibold ${scoreData.trendDirection === 'up' ? 'text-astu-green' : 'text-astu-red'}`}>
-            {Math.abs(scoreData.trend)}%
-          </span>
-        </div>
-      </div>
-      <div className="mt-2 flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`h-4 w-4 ${star <= Math.floor(scoreData.score) ? 'text-yellow-400 fill-yellow-400' : darkMode ? 'text-slate-600' : 'text-gray-300'}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
+  const quickActions = [
+    { tab: 'graduates', label: 'Browse graduates', desc: 'Search the alumni directory', icon: Users },
+    { tab: 'employment', label: 'Employment analytics', desc: 'Placement trends and employers', icon: Target },
+    { tab: 'insights', label: 'Department insights', desc: 'Skills, curriculum & tracer', icon: Lightbulb },
+    { tab: 'surveys', label: 'Tracer surveys', desc: 'Dispatch surveys to alumni', icon: ClipboardList },
+  ];
 
-  const renderCurriculumInsight = (insight: CurriculumInsight) => (
-    <div key={insight.title} className={`p-4 border rounded-xl ${
-      darkMode ? 'bg-slate-800 border-slate-700' :
-      insight.type === 'strength' ? 'bg-emerald-50 border-emerald-200' :
-      insight.type === 'weakness' ? 'bg-red-50 border-red-200' :
-      insight.priority === 'high' ? 'bg-yellow-50 border-yellow-200' :
-      insight.priority === 'medium' ? 'bg-blue-50 border-blue-200' :
-      'bg-gray-50 border-gray-200'
-    }`}>
-      <div className="flex items-start justify-between mb-2">
-        <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{insight.title}</p>
-        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-          insight.priority === 'high' ? 'bg-astu-red text-white' :
-          insight.priority === 'medium' ? 'bg-blue-600 text-white' :
-          'bg-gray-600 text-white'
-        }`}>
-          {insight.priority}
-        </span>
-      </div>
-      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{insight.description}</p>
-    </div>
-  );
+  const trendReversed = [...(data?.employmentTrend ?? [])].reverse();
+  const verificationPercent =
+    totalAlumni > 0 ? Math.round(((data?.verifiedCount ?? 0) / totalAlumni) * 100) : 0;
+  const recentGraduates = alumni
+    .filter((a) => a.fullName)
+    .slice()
+    .sort((a, b) => (b.graduationYear || 0) - (a.graduationYear || 0) || a.fullName.localeCompare(b.fullName))
+    .slice(0, 6);
+  const hasDistribution = (data?.employmentStatusDistribution ?? []).length > 0;
 
-  const renderRecentActivity = (activity: RecentActivity) => (
-    <div key={activity.id} className={`flex items-start gap-4 p-4 border rounded-xl hover:shadow-md transition-all duration-300 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-      <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700' : 'bg-gray-100'}`}>
-        <div className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
-          {getIcon(activity.icon)}
-        </div>
-      </div>
-      <div className="flex-1">
-        <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{activity.title}</p>
-        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{activity.description}</p>
-      </div>
-      <p className={`text-xs whitespace-nowrap ${darkMode ? 'text-gray-400' : 'text-gray-400'}`}>{activity.timestamp}</p>
-    </div>
-  );
+  const activities = ((): ActivityEntry[] => {
+    const items: ActivityEntry[] = [];
+    let id = 1;
+    const deptName = data?.department?.name || 'Department';
+
+    if (totalAlumni > 0) {
+      items.push({
+        id: id++,
+        type: 'verification',
+        title: `${totalAlumni.toLocaleString()} alumni in directory`,
+        description: `${deptName} · ${(stats.employmentRate ?? 0).toFixed(1)}% employment rate`,
+        timestamp: lastUpdated ? formatLastUpdated(lastUpdated) : 'Live',
+        unread: false,
+      });
+    }
+
+    if ((data?.unverifiedCount ?? 0) > 0) {
+      items.push({
+        id: id++,
+        type: 'alert',
+        title: `${data!.unverifiedCount} profiles need verification`,
+        description: 'Unverified alumni profiles may affect tracer reporting accuracy.',
+        timestamp: 'Action needed',
+        unread: true,
+      });
+    }
+
+    recentGraduates.slice(0, 3).forEach((record) => {
+      items.push({
+        id: id++,
+        type: record.employmentStatus === 'EMPLOYED' || record.employmentStatus === 'SELF_EMPLOYED' ? 'job' : 'message',
+        title: record.fullName,
+        description: record.company
+          ? `${record.company}${record.jobTitle ? ` · ${record.jobTitle}` : ''}`
+          : `Class of ${record.graduationYear || '—'} · status pending`,
+        timestamp: record.graduationYear ? `Class of ${record.graduationYear}` : 'Recent',
+        unread: !record.isVerified,
+      });
+    });
+
+    (data?.topCompanies ?? []).slice(0, 2).forEach((company) => {
+      items.push({
+        id: id++,
+        type: 'job',
+        title: `Top employer: ${company.name}`,
+        description: `${company.count} graduate${company.count === 1 ? '' : 's'} placed (${company.percentage.toFixed(0)}%)`,
+        timestamp: 'Placement',
+      });
+    });
+
+    if (items.length === 0) {
+      items.push({
+        id: 1,
+        type: 'broadcast',
+        title: 'Department workspace ready',
+        description: 'Alumni outcomes and tracer activity will appear here as data syncs.',
+        timestamp: 'Just now',
+      });
+    }
+
+    return items;
+  })();
+
+  const deptTitle = data?.department
+    ? `${data.department.code} · ${data.department.name}`
+    : 'Department Dashboard';
 
   return (
-    <div className="space-y-6">
-      {/* Department Command Center Banner */}
-      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#003580] via-[#004b99] to-[#0066cc] p-6 text-white shadow-md">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div>
-            <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white">
-              DEPARTMENT ACCREDITATION &amp; OUTCOMES HUB
-            </span>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight">Software Engineering Department Command Center</h2>
-            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-white/90">
-              Executive monitoring of graduate employment rates, curriculum skill alignment, ABET accreditation evidence, and department survey completions.
+    <div className="space-y-5">
+      <section className="relative overflow-hidden rounded-[10px] bg-gradient-to-br from-[#001F4D] via-[#003580] to-emerald-800 p-6 text-white shadow-lg md:p-8">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-16 -left-8 h-40 w-40 rounded-full bg-emerald-400/10" />
+        <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300">
+              <span className={`h-1.5 w-1.5 rounded-full bg-emerald-400 ${refreshing ? 'animate-pulse' : ''}`} />
+              Department Analytics Hub
+            </div>
+            <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl">{deptTitle}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">
+              Live employment outcomes, cohort trends, and skills from verified alumni records — ready for accreditation and tracer reporting.
             </p>
+            {lastUpdated && (
+              <p className="mt-3 text-xs font-medium text-white/60">
+                Data refreshed {formatLastUpdated(lastUpdated)}
+              </p>
+            )}
           </div>
-
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={handleRefresh}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl transition-all duration-300 font-bold text-xs"
+              disabled={refreshing}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/15 px-4 py-2 text-xs font-bold backdrop-blur-sm transition-all hover:bg-white/25"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#1D9E75] hover:brightness-110 text-white rounded-xl transition-all duration-300 font-bold text-xs shadow-sm"
+              type="button"
+              onClick={() => onNavigate?.('graduates')}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#003580] shadow-sm transition-all hover:bg-emerald-50"
             >
-              <Download className="h-4 w-4" />
-              Export Report
+              <GraduationCap className="h-3.5 w-3.5" />
+              View graduates
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate?.('surveys')}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/15 px-4 py-2 text-xs font-bold backdrop-blur-sm transition-all hover:bg-white/25"
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
+              Tracer surveys
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Command Center 4-Card Quick Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/15">
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">DEPARTMENT GRADUATES</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">1,247</p>
-            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">✓ 98% Verified SIS Census</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">EMPLOYMENT RATE</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">85%</p>
-            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">↑ +8% vs last year</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">EMPLOYER SATISFACTION</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">4.2 / 5</p>
-            <p className="text-[10px] text-amber-300 font-semibold mt-0.5">★ ABET Quality Target Met</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">ACTIVE PARTNERSHIPS</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">45 Companies</p>
-            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">128 Job Requisitions</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {quickActions.map((action) => {
+          const Icon = action.icon;
+          return (
+            <button
+              key={action.tab}
+              type="button"
+              onClick={() => onNavigate?.(action.tab)}
+              className={`group flex w-full items-center gap-3 rounded-[10px] border p-3.5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition ${
+                darkMode
+                  ? 'border-slate-800 bg-slate-900 hover:bg-slate-800'
+                  : 'border-gray-200/60 bg-white hover:bg-slate-50'
+              }`}
+            >
+              <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={`block truncate text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{action.label}</span>
+                <span className={`block truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{action.desc}</span>
+              </span>
+              <ArrowRight className={`h-4 w-4 shrink-0 transition group-hover:translate-x-0.5 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`} />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {kpis.map((kpi) => {
+          const Icon = kpi.icon;
+          return (
+            <div key={kpi.label} className={`card-hover rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
+              <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.label}</p>
+              <p className={`mt-1.5 text-3xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>{kpi.value}</p>
+              <p className={`mt-1.5 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{kpi.hint}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <AnalyticsChart
+              type="pie"
+              data={(data?.employmentStatusDistribution ?? []) as any}
+              xKey="status"
+              series={[{ key: 'count', label: 'Graduates' }]}
+              title="Employment Status Distribution"
+              subtitle="Breakdown of graduate outcomes"
+              height={280}
+              darkMode={darkMode}
+            />
+            <AnalyticsChart
+              type="line"
+              data={(data?.employmentTrend ?? []) as any}
+              xKey="year"
+              series={[{ key: 'employmentRate', label: 'Employment Rate (%)', color: '#003580' }]}
+              title="Employment Trend by Cohort"
+              subtitle="Placement rate per graduation year"
+              height={280}
+              darkMode={darkMode}
+            />
           </div>
         </div>
-      </div>
-
-      {/* Filters Bar */}
-      <div className={`rounded-2xl p-4 shadow-xs border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 block">Department Program</label>
-            <select
-              value={filters.department}
-              onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
-            >
-              <option value="Computer Science">Software Engineering (SWE)</option>
-              <option value="Electrical Engineering">Electrical &amp; Computer Eng (ECE)</option>
-              <option value="Mechanical Engineering">Mechanical Engineering (MEG)</option>
-              <option value="Civil Engineering">Civil Engineering (CVE)</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 block">Academic Cohort Year</label>
-            <select
-              value={filters.academicYear}
-              onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
-              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
-            >
-              <option value="2024">2024 Graduating Class</option>
-              <option value="2023">2023 Graduating Class</option>
-              <option value="2022">2022 Graduating Class</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1 block">Tracer Study Milestone</label>
-            <select
-              value={filters.tracerPeriod}
-              onChange={(e) => setFilters({ ...filters, tracerPeriod: e.target.value })}
-              className={`w-full px-4 py-2.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
-            >
-              <option value="6-month">6-Month Post-Graduation Tracer</option>
-              <option value="12-month">12-Month Post-Graduation Tracer</option>
-              <option value="24-month">24-Month Post-Graduation Tracer</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {mockDashboardKPICards.map(renderKPICard)}
-      </div>
-
-      {/* Row 1: Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AnalyticsChart
-          type="line"
-          data={mockEmploymentTrendData as any}
-          xKey="year"
-          series={[
-            { key: 'employmentRate', label: 'Employment Rate (%)', color: '#008080' }
-          ]}
-          title="Employment Trend"
-          subtitle="Graduate employment rate by year"
-          height={280}
-        />
-        <AnalyticsChart
-          type="pie"
-          data={mockTracerCompletionData as any}
-          xKey="status"
-          series={[
-            { key: 'count', label: 'Surveys' }
-          ]}
-          title="Tracer Study Completion"
-          subtitle="Survey completion status distribution"
-          height={280}
+        <ActivityTimeline
+          activities={activities}
+          darkMode={darkMode}
+          onViewAll={() => onNavigate?.('graduates')}
+          maxItems={5}
         />
       </div>
 
-      {/* Row 2: Top Companies & Industries */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-          <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Hiring Companies</h3>
-          <div className="space-y-3">
-            {mockTopHiringCompanies.map((company, index) => (
-              <div key={index} className={`flex items-center justify-between p-3 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-astu-navy/10 rounded-lg flex items-center justify-center font-bold text-astu-navy text-sm">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{company.name}</p>
-                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{company.graduateCount} graduates</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  {getTrendIcon(company.trendDirection)}
-                  <span className={`text-xs font-semibold ${company.trendDirection === 'up' ? 'text-astu-green' : 'text-astu-red'}`}>
-                    {Math.abs(company.trend)}%
-                  </span>
-                </div>
-              </div>
-            ))}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <AnalyticsChart
+          type="bar"
+          data={(data?.topSkills ?? []) as any}
+          xKey="name"
+          series={[{ key: 'count', label: 'Graduates' }]}
+          title="Top Skills"
+          subtitle="Most-reported skills by alumni"
+          height={280}
+          darkMode={darkMode}
+        />
+        <AnalyticsChart
+          type="bar"
+          data={(data?.topIndustries ?? []) as any}
+          xKey="name"
+          series={[{ key: 'count', label: 'Graduates' }]}
+          title="Top Industries"
+          subtitle="Sectors where graduates work"
+          height={280}
+          darkMode={darkMode}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card darkMode={darkMode}>
+          <div className="p-5">
+            <PanelHeader icon={CalendarRange} title="Cohort Performance" darkMode={darkMode} />
+            {trendReversed.length === 0 ? (
+              <EmptyHint text="No cohort data available yet." darkMode={darkMode} />
+            ) : (
+              <ul className="space-y-3.5">
+                {trendReversed.map((cohort) => (
+                  <RankRow
+                    key={cohort.year}
+                    name={`Class of ${cohort.year}`}
+                    count={cohort.employed}
+                    total={cohort.graduates}
+                    darkMode={darkMode}
+                  />
+                ))}
+              </ul>
+            )}
+            <p className={`mt-4 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              Employed graduates per graduation cohort (incl. self-employment)
+            </p>
           </div>
-        </div>
+        </Card>
 
-        <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-          <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Top Industries</h3>
-          <div className="space-y-3">
-            {mockTopIndustries.map((industry, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{industry.name}</p>
-                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{industry.percentage}%</p>
-                </div>
-                <div className={`w-full h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-                  <div className="bg-astu-navy h-full rounded-full" style={{ width: `${industry.percentage}%` }}></div>
-                </div>
-              </div>
-            ))}
+        <Card darkMode={darkMode}>
+          <div className="p-5">
+            <PanelHeader icon={Building2} title="Top Employers" darkMode={darkMode} />
+            {(data?.topCompanies ?? []).length === 0 ? (
+              <EmptyHint text="No employer data reported yet." darkMode={darkMode} />
+            ) : (
+              <ul className="space-y-3.5">
+                {(data?.topCompanies ?? []).map((item) => (
+                  <RankRow
+                    key={item.name}
+                    name={item.name}
+                    count={item.count}
+                    total={totalAlumni}
+                    darkMode={darkMode}
+                  />
+                ))}
+              </ul>
+            )}
           </div>
-        </div>
+        </Card>
+
+        <Card darkMode={darkMode}>
+          <div className="p-5">
+            <PanelHeader icon={MapPin} title="Top Locations" darkMode={darkMode} />
+            {(data?.locations ?? []).length === 0 ? (
+              <EmptyHint text="No location data reported yet." darkMode={darkMode} />
+            ) : (
+              <ul className="space-y-3.5">
+                {(data?.locations ?? []).map((item) => (
+                  <RankRow
+                    key={item.name}
+                    name={item.name}
+                    count={item.count}
+                    total={totalAlumni}
+                    darkMode={darkMode}
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
+        </Card>
       </div>
 
-      {/* Row 3: Skill Gap Summary */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Skill Gap Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockSkillGapItems.map(renderSkillGapItem)}
-        </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card darkMode={darkMode} className="lg:col-span-2">
+          <div className="p-5">
+            <PanelHeader icon={UserCheck} title="Recent Graduates" darkMode={darkMode} />
+            {recentGraduates.length === 0 ? (
+              <EmptyHint text="No graduate records found." darkMode={darkMode} />
+            ) : (
+              <ul className="divide-y">
+                {recentGraduates.map((record) => (
+                  <li key={record.id}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate?.('graduates')}
+                      className="group flex w-full items-center gap-3 py-3 text-left transition"
+                    >
+                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold text-xs ${darkMode ? 'bg-slate-700 text-white' : 'bg-[#003580]/10 text-[#003580]'}`}>
+                        {record.fullName
+                          .split(' ')
+                          .map((part) => part[0])
+                          .slice(0, 2)
+                          .join('')
+                          .toUpperCase()}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block truncate text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                          {record.fullName}
+                        </span>
+                        <span className={`block truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                          {record.company
+                            ? `${record.company}${record.jobTitle ? ` · ${record.jobTitle}` : ''}`
+                            : 'No employer reported'}
+                        </span>
+                      </span>
+                      <span className={`hidden shrink-0 text-xs tabular-nums sm:block ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {record.graduationYear || '—'}
+                      </span>
+                      <StatusBadge status={record.employmentStatus} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </Card>
+
+        <Card darkMode={darkMode}>
+          <div className="p-5">
+            <PanelHeader icon={BadgeCheck} title="Profile Verification" darkMode={darkMode} />
+            <p className={`text-3xl font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              {verificationPercent}%
+            </p>
+            <p className={`mt-1 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              {(data?.verifiedCount ?? 0).toLocaleString()} of {totalAlumni.toLocaleString()} alumni verified
+            </p>
+            <div className={`mt-4 h-2 w-full overflow-hidden rounded-full ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+              <div
+                className={`h-full rounded-full ${verificationPercent >= 90 ? 'bg-emerald-500' : verificationPercent >= 50 ? 'bg-[#003580]' : 'bg-amber-500'}`}
+                style={{ width: `${verificationPercent}%` }}
+              />
+            </div>
+            {data && data.unverifiedCount > 0 && (
+              <div className={`mt-4 rounded-xl p-3 ${darkMode ? 'bg-amber-500/10' : 'bg-amber-50'}`}>
+                <p className={`text-xs ${darkMode ? 'text-amber-300' : 'text-amber-700'}`}>
+                  {(data.unverifiedCount).toLocaleString()} graduate{data.unverifiedCount === 1 ? '' : 's'} still
+                  need their alumni profile verified.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.('graduates')}
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#003580] hover:underline"
+                >
+                  Review in Graduates <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
-      {/* Row 4: Employer Feedback Snapshot */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Employer Feedback Snapshot</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {mockEmployerFeedbackScores.map(renderFeedbackScore)}
+      {!hasDistribution && alumni.length > 0 && (
+        <div className={`rounded-2xl border p-5 text-sm ${darkMode ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200/80 text-slate-500'}`}>
+          Alumni records are available, but employment status data has not been reported yet.
         </div>
-      </div>
-
-      {/* Row 5: Curriculum Insight Summary */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Curriculum Insight Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockCurriculumInsights.map(renderCurriculumInsight)}
-        </div>
-      </div>
-
-      {/* Recent Activity Panel */}
-      <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
-        <h3 className={`text-lg font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Recent Activity</h3>
-        <div className="space-y-3">
-          {mockRecentActivities.map(renderRecentActivity)}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

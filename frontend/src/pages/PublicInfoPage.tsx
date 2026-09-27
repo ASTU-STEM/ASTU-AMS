@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -27,21 +27,30 @@ import {
   Mail,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
+import publicStatsService from "../features/public/services/publicStats.service";
 
-const pages: Record<string, {
+interface PageConfig {
   title: string;
   subtitle: string;
   icon: any;
   image: string;
   sections: { heading: string; body: string }[];
-}> = {
+  /**
+   * When set, the page renders these entries using figures fetched from
+   * /content/public-stats instead of the static `sections` above. Keys with no
+   * real rows are omitted, so nothing unmeasured is ever shown.
+   */
+  liveStats?: { key: string; heading: string; body: string }[];
+}
+
+const pages: Record<string, PageConfig> = {
   overview: {
     title: "ASTU-AMS Overview",
     subtitle: "An integrated Alumni Management System connecting graduates, employers, and departments. Developed in-house by ASTU to enable longitudinal employment tracking and accreditation compliance.",
     icon: Trophy,
     image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
     sections: [
-      { heading: "What is ASTU-AMS?", body: "ASTU-AMS is a comprehensive alumni management platform designed to bridge the gap between Adama Science and Technology University graduates, employers, and academic departments. With nearly three decades since ASTU's establishment, the platform boasts 1,238+ alumni members across 5 fields of study succeeding in business ventures, national and international companies, research institutes, and leadership positions." },
+      { heading: "What is ASTU-AMS?", body: "ASTU-AMS is a comprehensive alumni management platform designed to bridge the gap between Adama Science and Technology University graduates, employers, and academic departments. With nearly three decades since ASTU's establishment, the platform connects our registered alumni across the university's fields of study, supporting graduates succeeding in business ventures, national and international companies, research institutes, and leadership positions." },
       { heading: "Background & Rationale", body: "ASTU previously lacked a centralized, automated system to track graduate career trajectories. Graduate data was fragmented across departments and the Registrar's office. Without a unified digital ecosystem, the university remained unable to perform meaningful longitudinal analysis or maintain continuous relationships with its alumni network. The ASTU-AMS solves this by providing a centralized alumni database integrated with the Registrar and ERP systems." },
       { heading: "Core Mission", body: "To foster professional growth, streamline talent acquisition, and drive academic innovation through data-driven insights and seamless connectivity between all stakeholders. The system provides verified tracer study data required by the Education and Training Authority (ETA) and international accreditation bodies." },
       { heading: "Key Modules", body: "Alumni Registration & Verification, Profile Management, Automated Tracer Engine & Survey Logic, Event Calendar & RSVP, Mentorship & Job Board, Employer Portal & Analytics Dashboards, Messaging & Notifications, and Document Request Services." },
@@ -51,16 +60,15 @@ const pages: Record<string, {
   },
   "impact-numbers": {
     title: "Impact Numbers",
-    subtitle: "Key statistics demonstrating ASTU-AMS reach and effectiveness.",
+    subtitle: "Live figures counted directly from ASTU-AMS records.",
     icon: LineChart,
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1800&q=80",
-    sections: [
-      { heading: "1,238+ Alumni Members", body: "Registered alumni actively connected through the platform, spanning diverse industries and leadership positions." },
-      { heading: "5 Fields of Study", body: "Comprehensive coverage across Engineering, Natural Sciences, Technology, Business, and Research programs." },
-      { heading: "500+ Partner Organizations", body: "Employers and institutions partnering with ASTU for talent acquisition, internships, and research collaboration." },
-      { heading: "24,000+ Global Alumni", body: "A thriving network of ASTU graduates spread across industries worldwide, staying connected through the platform." },
-      { heading: "87% Employment Rate", body: "Graduate employment rate tracked through comprehensive tracer studies and employer feedback." },
-      { heading: "6,000+ Digital Requests", body: "Annual transcript, certificate, and document processing requests handled through the registrar portal." },
+    sections: [],
+    liveStats: [
+      { key: "alumni", heading: "Active Alumni Members", body: "Graduates with an active ASTU-AMS account, connected to the network and reachable by their department." },
+      { key: "departments", heading: "Departments", body: "Academic departments running their own portal for graduate tracking, employment outcomes and tracer studies." },
+      { key: "jobs", heading: "Open Roles", body: "Live job openings posted to the board by registered and verified employer partners." },
+      { key: "employers", heading: "Verified Partner Employers", body: "Organisations that completed verification and are permitted to post roles and request CVs." },
     ],
   },
   accreditation: {
@@ -80,7 +88,7 @@ const pages: Record<string, {
     icon: Award,
     image: "https://images.unsplash.com/photo-1523050854058-8df90110c7f1?auto=format&fit=crop&w=1800&q=80",
     sections: [
-      { heading: "Research Excellence", body: "1,240+ research publications and 38 startup showcases demonstrating ASTU's commitment to innovation and knowledge creation." },
+      { heading: "Research Excellence", body: "Research output and startup showcases demonstrating ASTU's commitment to innovation and knowledge creation." },
       { heading: "Industry Partnerships", body: "72 active industry projects and 80+ industry partners collaborating on research, internships, and curriculum development." },
       { heading: "National Recognition", body: "ASTU consistently ranks among Ethiopia's top science and technology universities, with multiple awards in engineering education." },
       { heading: "Expected Outcomes", body: "High-fidelity alumni tracking with 90%+ accuracy rate in graduate tracking, providing clear maps of alumni geographic distribution, salary benchmarks, and time-to-hire metrics across all programs." },
@@ -188,7 +196,7 @@ const pages: Record<string, {
     icon: BookOpen,
     image: "https://images.unsplash.com/photo-1504711434969-e33886168d6c?auto=format&fit=crop&w=1800&q=80",
     sections: [
-      { heading: "Research Database", body: "Browse 1,240+ research publications across engineering, natural sciences, and technology fields." },
+      { heading: "Research Database", body: "Browse research publications across engineering, natural sciences, and technology fields." },
       { heading: "Innovation Hub", body: "Explore 38 startup showcases and 72 industry projects emerging from ASTU research." },
       { heading: "Collaboration Opportunities", body: "Connect with research centers and explore partnership opportunities for joint projects." },
     ],
@@ -266,7 +274,7 @@ const pages: Record<string, {
   },
 };
 
-const fallbackPage = {
+const fallbackPage: PageConfig = {
   title: "Page Not Found",
   subtitle: "The requested page is not available.",
   icon: HelpCircle,
@@ -279,6 +287,28 @@ export default function PublicInfoPage() {
   const { slug = "overview" } = useParams();
   const page = pages[slug] ?? fallbackPage;
   const Icon = page.icon;
+
+  const [statValues, setStatValues] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!page.liveStats) return;
+    let isMounted = true;
+    publicStatsService.getStats().then((stats) => {
+      if (!isMounted) return;
+      setStatValues(
+        stats.reduce<Record<string, number>>((acc, s) => {
+          acc[s.key] = s.value;
+          return acc;
+        }, {})
+      );
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [slug, page.liveStats]);
+
+  // Only entries backed by a real, non-zero count are rendered.
+  const liveStatEntries = (page.liveStats ?? []).filter((e) => (statValues[e.key] ?? 0) > 0);
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
@@ -321,6 +351,32 @@ export default function PublicInfoPage() {
             </div>
           </div>
         </section>
+
+        {liveStatEntries.length > 0 ? (
+          <section className="mx-auto max-w-[1200px] px-4 py-12 md:px-8 md:py-16">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {liveStatEntries.map((entry, index) => {
+                const icons = [Users, Building2, Briefcase, Trophy];
+                const SectionIcon = icons[index % icons.length];
+                return (
+                  <article
+                    key={entry.key}
+                    className="group rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
+                  >
+                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 text-astu-navy transition-colors group-hover:bg-astu-navy/10">
+                      <SectionIcon className="h-5 w-5" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-astu-navy">
+                      {statValues[entry.key].toLocaleString()}
+                    </h2>
+                    <p className="mt-1 text-sm font-semibold text-astu-navy">{entry.heading}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{entry.body}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mx-auto max-w-[1200px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

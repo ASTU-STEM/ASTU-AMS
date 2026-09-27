@@ -36,6 +36,9 @@ coverage/
 *.csv
 *.dat
 *.sql
+# ...but Prisma migration history is source code and must be version-controlled,
+# otherwise a fresh clone cannot build a database.
+!prisma/migrations/**/*.sql
 *.sqlite
 *.db
 *.log

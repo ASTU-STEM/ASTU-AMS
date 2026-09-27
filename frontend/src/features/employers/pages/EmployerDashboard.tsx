@@ -44,11 +44,7 @@ const EmployerDashboard = () => {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Abebe Bikila applied for Senior Fullstack Engineer.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New messaging update from ASTU Placement Officer.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Feedback audit verified by CSE Department Dean.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
   const [activeChatTarget, setActiveChatTarget] = useState<any>(null);
@@ -75,9 +71,9 @@ const EmployerDashboard = () => {
       color: 'astu-navy',
       icon: 'work',
       bgGradient: 'from-blue-50 to-indigo-50',
-      trend: '+1 this week',
-      trendIcon: 'trending_up',
-      trendColor: 'astu-green'
+      trend: `${jobs.length} total posts`,
+      trendIcon: 'post_add',
+      trendColor: 'astu-navy'
     },
     {
       id: 2,
@@ -97,8 +93,8 @@ const EmployerDashboard = () => {
       color: 'astu-red',
       icon: 'check_circle',
       bgGradient: 'from-red-50 to-orange-50',
-      trend: 'Ready for interview',
-      trendIcon: 'schedule',
+      trend: `${shortlistedApplicationsCount} shortlisted`,
+      trendIcon: 'fact_check',
       trendColor: 'astu-red'
     },
     {
@@ -119,7 +115,7 @@ const EmployerDashboard = () => {
       color: 'purple-600',
       icon: 'rate_review',
       bgGradient: 'from-purple-50 to-pink-50',
-      trend: 'Curriculum reports',
+      trend: 'Graduate feedback',
       trendIcon: 'assignment_turned_in',
       trendColor: 'astu-green'
     }

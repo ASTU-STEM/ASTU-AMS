@@ -57,7 +57,9 @@ export class PrismaAlumniProfileRepository implements IAlumniProfileRepository {
       }
     }
 
-    const resolvedStatus = data.employmentStatus || prefs.employmentStatus || (isHired ? 'EMPLOYED' : 'UNEMPLOYED');
+    // No company on record means "not reported", not "unemployed".
+    const resolvedStatus =
+      data.employmentStatus || prefs.employmentStatus || (isHired ? 'EMPLOYED' : 'UNSPECIFIED');
     const resolvedBatch = data.batch || (data.graduationYear ? `${data.graduationYear}` : '2024');
 
     return {

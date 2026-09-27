@@ -42,7 +42,7 @@ const FALLBACK_RESPONSES: Record<string, string> = {
   "update my profile":
     "Go to your Dashboard → Profile tab to update your education, work experience, and skills. A complete profile increases your job match rate by up to 40%!",
   "find job":
-    "Navigate to the Career Center or Jobs tab in your dashboard. Filter by location, salary range, and department. We update listings daily from 500+ partner organizations.",
+    "Navigate to the Career Center or Jobs tab in your dashboard. Filter by location, salary range, and department. Listings are posted directly by verified employer partners.",
   "tracer survey":
     "The 6-Month Post-Graduation Tracer Study is required for alumni verification. Check your Surveys tab — responses typically close within 30 days of the deadline.",
   "request transcript":

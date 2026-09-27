@@ -214,7 +214,7 @@ export default function GalleryManagement() {
               key={album.name}
               type="button"
               onClick={() => setActiveAlbum(album.name)}
-              className={`fade-up rounded-[12px] border p-4 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${active ? 'border-[#003580] bg-[#003580]/5 ring-1 ring-[#003580]/15' : 'border-slate-200 bg-white'}`}
+              className={`fade-up rounded-[12px] border p-4 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${active ? 'border-[#003580] bg-[#003580]/5 ring-1 ring-[#003580]/15' : 'border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-700'}`}
             >
               <div className="flex items-start justify-between">
                 <span className={`inline-flex h-10 w-10 items-center justify-center rounded-[10px] ${album.bg} ${album.tone}`}>
@@ -226,21 +226,21 @@ export default function GalleryManagement() {
                   </span>
                 )}
               </div>
-              <h3 className="mt-3 text-sm font-semibold text-slate-900">{album.name}</h3>
-              <p className="mt-1 text-xs text-slate-500">{count} media files</p>
+              <h3 className="mt-3 text-sm font-semibold text-slate-900 dark:text-white">{album.name}</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{count} media files</p>
             </button>
           );
         })}
         <button onClick={() => setShowCreateAlbum(!showCreateAlbum)}
-          className="fade-up rounded-[12px] border border-dashed border-slate-300 bg-slate-50/50 p-4 text-left transition-all hover:border-[#003580]/30 hover:bg-[#003580]/5 hover:shadow-sm flex flex-col items-center justify-center min-h-[100px]">
+          className="fade-up rounded-[12px] border border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 p-4 text-left transition-all hover:border-[#003580]/30 hover:bg-[#003580]/5 hover:shadow-sm flex flex-col items-center justify-center min-h-[100px]">
           <Plus className="h-6 w-6 text-slate-400" />
-          <span className="mt-2 text-xs font-semibold text-slate-500">New Album</span>
+          <span className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">New Album</span>
         </button>
       </section>
 
       {showCreateAlbum && (
-        <div className="fade-up rounded-[10px] border border-blue-200 bg-blue-50/50 p-4 flex items-center gap-3">
-          <input value={newAlbumName} onChange={e => setNewAlbumName(e.target.value)} placeholder="Album name" className="flex-1 rounded-[8px] border border-blue-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#003580]" />
+        <div className="fade-up rounded-[10px] border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30 p-4 flex items-center gap-3">
+          <input value={newAlbumName} onChange={e => setNewAlbumName(e.target.value)} placeholder="Album name" className="flex-1 rounded-[8px] border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580]" />
           <button onClick={createAlbum} className="rounded-[8px] bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 transition-all">Create</button>
           <button onClick={() => setShowCreateAlbum(false)} className="text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>
         </div>
@@ -249,9 +249,9 @@ export default function GalleryManagement() {
       <section className="grid gap-4 xl:grid-cols-[360px_1fr]">
         {/* Upload Panel */}
         <div className="space-y-4">
-          <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <h2 className="text-sm font-semibold text-slate-900">Upload to {activeAlbum}</h2>
-            <p className="mt-1 text-xs text-slate-500 mb-4">Accepts images and video files. Uploaded media updates the public gallery instantly.</p>
+          <div className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Upload to {activeAlbum}</h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 mb-4">Accepts images and video files. Uploaded media updates the public gallery instantly.</p>
             <ImageUploader
               label={`Choose or Drag File for ${activeAlbum}`}
               value={uploadedSrc}
@@ -259,10 +259,10 @@ export default function GalleryManagement() {
             />
           </div>
 
-          <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-center gap-2">
               <FolderPlus className="h-5 w-5 text-[#003580]" />
-              <h2 className="text-sm font-semibold text-slate-900">Album Quick Stats</h2>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Album Quick Stats</h2>
             </div>
             <div className="mt-4 space-y-3">
               {[
@@ -271,8 +271,8 @@ export default function GalleryManagement() {
                 { label: 'Pending Review', value: albumStats.pending, color: 'text-[#E8A020]' },
                 { label: 'Rejected', value: albumStats.rejected, color: 'text-[#E24B4A]' },
               ].map(stat => (
-                <div key={stat.label} className="flex items-center justify-between rounded-[8px] bg-slate-50 px-3 py-2.5">
-                  <span className="text-xs font-medium text-slate-600">{stat.label}</span>
+                <div key={stat.label} className="flex items-center justify-between rounded-[8px] bg-slate-50 dark:bg-slate-800 px-3 py-2.5">
+                  <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{stat.label}</span>
                   <span className={`text-sm font-bold ${stat.color}`}>{stat.value}</span>
                 </div>
               ))}
@@ -281,16 +281,16 @@ export default function GalleryManagement() {
         </div>
 
         {/* Media Review */}
-        <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">{activeAlbum} — Media Review</h2>
-              <p className="mt-1 text-xs text-slate-500">Approve, reject, or delete gallery assets.</p>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{activeAlbum} — Media Review</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Approve, reject, or delete gallery assets.</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search media..." className="w-40 rounded-[8px] border border-slate-200 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[#003580]" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search media..." className="w-40 rounded-[8px] border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[#003580]" />
               </div>
             </div>
           </div>
@@ -302,11 +302,11 @@ export default function GalleryManagement() {
                 key={tab.key}
                 type="button"
                 onClick={() => setSelectedTab(tab.key)}
-                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-all ${selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-semibold transition-all ${selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
               >
                 {tab.label}
-                <span className={`px-1 py-0.5 rounded text-[9px] ${selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+                <span className={`px-1 py-0.5 rounded text-[9px] ${selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                   }`}>{tab.count}</span>
               </button>
             ))}
@@ -314,7 +314,7 @@ export default function GalleryManagement() {
 
           <div className="mt-4 space-y-2">
             {filteredMedia.map((item) => (
-              <div key={item.id} className="flex flex-col gap-2 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-slate-200 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <div key={item.id} className="flex flex-col gap-2 rounded-[10px] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 p-4 transition-all hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] overflow-hidden ${item.type === 'Video' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
                     }`}>
@@ -327,8 +327,8 @@ export default function GalleryManagement() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-900 truncate">{item.title}</h3>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white truncate">{item.title}</h3>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500">
                       <span>{item.type}</span>
                       <span>·</span>
                       <span>{item.uploadedBy}</span>
@@ -358,11 +358,11 @@ export default function GalleryManagement() {
                       </>
                     )}
                     <button onClick={() => window.open('/gallery', '_blank')}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-[#003580]/10 hover:text-[#003580] transition-all" title="Open Full Public Gallery">
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:bg-[#003580]/10 hover:text-[#003580] transition-all" title="Open Full Public Gallery">
                       <Eye className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={() => toast.success(`Editing "${item.title}"`)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit">
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all" title="Edit">
                       <Edit3 className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={() => deleteMedia(item.id)}
