@@ -174,7 +174,7 @@ export default function ASTUCareerCopilot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
-      text: "Hello! I'm your ASTU Career Copilot 👋\n\nI'm powered by AI to help you with jobs, mentorship, documents, tracer surveys, and more. How can I assist you today?",
+      text: "Hello! I'm ASTU AI 👋\n\nI'm powered by AI and live university database connections to help you with jobs, mentorship, documents, tracer surveys, and department analytics. How can I assist you today?",
       sender: "bot",
       timestamp: nowTime(),
       isAI: true,
@@ -265,7 +265,7 @@ export default function ASTUCareerCopilot() {
   const clearChat = () => {
     setMessages([{
       id: 1,
-      text: "Hello! I'm your ASTU Career Copilot 👋\n\nI'm powered by AI to help you with jobs, mentorship, documents, tracer surveys, and more. How can I assist you today?",
+      text: "Hello! I'm ASTU AI 👋\n\nI'm powered by AI and live university database connections to help you with jobs, mentorship, documents, tracer surveys, and department analytics. How can I assist you today?",
       sender: "bot",
       timestamp: nowTime(),
       isAI: true,
@@ -335,7 +335,7 @@ export default function ASTUCareerCopilot() {
       {/* Floating Action Button */}
       <button
         onClick={() => { setIsOpen(!isOpen); setIsMinimized(false); }}
-        aria-label={isOpen ? "Close chat" : "Open ASTU Career Copilot"}
+        aria-label={isOpen ? "Close chat" : "Open ASTU AI"}
         style={{
           position: "fixed", bottom: 24, right: 24, zIndex: 9999,
           width: 64, height: 64, borderRadius: "50%",
@@ -421,7 +421,7 @@ export default function ASTUCareerCopilot() {
             <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <span style={{ color:"#fff", fontSize:15, fontWeight:700, letterSpacing:"0.3px" }}>
-                  ASTU Career Copilot
+                  ASTU AI
                 </span>
                 <span style={{
                   width: 8, height: 8, borderRadius: "50%",
