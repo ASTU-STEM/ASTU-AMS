@@ -34,12 +34,23 @@ import { DocumentServicesTab } from '../components/DocumentServicesTab';
 import { SettingsTab } from '../components/SettingsTab';
 import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
+import { AlumniDirectoryTab } from '../components/AlumniDirectoryTab';
+import { AlumniToolsPage } from '../../tools/pages/AlumniToolsPage';
 
-const AlumniDashboard = () => {
+interface AlumniDashboardProps {
+  defaultTab?: string;
+}
+
+const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (defaultTab) return defaultTab;
+    if (window.location.pathname.endsWith('/tools')) return 'tools';
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'dashboard';
+  });
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('alumni_sidebar_collapsed') === 'true');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -781,11 +792,13 @@ const AlumniDashboard = () => {
     { id: 'jobs', label: 'Jobs Board', icon: 'work' },
     { id: 'career', label: 'Career Center', icon: 'school' },
     { id: 'surveys', label: 'Surveys', icon: 'assignment', badge: realPendingSurveysCount > 0 ? realPendingSurveysCount.toString() : null },
+    { id: 'tools', label: 'Tools', icon: 'construction' },
   ];
 
   const communityItems = [
     { id: 'profile', label: 'My Profile', icon: 'account_circle' },
     { id: 'mentorship', label: 'Mentorship', icon: 'diversity_3' },
+    { id: 'directory', label: 'Directory', icon: 'travel_explore' },
     { id: 'forum', label: 'Community', icon: 'group' },
     { id: 'donations', label: 'Giving', icon: 'volunteer_activism' },
   ];
@@ -994,10 +1007,10 @@ const AlumniDashboard = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+      <div className={`min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
         {/* Enhanced Header with Glass Effect */}
         <header
-          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
+          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 shrink-0"
           style={{
             background: 'var(--bg-navbar)',
             borderColor: 'var(--border-color)',
@@ -1131,7 +1144,8 @@ const AlumniDashboard = () => {
         </header>
 
         {/* Main Workspace Board */}
-        <main className="h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-[#f8fafc] p-2 sm:p-6 md:p-8 space-y-4 sm:space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden bg-[#f8fafc] dark:bg-slate-950 p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
@@ -1195,7 +1209,29 @@ const AlumniDashboard = () => {
                 />
               )}
               {activeTab === 'surveys' && <SurveysTab />}
-              {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={handleViewJob} onToggleSaveJob={handleToggleSaveJob} />}
+              {activeTab === 'tools' && (
+                <AlumniToolsPage
+                  profile={profile}
+                  jobs={jobs}
+                  surveys={surveys}
+                  mentors={mentors}
+                  documents={documents}
+                />
+              )}
+              {activeTab === 'directory' && (
+                <AlumniDirectoryTab
+                  onOpenChat={(alumni: any) => {
+                    setChatTarget({
+                      userId: alumni.userId || alumni.id,
+                      name: alumni.name,
+                      avatar: alumni.avatar,
+                      roleLabel: `${alumni.department || 'ASTU'} Graduate`
+                    });
+                    setActiveTab('messages');
+                    toast.success(`Opening direct chat with ${alumni.name} in ASTU_AMS Hub...`);
+                  }}
+                />
+              )}
               {activeTab === 'mentorship' && (
                 <MentorshipTab
                   mentors={mentors}
@@ -2017,6 +2053,7 @@ const AlumniDashboard = () => {
               )}
             </>
           )}
+          </div>
         </main>
       </div>
 
@@ -2290,3 +2327,4 @@ const AlumniDashboard = () => {
 };
 
 export default AlumniDashboard;
+

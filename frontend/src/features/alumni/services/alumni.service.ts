@@ -266,4 +266,13 @@ export const alumniService = {
   async deleteAccount() {
     return unwrap(await apiClient.delete('/alumni/account'));
   },
+
+  // ─── Alumni Directory ───────────────────────────────────────────────────
+  async getDirectory(params?: Record<string, any>) {
+    return unwrap(await apiClient.get('/alumni/directory', { params }));
+  },
+
+  async connectAlumni(alumniId: string) {
+    return unwrap(await apiClient.post('/alumni/connect', { alumniId }));
+  },
 };

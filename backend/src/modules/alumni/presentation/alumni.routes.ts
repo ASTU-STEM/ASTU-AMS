@@ -11,6 +11,10 @@ const router = Router();
 router.use(authenticateJWT);
 router.use(requireRoles([Role.ALUMNI]));
 
+// Directory & Networking
+router.get('/directory', asyncHandler(AlumniController.getDirectory));
+router.post('/connect', asyncHandler(AlumniController.connectAlumni));
+
 // Profile
 router.get('/me', asyncHandler(AlumniController.getMe));
 router.put('/me', uploadMiddleware.fields([{ name: 'avatar', maxCount: 1 }, { name: 'resume', maxCount: 1 }]), asyncHandler(AlumniController.updateMe));

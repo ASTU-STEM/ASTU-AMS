@@ -437,7 +437,15 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
   const [threads, setThreads] = useState<ConversationThread[]>(() => {
     try {
       const cached = localStorage.getItem('astuchat_threads_cache');
-      return cached ? JSON.parse(cached) : [];
+      if (!cached) return [];
+      const parsed: ConversationThread[] = JSON.parse(cached);
+      return parsed.map(t => {
+        if (t.name === 'ASTU Network Contact' || t.name === 'ASTU Network Member') {
+          const cleanName = t.email ? t.email.split('@')[0] : (t.alumniName && t.alumniName !== 'ASTU Network Contact' && t.alumniName !== 'ASTU Network Member' ? t.alumniName : (t.role === 'EMPLOYER' ? 'Corporate Recruiter' : 'Alumni Candidate'));
+          return { ...t, name: cleanName, alumniName: cleanName };
+        }
+        return t;
+      });
     } catch {
       return [];
     }
@@ -1560,22 +1568,49 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
     try {
       const response = await apiClient.get('/chat/threads');
       const data: ConversationThread[] = response.data.data || [];
-      setThreads(data);
-      try {
-        localStorage.setItem('astuchat_threads_cache', JSON.stringify(data));
-      } catch {
-        // ignore
-      }
+      
+      setThreads(prev => {
+        const serverKeys = new Set(data.map(t => (t.userId || t.partnerId || t.email || t.name).toLowerCase()));
+        
+        const updatedServerThreads = data.map(st => {
+          const local = prev.find(p =>
+            (p.userId && p.userId === st.userId) ||
+            (p.partnerId && p.partnerId === st.partnerId) ||
+            (p.name && st.name && p.name.toLowerCase() === st.name.toLowerCase())
+          );
+          if (local && local.name && local.name !== 'ASTU Network Contact' && local.name !== 'ASTU Network Member' && (st.name === 'ASTU Network Contact' || st.name === 'ASTU Network Member')) {
+            return { ...st, name: local.name, alumniName: local.name };
+          }
+          return st;
+        });
+
+        const extraLocalThreads = prev.filter(p => {
+          const k = (p.userId || p.partnerId || p.email || p.name).toLowerCase();
+          return !serverKeys.has(k) && p.name !== 'ASTU Network Contact' && p.name !== 'ASTU Network Member';
+        });
+
+        const nextThreads = [...extraLocalThreads, ...updatedServerThreads];
+        try {
+          localStorage.setItem('astuchat_threads_cache', JSON.stringify(nextThreads));
+        } catch { }
+        return nextThreads;
+      });
 
       setActiveThread(current => {
-        if (!current) return null; // Do not auto-select any thread
+        if (!current) return null;
         const match = data.find(t =>
           (current.userId && t.userId === current.userId) ||
           (current.partnerId && t.partnerId === current.partnerId) ||
           (current.email && t.email === current.email) ||
           (current.name && t.name.toLowerCase() === current.name.toLowerCase())
         );
-        return match || current;
+        if (match) {
+          if (current.name && current.name !== 'ASTU Network Contact' && current.name !== 'ASTU Network Member' && (match.name === 'ASTU Network Contact' || match.name === 'ASTU Network Member')) {
+            return { ...match, name: current.name, alumniName: current.name };
+          }
+          return match;
+        }
+        return current;
       });
     } catch (err) {
       console.error('Failed to load chat threads', err);
@@ -1601,6 +1636,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
     if (initialTarget && targetKey) {
       const targetId = initialTarget.userId || initialTarget.id;
       const targetName = initialTarget.name || 'Alumni Candidate';
+      const nowIso = new Date().toISOString();
 
       setThreads(prev => {
         const existing = prev.find(t =>
@@ -1610,8 +1646,15 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         );
 
         if (existing) {
-          setActiveThread(existing);
-          return prev;
+          const updated = {
+            ...existing,
+            name: targetName !== 'Alumni Candidate' ? targetName : existing.name,
+            avatar: initialTarget.avatar || existing.avatar,
+            roleLabel: initialTarget.roleLabel || existing.roleLabel,
+            lastMessageTime: nowIso
+          };
+          setActiveThread(updated);
+          return [updated, ...prev.filter(t => t !== existing)];
         }
 
         const fallbackId = targetId || `candidate-${Date.now()}`;
@@ -1627,7 +1670,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
           online: true,
           unreadCount: 0,
           lastMessage: 'Tap to start conversation...',
-          lastMessageTime: 'Just now',
+          lastMessageTime: nowIso,
           messages: []
         };
         setActiveThread(newThread);
@@ -1815,6 +1858,39 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
     if ((!typedMessage.trim() && !selectedFile) || !activeThread) return;
 
     setIsSending(true);
+    const sentText = typedMessage.trim() || (selectedFile ? 'Attachment' : '');
+    const nowIso = new Date().toISOString();
+
+    // Optimistically update active thread timestamp and move it to top
+    const newMsgObj: Message = {
+      id: `temp-${Date.now()}`,
+      sender: 'ALUMNI',
+      senderId: 'me',
+      senderRole: 'ALUMNI',
+      text: sentText,
+      fileUrl: selectedFile?.previewUrl || null,
+      fileType: selectedFile?.type || null,
+      isRead: true,
+      createdAt: nowIso
+    };
+
+    const updatedActiveThread: ConversationThread = {
+      ...activeThread,
+      lastMessage: sentText,
+      lastMessageTime: nowIso,
+      messages: [...(activeThread.messages || []), newMsgObj]
+    };
+
+    setActiveThread(updatedActiveThread);
+    setThreads(prev => {
+      const key = (activeThread.userId || activeThread.partnerId || activeThread.email || activeThread.name).toLowerCase();
+      const otherThreads = prev.filter(t => {
+        const k = (t.userId || t.partnerId || t.email || t.name).toLowerCase();
+        return k !== key && (!t.name || t.name.toLowerCase() !== activeThread.name.toLowerCase());
+      });
+      return [updatedActiveThread, ...otherThreads];
+    });
+
     try {
       const targetId = activeThread.userId || activeThread.partnerId;
 
@@ -1828,7 +1904,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
       await apiClient.post('/chat/send', {
         targetId,
-        text: typedMessage.trim(),
+        text: sentText,
         fileUrl,
         fileType
       });
@@ -1867,9 +1943,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
   // Start New Chat from Contact Modal
   const handleStartChatWithContact = (contact: Contact) => {
+    const nowIso = new Date().toISOString();
     const existing = threads.find(t => t.userId === contact.userId || t.partnerId === contact.id);
     if (existing) {
-      handleSelectThread(existing);
+      const updated = { ...existing, lastMessageTime: nowIso };
+      handleSelectThread(updated);
+      setThreads(prev => [updated, ...prev.filter(t => t !== existing)]);
     } else {
       const newThread: ConversationThread = {
         partnerId: contact.userId,
@@ -1883,7 +1962,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         online: true,
         unreadCount: 0,
         lastMessage: 'Tap to start conversation...',
-        lastMessageTime: 'Now',
+        lastMessageTime: nowIso,
         messages: []
       };
       setThreads(prev => [newThread, ...prev]);
@@ -1893,6 +1972,24 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
   };
 
   const getInitials = (name: string) => name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'CU';
+
+  // Helper to extract timestamp in epoch ms for thread sorting
+  const getThreadTimestampMs = useCallback((t: ConversationThread): number => {
+    if (!t) return 0;
+    if (t.messages && t.messages.length > 0) {
+      const lastMsg = t.messages[t.messages.length - 1];
+      if (lastMsg?.createdAt) {
+        const time = new Date(lastMsg.createdAt).getTime();
+        if (!isNaN(time) && time > 0) return time;
+      }
+    }
+    if (t.lastMessageTime) {
+      if (t.lastMessageTime === 'Now' || t.lastMessageTime === 'Just now') return Date.now();
+      const time = new Date(t.lastMessageTime).getTime();
+      if (!isNaN(time) && time > 0) return time;
+    }
+    return 0;
+  }, []);
 
   // Deduplicate and filter threads by tab & query
   const uniqueThreads = useMemo(() => {
@@ -1908,20 +2005,22 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
         const existing = map.get(key)!;
         const bestMessages = (t.messages?.length || 0) > (existing.messages?.length || 0) ? t.messages : existing.messages;
         const minUnread = isActive ? 0 : Math.min(t.unreadCount ?? 0, existing.unreadCount ?? 0);
+        const newestTime = getThreadTimestampMs(t) > getThreadTimestampMs(existing) ? t.lastMessageTime : existing.lastMessageTime;
 
         map.set(key, {
           ...existing,
           ...t,
           unreadCount: minUnread,
-          messages: bestMessages
+          messages: bestMessages,
+          lastMessageTime: newestTime
         });
       }
     });
     return Array.from(map.values());
-  }, [threads, activeThread]);
+  }, [threads, activeThread, getThreadTimestampMs]);
 
   const filteredThreads = useMemo(() => {
-    return uniqueThreads.filter(t => {
+    const list = uniqueThreads.filter(t => {
       const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             t.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             (t.roleLabel && t.roleLabel.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -1934,7 +2033,9 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
       return true;
     });
-  }, [uniqueThreads, searchQuery, activeFilter]);
+
+    return list.sort((a, b) => getThreadTimestampMs(b) - getThreadTimestampMs(a));
+  }, [uniqueThreads, searchQuery, activeFilter, getThreadTimestampMs]);
 
   // Filter modal contacts
   const filteredContacts = contacts.filter(c => 
