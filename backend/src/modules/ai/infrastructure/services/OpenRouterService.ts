@@ -2,6 +2,9 @@ import axios from 'axios';
 
 export class OpenRouterService {
   private static async getApiKey(): Promise<string | null> {
+    if (process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim() !== '') {
+      return process.env.OPENROUTER_API_KEY.trim();
+    }
     try {
       const prisma = require('../../../../core/config/db').default;
       const setting = await prisma.systemSetting.findUnique({ where: { key: 'integrations' } });
@@ -12,25 +15,16 @@ export class OpenRouterService {
         }
       }
     } catch (_) {}
-    return process.env.OPENROUTER_API_KEY || null;
+    return null;
   }
 
   private static async getModel(): Promise<string> {
-    try {
-      const prisma = require('../../../../core/config/db').default;
-      const setting = await prisma.systemSetting.findUnique({ where: { key: 'integrations' } });
-      if (setting && setting.value) {
-        const val = setting.value as any;
-        if (val.openRouterModel && val.openRouterModel.trim() !== '') {
-          let m = val.openRouterModel.trim();
-          if (m === 'deepseek/deepseek-r1:free') m = 'deepseek/deepseek-r1';
-          return m;
-        }
-      }
-    } catch (_) {}
-    let envModel = process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat';
-    if (envModel === 'deepseek/deepseek-r1:free') envModel = 'deepseek/deepseek-r1';
-    return envModel;
+    if (process.env.OPENROUTER_MODEL && process.env.OPENROUTER_MODEL.trim() !== '') {
+      let m = process.env.OPENROUTER_MODEL.trim();
+      if (m === 'deepseek/deepseek-r1:free' || m === 'deepseek/deepseek-chat') m = 'meta-llama/llama-3.3-70b-instruct';
+      return m;
+    }
+    return 'meta-llama/llama-3.3-70b-instruct';
   }
 
   static async generateText(prompt: string, systemInstruction?: string): Promise<string> {
@@ -43,8 +37,11 @@ export class OpenRouterService {
 
     const candidateModels = Array.from(new Set([
       primaryModel,
-      'deepseek/deepseek-chat',
       'meta-llama/llama-3.3-70b-instruct',
+      'google/gemini-2.5-flash',
+      'qwen/qwen-2.5-72b-instruct',
+      'mistralai/mistral-small-24b-instruct-2501',
+      'meta-llama/llama-3.1-8b-instruct',
     ]));
 
     for (const currentModel of candidateModels) {
@@ -65,7 +62,7 @@ export class OpenRouterService {
               'HTTP-Referer': 'https://github.com/astu-ams',
               'Content-Type': 'application/json',
             },
-            timeout: 6000,
+            timeout: 3000,
           }
         );
 
