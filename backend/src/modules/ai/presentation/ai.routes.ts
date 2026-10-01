@@ -7,7 +7,10 @@ import { asyncHandler } from '../../../core/utils/asyncHandler';
 
 const router = Router();
 
-// Secure all endpoints to ADMIN and REGISTRAR only
+// Unauthenticated Public Landing Page Chatbot Endpoint
+router.post('/public-chat', asyncHandler(AIController.publicChat));
+
+// Secure remaining admin endpoints to ADMIN and REGISTRAR only
 router.use(authenticateJWT);
 router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 

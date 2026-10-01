@@ -11,7 +11,7 @@ const PORT = env.PORT || 5000;
 
 async function bootstrap() {
   try {
-    Logger.info(' Bootstrapping ASTU-AMS API Server...');
+    Logger.info('🚀 Bootstrapping ASTU-AMS Public AI Assistant API Server...');
 
     // 1. Validate Database Connection (with resilient fallback dev DB models active and live job board repository)
     Logger.info('📡 Initializing database client...');
