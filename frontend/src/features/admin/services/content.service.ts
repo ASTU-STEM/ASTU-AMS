@@ -4,96 +4,18 @@ import { ContentCardItem } from '../components/ContentCard';
 const STORAGE_KEY = 'astu_ams_cms_content_items';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const initialItems: ContentCardItem[] = [
-  {
-    id: 'C-001',
-    title: 'ASTU Alumni Network: Bridging Generations',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
-    author: 'Content Manager',
-    updatedAt: '2 hours ago',
-    publishedAt: 'May 28, 2026',
-    views: 1240,
-    tags: ['alumni', 'community', 'networking'],
-    pinned: true,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-002',
-    title: 'Industry Partnership Week 2026',
-    type: 'page',
-    status: 'Scheduled',
-    excerpt: 'Five-day summit connecting ASTU students with leading employers across Ethiopia and East Africa.',
-    author: 'Content Manager',
-    updatedAt: 'Jun 5, 2026',
-    scheduledFor: 'Jun 12, 9:00 AM',
-    views: 0,
-    tags: ['partnership', 'employers', 'career'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-  },
-  {
-    id: 'C-003',
-    title: 'Tracer Survey Campaign Banner',
-    type: 'page',
-    status: 'Draft',
-    excerpt: 'Encourages 2024 alumni batch to complete the annual tracer study for institutional improvement.',
-    author: 'Content Manager',
-    updatedAt: 'Yesterday',
-    views: 0,
-    tags: ['tracer', 'survey', 'alumni'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-004',
-    title: 'Semester Break: Campus Safety Notice',
-    type: 'announcement',
-    status: 'Published',
-    excerpt: 'Important safety reminders for students, faculty, and visitors during the upcoming semester break.',
-    author: 'System Admin',
-    updatedAt: '45 min ago',
-    publishedAt: 'Jun 7, 2026',
-    views: 892,
-    tags: ['safety', 'campus', 'announcement'],
-    pinned: true,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-005',
-    title: 'Campus Tour 2026 Photo Album',
-    type: 'gallery',
-    status: 'Needs Review',
-    excerpt: 'Stunning aerial and ground-level photos from the 2026 campus tour. Awaiting final approval before publishing.',
-    author: 'Dept Head',
-    updatedAt: '3 days ago',
-    views: 0,
-    tags: ['campus', 'tour', 'photos'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-  },
-  {
-    id: 'C-006',
-    title: 'ASTU Research Grant Winners 2026',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'Announcing 12 applied research grants awarded to faculty and alumni engineering teams.',
-    author: 'Content Manager',
-    updatedAt: '1 day ago',
-    publishedAt: 'May 25, 2026',
-    views: 1890,
-    tags: ['research', 'grants', 'engineering'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-  },
-];
+/**
+ * No fabricated seed content.
+ *
+ * This previously declared six invented items ("ASTU Alumni Network: Bridging
+ * Generations" claiming 25,000+ graduates, "ASTU Research Grant Winners 2026"
+ * claiming 12 grants, and so on) and wrote them into localStorage on first read.
+ * Because the homepage only overwrites its localStorage snapshot when the API
+ * returns a non-empty list, those fabrications kept rendering on the public
+ * homepage even after the backend content was emptied. Content now comes from
+ * the API only; an empty list renders as an empty state.
+ */
+const initialItems: ContentCardItem[] = [];
 
 export const contentService = {
   getItems(): ContentCardItem[] {

@@ -60,96 +60,17 @@ const DEFAULT_EVENT_IMAGES: Record<string, string> = {
   'Grant Writing Workshop': 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=900&q=80',
 };
 
-const initialEvents: EventItem[] = [
-  {
-    id: 'E-001',
-    title: 'ASTU Alumni Career Summit',
-    kind: 'Event',
-    category: 'Career',
-    date: '2026-06-12',
-    rsvps: 420,
-    attendance: 120,
-    status: 'Open',
-    location: 'Main Auditorium',
-    image: '/images/astu-building.jpg',
-    description: 'Annual gathering of ASTU graduates, corporate recruiters, and keynote speakers.',
-    attendeesList: [
-      { name: 'Dr. Abebe Yosef', email: 'abebe@astu.edu.et', checkedIn: true },
-      { name: 'Helina Sileshi', email: 'helina@alumni.astu.edu.et', checkedIn: true },
-      { name: 'Bekele Kebede', email: 'bekele@alumni.astu.edu.et', checkedIn: false },
-      { name: 'Ruth Alemu', email: 'ruth@astu.edu.et', checkedIn: false },
-    ],
-  },
-  {
-    id: 'E-002',
-    title: 'Cloud Computing Bootcamp',
-    kind: 'Workshop',
-    category: 'Technical Training',
-    date: '2026-06-18',
-    rsvps: 96,
-    attendance: 40,
-    status: 'Approval Required',
-    location: 'CS Lab 101',
-    image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80',
-    description: 'Hands-on training on AWS, Azure, and cloud infrastructure for ASTU engineering seniors.',
-    attendeesList: [
-      { name: 'Yonas Bekele', email: 'yonas@alumni.astu.edu.et', checkedIn: true },
-      { name: 'Kalkidan Tadesse', email: 'kalkidan@alumni.astu.edu.et', checkedIn: false },
-    ],
-  },
-  {
-    id: 'E-003',
-    title: 'Employer Roundtable',
-    kind: 'Event',
-    category: 'Partnership',
-    date: '2026-06-26',
-    rsvps: 78,
-    attendance: 0,
-    status: 'Open',
-    location: 'Conference Hall A',
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=80',
-    description: 'Executive panel discussing graduate tracer study trends and skill alignment.',
-  },
-  {
-    id: 'E-004',
-    title: 'CV and Interview Lab',
-    kind: 'Workshop',
-    category: 'Employability',
-    date: '2026-05-20',
-    rsvps: 160,
-    attendance: 138,
-    status: 'Closed',
-    location: 'Career Center',
-    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80',
-    description: 'Interactive resume critique and mock interviews conducted by industry HR leads.',
-  },
-  {
-    id: 'E-005',
-    title: 'AI/ML Research Symposium',
-    kind: 'Event',
-    category: 'Research',
-    date: '2026-07-05',
-    rsvps: 234,
-    attendance: 0,
-    status: 'Open',
-    location: 'Engineering Complex',
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80',
-    description: 'Presentation of faculty and alumni research projects in machine learning.',
-  },
-  {
-    id: 'E-006',
-    title: 'Grant Writing Workshop',
-    kind: 'Workshop',
-    category: 'Research',
-    date: '2026-06-28',
-    rsvps: 45,
-    attendance: 0,
-    status: 'Approval Required',
-    location: 'Room 305',
-    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=900&q=80',
-    description: 'Masterclass on submitting competitive international research grant proposals.',
-  },
-];
+/**
+ * No fabricated seed events.
+ *
+ * This previously created three invented entries ("ASTU Alumni Career Summit"
+ * with 420 RSVPs and 120 attendees, "Cloud Computing Bootcamp", "Employer
+ * Roundtable") which were written to localStorage on first load. HomePage falls
+ * back to that localStorage key when the events API returns nothing, so these
+ * invented events rendered on the public homepage. Events now come from the
+ * API or from events an administrator actually creates here.
+ */
+const initialEvents: EventItem[] = [];
 
 const categories = ['Career', 'Technical Training', 'Partnership', 'Employability', 'Research', 'Graduation'];
 

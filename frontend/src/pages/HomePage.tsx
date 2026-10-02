@@ -373,7 +373,13 @@ export default function HomePage() {
     const eventIdOrSlug = rsvpModalItem.id || rsvpModalItem.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
     try {
       await eventsService.rsvpToEvent(eventIdOrSlug, 'GOING');
-    } catch {}
+    } catch (err) {
+      // Previously the failure was swallowed by an empty catch, so a rejected
+      // RSVP still confirmed the registration and claimed a ticket was emailed.
+      console.error('RSVP failed:', err);
+      toast.error('Registration could not be completed. Please try again.');
+      return;
+    }
 
     const updated = [...registeredTitles, rsvpModalItem.title];
     setRegisteredTitles(updated);
@@ -532,12 +538,15 @@ export default function HomePage() {
           if (apiFooter) setFooterConfig(apiFooter);
         }
 
-        // Apply live content items (news, announcements)
-        if (isMounted && Array.isArray(apiItems) && apiItems.length) {
+        // Apply live content items (news, announcements).
+        // An empty array is a valid answer meaning "nothing is published", so it
+        // must clear the localStorage snapshot rather than leave it on screen.
+        // Guarding on `apiItems.length` meant deleted content stayed visible.
+        if (isMounted && Array.isArray(apiItems)) {
           const liveNews = apiItems
             .filter((i: any) => i.status === 'Published' && (i.type === 'post' || i.type === 'announcement'))
             .map((i: any) => ({ id: i.id, title: i.title, date: i.publishedAt || i.updatedAt, excerpt: i.excerpt }));
-          if (liveNews.length) setLiveNews(liveNews);
+          setLiveNews(liveNews);
 
           const liveAnnounce = apiItems
             .filter((i: any) => i.status === 'Published')
@@ -548,7 +557,7 @@ export default function HomePage() {
               type: i.type === 'announcement' ? 'Official Announcement' : `${String(i.type).toUpperCase()} Announcement`,
               excerpt: i.excerpt,
             }));
-          if (liveAnnounce.length) setLiveAnnouncements(liveAnnounce);
+          setLiveAnnouncements(liveAnnounce);
         }
       } catch {
         // Silently fall back to localStorage data already applied above
@@ -568,7 +577,7 @@ export default function HomePage() {
               id: e.id || e.slug,
               title: e.title,
               date: typeof e.date === 'string' ? e.date.split('T')[0] : new Date(e.date).toLocaleDateString(),
-              location: e.location || 'ASTU Main Campus',
+location: e.location || 'Location to be confirmed',
               image: e.image || e.coverImage || e.bannerUrl || FALLBACK_IMAGE,
             }));
 
@@ -579,7 +588,7 @@ export default function HomePage() {
               title: e.title,
               date: typeof e.date === 'string' ? e.date.split('T')[0] : new Date(e.date).toLocaleDateString(),
               seats: e.capacity ? `${e.capacity} seats` : 'Open Registration',
-              focus: e.category || e.tags?.[0] || 'Career Readiness',
+              focus: e.category || e.tags?.[0] || 'General',
             }));
         }
 
@@ -1371,7 +1380,9 @@ export default function HomePage() {
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
-                  toast.success("Subscribed to ASTU-AMS announcements.");
+                  // No announcement-subscription endpoint exists, so this used to
+                  // claim success while discarding the address entirely.
+                  toast.error('Announcement sign-up is not available yet. No email address was stored.');
                   (event.currentTarget as HTMLFormElement).reset();
                 }}
                 className="mt-5 space-y-3"
@@ -1672,13 +1683,15 @@ export default function HomePage() {
               </p>
             </div>
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                toast.success('Thank you! You are subscribed to ASTU Alumni newsletter.');
-                (e.target as HTMLFormElement).reset();
-              }}
-              className="flex w-full lg:w-auto max-w-md gap-2"
-            >
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  // There is no newsletter endpoint, so this previously toasted
+                  // "You are subscribed" without storing anything or telling the
+                  // server. It now says plainly that no address was recorded.
+                  toast.error('Newsletter sign-up is not available yet. No email address was stored.');
+                }}
+                className="flex w-full lg:w-auto max-w-md gap-2"
+              >
               <input
                 type="email"
                 placeholder="Enter email for campus news..."
@@ -1988,7 +2001,7 @@ export default function HomePage() {
                 <div className="rounded-xl bg-slate-50 p-3.5 text-xs space-y-1 border border-slate-100">
                   <p className="text-slate-600"><span className="font-semibold text-slate-900">Scheduled Date:</span> {rsvpModalItem.date}</p>
                   {rsvpModalItem.location && <p className="text-slate-600"><span className="font-semibold text-slate-900">Venue / Location:</span> {rsvpModalItem.location}</p>}
-                  <p className="text-[10px] text-emerald-600 font-medium pt-1">Free Admission • Instant Entry Ticket Code Issued Upon Submission</p>
+                  <p className="text-[10px] text-slate-500 font-medium pt-1">Free Admission • A registration reference is generated after you submit</p>
                 </div>
 
                 <div className="space-y-3 pt-1">
@@ -2092,7 +2105,10 @@ export default function HomePage() {
                   />
                 </div>
 
-                <p className="text-[11px] text-slate-400">Digital pass saved! Scan at event entrance for instant QR check-in.</p>
+                <p className="text-[11px] text-slate-500">
+                    Keep this reference for your records. Entry check-in is not yet
+                    automated — nothing scans this code at the venue yet.
+                  </p>
 
                 <button
                   onClick={() => setRsvpModalItem(null)}

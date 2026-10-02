@@ -25,6 +25,7 @@ import {
   Save,
   ShieldCheck,
   Star,
+  Sparkles,
   Trash2,
   Trophy,
   Upload,
@@ -147,87 +148,30 @@ const initialGallery: GalleryImage[] = [
   { id: 'GI-3', title: 'ASTU Alumni Identity', src: '/src/assets/imgs/astu-logo.jpeg', active: true },
 ];
 
+// Real repository images only. This previously used an Unsplash stock photo
+// captioned "Career Expo Highlights", which rendered unrelated photography as
+// an ASTU event on the public homepage.
 const initialVideos: VideoItem[] = [
-  { id: 'VI-1', title: 'Career Expo Highlights', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80', active: true },
   { id: 'VI-2', title: 'Research & Innovation Forum', image: '/src/assets/images/arc.jpg', active: true },
   { id: 'VI-3', title: 'Graduation Ceremony Replay', image: '/src/assets/images/gc7.jpg', active: true },
 ];
 
-const initialEvents: EventItem[] = [
-  { id: 'EV-1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80', active: true },
-  { id: 'EV-2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'ASTU Research Center', image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80', active: true },
-];
+const initialEvents: EventItem[] = [];
 
-const initialWorkshops: WorkshopItem[] = [
-  { id: 'WS-1', title: 'AI for Engineering Research', date: 'June 14, 2026', seats: '120 seats', focus: 'Research & Innovation', active: true },
-  { id: 'WS-2', title: 'CV Builder and Interview Lab', date: 'June 20, 2026', seats: '80 seats', focus: 'Career Readiness', active: true },
-  { id: 'WS-3', title: 'Startup Finance for Alumni', date: 'July 4, 2026', seats: '60 seats', focus: 'Entrepreneurship', active: true },
-];
+const initialWorkshops: WorkshopItem[] = [];
 
-const initialNewsItems: NewsItem[] = [
-  { id: 'NW-1', title: 'New Engineering Lab Inaugurated', date: 'May 28, 2026', active: true },
-  { id: 'NW-2', title: 'ASTU Research Grant Winners', date: 'May 25, 2026', active: true },
-  { id: 'NW-3', title: 'Annual Career Expo Announced', date: 'May 20, 2026', active: true },
-];
+const initialNewsItems: NewsItem[] = [];
 
-const initialAnnouncements: Announcement[] = [
-  { id: 'AN-1', title: 'ASTU Alumni Association Inspires Graduating Class with Career Tips!', date: 'March 7, 2025', type: 'Alumni Announcement', active: true },
-  { id: 'AN-2', title: 'ASTU hosts a five-day DAAD Alumni workshop', date: 'March 7, 2025', type: 'Employer Announcement', active: true },
-  { id: 'AN-3', title: 'ASTU alumni serve as model United Nations secretariats!', date: 'January 7, 2025', type: 'Alumni Achievement', active: true },
-  { id: 'AN-4', title: 'Tracer Study 2026 response window is open', date: 'May 31, 2026', type: 'Alumni Announcement', active: true },
-  { id: 'AN-5', title: 'Call for employer partners: campus recruitment week', date: 'May 28, 2026', type: 'Employer Announcement', active: true },
-];
+const initialAnnouncements: Announcement[] = [];
 
-const initialStories: SuccessStory[] = [
-  {
-    id: 'SS-1',
-    name: 'Abebe Yosef',
-    role: 'Software Engineer',
-    company: 'Safaricom Ethiopia',
-    text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.',
-    fullStory:
-      'My journey at ASTU laid the foundation for everything I have achieved in tech. Through ASTU-AMS mentorship and job matching I joined Safaricom Ethiopia as a Software Engineer.',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
-    active: true,
-  },
-  {
-    id: 'SS-2',
-    name: 'Bekele Kebede',
-    role: 'Employer Partner',
-    company: 'GreenGrid Labs',
-    text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.',
-    fullStory:
-      'We partner with ASTU-AMS to recruit engineering graduates. Practical preparation and problem-solving skills from ASTU alumni are excellent.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
-    active: true,
-  },
-  {
-    id: 'SS-3',
-    name: 'Helina Sileshi',
-    role: 'Mentor & Alumni',
-    company: 'ASTU AI Research Center',
-    text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!',
-    fullStory:
-      'Through the ASTU-AMS mentorship framework I guide final-year students through research, career pathing, and professional growth.',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
-    active: true,
-  },
-];
+const initialStories: SuccessStory[] = [];
 
-const initialPartners: Partner[] = [
-  { id: 'PT-1', name: 'Ethio Telecom', active: true },
-  { id: 'PT-2', name: 'INSA', active: true },
-  { id: 'PT-3', name: 'Ethiopian Airlines', active: true },
-  { id: 'PT-4', name: 'Safaricom', active: true },
-  { id: 'PT-5', name: 'Huawei', active: true },
-  { id: 'PT-6', name: 'Commercial Bank of Ethiopia', active: true },
-];
+const initialTestimonials: Testimonial[] = [];
 
-const initialTestimonials: Testimonial[] = [
-  { id: 'TT-1', quote: 'ASTU-AMS gave our department the evidence we needed for skill-gap review.', by: 'Department Head', active: true },
-  { id: 'TT-2', quote: 'The candidate search and feedback tools improved our campus recruitment cycle.', by: 'Employer Partner', active: true },
-  { id: 'TT-3', quote: 'I found mentorship, events, and job matches without leaving the alumni portal.', by: 'ASTU Alumna', active: true },
-];
+// Partner logos are asserted relationships with real third-party companies
+// (Ethio Telecom, Safaricom, Huawei, CBE). Publishing a logo implies a signed
+// partnership, so this starts empty and is populated only from verified deals.
+const initialPartners: Partner[] = [];
 
 const initialFaq: FaqItem[] = [
   { id: 'FQ-1', question: 'Who can use ASTU-AMS?', answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.', active: true },
@@ -242,7 +186,7 @@ const tabConfig: { id: SectionTab; label: string; icon: React.ComponentType<{ cl
   { id: 'hero', label: 'Hero Slider', icon: ImagePlus, count: 0 },
   { id: 'stats', label: 'Impact Stats', icon: BarChart3, count: 0 },
   { id: 'portals', label: 'Stakeholder Portals', icon: Users, count: 0 },
-  { id: 'campus-life', label: 'Campus Life', icon: Star, count: 0 },
+  { id: 'campus-life', label: 'Campus Life', icon: Sparkles, count: 0 },
   { id: 'campuses', label: 'Campuses', icon: Building2, count: 0 },
   { id: 'gallery', label: 'Gallery', icon: Image, count: 0 },
   { id: 'video', label: 'Video Gallery', icon: PlayCircle, count: 0 },
@@ -323,14 +267,16 @@ export default function HomepageManagement() {
   const [faq, setFaq] = useState<FaqItem[]>(initialFaq);
 
   /* Proposal-specific states */
-  const [newsletterEmails, setNewsletterEmails] = useState<string[]>([
-    'alumni@astu.edu.et', 'employer@partner.com', 'graduate2024@email.com',
-  ]);
+  const [newsletterEmails, setNewsletterEmails] = useState<string[]>([]);
+  // responseRate/submissions/companies were seeded with invented figures
+  // (67.9%, 128 submissions, 24 companies) that were published to the public
+  // homepage. They now start blank for staff to fill from the real survey and
+  // feedback records.
   const [tracerSpotlight, setTracerSpotlight] = useState({
     enabled: true,
     title: 'Tracer Study 2026',
     description: 'Help ASTU maintain accreditation by completing your career outcome survey. Your responses drive curriculum updates and institutional quality assurance.',
-    responseRate: '67.9%',
+    responseRate: '',
     targetBatch: '2024',
     deadline: 'August 31, 2026',
   });
@@ -338,8 +284,8 @@ export default function HomepageManagement() {
     enabled: true,
     title: 'Employer Competency Feedback',
     description: 'Partner employers rate graduate competencies to help departments align curricula with industry needs.',
-    submissions: 128,
-    companies: 24,
+    submissions: 0,
+    companies: 0,
   });
   const [mentorshipStats, setMentorshipStats] = useState({
     enabled: false,
@@ -807,7 +753,7 @@ function StatsSection({ impactStats, setImpactStats }: { impactStats: ImpactStat
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Stat' : 'New Stat'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Value</label><input value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="1,238" /></div>
+            <div><label className="text-xs font-semibold text-slate-500">Value</label><input value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. 1,238" /></div>
             <div><label className="text-xs font-semibold text-slate-500">Suffix</label><input value={form.suffix} onChange={e => setForm(p => ({ ...p, suffix: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="+" /></div>
           </div>
           <div><label className="text-xs font-semibold text-slate-500">Label</label><input value={form.label} onChange={e => setForm(p => ({ ...p, label: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Registered Alumni Members" /></div>
