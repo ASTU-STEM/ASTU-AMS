@@ -12,7 +12,7 @@ export class DiditService {
     apiKey: string = ''
   ) {
     this.apiUrl = apiUrl;
-    this.apiKey = apiKey || process.env.DIDIT_API_KEY || 'fNZOouKi6YdbExgG-X2_OY7_lzjTCCl9Gwie3203Qrc';
+    this.apiKey = apiKey || process.env.DIDIT_API_KEY || '';
     this.workflowId = process.env.DIDIT_WORKFLOW_ID || '';
 
     this.client = axios.create({

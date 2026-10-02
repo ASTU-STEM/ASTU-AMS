@@ -571,7 +571,7 @@ export class EmployerController {
 
       const tx_ref = `ASTU-EMP-PREM-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      const secretKey = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-CHAPA_TEST_PRIV_YzGCRitzQDtxL9mPiBcgfHAd7M1E7HlvGbAnwP1F';
+      const secretKey = process.env.CHAPA_SECRET_KEY || '';
       const callbackUrl = process.env.CHAPA_CALLBACK_URL || 'https://webhook.site/astu-chapa-callback';
       let checkoutUrl = `${frontendUrl}/employer/dashboard?tab=profile&tx_ref=${tx_ref}&status=success`;
 
@@ -613,7 +613,7 @@ export class EmployerController {
         amount: amount || 15000,
         plan: plan || 'Monthly Premium',
         title: title || 'Premium Membership Plan',
-        publicKey: process.env.CHAPA_PUBLIC_KEY || 'CHAPUBK_TEST-CHAPA_TEST_PUB_14O385pJ_W6EtvLu8ASyLUJNWW5zbiecD0VDSRVS'
+        publicKey: process.env.CHAPA_PUBLIC_KEY || ''
       });
     } catch (err) { next(err); }
   }
@@ -625,7 +625,7 @@ export class EmployerController {
       const employer = await empRepo.findByUserId(userId);
       if (!employer) throw new Error('Employer profile not found');
 
-      const secretKey = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-CHAPA_TEST_PRIV_YzGCRitzQDtxL9mPiBcgfHAd7M1E7HlvGbAnwP1F';
+      const secretKey = process.env.CHAPA_SECRET_KEY || '';
 
       if (tx_ref && secretKey) {
         try {

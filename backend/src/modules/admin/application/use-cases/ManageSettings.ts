@@ -20,10 +20,14 @@ export const DEFAULT_SETTINGS = {
     return {
       smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
       smtpPort: String(process.env.SMTP_PORT || '465'),
-      smtpUser: process.env.SMTP_USER || 'astustun@gmail.com',
-      smtpPassword: process.env.SMTP_PASS || 'hddh dzbs kalr uebf',
+      // Secrets are read from the environment only. Previously each of these
+      // fell back to a hardcoded literal, which meant real credentials were
+      // committed to the repository and were served to any browser that could
+      // read the settings endpoint.
+      smtpUser: process.env.SMTP_USER || '',
+      smtpPassword: process.env.SMTP_PASS || '',
       fromName: 'ASTU Alumni Management System',
-      fromEmail: process.env.SMTP_FROM || process.env.SMTP_USER || 'astustun@gmail.com',
+      fromEmail: process.env.SMTP_FROM || process.env.SMTP_USER || '',
     };
   },
   get integrations() {
@@ -37,21 +41,21 @@ export const DEFAULT_SETTINGS = {
       diditToggle: true,
 
       regApiEndpoint: process.env.REGISTRAR_API_URL || 'https://registrar.astu.edu.et/api/v1',
-      regApiKey: process.env.REGISTRAR_API_KEY || 'astu_erp_live_sec_key',
+      regApiKey: process.env.REGISTRAR_API_KEY || '',
 
       openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
       openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
 
-      chapaSecretKey: process.env.CHAPA_SECRET_KEY || 'CHAPA_TEST_PRIV_UwuQ_bQaixYr3gDHWSXUzeYJIwUFbNe83EZLUsCf',
-      chapaPublicKey: process.env.CHAPA_PUBLIC_KEY || 'CHAPA_TEST_PUB_QtTbDIJUG_SdCp8zYvikvL3NyAcrALjfVKeO7K3e',
+      chapaSecretKey: process.env.CHAPA_SECRET_KEY || '',
+      chapaPublicKey: process.env.CHAPA_PUBLIC_KEY || '',
 
-      diditApiKey: process.env.DIDIT_API_KEY || 'fNZOouKi6YdbExgG-X2_OY7_lzjTCCl9Gwie3203Qrc',
+      diditApiKey: process.env.DIDIT_API_KEY || '',
 
-      smsGatewayUser: process.env.SMS_GATEWAY_USER || 'astu_sms',
-      smsGatewayPass: process.env.SMS_GATEWAY_PASS || 'password',
+      smsGatewayUser: process.env.SMS_GATEWAY_USER || '',
+      smsGatewayPass: process.env.SMS_GATEWAY_PASS || '',
 
-      googleClientId: process.env.GOOGLE_CLIENT_ID || 'google-client-id.apps.googleusercontent.com',
-      linkedinClientId: process.env.LINKEDIN_CLIENT_ID || 'linkedin-client-id',
+      googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+      linkedinClientId: process.env.LINKEDIN_CLIENT_ID || '',
     };
   },
   appearance: {

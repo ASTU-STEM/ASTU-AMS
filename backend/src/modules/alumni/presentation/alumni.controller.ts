@@ -213,7 +213,7 @@ export class AlumniController {
 
       const tx_ref = `ASTU-DOC-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      const secretKey = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-CHAPA_TEST_PRIV_YzGCRitzQDtxL9mPiBcgfHAd7M1E7HlvGbAnwP1F';
+      const secretKey = process.env.CHAPA_SECRET_KEY || '';
 
       let checkoutUrl = `${frontendUrl}/alumni/dashboard?tab=documents&tx_ref=${tx_ref}&status=success`;
       const callbackUrl = process.env.CHAPA_CALLBACK_URL || 'https://webhook.site/astu-chapa-callback';
@@ -257,7 +257,7 @@ export class AlumniController {
         amount: amount || 250,
         documentType,
         additionalInstructions,
-        publicKey: process.env.CHAPA_PUBLIC_KEY || 'CHAPUBK_TEST-CHAPA_TEST_PUB_14O385pJ_W6EtvLu8ASyLUJNWW5zbiecD0VDSRVS'
+        publicKey: process.env.CHAPA_PUBLIC_KEY || ''
       });
     } catch (err) {
       next(err);
@@ -270,7 +270,7 @@ export class AlumniController {
       const { tx_ref, documentType, additionalInstructions, amount } = req.body;
 
       let profile = await alumniRepo.findByUserId(userId);
-      const secretKey = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-CHAPA_TEST_PRIV_EXBJNVJ-o3qdJOo6mib_8geuuuzPNZ6B2lLckMJQ';
+      const secretKey = process.env.CHAPA_SECRET_KEY || '';
 
       // Verify with Chapa API
       try {
@@ -1101,7 +1101,7 @@ export class AlumniController {
 
       const tx_ref = `ASTU-DON-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      const secretKey = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-CHAPA_TEST_PRIV_YzGCRitzQDtxL9mPiBcgfHAd7M1E7HlvGbAnwP1F';
+      const secretKey = process.env.CHAPA_SECRET_KEY || '';
 
       let checkoutUrl = `${frontendUrl}/alumni/dashboard?tab=donations&tx_ref=${tx_ref}&status=success`;
       const callbackUrl = process.env.CHAPA_CALLBACK_URL || 'https://webhook.site/astu-chapa-callback';
@@ -1145,7 +1145,7 @@ export class AlumniController {
         amount: amount || 500,
         campaignId,
         campaignTitle: campaign?.title || 'ASTU Scholarship Fund 2026',
-        publicKey: process.env.CHAPA_PUBLIC_KEY || 'CHAPUBK_TEST-CHAPA_TEST_PUB_osvjFpEwm_HgJWO-HKsW6YKx6U0bz5fXIvyUcCzK'
+        publicKey: process.env.CHAPA_PUBLIC_KEY || ''
       });
     } catch (err) { next(err); }
   }
@@ -1156,7 +1156,7 @@ export class AlumniController {
       const { tx_ref, campaignId, amount } = req.body;
 
       let profile = await alumniRepo.findByUserId(userId);
-      const secretKey = process.env.CHAPA_SECRET_KEY || 'CHASECK_TEST-CHAPA_TEST_PRIV_YzGCRitzQDtxL9mPiBcgfHAd7M1E7HlvGbAnwP1F';
+      const secretKey = process.env.CHAPA_SECRET_KEY || '';
 
       // Verify with Chapa API
       try {

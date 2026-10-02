@@ -607,7 +607,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-600 space-y-1">
               <p className="font-bold text-gray-800 flex items-center justify-between">
                 <span>Chapa Test Environment</span>
-                <span className="text-[10px] text-emerald-600 font-mono">CHAPA_TEST_PRIV_...</span>
+                <span className="text-[10px] text-emerald-600 font-mono">configured via env</span>
               </p>
               <p className="text-[11px]">
                 Clicking Confirm will execute Chapa payment verification and send the document request directly to the ASTU Registrar.
