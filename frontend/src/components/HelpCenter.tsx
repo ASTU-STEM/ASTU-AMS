@@ -8,6 +8,7 @@ import {
   MdWork,
   MdDescription,
   MdGroups,
+  MdEventNote,
   MdQuiz,
   MdFeedback,
 } from "react-icons/md";
@@ -121,7 +122,7 @@ const sections: HelpSection[] = [
   },
   {
     title: "Events & Networking",
-    icon: MdGroups,
+    icon: MdEventNote,
     faqs: [
       {
         question: "How do I register for events?",

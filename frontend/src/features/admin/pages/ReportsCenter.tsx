@@ -40,6 +40,13 @@ import {
   TrendingDown,
   Layers,
   Cpu,
+  ChartSpline,
+  Plane,
+  School,
+  ScrollText,
+  Fingerprint,
+  IdCard,
+  Server,
   Compass,
   MessageSquare,
   Gift,
@@ -84,7 +91,7 @@ const reports: ReportItem[] = [
   // 2. Tracer Studies Domain (9 Reports)
   { title: 'Geographic Distribution Reports', area: 'Tracer Studies', cadence: 'Monthly', owner: 'Registrar', icon: MapPinned },
   { title: 'Tracer Study Reports', area: 'Tracer Studies', cadence: 'Wave Based', owner: 'Registrar', icon: FileSpreadsheet },
-  { title: 'Graduate Migration & Brain Drain Reports', area: 'Tracer Studies', cadence: 'Annual', owner: 'International Relations', icon: Globe2 },
+  { title: 'Graduate Migration & Brain Drain Reports', area: 'Tracer Studies', cadence: 'Annual', owner: 'International Relations', icon: Plane },
   { title: 'Gender & Equity Outcome Reports', area: 'Tracer Studies', cadence: 'Biannual', owner: 'Gender & Diversity Office', icon: Scale },
   { title: 'Tracer Survey Response & Completion Audit Reports', area: 'Tracer Studies', cadence: 'Per Wave', owner: 'Registrar', icon: FileCheck },
   { title: 'Postgraduate & Academic Progression Reports', area: 'Tracer Studies', cadence: 'Annual', owner: 'Postgraduate Directorate', icon: GradCap },
@@ -121,18 +128,18 @@ const reports: ReportItem[] = [
   { title: 'Campus Reunion & Networking Event Participation Reports', area: 'Events', cadence: 'Annual', owner: 'Alumni Directorate', icon: PartyPopper },
 
   // 6. Accreditation & Quality Domain (6 Reports)
-  { title: 'ABET Outcome & Accreditation Compliance Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Quality Assurance', icon: BadgeCheck },
+  { title: 'ABET Outcome & Accreditation Compliance Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Quality Assurance', icon: ScrollText },
   { title: 'HERQA Institutional Standard Audit Reports', area: 'Accreditation & Quality', cadence: 'Biannual', owner: 'Institutional Audit', icon: ShieldCheck },
   { title: 'Curriculum Relevancy & Course Evaluation Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Curriculum Directorate', icon: FileCheck2 },
-  { title: 'CGPA & Academic Performance Outcome Correlation Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Registrar & Analytics', icon: BarChart3 },
-  { title: 'Faculty Performance & Alumni Rating Benchmark Reports', area: 'Accreditation & Quality', cadence: 'Biannual', owner: 'Academic Senate', icon: Award },
+  { title: 'CGPA & Academic Performance Outcome Correlation Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Registrar & Analytics', icon: ChartSpline },
+  { title: 'Faculty Performance & Alumni Rating Benchmark Reports', area: 'Accreditation & Quality', cadence: 'Biannual', owner: 'Academic Senate', icon: School },
   { title: 'Institutional Quality Continuous Improvement Reports', area: 'Accreditation & Quality', cadence: 'Quarterly', owner: 'Quality Audit Committee', icon: LineChart },
 
   // 7. Governance & Security Domain (5 Reports)
   { title: 'System Audit Log & Security Compliance Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'ICT Security', icon: Lock },
-  { title: 'Admin Access Control & Role Permission Audit Reports', area: 'Governance & Security', cadence: 'Quarterly', owner: 'System Administrator', icon: ShieldCheck },
-  { title: 'Data Privacy & Student Identity Verification Audit Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar & Legal', icon: UserCheck },
-  { title: 'System Telemetry & API Performance Reports', area: 'Governance & Security', cadence: 'Weekly', owner: 'DevOps & Infrastructure', icon: Cpu },
+  { title: 'Admin Access Control & Role Permission Audit Reports', area: 'Governance & Security', cadence: 'Quarterly', owner: 'System Administrator', icon: Fingerprint },
+  { title: 'Data Privacy & Student Identity Verification Audit Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar & Legal', icon: IdCard },
+  { title: 'System Telemetry & API Performance Reports', area: 'Governance & Security', cadence: 'Weekly', owner: 'DevOps & Infrastructure', icon: Server },
   { title: 'Registrar Data Sync & Integrity Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar ICT', icon: RefreshCw },
 ];
 

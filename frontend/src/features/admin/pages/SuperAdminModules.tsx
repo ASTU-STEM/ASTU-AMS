@@ -21,7 +21,8 @@ import {
   MailCheck,
   MessageCircle,
   MonitorDot,
-  PanelTop,
+  Menu,
+  GalleryHorizontalEnd,
   Search,
   Shield,
   SlidersHorizontal,
@@ -86,7 +87,7 @@ const moduleGroups: GroupDefinition[] = [
       {
         id: 'menu-management',
         title: 'Homepage Menu Management',
-        icon: PanelTop,
+        icon: Menu,
         defaultStatus: 'Live',
         route: '/cms/footer',
         description: 'Header navigation items, dropdowns, and footer links.',
@@ -148,7 +149,7 @@ const moduleGroups: GroupDefinition[] = [
       {
         id: 'ad-banners',
         title: 'Advertisement Banner Management',
-        icon: PanelTop,
+        icon: GalleryHorizontalEnd,
         defaultStatus: 'Live',
         route: '/cms/gallery',
         description: 'Campus sponsorship banners, event promos, and workshop highlights.',

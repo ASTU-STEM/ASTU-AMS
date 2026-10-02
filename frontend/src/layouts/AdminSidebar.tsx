@@ -10,6 +10,7 @@ import {
   Heart,
   LayoutDashboard,
   LifeBuoy,
+  LockKeyhole,
   LogOut,
   MessageSquareText,
   PanelLeftClose,
@@ -58,7 +59,7 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Donations & Giving', path: '/admin/donations', icon: Heart, section: 'system', tooltip: 'Fundraising causes & Chapa donors' },
   { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'settings', tooltip: 'Unread notifications' },
   { label: 'System Logs', path: '/admin/logs', icon: ScrollText, section: 'settings', tooltip: 'Audit trail & system logs' },
-  { label: 'Backup & Security', path: '/admin/backup', icon: Shield, section: 'settings', tooltip: 'Backup & security settings' },
+  { label: 'Backup & Security', path: '/admin/backup', icon: LockKeyhole, section: 'settings', tooltip: 'Backup & security settings' },
   { label: 'Settings', path: '/admin/settings', icon: Settings, section: 'settings', tooltip: 'System configuration' },
 ];
 
