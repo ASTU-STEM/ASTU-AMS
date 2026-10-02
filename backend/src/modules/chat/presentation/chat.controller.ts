@@ -244,6 +244,52 @@ export class UnifiedChatController {
         if (u.employerProfile) partnerMap.set(u.employerProfile.id, info);
       });
 
+      // Fetch orphan alumni profiles & employer profiles directly for unresolved partner IDs
+      const missingPartnerIds = partnerIds.filter(id => !partnerMap.has(id));
+      if (missingPartnerIds.length > 0) {
+        const [extraAlumni, extraEmployers] = await Promise.all([
+          prisma.alumniProfile.findMany({
+            where: { id: { in: missingPartnerIds } },
+            include: { department: true }
+          }).catch(() => []),
+          prisma.employerProfile.findMany({
+            where: { id: { in: missingPartnerIds } }
+          }).catch(() => [])
+        ]);
+
+        extraAlumni.forEach((a: any) => {
+          const info = {
+            id: a.id,
+            userId: a.userId || a.id,
+            alumniId: a.id,
+            name: a.fullName || 'Alumni Candidate',
+            email: a.email || '',
+            role: 'ALUMNI',
+            roleLabel: 'Alumni Candidate',
+            department: a.department?.name || 'Graduate Candidate',
+            avatar: a.profilePicture || null
+          };
+          partnerMap.set(a.id, info);
+          if (a.userId) partnerMap.set(a.userId, info);
+        });
+
+        extraEmployers.forEach((e: any) => {
+          const info = {
+            id: e.id,
+            userId: e.userId || e.id,
+            employerId: e.id,
+            name: e.companyName || 'Corporate Recruiter',
+            email: e.contactEmail || '',
+            role: 'EMPLOYER',
+            roleLabel: 'Corporate Recruiter',
+            department: 'Corporate Network',
+            avatar: e.logoUrl || null
+          };
+          partnerMap.set(e.id, info);
+          if (e.userId) partnerMap.set(e.userId, info);
+        });
+      }
+
       // Build conversation threads
       const threadMap = new Map<string, any>();
 
@@ -254,13 +300,17 @@ export class UnifiedChatController {
         }
         if (!pId) return;
 
-        const partnerInfo = partnerMap.get(pId) || {
+        const partnerInfo = partnerMap.get(pId) ||
+          (msg.alumniId ? partnerMap.get(msg.alumniId) : null) ||
+          (msg.employerId ? partnerMap.get(msg.employerId) : null) ||
+          (msg.senderId && !myIds.includes(msg.senderId) ? partnerMap.get(msg.senderId) : null) ||
+          (msg.receiverId && !myIds.includes(msg.receiverId) ? partnerMap.get(msg.receiverId) : null) || {
           id: pId,
           userId: pId,
-          name: 'ASTU Network Contact',
+          name: 'ASTU Network Member',
           email: '',
-          role: msg.sender,
-          roleLabel: msg.sender,
+          role: msg.sender || 'ALUMNI',
+          roleLabel: msg.sender === 'EMPLOYER' ? 'Corporate Recruiter' : 'Alumni Candidate',
           department: 'ASTU Network',
           avatar: null
         };

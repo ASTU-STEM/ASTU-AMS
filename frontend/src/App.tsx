@@ -83,6 +83,15 @@ function AppContent() {
           }
         />
         <Route
+          path="/alumni/tools"
+          element={
+            <ProtectedRoute
+              element={<AlumniDashboard defaultTab="tools" />}
+              allowedRoles={["ALUMNI"]}
+            />
+          }
+        />
+        <Route
           path="/employer/dashboard"
           element={
             <ProtectedRoute

@@ -7,6 +7,7 @@ import { ReportAgent } from '../application/agents/ReportAgent';
 import { PDFReportGenerator } from '../infrastructure/services/PDFReportGenerator';
 import { DocumentProcessorService } from '../infrastructure/services/DocumentProcessorService';
 import { WorkflowAutomationService } from '../infrastructure/services/WorkflowAutomationService';
+import { PublicKnowledgeAssistantService } from '../infrastructure/services/PublicKnowledgeAssistantService';
 
 const chatbotWorkflow = new RunChatbotWorkflow();
 
@@ -49,6 +50,19 @@ export class AIController {
         intent: 'general',
         response: 'ASTU AI Assistant is online. Document analysis complete.',
         dbQueryResult: null,
+      });
+    }
+  }
+
+  static async publicChat(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { message } = req.body;
+      const response = await PublicKnowledgeAssistantService.processPublicMessage(message || '');
+      return sendSuccess(res, 'Public chat response generated.', { response });
+    } catch (err: any) {
+      console.error('AIController.publicChat EXCEPTION:', err?.stack || err);
+      return sendSuccess(res, 'Public chat response generated.', {
+        response: `[Backend Exception]: ${err?.message || err}`,
       });
     }
   }

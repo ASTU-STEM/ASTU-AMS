@@ -10,11 +10,6 @@ type ChatMessage = {
   isAI: boolean;
 };
 
-type ChatApiMessage = {
-  role: "user" | "assistant";
-  content: string;
-};
-
 const COLORS = {
   navy: "#003087",
   navyLight: "#0A3E9E",
@@ -27,66 +22,95 @@ const COLORS = {
   redLight: "#E74C3C",
 };
 
-const QUICK_REPLIES = [
-  { label: "Update Profile",      icon: "👤", q: "How do I update my profile?" },
-  { label: "Find Jobs",           icon: "💼", q: "How do I find job opportunities?" },
-  { label: "Tracer Survey",       icon: "📋", q: "What is the tracer survey deadline?" },
-  { label: "Request Transcript",  icon: "📄", q: "How do I request an official transcript?" },
-  { label: "Find a Mentor",       icon: "🤝", q: "How do I connect with a mentor?" },
-  { label: "Alumni Network",      icon: "🌐", q: "How do I join the alumni network?" },
-  { label: "Career Events",       icon: "🗓️", q: "What career events are coming up?" },
-  { label: "Contact Support",     icon: "🎧", q: "How do I contact alumni support?" },
-];
-
-const FALLBACK_RESPONSES: Record<string, string> = {
+const SYSTEM_MANUAL_RESPONSES: Record<string, string> = {
   "update my profile":
-    "Go to your Dashboard → Profile tab to update your education, work experience, and skills. A complete profile increases your job match rate by up to 40%!",
+    "👤 How to Update Your Profile:\n1. Sign in to your account and go to Dashboard → Profile.\n2. Update your education, work experience, technical skills, and portfolio links.\n3. Click Save Changes to increase your career match rate.",
   "find job":
-    "Navigate to the Career Center or Jobs tab in your dashboard. Filter by location, salary range, and department. Listings are posted directly by verified employer partners.",
+"💼 How to Find Jobs & Apply:\n1. Sign in to the Alumni Portal.\n2. Navigate to Career Center / Jobs.\n3. Filter vacancies by Department (CSE, ECE, ME, CE), Location, or Employer (Safaricom, Ethio Telecom, INSA, Sunshine Construction).\n4. Click Apply Now to submit your resume directly to the employer.",
   "tracer survey":
-    "The 6-Month Post-Graduation Tracer Study is required for alumni verification. Check your Surveys tab — responses typically close within 30 days of the deadline.",
+    "📋 How to Complete the Graduate Tracer Survey:\n1. Sign in to your Alumni Dashboard.\n2. Open the Surveys tab.\n3. Select the active Wave 3 Graduate Tracer Study.\n4. Answer the questions regarding your current employment status, salary range, and department feedback.\n5. Click Submit Survey to update university telemetry.",
   "request transcript":
-    "Go to Document Services → Request Document. Select 'Official Transcript' and submit. Processing takes 2–3 business days.",
-  "connect with a mentor":
-    "Visit the Mentorship tab to browse available mentors. Filter by industry, department, or expertise. Send a connection request directly from their profile.",
-  "alumni network":
-    "Join via the Alumni Network tab on your dashboard. You can search by graduation year, department, or industry to find fellow ASTU graduates.",
-  "career events":
-    "Check the Events tab on your dashboard for upcoming career fairs, workshops, and networking sessions. We host 20+ events per semester.",
+    "📄 How to Request Official Academic Transcripts or Degrees:\n1. Sign in to your Alumni Dashboard.\n2. Go to Document Services → Request Document.\n3. Select your document type (Official Transcript, Degree Certificate, English Medium of Instruction).\n4. Submit your request for Registrar processing (24–48 hours SLA target).\n5. Track request status under My Document Requests.",
+  "mentor":
+    "🤝 How to Connect with Alumni Mentors:\n1. Sign in to your dashboard and open the Mentorship tab.\n2. Browse verified alumni mentors filtered by industry or department.\n3. Click Connect on a mentor profile to send a direct guidance request.",
+  "register":
+    "📋 How to Register on ASTU Portal:\n1. Click the 'Register' button on the top right navigation bar.\n2. Choose your role: Alumni, Student, or Partner Employer.\n3. Fill in your name, email, student ID / graduation year, or company details.\n4. Create a password and click Submit.\n5. Verify your email to activate your account.",
+  "employer":
+    "🏢 How Employers Partner & Post Jobs:\n1. Click Register → Partner Employer on the homepage.\n2. Enter company contact details and industry type for verification.\n3. Once approved, sign in to the Employer Portal.\n4. Navigate to Manage Vacancies → Post Job.\n5. Enter job requirements to publish directly to ASTU graduates.",
   "contact support":
-    "Reach alumni support via the Help Center in your dashboard, or email alumni@astu.edu.et. Our team responds within 1 business day.",
+    "🎧 How to Contact Support:\n• Email Alumni Relations at: alumni@astu.edu.et\n• Call ASTU Campus Office: +251 22 110 0001\n• Or open a ticket in your dashboard under Help & Support.",
 };
 
+const SENSITIVE_KEYWORDS = [
+  'password', 'hash', 'audit log', 'database schema', 'all user', 'user emails', 'api key', 'secret token', 'db dump', 'delete user', 'suspend user', 'reset password for'
+];
+
 function getFallback(input: string) {
-  const key = input.toLowerCase();
-  for (const [pattern, response] of Object.entries(FALLBACK_RESPONSES)) {
+  const key = (input || '').toLowerCase();
+
+  if (SENSITIVE_KEYWORDS.some((kw) => key.includes(kw))) {
+    return "🔒 Data Security Notice:\nAs the public ASTU AI assistant, I cannot reveal private user accounts, password credentials, security audit logs, or internal administrative data.\n\nPlease sign in as an authorized user to access your personal dashboard.";
+  }
+
+  if (key.includes('who are') || key.includes('who r') || key.includes('your name') || key.includes('ur name') || key.includes('what are you')) {
+    return "I am ASTU AI 🤖, the official AI assistant for Adama Science & Technology University (ASTU).\n\nI can answer questions about ASTU, academic departments, employment telemetry, and guide you step-by-step on all portal features!";
+  }
+
+  if (key.includes('can u') || key.includes('can you') || key.includes('what do you') || key.includes('what do u') || key.includes('what u do') || key.includes('what can u') || key.includes('what can you') || key.includes('help') || key.includes('feature') || key.includes('capability') || key.includes('options')) {
+    return "💡 Here is what I can help you with:\n• 📋 Registration Guide: How to sign up as Alumni, Student, or Employer.\n• 📄 Academic Transcripts: How to request official transcripts and certificates.\n• 💼 Job Placements: How to browse job vacancies or post hiring opportunities.\n• 📊 Tracer Surveys: How to complete Wave 3 post-graduation tracer studies.\n• 🤝 Mentorship: How to connect with verified alumni mentors.";
+  }
+
+  if (key.includes('about astu') || key.includes('what is astu') || key.includes('adama science')) {
+    return "🏛️ About Adama Science and Technology University (ASTU):\nASTU is a premier center of excellence in Ethiopia dedicated to Science, Technology, Engineering, and Mathematics (STEM). Located in Adama, Ethiopia, ASTU trains high-calibre engineers and researchers across Computer Science (CSE), Electrical Engineering (ECE), Mechanical Engineering (ME), and Civil Engineering (CE).";
+  }
+
+  if (key.includes('salary') || key.includes('salaries') || key.includes('pay') || key.includes('income')) {
+    return "💰 Salary Telemetry (ASTU Graduates):\n• Average Starting Salary: ETB 19,185 / month\n• Top Earning Department: Software Engineering (Avg ETB 23,400 / month)\n• Computer Science & ECE: Avg ETB 22,000 / month";
+  }
+
+  if (key.includes('employment') || key.includes('placement rate') || key.includes('hire rate')) {
+    return "📊 ASTU Employment Telemetry:\n• Overall Employment Rate: 55.0%\n• Electrical & Computer Engineering Placement: 75.0%\n• Software Engineering Placement: 63.0%\n• Average Time to Hire: 16.3 months";
+  }
+
+  for (const [pattern, response] of Object.entries(SYSTEM_MANUAL_RESPONSES)) {
     if (key.includes(pattern)) return response;
   }
-  return "I can help with profile updates, job searches, tracer surveys, transcripts, mentorship, alumni networking, and career events. Try one of the quick action buttons below!";
+
+  return "🤖 ASTU AI Assistant:\nI am here to assist you with ASTU portal navigation, transcript requests, job applications, tracer surveys, and university statistics.\n\nYou can ask me specific questions such as:\n• \"What can you do?\"\n• \"How do I request my transcript?\"\n• \"Which companies hire ASTU alumni?\"\n• \"How do I register?\"";
 }
 
-async function askAssistant(userMessage: string, history: ChatMessage[]) {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-  const messages: ChatApiMessage[] = [
-    ...history.map((m) => ({
-      role: m.sender === "user" ? "user" as const : "assistant" as const,
-      content: m.text,
-    })),
-    { role: "user", content: userMessage },
-  ];
+async function askAssistant(userMessage: string) {
+  const envUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const urlsToTry = Array.from(new Set([
+    `${envUrl}/ai/public-chat`,
+    "http://localhost:5000/api/ai/public-chat",
+    "http://localhost:5000/api/v1/ai/public-chat",
+  ]));
 
-  const response = await fetch(`${apiBaseUrl}/ai/chat`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: userMessage, messages }),
-  });
+  for (const url of urlsToTry) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-  if (!response.ok) throw new Error("Chat API error");
-  const data = await response.json();
-  const reply = data.data?.response;
-  return typeof reply === "string" && reply.trim()
-    ? reply
-    : getFallback(userMessage);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const reply = data.data?.response;
+        if (typeof reply === "string" && reply.trim()) {
+          return reply.replace(/\*\*/g, "").replace(/\*/g, "").trim();
+        }
+      }
+    } catch (_) {}
+  }
+
+  return getFallback(userMessage);
 }
 
 function nowTime() {
@@ -112,6 +136,120 @@ function TypingDots() {
   );
 }
 
+function renderStructuredContent(rawText: string, isUser: boolean) {
+  const cleanedText = rawText
+    .replace(/\*\*/g, "")
+    .replace(/\*/g, "")
+    .replace(/"\s*"/g, '"');
+
+  const lines = cleanedText.split("\n");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return null;
+
+        const isHeader =
+          (trimmed.endsWith(":") && trimmed.length < 65) ||
+          /^[🎓🏛️💼📋📄🤝🏢📊🎧💡👤🔒💰]/.test(trimmed) ||
+          /^([A-Z\s]{4,}):?$/.test(trimmed);
+
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+        const bulletMatch = trimmed.match(/^([•\-✓\*])\s*(.*)$/);
+
+        if (isHeader && !numMatch && !bulletMatch) {
+          return (
+            <div
+              key={idx}
+              style={{
+                fontWeight: 700,
+                fontSize: 13.5,
+                marginTop: idx === 0 ? 0 : 4,
+                marginBottom: 2,
+                color: isUser ? "#fff" : COLORS.navy,
+                lineHeight: 1.4,
+              }}
+            >
+              {trimmed}
+            </div>
+          );
+        }
+
+        if (numMatch) {
+          return (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+                paddingLeft: 2,
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: 700,
+                  fontSize: 11,
+                  minWidth: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  background: isUser ? "rgba(255,255,255,0.2)" : "rgba(0,48,135,0.12)",
+                  color: isUser ? "#fff" : COLORS.navy,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  marginTop: 2,
+                }}
+              >
+                {numMatch[1]}
+              </span>
+              <span style={{ fontSize: 13, lineHeight: 1.55 }}>
+                {numMatch[2]}
+              </span>
+            </div>
+          );
+        }
+
+        if (bulletMatch) {
+          return (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "flex-start",
+                paddingLeft: 2,
+              }}
+            >
+              <span
+                style={{
+                  color: isUser ? "#fff" : COLORS.green,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  flexShrink: 0,
+                }}
+              >
+                {bulletMatch[1] === "✓" ? "✓" : "•"}
+              </span>
+              <span style={{ fontSize: 13, lineHeight: 1.55 }}>
+                {bulletMatch[2]}
+              </span>
+            </div>
+          );
+        }
+
+        return (
+          <div key={idx} style={{ fontSize: 13, lineHeight: 1.55 }}>
+            {trimmed}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.sender === "user";
   return (
@@ -133,7 +271,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
       </div>
 
       <div style={{
-        maxWidth: "75%",
+        maxWidth: "78%",
         background: isUser
           ? `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`
           : "#fff",
@@ -147,9 +285,9 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           ? `0 4px 12px ${COLORS.navy}30`
           : "0 2px 8px rgba(0,0,0,0.06)",
       }}>
-        <p style={{ fontSize: 14, lineHeight: 1.7, margin: 0, whiteSpace: "pre-wrap" }}>{msg.text}</p>
+        {renderStructuredContent(msg.text, isUser)}
         <p style={{
-          fontSize: 11, marginTop: 6, marginBottom: 0,
+          fontSize: 10.5, marginTop: 6, marginBottom: 0,
           color: isUser ? "rgba(255,255,255,0.55)" : "#9aa3b8",
           textAlign: isUser ? "right" : "left",
         }}>
@@ -174,7 +312,7 @@ export default function ASTUCareerCopilot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
-      text: "Hello! I'm ASTU AI 👋\n\nI'm powered by AI and live university database connections to help you with jobs, mentorship, documents, tracer surveys, and department analytics. How can I assist you today?",
+      text: "Hello! I'm ASTU AI 👋\n\nI can answer questions about Adama Science & Technology University (ASTU) and guide you step-by-step on how to use all features of the Alumni Management & Career Placement Portal. How can I assist you today?",
       sender: "bot",
       timestamp: nowTime(),
       isAI: true,
@@ -182,7 +320,6 @@ export default function ASTUCareerCopilot() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [showQuickReplies, setShowQuickReplies] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -233,11 +370,9 @@ export default function ASTUCareerCopilot() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
-    setShowQuickReplies(false);
 
     try {
-      const history = messages.slice(-6);
-      const responseText = await askAssistant(trimmed, history);
+      const responseText = await askAssistant(trimmed);
       const botMsg: ChatMessage = {
         id: Date.now() + 1,
         text: responseText,
@@ -265,12 +400,11 @@ export default function ASTUCareerCopilot() {
   const clearChat = () => {
     setMessages([{
       id: 1,
-      text: "Hello! I'm ASTU AI 👋\n\nI'm powered by AI and live university database connections to help you with jobs, mentorship, documents, tracer surveys, and department analytics. How can I assist you today?",
+      text: "Hello! I'm ASTU AI 👋\n\nI can answer questions about Adama Science & Technology University (ASTU) and guide you step-by-step on how to use all features of the Alumni Management & Career Placement Portal. How can I assist you today?",
       sender: "bot",
       timestamp: nowTime(),
       isAI: true,
     }]);
-    setShowQuickReplies(true);
     setUnreadCount(0);
   };
 
@@ -301,17 +435,6 @@ export default function ASTUCareerCopilot() {
         @keyframes floatSlow {
           0%, 100% { transform: translateY(0) rotate(0deg); }
           50% { transform: translateY(-6px) rotate(2deg); }
-        }
-        .qr-btn {
-          transition: all 0.2s ease;
-          border: 1.5px solid ${COLORS.navy};
-          background: linear-gradient(135deg, #eef3fa, #e8edf8);
-        }
-        .qr-btn:hover {
-          background: linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight}) !important;
-          color: #fff !important;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px ${COLORS.navy}40;
         }
         .action-btn:hover { opacity: 0.85; transform: scale(1.05); }
         .send-btn:not(:disabled):hover {
@@ -383,7 +506,7 @@ export default function ASTUCareerCopilot() {
             position: "fixed",
             bottom: 100, right: 24, zIndex: 9998,
             width: 400, maxWidth: "calc(100vw - 48px)",
-            height: isMinimized ? 68 : 580,
+            height: isMinimized ? 68 : 560,
             maxHeight: "calc(100vh - 130px)",
             borderRadius: 24,
             background: "#fff",
@@ -496,75 +619,22 @@ export default function ASTUCareerCopilot() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Replies */}
-              {showQuickReplies && (
-                <div style={{
-                  padding:"10px 14px", background:"#fff",
-                  borderTop:"1px solid #edf0f8",
-                  display:"flex", flexWrap:"wrap", gap:6,
-                }}>
-                  <div style={{
-                    width:"100%", fontSize:11, color:"#8a94b0",
-                    marginBottom:4, fontWeight:600, letterSpacing:"0.5px",
-                    textTransform: "uppercase",
-                  }}>
-                    Quick actions:
-                  </div>
-                  {QUICK_REPLIES.map((r) => (
-                    <button
-                      key={r.label}
-                      onClick={() => sendMessage(r.q)}
-                      className="qr-btn"
-                      disabled={isTyping}
-                      style={{
-                        fontSize:12, padding:"6px 12px", borderRadius:22,
-                        color: COLORS.navy,
-                        cursor:"pointer",
-                        display:"flex", alignItems:"center", gap:5,
-                        whiteSpace:"nowrap", fontWeight:600,
-                        opacity: isTyping ? 0.5 : 1,
-                      }}
-                    >
-                      <span>{r.icon}</span> {r.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
               {/* Input bar */}
               <div style={{
                 padding:"12px 14px", background:"#fff",
                 borderTop:"1px solid #edf0f8",
                 display:"flex", gap:8, alignItems:"center", flexShrink:0,
               }}>
-                {!showQuickReplies && (
-                  <button
-                    onClick={() => setShowQuickReplies(true)}
-                    title="Show quick actions"
-                    style={{
-                      width:36, height:36, borderRadius:12,
-                      background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight})`,
-                      border:"none",
-                      color:"#fff", cursor:"pointer",
-                      fontSize:16, display:"flex", alignItems:"center", justifyContent:"center",
-                      flexShrink:0, transition:"all 0.15s",
-                      boxShadow: `0 2px 8px ${COLORS.gold}40`,
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-                  >⚡</button>
-                )}
-
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-                  placeholder="Ask about jobs, surveys, mentors…"
+                  placeholder="Ask about ASTU, how to register, or request transcripts…"
                   disabled={isTyping}
                   className="chat-input"
                   style={{
-                    flex:1, fontSize:14, padding:"10px 14px",
+                    flex:1, fontSize:13.5, padding:"10px 14px",
                     borderRadius:12, border:"1.5px solid #dde3f0",
                     background:"#f4f7fc", color:"#1a1a2e",
                     transition:"border-color 0.2s, box-shadow 0.2s",
@@ -600,7 +670,7 @@ export default function ASTUCareerCopilot() {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}>
-                  ASTU Alumni Portal Assistant
+                  ASTU AI • Interactive Institutional Knowledge & Career Guide
                 </span>
               </div>
             </>

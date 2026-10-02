@@ -9,7 +9,7 @@ import { sendSuccess } from './core/utils/response.utils';
 
 const app = express();
 
-// 1. Basic Security Headers (Helmet)
+// 1. Basic Security Headers (Helmet) - ASTU AI Active
 app.use(helmet({
   crossOriginResourcePolicy: false, // Permit loading uploaded local files on frontend
 }));
@@ -94,6 +94,7 @@ import supportRouter from './modules/support/presentation/support.routes';
 import adminRouter from './modules/admin/infrastructure/routes/adminRoutes';
 import contentRouter from './modules/content/presentation/content.routes';
 import chatRouter from './modules/chat/presentation/chat.routes';
+import toolsRouter from './modules/tools/presentation/tools.routes';
 
 app.use('/api/auth', authRouter);
 app.use('/api/alumni', alumniRouter);
@@ -105,6 +106,7 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/v1/ai', aiRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/content', contentRouter);
 app.use('/api/mentorship', mentorshipRouter);
@@ -112,6 +114,7 @@ app.use('/api/jobs', jobboardRouter);
 app.use('/api/support', supportRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/tools', toolsRouter);
 
 // 7. Base API Health Check
 app.get('/health', (req, res) => {
