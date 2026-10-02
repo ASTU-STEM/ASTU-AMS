@@ -158,6 +158,53 @@ export const authService = {
     }
   },
 
+  /**
+   * Employer login. Uses the dedicated /auth/employer/login endpoint, which
+   * the backend applies `isEmployerLoginFlow` to. This must never be faked:
+   * the employer portal is gated on a real EMPLOYER role, so a simulated
+   * success would hand every visitor an authenticated session.
+   */
+  async employerLogin(credentials: { email: string; password: string }): Promise<ApiResult<AuthResponse['data']>> {
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/employer/login', {
+        emailOrStudentId: credentials.email,
+        password: credentials.password,
+      });
+      const { data } = response;
+
+      if (data.success && data.data?.token) {
+        localStorage.setItem('authToken', data.data.token);
+        if (data.data.refreshToken) {
+          localStorage.setItem('refreshToken', data.data.refreshToken);
+        }
+        if (data.data.user) {
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+          localStorage.setItem('astu_ams_user_role', data.data.user.role);
+        }
+        window.dispatchEvent(new Event('astu-auth-changed'));
+        return { ok: true, data: data.data };
+      }
+
+      return {
+        ok: false,
+        errorCode: 'INVALID_CREDENTIALS',
+        message: data.message || 'Login failed. Please check your credentials.',
+      };
+    } catch (error) {
+      let message = 'Login failed. Please check your email and password.';
+      const errorCode = 'SERVER_ERROR';
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data) {
+          const resData = error.response.data as any;
+          message = resData.message || resData.error || message;
+        } else if (error.code === 'ERR_NETWORK' || !error.response) {
+          message = 'Unable to reach backend server (http://localhost:5000). Please ensure the backend server is running.';
+        }
+      }
+      return { ok: false, errorCode, message };
+    }
+  },
+
   // ==================== SIGNUP ====================
   async signup(data: SignupData): Promise<ApiResult<{ success: boolean; email?: string; redirect?: string }>> {
     try {

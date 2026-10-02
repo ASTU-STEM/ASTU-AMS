@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   HiXMark,
   HiCheckCircle,
+  HiXCircle,
   HiExclamationCircle,
 } from "react-icons/hi2";
 import { MdPhone, MdPerson, MdMoney } from "react-icons/md";
@@ -91,17 +92,16 @@ export default function TelebirrDonationModal({
       if (onSuccess) onSuccess();
       toast.success(`Thank you, ${donorName}! Your donation of ${numericAmount} ETB was processed via Chapa.`);
     } catch (err: any) {
-      console.warn("Chapa donation processing fallback:", err);
-      // Seamless demo fallback execution
-      try {
-        await alumniService.makeDonation(campaignId, numericAmount, txRef);
-      } catch (e) {
-        console.warn("Local donation update notice", e);
-      }
-
-      setStep("success");
-      if (onSuccess) onSuccess();
-      toast.success(`Thank you, ${donorName}! Your donation of ${numericAmount} ETB was processed via Chapa.`);
+      // A failed payment must never report success. Previously the catch block
+      // fell through to setStep("success") and toasted "was processed via
+      // Chapa", so a declined or errored payment still looked like a receipt
+      // and onSuccess() still fired.
+      console.error("Chapa donation failed:", err);
+      setStep("failed");
+      toast.error(
+        err?.response?.data?.message ||
+          "The donation could not be processed. No money was taken — please try again."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -375,6 +375,37 @@ export default function TelebirrDonationModal({
                 className="w-full py-3 rounded-xl bg-emerald-700 text-white text-xs font-extrabold hover:bg-emerald-800 transition-all shadow-md"
               >
                 Done & Return
+              </button>
+            </div>
+          )}
+
+          {step === "failed" && (
+            <div className="p-6 text-center space-y-4">
+              <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto shadow-inner">
+                <HiXCircle className="h-12 w-12 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-extrabold text-gray-900">
+                  Donation Not Completed
+                </h3>
+                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                  Your payment could not be verified, so no donation was recorded and no
+                  money was taken. If you were charged, please contact the finance office
+                  with the reference below.
+                </p>
+              </div>
+              {txRef && (
+                <div className="bg-red-50 rounded-2xl p-4 text-left text-xs space-y-1 border border-red-100">
+                  <p className="text-gray-500 font-medium">Transaction Reference:</p>
+                  <p className="font-mono font-bold text-red-800 text-sm">{txRef}</p>
+                  <p className="text-[10px] text-red-600 pt-1">Status: Failed</p>
+                </div>
+              )}
+              <button
+                onClick={handleReset}
+                className="w-full py-3 rounded-xl bg-slate-800 text-white text-xs font-extrabold hover:bg-slate-900 transition-all shadow-md"
+              >
+                Close
               </button>
             </div>
           )}
