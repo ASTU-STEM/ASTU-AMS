@@ -36,24 +36,26 @@ export default function IctAdminDashboard() {
   const [activeTab, setActiveTab] = useState<'telemetry' | 'security' | 'loadbalancer' | 'apigateway' | 'dbdiagnostics' | 'techcontrols'>('telemetry');
   const [loading, setLoading] = useState(false);
 
-  // Live Technical Metrics State
-  const [telemetry, setTelemetry] = useState({
-    cpuUsagePct: 24,
-    cpuCount: 16,
-    cpuModel: 'Intel Xeon Scalable Enterprise CPU @ 3.20GHz',
-    memoryUsagePct: 42,
-    memoryTotalMB: 32768,
-    memoryUsedMB: 13762,
-    diskStorage: { totalGB: 500, usedGB: 142, freeGB: 358, usagePct: 28.4 },
-    networkLatencyMs: { gateway: 2.4, database: 3.8, redisCache: 0.7, mailGateway: 12.1 },
-    uptimeFormatted: '14d 6h 32m',
-    activeSessions: 38,
-    clusterNodes: [
-      { id: 'node-01', name: 'ASTU Core App Primary Node', status: 'ONLINE', load: '22%', latency: '2ms' },
-      { id: 'node-02', name: 'ASTU API Gateway Secondary', status: 'ONLINE', load: '19%', latency: '4ms' },
-      { id: 'node-03', name: 'ASTU Async Worker Queue', status: 'ONLINE', load: '14%', latency: '1ms' },
-    ],
-  });
+// Live Technical Metrics State.
+// Starts as null, not as a set of plausible numbers. This dashboard previously
+// seeded cpuUsagePct: 24, 3 ONLINE cluster nodes, 14d uptime and 1,420 dropped
+// packets, then re-randomised CPU/RAM every 4s, so an entirely offline system
+// rendered a healthy "live" console. It now shows nothing until the server
+// reports real telemetry.
+const [telemetryStale, setTelemetryStale] = useState(false);
+const [telemetry, setTelemetry] = useState<{
+  cpuUsagePct: number;
+  cpuCount: number;
+  cpuModel: string;
+  memoryUsagePct: number;
+  memoryTotalMB: number;
+  memoryUsedMB: number;
+  diskStorage: { totalGB: number; usedGB: number; freeGB: number; usagePct: number };
+  networkLatencyMs: { gateway: number; database: number; redisCache: number; mailGateway: number };
+  uptimeFormatted: string;
+  activeSessions: number;
+  clusterNodes: { id: string; name: string; status: string; load: string; latency: string }[];
+} | null>(null);
 
   const [securityStatus, setSecurityStatus] = useState({
     protectionMode: 'ADAPTIVE_STRICT',
@@ -113,23 +115,26 @@ export default function IctAdminDashboard() {
       const data = await res.json();
       if (data.success && data.data) {
         setTelemetry(prev => ({ ...prev, ...data.data }));
+        setTelemetryStale(false);
+      } else {
+        setTelemetryStale(true);
       }
     } catch {
-      // fallback to mock telemetry state
+      // Leave the last real reading on screen and mark it stale rather than
+      // silently continuing to present seeded mock values as live metrics.
+      setTelemetryStale(true);
     } finally {
       setLoading(false);
     }
   }, [user?.role]);
 
+  // Poll the real telemetry endpoint instead of jittering the CPU and memory
+  // figures with Math.random(). The previous timer invented a new number every
+  // 4 seconds under a "live monitoring" badge, so the dashboard looked healthy
+  // even with the backend down.
   useEffect(() => {
     fetchTechnicalData();
-    const timer = setInterval(() => {
-      setTelemetry(prev => ({
-        ...prev,
-        cpuUsagePct: Math.min(95, Math.max(12, prev.cpuUsagePct + Math.floor(Math.random() * 7 - 3))),
-        memoryUsagePct: Math.min(90, Math.max(30, prev.memoryUsagePct + Math.floor(Math.random() * 3 - 1))),
-      }));
-    }, 4000);
+    const timer = setInterval(fetchTechnicalData, 4000);
     return () => clearInterval(timer);
   }, [fetchTechnicalData]);
 
@@ -158,10 +163,12 @@ export default function IctAdminDashboard() {
       if (data.success) {
         toast.success(data.data?.message || `${label} executed successfully`);
       } else {
-        toast.success(`${label} completed successfully`);
+        // Previously the failure branch toasted "completed successfully", and
+        // so did the catch block, so an action that never ran reported success.
+        toast.error(data.message || `${label} failed`);
       }
-    } catch {
-      toast.success(`${label} completed successfully`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : `${label} failed: unable to reach the server`);
     }
   };
 
@@ -241,11 +248,11 @@ export default function IctAdminDashboard() {
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800/80 text-xs">
           <div className="flex items-center gap-2 text-slate-300">
             <Cpu className="h-4 w-4 text-indigo-400" />
-            <span>CPU Load: <strong className="text-white">{telemetry.cpuUsagePct}%</strong></span>
+            <span>CPU Load: <strong className="text-white">{telemetry ? `${telemetry.cpuUsagePct}%` : '—'}</strong></span>
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <Activity className="h-4 w-4 text-emerald-400" />
-            <span>RAM Used: <strong className="text-white">{telemetry.memoryUsagePct}% ({Math.round(telemetry.memoryUsedMB/1024)}GB)</strong></span>
+            <span>RAM Used: <strong className="text-white">{telemetry ? `${telemetry.memoryUsagePct}% (${Math.round(telemetry.memoryUsedMB/1024)}GB)` : '—'}</strong></span>
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <ShieldAlert className="h-4 w-4 text-cyan-400" />
@@ -253,7 +260,7 @@ export default function IctAdminDashboard() {
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <Radio className="h-4 w-4 text-purple-400" />
-            <span>Network Latency: <strong className="text-white">{telemetry.networkLatencyMs.database}ms</strong></span>
+            <span>Network Latency: <strong className="text-white">{telemetry ? `${telemetry.networkLatencyMs.database}ms` : '—'}</strong></span>
           </div>
         </div>
       </div>
@@ -291,6 +298,22 @@ export default function IctAdminDashboard() {
       {/* TAB 1: HEALTH TELEMETRY */}
       {activeTab === 'telemetry' && (
         <div className="space-y-6">
+          {telemetryStale && telemetry && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">
+              Live telemetry is unavailable — the values below are the last reading
+              received and may be out of date.
+            </div>
+          )}
+          {!telemetry ? (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
+              <p className="text-sm font-bold text-slate-700">No telemetry available</p>
+              <p className="mt-1.5 text-xs text-slate-500">
+                The server has not reported system metrics. Nothing is shown here rather
+                than displaying placeholder figures.
+              </p>
+            </div>
+          ) : (
+          <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* CPU Metric Card */}
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -384,6 +407,8 @@ export default function IctAdminDashboard() {
               ))}
             </div>
           </div>
+          </>
+          )}
         </div>
       )}
 

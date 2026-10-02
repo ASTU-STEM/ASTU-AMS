@@ -1303,7 +1303,9 @@ export default function NotificationCenter() {
         toast.success('Inserted Primary CTA Action Button Component.');
         break;
       case 'metric_block':
-        insertFormatting('\n📊 KEY HIGHLIGHT: Over 12,000+ ASTU Engineering Alumni Connected Worldwide.\n');
+        // No invented figure. A metric block inserted into a real broadcast must
+        // not assert a number nobody has measured; staff type the real figure.
+        insertFormatting('\n📊 KEY HIGHLIGHT: [Insert verified figure and its source, e.g. "1,238 alumni registered — Registrar roster, Sept 2026"]\n');
         toast.success('Inserted Metric Highlight Component.');
         break;
       case 'signature_block':
@@ -1315,7 +1317,10 @@ export default function NotificationCenter() {
         toast.success('Inserted Event Agenda Table Component.');
         break;
       case 'social_links':
-        insertFormatting('\n\n🔗 ASTU Official Links: [Website](https://astu.edu.et) | [LinkedIn](https://linkedin.com) | [Telegram](https://t.me/astu_official)\n');
+        // Only the university domain is asserted. The previous entry pointed at
+        // bare linkedin.com and an unverified t.me handle, both of which would
+        // have shipped to every recipient as an official ASTU link.
+        insertFormatting('\n\n🔗 ASTU Official Links: [Website](https://astu.edu.et)\n');
         toast.success('Inserted Social Links Footer Component.');
         break;
       case 'code_block':
@@ -1323,7 +1328,10 @@ export default function NotificationCenter() {
         toast.success('Inserted Syntax Code Block Component.');
         break;
       case 'quote_card':
-        insertFormatting('\n> "Education is the most powerful weapon which you can use to change the world." — ASTU Alma Mater Motto\n');
+        // Placeholder, not a quote. The previous text was a Mandela line
+        // labelled "ASTU Alma Mater Motto", i.e. a misattribution sent to real
+        // alumni as if the university had endorsed it.
+        insertFormatting('\n> "[Insert the quotation and its verified author or source]"\n');
         toast.success('Inserted Blockquote Citation Component.');
         break;
       case 'grid_2col':

@@ -122,8 +122,8 @@ class FakePrisma {
 
   user = {
     findUnique: async ({ where }: any) => {
-      if (where.id) return this.store.users.find((u: any) => u.id === where.id) || null;
-      if (where.email) return this.store.users.find((u: any) => u.email === where.email) || null;
+      if (where.id) return withDates(this.store.users.find((u: any) => u.id === where.id) || null);
+      if (where.email) return withDates(this.store.users.find((u: any) => u.email === where.email) || null);
       return null;
     },
     findMany: async ({ where, skip, take, select }: any = {}) => {
@@ -135,7 +135,7 @@ class FakePrisma {
       });
       if (skip) users = users.slice(skip);
       if (take) users = users.slice(0, take);
-      return users;
+      return users.map((u: any) => withDates(u));
     },
     count: async ({ where }: any = {}) => {
       return this.store.users.filter((u: any) => matchWhere(u, where)).length;
@@ -145,7 +145,7 @@ class FakePrisma {
       const rec = { ...data, id: `dev-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isActive: data.isActive ?? false };
       (store.users || (store.users = [])).push(rec);
       writeDevDb(store);
-      return rec;
+      return withDates(rec);
     },
     update: async ({ where, data }: any) => {
       const store = this.store;
@@ -153,7 +153,7 @@ class FakePrisma {
       if (idx === -1) throw new Error('User not found');
       store.users[idx] = { ...store.users[idx], ...data, updatedAt: new Date().toISOString() };
       writeDevDb(store);
-      return store.users[idx];
+      return withDates(store.users[idx]);
     },
     delete: async ({ where }: any) => {
       const store = this.store;
@@ -681,12 +681,15 @@ class FakePrisma {
       const rec = { ...data, id: `dev-log-${Date.now()}`, createdAt: new Date().toISOString() };
       (store.auditLogs || (store.auditLogs = [])).push(rec);
       writeDevDb(store);
-      return rec;
+      return withDates(rec);
     },
     findMany: async ({ where }: any = {}) => {
       let logs = [...(this.store.auditLogs || [])];
       if (where?.userId) logs = logs.filter((l: any) => l.userId === where.userId);
-      return logs.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 50);
+      return logs
+        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 50)
+        .map((l: any) => withDates(l));
     },
   };
 
@@ -810,15 +813,16 @@ class FakePrisma {
       if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
       if (where?.status) jobs = jobs.filter((j: any) => j.status === where.status);
       return jobs.map((j: any) => {
-        const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerId) || {
-          id: j.employerId || 'dev-employer-insa',
-          companyName: 'INSA Corporation',
-          industry: 'Cybersecurity & Defense Tech',
-          location: 'Addis Ababa, Ethiopia',
-          logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
-          website: 'https://insa.gov.et'
-        };
-        return {
+const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerId) || {
+        id: j.employerId || 'dev-employer-unknown',
+        // Not a real company: see the note on the findMany fallback above.
+        companyName: 'Employer details unavailable',
+        industry: null,
+        location: null,
+        logoUrl: null,
+        website: null
+      };
+        return withDates({
           ...j,
           isActive: j.isActive ?? true,
           status: j.status || 'PUBLISHED',
@@ -827,7 +831,7 @@ class FakePrisma {
           _count: {
             applications: (store.jobApplications || []).filter((a: any) => a.jobId === j.id).length
           }
-        };
+        });
       });
     },
     findUnique: async ({ where }: any = {}) => {
@@ -836,13 +840,17 @@ class FakePrisma {
       if (!j) return null;
       const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerId) || {
         id: j.employerId || 'dev-employer-insa',
-        companyName: 'INSA Corporation',
-        industry: 'Cybersecurity & Defense Tech',
-        location: 'Addis Ababa, Ethiopia',
-        logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
-        website: 'https://insa.gov.et'
+        // Not a real company. This placeholder previously invented "INSA
+        // Corporation" so a job row missing its employer still rendered a
+        // plausible-looking listing; it attributed vacancies to a real
+        // third party that had nothing to do with the record.
+        companyName: 'Employer details unavailable',
+        industry: null,
+        location: null,
+        logoUrl: null,
+        website: null
       };
-      return {
+      return withDates({
         ...j,
         isActive: j.isActive ?? true,
         status: j.status || 'PUBLISHED',
@@ -852,7 +860,7 @@ class FakePrisma {
           applications: (store.jobApplications || []).filter((a: any) => a.jobId === j.id).length,
           views: j.views || 0
         }
-      };
+      });
     },
     count: async ({ where }: any = {}) => {
       const store = readDevDb();
@@ -1569,6 +1577,34 @@ let usingFallback = false;
 
 // ─── Survey / relation helpers for FakePrisma ───
 const toDate = (v: any): any => (v == null || v instanceof Date ? v : new Date(v));
+
+/**
+ * Normalise the timestamp fields of a record read out of the JSON dev store.
+ *
+ * Real Prisma hands back `Date` objects, so controllers are written to call
+ * `.toISOString()` on `createdAt`, `updatedAt`, `deadline` and friends. The
+ * fallback store returns whatever JSON.parse produced, which is a *string*, so
+ * those calls threw `... is not a function` and took whole admin endpoints
+ * down with HTTP 500. Coercing on read keeps the fake store shape-compatible
+ * with the real client.
+ */
+const DATE_FIELDS = [
+  'createdAt', 'updatedAt', 'deletedAt', 'deadline', 'publishedAt',
+  'submittedAt', 'scheduledAt', 'completedAt', 'assignedAt', 'dueDate',
+  'verifiedAt', 'approvedAt', 'lastLoginAt', 'expiresAt', 'respondedAt',
+];
+
+function withDates<T extends Record<string, any>>(record: T): T {
+  if (!record || typeof record !== 'object') return record;
+  const row = record as Record<string, any>;
+  for (const field of DATE_FIELDS) {
+    if (row[field] !== undefined && row[field] !== null && !(row[field] instanceof Date)) {
+      const parsed = new Date(row[field]);
+      if (!Number.isNaN(parsed.getTime())) row[field] = parsed;
+    }
+  }
+  return row as T;
+}
 
 function matchWhere(record: any, where: any): boolean {
   if (!where || typeof where !== 'object') return true;
