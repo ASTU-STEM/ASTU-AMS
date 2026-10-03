@@ -67,6 +67,7 @@ import DepartmentDashboard from '../features/departments/pages/DepartmentDashboa
 import AdminDashboard from '../features/admin/pages/AdminDashboard';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import { useSystemSettings } from '../context/SystemSettingsContext';
 
 // No backend call here (logout is purely local for now)
 const logoutLocally = () => {
@@ -100,6 +101,7 @@ export function DashboardLayout({
   headerActions,
   loading = false
 }: DashboardLayoutProps) {
+  const { settings } = useSystemSettings();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem(`dashboard_layout_${role}_collapsed`) === 'true');
   const location = useLocation();
@@ -127,7 +129,7 @@ export function DashboardLayout({
                <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
              </div>
              {!sidebarDisplayCollapsed && <div className="overflow-hidden">
-               <span className="font-extrabold text-md tracking-tight text-[#003366] block whitespace-nowrap">ASTU-AMS</span>
+               <span className="font-extrabold text-md tracking-tight text-[#003366] block whitespace-nowrap">{settings.general.abbreviation}-AMS</span>
                <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block whitespace-nowrap">{role}</span>
              </div>}
            </Link>

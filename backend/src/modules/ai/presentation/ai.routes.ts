@@ -7,7 +7,10 @@ import { asyncHandler } from '../../../core/utils/asyncHandler';
 
 const router = Router();
 
-// Secure all endpoints to ADMIN and REGISTRAR only
+// Unauthenticated Public Landing Page Chatbot Endpoint
+router.post('/public-chat', asyncHandler(AIController.publicChat));
+
+// Secure remaining admin endpoints to ADMIN and REGISTRAR only
 router.use(authenticateJWT);
 router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 
@@ -18,5 +21,7 @@ router.post('/reports/executive', asyncHandler(AIController.generateExecutiveRep
 router.post('/reports/tracer', asyncHandler(AIController.generateTracerReport));
 router.post('/reports/accreditation', asyncHandler(AIController.generateAccreditationReport));
 router.post('/reports/curriculum', asyncHandler(AIController.generateCurriculumReport));
+router.get('/workflows', asyncHandler(AIController.listMoeWorkflows));
+router.post('/workflows/execute', asyncHandler(AIController.executeMoeWorkflow));
 
 export default router;

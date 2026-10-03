@@ -254,7 +254,6 @@ export function DashboardShell({
                             else if (lower.includes('survey')) onTabChange('surveys');
                             else if (lower.includes('mentor')) onTabChange('mentorship');
                             else if (lower.includes('document')) onTabChange('documents');
-                            else onTabChange('jobs');
                           }}
                           className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
                         >

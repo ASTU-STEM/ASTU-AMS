@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { GraduateRecord } from '../types/registrar.types';
 import toast from 'react-hot-toast';
 
@@ -34,6 +35,9 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
   const [selectedRecords, setSelectedRecords] = useState<number[]>([]);
 
+  const generateRandomPassword = () =>
+    `ASTU-${Math.random().toString(36).slice(2, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
   const [formData, setFormData] = useState({
     studentId: '',
     fullName: '',
@@ -43,7 +47,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     dateOfBirth: '',
     department: 'Computer Science and Engineering',
     graduationYear: '2024',
-    cgpa: ''
+    cgpa: '',
+    password: generateRandomPassword(),
+    autoGeneratePassword: true,
+    status: 'Active' as 'Active' | 'Inactive' | 'Suspended' | 'Pending Verification',
+    isVerified: true,
   });
 
   const departments = useMemo(() => {
@@ -153,7 +161,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.studentId || !formData.fullName || !formData.email || !formData.cgpa) {
-      toast.error('Please fill out all graduate fields.');
+      toast.error('Please fill out all required graduate fields.');
       return;
     }
 
@@ -161,10 +169,17 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       studentId: formData.studentId,
       fullName: formData.fullName,
       email: formData.email,
+      phone: formData.phone,
+      nationality: formData.nationality,
+      dateOfBirth: formData.dateOfBirth,
       department: formData.department,
       graduationYear: formData.graduationYear,
-      cgpa: formData.cgpa
-    });
+      cgpa: formData.cgpa,
+      password: formData.password,
+      autoGeneratePassword: formData.autoGeneratePassword,
+      status: formData.status,
+      isVerified: formData.isVerified
+    } as any);
 
     setIsAdding(false);
     setFormData({
@@ -176,7 +191,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       dateOfBirth: '',
       department: 'Computer Science and Engineering',
       graduationYear: '2024',
-      cgpa: ''
+      cgpa: '',
+      password: generateRandomPassword(),
+      autoGeneratePassword: true,
+      status: 'Active',
+      isVerified: true
     });
     toast.success('Graduate profile added to SIS database!');
   };
@@ -195,7 +214,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       toast.error('No records selected.');
       return;
     }
-    selectedRecords.forEach(id => onArchiveGraduate(id));
+    selectedRecords.forEach((id: number) => onArchiveGraduate(id));
     toast.success(`Archived ${selectedRecords.length} records.`);
     setSelectedRecords([]);
   };
@@ -205,14 +224,14 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       toast.error('No records selected.');
       return;
     }
-    selectedRecords.forEach(id => onVerifyIdentity(id));
+    selectedRecords.forEach((id: number) => onVerifyIdentity(id));
     toast.success(`Verified ${selectedRecords.length} identities.`);
     setSelectedRecords([]);
   };
 
   const toggleSelect = (id: number) => {
-    setSelectedRecords(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    setSelectedRecords((prev: number[]) =>
+      prev.includes(id) ? prev.filter((i: number) => i !== id) : [...prev, id]
     );
   };
 
@@ -230,6 +249,33 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     source: 'All',
     dateRange: 'All'
   });
+
+  const isAnyModalOpen = isAdding || Boolean(editingGrad) || isExportModalOpen;
+
+  useEffect(() => {
+    if (!isAnyModalOpen) return;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    const scrollContainers = document.querySelectorAll('main, .admin-shell, .overflow-y-auto');
+    const savedOverflows: { el: HTMLElement; overflow: string }[] = [];
+    scrollContainers.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      savedOverflows.push({ el: htmlEl, overflow: htmlEl.style.overflow });
+      htmlEl.style.overflow = 'hidden';
+    });
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      savedOverflows.forEach(({ el, overflow }) => {
+        el.style.overflow = overflow;
+      });
+    };
+  }, [isAnyModalOpen]);
 
   const [exportColumns, setExportColumns] = useState({
     studentId: true,
@@ -487,91 +533,208 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
         </div>
       </div>
 
-      {/* Add Graduate Form */}
-      {isAdding && (
-        <form onSubmit={handleAddSubmit} className="bg-white p-6 border border-gray-200/60 rounded-3xl max-w-3xl mx-auto shadow-sm space-y-6">
-          <h4 className="font-bold text-lg border-b pb-2 flex items-center gap-2">
-            <span className="material-symbols-outlined text-astu-navy">person_add</span>
-            Add SIS Graduate Profile
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Student ID *</label>
-              <input type="text" value={formData.studentId} onChange={e => setFormData(prev => ({ ...prev, studentId: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20"
-                placeholder="e.g. UG/12839/14" required />
+      {/* Add Graduate Modal */}
+      {isAdding && createPortal(
+        <div 
+          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/75 backdrop-blur-md z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden"
+          onWheel={(e) => e.stopPropagation()}
+        >
+          <form onSubmit={handleAddSubmit} className="bg-white rounded-3xl w-full max-w-4xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] border border-slate-300/80 p-6 md:p-8 space-y-6 relative my-auto max-h-[92vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <h4 className="font-extrabold text-lg flex items-center gap-2 text-slate-800">
+                <span className="material-symbols-outlined text-[#003580]">person_add</span>
+                Add SIS Graduate Profile
+              </h4>
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Full Name *</label>
-              <input type="text" value={formData.fullName} onChange={e => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20"
-                placeholder="e.g. Abebe Bikila" required />
+
+            {/* Account Security & Credentials Card */}
+            <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 space-y-4 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#003580] text-white flex items-center justify-center shadow-xs">
+                    <span className="material-symbols-outlined text-sm">key</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">ACCOUNT SECURITY & CREDENTIALS</h4>
+                    <p className="text-[11px] text-slate-500">Configure password policy and account status</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, password: generateRandomPassword() }))}
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                >
+                  <span className="text-amber-500 font-bold">✨</span> Generate Password
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-600 uppercase">INITIAL PASSWORD</label>
+                  <div className="relative flex items-center">
+                    <span className="material-symbols-outlined absolute left-2.5 text-slate-400 text-sm">lock</span>
+                    <input
+                      type="text"
+                      value={formData.password}
+                      disabled={formData.autoGeneratePassword}
+                      onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                      className="w-full text-xs pl-8 pr-8 py-2.5 border border-slate-200 bg-white rounded-xl font-mono text-slate-800 focus:outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:text-slate-600"
+                      placeholder="Initial Password"
+                    />
+                    {formData.password && (
+                      <button
+                        type="button"
+                        onClick={() => { navigator.clipboard.writeText(formData.password); toast.success('Password copied!'); }}
+                        className="absolute right-2.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                        title="Copy password"
+                      >
+                        <span className="material-symbols-outlined text-sm">content_copy</span>
+                      </button>
+                    )}
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 text-[11px] text-slate-600 mt-1 cursor-pointer font-medium">
+                    <input
+                      type="checkbox"
+                      checked={formData.autoGeneratePassword}
+                      onChange={e => setFormData(prev => ({
+                        ...prev,
+                        autoGeneratePassword: e.target.checked,
+                        password: e.target.checked ? generateRandomPassword() : prev.password
+                      }))}
+                      className="rounded border-slate-300 text-[#003580] focus:ring-[#003580] cursor-pointer"
+                    />
+                    Auto-generate password & send welcome notification
+                  </label>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-600 uppercase">INITIAL ACCOUNT STATUS</label>
+                  <select
+                    value={formData.status}
+                    onChange={e => setFormData(prev => {
+                      const st = e.target.value as any;
+                      return {
+                        ...prev,
+                        status: st,
+                        isVerified: st === 'Active' ? true : prev.isVerified
+                      };
+                    })}
+                    className="w-full text-xs p-2.5 border border-slate-200 bg-white rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Suspended">Suspended</option>
+                    <option value="Pending Verification">Pending Verification</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-600 uppercase">INITIAL PROFILE VERIFICATION</label>
+                  <select
+                    value={formData.isVerified ? 'Verified' : 'Unverified'}
+                    onChange={e => setFormData(prev => ({ ...prev, isVerified: e.target.value === 'Verified' }))}
+                    className="w-full text-xs p-2.5 border border-slate-200 bg-white rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                  >
+                    <option value="Verified">Verified (Record Confirmed)</option>
+                    <option value="Unverified">Unverified (Pending Review)</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Email Address</label>
-              <input type="email" value={formData.email} onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20"
-                placeholder="e.g. abebe.b@gmail.com" />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">STUDENT ID *</label>
+                <input type="text" value={formData.studentId} onChange={e => setFormData(prev => ({ ...prev, studentId: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  placeholder="e.g. UG/12839/14" required />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">FULL NAME *</label>
+                <input type="text" value={formData.fullName} onChange={e => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  placeholder="e.g. Abebe Bikila" required />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">EMAIL ADDRESS *</label>
+                <input type="email" value={formData.email} onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  placeholder="e.g. abebe.b@gmail.com" required />
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Phone Number</label>
-              <input type="text" value={formData.phone || ''} onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20"
-                placeholder="e.g. +251 911223344" />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">PHONE NUMBER</label>
+                <input type="text" value={formData.phone || ''} onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  placeholder="e.g. +251 911223344" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">NATIONALITY</label>
+                <input type="text" value={formData.nationality || ''} onChange={e => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  placeholder="e.g. Ethiopian" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">DATE OF BIRTH</label>
+                <input type="date" value={formData.dateOfBirth || ''} onChange={e => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20" />
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Nationality</label>
-              <input type="text" value={formData.nationality || ''} onChange={e => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20"
-                placeholder="e.g. Ethiopian" />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">DEPARTMENT *</label>
+                <select value={formData.department} onChange={e => setFormData(prev => ({ ...prev, department: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none font-semibold text-gray-700">
+                  <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                  <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
+                  <option value="Civil Engineering">Civil Engineering</option>
+                  <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
+                  <option value="Chemical Engineering">Chemical Engineering</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">GRADUATION YEAR *</label>
+                <select value={formData.graduationYear} onChange={e => setFormData(prev => ({ ...prev, graduationYear: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none font-semibold text-gray-700">
+                  <option value="2024">Class of 2024</option>
+                  <option value="2023">Class of 2023</option>
+                  <option value="2022">Class of 2022</option>
+                  <option value="2021">Class of 2021</option>
+                  <option value="2020">Class of 2020</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">FINAL CGPA *</label>
+                <input type="text" value={formData.cgpa} onChange={e => setFormData(prev => ({ ...prev, cgpa: e.target.value }))}
+                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  placeholder="e.g. 3.82" required />
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Date of Birth</label>
-              <input type="date" value={formData.dateOfBirth || ''} onChange={e => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Department *</label>
-              <select value={formData.department} onChange={e => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none font-semibold text-gray-700">
-                <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
-                <option value="Civil Engineering">Civil Engineering</option>
-                <option value="Mechanical and Vehicle Engineering">Mechanical and Vehicle Engineering</option>
-                <option value="Chemical Engineering">Chemical Engineering</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Graduation Year *</label>
-              <select value={formData.graduationYear} onChange={e => setFormData(prev => ({ ...prev, graduationYear: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none font-semibold text-gray-700">
-                <option value="2024">Class of 2024</option>
-                <option value="2023">Class of 2023</option>
-                <option value="2022">Class of 2022</option>
-                <option value="2021">Class of 2021</option>
-                <option value="2020">Class of 2020</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 uppercase">Final CGPA *</label>
-              <input type="text" value={formData.cgpa} onChange={e => setFormData(prev => ({ ...prev, cgpa: e.target.value }))}
-                className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20"
-                placeholder="e.g. 3.82" required />
-            </div>
-          </div>
-          <button type="submit" className="w-full py-3 bg-astu-navy hover:bg-astu-navy/90 text-white rounded-xl text-xs font-bold shadow-md transition-all hover:scale-[1.01]">
-            Confirm & Save Record
-          </button>
-        </form>
+
+            <button type="submit" className="w-full py-3.5 bg-[#002866] hover:bg-[#001e4d] text-white rounded-xl text-xs font-extrabold shadow-md transition-all cursor-pointer">
+              Confirm & Save Record
+            </button>
+          </form>
+        </div>,
+        document.body
       )}
 
       {/* Edit Modal */}
-      {editingGrad && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      {editingGrad && createPortal(
+        <div 
+          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/75 backdrop-blur-md z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden"
+          onWheel={(e) => e.stopPropagation()}
+        >
           <form onSubmit={handleEditSubmit} className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-6 space-y-6">
             <div className="flex justify-between items-start pb-2 border-b">
               <div>
@@ -615,7 +778,8 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
               <button type="submit" className="flex-1 py-3 bg-astu-navy text-white rounded-xl text-xs font-bold shadow-md hover:bg-astu-navy/90 transition-all">Save Profile Changes</button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Advanced Modern & Sleek Filter Control Bar */}
@@ -824,8 +988,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       </div>
 
       {/* Advanced CSV Export Modal */}
-      {isExportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      {isExportModalOpen && createPortal(
+        <div 
+          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 bg-slate-950/75 backdrop-blur-md overflow-hidden"
+          onWheel={(e) => e.stopPropagation()}
+        >
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 p-6 md:p-8 relative">
             
             {/* Header */}
@@ -1128,7 +1295,8 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Facebook, Linkedin, Send, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { useSystemSettings } from "../context/SystemSettingsContext";
 
 const footerSections = [
   {
@@ -41,6 +42,9 @@ const footerSections = [
 ];
 
 export default function Footer() {
+  const { settings } = useSystemSettings();
+  const { universityName, abbreviation, address, postalCode, phoneNumber, contactEmail, website } = settings.general;
+
   const handleNavClick = (item: { href?: string; id?: string; scroll?: boolean }) => {
     if (item.href) {
       window.location.href = item.href;
@@ -59,26 +63,26 @@ export default function Footer() {
       <div className="mx-auto max-w-[1440px] px-4 md:px-8">
         <div className="grid gap-8 py-12 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <h4 className="text-lg font-bold text-white">ASTU-AMS</h4>
+            <h4 className="text-lg font-bold text-white">{abbreviation}-AMS</h4>
             <p className="mt-2 text-sm text-slate-400">
-              Adama Science and Technology University Alumni Management System - Connecting excellence to industry.
+              {universityName} Alumni Management System - Connecting excellence to industry.
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-astu-green" />
-                <span>Adama Science and Technology University, Adama, Ethiopia</span>
+                <span>{universityName}, {address}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 text-astu-green" />
-                <span>P.O. Box: 1888 Adama, Ethiopia</span>
+                <span>{postalCode}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-astu-green" />
-                <span>+251-221-110000</span>
+                <span>{phoneNumber}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-astu-green" />
-                <span>irccd@astu.edu.et</span>
+                <span>{contactEmail}</span>
               </div>
             </div>
           </div>
@@ -102,7 +106,7 @@ export default function Footer() {
         </div>
         <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-700 py-6 md:flex-row">
           <p className="text-sm text-slate-400">
-            &copy; 2026 Adama Science and Technology University. All rights reserved.
+            &copy; {new Date().getFullYear()} {universityName}. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <a href="https://web.facebook.com/adamaastu/" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Facebook">
@@ -117,7 +121,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-slate-800 py-3 text-center text-[11px] text-slate-500">
-          Designed by <a href="https://www.astu.edu.et" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">ASTU-BADA</a>
+          Designed by <a href={website} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white">{abbreviation}-AMS</a>
         </div>
       </div>
     </footer>

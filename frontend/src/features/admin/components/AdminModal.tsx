@@ -28,12 +28,28 @@ export default function AdminModal({
       }
     };
 
-    const originalOverflow = document.body.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    const scrollContainers = document.querySelectorAll('main, .admin-shell');
+    const savedOverflows: { el: HTMLElement; overflow: string }[] = [];
+    scrollContainers.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.closest('.modal-panel')) return;
+      savedOverflows.push({ el: htmlEl, overflow: htmlEl.style.overflow });
+      htmlEl.style.overflow = 'hidden';
+    });
+
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      savedOverflows.forEach(({ el, overflow }) => {
+        el.style.overflow = overflow;
+      });
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [open, onClose]);
@@ -42,7 +58,8 @@ export default function AdminModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 p-3 sm:p-5 md:p-6 backdrop-blur-md animate-[fadeIn_0.2s_ease]"
+      className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center bg-slate-950/75 p-3 sm:p-5 md:p-6 backdrop-blur-md animate-[fadeIn_0.2s_ease]"
+      onWheel={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         if (closeOnBackdrop && event.target === event.currentTarget) {
           onClose();

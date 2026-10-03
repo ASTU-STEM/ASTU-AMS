@@ -58,7 +58,7 @@ export class EmailService {
 
         if (emailsSet.size === 0) {
           const admins = await prisma.user.findMany({
-            where: { role: 'ADMIN' },
+            where: { role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
             select: { email: true }
           });
           admins.forEach((u: any) => {
@@ -215,10 +215,47 @@ export class EmailService {
     return trimmed;
   }
 
+  private getTransporter(dbConfig?: any): nodemailer.Transporter {
+    if (dbConfig && dbConfig.smtpHost) {
+      const port = parseInt(dbConfig.smtpPort || '587', 10);
+      return nodemailer.createTransport({
+        host: dbConfig.smtpHost,
+        port: port,
+        secure: port === 465,
+        auth: dbConfig.smtpUser ? {
+          user: dbConfig.smtpUser,
+          pass: dbConfig.smtpPassword || env.SMTP_PASS,
+        } : undefined,
+      });
+    }
+    return this.transporter;
+  }
+
   async sendMail(options: MailOptions) {
     const resolvedTo = await this.resolveUserDeliveryEmail(options.to);
+    
+    let activeFrom = options.from || env.SMTP_FROM;
+    let activeTransporter = this.transporter;
+
+    try {
+      const prisma = require('../config/db').default;
+      const dbEmailSetting = await prisma.systemSetting.findUnique({ where: { key: 'email' } });
+      if (dbEmailSetting && dbEmailSetting.value) {
+        const emailVal = dbEmailSetting.value as any;
+        if (emailVal.fromEmail) {
+          const name = emailVal.fromName || 'ASTU Alumni Management System';
+          activeFrom = options.from || `"${name}" <${emailVal.fromEmail}>`;
+        }
+        if (emailVal.smtpHost) {
+          activeTransporter = this.getTransporter(emailVal);
+        }
+      }
+    } catch (err) {
+      // Fall back to default environment config
+    }
+
     const message = {
-      from: options.from || env.SMTP_FROM,
+      from: activeFrom,
       to: resolvedTo || options.to,
       subject: options.subject,
       text: options.text,
@@ -227,7 +264,7 @@ export class EmailService {
     };
 
     console.log(`[EMAIL DISPATCH] Delivered to (Dynamic DB/Role Resolved): ${message.to} | Subject: "${options.subject}"`);
-    const info = await this.transporter.sendMail(message);
+    const info = await activeTransporter.sendMail(message);
     return info;
   }
 
@@ -355,8 +392,65 @@ export class EmailService {
     return this.sendMail({ to: email, subject, text, html });
   }
 
-  async sendGenericNotification(email: string, subject: string, message: string) {
-    const html = `<p>Hello,</p><p>${message}</p><p>Login to ASTU AMS for more details.</p>`;
+  async sendGenericNotification(
+    email: string,
+    subject: string,
+    message: string,
+    extra?: { imageUrl?: string; ctaLink?: string; ctaText?: string; priority?: string; category?: string }
+  ) {
+    const bannerHtml = extra?.imageUrl
+      ? `<div style="text-align: center; margin-bottom: 24px;"><img src="${extra.imageUrl}" alt="Notification Banner" style="max-width: 100%; border-radius: 10px; max-height: 280px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.08);" /></div>`
+      : '';
+
+    const priorityBadge = extra?.priority
+      ? `<span style="background-color: ${extra.priority === 'Urgent' ? '#fef2f2' : extra.priority === 'High' ? '#fff7ed' : '#f0f9ff'}; color: ${extra.priority === 'Urgent' ? '#991b1b' : extra.priority === 'High' ? '#c2410c' : '#0369a1'}; border: 1px solid ${extra.priority === 'Urgent' ? '#fecaca' : extra.priority === 'High' ? '#ffedd5' : '#e0f2fe'}; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-right: 8px;">${extra.priority} Priority</span>`
+      : '';
+
+    const categoryBadge = extra?.category
+      ? `<span style="background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 12px; display: inline-block;">${extra.category}</span>`
+      : '';
+
+    const badgesHtml = (priorityBadge || categoryBadge)
+      ? `<div style="margin-bottom: 16px;">${priorityBadge}${categoryBadge}</div>`
+      : '';
+
+    const ctaHtml = extra?.ctaLink
+      ? `
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${extra.ctaLink}" target="_blank" style="background-color: #003580; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(0,53,128,0.25); letter-spacing: 0.3px;">
+            ${extra.ctaText || 'View Details on ASTU Portal'}
+          </a>
+        </div>
+      `
+      : `
+        <div style="text-align: center; margin: 24px 0;">
+          <a href="${env.FRONTEND_URL || 'http://localhost:5173'}" target="_blank" style="background-color: #003580; color: #ffffff; padding: 12px 26px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px; display: inline-block; shadow: 0 2px 8px rgba(0,53,128,0.15);">
+            Open ASTU AMS Portal
+          </a>
+        </div>
+      `;
+
+    const html = `
+      <div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background-color: #ffffff; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+        <div style="background: linear-gradient(135deg, #003580 0%, #002254 100%); color: #ffffff; padding: 28px 24px; text-align: center;">
+          <h2 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 0.5px;">ASTU Official Broadcast</h2>
+          <p style="margin: 6px 0 0 0; color: #93c5fd; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Adama Science & Technology University</p>
+        </div>
+        <div style="padding: 28px 24px;">
+          ${bannerHtml}
+          ${badgesHtml}
+          <h3 style="color: #003580; margin-top: 0; font-size: 18px; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; leading-height: 1.4;">${subject}</h3>
+          <div style="font-size: 14px; color: #334155; line-height: 1.7; white-space: pre-wrap; margin: 18px 0;">${message}</div>
+          ${ctaHtml}
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0 18px 0;" />
+          <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0; line-height: 1.5;">
+            This is an automated broadcast from the official <strong>ASTU Alumni Management System</strong>.<br/>
+            Adama Science & Technology University &copy; 2026. All rights reserved.
+          </p>
+        </div>
+      </div>
+    `;
+
     return this.sendMail({ to: email, subject, text: message, html });
   }
 

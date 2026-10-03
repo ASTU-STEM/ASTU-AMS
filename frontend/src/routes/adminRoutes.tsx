@@ -18,13 +18,19 @@ import AdminProfile from '../features/admin/pages/AdminProfile';
 import DonationsManagement from '../features/admin/pages/DonationsManagement';
 import AdminChatPage from '../features/admin/pages/AdminChatPage';
 import SupportDeskManagement from '../features/admin/pages/SupportDeskManagement';
+import IctAdminDashboard from '../features/admin/pages/IctAdminDashboard';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminRoutes() {
+  const { user } = useAuth();
+  const defaultTab = user?.role === 'ADMIN' ? 'ict-portal' : 'dashboard';
+
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route index element={<Navigate to={defaultTab} replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="ict-portal" element={<IctAdminDashboard />} />
         <Route path="modules" element={<SuperAdminModules />} />
         <Route path="reports" element={<ReportsCenter />} />
         <Route path="messages" element={<AdminChatPage />} />

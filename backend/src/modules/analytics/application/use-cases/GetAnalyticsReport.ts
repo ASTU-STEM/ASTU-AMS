@@ -10,11 +10,7 @@ export class GetAnalyticsReport {
     const deptKey = filters?.department || 'all';
     const cacheKey = `analytics:dashboard:${yearKey}:${deptKey}`;
 
-    const cached = await AnalyticsCacheService.get<any>(cacheKey);
-    
-    if (cached) {
-      return cached as AnalyticsReport;
-    }
+    await AnalyticsCacheService.clear(cacheKey).catch(() => {});
 
     const [
       overallEmployment,

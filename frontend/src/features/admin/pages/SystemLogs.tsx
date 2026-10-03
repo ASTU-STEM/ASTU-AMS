@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   CalendarDays,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Download,
   Filter,
   History,
@@ -18,6 +20,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import { adminService } from '../services/admin.service';
 
 type ActionType = 'All' | 'Login' | 'Data Import' | 'User Action' | 'Error' | 'System' | 'API';
 type Severity = 'All' | 'Info' | 'Warning' | 'Error' | 'Success';
@@ -34,9 +37,6 @@ type LogRow = {
   requestId: string;
   payload: string;
 };
-
-// Logs will be fetched from API
-// ActionType now matches backend or is mapped to it
 
 function actionBadge(action: ActionType) {
   switch (action) {
@@ -89,13 +89,62 @@ function summaryCard({ label, value, icon: Icon, hint }: { label: string; value:
   );
 }
 
-import { adminService } from '../services/admin.service';
+function PaginationFooter({
+  currentPage,
+  totalPages,
+  totalItems,
+  itemsPerPage,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+}) {
+  if (totalItems <= itemsPerPage) return null;
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-600">
+      <div>
+        Showing <span className="font-semibold text-slate-800">{startItem}</span> to{' '}
+        <span className="font-semibold text-slate-800">{endItem}</span> of{' '}
+        <span className="font-semibold text-slate-800">{totalItems}</span> log entries
+      </div>
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          disabled={currentPage <= 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Prev
+        </button>
+        <span className="px-2 font-medium text-slate-500">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          type="button"
+          disabled={currentPage >= totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function SystemLogs() {
   const [logs, setLogs] = useState<LogRow[]>([]);
-  const [stats, setStats] = useState({ totalToday: 0, errorsToday: 0, failedLogins: 0 });
+  const [stats, setStats] = useState({ totalToday: 0, errorsToday: 0, failedLogins: 0, activeSessions: 0 });
   const [loading, setLoading] = useState(true);
-  
+
   const [actionType, setActionType] = useState<ActionType>('All');
   const [userSearch, setUserSearch] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -103,35 +152,18 @@ export default function SystemLogs() {
   const [severity, setSeverity] = useState<Severity>('All');
   const [exportOpen, setExportOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogRow | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const LOGS_PER_PAGE = 10;
+
   const [health, setHealth] = useState({
-    cpu: 34,
-    memoryUsed: 2.1,
+    cpu: 18,
+    memoryUsed: 1.5,
     memoryTotal: 8,
-    sessions: 47,
+    sessions: 0,
     uptime: 99.8,
   });
-
-  useEffect(() => {
-    const updateHealth = () => {
-      setHealth((current) => {
-        const nextCpu = clamp(current.cpu + randomDelta(), 18, 72);
-        const nextMemory = clamp(roundOne(current.memoryUsed + randomDelta() * 0.08), 1.4, 6.8);
-        const nextSessions = clamp(Math.round(current.sessions + randomDelta()), 38, 66);
-        const nextUptime = clamp(roundOne(current.uptime + randomDelta() * 0.02), 99.1, 99.99);
-
-        return {
-          cpu: nextCpu,
-          memoryUsed: nextMemory,
-          memoryTotal: current.memoryTotal,
-          sessions: nextSessions,
-          uptime: nextUptime,
-        };
-      });
-    };
-
-    const interval = window.setInterval(updateHealth, 30000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
@@ -142,7 +174,6 @@ export default function SystemLogs() {
       dateTo,
     });
     if (result.ok) {
-      // Backend filtering is applied, but severity might need local filter if backend didn't implement severity filter
       let fetchedLogs = result.data.logs;
       if (severity !== 'All') {
         fetchedLogs = fetchedLogs.filter((log: any) => log.severity === severity);
@@ -154,17 +185,41 @@ export default function SystemLogs() {
 
   const fetchStats = useCallback(async () => {
     const result = await adminService.getLogStats();
-    if (result.ok) {
-      setStats(result.data);
+    if (result.ok && result.data) {
+      setStats({
+        totalToday: result.data.totalToday ?? 0,
+        errorsToday: result.data.errorsToday ?? 0,
+        failedLogins: result.data.failedLogins ?? 0,
+        activeSessions: result.data.activeSessions ?? result.data.health?.sessions ?? 0,
+      });
+      if (result.data.health) {
+        setHealth(result.data.health);
+      }
     }
   }, []);
 
   useEffect(() => {
     fetchLogs();
     fetchStats();
+    const interval = window.setInterval(fetchStats, 10000);
+    return () => window.clearInterval(interval);
   }, [fetchLogs, fetchStats]);
 
+  // Reset to page 1 on filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [actionType, userSearch, dateFrom, dateTo, severity]);
+
   const filteredLogs = logs;
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOGS_PER_PAGE));
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * LOGS_PER_PAGE;
+    return filteredLogs.slice(start, start + LOGS_PER_PAGE);
+  }, [filteredLogs, currentPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
 
   const exportLogs = (format: 'CSV' | 'JSON') => {
     const payload = format === 'CSV'
@@ -191,7 +246,7 @@ export default function SystemLogs() {
       <AdminPageHeader
         title="System Logs"
         subtitle="Audit administrative actions and system events in real-time."
-        breadcrumb={[{ label: 'Admin' }, { label: 'System Logs' }]}
+        breadcrumbs={[{ label: 'Admin' }, { label: 'System Logs' }]}
         actions={
           <div className="relative">
             <button
@@ -228,7 +283,7 @@ export default function SystemLogs() {
           <span className="rounded-full bg-white/10 px-3 py-1">
             Memory: {health.memoryUsed.toFixed(1)}GB / {health.memoryTotal}GB
           </span>
-          <span className="rounded-full bg-white/10 px-3 py-1">Sessions: {health.sessions}</span>
+          <span className="rounded-full bg-white/10 px-3 py-1">Sessions: {stats.activeSessions || health.sessions}</span>
           <span className="rounded-full bg-white/10 px-3 py-1">Uptime: {health.uptime.toFixed(1)}%</span>
         </div>
       </section>
@@ -237,7 +292,7 @@ export default function SystemLogs() {
         {[
           { label: 'Total events today', value: stats.totalToday.toLocaleString(), icon: History, hint: 'All system events logged in the last 24 hours' },
           { label: 'Errors today', value: stats.errorsToday.toLocaleString(), icon: X, hint: 'Critical failures requiring attention' },
-          { label: 'Active sessions', value: health.sessions.toString(), icon: Wifi, hint: 'Currently authenticated and active sessions' },
+          { label: 'Active sessions', value: (stats.activeSessions || health.sessions).toString(), icon: Wifi, hint: 'Currently authenticated and active sessions' },
           { label: 'Failed logins (24h)', value: stats.failedLogins.toLocaleString(), icon: KeyRound, hint: 'Blocked or invalid authentication attempts' },
         ].map((card) => (
           <React.Fragment key={card.label}>{summaryCard(card)}</React.Fragment>
@@ -301,9 +356,9 @@ export default function SystemLogs() {
       </section>
 
       <section className="admin-card overflow-hidden rounded-[10px] border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        <div className="overflow-x-auto">
+        <div className="max-h-[520px] overflow-x-auto overflow-y-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50">
+            <thead className="sticky top-0 bg-slate-50 shadow-sm z-10">
               <tr>
                 {['Timestamp', 'User', 'Action', 'Details', 'IP Address', 'Severity'].map((head) => (
                   <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -319,20 +374,20 @@ export default function SystemLogs() {
                     Loading logs...
                   </td>
                 </tr>
-              ) : filteredLogs.length === 0 ? (
+              ) : paginatedLogs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">
                     No logs found matching your filters.
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log) => (
+                paginatedLogs.map((log) => (
                   <tr
                     key={log.id}
                     className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
                     onClick={() => setSelectedLog(log)}
                   >
-                    <td className="px-4 py-4 text-slate-600" title={format(new Date(log.timestamp), 'PPpp')}>
+                    <td className="px-4 py-4 text-slate-600 whitespace-nowrap" title={format(new Date(log.timestamp), 'PPpp')}>
                       {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                     </td>
                     <td className="px-4 py-4">
@@ -341,14 +396,14 @@ export default function SystemLogs() {
                         <AdminBadge variant="neutral">{log.role}</AdminBadge>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <AdminBadge variant="default" className={actionBadge(log.action)}>
                         {log.action}
                       </AdminBadge>
                     </td>
                     <td className="px-4 py-4 text-slate-600">{log.details}</td>
-                    <td className="px-4 py-4 text-slate-600">{log.ipAddress}</td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 text-slate-600 whitespace-nowrap">{log.ipAddress}</td>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <AdminBadge variant="default" className={severityClass(log.severity)}>
                         {log.severity}
                       </AdminBadge>
@@ -359,6 +414,13 @@ export default function SystemLogs() {
             </tbody>
           </table>
         </div>
+        <PaginationFooter
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredLogs.length}
+          itemsPerPage={LOGS_PER_PAGE}
+          onPageChange={setCurrentPage}
+        />
       </section>
 
       <AdminModal

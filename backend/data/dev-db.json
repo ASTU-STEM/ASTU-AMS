@@ -82,7 +82,7 @@
       ],
       "id": "dev-alumni-1787763781926",
       "createdAt": "2026-08-26T17:03:01.926Z",
-      "updatedAt": "2026-09-10T13:10:17.280Z",
+      "updatedAt": "2026-10-01T20:17:53.435Z",
       "employmentStatus": "EMPLOYED",
       "salary": 18000,
       "preferences": {
@@ -107,7 +107,7 @@
       ],
       "id": "dev-alumni-1787763782058",
       "createdAt": "2026-08-26T17:03:02.058Z",
-      "updatedAt": "2026-09-10T13:10:05.632Z",
+      "updatedAt": "2026-10-01T20:17:43.016Z",
       "employmentStatus": "EMPLOYED",
       "salary": 25000,
       "preferences": {
@@ -131,7 +131,7 @@
       ],
       "id": "dev-alumni-1787765356770",
       "createdAt": "2026-08-26T17:29:16.770Z",
-      "updatedAt": "2026-09-10T13:09:34.951Z"
+      "updatedAt": "2026-10-01T20:17:22.165Z"
     },
     {
       "id": "dev-alumni-12345",
@@ -401,6 +401,294 @@
       "pendingVerificationCode": null,
       "verificationCodeExpiresAt": null,
       "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1789141138525",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1789141138525@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1789141138721",
+      "createdAt": "2026-09-11T15:38:58.721Z",
+      "updatedAt": "2026-09-11T15:39:00.425Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1789474587336",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1789474587336@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1789474587470",
+      "createdAt": "2026-09-15T12:16:27.470Z",
+      "updatedAt": "2026-09-15T12:16:33.345Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1789935320128",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1789935320128@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1789935320273",
+      "createdAt": "2026-09-20T20:15:20.273Z",
+      "updatedAt": "2026-09-20T20:15:22.522Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1789935697865",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1789935697865@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1789935697974",
+      "createdAt": "2026-09-20T20:21:37.974Z",
+      "updatedAt": "2026-09-20T20:21:41.513Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1789976404716",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1789976404716@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1789976404867",
+      "createdAt": "2026-09-21T07:40:04.867Z",
+      "updatedAt": "2026-09-21T07:40:06.606Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1789977899898",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1789977899898@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1789977900077",
+      "createdAt": "2026-09-21T08:05:00.077Z",
+      "updatedAt": "2026-09-21T08:05:02.166Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790011680708",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790011680708@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790011680857",
+      "createdAt": "2026-09-21T17:28:00.857Z",
+      "updatedAt": "2026-09-21T17:28:03.920Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790013079451",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790013079451@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790013079589",
+      "createdAt": "2026-09-21T17:51:19.589Z",
+      "updatedAt": "2026-09-21T17:51:22.671Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790053176446",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790053176446@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790053176700",
+      "createdAt": "2026-09-22T04:59:36.700Z",
+      "updatedAt": "2026-09-22T04:59:39.818Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790054115067",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790054115067@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790054115330",
+      "createdAt": "2026-09-22T05:15:15.330Z",
+      "updatedAt": "2026-09-22T05:15:18.979Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790334784692",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790334784692@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790334784786",
+      "createdAt": "2026-09-25T11:13:04.786Z",
+      "updatedAt": "2026-09-25T11:13:06.241Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790531063980",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790531063980@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790531064186",
+      "createdAt": "2026-09-27T17:44:24.186Z",
+      "updatedAt": "2026-09-27T17:44:26.106Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790534702089",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790534702089@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790534702271",
+      "createdAt": "2026-09-27T18:45:02.271Z",
+      "updatedAt": "2026-09-27T18:45:06.268Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790535500637",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790535500637@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790535500736",
+      "createdAt": "2026-09-27T18:58:20.736Z",
+      "updatedAt": "2026-09-27T18:58:23.316Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790862458662",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790862458662@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790862459076",
+      "createdAt": "2026-10-01T13:47:39.076Z",
+      "updatedAt": "2026-10-01T13:47:42.534Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1790885909953",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1790885909953@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1790885910083",
+      "createdAt": "2026-10-01T20:18:30.083Z",
+      "updatedAt": "2026-10-01T20:18:31.401Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
     }
   ],
   "employerProfiles": [
@@ -415,7 +703,7 @@
       "companySize": "11-50",
       "id": "dev-employer-1787763781981",
       "createdAt": "2026-08-26T17:03:01.981Z",
-      "updatedAt": "2026-09-10T13:10:01.904Z"
+      "updatedAt": "2026-10-01T20:17:41.076Z"
     }
   ],
   "departments": [
@@ -856,10 +1144,1042 @@
       "id": "dev-notif-1789045817315",
       "createdAt": "2026-09-10T13:10:17.315Z",
       "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/12/2026, 6:38:22 PM.",
+      "id": "dev-notif-1789141102514",
+      "createdAt": "2026-09-11T15:38:22.514Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1789141102570",
+      "createdAt": "2026-09-11T15:38:22.570Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/16/2026, 3:15:50 PM.",
+      "id": "dev-notif-1789474550983",
+      "createdAt": "2026-09-15T12:15:50.983Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1789474551032",
+      "createdAt": "2026-09-15T12:15:51.032Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/21/2026, 11:15:15 PM.",
+      "id": "dev-notif-1789935316028",
+      "createdAt": "2026-09-20T20:15:16.028Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1789935316102",
+      "createdAt": "2026-09-20T20:15:16.102Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/21/2026, 11:21:13 PM.",
+      "id": "dev-notif-1789935673883",
+      "createdAt": "2026-09-20T20:21:13.883Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1789935673985",
+      "createdAt": "2026-09-20T20:21:13.985Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/22/2026, 10:39:27 AM.",
+      "id": "dev-notif-1789976367824",
+      "createdAt": "2026-09-21T07:39:27.824Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1789976367886",
+      "createdAt": "2026-09-21T07:39:27.886Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/22/2026, 11:04:20 AM.",
+      "id": "dev-notif-1789977860648",
+      "createdAt": "2026-09-21T08:04:20.648Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1789977860703",
+      "createdAt": "2026-09-21T08:04:20.703Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/22/2026, 8:27:25 PM.",
+      "id": "dev-notif-1790011645084",
+      "createdAt": "2026-09-21T17:27:25.084Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790011645132",
+      "createdAt": "2026-09-21T17:27:25.132Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/22/2026, 8:50:42 PM.",
+      "id": "dev-notif-1790013042642",
+      "createdAt": "2026-09-21T17:50:42.642Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790013042694",
+      "createdAt": "2026-09-21T17:50:42.694Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/23/2026, 7:58:55 AM.",
+      "id": "dev-notif-1790053136008",
+      "createdAt": "2026-09-22T04:58:56.008Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790053136055",
+      "createdAt": "2026-09-22T04:58:56.055Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/23/2026, 8:14:24 AM.",
+      "id": "dev-notif-1790054064485",
+      "createdAt": "2026-09-22T05:14:24.485Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790054064613",
+      "createdAt": "2026-09-22T05:14:24.613Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/26/2026, 2:12:23 PM.",
+      "id": "dev-notif-1790334743128",
+      "createdAt": "2026-09-25T11:12:23.128Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790334743179",
+      "createdAt": "2026-09-25T11:12:23.179Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/28/2026, 8:43:28 PM.",
+      "id": "dev-notif-1790531008458",
+      "createdAt": "2026-09-27T17:43:28.458Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790531008510",
+      "createdAt": "2026-09-27T17:43:28.510Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/28/2026, 9:44:06 PM.",
+      "id": "dev-notif-1790534647081",
+      "createdAt": "2026-09-27T18:44:07.081Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790534647164",
+      "createdAt": "2026-09-27T18:44:07.164Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 9/28/2026, 9:57:47 PM.",
+      "id": "dev-notif-1790535467247",
+      "createdAt": "2026-09-27T18:57:47.247Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790535467347",
+      "createdAt": "2026-09-27T18:57:47.347Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 10/2/2026, 4:46:25 PM.",
+      "id": "dev-notif-1790862385591",
+      "createdAt": "2026-10-01T13:46:25.591Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790862385739",
+      "createdAt": "2026-10-01T13:46:25.739Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Application SHORTLISTED",
+      "content": "Great news! Your application for \"Fullstack Engineer\" at Google East Africa has been shortlisted. They will be in touch with you soon.",
+      "id": "dev-notif-1790885861237",
+      "createdAt": "2026-10-01T20:17:41.237Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Fullstack Engineer on 10/2/2026, 11:17:42 PM.",
+      "id": "dev-notif-1790885862940",
+      "createdAt": "2026-10-01T20:17:42.940Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Google East Africa for the position of \"Fullstack Engineer\". Your profile placement has been updated to Employed at Google East Africa.",
+      "id": "dev-notif-1790885863049",
+      "createdAt": "2026-10-01T20:17:43.049Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 10/2/2026, 11:17:53 PM.",
+      "id": "dev-notif-1790885873399",
+      "createdAt": "2026-10-01T20:17:53.399Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1790885873471",
+      "createdAt": "2026-10-01T20:17:53.471Z",
+      "isRead": false
     }
   ],
   "documentRequests": [],
   "jobs": [
+    {
+      "employerId": "dev-employer-1790885873328",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-10-06T20:17:53.333Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790885873340",
+      "createdAt": "2026-10-01T20:17:53.340Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-11T20:17:41.114Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790885861138",
+      "createdAt": "2026-10-01T20:17:41.138Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-11T13:46:38.660Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790862398727",
+      "createdAt": "2026-10-01T13:46:38.727Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790862385189",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-10-06T13:46:25.208Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790862385237",
+      "createdAt": "2026-10-01T13:46:25.238Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790535467136",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-10-02T18:57:47.141Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790535467152",
+      "createdAt": "2026-09-27T18:57:47.152Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-07T18:57:30.883Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790535450898",
+      "createdAt": "2026-09-27T18:57:30.898Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-07T18:44:18.806Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790534658868",
+      "createdAt": "2026-09-27T18:44:18.868Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790534646906",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-10-02T18:44:06.911Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790534646931",
+      "createdAt": "2026-09-27T18:44:06.931Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790531008382",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-10-02T17:43:28.390Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790531008398",
+      "createdAt": "2026-09-27T17:43:28.398Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-07T17:43:16.864Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790530996888",
+      "createdAt": "2026-09-27T17:43:16.888Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790334743068",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-30T11:12:23.072Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790334743081",
+      "createdAt": "2026-09-25T11:12:23.081Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-05T11:12:12.756Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790334732777",
+      "createdAt": "2026-09-25T11:12:12.777Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790054064324",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-27T05:14:24.342Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790054064362",
+      "createdAt": "2026-09-22T05:14:24.362Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-02T05:14:02.897Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790054042958",
+      "createdAt": "2026-09-22T05:14:02.958Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790053135941",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-27T04:58:55.947Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790053135953",
+      "createdAt": "2026-09-22T04:58:55.953Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-02T04:58:41.718Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790053121735",
+      "createdAt": "2026-09-22T04:58:41.735Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790013042588",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-26T17:50:42.592Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790013042599",
+      "createdAt": "2026-09-21T17:50:42.599Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-01T17:50:25.886Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790013025915",
+      "createdAt": "2026-09-21T17:50:25.916Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1790011645020",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-26T17:27:25.025Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790011645031",
+      "createdAt": "2026-09-21T17:27:25.031Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-01T17:27:12.471Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1790011632489",
+      "createdAt": "2026-09-21T17:27:12.489Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1789977860565",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-26T08:04:20.571Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789977860580",
+      "createdAt": "2026-09-21T08:04:20.580Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-01T08:04:10.335Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789977850353",
+      "createdAt": "2026-09-21T08:04:10.353Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1789976367765",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-26T07:39:27.769Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789976367777",
+      "createdAt": "2026-09-21T07:39:27.777Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-10-01T07:39:16.923Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789976356945",
+      "createdAt": "2026-09-21T07:39:16.945Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1789935673775",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-25T20:21:13.782Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789935673796",
+      "createdAt": "2026-09-20T20:21:13.796Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-09-30T20:20:59.193Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789935659215",
+      "createdAt": "2026-09-20T20:20:59.215Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1789935315934",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-25T20:15:15.941Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789935315948",
+      "createdAt": "2026-09-20T20:15:15.948Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-09-30T20:15:02.553Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789935302580",
+      "createdAt": "2026-09-20T20:15:02.580Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1789474550932",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-20T12:15:50.936Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789474550942",
+      "createdAt": "2026-09-15T12:15:50.942Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-09-25T12:15:38.489Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789474538502",
+      "createdAt": "2026-09-15T12:15:38.502Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1789141102436",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-09-16T15:38:22.441Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789141102448",
+      "createdAt": "2026-09-11T15:38:22.448Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-09-21T15:38:11.953Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1789141091968",
+      "createdAt": "2026-09-11T15:38:11.968Z",
+      "views": 0
+    },
     {
       "employerId": "dev-employer-1789045817154",
       "title": "Mechanical Design Associate",
@@ -1734,6 +3054,342 @@
   "jobApplications": [],
   "hiringEvents": [],
   "employerFeedbacks": [
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790885867466",
+      "createdAt": "2026-10-01T20:17:47.466Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790862405364",
+      "createdAt": "2026-10-01T13:46:45.364Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790535462023",
+      "createdAt": "2026-09-27T18:57:42.023Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790534668643",
+      "createdAt": "2026-09-27T18:44:28.643Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790531002939",
+      "createdAt": "2026-09-27T17:43:22.939Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790334737739",
+      "createdAt": "2026-09-25T11:12:17.739Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790054053410",
+      "createdAt": "2026-09-22T05:14:13.410Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790053129778",
+      "createdAt": "2026-09-22T04:58:49.778Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790013037688",
+      "createdAt": "2026-09-21T17:50:37.688Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1790011640135",
+      "createdAt": "2026-09-21T17:27:20.135Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1789977855439",
+      "createdAt": "2026-09-21T08:04:15.439Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1789976362434",
+      "createdAt": "2026-09-21T07:39:22.434Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1789935668012",
+      "createdAt": "2026-09-20T20:21:08.012Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1789935309715",
+      "createdAt": "2026-09-20T20:15:09.715Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1789474546319",
+      "createdAt": "2026-09-15T12:15:46.319Z"
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1789141097357",
+      "createdAt": "2026-09-11T15:38:17.357Z"
+    },
     {
       "employerId": "dev-employer-1787763781981",
       "alumniId": "dev-alumni-1787763782058",

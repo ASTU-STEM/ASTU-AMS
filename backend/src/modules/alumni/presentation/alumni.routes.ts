@@ -11,6 +11,10 @@ const router = Router();
 router.use(authenticateJWT);
 router.use(requireRoles([Role.ALUMNI]));
 
+// Directory & Networking
+router.get('/directory', asyncHandler(AlumniController.getDirectory));
+router.post('/connect', asyncHandler(AlumniController.connectAlumni));
+
 // Profile
 router.get('/me', asyncHandler(AlumniController.getMe));
 router.put('/me', uploadMiddleware.fields([{ name: 'avatar', maxCount: 1 }, { name: 'resume', maxCount: 1 }]), asyncHandler(AlumniController.updateMe));
@@ -21,7 +25,7 @@ router.put('/experiences/:id', asyncHandler(AlumniController.updateExperience));
 router.delete('/experiences/:id', asyncHandler(AlumniController.deleteExperience));
 
 // Files
-router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
+router.post('/upload', uploadMiddleware.fields([{ name: 'cv', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }, { name: 'avatar', maxCount: 1 }]), asyncHandler(AlumniController.uploadFiles));
 router.post('/upload-certificate', uploadMiddleware.single('certificateImage'), asyncHandler(AlumniController.uploadCertificate));
 router.post('/upload-document-file', uploadMiddleware.single('documentFile'), asyncHandler(AlumniController.uploadDocumentFile));
 

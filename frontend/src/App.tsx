@@ -33,9 +33,12 @@ import DepartmentDashboard from "./features/departments/pages/DepartmentDashboar
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoutes from "./routes/adminRoutes";
+import IctRoutes from "./routes/ictRoutes";
 import CmsRoutes from "./routes/cmsRoutes";
 import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
+
+import { SystemSettingsProvider } from "./context/SystemSettingsContext";
 
 function AppContent() {
   return (
@@ -80,6 +83,15 @@ function AppContent() {
           }
         />
         <Route
+          path="/alumni/tools"
+          element={
+            <ProtectedRoute
+              element={<AlumniDashboard defaultTab="tools" />}
+              allowedRoles={["ALUMNI"]}
+            />
+          }
+        />
+        <Route
           path="/employer/dashboard"
           element={
             <ProtectedRoute
@@ -107,11 +119,20 @@ function AppContent() {
           }
         />
         <Route
+          path="/ict/*"
+          element={
+            <ProtectedRoute
+              element={<IctRoutes />}
+              allowedRoles={["ADMIN", "SUPER_ADMIN"]}
+            />
+          }
+        />
+        <Route
           path="/admin/*"
           element={
             <ProtectedRoute
               element={<AdminRoutes />}
-              allowedRoles={["ADMIN"]}
+              allowedRoles={["SUPER_ADMIN"]}
             />
           }
         />
@@ -134,9 +155,11 @@ function App() {
   return (
     <Provider store={store}>
       <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
-      <RegistrationProvider>
-        <AppContent />
-      </RegistrationProvider>
+      <SystemSettingsProvider>
+        <RegistrationProvider>
+          <AppContent />
+        </RegistrationProvider>
+      </SystemSettingsProvider>
     </Provider>
   );
 }

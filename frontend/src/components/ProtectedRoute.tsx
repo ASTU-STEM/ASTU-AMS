@@ -47,7 +47,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       EMPLOYER: '/employer/dashboard',
       REGISTRAR: '/registrar/dashboard',
       DEPARTMENT_HEAD: '/department/dashboard',
-      ADMIN: '/admin/dashboard',
+      SUPER_ADMIN: '/admin/dashboard',
+      ADMIN: '/ict/dashboard',
       CMS_MANAGER: '/cms/dashboard',
       ALUMNI_OFFICE: '/cms/dashboard',
     };
