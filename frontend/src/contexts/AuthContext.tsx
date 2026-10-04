@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import type { User, UserRole } from '../types';
 import { authService } from '../features/auth/services/auth.service';
+import config from '../config';
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +25,54 @@ const normalizeRole = (role?: string | null): UserRole | null => {
     case 'ALUMNI_OFFICE':
     case 'CMS_MANAGER': return 'CMS_MANAGER';
     default: return null;
+  }
+};
+
+/**
+ * Read the `exp` claim from a JWT without verifying it.
+ *
+ * The access token lives 60 minutes (backend/.env JWT_ACCESS_EXPIRY). The old
+ * restore path only checked that a token *existed*, so after an hour the user
+ * still appeared signed in while every authenticated request returned 401.
+ */
+const isTokenExpired = (token: string, skewSeconds = 15): boolean => {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return true;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const claims = JSON.parse(atob(padded));
+    if (typeof claims.exp !== 'number') return false;
+    return claims.exp * 1000 - skewSeconds * 1000 <= Date.now();
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Exchange the refresh token for a new access token.
+ *
+ * Returns true when localStorage now holds a fresh access token. Used on boot
+ * so an expired access token self-heals instead of blanking the dashboard.
+ */
+const refreshAccessToken = async (): Promise<boolean> => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) return false;
+  try {
+    const response = await fetch(`${config.apiUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!response.ok) return false;
+    const body = await response.json();
+    const token = body?.data?.accessToken ?? body?.data?.token;
+    if (!token) return false;
+    localStorage.setItem('authToken', token);
+    if (body.data.refreshToken) localStorage.setItem('refreshToken', body.data.refreshToken);
+    return true;
+  } catch {
+    return false;
   }
 };
 
@@ -88,8 +137,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setUser(readStoredUser());
-    setIsLoading(false);
+    // A stale access token used to be accepted as a valid session, which left
+    // the user "signed in" with every authenticated API call returning 401 and
+    // the dashboard showing "couldn't load" for each panel. Try to renew it
+    // before deciding the session is dead.
+    const boot = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token && isTokenExpired(token)) {
+        const renewed = await refreshAccessToken();
+        if (!renewed) {
+          clearAuthStorage();
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+      }
+      setUser(readStoredUser());
+      setIsLoading(false);
+    };
+
+    void boot();
 
     const syncStoredUser = () => {
       setUser(readStoredUser());

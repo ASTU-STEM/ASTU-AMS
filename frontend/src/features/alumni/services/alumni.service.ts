@@ -15,6 +15,54 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Recover from an expired access token instead of failing every call.
+//
+// This client had no 401 handling, so once the 60-minute access token lapsed
+// every authenticated request rejected and the dashboard reported each section
+// as failed while the user stayed "signed in". Only one refresh is in flight at
+// a time; concurrent callers queue on the same promise and are then replayed.
+let refreshInFlight: Promise<boolean> | null = null;
+
+const refreshAccessToken = (): Promise<boolean> => {
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = (async () => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return false;
+    try {
+      const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+      const token = response.data?.data?.accessToken ?? response.data?.data?.token;
+      if (!token) return false;
+      localStorage.setItem('authToken', token);
+      if (response.data?.data?.refreshToken) {
+        localStorage.setItem('refreshToken', response.data.data.refreshToken);
+      }
+      window.dispatchEvent(new Event('astu-auth-changed'));
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
+};
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const original = error.config as (typeof error.config & { _retry?: boolean }) | undefined;
+    if (error.response?.status !== 401 || !original || original._retry) {
+      return Promise.reject(error);
+    }
+    original._retry = true;
+    const renewed = await refreshAccessToken();
+    if (!renewed) return Promise.reject(error);
+    return apiClient(original);
+  },
+);
+
 // Generic response unwrapper
 const unwrap = <T>(res: { data: { data: T } }): T => res.data.data;
 
