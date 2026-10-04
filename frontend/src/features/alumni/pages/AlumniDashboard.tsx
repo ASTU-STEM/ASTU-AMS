@@ -91,6 +91,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const [loadIssues, setLoadIssues] = useState<string[]>([]);
   // Lets the failure banner re-fetch without a full page reload.
   const reloadDashboardRef = useRef<() => void>(() => {});
+  const [loadReasons, setLoadReasons] = useState<string[]>([]);
 
   const [profile, setProfile] = useState<AlumniProfile | null>(null);
   const [jobs, setJobs] = useState<JobMatch[]>([]);
@@ -566,11 +567,19 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
     // Collects the sections that failed so the page can say so, instead of
     // rendering them as legitimately empty.
     const issues: string[] = [];
+    // Keep the reason too: "did not load" and "loaded but was rejected" need
+    // different fixes, and a bare label hides that.
+    const reasons = new Set<string>();
     const settle = async <T,>(promise: Promise<T>, fallback: T, index: number): Promise<T> => {
       try {
         return await promise;
-      } catch {
+      } catch (err: any) {
         issues.push(DASHBOARD_FETCH_LABELS[index] ?? `section ${index + 1}`);
+        const status = err?.response?.status;
+        if (status) reasons.add(`HTTP ${status}`);
+        else if (err?.code) reasons.add(err.code);
+        else if (err?.message) reasons.add(err.message);
+        console.warn(`[dashboard] ${DASHBOARD_FETCH_LABELS[index]} failed:`, err?.code || status || err?.message || err);
         return fallback;
       }
     };
@@ -798,12 +807,14 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
         // Surface partial failures rather than silently rendering empty sections.
         setLoadIssues(issues);
+        setLoadReasons([...reasons]);
         if (issues.length > 0) {
           console.warn('[AlumniDashboard] sections failed to load:', issues);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Failed to load dashboard data', err);
         setLoadIssues(['the dashboard']);
+        setLoadReasons([err?.code || err?.message || 'unknown error']);
       } finally {
         setIsLoading(false);
       }
@@ -1321,11 +1332,15 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 <span className="font-bold">Couldn’t load some profile data.</span>{' '}
                 Still missing: {loadIssues.slice(0, 4).join(', ')}
                 {loadIssues.length > 4 ? ` +${loadIssues.length - 4} more` : ''}. Other sections are available.
+                {loadReasons.length > 0 && (
+                  <span className="ml-1 font-mono text-[11px] opacity-80">({loadReasons.join(', ')})</span>
+                )}
               </p>
               <button
                 type="button"
                 onClick={() => {
                   setLoadIssues([]);
+                  setLoadReasons([]);
                   reloadDashboardRef.current();
                 }}
                 className="shrink-0 rounded-lg border border-amber-400 px-3 py-1.5 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50"
