@@ -10,9 +10,13 @@ const router = Router();
 router.use(authenticateJWT);
 
 // Any authenticated user can access their own notifications
+// Literal paths are registered before the ':notificationId' patterns so they can
+// never be shadowed by them.
 router.get('/', asyncHandler(NotificationsController.getMyNotifications));
-router.put('/:notificationId/read', asyncHandler(NotificationsController.markAsRead));
 router.put('/read-all', asyncHandler(NotificationsController.markAllAsRead));
+router.delete('/', asyncHandler(NotificationsController.clearNotifications));
+router.put('/:notificationId/read', asyncHandler(NotificationsController.markAsRead));
+router.delete('/:notificationId', asyncHandler(NotificationsController.deleteNotification));
 
 // Admin-only: send a notification to a specific user
 router.post('/', requireRoles([Role.ADMIN]), asyncHandler(NotificationsController.sendNotification));

@@ -28,12 +28,28 @@ export class PrismaNotificationRepository implements INotificationRepository {
     }
   }
 
-  async markAsRead(id: string): Promise<Notification> {
-    const notif = await prisma.notification.update({
-      where: { id },
+  /**
+   * Scoped by owner. `updateMany` with `{ id, userId }` is used rather than
+   * `update` so a mismatched owner matches zero rows instead of flipping
+   * somebody else's notification.
+   */
+  async markAsRead(id: string, userId: string): Promise<Notification | null> {
+    const result = await prisma.notification.updateMany({
+      where: { id, userId },
       data: { isRead: true },
     });
-    return notif as any as Notification;
+    if (!result.count) return null;
+    return (await prisma.notification.findUnique({ where: { id } })) as any as Notification;
+  }
+
+  async deleteOne(id: string, userId: string): Promise<boolean> {
+    const result = await prisma.notification.deleteMany({ where: { id, userId } });
+    return result.count > 0;
+  }
+
+  async deleteAllForUser(userId: string): Promise<number> {
+    const result = await prisma.notification.deleteMany({ where: { userId } });
+    return result.count;
   }
 
   async markAllAsRead(userId: string): Promise<number> {

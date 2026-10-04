@@ -695,6 +695,23 @@ class FakePrisma {
   };
 
   notification = {
+    // createMany / update / updateMany were missing here, so they fell through
+    // to the generic in-memory model. Broadcasts reported "sent: 7" while
+    // writing zero rows, and mark-as-read silently did nothing, because the
+    // generic store is never persisted to dev-db.json.
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      if (!store.notifications) store.notifications = [];
+      const rows = (Array.isArray(data) ? data : [data]).map((d: any) => ({
+        ...d,
+        id: d.id || `dev-notif-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        createdAt: new Date().toISOString(),
+        isRead: d.isRead ?? false,
+      }));
+      store.notifications.unshift(...rows);
+      writeDevDb(store);
+      return { count: rows.length };
+    },
     create: async ({ data }: any) => {
       const store = readDevDb();
       const rec = { ...data, id: data.id || `dev-notif-${Date.now()}`, createdAt: new Date().toISOString(), isRead: false };
@@ -712,44 +729,73 @@ class FakePrisma {
     findMany: async ({ where, orderBy }: any = {}) => {
       const store = readDevDb();
       let items = store.notifications || [];
-      if (where?.userId) items = items.filter((n: any) => n.userId === where.userId);
-      if (where?.isRead !== undefined) items = items.filter((n: any) => n.isRead === where.isRead);
+      const entries = Object.entries(where || {});
+      if (entries.length) {
+        items = items.filter((n: any) => entries.every(([k, v]) => n[k] === v));
+      }
+      const order = Object.entries(orderBy || {});
+      if (order.length) {
+        items = [...items].sort((a: any, b: any) => {
+          for (const [k, dir] of order) {
+            const av = a[k], bv = b[k];
+            if (av === bv) continue;
+            const cmp = av > bv ? 1 : -1;
+            return dir === 'asc' ? cmp : -cmp;
+          }
+          return 0;
+        });
+      }
       return items;
     },
     deleteMany: async ({ where }: any = {}) => {
       const store = readDevDb();
+      const before = (store.notifications || []).length;
+      // Honour every supplied key, not just userId: the repository deletes with
+      // { id, userId } to enforce ownership, and matching on userId alone would
+      // wipe the caller's whole list.
+      const matches = (n: any) => Object.entries(where || {}).every(([k, v]) => n[k] === v);
       if (store.notifications) {
-        if (where?.userId) store.notifications = store.notifications.filter((n: any) => n.userId !== where.userId);
-        else store.notifications = [];
+        store.notifications = Object.keys(where || {}).length === 0
+          ? []
+          : store.notifications.filter((n: any) => !matches(n));
         writeDevDb(store);
       }
-      return { count: 0 };
+      return { count: before - (store.notifications || []).length };
     },
     count: async ({ where }: any = {}) => {
       const store = readDevDb();
       let items = store.notifications || [];
-      if (where?.userId) items = items.filter((n: any) => n.userId === where.userId);
-      if (where?.isRead !== undefined) items = items.filter((n: any) => n.isRead === where.isRead);
+      const entries = Object.entries(where || {});
+      if (entries.length) {
+        items = items.filter((n: any) => entries.every(([k, v]) => n[k] === v));
+      }
       return items.length;
     },
+    // These honour *every* key in `where`. Previously `update` ignored userId and
+    // `updateMany` ignored id, so the owner-scoped markAsRead({ id, userId })
+    // marked the caller's entire inbox as read instead of one notification.
     update: async ({ where, data }: any) => {
       const store = readDevDb();
       const items = store.notifications || [];
-      const idx = items.findIndex((n: any) => n.id === where.id);
-      if (idx >= 0) { items[idx] = { ...items[idx], ...data }; writeDevDb(store); return items[idx]; }
-      return { id: where.id, ...data };
+      const matches = (n: any) => Object.entries(where || {}).every(([k, v]) => n[k] === v);
+      const idx = items.findIndex(matches);
+      if (idx < 0) throw new Error(`Record to update not found: ${JSON.stringify(where)}`);
+      items[idx] = { ...items[idx], ...data };
+      writeDevDb(store);
+      return items[idx];
     },
     updateMany: async ({ where, data }: any) => {
       const store = readDevDb();
-      let items = store.notifications || [];
-      if (where?.userId) items = items.filter((n: any) => n.userId === where.userId);
-      if (where?.isRead !== undefined) items = items.filter((n: any) => n.isRead === where.isRead);
-      if (items.length > 0 && store.notifications) {
-        const ids = new Set(items.map((n: any) => n.id));
-        store.notifications = store.notifications.map((n: any) => ids.has(n.id) ? { ...n, ...data } : n);
-        writeDevDb(store);
-      }
-      return { count: items.length };
+      const items = store.notifications || [];
+      const matches = (n: any) => Object.entries(where || {}).every(([k, v]) => n[k] === v);
+      let count = 0;
+      store.notifications = items.map((n: any) => {
+        if (!matches(n)) return n;
+        count += 1;
+        return { ...n, ...data };
+      });
+      writeDevDb(store);
+      return { count };
     },
   };
 

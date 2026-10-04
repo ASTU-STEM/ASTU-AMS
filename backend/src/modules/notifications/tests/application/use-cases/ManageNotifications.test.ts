@@ -1,4 +1,11 @@
-import { SendNotification, GetUserNotifications, MarkAsRead, MarkAllAsRead } from '../../../application/use-cases/ManageNotifications';
+import {
+  SendNotification,
+  GetUserNotifications,
+  MarkAsRead,
+  MarkAllAsRead,
+  DeleteNotification,
+  ClearNotifications,
+} from '../../../application/use-cases/ManageNotifications';
 import { INotificationRepository } from '../../../application/ports/INotificationRepository';
 import { Notification } from '../../../domain/entities/Notification';
 import { NotificationNotFoundError } from '../../../domain/errors/NotificationErrors';
@@ -15,6 +22,8 @@ describe('ManageNotifications Use Cases', () => {
       create: jest.fn(),
       markAsRead: jest.fn(),
       markAllAsRead: jest.fn(),
+      deleteOne: jest.fn(),
+      deleteAllForUser: jest.fn(),
     };
   });
 
@@ -44,18 +53,50 @@ describe('ManageNotifications Use Cases', () => {
   });
 
   describe('MarkAsRead', () => {
-    it('should mark a notification as read', async () => {
-      mockRepo.findById.mockResolvedValue(mockNotif);
+    it('should mark the caller\'s own notification as read', async () => {
       mockRepo.markAsRead.mockResolvedValue({ ...mockNotif, isRead: true });
       const useCase = new MarkAsRead(mockRepo);
-      const result = await useCase.execute('n1');
-      expect(result.isRead).toBe(true);
+      const result = await useCase.execute('n1', 'usr1');
+      expect(result!.isRead).toBe(true);
+      // The owner must be part of the repository call, not just a prior check.
+      expect(mockRepo.markAsRead).toHaveBeenCalledWith('n1', 'usr1');
+    });
+
+    it('should not mark a notification belonging to another user', async () => {
+      // The repository resolves null when { id, userId } matches no row.
+      mockRepo.markAsRead.mockResolvedValue(null);
+      const useCase = new MarkAsRead(mockRepo);
+      await expect(useCase.execute('n1', 'usr2')).rejects.toThrow(NotificationNotFoundError);
     });
 
     it('should throw NotificationNotFoundError if not found', async () => {
-      mockRepo.findById.mockResolvedValue(null);
+      mockRepo.markAsRead.mockResolvedValue(null);
       const useCase = new MarkAsRead(mockRepo);
-      await expect(useCase.execute('n1')).rejects.toThrow(NotificationNotFoundError);
+      await expect(useCase.execute('n1', 'usr1')).rejects.toThrow(NotificationNotFoundError);
+    });
+  });
+
+  describe('DeleteNotification', () => {
+    it('should delete the caller\'s own notification', async () => {
+      mockRepo.deleteOne.mockResolvedValue(true);
+      const useCase = new DeleteNotification(mockRepo);
+      await expect(useCase.execute('n1', 'usr1')).resolves.toEqual({ deleted: true });
+      expect(mockRepo.deleteOne).toHaveBeenCalledWith('n1', 'usr1');
+    });
+
+    it('should refuse to delete another user\'s notification', async () => {
+      mockRepo.deleteOne.mockResolvedValue(false);
+      const useCase = new DeleteNotification(mockRepo);
+      await expect(useCase.execute('n1', 'usr2')).rejects.toThrow(NotificationNotFoundError);
+    });
+  });
+
+  describe('ClearNotifications', () => {
+    it('should clear only the caller\'s notifications', async () => {
+      mockRepo.deleteAllForUser.mockResolvedValue(4);
+      const useCase = new ClearNotifications(mockRepo);
+      await expect(useCase.execute('usr1')).resolves.toEqual({ deleted: 4 });
+      expect(mockRepo.deleteAllForUser).toHaveBeenCalledWith('usr1');
     });
   });
 
