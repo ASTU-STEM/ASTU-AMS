@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
@@ -89,6 +89,8 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   // Sections that failed to load, so a partial outage is visible instead of
   // looking like empty data.
   const [loadIssues, setLoadIssues] = useState<string[]>([]);
+  // Lets the failure banner re-fetch without a full page reload.
+  const reloadDashboardRef = useRef<() => void>(() => {});
 
   const [profile, setProfile] = useState<AlumniProfile | null>(null);
   const [jobs, setJobs] = useState<JobMatch[]>([]);
@@ -806,6 +808,9 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         setIsLoading(false);
       }
     };
+    reloadDashboardRef.current = () => {
+      void loadDashboardData();
+    };
     loadDashboardData();
   }, []);
 
@@ -1319,7 +1324,10 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               </p>
               <button
                 type="button"
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  setLoadIssues([]);
+                  reloadDashboardRef.current();
+                }}
                 className="shrink-0 rounded-lg border border-amber-400 px-3 py-1.5 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50"
               >
                 Retry now
