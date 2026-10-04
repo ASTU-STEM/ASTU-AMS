@@ -590,7 +590,7 @@ const DepartmentDashboard = () => {
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
                 aria-label="Toggle dark mode"
               >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
               </button>
 
               <NotificationBell darkMode={darkMode} onNavigate={(tab) => goToTab(tab as DepartmentTab)} />
