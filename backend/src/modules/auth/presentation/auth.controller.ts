@@ -6,12 +6,12 @@ import { PrismaUserRepository } from '../infrastructure/repositories/PrismaUserR
 import { PrismaAuditLogRepository } from '../infrastructure/repositories/PrismaAuditLogRepository';
 import { LoginUser } from '../application/use-cases/LoginUser';
 import { RegisterEmployer } from '../application/use-cases/RegisterEmployer';
-import { ActivateAlumni } from '../application/use-cases/ActivateAlumni';
 import { RefreshToken } from '../application/use-cases/RefreshToken';
 import { LogoutUser } from '../application/use-cases/LogoutUser';
 import { RegisterAlumni } from '../application/use-cases/RegisterAlumni';
 import { VerifyAlumniEmail } from '../application/use-cases/VerifyAlumniEmail';
 import { VerifyAlumniNationalId } from '../application/use-cases/VerifyAlumniNationalId';
+import { ResendAlumniOtp } from '../application/use-cases/ResendAlumniOtp';
 import { CreateAdminUser } from '../application/use-cases/CreateAdminUser';
 import { ForgotPassword } from '../application/use-cases/ForgotPassword';
 import { ResetPassword } from '../application/use-cases/ResetPassword';
@@ -23,7 +23,7 @@ import { SubmitRegistrationIssue } from '../application/use-cases/SubmitRegistra
 import { DiditService } from '../infrastructure/services/DiditService';
 import { EmailService } from '../../../core/services/EmailService';
 import { storeEmail2FAOTP, verifyTOTP, verifyEmail2FAOTP } from '../../../core/utils/totp.utils';
-import { loginSchema, activateAlumniSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
+import { loginSchema, registerEmployerSchema, registerAlumniSchema, verifyAlumniEmailSchema, resendOtpSchema, verifyNationalIdSchema, createAdminUserSchema } from './auth.validation';
 
 const userRepository = new PrismaUserRepository();
 const auditLogRepository = new PrismaAuditLogRepository();
@@ -58,17 +58,6 @@ export class AuthController {
       const useCase = new RegisterEmployer(userRepository, auditLogRepository, emailService);
       const result = await useCase.execute(parsedData, req.ip || 'unknown');
       return sendSuccess(res, 'Employer registration submitted successfully! Please wait for admin approval.', result, 201);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  static async activateAlumni(req: Request, res: Response, next: NextFunction) {
-    try {
-      const parsedData = activateAlumniSchema.parse(req.body);
-      const useCase = new ActivateAlumni(userRepository, auditLogRepository);
-      await useCase.execute(parsedData, req.ip || 'unknown');
-      return sendSuccess(res, 'Account activated successfully! You can now login.', null);
     } catch (err) {
       next(err);
     }
@@ -141,6 +130,17 @@ export class AuthController {
       const useCase = new VerifyAlumniNationalId(userRepository);
       const result = await useCase.execute(parsedData, diditSvc);
       return sendSuccess(res, 'National ID verified and account activated.', result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async resendOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsedData = resendOtpSchema.parse(req.body);
+      const useCase = new ResendAlumniOtp(emailService);
+      const result = await useCase.execute(parsedData);
+      return sendSuccess(res, result.message, result);
     } catch (err) {
       next(err);
     }

@@ -27,6 +27,16 @@ export class OpenRouterService {
     return 'meta-llama/llama-3.3-70b-instruct';
   }
 
+  /**
+   * True when generateText() can actually reach a model. Callers need this to
+   * tell the user whether an answer came from an LLM or from generateMockResponse,
+   * which fabricates institutional statistics (employment rate, salary, system
+   * account counts) that must never be presented as real findings.
+   */
+  static async isLive(): Promise<boolean> {
+    return !!(await this.getApiKey());
+  }
+
   static async generateText(prompt: string, systemInstruction?: string): Promise<string> {
     const apiKey = await this.getApiKey();
     const primaryModel = await this.getModel();

@@ -30,13 +30,13 @@ const upload = multer({ storage: storage });
 router.post('/login', asyncHandler(AuthController.login));
 router.post('/send-2fa-otp', asyncHandler(AuthController.send2FAOTP));
 router.post('/verify-2fa-code', asyncHandler(AuthController.verify2FACode));
-router.post('/activate-alumni', asyncHandler(AuthController.activateAlumni));
 router.post('/refresh', asyncHandler(AuthController.refresh));
 
 // Alumni Registration Flow
 router.post('/register', asyncHandler(AuthController.registerAlumni));
 router.post('/register/verify-email', asyncHandler(AuthController.verifyAlumniEmail));
 router.post('/register/verify-national-id', asyncHandler(AuthController.verifyAlumniNationalId));
+router.post('/resend-otp', asyncHandler(AuthController.resendOtp));
 
 // Manual Verification (with file uploads)
 router.post(

@@ -50,9 +50,11 @@ export class ApplyToJob {
       throw new JobExpiredError();
     }
 
-    // 5. Alumni must not have already applied
+    // 5. Alumni must not have a live application already. A WITHDRAWN application
+    // does not count: otherwise withdrawing permanently locks the graduate out
+    // of a job that is still open, with no way back.
     const existingApp = await this.alumniRepo.findApplicationByAlumniAndJob(alumni.id, jobId);
-    if (existingApp) {
+    if (existingApp && existingApp.status !== 'WITHDRAWN') {
       throw new DuplicateApplicationError();
     }
 

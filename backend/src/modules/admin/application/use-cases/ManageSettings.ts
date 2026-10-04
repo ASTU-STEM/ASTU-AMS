@@ -15,6 +15,8 @@ export const DEFAULT_SETTINGS = {
     supportEmail: 'support@astu.edu.et',
     postalCode: 'P.O. Box 1888, Adama, Ethiopia',
     portalTitle: 'Alumni Management System',
+    siteName: 'ASTU Alumni',
+    tagline: 'Graduate Network',
   },
   get email() {
     return {
@@ -61,7 +63,9 @@ export const DEFAULT_SETTINGS = {
   appearance: {
     primaryColor: '#003580',
     accentColor: '#E8A020',
-    logoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH',
+    // Bundled frontend asset, resolved by config.mediaUrl(). An admin can point
+    // this at an uploaded /uploads/cms/... file to replace it without a deploy.
+    logoUrl: 'images/astu-seal-logo.png',
   },
 };
 

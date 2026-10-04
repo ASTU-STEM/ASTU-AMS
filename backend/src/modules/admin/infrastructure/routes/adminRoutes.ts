@@ -9,6 +9,12 @@ const router = Router();
 const adminController = new AdminController();
 const techOpsController = new TechnicalOpsController();
 
+// Branding has to be readable by every signed-in role, not just admins: the
+// alumni portal renders its header from this. Registered BEFORE the admin guard
+// below, and it projects only `general` + `appearance`, so SMTP credentials and
+// integration API keys are never included in the response.
+router.get('/settings/public', adminController.getPublicSettings);
+
 // SUPER_ADMIN and ADMIN roles can access these admin routes
 router.use(authenticateJWT, requireRoles([Role.SUPER_ADMIN, Role.ADMIN, 'SUPER_ADMIN', 'ADMIN']));
 
@@ -74,7 +80,6 @@ router.get('/sync-logs', adminController.getSyncLogs);
 router.post('/data-import', requirePermission('edit_system_settings'), adminController.importData);
 
 // System Settings
-router.get('/settings/public', adminController.getPublicSettings);
 router.get('/settings', requirePermission('view_system_settings'), adminController.getSettings);
 router.put('/settings', requirePermission('edit_system_settings'), adminController.updateSettings);
 router.post('/settings/test-integration', requirePermission('edit_system_settings'), adminController.testIntegration);

@@ -30,11 +30,6 @@ export const submitManualVerificationSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const activateAlumniSchema = z.object({
-  token: z.string().min(1, 'Activation token is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters long'),
-});
-
 export const registerEmployerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
@@ -79,6 +74,10 @@ export const registerAlumniSchema = z.object({
 export const verifyAlumniEmailSchema = z.object({
   studentId: z.string().min(1, 'Student ID is required'),
   code: z.string().min(4, 'Verification code is required'),
+});
+
+export const resendOtpSchema = z.object({
+  studentId: z.string().min(1, 'Student ID is required'),
 });
 
 export const verifyNationalIdSchema = z.object({

@@ -1,122 +1,109 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 import prisma from '../../../../core/config/db';
+import { InvalidTokenError } from '../../domain/errors/AuthErrors';
 
 export interface ResetPasswordRequest {
   token: string;
   newPassword: string;
 }
 
+const RESET_CACHE_PREFIX = 'password_reset_';
+const RESET_CHANNELS = ['PASSWORD_RESET', 'PASSWORD_RESET_PHONE'];
+
+function tokensMatch(candidate: unknown, provided: string): boolean {
+  if (typeof candidate !== 'string' || candidate.length === 0) return false;
+  const a = Buffer.from(candidate);
+  const b = Buffer.from(provided);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 export class ResetPassword {
   async execute(req: ResetPasswordRequest) {
-    // First, try to find the reset data in AlumniProfile (for alumni users)
-    const alumniProfile = await prisma.alumniProfile.findFirst({
-      where: {
-        verificationChannel: { in: ['PASSWORD_RESET', 'PASSWORD_RESET_PHONE'] },
-        verificationCodeExpiresAt: { gte: new Date() },
-        pendingVerificationCode: { not: null },
-      },
-      include: { user: true },
+    const token = (req.token || '').trim();
+    if (!token) throw new InvalidTokenError();
+
+    const hashedPassword = await bcrypt.hash(req.newPassword, 10);
+
+    // Resolve the token to exactly one account before touching any password.
+    // Both stores are keyed/verified against the owner of the token, never
+    // against an arbitrary pending profile.
+    const resolved = await this.resolveTokenOwner(token);
+
+    if (!resolved) throw new InvalidTokenError();
+
+    await prisma.user.update({
+      where: { id: resolved.userId },
+      data: { password: hashedPassword },
     });
 
-    if (alumniProfile && alumniProfile.user) {
-      // Verify token matches (the token here is the OTP code sent)
-      if (alumniProfile.pendingVerificationCode !== req.token) {
-        // Try looking up from AnalyticsCache for token-based reset
-        const cacheEntry = await prisma.analyticsCache.findFirst({
-          where: {
-            key: { startsWith: 'password_reset_' },
-            expiresAt: { gte: new Date() },
-          },
-        });
-
-        if (cacheEntry) {
-          const cacheData = cacheEntry.data as any;
-          if (cacheData.resetToken === req.token || cacheData.resetCode === req.token) {
-            const userId = cacheEntry.key.replace('password_reset_', '');
-            const hashedPassword = await bcrypt.hash(req.newPassword, 10);
-
-            await prisma.user.update({
-              where: { id: userId },
-              data: { password: hashedPassword },
-            });
-
-            // Clean up the cache entry
-            await prisma.analyticsCache.delete({ where: { key: cacheEntry.key } });
-            
-            // Clean up the alumni profile if applicable
-            await prisma.alumniProfile.update({
-              where: { id: alumniProfile.id },
-              data: {
-                pendingVerificationCode: null,
-                verificationCodeExpiresAt: null,
-                verificationChannel: null,
-              },
-            });
-
-            return {
-              success: true,
-              message: 'Your password has been reset successfully.',
-            };
-          }
-        }
-
-        throw new Error('Invalid or expired reset token.');
-      }
-
-      // Valid alumni reset
-      const hashedPassword = await bcrypt.hash(req.newPassword, 10);
-
-      await prisma.user.update({
-        where: { id: alumniProfile.user.id },
-        data: { password: hashedPassword },
-      });
-
-      // Clear the reset state
+    if (resolved.profileId) {
       await prisma.alumniProfile.update({
-        where: { id: alumniProfile.id },
+        where: { id: resolved.profileId },
         data: {
           pendingVerificationCode: null,
           verificationCodeExpiresAt: null,
           verificationChannel: null,
         },
       });
-
-      return {
-        success: true,
-        message: 'Your password has been reset successfully.',
-      };
     }
 
-    // Try AnalyticsCache for non-alumni users
+    if (resolved.cacheKey) {
+      await prisma.analyticsCache.deleteMany({ where: { key: resolved.cacheKey } });
+    }
+
+    return {
+      success: true,
+      message: 'Your password has been reset successfully.',
+    };
+  }
+
+  private async resolveTokenOwner(
+    token: string
+  ): Promise<{ userId: string; profileId: string | null; cacheKey: string | null } | null> {
     const cacheEntries = await prisma.analyticsCache.findMany({
       where: {
-        key: { startsWith: 'password_reset_' },
+        key: { startsWith: RESET_CACHE_PREFIX },
         expiresAt: { gte: new Date() },
       },
     });
 
     for (const entry of cacheEntries) {
-      const cacheData = entry.data as any;
-      if (cacheData.resetToken === req.token || cacheData.resetCode === req.token) {
-        const userId = entry.key.replace('password_reset_', '');
-        const hashedPassword = await bcrypt.hash(req.newPassword, 10);
+      const data = (entry.data || {}) as { resetToken?: string; resetCode?: string };
+      if (!tokensMatch(data.resetToken, token) && !tokensMatch(data.resetCode, token)) continue;
 
-        await prisma.user.update({
-          where: { id: userId },
-          data: { password: hashedPassword },
-        });
+      const userId = entry.key.slice(RESET_CACHE_PREFIX.length);
+      if (!userId) continue;
 
-        await prisma.analyticsCache.delete({ where: { key: entry.key } });
-
-        return {
-          success: true,
-          message: 'Your password has been reset successfully.',
-        };
-      }
+      const profile = await prisma.alumniProfile.findFirst({ where: { userId } });
+      return { userId, profileId: profile?.id ?? null, cacheKey: entry.key };
     }
 
-    throw new Error('Invalid or expired reset token. Please request a new password reset.');
+    // Phone-based recovery never writes a cache entry, so fall back to matching
+    // the OTP against every outstanding profile and only ever mutating the one
+    // that actually owns it.
+    const pendingProfiles = await prisma.alumniProfile.findMany({
+      where: {
+        verificationChannel: { in: RESET_CHANNELS },
+        verificationCodeExpiresAt: { gte: new Date() },
+        pendingVerificationCode: { not: null },
+        userId: { not: null },
+      },
+      include: { user: true },
+    });
+
+    for (const profile of pendingProfiles) {
+      if (!tokensMatch(profile.pendingVerificationCode, token)) continue;
+      if (!profile.userId || !profile.user) continue;
+
+      const entry = cacheEntries.find(
+        (e) => e.key === `${RESET_CACHE_PREFIX}${profile.userId}`
+      );
+      return { userId: profile.userId, profileId: profile.id, cacheKey: entry?.key ?? null };
+    }
+
+    return null;
   }
 }

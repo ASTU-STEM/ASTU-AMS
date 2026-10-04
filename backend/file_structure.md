@@ -123,7 +123,6 @@
 │   │   │   │   ├── 📄 IAuditLogRepository.ts
 │   │   │   │   └── 📄 IUserRepository.ts
 │   │   │   └── 📁 use-cases
-│   │   │       ├── 📄 ActivateAlumni.ts
 │   │   │       ├── 📄 LoginUser.ts
 │   │   │       ├── 📄 LogoutUser.ts
 │   │   │       ├── 📄 RefreshToken.ts

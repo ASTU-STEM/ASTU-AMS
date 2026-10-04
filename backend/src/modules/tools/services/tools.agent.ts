@@ -1,11 +1,12 @@
 import { agentRegistry } from '../agents/agentRegistry';
+import { OpenRouterService } from '../../ai/infrastructure/services/OpenRouterService';
 
 export class ToolsAIAgent {
   static async executeToolAI(
     toolId: string,
     inputs: Record<string, any>,
     userProfile?: any
-  ): Promise<{ text: string; summary: string }> {
+  ): Promise<{ text: string; summary: string; source: 'llm' | 'template' }> {
     // Determine the array of agents for parallel execution
     // The main agent is the requested toolId
     // We add contextual agents to fulfill the parallel execution requirement for all 50 tools
@@ -29,9 +30,16 @@ export class ToolsAIAgent {
       combinedText += `${res.text}\n\n`;
     });
     
+    // Without a configured provider the agent layer emits its own canned text.
+    // Say so, so the UI can label the output instead of implying a live model
+    // produced it.
+    const live = await OpenRouterService.isLive();
+
     return {
       text: combinedText.trim(),
-      summary: mainResult.summary + ' (Enhanced by parallel contextual agents)'
+      summary: (live ? mainResult.summary : `${mainResult.summary} (no AI provider configured - static guidance shown)`)
+        + ' (Enhanced by parallel contextual agents)',
+      source: live ? 'llm' : 'template',
     };
   }
 

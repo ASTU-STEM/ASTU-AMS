@@ -668,7 +668,7 @@ export class AlumniController {
         name: a.fullName,
         title: `${(a as any).currentPosition || 'ASTU Senior Alumni'} ${(a as any).company ? '@ ' + (a as any).company : ''}`,
         avatar: a.profilePicture ? `http://localhost:5000${a.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-        posts: `${a._count.forumPosts || 1} posts`
+        posts: `${(a as any)._count?.forumPosts ?? 0} posts`
       }));
 
       const formatted = posts.map((p: any) => {
@@ -707,8 +707,8 @@ export class AlumniController {
       return sendSuccess(res, 'Forum posts fetched', {
         posts: formatted,
         stats: {
-          totalAlumni: totalAlumniCount || 15420,
-          totalPosts: totalPostsCount || 3890,
+          totalAlumni: totalAlumniCount || 0,
+          totalPosts: totalPostsCount || 0,
           topContributors
         }
       });

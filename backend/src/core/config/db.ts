@@ -27,9 +27,9 @@ function emptyDevStore(): any {
   return {
     users: [], adminProfiles: [], alumniProfiles: [], employers: [], jobs: [],
     jobApplications: [], interviews: [], contents: [], contentItems: [],
-    notifications: [], auditLogs: [], registrarStudents: [], registrarSyncLogs: [],
+notifications: [], auditLogs: [], registrarStudents: [], registrarSyncLogs: [],
     documentRequests: [], departments: [], surveys: [], surveyResponses: [],
-    events: [], homepageConfigs: [], feedback: [],
+    events: [], homepageConfigs: [], feedback: [], systemSettings: [],
   };
 }
 
@@ -54,6 +54,7 @@ function readDevDbFromDisk(): any {
       contentItems: [],
       mediaAssets: [],
       homepageConfigs: [],
+      systemSettings: [],
       revokedTokens: [],
     };
   }
@@ -807,12 +808,20 @@ class FakePrisma {
   };
 
   job = {
-    findMany: async ({ where }: any = {}) => {
+    findMany: async ({ where, skip, take, orderBy }: any = {}) => {
       const store = readDevDb();
       let jobs = store.jobs || [];
       if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
       if (where?.status) jobs = jobs.filter((j: any) => j.status === where.status);
-      return jobs.map((j: any) => {
+      // where.OR (keyword search) is not supported here yet, but pagination was:
+      // without skip/take every call returned all 69 rows while the response
+      // envelope advertised "limit: 20, totalPages: 4".
+      if (orderBy?.createdAt === 'asc') jobs = [...jobs].sort((a: any, b: any) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+      else if (orderBy?.createdAt === 'desc') jobs = [...jobs].sort((a: any, b: any) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+      const start = Number(skip) || 0;
+      const end = take === undefined || take === null ? undefined : start + Number(take);
+      if (start || end !== undefined) jobs = jobs.slice(start, end);
+      const result = jobs.map((j: any) => {
 const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerId) || {
         id: j.employerId || 'dev-employer-unknown',
         // Not a real company: see the note on the findMany fallback above.
@@ -833,6 +842,9 @@ const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerI
           }
         });
       });
+      // Prisma does not return a count from findMany; the repository derives the
+      // total separately, so the count query must still see every row.
+      return result;
     },
     findUnique: async ({ where }: any = {}) => {
       const store = readDevDb();
@@ -897,6 +909,18 @@ const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerI
   };
 
   jobApplication = {
+    // Without this the delegate fell through to the catch-all, whose stub
+    // returns null for every call. That silently disabled two real guards:
+    // ApplyToJob's duplicate check (the same job could be applied to unlimited
+    // times) and WithdrawApplication's lookup (always 404 "not found").
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const apps = store.jobApplications || [];
+      if (!where || Object.keys(where).length === 0) return apps[0] || null;
+      return apps.find((a: any) =>
+        Object.entries(where).every(([k, v]) => a[k] === v)
+      ) || null;
+    },
     count: async ({ where }: any = {}) => {
       const store = readDevDb();
       let apps = store.jobApplications || [];
@@ -946,7 +970,7 @@ const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerI
         const user = (store.users || []).find((u: any) => u.id === alumni?.userId || u.id === a.alumniId);
         return {
           ...a,
-          job: job ? { ...job, employer: emp || { id: job.employerId || 'dev-employer-1', companyName: 'Safaricom Ethiopia' } } : null,
+          job: job ? { ...job, employer: emp || { id: job.employerId || 'dev-employer-unknown', companyName: 'Employer details unavailable' } } : null,
           alumni: alumni ? { ...alumni, user: user || { email: alumni?.email || 'alumni@astu.edu.et' } } : null,
         };
       });
@@ -960,7 +984,7 @@ const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerI
         const emp = (store.employerProfiles || []).find((e: any) => e.id === job?.employerId || e.userId === job?.employerId);
         const alumni = (store.alumniProfiles || []).find((al: any) => al.id === app.alumniId || al.userId === app.alumniId);
         const user = (store.users || []).find((u: any) => u.id === alumni?.userId || u.id === app.alumniId);
-        const empObject = emp || { id: job?.employerId || 'dev-employer-1', companyName: 'Safaricom Ethiopia' };
+        const empObject = emp || { id: job?.employerId || 'dev-employer-unknown', companyName: 'Employer details unavailable' };
         return {
           ...app,
           job: job ? { ...job, employer: empObject } : null,
@@ -1560,6 +1584,39 @@ const emp = (store.employerProfiles || []).find((e: any) => e.id === j.employerI
     },
   };
 
+  // Without this the System Settings endpoints always fell through to
+  // ManageSettings' hardcoded defaults in the dev fallback, so branding edits
+  // made in the admin UI silently vanished on reload.
+  systemSetting = {
+    findMany: async () => {
+      const store = readDevDb();
+      return store.systemSettings || [];
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.systemSettings || []).find((s: any) => s.key === where?.key) || null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      if (!store.systemSettings) store.systemSettings = [];
+      const key = where?.key;
+      const idx = store.systemSettings.findIndex((s: any) => s.key === key);
+      if (idx !== -1) {
+        store.systemSettings[idx] = {
+          ...store.systemSettings[idx],
+          ...update,
+          updatedAt: new Date().toISOString(),
+        };
+        writeDevDb(store);
+        return store.systemSettings[idx];
+      }
+      const rec = { key, ...create, updatedAt: new Date().toISOString() };
+      store.systemSettings.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+  };
+
   // Catch-all: for any model not explicitly defined, return safe no-ops
   [key: string]: any;
 
@@ -1770,6 +1827,44 @@ function responseWithRelations(resp: any, include: any, store: any) {
   return out;
 }
 
+const NUMERIC_ATOMIC_OPS = ['increment', 'decrement', 'multiply', 'divide', 'set'] as const;
+
+/**
+ * Apply a Prisma `data` payload, resolving atomic number operators.
+ *
+ * `Object.assign(item, data)` used to be used here, which copied Prisma's
+ * `{ increment: n }` shorthand onto the record verbatim. A single donation then
+ * turned `raised`/`donorCount` into `{ increment: 500 }` objects, which the API
+ * happily returned and React refused to render ("Objects are not valid as a
+ * React child").
+ */
+function applyAtomicOps(target: any, data: any): void {
+  if (!data || typeof data !== 'object') return;
+
+  for (const [key, value] of Object.entries(data)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const op = NUMERIC_ATOMIC_OPS.find((o) => o in (value as any));
+      if (op) {
+        const operand = Number((value as any)[op]);
+        const current = Number(target[key]);
+        const base = Number.isFinite(current) ? current : 0;
+        const n = Number.isFinite(operand) ? operand : 0;
+        switch (op) {
+          case 'increment': target[key] = base + n; break;
+          case 'decrement': target[key] = base - n; break;
+          case 'multiply': target[key] = base * n; break;
+          case 'divide': target[key] = n === 0 ? base : base / n; break;
+          case 'set': target[key] = n; break;
+        }
+        continue;
+      }
+      // Nested relation payloads ({ create: ... }, { connect: ... }) and any other
+      // structured value are stored as-is, matching the previous behaviour.
+    }
+    target[key] = value;
+  }
+}
+
 const createSafeModel = (name: string) => {
   const store: any[] = [];
   return {
@@ -1818,7 +1913,7 @@ const createSafeModel = (name: string) => {
         item = { id, ...where };
         store.push(item);
       }
-      Object.assign(item, data);
+      applyAtomicOps(item, data);
       return item;
     },
     delete: async ({ where }: any = {}) => {

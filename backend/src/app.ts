@@ -56,8 +56,9 @@ for (const p of [
   '/api/auth/reset-password',
   '/api/auth/send-2fa-otp',
   '/api/auth/verify-2fa-code',
-  '/api/auth/verify-alumni-email',
-  '/api/auth/verify-alumni-national-id',
+  '/api/auth/register/verify-email',
+  '/api/auth/register/verify-national-id',
+  '/api/auth/resend-otp',
 ]) {
   app.use(p, authLimiter);
 }
