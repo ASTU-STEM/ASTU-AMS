@@ -2,6 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { AlumniProfile, Certification, Project, Achievement } from '../types/alumni.types';
 import { alumniService } from '../services/alumni.service';
 import toast from 'react-hot-toast';
+import { EmptyState } from '../../../components/EmptyState';
+import Modal from '../../../components/ui/Modal';
+import {
+  alumniInputClass,
+  alumniLabelClass,
+  alumniTextareaClass,
+  alumniCardClass,
+  alumniPanelClass,
+  alumniPrimaryBtnClass,
+  alumniSecondaryBtnClass,
+  alumniFieldHintClass,
+  alumniVerifiedBadgeClass,
+  alumniLockedInputClass,
+  alumniSectionTitleClass,
+  alumniMutedClass,
+} from './alumniUi';
+
+const VerifiedBadge = () => (
+  <span className={alumniVerifiedBadgeClass} title="Synced from ASTU Registrar and locked for editing">
+    <span className="material-symbols-outlined text-[12px]">lock</span>
+    Registrar verified
+  </span>
+);
 
 import { calculateProfileCompletion, getProfileCompletionBreakdown } from '../utils/profileCompletion';
 
@@ -91,8 +114,10 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     } catch (_) {}
   };
 
-  const handleAddSkill = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // The event is optional: the Enter-key handler on the input calls this with no
+  // argument, which made `e.preventDefault()` throw on undefined.
+  const handleAddSkill = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     const skillTrimmed = newSkill.trim();
     if (skillTrimmed && !formData.skills.includes(skillTrimmed)) {
       const updatedSkills = [...formData.skills, skillTrimmed];
@@ -390,7 +415,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     } else {
       onSave(formData);
     }
-    toast.success('Profile saving...');
+    // No toast here: it fired a success-styled message before the request had
+    // been made. AlumniDashboard.handleSaveProfile reports the real outcome.
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -437,13 +463,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
     { id: 'resume', label: 'Resume', icon: 'description' },
   ];
 
-  const inputClass = "w-full text-xs p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] focus:bg-[var(--bg-card)] transition-all duration-200 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]";
-  const labelClass = "text-[10px] font-extrabold text-[var(--text-secondary)] uppercase tracking-[0.15em]";
+  const inputClass = alumniInputClass;
+  const labelClass = alumniLabelClass;
 
   return (
     <div className="space-y-6">
       {/* Profile Hero Banner */}
-      <section className="relative overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm">
+      <section className={`relative overflow-hidden ${alumniCardClass}`}>
         <div className="absolute inset-0 bg-gradient-to-br from-[#003366] via-[#004080] to-[#1a5c3a] opacity-95"></div>
         <div className="absolute inset-0">
           <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
@@ -464,9 +490,17 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 </div>
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-white tracking-tight">{formData.fullName || 'New Alumnus'}</h2>
-                <p className="text-sm text-white/70 font-medium mt-0.5">{formData.currentRole} {formData.company ? `at ${formData.company}` : ''}</p>
-                <p className="text-[10px] text-white/50 font-semibold mt-1">{typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department} • {formData.batch}</p>
+                <h2 className="text-xl font-extrabold text-white tracking-tight">{formData.fullName || 'Your alumni profile'}</h2>
+                <p className="text-sm text-white/75 font-medium mt-0.5">
+                  {formData.currentRole
+                    ? `${formData.currentRole}${formData.company ? ` at ${formData.company}` : ''}`
+                    : 'Add your role and workplace to stand out to recruiters'}
+                </p>
+                <p className="text-[11px] text-white/55 font-medium mt-1.5">
+                  {[typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department, formData.batch]
+                    .filter(Boolean)
+                    .join(' · ') || 'Academic details sync from the ASTU Registrar'}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -474,20 +508,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 type="button"
                 onClick={() => setShowScoreModal(true)}
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10 transition-all cursor-pointer group"
-                title="Click to view profile completeness breakdown"
+                title="View what is missing to complete your profile"
               >
                 <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getScoreColor()} flex items-center justify-center mx-auto group-hover:scale-105 transition-transform`}>
                   <span className="text-sm font-extrabold text-white">{profileScore}%</span>
                 </div>
-                <p className="text-[9px] text-white/80 font-bold uppercase tracking-wider mt-1.5 flex items-center justify-center gap-1">
-                  Profile Score <span>🔍</span>
+                <p className="text-[9px] text-white/80 font-bold uppercase tracking-wider mt-1.5">
+                  Profile strength
                 </p>
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white rounded-xl text-xs font-extrabold tracking-wider uppercase transition-all duration-300 border border-white/15 shadow-lg hover:shadow-xl"
+                className="px-5 py-2.5 bg-white text-[#003366] rounded-xl text-xs font-extrabold tracking-wide uppercase transition-all duration-300 border border-white/20 shadow-lg hover:bg-[#FFD700] hover:shadow-xl"
               >
-                💾 Save Changes
+                Save changes
               </button>
             </div>
           </div>
@@ -497,34 +531,35 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
       {/* Profile Completion Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: 'verified', label: 'Identity', value: 'Verified', color: 'emerald', isClickable: false },
-          { icon: 'analytics', label: 'Completeness', value: `${profileScore}% (Click to view)`, color: 'blue', isClickable: true },
-          { icon: 'work', label: 'Resume', value: (formData.resume || formData.resumeUrl) ? 'Uploaded' : 'Missing', color: (formData.resume || formData.resumeUrl) ? 'emerald' : 'amber', isClickable: false },
-          { icon: 'link', label: 'LinkedIn', value: formData.linkedInUrl ? 'Connected' : 'Not set', color: formData.linkedInUrl ? 'emerald' : 'amber', isClickable: false },
+          { icon: 'verified', label: 'Identity', value: 'Verified graduate', hint: 'Registrar matched', color: 'emerald', isClickable: false },
+          { icon: 'analytics', label: 'Completeness', value: `${profileScore}% complete`, hint: 'Tap to see gaps', color: 'blue', isClickable: true },
+          { icon: 'description', label: 'Resume', value: (formData.resume || formData.resumeUrl) ? 'Uploaded' : 'Not uploaded', hint: (formData.resume || formData.resumeUrl) ? 'Ready for applications' : 'Add a PDF resume', color: (formData.resume || formData.resumeUrl) ? 'emerald' : 'amber', isClickable: false },
+          { icon: 'link', label: 'LinkedIn', value: formData.linkedInUrl ? 'Connected' : 'Not connected', hint: formData.linkedInUrl ? 'Visible to recruiters' : 'Add your profile URL', color: formData.linkedInUrl ? 'emerald' : 'amber', isClickable: false },
         ].map((stat, idx) => (
           <div
             key={idx}
             onClick={() => stat.isClickable && setShowScoreModal(true)}
-            className={`bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] p-3.5 shadow-sm hover:shadow-md transition-all duration-200 ${
+            className={`${alumniPanelClass} !p-3.5 hover:shadow-md transition-all duration-200 ${
               stat.isClickable ? 'cursor-pointer hover:border-[#003366]/40 ring-1 ring-blue-500/20' : ''
             }`}
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-base">{stat.icon}</span>
+              <span className="material-symbols-outlined text-base text-[var(--text-secondary)]">{stat.icon}</span>
               <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-700' :
-                stat.color === 'blue' ? 'bg-blue-50 text-blue-700' :
-                'bg-amber-50 text-amber-700'
+                stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' :
+                stat.color === 'blue' ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300' :
+                'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300'
               }`}>{stat.label}</span>
             </div>
-            <p className="text-xs font-extrabold text-[var(--text-primary)]">{stat.value}</p>
+            <p className="text-sm font-extrabold text-[var(--text-primary)]">{stat.value}</p>
+            <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{stat.hint}</p>
           </div>
         ))}
       </div>
 
       {/* Section Tabs */}
-      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
-        <div className="flex overflow-x-auto border-b border-[var(--border-color)]">
+      <div className={`${alumniCardClass} overflow-hidden`}>
+        <div className="flex overflow-x-auto border-b border-[var(--border-color)] scrollbar-thin">
           {sections.map(section => (
             <button
               key={section.id}
@@ -535,7 +570,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)]'
               }`}
             >
-              <span className="text-sm">{section.icon}</span>
+              <span className="material-symbols-outlined text-[18px] leading-none">{section.icon}</span>
               {section.label}
             </button>
           ))}
@@ -546,42 +581,77 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           {activeSection === 'personal' && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Personal Information</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Manage your contact details and personal information.</p>
+                <h3 className={alumniSectionTitleClass}>Personal details</h3>
+                <p className={`${alumniMutedClass} mt-1`}>Keep contact info current so recruiters, mentors, and ASTU services can reach you.</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className={labelClass}>Full Name</label>
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={labelClass}>Full name</label>
+                    <VerifiedBadge />
                   </div>
-                  <input type="text" name="fullName" value={formData.fullName} className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`} readOnly disabled title="Full Name is synced from ASTU Registrar and cannot be edited in portal" />
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName || ''}
+                    placeholder="Synced from Registrar"
+                    className={`${inputClass} ${alumniLockedInputClass}`}
+                    readOnly
+                    disabled
+                    title="Full name is synced from ASTU Registrar and cannot be edited here"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Email Address</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} className={inputClass} required />
+                  <label className={labelClass}>Email address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email || ''}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                    placeholder="you@example.com"
+                    required
+                  />
+                  <p className={alumniFieldHintClass}>Primary email for job alerts and university notices.</p>
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Phone Number</label>
-                  <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className={inputClass} placeholder="+251 9..." />
+                  <label className={labelClass}>Phone number</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone || ''}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                    placeholder="+251 9XX XXX XXX"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className={labelClass}>Student ID / Batch No.</label>
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={labelClass}>Student ID</label>
+                    <VerifiedBadge />
                   </div>
-                  <input type="text" name="studentId" value={formData.studentId} className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`} readOnly disabled title="Student ID is synced from ASTU Registrar and cannot be edited in portal" />
+                  <input
+                    type="text"
+                    name="studentId"
+                    value={formData.studentId || ''}
+                    placeholder="Synced from Registrar"
+                    className={`${inputClass} ${alumniLockedInputClass}`}
+                    readOnly
+                    disabled
+                    title="Student ID is synced from ASTU Registrar and cannot be edited here"
+                  />
                 </div>
               </div>
                   <div className="space-y-1.5">
-                    <label className={labelClass}>Professional Bio</label>
+                    <label className={labelClass}>Professional bio</label>
                     <textarea
                       name="bio"
-                      value={formData.bio}
+                      value={formData.bio || ''}
                       onChange={handleInputChange}
-                      className={`${inputClass} h-24 resize-none`}
-                      placeholder="Share a short summary about your background, career interests, or tech stack..."
+                      className={`${alumniTextareaClass} h-24 resize-none`}
+                      placeholder="2–3 sentences about your background, strengths, and career focus…"
                     />
+                    <p className={alumniFieldHintClass}>Shown on your public alumni profile and in recruiter search results.</p>
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="space-y-1.5">
@@ -589,9 +659,9 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       <input type="text" name="nationality" value={formData.nationality || ''} onChange={handleInputChange} className={inputClass} placeholder="e.g. Ethiopian" />
                     </div>
                     <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className={labelClass}>Date of Birth</label>
-                        <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <label className={labelClass}>Date of birth</label>
+                        <VerifiedBadge />
                       </div>
                       <input
                         type="date"
@@ -601,16 +671,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                             ? new Date(formData.dateOfBirth).toISOString().split('T')[0]
                             : ''
                         }
-                        className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                        className={`${inputClass} ${alumniLockedInputClass}`}
                         readOnly
                         disabled
-                        title="Date of Birth is synced from ASTU Registrar record and cannot be edited in portal"
+                        title="Date of birth is synced from ASTU Registrar and cannot be edited here"
                       />
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelClass}>Gender</label>
                       <select name="gender" value={formData.gender || ''} onChange={handleInputChange} className={inputClass}>
-                        <option value="">Select</option>
+                        <option value="">Select gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Prefer not to say">Prefer not to say</option>
@@ -619,14 +689,14 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Languages Spoken</label>
+                      <label className={labelClass}>Languages</label>
                       <input type="text" name="languages" value={Array.isArray(formData.languages) ? formData.languages.join(', ') : ''} onChange={(e) => setFormData(p => ({ ...p, languages: e.target.value.split(',').map(l => l.trim()).filter(Boolean) }))} className={inputClass} placeholder="e.g. English, Amharic, Afan Oromo" />
-                      <p className="text-[8px] text-[var(--text-muted)]">Separate multiple languages with commas</p>
+                      <p className={alumniFieldHintClass}>Separate languages with commas.</p>
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Marital Status</label>
+                      <label className={labelClass}>Marital status</label>
                       <select name="maritalStatus" value={formData.maritalStatus || ''} onChange={handleInputChange} className={inputClass}>
-                        <option value="">Select</option>
+                        <option value="">Select status</option>
                         <option value="Single">Single</option>
                         <option value="Married">Married</option>
                         <option value="Divorced">Divorced</option>
@@ -635,12 +705,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className={labelClass}>Volunteer / Community Work</label>
-                    <textarea name="volunteerWork" value={formData.volunteerWork || ''} onChange={handleInputChange} className={`${inputClass} h-20 resize-none`} placeholder="Describe any volunteer or community service work..." />
+                    <label className={labelClass}>Volunteer & community work</label>
+                    <textarea name="volunteerWork" value={formData.volunteerWork || ''} onChange={handleInputChange} className={`${alumniTextareaClass} h-20 resize-none`} placeholder="Clubs, outreach, mentoring, or community service…" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className={labelClass}>Current Address</label>
-                    <input type="text" name="address" value={formData.address || ''} onChange={handleInputChange} className={inputClass} placeholder="City, Region, Country" />
+                    <label className={labelClass}>Current address</label>
+                    <input type="text" name="address" value={formData.address || ''} onChange={handleInputChange} className={inputClass} placeholder="City, region, country" />
                   </div>
                 </div>
               )}
@@ -650,53 +720,62 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           {activeSection === 'academic' && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Academic Record</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Your ASTU official academic information synced from the Registrar Student Information System.</p>
+                <h3 className={alumniSectionTitleClass}>Academic record</h3>
+                <p className={`${alumniMutedClass} mt-1`}>Official ASTU degree details from the Registrar. These fields are locked and update when your student record syncs.</p>
+              </div>
+              <div className="rounded-xl border border-[#003366]/10 bg-[#003366]/5 dark:bg-[#003366]/20 p-4 flex items-start gap-3">
+                <span className="material-symbols-outlined text-[#003366] dark:text-[#FFD700] text-xl shrink-0">info</span>
+                <p className="text-[12px] leading-relaxed text-[var(--text-secondary)]">
+                  If department, batch, or CGPA look empty, retry the dashboard load or contact the Registrar office to confirm your graduation record.
+                </p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className={labelClass}>Department</label>
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                    <VerifiedBadge />
                   </div>
                   <input
                     type="text"
                     name="department"
-                    value={typeof formData.department === 'object' ? (formData.department as any)?.name : formData.department}
-                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    value={typeof formData.department === 'object' ? ((formData.department as any)?.name || '') : (formData.department || '')}
+                    placeholder="Awaiting Registrar sync"
+                    className={`${inputClass} ${alumniLockedInputClass}`}
                     readOnly
                     disabled
-                    title="Department is synced from ASTU Registrar and cannot be edited in portal"
+                    title="Department is synced from ASTU Registrar and cannot be edited here"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className={labelClass}>Graduation Batch</label>
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={labelClass}>Graduation batch</label>
+                    <VerifiedBadge />
                   </div>
                   <input
                     type="text"
                     name="batch"
                     value={formData.batch || (formData.graduationYear ? `${formData.graduationYear}` : '')}
-                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    placeholder="e.g. Class of 2024"
+                    className={`${inputClass} ${alumniLockedInputClass}`}
                     readOnly
                     disabled
-                    title="Graduation Batch is synced from ASTU Registrar and cannot be edited in portal"
+                    title="Graduation batch is synced from ASTU Registrar and cannot be edited here"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className={labelClass}>Final CGPA</label>
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">🔒 Registrar Verified</span>
+                    <VerifiedBadge />
                   </div>
                   <input
                     type="text"
                     name="cgpa"
-                    value={formData.cgpa}
-                    className={`${inputClass} opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/60`}
+                    value={formData.cgpa != null && formData.cgpa !== '' && Number(formData.cgpa) > 0 ? formData.cgpa : ''}
+                    placeholder="Not available yet"
+                    className={`${inputClass} ${alumniLockedInputClass}`}
                     readOnly
                     disabled
-                    title="Final CGPA is synced from ASTU Registrar and cannot be edited in portal"
+                    title="Final CGPA is synced from ASTU Registrar and cannot be edited here"
                   />
                 </div>
               </div>
@@ -707,12 +786,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           {activeSection === 'employment' && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Employment Details</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your employment status, workplace, company location, role title, and compensation.</p>
+                <h3 className={alumniSectionTitleClass}>Employment</h3>
+                <p className={`${alumniMutedClass} mt-1`}>Tell employers where you work now and what you do—this powers job matching and alumni insights.</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Employment Status</label>
+                  <label className={labelClass}>Employment status</label>
                   <select
                     name="employmentStatus"
                     value={formData.employmentStatus || 'EMPLOYED'}
@@ -722,13 +801,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     }}
                     className={inputClass}
                   >
-                    <option value="EMPLOYED">Employed (Full-Time / Part-Time / Contract)</option>
-                    <option value="UNEMPLOYED">Unemployed / Actively Seeking Placement</option>
-                    <option value="SELF_EMPLOYED">Self-Employed / Entrepreneur / Freelancer</option>
+                    <option value="EMPLOYED">Employed</option>
+                    <option value="UNEMPLOYED">Looking for work</option>
+                    <option value="SELF_EMPLOYED">Self-employed / freelance</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Role / Title</label>
+                  <label className={labelClass}>Job title</label>
                   <input
                     type="text"
                     name="currentRole"
@@ -736,11 +815,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     onChange={handleInputChange}
                     onBlur={() => handleEmploymentBlurOrChange()}
                     className={inputClass}
-                    placeholder="e.g. Junior Frontend Dev / Senior Software Engineer"
+                    placeholder="e.g. Software Engineer"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Company / Employer Name</label>
+                  <label className={labelClass}>Company / employer</label>
                   <input
                     type="text"
                     name="company"
@@ -748,11 +827,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     onChange={handleInputChange}
                     onBlur={() => handleEmploymentBlurOrChange()}
                     className={inputClass}
-                    placeholder="e.g. Safaricom Ethiopia PLC / Chapa Financials"
+                    placeholder="e.g. Safaricom Ethiopia"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Work Location / Company Place</label>
+                  <label className={labelClass}>Work location</label>
                   <input
                     type="text"
                     name="workLocation"
@@ -763,11 +842,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     }}
                     onBlur={() => handleEmploymentBlurOrChange()}
                     className={inputClass}
-                    placeholder="e.g. Addis Ababa HQ (Hybrid), Hawassa Branch, Remote"
+                    placeholder="e.g. Addis Ababa · Hybrid"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Industry Sector</label>
+                  <label className={labelClass}>Industry</label>
                   <input
                     type="text"
                     name="industry"
@@ -775,11 +854,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     onChange={handleInputChange}
                     onBlur={() => handleEmploymentBlurOrChange()}
                     className={inputClass}
-                    placeholder="e.g. Telecommunications & Digital Services, Software"
+                    placeholder="e.g. Software & AI"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className={labelClass}>Salary Range</label>
+                  <label className={labelClass}>Salary range</label>
                   <select
                     name="salaryRange"
                     value={formData.salaryRange || 'Competitive Salary'}
@@ -790,29 +869,30 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     className={inputClass}
                   >
                     <option value="Under 15,000 ETB">Under 15,000 ETB</option>
-                    <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
-                    <option value="30,001 - 60,000 ETB">30,001 - 60,000 ETB</option>
-                    <option value="60,001 - 100,000 ETB">60,001 - 100,000 ETB</option>
+                    <option value="15,000 - 30,000 ETB">15,000 – 30,000 ETB</option>
+                    <option value="30,001 - 60,000 ETB">30,001 – 60,000 ETB</option>
+                    <option value="60,001 - 100,000 ETB">60,001 – 100,000 ETB</option>
                     <option value="Over 100,000 ETB">Over 100,000 ETB</option>
-                    <option value="Competitive Salary">Competitive Salary</option>
-                    <option value="Seeking Opportunities">Seeking Opportunities</option>
+                    <option value="Competitive Salary">Prefer not to say</option>
+                    <option value="Seeking Opportunities">Seeking opportunities</option>
                   </select>
+                  <p className={alumniFieldHintClass}>Used only for anonymous alumni salary insights.</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Social Links Section - ENHANCED */}
+          {/* Social Links Section */}
           {activeSection === 'social' && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Social & Professional Profiles</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Connect your professional profiles to boost visibility to recruiters and mentors.</p>
+                <h3 className={alumniSectionTitleClass}>Social & professional links</h3>
+                <p className={`${alumniMutedClass} mt-1`}>Connect the profiles recruiters and mentors check first.</p>
               </div>
 
               {/* LinkedIn Profile Card */}
               <div className={`rounded-xl border-2 overflow-hidden transition-all duration-300 ${
-                formData.linkedInUrl ? 'border-blue-200 bg-blue-50/30' : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-blue-200'
+                formData.linkedInUrl ? 'border-blue-200 bg-blue-50/30 dark:border-blue-500/30 dark:bg-blue-500/5' : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-blue-200'
               }`}>
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-4">
@@ -824,12 +904,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-extrabold text-[var(--text-primary)]">LinkedIn Profile</h4>
+                          <h4 className="text-sm font-extrabold text-[var(--text-primary)]">LinkedIn</h4>
                           {formData.linkedInUrl && (
                             <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-extrabold rounded-full uppercase tracking-wider">Connected</span>
                           )}
                         </div>
-                        <p className="text-[10px] text-[var(--text-secondary)]">Showcase your professional experience, endorsements, and recommendations.</p>
+                        <p className="text-[11px] text-[var(--text-secondary)]">Experience, endorsements, and recommendations.</p>
                       </div>
                     </div>
                     {formData.linkedInUrl && (
@@ -845,7 +925,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     )}
                   </div>
                   <div className="mt-4">
-                    <label className={labelClass}>LinkedIn Profile URL</label>
+                    <label className={labelClass}>LinkedIn URL</label>
                     <div className="relative mt-1.5">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0A66C2]">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
@@ -855,7 +935,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                         name="linkedInUrl"
                         value={formData.linkedInUrl || ''}
                         onChange={handleInputChange}
-                        placeholder="https://linkedin.com/in/your-handle"
+                        placeholder="https://linkedin.com/in/your-name"
                         className={`${inputClass} pl-10`}
                       />
                     </div>
@@ -877,12 +957,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-extrabold text-[var(--text-primary)]">GitHub Profile</h4>
+                          <h4 className="text-sm font-extrabold text-[var(--text-primary)]">GitHub</h4>
                           {formData.gitHubUrl && (
                             <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-extrabold rounded-full uppercase tracking-wider">Connected</span>
                           )}
                         </div>
-                        <p className="text-[10px] text-[var(--text-secondary)]">Display your open-source contributions, repositories, and code portfolio.</p>
+                        <p className="text-[11px] text-[var(--text-secondary)]">Repos, open source, and code samples.</p>
                       </div>
                     </div>
                     {formData.gitHubUrl && (
@@ -898,7 +978,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     )}
                   </div>
                   <div className="mt-4">
-                    <label className={labelClass}>GitHub Profile URL</label>
+                    <label className={labelClass}>GitHub URL</label>
                     <div className="relative mt-1.5">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
@@ -908,7 +988,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                         name="gitHubUrl"
                         value={formData.gitHubUrl || ''}
                         onChange={handleInputChange}
-                        placeholder="https://github.com/your-handle"
+                        placeholder="https://github.com/your-username"
                         className={`${inputClass} pl-10`}
                       />
                     </div>
@@ -923,11 +1003,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     <span className="material-symbols-outlined text-white text-lg">language</span>
                   </div>
                   <div>
-                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Portfolio / Personal Website</h4>
-                    <p className="text-[10px] text-[var(--text-secondary)]">Link your personal website or portfolio.</p>
+                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Portfolio website</h4>
+                    <p className="text-[11px] text-[var(--text-secondary)]">Personal site, Behance, or project showcase.</p>
                   </div>
                 </div>
-                <input type="url" name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://your-portfolio.com" className={inputClass} />
+                <input type="url" name="portfolioUrl" value={formData.portfolioUrl || ''} onChange={handleInputChange} placeholder="https://yourname.com" className={inputClass} />
               </div>
 
               {/* Twitter/X URL */}
@@ -937,8 +1017,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                   </div>
                   <div>
-                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">X (Twitter) Profile</h4>
-                    <p className="text-[10px] text-[var(--text-secondary)]">Connect your X/Twitter for professional networking.</p>
+                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">X (Twitter)</h4>
+                    <p className="text-[11px] text-[var(--text-secondary)]">Optional — for professional networking.</p>
                   </div>
                 </div>
                 <input type="url" name="twitterUrl" value={formData.twitterUrl || ''} onChange={handleInputChange} placeholder="https://x.com/your-handle" className={inputClass} />
@@ -946,11 +1026,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
 
               {/* Social Profiles Tip */}
               <div className="bg-[#003366]/5 border border-[#003366]/10 rounded-xl p-4 flex items-start gap-3">
-                <span className="text-lg">💡</span>
+                <span className="material-symbols-outlined text-[#003366] text-xl shrink-0">lightbulb</span>
                 <div>
-                  <p className="text-xs font-bold text-[#003366]">Pro Tip: Connect Your Profiles</p>
-                  <p className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-relaxed">
-                    Alumni with connected LinkedIn and GitHub profiles receive 3x more recruiter views and 2x more mentorship opportunities. Keep your profiles updated for maximum visibility.
+                  <p className="text-xs font-bold text-[#003366]">Tip: complete LinkedIn + GitHub first</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 leading-relaxed">
+                    Profiles with both links are easier for recruiters and mentors to review. Keep them updated before applying to jobs.
                   </p>
                 </div>
               </div>
@@ -961,27 +1041,30 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           {activeSection === 'skills' && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Technical & Soft Skills</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Add skills to improve job matching and recommendations.</p>
+                <h3 className={alumniSectionTitleClass}>Skills</h3>
+                <p className={`${alumniMutedClass} mt-1`}>List tools and strengths so jobs and mentors can match you better.</p>
               </div>
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
                   {formData.skills.map((skill) => (
                     <span key={skill} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-full text-[11px] font-bold text-[var(--text-primary)] shadow-sm hover:shadow-md transition-all group">
                       {skill}
-                      <button type="button" onClick={() => handleRemoveSkill(skill)} className="w-4 h-4 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-100 hover:text-red-500 transition-colors">
+                      <button type="button" onClick={() => handleRemoveSkill(skill)} className="w-4 h-4 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-red-100 hover:text-red-500 transition-colors" aria-label={`Remove ${skill}`}>
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </span>
                   ))}
-                  {formData.skills.length === 0 && <p className="text-xs text-[var(--text-muted)] italic">No skills added yet.</p>}
+                  {formData.skills.length === 0 && (
+                    <p className="text-xs text-[var(--text-muted)]">No skills yet — add 5–10 that match roles you want.</p>
+                  )}
                 </div>
                 <div className="flex gap-2 max-w-md">
-                  <input type="text" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} placeholder="e.g. React, Docker, Python, System Design" className={`${inputClass} flex-1`} />
+                  <input type="text" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSkill(); } }} placeholder="e.g. React, Python, Project Management" className={`${inputClass} flex-1`} />
                   <button type="button" onClick={handleAddSkill} className="px-4 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
-                    <span>➕</span> Add
+                    <span className="material-symbols-outlined text-sm">add</span> Add
                   </button>
                 </div>
+                <p className={alumniFieldHintClass}>Press Enter or Add after each skill.</p>
               </div>
             </div>
           )}
@@ -991,8 +1074,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Professional Certifications</h3>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your verified credentials, upload certificate files, and link credential URLs.</p>
+                  <h3 className={alumniSectionTitleClass}>Certifications</h3>
+                  <p className={`${alumniMutedClass} mt-1`}>Add licenses and credentials with a file or verification link.</p>
                 </div>
                 <button onClick={() => setShowCertForm(!showCertForm)} className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all">
                   <span>{showCertForm ? '✕' : '+'}</span> {showCertForm ? 'Cancel' : 'Add Certification'}
@@ -1003,31 +1086,31 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-4 shadow-sm">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Certification Name *</label>
-                      <input type="text" value={newCertification.name || ''} onChange={(e) => setNewCertification(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="e.g. AWS Certified Solutions Architect" />
+                      <label className={labelClass}>Certification name *</label>
+                      <input type="text" value={newCertification.name || ''} onChange={(e) => setNewCertification(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="e.g. AWS Solutions Architect" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Issuing Organization *</label>
+                      <label className={labelClass}>Issuing organization *</label>
                       <input type="text" value={newCertification.issuer || ''} onChange={(e) => setNewCertification(p => ({ ...p, issuer: e.target.value }))} className={inputClass} placeholder="e.g. Amazon Web Services" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Issue Date</label>
+                      <label className={labelClass}>Issue date</label>
                       <input type="text" value={newCertification.issueDate || ''} onChange={(e) => setNewCertification(p => ({ ...p, issueDate: e.target.value }))} className={inputClass} placeholder="e.g. Jan 2025" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Expiry Date</label>
-                      <input type="text" value={newCertification.expiryDate || ''} onChange={(e) => setNewCertification(p => ({ ...p, expiryDate: e.target.value }))} className={inputClass} placeholder="e.g. Jan 2028 (Optional)" />
+                      <label className={labelClass}>Expiry date</label>
+                      <input type="text" value={newCertification.expiryDate || ''} onChange={(e) => setNewCertification(p => ({ ...p, expiryDate: e.target.value }))} className={inputClass} placeholder="Optional · e.g. Jan 2028" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className={labelClass}>Credential URL</label>
-                      <input type="url" value={newCertification.credentialUrl || ''} onChange={(e) => setNewCertification(p => ({ ...p, credentialUrl: e.target.value }))} className={inputClass} placeholder="https://credly.com/badges/your-badge" />
+                      <input type="url" value={newCertification.credentialUrl || ''} onChange={(e) => setNewCertification(p => ({ ...p, credentialUrl: e.target.value }))} className={inputClass} placeholder="https://credly.com/badges/…" />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Upload Certificate File / Image</label>
+                      <label className={labelClass}>Certificate file</label>
                       <div className="flex items-center gap-3">
                         <input
                           type="file"
@@ -1063,12 +1146,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className={labelClass}>Description / Notes</label>
+                    <label className={labelClass}>Notes</label>
                     <textarea
                       value={newCertification.description || ''}
                       onChange={(e) => setNewCertification(p => ({ ...p, description: e.target.value }))}
                       className={`${inputClass} h-20 resize-none`}
-                      placeholder="Optional notes or details about skills covered..."
+                      placeholder="Optional — skills covered or credential ID…"
                     />
                   </div>
 
@@ -1085,7 +1168,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       onClick={handleSaveCertification}
                       className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
                     >
-                      💾 Save & Persist Certification
+                      Save certification
                     </button>
                   </div>
                 </div>
@@ -1160,11 +1243,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-[var(--text-muted)]">
-                  <span className="text-3xl block mb-2">🏅</span>
-                  <p className="text-xs font-bold">No certifications added yet.</p>
-                  <p className="text-[10px] mt-1">Add professional certifications to boost your profile credibility.</p>
-                </div>
+                <EmptyState
+                  icon={<span className="material-symbols-outlined text-4xl">verified</span>}
+                  title="No certifications yet"
+                  description="Add professional credentials to strengthen your profile."
+                  action={
+                    <button type="button" onClick={() => setShowCertForm(true)} className={alumniPrimaryBtnClass}>
+                      Add certification
+                    </button>
+                  }
+                />
               )}
             </div>
           )}
@@ -1174,8 +1262,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Projects & Portfolio</h3>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Showcase your technical projects, portfolio items, and open source contributions.</p>
+                  <h3 className={alumniSectionTitleClass}>Projects</h3>
+                  <p className={`${alumniMutedClass} mt-1`}>Highlight work that shows what you can build or deliver.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -1197,25 +1285,25 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-4 shadow-sm">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Project Title *</label>
-                      <input type="text" value={newProject.title || ''} onChange={(e) => setNewProject(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="e.g. E-commerce Platform" />
+                      <label className={labelClass}>Project title *</label>
+                      <input type="text" value={newProject.title || ''} onChange={(e) => setNewProject(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="e.g. Campus events app" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Role / Contribution</label>
-                      <input type="text" value={newProject.role || ''} onChange={(e) => setNewProject(p => ({ ...p, role: e.target.value }))} className={inputClass} placeholder="e.g. Lead Full-Stack Developer" />
+                      <label className={labelClass}>Your role</label>
+                      <input type="text" value={newProject.role || ''} onChange={(e) => setNewProject(p => ({ ...p, role: e.target.value }))} className={inputClass} placeholder="e.g. Full-stack developer" />
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
                       <label className={labelClass}>Description</label>
-                      <textarea value={newProject.description || ''} onChange={(e) => setNewProject(p => ({ ...p, description: e.target.value }))} className={`${inputClass} h-24 resize-none`} placeholder="Describe project goals, features, and key achievements..." />
+                      <textarea value={newProject.description || ''} onChange={(e) => setNewProject(p => ({ ...p, description: e.target.value }))} className={`${inputClass} h-24 resize-none`} placeholder="What you built, the problem it solved, and the outcome…" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Project URL / Live Demo</label>
-                      <input type="url" value={newProject.url || ''} onChange={(e) => setNewProject(p => ({ ...p, url: e.target.value }))} className={inputClass} placeholder="https://github.com/username/project" />
+                      <label className={labelClass}>Project URL</label>
+                      <input type="url" value={newProject.url || ''} onChange={(e) => setNewProject(p => ({ ...p, url: e.target.value }))} className={inputClass} placeholder="https://github.com/you/project" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Technologies Used</label>
+                      <label className={labelClass}>Technologies</label>
                       <div className="flex gap-2">
-                        <input type="text" value={newTechnology} onChange={(e) => setNewTechnology(e.target.value)} className={inputClass} placeholder="e.g. React, Node.js, PostgreSQL" />
+                        <input type="text" value={newTechnology} onChange={(e) => setNewTechnology(e.target.value)} className={inputClass} placeholder="e.g. React, Node.js" />
                         <button
                           type="button"
                           onClick={() => {
@@ -1257,7 +1345,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       onClick={handleSaveProject}
                       className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
                     >
-                      💾 Save & Persist Project
+                      Save project
                     </button>
                   </div>
                 </div>
@@ -1308,18 +1396,31 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       {proj.url && (
                         <a href={proj.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-[#003366] hover:underline">
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                          View Project
+                          Open project
                         </a>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-[var(--text-muted)]">
-                  <span className="text-3xl block mb-2">💻</span>
-                  <p className="text-xs font-bold">No projects added yet.</p>
-                  <p className="text-[10px] mt-1">Showcase your work to attract recruiters.</p>
-                </div>
+                <EmptyState
+                  icon={<span className="material-symbols-outlined text-4xl">code</span>}
+                  title="No projects yet"
+                  description="Add a few projects so recruiters can see your work."
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingProjectId(null);
+                        setNewProject({});
+                        setShowProjectForm(true);
+                      }}
+                      className={alumniPrimaryBtnClass}
+                    >
+                      Add project
+                    </button>
+                  }
+                />
               )}
             </div>
           )}
@@ -1329,8 +1430,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Achievements & Recognition</h3>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">Awards, research publications, patents, and professional honors.</p>
+                  <h3 className={alumniSectionTitleClass}>Achievements</h3>
+                  <p className={`${alumniMutedClass} mt-1`}>Awards, publications, patents, and professional recognition.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -1344,7 +1445,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   }}
                   className="px-3 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 hover:shadow-lg transition-all"
                 >
-                  <span>{showAchievementForm ? '✕' : '+'}</span> {showAchievementForm ? 'Cancel' : 'Add Achievement'}
+                  <span>{showAchievementForm ? '✕' : '+'}</span> {showAchievementForm ? 'Cancel' : 'Add achievement'}
                 </button>
               </div>
 
@@ -1352,25 +1453,25 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 <div className="p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-4 shadow-sm">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1.5 md:col-span-2">
-                      <label className={labelClass}>Achievement Title *</label>
-                      <input type="text" value={newAchievement.title || ''} onChange={(e) => setNewAchievement(a => ({ ...a, title: e.target.value }))} className={inputClass} placeholder="e.g. National AI Research Excellence Award" />
+                      <label className={labelClass}>Title *</label>
+                      <input type="text" value={newAchievement.title || ''} onChange={(e) => setNewAchievement(a => ({ ...a, title: e.target.value }))} className={inputClass} placeholder="e.g. Research excellence award" />
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Category Type</label>
+                      <label className={labelClass}>Type</label>
                       <select value={newAchievement.type || 'award'} onChange={(e) => setNewAchievement(a => ({ ...a, type: e.target.value as any }))} className={inputClass}>
-                        <option value="award">🏆 Award / Honor</option>
-                        <option value="publication">📖 Research Publication</option>
-                        <option value="patent">📜 Patent / Innovation</option>
-                        <option value="recognition">🌟 Professional Recognition</option>
+                        <option value="award">Award / honor</option>
+                        <option value="publication">Research publication</option>
+                        <option value="patent">Patent / innovation</option>
+                        <option value="recognition">Professional recognition</option>
                       </select>
                     </div>
                     <div className="space-y-1.5">
-                      <label className={labelClass}>Date Received / Published</label>
+                      <label className={labelClass}>Date</label>
                       <input type="text" value={newAchievement.date || ''} onChange={(e) => setNewAchievement(a => ({ ...a, date: e.target.value }))} className={inputClass} placeholder="e.g. Feb 2025" />
                     </div>
                     <div className="space-y-1.5 md:col-span-2">
-                      <label className={labelClass}>Description / Links</label>
-                      <input type="text" value={newAchievement.description || ''} onChange={(e) => setNewAchievement(a => ({ ...a, description: e.target.value }))} className={inputClass} placeholder="Brief summary, journal link, or award presenter details..." />
+                      <label className={labelClass}>Details or link</label>
+                      <input type="text" value={newAchievement.description || ''} onChange={(e) => setNewAchievement(a => ({ ...a, description: e.target.value }))} className={inputClass} placeholder="Short summary, journal link, or presenter…" />
                     </div>
                   </div>
 
@@ -1391,7 +1492,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                       onClick={handleSaveAchievement}
                       className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all"
                     >
-                      💾 Save & Persist Achievement
+                      Save achievement
                     </button>
                   </div>
                 </div>
@@ -1443,11 +1544,24 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-[var(--text-muted)]">
-                  <span className="text-3xl block mb-2">🏆</span>
-                  <p className="text-xs font-bold">No achievements added yet.</p>
-                  <p className="text-[10px] mt-1">Share your awards, publications, and recognitions to build prestige.</p>
-                </div>
+                <EmptyState
+                  icon={<span className="material-symbols-outlined text-4xl">emoji_events</span>}
+                  title="No achievements yet"
+                  description="Share awards, publications, and recognition that set you apart."
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAchievementId(null);
+                        setNewAchievement({});
+                        setShowAchievementForm(true);
+                      }}
+                      className={alumniPrimaryBtnClass}
+                    >
+                      Add achievement
+                    </button>
+                  }
+                />
               )}
             </div>
           )}
@@ -1456,22 +1570,22 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
           {activeSection === 'resume' && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Professional Resume / CV</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Upload your resume to make it visible to partner employers.</p>
+                <h3 className={alumniSectionTitleClass}>Resume & cover letter</h3>
+                <p className={`${alumniMutedClass} mt-1`}>Upload a CV employers can download, and keep a reusable cover letter for applications.</p>
               </div>
               {formData.resume || formData.resumeUrl ? (
-                <div className="p-5 rounded-xl border border-emerald-200 bg-emerald-50/30">
+                <div className="p-5 rounded-xl border border-emerald-200 bg-emerald-50/30 dark:border-emerald-500/20 dark:bg-emerald-500/5">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white shadow-lg">
-                        <span className="text-2xl">📄</span>
+                        <span className="material-symbols-outlined text-2xl">description</span>
                       </div>
                       <div>
                         <h5 className="text-sm font-extrabold text-[var(--text-primary)]">
-                          {formData.resume?.fileName || (formData.resumeUrl ? formData.resumeUrl.split('/').pop() : 'Professional_Resume.pdf')}
+                          {formData.resume?.fileName || (formData.resumeUrl ? formData.resumeUrl.split('/').pop() : 'Resume.pdf')}
                         </h5>
-                        <p className="text-[10px] text-[var(--text-secondary)]">
-                          Size: {formData.resume?.fileSize || 'Verified File'} • Uploaded {formData.resume?.uploadedAt || 'Uploaded'}
+                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                          {formData.resume?.fileSize || 'PDF'} · {formData.resume?.uploadedAt || 'Ready for applications'}
                         </p>
                       </div>
                     </div>
@@ -1483,11 +1597,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                           rel="noreferrer"
                           className="flex items-center gap-1.5 px-4 py-2 border border-[var(--border-color)] rounded-xl text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all shadow-xs"
                         >
-                          ⬇️ Download
+                          <span className="material-symbols-outlined text-sm">download</span>
+                          Download
                         </a>
                       )}
                       <button onClick={handleRemoveResume} className="flex items-center gap-1.5 px-4 py-2 border border-red-200 rounded-xl text-[11px] font-bold text-red-600 hover:bg-red-50 transition-all">
-                        🗑️ Remove
+                        <span className="material-symbols-outlined text-sm">delete</span>
+                        Remove
                       </button>
                     </div>
                   </div>
@@ -1496,28 +1612,27 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                 <label className="block border-2 border-dashed border-[var(--border-color)] rounded-xl p-10 text-center hover:border-[#003366]/30 hover:bg-[#003366]/5 transition-all cursor-pointer group">
                   <input type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" disabled={isUploading} />
                   <div className="space-y-3">
-                    <span className="text-4xl block group-hover:scale-110 transition-transform">{isUploading ? '⏳' : '📁'}</span>
+                    <span className="material-symbols-outlined text-4xl text-[var(--text-muted)] block group-hover:scale-110 transition-transform">
+                      {isUploading ? 'hourglass_top' : 'upload_file'}
+                    </span>
                     <div>
-                      <p className="text-xs font-bold text-[var(--text-primary)]">{isUploading ? 'Uploading...' : 'Click or drag to upload resume'}</p>
-                      <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">PDF, DOC, or DOCX formats up to 5MB</p>
+                      <p className="text-sm font-bold text-[var(--text-primary)]">{isUploading ? 'Uploading…' : 'Drop your resume here, or click to browse'}</p>
+                      <p className="text-[11px] text-[var(--text-secondary)] mt-1">PDF, DOC, or DOCX · max 5MB</p>
                     </div>
                   </div>
                 </label>
               )}
 
-              {/* Default Cover Letter Template */}
               <div className="pt-6 border-t border-[var(--border-color)] space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider">Default Cover Letter Template</h4>
-                    <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Write a reusable cover letter to auto-fill when applying to jobs.</p>
-                  </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Default cover letter</h4>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Saved and reused when you apply to jobs from the board.</p>
                 </div>
                 <textarea
                   value={savedCoverLetter}
                   onChange={(e) => setSavedCoverLetter(e.target.value)}
-                  placeholder="Dear Hiring Manager,&#10;&#10;I am writing to express my strong interest in the open position at your organization..."
-                  className="w-full text-xs p-3.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all h-32 resize-none"
+                  placeholder="Dear Hiring Manager,&#10;&#10;I am writing to express my interest in…"
+                  className={alumniTextareaClass}
                 />
                 <div className="flex justify-end">
                   <button
@@ -1525,11 +1640,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
                     onClick={() => {
                       localStorage.setItem('astu_saved_cover_letter', savedCoverLetter);
                       onSave({ ...formData, bio: savedCoverLetter } as any);
-                      toast.success('Default cover letter template saved!');
+                      toast.success('Cover letter template saved');
                     }}
-                    className="px-4 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white text-xs font-bold rounded-xl hover:shadow-md transition-all flex items-center gap-1.5"
+                    className={alumniPrimaryBtnClass}
                   >
-                    💾 Save Cover Letter Template
+                    Save cover letter
                   </button>
                 </div>
               </div>
@@ -1539,113 +1654,96 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onSave }) => {
       </div>
 
       {/* Profile Score Breakdown Modal */}
-      {showScoreModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-[var(--border-color)] max-w-lg w-full p-6 shadow-2xl space-y-5 relative overflow-hidden">
-            <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getScoreColor()} flex items-center justify-center text-white font-extrabold text-lg shadow-md`}>
-                  {breakdown.score}%
-                </div>
-                <div>
-                  <h3 className="text-base font-extrabold text-[var(--text-primary)]">Profile Completeness Breakdown</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                    {breakdown.missing.length === 0
-                      ? '🎉 Congratulations! Your profile is 100% complete.'
-                      : `Complete ${breakdown.missing.length} missing item(s) to reach 100%!`}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowScoreModal(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors font-bold text-sm"
-              >
-                ✕
-              </button>
+      <Modal
+        isOpen={showScoreModal}
+        onClose={() => setShowScoreModal(false)}
+        title="Profile strength"
+        size="lg"
+        footer={
+          <button type="button" onClick={() => setShowScoreModal(false)} className={alumniSecondaryBtnClass}>
+            Close
+          </button>
+        }
+      >
+        <div className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getScoreColor()} flex items-center justify-center text-white font-extrabold text-lg shadow-md`}>
+              {breakdown.score}%
             </div>
+            <p className="text-sm text-[var(--text-secondary)]">
+              {breakdown.missing.length === 0
+                ? 'Your profile is complete — great work.'
+                : `${breakdown.missing.length} item${breakdown.missing.length === 1 ? '' : 's'} left to strengthen your profile.`}
+            </p>
+          </div>
 
-            {/* Progress Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)]">
-                <span>Completion Score</span>
-                <span className="text-[#003366] font-extrabold">{breakdown.score}% Complete</span>
-              </div>
-              <div className="w-full h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden p-0.5 border border-gray-200 dark:border-gray-700">
-                <div
-                  className={`h-full rounded-full bg-gradient-to-r ${getScoreColor()} transition-all duration-500`}
-                  style={{ width: `${breakdown.score}%` }}
-                />
-              </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs font-bold text-[var(--text-secondary)]">
+              <span>Completion</span>
+              <span className="text-[#003366] font-extrabold">{breakdown.score}%</span>
             </div>
+            <div className="w-full h-3 bg-[var(--bg-page)] rounded-full overflow-hidden p-0.5 border border-[var(--border-color)]">
+              <div
+                className={`h-full rounded-full bg-gradient-to-r ${getScoreColor()} transition-all duration-500`}
+                style={{ width: `${breakdown.score}%` }}
+              />
+            </div>
+          </div>
 
-            {/* Missing Items Section */}
-            {breakdown.missing.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base">warning</span>
-                  Missing Profile Items ({breakdown.missing.length})
-                </h4>
-                <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                  {breakdown.missing.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between p-3 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-                        <div>
-                          <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{item.title}</p>
-                          <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">+{item.weight.toFixed(1)}% score boost</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowScoreModal(false);
-                          setActiveSection(item.sectionId);
-                          toast.success(`Switched tab to complete: ${item.title}`);
-                        }}
-                        className="px-3 py-1.5 bg-[#003366] text-white rounded-lg text-[10px] font-extrabold hover:bg-[#002244] transition-all shadow-xs flex items-center gap-1"
-                      >
-                        {item.actionText} ➔
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Completed Items Section */}
+          {breakdown.missing.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-base">check_circle</span>
-                Completed Sections ({breakdown.completed.length})
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">warning</span>
+                Still missing ({breakdown.missing.length})
               </h4>
-              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
-                {breakdown.completed.map((item) => (
-                  <span
+              <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                {breakdown.missing.map((item) => (
+                  <div
                     key={item.id}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-lg text-[10px] font-bold"
+                    className="flex items-center justify-between p-3 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20"
                   >
-                    ✓ {item.title} (+{item.weight.toFixed(1)}%)
-                  </span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{item.title}</p>
+                        <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">+{item.weight.toFixed(1)}% score boost</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowScoreModal(false);
+                        setActiveSection(item.sectionId);
+                        toast.success(`Switched tab to complete: ${item.title}`);
+                      }}
+                      className="px-3 py-1.5 bg-[#003366] text-white rounded-lg text-[10px] font-extrabold hover:bg-[#002244] transition-all shadow-xs flex items-center gap-1"
+                    >
+                      {item.actionText} ➔
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
+          )}
 
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowScoreModal(false)}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold hover:bg-gray-200 transition-all"
-              >
-                Close
-              </button>
+          <div className="space-y-2">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              Completed Sections ({breakdown.completed.length})
+            </h4>
+            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+              {breakdown.completed.map((item) => (
+                <span
+                  key={item.id}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-lg text-[10px] font-bold"
+                >
+                  ✓ {item.title} (+{item.weight.toFixed(1)}%)
+                </span>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

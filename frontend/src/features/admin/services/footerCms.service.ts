@@ -74,15 +74,15 @@ export const defaultFooterConfig: FooterCmsConfig = {
       links: [
         { id: 'FL-12', label: 'Contact Us', href: '#contact' },
         { id: 'FL-13', label: 'Photo Gallery', href: '#gallery' },
-        { id: 'FL-14', label: 'Community Feed', href: '#community' },
+        { id: 'FL-14', label: 'Community Voices', href: '#testimonials' },
         { id: 'FL-15', label: 'Join Alumni', href: '/register' },
       ],
     },
   ],
   socialLinks: [
     { id: 'SL-01', platform: 'Facebook', url: 'https://web.facebook.com/adamaastu/', icon: 'Facebook' },
-    { id: 'SL-02', platform: 'Telegram', url: 'https://t.me/Adama_STU_Almuni', icon: 'Send' },
-    { id: 'SL-03', platform: 'LinkedIn', url: 'https://linkedin.com', icon: 'Linkedin' },
+    { id: 'SL-02', platform: 'Telegram', url: 'https://t.me/Adama_STU_Alumni', icon: 'Send' },
+    { id: 'SL-03', platform: 'LinkedIn', url: 'https://www.linkedin.com/school/adama-science-and-technology-university/', icon: 'Linkedin' },
   ],
   contactInfo: {
     address: 'Adama Science and Technology University, Adama, Ethiopia',
@@ -91,9 +91,9 @@ export const defaultFooterConfig: FooterCmsConfig = {
     email: 'irccd@astu.edu.et',
   },
   copyright: `© ${new Date().getFullYear()} Adama Science and Technology University. All rights reserved.`,
-  credit: 'Designed by ASTU-BADA',
+  credit: 'Designed by ASTU-AMS',
   newsletterTitle: 'Stay Connected with ASTU',
-  newsletterSubtitle: 'Get updates on annual reunions, tech career expos, and graduate employment reports.',
+  newsletterSubtitle: 'Get updates on reunions, career expos, and graduate employment reports.',
 };
 
 export const footerCmsService = {

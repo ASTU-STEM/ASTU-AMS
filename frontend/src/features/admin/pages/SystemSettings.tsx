@@ -421,13 +421,20 @@ export default function SystemSettings() {
       },
     };
 
-    const result = await adminService.updateSettings(settingsPayload);
-    setSaving(false);
-    if (result.ok) {
-      updateSettingsState(settingsPayload);
-      toast.success('Settings saved successfully!');
-    } else {
-      toast.error(result.message || 'Failed to save settings.');
+    try {
+      const result = await adminService.updateSettings(settingsPayload);
+      if (result.ok) {
+        updateSettingsState(settingsPayload);
+        toast.success('Settings saved successfully!');
+      } else {
+        toast.error(result.message || 'Failed to save settings.');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to save settings.');
+    } finally {
+      // Was only called on the success path, so any network throw left the Save
+      // button disabled forever.
+      setSaving(false);
     }
   };
 

@@ -9,6 +9,7 @@ import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import { notificationService } from '../features/notifications/services/notification.service';
+import { useTheme } from '../hooks/useTheme';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -64,7 +65,7 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
 };
 
 export default function AdminLayout() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
+  const { theme, toggleTheme } = useTheme();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -125,12 +126,6 @@ export default function AdminLayout() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && !target.closest('[data-admin-menu]')) {
@@ -154,10 +149,6 @@ export default function AdminLayout() {
     logout();
     toast.success('Logged out successfully');
     navigate('/login');
-  };
-
-  const toggleTheme = () => {
-    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   };
 
   const [realNotifications, setRealNotifications] = useState<any[]>([]);
@@ -264,7 +255,7 @@ export default function AdminLayout() {
 
   return (
     <>
-    <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes astu-admin-fade-in {
           from { opacity: 0; transform: translateY(4px); }
@@ -447,7 +438,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1}className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

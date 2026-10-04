@@ -27,8 +27,10 @@ import { FeedbackTab } from '../components/FeedbackTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
 import { CandidateProfileModal } from '../components/CandidateProfileModal';
+import { useTheme } from '../../../hooks/useTheme';
 
 const EmployerDashboard = () => {
+  const { darkMode, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -38,7 +40,6 @@ const EmployerDashboard = () => {
   const [selectedSearchCandidate, setSelectedSearchCandidate] = useState<CandidateApplication | null>(null);
 
   // Theme Dark / Light mode
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -430,12 +431,6 @@ const EmployerDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
   const initials = (profile?.name || 'Company Profile').split(' ').map(n => n ? n[0] : '').filter(Boolean).join('').slice(0, 2).toUpperCase() || 'EP';
 
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-
   // Load all data from backend on mount
   useEffect(() => {
     // Load profile
@@ -655,7 +650,7 @@ const EmployerDashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
         <style>{`
         @keyframes gradient-shift {
           0% { background-position: 0% 50%; }
@@ -1027,7 +1022,7 @@ const EmployerDashboard = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setDarkMode(!darkMode);
+                  toggleTheme();
                   toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
                 }}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
@@ -1137,7 +1132,7 @@ const EmployerDashboard = () => {
           </header>
 
           {/* Main Content */}
-          <main className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
 

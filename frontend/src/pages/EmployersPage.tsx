@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, MapPin, Briefcase, Phone, Mail } from "lucide-react";
+import { Building2, MapPin, Briefcase, Phone, Mail, ArrowRight } from "lucide-react";
+import Navbar from "../components/Navbar";
 
 import electricLabs from "../assets/images/electriclabs.jpeg";
 import gc7 from "../assets/images/gc7.jpg";
 import arcImage from "../assets/images/arc.jpg";
 
 const featuredEmployers = [
-  { name: "Ethio Telecom", area: "Telecom & Cloud", openings: "14 graduate roles", image: electricLabs },
-  { name: "Ethiopian Airlines", area: "Aviation Technology", openings: "8 internship tracks", image: gc7 },
-  { name: "INSA", area: "Cybersecurity", openings: "6 research placements", image: arcImage },
-  { name: "Huawei Ethiopia", area: "Network Engineering", openings: "11 certification paths", image: arcImage },
-  { name: "Safaricom", area: "Mobile Financial Services", openings: "12 positions", image: electricLabs },
-  { name: "Commercial Bank of Ethiopia", area: "Banking Technology", openings: "20+ openings", image: gc7 },
+  { name: "Ethio Telecom", area: "Telecom & Cloud", openings: "Graduate roles and internships", image: electricLabs },
+  { name: "Ethiopian Airlines", area: "Aviation Technology", openings: "Internship tracks", image: gc7 },
+  { name: "INSA", area: "Cybersecurity", openings: "Research placements", image: arcImage },
+  { name: "Huawei Ethiopia", area: "Network Engineering", openings: "Certification paths", image: arcImage },
+  { name: "Safaricom", area: "Mobile Financial Services", openings: "Technology roles", image: electricLabs },
+  { name: "Commercial Bank of Ethiopia", area: "Banking Technology", openings: "Graduate openings", image: gc7 },
 ];
 
 const partnerCompanies = [
@@ -30,7 +31,7 @@ const faqItems = [
   { question: "Who can use ASTU-AMS?", answer: "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services." },
   { question: "How are tracer studies used?", answer: "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence." },
   { question: "Can employers register events?", answer: "Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports." },
-  { question: "How do I verify alumni credentials?", answer: "Registrar officers can validate alumni credentials against SIS records through the verification center." },
+  { question: "How do I verify alumni credentials?", answer: "Registrar officers can validate alumni credentials against SIS records through the verification centre." },
   { question: "What services are available for departments?", answer: "Department heads can monitor graduate employment outcomes, identify skill gaps, and generate accreditation-ready reports." },
   { question: "How do alumni update their profiles?", answer: "Alumni can maintain their professional profiles, complete tracer surveys, and access verified job listings after login." },
 ];
@@ -57,11 +58,30 @@ export default function EmployersPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-on-surface">
-      <header className="border-b border-outline-variant bg-white">
-        <div className="mx-auto max-w-[1440px] px-4 py-6 md:px-8">
-          <h1 className="text-3xl font-bold text-astu-navy">Featured Employers & Partners</h1>
-          <p className="mt-2 text-sm text-on-surface-variant">Partner companies and organizations working with ASTU-AMS</p>
+    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+      <Navbar />
+
+      <header className="border-b border-outline-variant bg-white dark:bg-slate-900/90 dark:border-slate-800 transition-colors">
+        <div className="mx-auto max-w-[1440px] px-4 py-8 md:px-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Employer Network</p>
+          <h1 className="mt-2 text-3xl font-bold text-astu-navy dark:text-white">Featured Employers and Partners</h1>
+          <p className="mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            Organisations collaborating with ASTU on graduate recruitment, internships, and industry feedback.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              onClick={() => navigate("/partners")}
+              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 shadow-sm"
+            >
+              Partner with ASTU <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate("/employers/register")}
+              className="inline-flex items-center gap-2 rounded-lg border border-outline-variant dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-astu-navy dark:text-blue-300 hover:bg-surface-container-low dark:hover:bg-slate-800"
+            >
+              Register as Employer
+            </button>
+          </div>
         </div>
       </header>
 
@@ -69,7 +89,7 @@ export default function EmployersPage() {
         <section className="mb-16">
           <div className="mb-8 reveal">
             <h2 className="text-2xl font-bold text-astu-navy">Featured Employers</h2>
-            <p className="mt-2 text-sm text-on-surface-variant">Leading organizations hiring ASTU graduates</p>
+            <p className="mt-2 text-sm text-on-surface-variant">Leading organisations hiring ASTU graduates</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featuredEmployers.map((employer) => (
@@ -85,10 +105,10 @@ export default function EmployersPage() {
                     <span className="text-on-surface-variant">{employer.openings}</span>
                   </div>
                   <button
-                    onClick={() => navigate("/employer/dashboard")}
+                    onClick={() => navigate("/partners")}
                     className="mt-4 rounded-md bg-astu-navy px-3 py-2 text-xs font-semibold text-white hover:brightness-110"
                   >
-                    View Opportunities
+                    Learn About Partnership
                   </button>
                 </div>
               </article>

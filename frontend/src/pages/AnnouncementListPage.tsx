@@ -44,7 +44,7 @@ export default function AnnouncementListPage() {
   const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
+    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
       {/* Header Banner */}
@@ -65,7 +65,7 @@ export default function AnnouncementListPage() {
       </div>
 
       {/* Controls Bar */}
-      <div className="border-b border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors">
         <div className="mx-auto max-w-[1240px] px-4 py-4 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="relative flex-1 min-w-[240px]">
@@ -75,7 +75,7 @@ export default function AnnouncementListPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search official notices by title, excerpt, or keyword..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm outline-none focus:border-[#003580] focus:bg-white"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-[#003580] focus:bg-white dark:focus:bg-slate-800 transition-colors"
               />
             </div>
 
@@ -84,7 +84,7 @@ export default function AnnouncementListPage() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#003580]"
+                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none focus:border-[#003580] transition-colors"
               >
                 <option value="all">All Notice Types</option>
                 <option value="announcement">Announcements</option>
@@ -100,31 +100,31 @@ export default function AnnouncementListPage() {
       {/* Main List */}
       <main className="mx-auto max-w-[1240px] flex-1 px-4 py-8 sm:px-6">
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-            <Bell className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-3 text-lg font-bold text-slate-700">No Announcements Found</h3>
-            <p className="text-xs text-slate-500 mt-1">Try adjusting your search term or category filter.</p>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center shadow-sm">
+            <Bell className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
+            <h3 className="mt-3 text-lg font-bold text-slate-700 dark:text-slate-200">No Announcements Found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Try adjusting your search term or category filter.</p>
             <button
               onClick={() => {
                 setSearch('');
                 setTypeFilter('all');
               }}
-              className="mt-4 rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white"
+              className="mt-4 rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white shadow-sm"
             >
               Reset Filters
             </button>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {filtered.map((item) => (
               <article
                 key={item.id}
                 onClick={() => navigate(`/announcements/${slugifiedId(item.title)}`)}
-                className="group cursor-pointer flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:border-[#003580]/30 hover:shadow-md transition-all"
+                className="group cursor-pointer flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm hover:border-[#003580]/30 hover:shadow-md transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-md bg-[#C8102E]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#C8102E]">
+                    <span className="rounded-md bg-[#C8102E]/10 dark:bg-red-900/30 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#C8102E] dark:text-red-400">
                       {item.type}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-slate-400 font-medium">
@@ -133,17 +133,17 @@ export default function AnnouncementListPage() {
                     </span>
                   </div>
 
-                  <h2 className="mt-3 text-lg font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                  <h2 className="mt-3 text-lg font-bold text-[#003580] dark:text-blue-200 group-hover:text-[#C8102E] dark:group-hover:text-blue-400 transition-colors leading-snug">
                     {item.title}
                   </h2>
 
-                  <p className="mt-2 text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                  <p className="mt-2 text-xs text-slate-600 dark:text-slate-300 line-clamp-3 leading-relaxed">
                     {item.excerpt || item.title}
                   </p>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-semibold text-[#003580]">
-                  <span className="flex items-center gap-1 text-slate-500">
+                <div className="mt-6 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4 text-xs font-semibold text-[#003580] dark:text-blue-300">
+                  <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     ASTU Directorate Notice
                   </span>

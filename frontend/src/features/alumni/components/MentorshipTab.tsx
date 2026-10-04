@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Mentor, MentorshipSession } from '../types/alumni.types';
 import { alumniService } from '../services/alumni.service';
 import toast from 'react-hot-toast';
+import { AlumniSectionShell } from './AlumniSectionShell';
+import { BrandMark } from './BrandMark';
+import { alumniTabRailClass } from './alumniUi';
 
 interface MentorReview {
   id: number;
@@ -184,58 +187,24 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
   const connectedMentors = mentors.filter(m => m.status === 'CONNECTED');
 
   return (
-    <div className="space-y-6">
-      {/* ── Hero Banner with ASTU Branding ── */}
-      <section
-        className="rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #003366 0%, #001a33 50%, #0d2b4d 100%)' }}
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFCC00]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <img
-              alt="ASTU Logo"
-              className="h-14 w-14 object-contain scale-110 shrink-0"
-              src="/images/astu-seal-logo.png"
-            />
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFCC00]"></span>
-                ASTU Professional Network
-              </span>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                Peer Mentorship Network
-              </h2>
-              <p className="text-sm text-white/70 leading-relaxed max-w-xl">
-                Connect with seasoned ASTU graduates, schedule 1-on-1 virtual sessions,
-                or serve as a mentor to senior undergraduates.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center">
-              <div className="text-2xl font-extrabold text-[#FFCC00]">{mentors.length}</div>
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Mentors</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center">
-              <div className="text-2xl font-extrabold text-white">{connectedMentors.length}</div>
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Connected</div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <AlumniSectionShell
+      eyebrow="Mentorship"
+      title="Find a mentor — or become one"
+      description="Book 1:1 sessions with experienced ASTU graduates, or offer guidance to peers and students."
+      metrics={[
+        { value: mentors.length, label: 'Mentors', accent: 'gold' },
+        { value: connectedMentors.length, label: 'Connected', accent: 'white' },
+      ]}
+    >
 
       {/* ── Role Navigation Tabs ── */}
-      <div className="flex gap-1 border-b border-gray-200 bg-gray-50/50 rounded-xl p-1">
+      <div className={`${alumniTabRailClass}`}>
         <button
           onClick={() => setActiveTab('find')}
           className={`flex-1 py-2.5 px-3 rounded-lg font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5 ${
             activeTab === 'find'
-              ? 'bg-white text-[#003366] shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-[#003366] text-white shadow-md'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
           <span className="material-symbols-outlined text-base">person_search</span>
@@ -245,8 +214,8 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           onClick={() => setActiveTab('become')}
           className={`flex-1 py-2.5 px-3 rounded-lg font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5 ${
             activeTab === 'become'
-              ? 'bg-white text-[#003366] shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-[#003366] text-white shadow-md'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
           <span className="material-symbols-outlined text-base">school</span>
@@ -622,10 +591,9 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
             <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <img
-                    alt="ASTU"
-                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                    src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                  <BrandMark
+                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20 text-[10px]"
+                    tone="dark"
                   />
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">Mentorship Request</span>
@@ -683,10 +651,9 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
             <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <img
-                    alt="ASTU"
-                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                    src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                  <BrandMark
+                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20 text-[10px]"
+                    tone="dark"
                   />
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">Schedule Session</span>
@@ -758,6 +725,6 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           </form>
         </div>
       )}
-    </div>
+    </AlumniSectionShell>
   );
 };

@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alumni Portal | ASTU-AMS</title>
+    <script>
+      // Apply the stored theme before first paint. Without this the <html> stays
+      // class="light" until React mounts, so a dark-mode user gets a full flash
+      // of the light theme on every reload.
+      (function () {
+        try {
+          var t = localStorage.getItem("theme") === "dark" ? "dark" : "light";
+          var r = document.documentElement;
+          r.classList.remove("light", "dark");
+          r.classList.add(t);
+          r.style.colorScheme = t;
+        } catch (e) {}
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -113,6 +127,13 @@
     </script>
   </head>
   <body class="bg-background font-body-md text-on-surface">
+    <a
+      id="skip-to-content"
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100000] focus:rounded-lg focus:bg-[#003366] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg"
+    >
+      Skip to main content
+    </a>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

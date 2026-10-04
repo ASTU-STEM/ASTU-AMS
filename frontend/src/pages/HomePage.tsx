@@ -111,11 +111,12 @@ const STAT_PRESENTATION: Record<
 const navSections = [
   { label: "Home", id: "home" },
   { label: "Impact Numbers", id: "impact-numbers" },
+  { label: "How It Works", id: "how-it-works" },
   { label: "Impact", id: "impact" },
   { label: "Gallery", id: "gallery" },
   { label: "Campuses", id: "campuses" },
   { label: "Announcements", id: "announcements" },
-  { label: "Community", id: "community" },
+  { label: "Community", id: "testimonials" },
   { label: "Events", id: "events" },
   { label: "Workshops", id: "workshops" },
   { label: "News", id: "news" },
@@ -323,7 +324,7 @@ export default function HomePage() {
               image: FALLBACK_IMAGE,
               tagline: 'ASTU-AMS',
               title: 'Alumni Management System',
-              description: welcomeMessage || 'Publish hero slides from Homepage CMS.',
+              description: welcomeMessage || 'Connecting ASTU graduates, employers, and academic departments in one verified network.',
             },
           ],
     [normalisedSlides, welcomeMessage]
@@ -754,7 +755,7 @@ location: e.location || 'Location to be confirmed',
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
-    <div className="min-h-screen bg-background text-on-surface">
+    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
       <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20">
@@ -816,7 +817,7 @@ location: e.location || 'Location to be confirmed',
                 )}
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 md:text-base">
-                {activeHero?.description || welcomeMessage || 'Content is managed from the ASTU Homepage CMS.'}
+                {activeHero?.description || welcomeMessage || 'Connecting ASTU graduates, employers, and academic departments through verified career and alumni services.'}
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
@@ -991,7 +992,16 @@ location: e.location || 'Location to be confirmed',
             </div>
             <button
               className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 hover:scale-105 transition-all btn-magnetic shadow-lg hover:shadow-xl"
-              onClick={() => navigate(impactSection?.ctaRoute || '/info/campus-life')}
+              onClick={() => {
+                const route = impactSection?.ctaRoute;
+                if (route && route.startsWith('#')) {
+                  document.getElementById(route.slice(1))?.scrollIntoView({ behavior: 'smooth' });
+                } else if (route) {
+                  navigate(route);
+                } else {
+                  document.getElementById('campus-life')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
             >
               {impactSection?.ctaLabel || 'Explore Campus Life'}
             </button>
@@ -1012,13 +1022,13 @@ location: e.location || 'Location to be confirmed',
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Explore Life At ASTU</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Campus Life, Facilities, Events, and Galleries</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.
+              Discover events, facilities, campus activities, media galleries, and student services that define life at Adama Science and Technology University.
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             {liveCampusLife.length === 0 ? (
               <div className="md:col-span-3">
-                <EmptySection message="No campus life cards published yet. Add them from Homepage CMS." />
+                <EmptySection message="Campus life highlights will appear here once published by the university content team." />
               </div>
             ) : (
               liveCampusLife.map((card, idx) => (
@@ -1053,7 +1063,7 @@ location: e.location || 'Location to be confirmed',
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {liveCampuses.length === 0 ? (
               <div className="sm:col-span-2 lg:col-span-4">
-                <EmptySection message="No campuses published yet. Add them from Homepage CMS." />
+                <EmptySection message="Campus profiles will appear here once published by the university content team." />
               </div>
             ) : (
               liveCampuses.map((campus, idx) => (
@@ -1072,15 +1082,16 @@ location: e.location || 'Location to be confirmed',
 
         <section id="gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">ASTU Gallery</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Photo Gallery</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Visual highlights from ASTU campus life, innovation spaces, and alumni identity.
+              Campus life, events, and institutional moments from Adama Science and Technology University.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
             {liveGallery.length === 0 ? (
               <div className="sm:col-span-2 md:col-span-3">
-                <EmptySection message="No gallery images published yet. Upload from Homepage CMS or Gallery Manager." />
+                <EmptySection message="Photo gallery items will appear here once published by the university content team." />
               </div>
             ) : (
               liveGallery.map((item, idx) => (
@@ -1107,8 +1118,9 @@ location: e.location || 'Location to be confirmed',
         <section id="video-gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">Video Gallery</h3>
-              <p className="mt-2 text-sm text-on-surface-variant">Livestreams, workshop recordings, graduation moments, and research showcases.</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
+              <h3 className="mt-2 text-2xl font-bold text-astu-navy sm:text-3xl">Video Gallery</h3>
+              <p className="mt-2 text-sm text-on-surface-variant">Workshop recordings, graduation moments, and research showcases.</p>
             </div>
             <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low">
               View Media Library
@@ -1117,7 +1129,7 @@ location: e.location || 'Location to be confirmed',
           <div className="grid gap-4 md:grid-cols-3">
             {liveVideos.length === 0 ? (
               <div className="md:col-span-3">
-                <EmptySection message="No videos published yet. Add videos from Homepage CMS." />
+                <EmptySection message="Video highlights will appear here once published by the university content team." />
               </div>
             ) : (
               liveVideos.map((video: any, idx: number) => (
@@ -1224,7 +1236,8 @@ location: e.location || 'Location to be confirmed',
         <section id="events" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <h3 className="text-2xl font-bold text-astu-navy sm:text-3xl">Upcoming Alumni Events</h3>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Events</p>
+              <h3 className="mt-2 text-2xl font-bold text-astu-navy sm:text-3xl">Upcoming Alumni Events</h3>
               <p className="mt-2 text-sm text-on-surface-variant">Networking, learning, and professional growth opportunities.</p>
             </div>
             <button
@@ -1283,9 +1296,10 @@ location: e.location || 'Location to be confirmed',
 
         <section id="workshops" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Upcoming Workshops</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Workshops</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Upcoming Workshops</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Practical training with RSVP tracking, approval workflows, QR attendance, certificates, and feedback forms.
+              Practical training sessions with RSVP, attendance tracking, and certificates of participation.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -1314,9 +1328,10 @@ location: e.location || 'Location to be confirmed',
 
         <section id="news" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-slate-50/30">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Latest News</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">News</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Latest News</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Stay updated with ASTU announcements and university news.
+              University updates, academic notices, and alumni network news.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1398,15 +1413,16 @@ location: e.location || 'Location to be confirmed',
 
         <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Alumni Success Stories</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Alumni Success Stories</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              Inspiring journeys of ASTU graduates making impact globally.
+              Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {liveStories.length === 0 ? (
               <div className="sm:col-span-2 lg:col-span-3">
-                <EmptySection message="No success stories published yet. Add them under Homepage CMS → Stories." />
+                <EmptySection message="Alumni success stories will appear here once published by the university content team." />
               </div>
             ) : (
               liveStories.slice(0, 3).map((story, idx) => (
@@ -1494,7 +1510,7 @@ location: e.location || 'Location to be confirmed',
               })}
               {!researchHighlights?.stats?.length && (
                 <div className="sm:col-span-3">
-                  <EmptySection message="Publish research highlight stats from Homepage CMS to show them here." />
+                  <EmptySection message="Research highlights will appear here once published by the university content team." />
                 </div>
               )}
             </div>
@@ -1503,12 +1519,13 @@ location: e.location || 'Location to be confirmed',
 
         <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-8">
           <div className="mb-10 text-center reveal">
-            <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Partner Companies</h3>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Partners</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Partner Organisations</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
           <div className="relative">
             {livePartners.length === 0 ? (
-              <EmptySection message="No partners published yet. Add them from Homepage CMS." />
+              <EmptySection message="Partner organisations will appear here once published by the university content team." />
             ) : (
             <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
               {[...livePartners, ...livePartners].map((partner, idx) => {
@@ -1539,13 +1556,16 @@ location: e.location || 'Location to be confirmed',
 
         <section id="testimonials" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Testimonials</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Community Voices</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">What Our Community Says</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+              Reflections from alumni, employers, and partners connected through the ASTU network.
+            </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {liveTestimonials.length === 0 ? (
               <div className="md:col-span-3">
-                <EmptySection message="No testimonials published yet. Add them from Homepage CMS." />
+                <EmptySection message="Community testimonials will appear here once published by the university content team." />
               </div>
             ) : (
               liveTestimonials.map((item: any, idx: number) => (
@@ -1569,7 +1589,7 @@ location: e.location || 'Location to be confirmed',
           </div>
           <div className="mx-auto max-w-3xl space-y-3">
             {liveFaq.length === 0 ? (
-              <EmptySection message="No FAQs published yet. Add them from Homepage CMS or FAQ Manager." />
+              <EmptySection message="Frequently asked questions will appear here once published by the university content team." />
             ) : (
               liveFaq.map((item, idx) => (
               <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant bg-white overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>

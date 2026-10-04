@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import config from '../config';
 
 export interface SystemSettingsState {
   general: {
@@ -15,6 +16,8 @@ export interface SystemSettingsState {
     supportEmail: string;
     postalCode: string;
     portalTitle: string;
+    siteName: string;
+    tagline: string;
   };
   email: {
     smtpHost: string;
@@ -55,6 +58,8 @@ export const DEFAULT_FRONTEND_SETTINGS: SystemSettingsState = {
     supportEmail: 'support@astu.edu.et',
     postalCode: 'P.O. Box 1888, Adama, Ethiopia',
     portalTitle: 'Alumni Management System',
+    siteName: 'ASTU Alumni',
+    tagline: 'Graduate Network',
   },
   email: {
     smtpHost: 'smtp.astu.edu.et',
@@ -76,7 +81,7 @@ export const DEFAULT_FRONTEND_SETTINGS: SystemSettingsState = {
   appearance: {
     primaryColor: '#003580',
     accentColor: '#E8A020',
-    logoUrl: '/images/astu-seal-logo.png',
+    logoUrl: 'images/astu-seal-logo.png',
   },
 };
 
@@ -100,7 +105,9 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/admin/settings/public');
+      // Absolute base URL: there is no dev proxy, so a relative '/api/...' would
+      // be resolved against the Vite origin and never reach the backend.
+      const response = await fetch(`${config.apiUrl}/admin/settings/public`);
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {

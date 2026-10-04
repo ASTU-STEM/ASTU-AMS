@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import type { AdminModalProps } from '../types/admin.types';
@@ -19,6 +19,8 @@ export default function AdminModal({
   size = 'md',
   closeOnBackdrop = true,
 }: AdminModalProps) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const titleId = React.useId();
   useEffect(() => {
     if (!open) return;
 
@@ -42,15 +44,56 @@ export default function AdminModal({
       htmlEl.style.overflow = 'hidden';
     });
 
+    // Move focus into the dialog and restore it on close. Without this, opening a
+    // modal left focus on the page behind it, so keyboard users continued
+    // tabbing through content they could not see.
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const focusTimer = window.setTimeout(() => {
+      const panel = panelRef.current;
+      if (!panel) return;
+      const target = panel.querySelector<HTMLElement>(
+        '[data-autofocus], input:not([type="hidden"]), select, textarea, button, [href], [tabindex]:not([tabindex="-1"])',
+      );
+      (target ?? panel).focus();
+    }, 0);
+
+    const handleTrapKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+      if (focusables.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleTrapKeyDown);
 
     return () => {
+      window.clearTimeout(focusTimer);
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
       savedOverflows.forEach(({ el, overflow }) => {
         el.style.overflow = overflow;
       });
       window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleTrapKeyDown);
+      previouslyFocused?.focus?.();
     };
   }, [open, onClose]);
 
@@ -73,6 +116,11 @@ export default function AdminModal({
       `}</style>
 
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={[
           'modal-panel my-auto flex max-h-[92vh] w-full flex-col overflow-hidden rounded-[16px] border border-slate-300/80 bg-white dark:border-slate-700 dark:bg-slate-900 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.7)]',
           sizeClasses[size],
@@ -97,7 +145,7 @@ export default function AdminModal({
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-extrabold tracking-tight text-white sm:text-lg">{title}</h2>
+                  <h2 id={titleId} className="text-base font-extrabold tracking-tight text-white sm:text-lg">{title}</h2>
                   <span className="inline-flex items-center rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300 border border-emerald-400/30">
                     ASTU System
                   </span>

@@ -463,11 +463,15 @@ export default function MediaLibrary() {
   const handleDeleteSingle = async (item: MediaItem) => {
     if (!window.confirm(`Delete "${item.name}"? This action cannot be undone.`)) return;
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    // The delete used to be `axios.delete(...).catch(() => {})` inside a
+    // try/catch that also ignored errors, so the item vanished from the list and
+    // a success toast fired even when the server rejected or never ran it.
     try {
       const filename = item.url?.split('/').pop() || item.id;
-      await axios.delete(`${apiBase}/content/media/${filename}`).catch(() => {});
+      await axios.delete(`${apiBase}/content/media/${filename}`);
     } catch {
-      /* ignore */
+      toast.error(`Could not delete "${item.name}". It may still exist on the server.`);
+      return;
     }
     setMedia((prev) => prev.filter((m) => m.id !== item.id));
     if (lightboxItem?.id === item.id) setLightboxItem(null);
@@ -478,12 +482,24 @@ export default function MediaLibrary() {
     if (selectedIds.length === 0) return;
     if (!window.confirm(`Permanently delete ${selectedIds.length} selected file(s)?`)) return;
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    // These deletes were fire-and-forget and unawaited, so the success toast
+    // fired before the server responded. Now awaited and failures are counted.
+    const failures: string[] = [];
     for (const id of selectedIds) {
       const item = media.find((m) => m.id === id);
-      if (item?.url) {
-        const filename = item.url.split('/').pop() || id;
-        axios.delete(`${apiBase}/content/media/${filename}`).catch(() => {});
+      if (!item?.url) continue;
+      const filename = item.url.split('/').pop() || id;
+      try {
+        await axios.delete(`${apiBase}/content/media/${filename}`);
+      } catch {
+        failures.push(item.name);
       }
+    }
+    if (failures.length > 0) {
+      toast.error(`Could not delete ${failures.length} file(s): ${failures.slice(0, 3).join(', ')}${failures.length > 3 ? '…' : ''}`);
+      setMedia((prev) => prev.filter((m) => !failures.includes(m.name)));
+      setSelectedIds([]);
+      return;
     }
     setMedia((prev) => prev.filter((m) => !selectedIds.includes(m.id)));
     toast.success(`${selectedIds.length} file(s) permanently deleted`);

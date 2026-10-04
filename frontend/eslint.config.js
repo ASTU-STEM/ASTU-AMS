@@ -28,6 +28,9 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      // NOTE: enabling this surfaces 433 pre-existing unused vars/imports across
+      // src/. Left off so the lint gate stays usable; it is why dead imports can
+      // slip through unnoticed. Clean the backlog, then switch it to 'warn'.
       '@typescript-eslint/no-unused-vars': 'off',
       'no-unused-vars': 'off',
     },

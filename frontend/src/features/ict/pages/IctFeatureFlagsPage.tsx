@@ -23,11 +23,15 @@ export default function IctFeatureFlagsPage() {
     { id: 'f-6', name: 'Experimental AI Root Cause Agent', enabled: true, rolloutPct: 10, target: '10% of Admins' },
   ]);
 
+  // NOTE: this page holds no network calls at all - the flags live in React
+  // state only. It previously showed "Feature toggle updated in real-time",
+  // which claimed a server-side change that never happened. The message is now
+  // honest about being local-only.
   const toggleFeature = (id: string) => {
     setFeatures((prev) =>
       prev.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f))
     );
-    toast.success('Feature toggle updated in real-time');
+    toast('Toggled locally only - this screen is not connected to the server yet.');
   };
 
   const updateRollout = (id: string, pct: number) => {

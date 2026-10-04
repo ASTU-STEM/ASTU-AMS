@@ -322,23 +322,6 @@ export const authService = {
     }
   },
 
-  // ==================== GET CURRENT USER ====================
-  async getCurrentUser(): Promise<ApiResult<AuthResponse['data']>> {
-    try {
-      const response = await apiClient.get<AuthResponse>('/auth/me');
-      if (response.data.success && response.data.data) {
-        return { ok: true, data: response.data.data };
-      }
-      return { ok: false, errorCode: 'GET_USER_FAILED', message: 'Failed to fetch user profile.' };
-    } catch (error) {
-      return {
-        ok: false,
-        errorCode: 'GET_USER_ERROR',
-        message: error instanceof Error ? error.message : 'An unexpected error occurred.'
-      };
-    }
-  },
-
   // ==================== PASSWORD RESET ====================
   async requestPasswordReset(emailOrPhone: string, method: 'email' | 'phone'): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
@@ -395,9 +378,9 @@ export const authService = {
     }
   },
 
-  async resendOtp(email: string): Promise<ApiResult<{ success: boolean; message: string }>> {
+  async resendOtp(studentId: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-otp', { email });
+      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-otp', { studentId });
       if (response.data.success) {
         return { ok: true, data: response.data };
       }

@@ -89,10 +89,10 @@ const pages: Record<string, PageConfig> = {
     image: "https://images.unsplash.com/photo-1523050854058-8df90110c7f1?auto=format&fit=crop&w=1800&q=80",
     sections: [
       { heading: "Research Excellence", body: "Research output and startup showcases demonstrating ASTU's commitment to innovation and knowledge creation." },
-      { heading: "Industry Partnerships", body: "72 active industry projects and 80+ industry partners collaborating on research, internships, and curriculum development." },
-      { heading: "National Recognition", body: "ASTU consistently ranks among Ethiopia's top science and technology universities, with multiple awards in engineering education." },
-      { heading: "Expected Outcomes", body: "High-fidelity alumni tracking with 90%+ accuracy rate in graduate tracking, providing clear maps of alumni geographic distribution, salary benchmarks, and time-to-hire metrics across all programs." },
-      { heading: "Accreditation Readiness", body: "Robust, audit-ready repository of tracer study reports fulfilling ETA requirements, enabling data-driven curriculum evolution with updates every two years based on industrial trends." },
+      { heading: "Industry Partnerships", body: "ASTU collaborates with industry partners on research, internships, and curriculum development to keep programmes aligned with labour-market needs." },
+      { heading: "National Recognition", body: "ASTU is recognised among Ethiopia's leading science and technology universities, with a strong record in engineering education and applied research." },
+      { heading: "Expected Outcomes", body: "High-fidelity alumni tracking that supports clear maps of graduate distribution, employment pathways, and programme-level outcomes for accreditation and planning." },
+      { heading: "Accreditation Readiness", body: "An audit-ready repository of tracer study reports that supports ETA requirements and data-informed curriculum review." },
     ],
   },
   faq: {
@@ -119,7 +119,7 @@ const pages: Record<string, PageConfig> = {
       { heading: "Phone", body: "+251-221-110000" },
       { heading: "Email", body: "irccd@astu.edu.et" },
       { heading: "Office Hours", body: "Monday to Friday, 8:00 AM - 5:00 PM (EAT)" },
-      { heading: "Social Media", body: "Facebook: /adamaastu | Telegram: @Adama_STU_Almuni" },
+      { heading: "Social Media", body: "Facebook: /adamaastu | Telegram: @Adama_STU_Alumni" },
     ],
   },
   "community-feed": {
@@ -163,7 +163,7 @@ const pages: Record<string, PageConfig> = {
     icon: Briefcase,
     image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1800&q=80",
     sections: [
-      { heading: "Annual Career Expo", body: "Meet 50+ employers, attend workshops, and apply for open positions at our flagship career event." },
+      { heading: "Annual Career Expo", body: "Meet employer partners, attend workshops, and apply for open positions at ASTU's flagship career event." },
       { heading: "On-Campus Recruitment", body: "Employers conduct interviews and information sessions throughout the academic year." },
       { heading: "Job Matching", body: "AI-powered job matching connects your skills and preferences with relevant opportunities." },
     ],
@@ -197,7 +197,7 @@ const pages: Record<string, PageConfig> = {
     image: "https://images.unsplash.com/photo-1504711434969-e33886168d6c?auto=format&fit=crop&w=1800&q=80",
     sections: [
       { heading: "Research Database", body: "Browse research publications across engineering, natural sciences, and technology fields." },
-      { heading: "Innovation Hub", body: "Explore 38 startup showcases and 72 industry projects emerging from ASTU research." },
+      { heading: "Innovation Hub", body: "Explore startup showcases and industry projects emerging from ASTU research programmes." },
       { heading: "Collaboration Opportunities", body: "Connect with research centers and explore partnership opportunities for joint projects." },
     ],
   },
@@ -208,8 +208,8 @@ const pages: Record<string, PageConfig> = {
     image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1800&q=80",
     sections: [
       { heading: "Startup Incubation", body: "ASTU supports student and alumni startups through incubation programs, funding access, and mentorship." },
-      { heading: "Research Centers", body: "12+ specialized research centers focusing on AI, renewable energy, biotechnology, and more." },
-      { heading: "Industry Collaboration", body: "80+ industry partners collaborate on applied research, technology transfer, and innovation projects." },
+      { heading: "Research Centers", body: "Specialised research centres focusing on AI, renewable energy, biotechnology, and applied engineering." },
+      { heading: "Industry Collaboration", body: "Industry partners collaborate on applied research, technology transfer, and innovation projects with ASTU departments." },
     ],
   },
   "alumni-portal": {
@@ -311,7 +311,7 @@ export default function PublicInfoPage() {
   const liveStatEntries = (page.liveStats ?? []).filter((e) => (statValues[e.key] ?? 0) > 0);
 
   return (
-    <div className="min-h-screen bg-background text-on-surface">
+    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
       <Navbar />
       <main>
         <section className="relative overflow-hidden">
@@ -361,16 +361,16 @@ export default function PublicInfoPage() {
                 return (
                   <article
                     key={entry.key}
-                    className="group rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
+                    className="group rounded-xl border border-outline-variant dark:border-slate-800 bg-white dark:bg-slate-900 p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all"
                   >
-                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 text-astu-navy transition-colors group-hover:bg-astu-navy/10">
+                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 dark:bg-blue-900/30 text-astu-navy dark:text-blue-300 transition-colors group-hover:bg-astu-navy/10">
                       <SectionIcon className="h-5 w-5" />
                     </div>
-                    <h2 className="text-2xl font-bold text-astu-navy">
+                    <h2 className="text-2xl font-bold text-astu-navy dark:text-blue-200">
                       {statValues[entry.key].toLocaleString()}
                     </h2>
-                    <p className="mt-1 text-sm font-semibold text-astu-navy">{entry.heading}</p>
-                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{entry.body}</p>
+                    <p className="mt-1 text-sm font-semibold text-astu-navy dark:text-blue-300">{entry.heading}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-300">{entry.body}</p>
                   </article>
                 );
               })}
@@ -386,13 +386,13 @@ export default function PublicInfoPage() {
               return (
                 <article
                   key={section.heading}
-                  className="group rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
+                  className="group rounded-xl border border-outline-variant dark:border-slate-800 bg-white dark:bg-slate-900 p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all"
                 >
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 text-astu-navy group-hover:bg-astu-navy/10 transition-colors">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 dark:bg-blue-900/30 text-astu-navy dark:text-blue-300 group-hover:bg-astu-navy/10 transition-colors">
                     <SectionIcon className="h-5 w-5" />
                   </div>
-                  <h2 className="text-base font-bold text-astu-navy">{section.heading}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{section.body}</p>
+                  <h2 className="text-base font-bold text-astu-navy dark:text-blue-200">{section.heading}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-300">{section.body}</p>
                 </article>
               );
             })}

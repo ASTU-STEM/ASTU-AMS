@@ -1707,15 +1707,37 @@ export default function UserManagement() {
     const { adminService } = await import('../services/admin.service');
     const { default: toast } = await import('react-hot-toast');
     
+    if (action === 'delete') {
+      // No confirmation existed here, while the single-user delete at
+      // handleRowAction does confirm. One click could wipe N accounts.
+      if (!window.confirm(
+        `Permanently delete ${selectedIds.length} user account(s)?\n\n` +
+        selected.slice(0, 8).map((u) => `• ${u.name || u.email}`).join('\n') +
+        (selected.length > 8 ? `\n…and ${selected.length - 8} more` : '') +
+        '\n\nThis cannot be undone.'
+      )) return;
+    }
+
     setLoading(true);
     let result;
-    
+
+    try {
     if (action === 'delete') {
-      // For now we'll do delete sequentially or wait for backend support, wait, delete is single user only in our backend. Let's do it sequentially:
+      // deleteUser resolves { ok: false } rather than throwing, so each result
+      // has to be inspected or a 404 is reported as a successful deletion.
+      const failed: string[] = [];
       for (const id of selectedIds) {
-        await adminService.deleteUser(id);
+        const res = await adminService.deleteUser(id);
+        if (!res.ok) {
+          const u = users.find((x) => x.id === id);
+          failed.push(u?.name || u?.email || id);
+        }
       }
-      toast.success('Deleted selected users');
+      if (failed.length > 0) {
+        toast.error(`Could not delete ${failed.length} user(s): ${failed.slice(0, 3).join(', ')}${failed.length > 3 ? '…' : ''}`);
+      } else {
+        toast.success(`Deleted ${selectedIds.length} user(s)`);
+      }
     } else {
       const apiAction = action === 'activate' ? 'verify' : 'suspend'; // verify handles both active and verification
       result = await adminService.bulkUpdateStatus(selectedIds, apiAction);
@@ -1725,7 +1747,14 @@ export default function UserManagement() {
         toast.error(result.message || 'Failed to update users');
       }
     }
-    
+    } catch (err: any) {
+      // Without this, a throw left setLoading(true) in place forever and the
+      // table stayed stuck on its loading branch.
+      toast.error(err?.response?.data?.message || 'The bulk action failed.');
+    } finally {
+      setLoading(false);
+    }
+
     updateSelectedIds([]);
     await fetchUsers();
   };

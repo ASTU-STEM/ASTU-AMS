@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Bot, ChevronDown, ChevronUp, MessageCircle, Send, Trash2, X } from "lucide-react";
 
 type MessageSender = "user" | "bot";
 
@@ -24,21 +25,21 @@ const COLORS = {
 
 const SYSTEM_MANUAL_RESPONSES: Record<string, string> = {
   "update my profile":
-    "👤 How to Update Your Profile:\n1. Sign in to your account and go to Dashboard → Profile.\n2. Update your education, work experience, technical skills, and portfolio links.\n3. Click Save Changes to increase your career match rate.",
+    "How to update your profile:\n1. Sign in and open Dashboard → Profile.\n2. Update education, work experience, skills, and portfolio links.\n3. Save changes to keep your career profile current.",
   "find job":
-"💼 How to Find Jobs & Apply:\n1. Sign in to the Alumni Portal.\n2. Navigate to Career Center / Jobs.\n3. Filter vacancies by Department (CSE, ECE, ME, CE), Location, or Employer (Safaricom, Ethio Telecom, INSA, Sunshine Construction).\n4. Click Apply Now to submit your resume directly to the employer.",
+    "How to find jobs and apply:\n1. Sign in to the Alumni Portal.\n2. Open Career Center / Jobs.\n3. Filter by department, location, or employer.\n4. Submit your application from the listing page.",
   "tracer survey":
-    "📋 How to Complete the Graduate Tracer Survey:\n1. Sign in to your Alumni Dashboard.\n2. Open the Surveys tab.\n3. Select the active Wave 3 Graduate Tracer Study.\n4. Answer the questions regarding your current employment status, salary range, and department feedback.\n5. Click Submit Survey to update university telemetry.",
+    "How to complete the graduate tracer survey:\n1. Sign in to your Alumni Dashboard.\n2. Open the Surveys tab.\n3. Select the active tracer study.\n4. Answer the questions about employment status and feedback.\n5. Submit the survey.",
   "request transcript":
-    "📄 How to Request Official Academic Transcripts or Degrees:\n1. Sign in to your Alumni Dashboard.\n2. Go to Document Services → Request Document.\n3. Select your document type (Official Transcript, Degree Certificate, English Medium of Instruction).\n4. Submit your request for Registrar processing (24–48 hours SLA target).\n5. Track request status under My Document Requests.",
+    "How to request academic documents:\n1. Sign in to your Alumni Dashboard.\n2. Go to Document Services → Request Document.\n3. Select Official Transcript, Degree Certificate, or related document.\n4. Submit the request for Registrar processing.\n5. Track status under My Document Requests.",
   "mentor":
-    "🤝 How to Connect with Alumni Mentors:\n1. Sign in to your dashboard and open the Mentorship tab.\n2. Browse verified alumni mentors filtered by industry or department.\n3. Click Connect on a mentor profile to send a direct guidance request.",
+    "How to connect with alumni mentors:\n1. Sign in and open the Mentorship tab.\n2. Browse mentors by industry or department.\n3. Send a guidance request from a mentor profile.",
   "register":
-    "📋 How to Register on ASTU Portal:\n1. Click the 'Register' button on the top right navigation bar.\n2. Choose your role: Alumni, Student, or Partner Employer.\n3. Fill in your name, email, student ID / graduation year, or company details.\n4. Create a password and click Submit.\n5. Verify your email to activate your account.",
+    "How to register on ASTU-AMS:\n1. Click Register in the top navigation.\n2. Choose Alumni or Partner Employer.\n3. Complete the required details.\n4. Create a password and submit.\n5. Verify your email to activate the account.",
   "employer":
-    "🏢 How Employers Partner & Post Jobs:\n1. Click Register → Partner Employer on the homepage.\n2. Enter company contact details and industry type for verification.\n3. Once approved, sign in to the Employer Portal.\n4. Navigate to Manage Vacancies → Post Job.\n5. Enter job requirements to publish directly to ASTU graduates.",
+    "How employers partner and post jobs:\n1. Open Partner registration from the Partners page.\n2. Enter organisation and contact details for verification.\n3. After approval, sign in to the Employer Portal.\n4. Publish vacancies from the employer dashboard.",
   "contact support":
-    "🎧 How to Contact Support:\n• Email Alumni Relations at: alumni@astu.edu.et\n• Call ASTU Campus Office: +251 22 110 0001\n• Or open a ticket in your dashboard under Help & Support.",
+    "How to contact support:\n• Email: irccd@astu.edu.et\n• Phone: +251-221-110000\n• Or open a ticket from Help & Support after signing in.",
 };
 
 const SENSITIVE_KEYWORDS = [
@@ -49,34 +50,34 @@ function getFallback(input: string) {
   const key = (input || '').toLowerCase();
 
   if (SENSITIVE_KEYWORDS.some((kw) => key.includes(kw))) {
-    return "🔒 Data Security Notice:\nAs the public ASTU AI assistant, I cannot reveal private user accounts, password credentials, security audit logs, or internal administrative data.\n\nPlease sign in as an authorized user to access your personal dashboard.";
+    return "Security notice:\nThis public assistant cannot share private accounts, credentials, audit logs, or internal administrative data.\n\nPlease sign in with an authorised account to access your dashboard.";
   }
 
   if (key.includes('who are') || key.includes('who r') || key.includes('your name') || key.includes('ur name') || key.includes('what are you')) {
-    return "I am ASTU AI 🤖, the official AI assistant for Adama Science & Technology University (ASTU).\n\nI can answer questions about ASTU, academic departments, employment telemetry, and guide you step-by-step on all portal features!";
+    return "I am the ASTU-AMS assistant for Adama Science and Technology University.\n\nI can help with portal navigation, registration, document requests, jobs, tracer surveys, and mentorship guidance.";
   }
 
   if (key.includes('can u') || key.includes('can you') || key.includes('what do you') || key.includes('what do u') || key.includes('what u do') || key.includes('what can u') || key.includes('what can you') || key.includes('help') || key.includes('feature') || key.includes('capability') || key.includes('options')) {
-    return "💡 Here is what I can help you with:\n• 📋 Registration Guide: How to sign up as Alumni, Student, or Employer.\n• 📄 Academic Transcripts: How to request official transcripts and certificates.\n• 💼 Job Placements: How to browse job vacancies or post hiring opportunities.\n• 📊 Tracer Surveys: How to complete Wave 3 post-graduation tracer studies.\n• 🤝 Mentorship: How to connect with verified alumni mentors.";
+    return "I can help with:\n• Registration as alumni or employer\n• Academic transcript and document requests\n• Browsing and applying to job listings\n• Completing graduate tracer surveys\n• Connecting with alumni mentors";
   }
 
   if (key.includes('about astu') || key.includes('what is astu') || key.includes('adama science')) {
-    return "🏛️ About Adama Science and Technology University (ASTU):\nASTU is a premier center of excellence in Ethiopia dedicated to Science, Technology, Engineering, and Mathematics (STEM). Located in Adama, Ethiopia, ASTU trains high-calibre engineers and researchers across Computer Science (CSE), Electrical Engineering (ECE), Mechanical Engineering (ME), and Civil Engineering (CE).";
+    return "About Adama Science and Technology University (ASTU):\nASTU is a science and technology university in Adama, Ethiopia, focused on STEM education and research across Computer Science, Electrical Engineering, Mechanical Engineering, Civil Engineering, and related fields.";
   }
 
   if (key.includes('salary') || key.includes('salaries') || key.includes('pay') || key.includes('income')) {
-    return "💰 Salary Telemetry (ASTU Graduates):\n• Average Starting Salary: ETB 19,185 / month\n• Top Earning Department: Software Engineering (Avg ETB 23,400 / month)\n• Computer Science & ECE: Avg ETB 22,000 / month";
+    return "Salary figures are only published through official tracer study reports.\n\nPlease check the Impact Numbers section on the homepage, or sign in to view authorised employment analytics for your role.";
   }
 
   if (key.includes('employment') || key.includes('placement rate') || key.includes('hire rate')) {
-    return "📊 ASTU Employment Telemetry:\n• Overall Employment Rate: 55.0%\n• Electrical & Computer Engineering Placement: 75.0%\n• Software Engineering Placement: 63.0%\n• Average Time to Hire: 16.3 months";
+    return "Employment and placement figures are drawn from verified ASTU-AMS records and published reports.\n\nPlease review the live Impact Numbers on the homepage, or sign in for role-specific analytics.";
   }
 
   for (const [pattern, response] of Object.entries(SYSTEM_MANUAL_RESPONSES)) {
     if (key.includes(pattern)) return response;
   }
 
-  return "🤖 ASTU AI Assistant:\nI am here to assist you with ASTU portal navigation, transcript requests, job applications, tracer surveys, and university statistics.\n\nYou can ask me specific questions such as:\n• \"What can you do?\"\n• \"How do I request my transcript?\"\n• \"Which companies hire ASTU alumni?\"\n• \"How do I register?\"";
+  return "ASTU-AMS Assistant:\nI can help with portal navigation, transcript requests, job applications, tracer surveys, and university information.\n\nTry asking:\n• \"What can you do?\"\n• \"How do I request my transcript?\"\n• \"How do I register?\"\n• \"How do employers post jobs?\"";
 }
 
 async function askAssistant(userMessage: string) {
@@ -267,7 +268,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
         fontSize: 15, color: "#fff", fontWeight: 700,
         boxShadow: `0 2px 8px ${isUser ? COLORS.green : COLORS.navy}40`,
       }}>
-        {isUser ? "You" : "🤖"}
+        {isUser ? "You" : <Bot size={16} strokeWidth={2.25} />}
       </div>
 
       <div style={{
@@ -312,7 +313,7 @@ export default function ASTUCareerCopilot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
-      text: "Hello! I'm ASTU AI 👋\n\nI can answer questions about Adama Science & Technology University (ASTU) and guide you step-by-step on how to use all features of the Alumni Management & Career Placement Portal. How can I assist you today?",
+      text: "Hello! I am the ASTU-AMS assistant.\n\nI can answer questions about Adama Science and Technology University and guide you through alumni, employer, and portal services. How can I help you today?",
       sender: "bot",
       timestamp: nowTime(),
       isAI: true,
@@ -400,7 +401,7 @@ export default function ASTUCareerCopilot() {
   const clearChat = () => {
     setMessages([{
       id: 1,
-      text: "Hello! I'm ASTU AI 👋\n\nI can answer questions about Adama Science & Technology University (ASTU) and guide you step-by-step on how to use all features of the Alumni Management & Career Placement Portal. How can I assist you today?",
+      text: "Hello! I am the ASTU-AMS assistant.\n\nI can answer questions about Adama Science and Technology University and guide you through alumni, employer, and portal services. How can I help you today?",
       sender: "bot",
       timestamp: nowTime(),
       isAI: true,
@@ -458,7 +459,7 @@ export default function ASTUCareerCopilot() {
       {/* Floating Action Button */}
       <button
         onClick={() => { setIsOpen(!isOpen); setIsMinimized(false); }}
-        aria-label={isOpen ? "Close chat" : "Open ASTU AI"}
+        aria-label={isOpen ? "Close chat" : "Open ASTU assistant"}
         style={{
           position: "fixed", bottom: 24, right: 24, zIndex: 9999,
           width: 64, height: 64, borderRadius: "50%",
@@ -471,6 +472,7 @@ export default function ASTUCareerCopilot() {
           transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)",
           transform: "scale(1)",
           animation: !isOpen ? "pulse 2.5s infinite" : "none",
+          color: "#fff",
         }}
         onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.12)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
@@ -480,8 +482,8 @@ export default function ASTUCareerCopilot() {
           background: `linear-gradient(135deg, ${COLORS.gold}, ${COLORS.goldLight}, ${COLORS.green})`,
           opacity: 0.3, animation: "floatSlow 3s ease-in-out infinite",
         }} />
-        <span style={{ fontSize: 26, lineHeight: 1, position: "relative", zIndex: 1 }}>
-          {isOpen ? "✕" : "💬"}
+        <span style={{ lineHeight: 1, position: "relative", zIndex: 1, display: "flex" }}>
+          {isOpen ? <X size={26} strokeWidth={2.25} /> : <MessageCircle size={26} strokeWidth={2.25} />}
         </span>
         {!isOpen && unreadCount > 0 && (
           <span style={{
@@ -537,14 +539,15 @@ export default function ASTUCareerCopilot() {
               background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))",
               border: "2px solid rgba(255,255,255,0.25)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 22, flexShrink: 0,
+              flexShrink: 0,
               boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
-            }}>🤖</div>
+              color: "#fff",
+            }}><Bot size={22} strokeWidth={2} /></div>
 
             <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <span style={{ color:"#fff", fontSize:15, fontWeight:700, letterSpacing:"0.3px" }}>
-                  ASTU AI
+                  ASTU Assistant
                 </span>
                 <span style={{
                   width: 8, height: 8, borderRadius: "50%",
@@ -560,8 +563,8 @@ export default function ASTUCareerCopilot() {
 
             <div style={{ display:"flex", gap:6, zIndex:1 }}>
               {[
-                { icon:"🗑️", title:"Clear chat", action: clearChat },
-                { icon: isMinimized ? "⬆️" : "⬇️", title: isMinimized ? "Expand" : "Minimize", action: () => setIsMinimized(!isMinimized) },
+                { icon: <Trash2 size={14} />, title:"Clear chat", action: clearChat },
+                { icon: isMinimized ? <ChevronUp size={14} /> : <ChevronDown size={14} />, title: isMinimized ? "Expand" : "Minimize", action: () => setIsMinimized(!isMinimized) },
               ].map(({ icon, title, action }) => (
                 <button key={title} onClick={action} title={title} className="action-btn"
                   style={{
@@ -570,7 +573,7 @@ export default function ASTUCareerCopilot() {
                     border:"0.5px solid rgba(255,255,255,0.18)",
                     color:"#fff", cursor:"pointer",
                     display:"flex", alignItems:"center", justifyContent:"center",
-                    fontSize:14, transition:"all 0.15s",
+                    transition:"all 0.15s",
                     backdropFilter: "blur(4px)",
                   }}
                 >{icon}</button>
@@ -603,10 +606,10 @@ export default function ASTUCareerCopilot() {
                     <div style={{
                       width:34, height:34, borderRadius:"50%", flexShrink:0,
                       background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
-                      fontSize:15, color:"#fff",
+                      color:"#fff",
                       display:"flex", alignItems:"center", justifyContent:"center",
                       boxShadow: `0 2px 8px ${COLORS.navy}40`,
-                    }}>🤖</div>
+                    }}><Bot size={16} strokeWidth={2.25} /></div>
                     <div style={{
                       background:"#fff", borderRadius:16, borderBottomLeftRadius:4,
                       padding:"10px 16px", border:"1px solid #e2e8f4",
@@ -655,7 +658,7 @@ export default function ASTUCareerCopilot() {
                     opacity: (!input.trim() || isTyping) ? 0.4 : 1,
                     boxShadow: `0 2px 8px ${COLORS.navy}30`,
                   }}
-                >➤</button>
+                ><Send size={16} /></button>
               </div>
 
               {/* Powered by footer */}
@@ -670,7 +673,7 @@ export default function ASTUCareerCopilot() {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}>
-                  ASTU AI • Interactive Institutional Knowledge & Career Guide
+                  ASTU-AMS Assistant • Portal guidance and institutional support
                 </span>
               </div>
             </>

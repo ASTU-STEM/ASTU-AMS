@@ -113,7 +113,7 @@ export function DashboardLayout({
   const sidebarDisplayCollapsed = sidebarCollapsed && !sidebarOpen;
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
+    <div className="app-shell flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
@@ -244,7 +244,7 @@ export function DashboardLayout({
 function LandingPage() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-slate-50 antialiased font-sans">
+    <div className="app-shell min-h-screen bg-slate-50 antialiased font-sans">
       {/* Structural Navbar */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 py-4 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">

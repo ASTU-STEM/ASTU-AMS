@@ -5,6 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import CmsSidebar from './CmsSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
+import { useTheme } from '../hooks/useTheme';
 
 class CmsRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -73,7 +74,7 @@ function formatHeaderDate() {
 }
 
 export default function CmsLayout() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
+  const { theme, toggleTheme } = useTheme();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -118,12 +119,6 @@ export default function CmsLayout() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && !target.closest('[data-cms-menu]')) setMenuOpen(false);
@@ -153,10 +148,6 @@ export default function CmsLayout() {
     logout();
     toast.success('Logged out successfully');
     navigate('/login');
-  };
-
-  const toggleTheme = () => {
-    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   };
 
   const notifications = [
@@ -206,7 +197,7 @@ export default function CmsLayout() {
 
   return (
     <>
-    <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
+    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}
@@ -367,7 +358,7 @@ export default function CmsLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
           <style>{`@keyframes cms-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <CmsRouteBoundary key={location.pathname}>
             <Outlet />

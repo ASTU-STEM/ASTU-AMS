@@ -3,6 +3,7 @@ import { DocumentRequest } from '../types/alumni.types';
 import toast from 'react-hot-toast';
 import { FileDown, Shield, Clock, CheckCircle2, AlertCircle, CreditCard, Lock, X, Check, ArrowLeft, RefreshCw, Upload, FileText } from 'lucide-react';
 import { alumniService } from '../services/alumni.service';
+import { AlumniSectionShell } from './AlumniSectionShell';
 
 interface DocumentServicesTabProps {
   documentRequests: DocumentRequest[];
@@ -178,48 +179,16 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
   const approvedCount = documentRequests.filter(d => d.status === 'Approved' || d.status === 'Dispatched').length;
 
   return (
-    <div className="space-y-6">
-      {/* Enhanced Hero Banner */}
-      <section className="relative overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#003366] via-[#004d99] to-[#006633] opacity-95"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#FFD700]/10 rounded-full translate-y-1/3 -translate-x-1/4"></div>
-          <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-white/5 rounded-full"></div>
-        </div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 bg-white/15 text-[#FFD700] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-full backdrop-blur-sm">
-                ASTU Registrar
-              </span>
-              <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-full backdrop-blur-sm">
-                Digital Services
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
-              Document Services Portal
-            </h2>
-            <p className="text-sm text-white/80 leading-relaxed max-w-xl">
-              Request verified academic transcripts, degree verification files, or certificates online. Documents are verified by the registrar and dispatched securely.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
-              <p className="text-2xl font-extrabold text-white">{documentRequests.length}</p>
-              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Total Requests</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
-              <p className="text-2xl font-extrabold text-amber-300">{pendingCount}</p>
-              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Pending</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
-              <p className="text-2xl font-extrabold text-emerald-300">{approvedCount}</p>
-              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Completed</p>
-            </div>
-          </div>
-        </div>
-      </section>
+    <AlumniSectionShell
+      eyebrow="Registrar"
+      title="Document requests"
+      description="Order transcripts, degree letters, and certificates — verified by the Registrar and delivered securely."
+      metrics={[
+        { value: documentRequests.length, label: 'Total Requests', accent: 'white' },
+        { value: pendingCount, label: 'Pending', accent: 'gold' },
+        { value: approvedCount, label: 'Completed', accent: 'green' },
+      ]}
+    >
 
       {/* Main Grid: Request Form & Tracking Table */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -826,6 +795,6 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </AlumniSectionShell>
   );
 };

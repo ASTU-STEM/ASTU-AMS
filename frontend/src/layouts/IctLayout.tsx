@@ -9,6 +9,7 @@ import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import IctCommandPalette from '../components/IctCommandPalette';
 import IctEmergencyBanner from '../components/IctEmergencyBanner';
+import { useTheme } from '../hooks/useTheme';
 
 class IctRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -59,7 +60,7 @@ const routeMeta: Record<string, { title: string; subtitle: string }> = {
 };
 
 export default function IctLayout() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
+  const { theme, toggleTheme } = useTheme();
   const [calendarMode, setCalendarMode] = useState<'GC' | 'EC'>('GC');
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -83,12 +84,6 @@ export default function IctLayout() {
     setMenuOpen(false);
     setMobileSidebarOpen(false);
   }, [location.pathname]);
-
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     const handleOpenPalette = () => setCommandPaletteOpen(true);
@@ -118,13 +113,9 @@ export default function IctLayout() {
     navigate('/login');
   };
 
-  const toggleTheme = () => {
-    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
-  };
-
   return (
     <>
-      <div className="ict-shell min-h-screen bg-slate-100 font-['Inter',sans-serif] text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+      <div className="ict-shell app-shell min-h-screen bg-slate-100 font-['Inter',sans-serif] text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
         {mobileSidebarOpen && (
           <button
             type="button"
@@ -282,7 +273,7 @@ export default function IctLayout() {
           </header>
 
           {/* Main Content Area */}
-          <main className="min-h-[calc(100vh-4rem)] p-6 lg:p-8 space-y-6">
+          <main id="main-content" tabIndex={-1}className="min-h-[calc(100vh-4rem)] p-6 lg:p-8 space-y-6">
             <IctRouteBoundary key={location.pathname}>
               <Outlet />
             </IctRouteBoundary>

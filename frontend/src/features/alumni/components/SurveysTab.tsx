@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { ClipboardList } from 'lucide-react';
 import { surveyService } from '../../surveys/services/survey.service';
+import { EmptyState } from '../../../components/EmptyState';
+import { LoadingSkeleton } from '../../../components/LoadingSkeleton';
+import { AlumniSectionShell } from './AlumniSectionShell';
+import { BrandMark } from './BrandMark';
+import {
+  alumniCardClass,
+  alumniInputClass,
+  alumniLabelClass,
+  alumniMutedClass,
+  alumniPanelClass,
+  alumniPrimaryBtnClass,
+  alumniSecondaryBtnClass,
+  alumniSectionTitleClass,
+  alumniSelectClass,
+  alumniStatusBadge,
+  alumniTextareaClass,
+} from './alumniUi';
 
 // ─── Reusable question field renderer ────────────────────────────────────────
 const QuestionField = ({
@@ -14,13 +32,13 @@ const QuestionField = ({
   answers: Record<string, string | string[]>;
   onChange: (id: string, val: string | string[]) => void;
 }) => (
-  <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 space-y-2.5">
-    <label className="text-sm font-bold text-gray-900 leading-relaxed block">
-      <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#003366]/10 text-[#003366] text-[10px] font-extrabold mr-1.5">
+  <div className={`${alumniCardClass} p-4 space-y-2.5 bg-[var(--bg-page)]`}>
+    <label className={`${alumniLabelClass} !normal-case !tracking-normal !text-sm !font-bold text-[var(--text-primary)] leading-relaxed`}>
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#003366]/10 text-[#003366] dark:text-[#FFD700] text-[10px] font-extrabold mr-1.5 align-middle">
         {idx + 1}
       </span>
       {q.questionText}
-      {q.required && <span className="text-red-500 ml-1">*</span>}
+      {q.required && <span className="text-rose-500 ml-1">*</span>}
     </label>
 
     {(q.questionType === 'TEXT' || q.questionType === 'NUMBER' || q.questionType === 'DATE') && (
@@ -28,7 +46,7 @@ const QuestionField = ({
         type={q.questionType === 'NUMBER' ? 'number' : q.questionType === 'DATE' ? 'date' : 'text'}
         value={(answers[q.id] as string) || ''}
         onChange={(e) => onChange(q.id, e.target.value)}
-        className="w-full text-sm p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all"
+        className={alumniInputClass}
         required={q.required}
         placeholder={q.placeholder || ''}
       />
@@ -44,7 +62,7 @@ const QuestionField = ({
           onChange={(e) => onChange(q.id, e.target.value)}
           className="flex-1 accent-[#003366]"
         />
-        <span className="text-sm font-bold text-[#003366] min-w-[28px] text-center">
+        <span className="text-sm font-bold text-[#003366] dark:text-[#FFD700] min-w-[28px] text-center">
           {(answers[q.id] as string) || '5'}
         </span>
       </div>
@@ -54,7 +72,7 @@ const QuestionField = ({
       <textarea
         value={(answers[q.id] as string) || ''}
         onChange={(e) => onChange(q.id, e.target.value)}
-        className="w-full text-sm p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all h-24 resize-none"
+        className={`${alumniTextareaClass} min-h-[96px] resize-none`}
         required={q.required}
         placeholder={q.placeholder || ''}
       />
@@ -64,7 +82,7 @@ const QuestionField = ({
       <select
         value={(answers[q.id] as string) || ''}
         onChange={(e) => onChange(q.id, e.target.value)}
-        className="w-full text-sm p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all"
+        className={alumniSelectClass}
         required={q.required}
       >
         <option value="">-- Select an option --</option>
@@ -77,7 +95,7 @@ const QuestionField = ({
     {q.questionType === 'RADIO' && q.options && (
       <div className="space-y-2 mt-1">
         {q.options.map((opt: string) => (
-          <label key={opt} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label key={opt} className="flex items-center gap-2 text-sm text-[var(--text-secondary)] cursor-pointer">
             <input
               type="radio"
               name={q.id}
@@ -98,7 +116,7 @@ const QuestionField = ({
         {q.options.map((opt: string) => {
           const currentArr = (answers[q.id] as string[]) || [];
           return (
-            <label key={opt} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <label key={opt} className="flex items-center gap-2 text-sm text-[var(--text-secondary)] cursor-pointer">
               <input
                 type="checkbox"
                 value={opt}
@@ -173,10 +191,7 @@ export const SurveysTab = () => {
     e.preventDefault();
     if (!activeAssignment) return;
 
-    // Optional: Add strict validation here if required
-
     const formattedAnswers = Object.entries(answers).map(([questionId, answerText]) => {
-      // If array (checkboxes), join by comma
       const text = Array.isArray(answerText) ? answerText.join(', ') : answerText;
       return { questionId, answerText: text };
     });
@@ -186,7 +201,7 @@ export const SurveysTab = () => {
       toast.success('Thank you! Tracer survey submitted successfully.');
       setActiveAssignment(null);
       setAnswers({});
-      fetchMySurveys(); // refresh list
+      fetchMySurveys();
     } catch (err) {
       console.error(err);
       toast.error('Failed to submit survey. Please try again.');
@@ -199,172 +214,149 @@ export const SurveysTab = () => {
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   if (loading) {
-    return <div className="text-center p-8">Loading tracer studies...</div>;
+    return (
+      <div className="space-y-4">
+        <LoadingSkeleton variant="card" count={1} />
+        <LoadingSkeleton variant="card" count={3} className="mt-2" />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* ── Hero Banner with ASTU Branding ── */}
-      <section
-        className="rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #003366 0%, #001a33 50%, #0d2b4d 100%)' }}
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFCC00]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <img
-              alt="ASTU Logo"
-              className="h-14 w-14 object-contain scale-110 shrink-0"
-              src="/images/astu-seal-logo.png"
-            />
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">
-                Tracer & Accreditation Studies
-              </span>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                Graduate Tracer Surveys
-              </h2>
-              <p className="text-sm text-white/70 leading-relaxed max-w-xl">
-                Complete your tracer studies to help ASTU maintain ABET and ETA accreditation.
-                Your responses drive curriculum improvements and career support programs.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 min-w-[200px]">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-white/50 mb-2">Completion Progress</div>
-            <div className="flex items-end gap-2 mb-3">
-              <span className="text-3xl font-extrabold text-[#FFCC00]">{progressPct}%</span>
-              <span className="text-xs text-white/60 mb-1">{completedCount}/{totalCount} done</span>
-            </div>
-            <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #FFCC00, #FFD700)' }}
-              />
-            </div>
-            {pendingCount > 0 && (
-              <p className="text-[10px] text-[#FFCC00] font-semibold mt-2">
-                {pendingCount} pending — submit before deadline
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Main interface: Survey list OR active survey questionnaire ── */}
+    <AlumniSectionShell
+      eyebrow="Tracer studies"
+      title="Graduate surveys"
+      description="Complete tracer studies to support ASTU accreditation and improve programs for future graduates."
+      metrics={[
+        { value: `${progressPct}%`, label: 'Progress', accent: 'gold' },
+        { value: completedCount, label: 'Completed', accent: 'green' },
+        { value: pendingCount, label: 'Pending', accent: 'white' },
+      ]}
+    >
       {!activeAssignment ? (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold material-symbols-outlined" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>assignment</span>
-                Your Tracer Questionnaires
-              </h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-[10px] font-bold bg-[#003366]/10 text-[#003366] rounded-full">
-                {completedCount} Completed
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
+              <span
+                className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold material-symbols-outlined"
+                style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
+              >
+                assignment
               </span>
+              Your Tracer Questionnaires
+            </h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={alumniStatusBadge.brand}>{completedCount} Completed</span>
               {pendingCount > 0 && (
-                <span className="px-2.5 py-1 text-[10px] font-bold bg-red-50 text-[#CC0033] rounded-full">
-                  {pendingCount} Pending
-                </span>
+                <span className={alumniStatusBadge.danger}>{pendingCount} Pending</span>
               )}
             </div>
           </div>
 
-          <div className="space-y-3">
-            {assignments.map((assignment, idx) => {
-              const isCompleted = assignment.status === 'COMPLETED';
-              const isExpired = assignment.status === 'EXPIRED';
-              return (
-                <div
-                  key={assignment.id}
-                  className={`rounded-2xl border transition-all duration-200 ${
-                    isCompleted || isExpired
-                      ? 'bg-gray-50/80 border-gray-200/80'
-                      : 'bg-white border-gray-200/60 hover:shadow-md hover:border-[#003366]/20'
-                  }`}
-                >
-                  <div className="p-5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex-1 space-y-2.5">
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold tracking-wider rounded-full ${
-                              isCompleted
-                                ? 'bg-[#1D9E75]/10 text-[#1D9E75] border border-[#1D9E75]/20'
-                                : isExpired ? 'bg-gray-200 text-gray-600' : 'bg-[#CC0033]/10 text-[#CC0033] border border-[#CC0033]/20'
-                            }`}
-                          >
-                            {isCompleted ? 'Completed' : isExpired ? 'Expired' : 'Pending Action'}
-                          </span>
-                          <span className="text-[10px] text-gray-400 font-semibold">
-                            Deadline: {new Date(assignment.dueDate).toLocaleDateString()}
-                          </span>
+          {assignments.length === 0 ? (
+            <div className={alumniPanelClass}>
+              <EmptyState
+                icon={<ClipboardList className="h-10 w-10 text-slate-400 dark:text-slate-500" />}
+                title="No tracer surveys yet"
+                description="New surveys appear here when the university assigns them."
+              />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {assignments.map((assignment) => {
+                const isCompleted = assignment.status === 'COMPLETED';
+                const isExpired = assignment.status === 'EXPIRED';
+                return (
+                  <div
+                    key={assignment.id}
+                    className={`${alumniCardClass} transition-all duration-200 ${
+                      isCompleted || isExpired
+                        ? 'opacity-80'
+                        : 'hover:shadow-md hover:border-[#003366]/30'
+                    }`}
+                  >
+                    <div className="p-5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-1 space-y-2.5 min-w-0">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span
+                              className={
+                                isCompleted
+                                  ? alumniStatusBadge.success
+                                  : isExpired
+                                    ? alumniStatusBadge.neutral
+                                    : alumniStatusBadge.danger
+                              }
+                            >
+                              {isCompleted ? 'Completed' : isExpired ? 'Expired' : 'Pending Action'}
+                            </span>
+                            <span className="text-[10px] text-[var(--text-muted)] font-semibold">
+                              Deadline: {new Date(assignment.dueDate).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          <h4 className="text-base font-bold text-[var(--text-primary)]">
+                            {assignment.survey?.title || 'Tracer Study'}
+                          </h4>
+                          <p className={`${alumniMutedClass} text-xs leading-relaxed max-w-2xl`}>
+                            {assignment.survey?.description}
+                          </p>
                         </div>
 
-                        <h4 className="text-base font-bold text-gray-900">{assignment.survey?.title || 'Tracer Study'}</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed max-w-2xl">{assignment.survey?.description}</p>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          if (!isCompleted && !isExpired) {
-                            handleStartSurvey(assignment);
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!isCompleted && !isExpired) {
+                              handleStartSurvey(assignment);
+                            }
+                          }}
+                          disabled={isCompleted || isExpired}
+                          className={
+                            isCompleted || isExpired
+                              ? `${alumniSecondaryBtnClass} opacity-60 cursor-not-allowed flex-shrink-0`
+                              : `${alumniPrimaryBtnClass} flex-shrink-0`
                           }
-                        }}
-                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex-shrink-0 ${
-                          isCompleted || isExpired
-                            ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
-                            : 'text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
-                        }`}
-                        style={!isCompleted && !isExpired ? { background: 'linear-gradient(135deg, #003366, #001a33)' } : undefined}
-                      >
-                        {isCompleted ? 'Submitted' : isExpired ? 'Expired' : 'Start Questionnaire'}
-                      </button>
+                        >
+                          {isCompleted ? 'Submitted' : isExpired ? 'Expired' : 'Start Questionnaire'}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          )}
 
-            {assignments.length === 0 && (
-              <div className="text-center py-12 px-6 rounded-2xl bg-gray-50 border border-gray-200/60">
-                <div className="text-4xl mb-3 opacity-30 material-symbols-outlined">analytics</div>
-                <p className="text-sm font-semibold text-gray-600">No tracer study questionnaires found.</p>
-                <p className="text-xs text-gray-400 mt-1">New surveys will appear here when assigned.</p>
-              </div>
-            )}
-          </div>
+          {pendingCount > 0 && totalCount > 0 && (
+            <p className="text-xs font-semibold text-[#003366] dark:text-[#FFD700]">
+              {pendingCount} pending — submit before deadline · {completedCount}/{totalCount} done
+            </p>
+          )}
         </div>
       ) : (
-        /* ── Active Survey Question Form ── */
-        <div className="rounded-2xl bg-white border border-gray-200/60 shadow-sm overflow-hidden">
+        <div className={`${alumniCardClass} overflow-hidden`}>
           <div
             className="p-5 text-white"
             style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img
-                  alt="ASTU"
-                  className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                  src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <BrandMark
+                  className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20 text-[10px] shrink-0"
+                  tone="dark"
                 />
-                <div>
+                <div className="min-w-0">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">
                     Tracer Study in Progress
                   </span>
-                  <h3 className="text-lg font-bold mt-0.5">{activeAssignment.survey?.title}</h3>
+                  <h3 className="text-lg font-bold mt-0.5 truncate">{activeAssignment.survey?.title}</h3>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => { setActiveAssignment(null); setAnswers({}); }}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors border border-white/20"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors border border-white/20 shrink-0"
+                aria-label="Close questionnaire"
               >
                 <span className="material-symbols-outlined text-white text-sm">close</span>
               </button>
@@ -375,7 +367,7 @@ export const SurveysTab = () => {
             {(() => {
               const sectionQuestions = (activeAssignment.survey?.sections || []).flatMap((sec: any) => sec.questions || []);
               const directQuestions = activeAssignment.survey?.questions || [];
-              
+
               const allQuestionsMap = new Map();
               [...directQuestions, ...sectionQuestions].forEach((q: any) => {
                 if (q && q.questionText) {
@@ -386,20 +378,26 @@ export const SurveysTab = () => {
 
               if (allQuestions.length === 0) {
                 return (
-                  <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-gray-200">
-                    No questions available for this survey template.
-                  </div>
+                  <EmptyState
+                    title="No questions available"
+                    description="This survey template has no questions configured yet."
+                    className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]"
+                  />
                 );
               }
 
-              const hasSectionQuestions = (activeAssignment.survey?.sections || []).some((s: any) => (s.questions?.length || 0) > 0);
-              
+              const hasSectionQuestions = (activeAssignment.survey?.sections || []).some(
+                (s: any) => (s.questions?.length || 0) > 0
+              );
+
               if (hasSectionQuestions) {
                 return activeAssignment.survey.sections.map((section: any, sIdx: number) => (
                   <div key={section.id || sIdx} className="space-y-4">
-                    <div className="border-b border-gray-200 pb-2">
-                      <h4 className="text-lg font-bold text-[#003366]">{section.title}</h4>
-                      {section.description && <p className="text-sm text-gray-500">{section.description}</p>}
+                    <div className="border-b border-[var(--border-color)] pb-2">
+                      <h4 className="text-lg font-bold text-[#003366] dark:text-[#FFD700]">{section.title}</h4>
+                      {section.description && (
+                        <p className={alumniMutedClass}>{section.description}</p>
+                      )}
                     </div>
                     {(section.questions || []).map((q: any, idx: number) => (
                       <QuestionField key={q.id || idx} q={q} idx={idx} answers={answers} onChange={handleAnswerChange} />
@@ -417,29 +415,22 @@ export const SurveysTab = () => {
               );
             })()}
 
-
-            <div className="flex gap-3 pt-4 border-t border-gray-100">
+            <div className="sticky bottom-0 z-10 -mx-5 -mb-5 px-5 py-4 flex gap-3 border-t border-[var(--border-color)] bg-[var(--bg-card)]/95 backdrop-blur-sm">
               <button
                 type="button"
                 onClick={() => { setActiveAssignment(null); setAnswers({}); }}
-                className="flex-1 px-5 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-semibold text-gray-700 transition-colors"
+                className={`${alumniSecondaryBtnClass} flex-1`}
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="flex-1 px-5 py-3 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
-                style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-sm">send</span>
-                  Submit Answers
-                </span>
+              <button type="submit" className={`${alumniPrimaryBtnClass} flex-1`}>
+                <span className="material-symbols-outlined text-sm">send</span>
+                Submit Answers
               </button>
             </div>
           </form>
         </div>
       )}
-    </div>
+    </AlumniSectionShell>
   );
 };

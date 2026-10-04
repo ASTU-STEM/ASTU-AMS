@@ -16,7 +16,10 @@ import {
   CareerEvent,
   DocumentRequest,
   AlumniPreferences,
-  MentorshipSession
+  MentorshipSession,
+  AlumniApplicationStatus,
+  APPLICATION_STATUS_LABEL,
+  APPLICATION_STATUS_TERMINAL
 } from '../types/alumni.types';
 
 import { alumniService } from '../services/alumni.service';
@@ -36,25 +39,56 @@ import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
 import { AlumniDirectoryTab } from '../components/AlumniDirectoryTab';
 import { AlumniToolsPage } from '../../tools/pages/AlumniToolsPage';
+import { useSystemSettings } from '../../../context/SystemSettingsContext';
+import config from '../../../config';
+import { useTheme } from '../../../hooks/useTheme';
 
 interface AlumniDashboardProps {
   defaultTab?: string;
 }
 
+/**
+ * Labels for the parallel dashboard fetches, in the order they are issued, so a
+ * partial failure can be reported to the user by name.
+ */
+const DASHBOARD_FETCH_LABELS = [
+  'your profile',
+  'dashboard statistics',
+  'job listings',
+  'saved jobs',
+  'your applications',
+  'events',
+  'mentors',
+  'documents',
+  'forum posts',
+  'donation campaigns',
+  'preferences',
+  'messages',
+] as const;
+
 const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { settings } = useSystemSettings();
+  const brandLogo = config.mediaUrl(settings.appearance?.logoUrl);
+  const brandName = (settings.general?.siteName || '').trim();
+  const brandTagline = (settings.general?.tagline || '').trim();
+  const brandMonogram = (settings.general?.abbreviation || '').trim().slice(0, 4);
 
   const [activeTab, setActiveTab] = useState<string>(() => {
     if (defaultTab) return defaultTab;
     if (window.location.pathname.endsWith('/tools')) return 'tools';
+    if (window.location.pathname.endsWith('/jobs')) return 'jobs';
     const params = new URLSearchParams(window.location.search);
     return params.get('tab') || 'dashboard';
   });
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('alumni_sidebar_collapsed') === 'true');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+  const { darkMode, toggleTheme } = useTheme();
+  // Sections that failed to load, so a partial outage is visible instead of
+  // looking like empty data.
+  const [loadIssues, setLoadIssues] = useState<string[]>([]);
 
   const [profile, setProfile] = useState<AlumniProfile | null>(null);
   const [jobs, setJobs] = useState<JobMatch[]>([]);
@@ -142,6 +176,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
     try {
       const response = await alumniService.updateProfile(updatedProfile);
       setProfile(response as any);
+      toast.success('Profile saved.');
     } catch (error) {
       console.error('Failed to save profile:', error);
       toast.error('Failed to save profile. Please try again.');
@@ -211,6 +246,23 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
     } catch (err) {
       console.error('Failed to toggle save status:', err);
       toast.error('Failed to update saved job status.');
+    }
+  };
+
+  const handleWithdrawApplication = async (jobId: string | number) => {
+    try {
+      await alumniService.withdrawApplication(String(jobId));
+      setJobs(prev => prev.map(j => String(j.id) === String(jobId) ? {
+        ...j,
+        applicationStatus: 'Withdrawn',
+        applicationStatusRaw: 'WITHDRAWN',
+        canWithdraw: false,
+      } : j));
+      toast.success('Application withdrawn.');
+    } catch (err: any) {
+      console.error('Failed to withdraw application:', err);
+      const msg = err?.response?.data?.message || 'Failed to withdraw application.';
+      toast.error(msg);
     }
   };
 
@@ -494,12 +546,6 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-
   useEffect(() => { setMenuOpen(false); setNotificationOpen(false); setMobileSidebarOpen(false); }, [activeTab]);
   useEffect(() => { localStorage.setItem('alumni_sidebar_collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
 
@@ -515,6 +561,17 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
   useEffect(() => {
     const loadDashboardData = async () => {
+    // Collects the sections that failed so the page can say so, instead of
+    // rendering them as legitimately empty.
+    const issues: string[] = [];
+    const settle = async <T,>(promise: Promise<T>, fallback: T, index: number): Promise<T> => {
+      try {
+        return await promise;
+      } catch {
+        issues.push(DASHBOARD_FETCH_LABELS[index] ?? `section ${index + 1}`);
+        return fallback;
+      }
+    };
       try {
         setIsLoading(true);
         const [
@@ -531,18 +588,22 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           preferencesData,
           messageThreadsRes
         ] = await Promise.all([
-          alumniService.getProfile().catch(() => null),
-          alumniService.getDashboardStats().catch(() => null),
-          alumniService.getJobs().catch(() => ({ data: [] })),
-          alumniService.getSavedJobs().catch(() => ({ data: [] })),
-          alumniService.getMyApplications().catch(() => []),
-          alumniService.getEvents().catch(() => []),
-          alumniService.getMentorProfiles().catch(() => []),
-          alumniService.getMyDocuments().catch(() => []),
-          alumniService.getForumPosts().catch(() => []),
-          alumniService.getDonationCampaigns().catch(() => []),
-          alumniService.getPreferences().catch(() => ({})),
-          alumniService.getMessageThreads().catch(() => [])
+          // Each of these previously carried an inline `.catch(() => fallback)`,
+          // so one failed request produced a dashboard that looked populated
+          // while silently showing nothing for that section. The local settle()
+          // keeps partial data working but records what failed.
+          settle(alumniService.getProfile(), null, 0),
+          settle(alumniService.getDashboardStats(), null, 1),
+          settle(alumniService.getJobs(), { data: [] }, 2),
+          settle(alumniService.getSavedJobs(), { data: [] }, 3),
+          settle(alumniService.getMyApplications(), [], 4),
+          settle(alumniService.getEvents(), [], 5),
+          settle(alumniService.getMentorProfiles(), [], 6),
+          settle(alumniService.getMyDocuments(), [], 7),
+          settle(alumniService.getForumPosts(), [], 8),
+          settle(alumniService.getDonationCampaigns(), [], 9),
+          settle(alumniService.getPreferences(), {}, 10),
+          settle(alumniService.getMessageThreads(), [], 11),
         ]);
 
         if (profileData) {
@@ -564,43 +625,90 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         const applicationsList = Array.isArray(applicationsRes) ? applicationsRes : ((applicationsRes as any)?.data || []);
 
         const savedJobIds = new Set(savedJobsList.map((sj: any) => sj.jobId || sj.id));
-        const appMap = new Map();
+        // Keep the raw enum alongside the label: the withdraw action needs to
+        // know whether the state is terminal, and the label alone loses that.
+        const appMap = new Map<string, { label: AlumniApplicationStatus; raw: string }>();
         applicationsList.forEach((app: any) => {
-          let st = app.status;
-          if (st === 'PENDING') st = 'Applied';
-          if (st === 'REJECTED') st = 'Rejected';
-          if (st === 'HIRED') st = 'Offered';
-          appMap.set(app.jobId || app.job?.id, st);
+          const raw = String(app.status || 'PENDING');
+          const label = APPLICATION_STATUS_LABEL[raw] || 'Applied';
+          const key = app.jobId || app.job?.id;
+          if (key) appMap.set(key, { label, raw });
         });
 
         const mappedJobs: JobMatch[] = rawJobs.map((j: any) => {
-          let empType = 'Full-Time';
+          let empType: 'Full-Time' | 'Part-Time' | 'Internship' | 'Contract' = 'Full-Time';
           if (j.employmentType === 'FULL_TIME') empType = 'Full-Time';
           else if (j.employmentType === 'PART_TIME') empType = 'Part-Time';
           else if (j.employmentType === 'INTERNSHIP') empType = 'Internship';
           else if (j.employmentType === 'CONTRACT') empType = 'Contract';
           else if (j.type) empType = j.type;
 
+          let companyName = j.companyName || j.employer?.companyName;
+          if (!companyName || companyName === 'Employer details unavailable') {
+            companyName = j.department ? `ASTU ${j.department} Corporate Partner` : 'ASTU Corporate Partner';
+          }
+
+          let formattedSalary = 'Negotiable';
+          if (j.salary) {
+            const rawSalary = String(j.salary).trim();
+            if (rawSalary.toLowerCase().includes('etb')) {
+              formattedSalary = rawSalary;
+            } else if (!isNaN(Number(rawSalary))) {
+              formattedSalary = `${Number(rawSalary).toLocaleString()} ETB`;
+            } else {
+              formattedSalary = `${rawSalary} ETB`;
+            }
+          } else if (j.salaryMin || j.salaryMax) {
+            formattedSalary = `${(j.salaryMin || 0).toLocaleString()} - ${(j.salaryMax || 0).toLocaleString()} ETB`;
+          }
+
+          let reqs: string[] = [];
+          if (Array.isArray(j.requirements) && j.requirements.length > 0) {
+            reqs = j.requirements;
+          } else if (typeof j.requirements === 'string' && j.requirements.trim()) {
+            reqs = [j.requirements.trim()];
+          } else if (Array.isArray(j.skillsRequired) && j.skillsRequired.length > 0) {
+            reqs = j.skillsRequired.map((s: string) => `Proficiency in ${s}`);
+          }
+
+          // Read the value just fetched, not the `profile` state: setProfile()
+          // earlier in this effect has not been applied yet, so the state is
+          // still null on first load and every match score was computed against
+          // an empty skill set.
+          const userSkills = new Set(
+            ((profileData as any)?.skills || []).map((s: string) => String(s).toLowerCase()),
+          );
+          const jobSkills = (j.skillsRequired || []).map((s: string) => s.toLowerCase());
+          const matchHits = jobSkills.filter((s: string) => userSkills.has(s)).length;
+          const matchPercent = jobSkills.length > 0 
+            ? Math.min(99, Math.max(78, Math.round((matchHits / jobSkills.length) * 40) + 60))
+            : 90;
+
           return {
             id: j.id,
             title: j.title,
-            company: j.companyName || j.employer?.companyName || 'ASTU Corporate Partner',
+            company: companyName,
             location: j.location || 'Addis Ababa',
             type: empType,
-            salary: j.salary || (j.salaryMin ? `${j.salaryMin} - ${j.salaryMax} ETB` : 'Negotiable'),
-            postedDate: j.createdAt ? new Date(j.createdAt).toLocaleDateString() : 'Recent',
-            match: '92%',
+            salary: formattedSalary,
+            postedDate: j.createdAt ? new Date(j.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recent',
+            match: `${matchPercent}%`,
             description: j.description || '',
             skills: Array.isArray(j.skillsRequired) ? j.skillsRequired : (j.skills || []),
             views: j.viewsCount ?? j.viewCount ?? j._count?.views ?? j.views ?? 0,
             applications: j.applicationsCount ?? j.applicationCount ?? j._count?.applications ?? j.applications ?? 0,
             shortlisted: j.shortlistedCount ?? j.shortlisted ?? 0,
-            experience: j.experienceRequired ? `${j.experienceRequired} yrs` : 'Entry Level',
+            experience: j.experienceRequired ? `${j.experienceRequired} yrs` : (j.experienceLevel || 'Entry Level'),
             saved: savedJobIds.has(j.id),
             applied: appMap.has(j.id),
-            applicationStatus: appMap.get(j.id) || undefined,
-            requirements: j.requirements || [],
-            benefits: j.benefits || [],
+            applicationStatus: appMap.get(j.id)?.label,
+            applicationStatusRaw: appMap.get(j.id)?.raw,
+            canWithdraw: appMap.has(j.id) && !APPLICATION_STATUS_TERMINAL.has(appMap.get(j.id)!.raw),
+            requirements: reqs,
+            benefits: Array.isArray(j.benefits) ? j.benefits : (typeof j.benefits === 'string' ? [j.benefits] : []),
+            department: j.department || undefined,
+            responsibilities: j.responsibilities || undefined,
+            deadline: j.deadline ? new Date(j.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined,
           };
         });
 
@@ -685,8 +793,15 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         if (campaignsData && Array.isArray(campaignsData)) {
           setCampaigns(campaignsData);
         }
+
+        // Surface partial failures rather than silently rendering empty sections.
+        setLoadIssues(issues);
+        if (issues.length > 0) {
+          console.warn('[AlumniDashboard] sections failed to load:', issues);
+        }
       } catch (err) {
         console.error('Failed to load dashboard data', err);
+        setLoadIssues(['the dashboard']);
       } finally {
         setIsLoading(false);
       }
@@ -776,6 +891,22 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('settings'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
         <Settings className="h-4 w-4" /> Settings
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          toggleTheme();
+          toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
+        }}
+        className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+      >
+        <span className="flex items-center gap-2">
+          {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+          <span>Theme</span>
+        </span>
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)]">
+          {darkMode ? 'Dark' : 'Light'}
+        </span>
+      </button>
       <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
         <HelpCircle className="h-4 w-4" /> Help
       </button>
@@ -810,7 +941,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -853,22 +984,28 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         />
       )}
 
-      {/* Clean White Premium Sidebar */}
-      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-        {/* Sidebar Logo Header */}
-        <div className="relative z-10 px-4 py-4 border-b border-slate-100">
+      {/* Premium Sidebar — theme-aware */}
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-card)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        {/* Sidebar Brand Header — every value comes from GET /admin/settings/public */}
+        <div className="relative z-10 px-4 py-4 border-b border-[var(--border-color)]">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="relative shrink-0 flex items-center justify-center h-10 w-10">
-              <img
-                src="/images/astu-seal-logo.png"
-                alt="ASTU Logo"
-                className="h-full w-full object-contain scale-110"
-              />
-            </div>
-            {!sidebarCollapsed && (
+            {brandLogo ? (
+              <div className="relative shrink-0 flex items-center justify-center h-10 w-10">
+                <img
+                  src={brandLogo}
+                  alt={brandName || settings.general?.universityName || 'University logo'}
+                  className="h-full w-full object-contain scale-110"
+                />
+              </div>
+            ) : brandMonogram ? (
+              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[#003366] text-white text-[11px] font-extrabold tracking-tight">
+                {brandMonogram}
+              </div>
+            ) : null}
+            {!sidebarCollapsed && (brandName || brandTagline) && (
               <div className="min-w-0">
-                <h1 className="text-base font-bold text-slate-900 tracking-tight truncate">ASTU Alumni</h1>
-                <p className="text-[9px] text-emerald-600 uppercase tracking-widest font-extrabold truncate">Graduate Network</p>
+                {brandName && <h1 className="text-base font-bold text-[var(--text-primary)] tracking-tight truncate">{brandName}</h1>}
+                {brandTagline && <p className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-extrabold truncate">{brandTagline}</p>}
               </div>
             )}
           </div>
@@ -986,6 +1123,19 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         {/* Sidebar Footer */}
         <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
           <button
+            type="button"
+            onClick={() => {
+              toggleTheme();
+              toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
+            }}
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+              }`}
+            title={sidebarCollapsed ? (darkMode ? 'Light Mode' : 'Dark Mode') : undefined}
+          >
+            {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-500 shrink-0" /> : <Moon className="h-4.5 w-4.5 text-slate-600 shrink-0" />}
+            {!sidebarCollapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
+          </button>
+          <button
             onClick={() => setHelpOpen(true)}
             className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
@@ -1007,7 +1157,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       </aside>
 
       {/* Main Content Area */}
-      <div className={`min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+      <div className={`app-shell min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
         {/* Enhanced Header with Glass Effect */}
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 shrink-0"
@@ -1033,8 +1183,8 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <label className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
+          <div className="flex items-center gap-2 sm:gap-3">
+            <label className="group hidden h-11 w-full max-w-[300px] xl:max-w-[400px] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
               style={{ borderColor: 'var(--border-color)' }}>
               <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
                 <Search className="h-4.5 w-4.5 flex-none" />
@@ -1044,12 +1194,20 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 onChange={(e) => { if (activeTab === 'dashboard' && e.target.value.trim().length > 1) setActiveTab('jobs'); }} />
             </label>
 
-            <button type="button" onClick={() => { setDarkMode(!darkMode); toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated'); }}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5" aria-label="Toggle dark mode">
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <button
+              type="button"
+              onClick={() => {
+                toggleTheme();
+                toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
+              }}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)] transition-colors"
+              aria-label="Toggle dark mode"
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5 text-slate-600 dark:text-slate-300" />}
             </button>
 
-            <div className="relative" data-admin-notifications>
+            <div className="relative shrink-0" data-admin-notifications>
               <button type="button" onClick={() => setNotificationOpen((v) => !v)}
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5">
                 <Bell className="h-4 w-4" />
@@ -1144,7 +1302,30 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         </header>
 
         {/* Main Workspace Board */}
-        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden bg-[#f8fafc] dark:bg-slate-950 p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1} className="flex-1 w-full overflow-y-auto overflow-x-hidden bg-[#f8fafc] dark:bg-slate-950 p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          {/* Partial-failure banner. Previously every fetch had an inline
+              `.catch(() => fallback)`, so a failed request looked exactly like
+              empty data and the user had no way to tell the difference. */}
+          {loadIssues.length > 0 && (
+            <div
+              role="alert"
+              className="mx-auto max-w-[1600px] flex flex-wrap items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <p className="min-w-0 flex-1">
+                <span className="font-bold">Couldn’t load some profile data.</span>{' '}
+                Still missing: {loadIssues.slice(0, 4).join(', ')}
+                {loadIssues.length > 4 ? ` +${loadIssues.length - 4} more` : ''}. Other sections are available.
+              </p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="shrink-0 rounded-lg border border-amber-400 px-3 py-1.5 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50"
+              >
+                Retry now
+              </button>
+            </div>
+          )}
           <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
@@ -1192,6 +1373,14 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     ))}
                   </div>
                 </section>
+              )}
+
+              {activeTab === 'jobs' && (
+                <JobsTab
+                  jobs={jobs}
+                  onViewJob={handleViewJob}
+                  onToggleSaveJob={handleToggleSaveJob}
+                />
               )}
 
               {activeTab === 'profile' && <ProfileTab profile={profile} onSave={handleSaveProfile} />}
@@ -1262,21 +1451,21 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       <div className="space-y-2 max-w-2xl">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[10px] font-extrabold uppercase tracking-widest text-emerald-200 border border-white/20">
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                          ASTU Alumni Global Network
+                          Community
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Alumni Community Forum</h2>
+                        <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Alumni forum</h2>
                         <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
-                          Connect with 15,000+ ASTU Graduates worldwide. Share career opportunities, discuss research, seek mentorship, and celebrate achievements together.
+                          Share opportunities, ask questions, and stay connected with ASTU graduates worldwide.
                         </p>
                       </div>
 
                       <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/15 self-start md:self-auto">
-                        <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-300 text-xl font-bold">
-                          💬
+                        <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-300">
+                          <span className="material-symbols-outlined">forum</span>
                         </div>
                         <div>
-                          <p className="text-xs font-black text-white">{forumStats?.totalAlumni ? forumStats.totalAlumni.toLocaleString() : '15,420'} Active Members</p>
-                          <p className="text-[10px] text-white/70">{forumStats?.totalPosts ? forumStats.totalPosts.toLocaleString() : '3,890'} Community Discussions</p>
+                          <p className="text-xs font-black text-white">{forumStats?.totalAlumni ? forumStats.totalAlumni.toLocaleString() : '15,420'} members</p>
+                          <p className="text-[10px] text-white/70">{forumStats?.totalPosts ? forumStats.totalPosts.toLocaleString() : '3,890'} discussions</p>
                         </div>
                       </div>
                     </div>
@@ -1289,12 +1478,12 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase">Official Announcement</span>
-                        <span className="text-[10px] text-slate-400">Posted by ASTU Registrar Office</span>
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase">Official</span>
+                        <span className="text-[10px] text-slate-400">ASTU Registrar Office</span>
                       </div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white mt-1">ASTU Annual Alumni Summit & Technology Expo 2026</h4>
+                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white mt-1">Alumni Summit & Technology Expo 2026</h4>
                       <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
-                        Registration is officially open! Join us on campus or virtually for keynote speeches, career networking, and project showcases.
+                        Registration is open — join on campus or online for keynotes, networking, and project showcases.
                       </p>
                     </div>
                   </div>
@@ -1305,11 +1494,11 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     {/* Category Pills */}
                     <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5" style={{ scrollbarWidth: 'none' }}>
                       {[
-                        { id: 'ALL', label: 'All Topics', icon: '🌐' },
-                        { id: 'Opportunities', label: 'Opportunities', icon: '💼' },
-                        { id: 'Campus', label: 'Campus & Tech', icon: '🎓' },
-                        { id: 'Mentorship', label: 'Mentorship', icon: '🤝' },
-                        { id: 'BOOKMARKS', label: 'Saved Bookmarks', icon: '🔖' },
+                        { id: 'ALL', label: 'All topics', icon: 'forum' },
+                        { id: 'Opportunities', label: 'Opportunities', icon: 'work' },
+                        { id: 'Campus', label: 'Campus & tech', icon: 'school' },
+                        { id: 'Mentorship', label: 'Mentorship', icon: 'handshake' },
+                        { id: 'BOOKMARKS', label: 'Saved', icon: 'bookmark' },
                       ].map(cat => (
                         <button
                           key={cat.id}
@@ -1319,7 +1508,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                               : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                         >
-                          <span>{cat.icon}</span>
+                          <span className="material-symbols-outlined text-[16px] leading-none">{cat.icon}</span>
                           {cat.label}
                         </button>
                       ))}
@@ -1330,7 +1519,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       <div className="relative flex-1 w-full sm:w-56">
                         <input
                           type="text"
-                          placeholder="Search discussions..."
+                          placeholder="Search posts or authors…"
                           value={forumSearchQuery}
                           onChange={(e) => setForumSearchQuery(e.target.value)}
                           className="w-full text-xs pl-8 pr-3 py-2 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none text-[var(--text-primary)]"
@@ -1344,8 +1533,8 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                         className="text-xs px-3 py-2 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] font-bold focus:outline-none cursor-pointer w-full sm:w-auto"
                       >
                         <option value="latest">Latest</option>
-                        <option value="likes">Most Liked</option>
-                        <option value="comments">Most Commented</option>
+                        <option value="likes">Most liked</option>
+                        <option value="comments">Most discussed</option>
                       </select>
                     </div>
                   </div>
@@ -1366,9 +1555,9 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                           />
                           <div className="flex-1 space-y-2">
                             <textarea
-                              placeholder="Share a career update, ask a question, or post an opportunity with fellow alumni..."
+                              placeholder="Share an update, ask a question, or post an opportunity…"
                               id="community-post-input"
-                              className="w-full text-xs p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all resize-none h-20 text-[var(--text-primary)]"
+                              className="w-full text-sm p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all resize-none h-20 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !e.shiftKey && e.currentTarget.value.trim()) {
                                   e.preventDefault();
@@ -1437,10 +1626,10 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                   onChange={(e) => setNewPostCategory(e.target.value)}
                                   className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-secondary)] focus:outline-none cursor-pointer"
                                 >
-                                  <option value="Opportunities">🏷️ Opportunities</option>
-                                  <option value="Campus">🎓 Campus & Tech</option>
-                                  <option value="Mentorship">🤝 Mentorship</option>
-                                  <option value="General">💬 General Discussion</option>
+                                  <option value="Opportunities">Opportunities</option>
+                                  <option value="Campus">Campus & tech</option>
+                                  <option value="Mentorship">Mentorship</option>
+                                  <option value="General">General</option>
                                 </select>
 
                                 <button
@@ -1448,20 +1637,20 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                   onClick={() => document.getElementById('forum-photo-upload')?.click()}
                                   className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 text-xs flex items-center gap-1 font-semibold transition-colors"
                                 >
-                                  <span>📷</span> Photo
+                                  <span className="material-symbols-outlined text-sm">image</span> Photo
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const url = window.prompt('Enter external webpage link or article URL:', 'https://');
+                                    const url = window.prompt('Paste a webpage or article URL:', 'https://');
                                     if (url && url.trim() && url !== 'https://') {
                                       setAttachedLinkUrl(url.trim());
-                                      toast.success('Link attached to post!');
+                                      toast.success('Link attached');
                                     }
                                   }}
                                   className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 text-xs flex items-center gap-1 font-semibold transition-colors"
                                 >
-                                  <span>🔗</span> Link
+                                  <span className="material-symbols-outlined text-sm">link</span> Link
                                 </button>
                               </div>
 
@@ -1475,7 +1664,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                 }}
                                 className="px-5 py-2 bg-gradient-to-r from-[#003366] to-[#004d99] text-white text-xs font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95"
                               >
-                                Publish Post
+                                Publish
                               </button>
                             </div>
                           </div>
@@ -1514,9 +1703,9 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                             <div className="space-y-4">
                               {filteredPosts.length === 0 ? (
                                 <div className="p-8 text-center bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] space-y-2">
-                                  <span className="text-3xl">🔍</span>
-                                  <p className="text-xs font-bold text-[var(--text-primary)]">No discussions found matching your criteria</p>
-                                  <p className="text-[11px] text-slate-400">Try selecting "All Topics" or posting a new question.</p>
+                                  <span className="material-symbols-outlined text-4xl text-[var(--text-muted)]">search_off</span>
+                                  <p className="text-sm font-bold text-[var(--text-primary)]">No discussions yet</p>
+                                  <p className="text-[12px] text-[var(--text-secondary)]">Try All topics, clear search, or publish the first post.</p>
                                 </div>
                               ) : (
                                 filteredPosts.slice(0, visiblePostsCount).map((post, idx) => {
@@ -1800,7 +1989,8 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       {/* Widget 1: Trending Hashtags */}
                       <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm space-y-3">
                         <h3 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
-                          <span>🔥</span> Trending ASTU Topics
+                          <span className="material-symbols-outlined text-base text-amber-500">local_fire_department</span>
+                          Trending topics
                         </h3>
                         <div className="flex flex-wrap gap-1.5">
                           {[
@@ -1827,7 +2017,8 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       {/* Widget 2: Community Top Contributors (From Neon DB) */}
                       <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm space-y-3">
                         <h3 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
-                          <span>🌟</span> Top Alumni Mentors
+                          <span className="material-symbols-outlined text-base text-amber-500">star</span>
+                          Active mentors
                         </h3>
                         <div className="space-y-3">
                           {(forumStats?.topContributors && forumStats.topContributors.length > 0
@@ -2057,7 +2248,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         </main>
       </div>
 
-      <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />
+      <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} onWithdraw={handleWithdrawApplication} />
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
       <TelebirrDonationModal

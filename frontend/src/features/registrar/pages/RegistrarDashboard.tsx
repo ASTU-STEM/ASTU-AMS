@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import { PageLoader } from '../../../components/loaders';
 
 
 // Types
@@ -23,8 +24,10 @@ import { DataIssuesTab } from '../components/DataIssuesTab';
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
+import { useTheme } from '../../../hooks/useTheme';
 
 const RegistrarDashboard = () => {
+  const { darkMode, toggleTheme } = useTheme();
    const navigate = useNavigate();
    const { user, logout } = useAuth();
 
@@ -71,7 +74,6 @@ const RegistrarDashboard = () => {
 
 
    // Theme Dark / Light mode
-   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
@@ -668,12 +670,6 @@ const RegistrarDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-
-  useEffect(() => {
     if (activeTab === 'dashboard' && normalizedSearch) {
       // keep user in dashboard unless they explicitly search
     }
@@ -711,7 +707,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
+    <div className="app-shell min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -959,7 +955,7 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => {
-                  setDarkMode(!darkMode);
+                  toggleTheme();
                   toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
                 }}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
@@ -1065,6 +1061,15 @@ useEffect(() => {
               </div>
             </div>
           </header>
+
+            {/* isLoadingData was set but never read, so this page had no
+                loading UI at all: every counter showed 0 and the records table
+                rendered empty while the requests were still in flight. */}
+            {isLoadingData && (
+              <div className="px-4 pt-4 sm:px-6">
+                <PageLoader />
+              </div>
+            )}
 
           {/* Dynamic tabs routing */}
           <div className="flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>

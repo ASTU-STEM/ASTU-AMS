@@ -15,7 +15,6 @@ import StoryDetailPage from "./pages/StoryDetailPage";
 import EventDetailPage from "./pages/EventDetailPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
-import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
 import VerifyNationalIdCallbackPage from "./features/auth/pages/VerifyNationalIdCallbackPage";
 import EmployerRegistrationPage from "./features/auth/pages/EmployerRegistrationPage";
@@ -55,7 +54,6 @@ function AppContent() {
         <Route path="/events/:id" element={<EventDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
-        <Route path="/activate-account" element={<AlumniActivationPage />} />
         <Route path="/employers" element={<EmployersPage />} />
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -87,6 +85,15 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<AlumniDashboard defaultTab="tools" />}
+              allowedRoles={["ALUMNI"]}
+            />
+          }
+        />
+        <Route
+          path="/alumni/jobs"
+          element={
+            <ProtectedRoute
+              element={<AlumniDashboard defaultTab="jobs" />}
               allowedRoles={["ALUMNI"]}
             />
           }

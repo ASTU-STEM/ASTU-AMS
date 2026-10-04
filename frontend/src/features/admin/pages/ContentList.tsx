@@ -194,6 +194,11 @@ export default function ContentList() {
 
   const bulkDelete = useCallback(() => {
     if (selectedIds.length === 0) return;
+    // The single-item delete confirms; this did not, so one click could remove
+    // every selected item.
+    if (!window.confirm(`Permanently delete ${selectedIds.length} content item(s)? This cannot be undone.`)) {
+      return;
+    }
     selectedIds.forEach(id => contentService.deleteItem(id));
     setItems(contentService.getItems());
     toast.success(`${selectedIds.length} item(s) deleted`);

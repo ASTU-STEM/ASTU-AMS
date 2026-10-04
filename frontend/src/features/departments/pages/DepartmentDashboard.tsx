@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTheme } from '../../../hooks/useTheme';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import {
@@ -149,10 +150,10 @@ const DepartmentDashboard = () => {
   const [activeTab, setActiveTab] = useState<DepartmentTab>(
     isDepartmentTab(tabFromUrl) ? tabFromUrl : 'dashboard'
   );
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-  }, [darkMode]);
+  // useTheme removes both classes before adding the target one. The previous
+  // `classList.toggle('dark', darkMode)` left `light` on <html>, so with both
+  // classes present the light tokens won and the toggle did nothing visible.
+  const { darkMode, setTheme: setDarkMode } = useTheme();
   const [helpOpen, setHelpOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerSearch, setHeaderSearch] = useState('');
@@ -302,7 +303,7 @@ const DepartmentDashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
         <style>{`
           .nav-btn {
             transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -581,9 +582,9 @@ const DepartmentDashboard = () => {
                 type="button"
                 onClick={() => {
                   const next = !darkMode;
-                  setDarkMode(next);
-                  document.documentElement.classList.toggle('dark', next);
-                  localStorage.setItem('theme', next ? 'dark' : 'light');
+                  // useTheme owns the class list and localStorage; the manual
+                  // classList.toggle here was re-introducing the same bug.
+                  setDarkMode(next ? 'dark' : 'light');
                   toast.success(next ? 'Dark theme activated' : 'Light theme activated');
                 }}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"

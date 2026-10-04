@@ -3,6 +3,7 @@ import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Su
 import { AppSidebar, SidebarNavItem } from './AppSidebar';
 import HelpCenter from './HelpCenter';
 import toast from 'react-hot-toast';
+import { useTheme } from '../hooks/useTheme';
 
 export interface DashboardShellProps {
   children: React.ReactNode;
@@ -46,9 +47,7 @@ export function DashboardShell({
    onSearch,
    headerChildren,
  }: DashboardShellProps) {
-   const [darkMode, setDarkMode] = useState(
-     () => localStorage.getItem('theme') === 'dark'
-   );
+  const { darkMode, toggleTheme } = useTheme();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -89,11 +88,6 @@ export function DashboardShell({
   }, [brand, sidebarCollapsed]);
 
 // Sync theme
-   useEffect(() => {
-     document.documentElement.classList.remove('light', 'dark');
-     document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-   }, [darkMode]);
 
    // Logout handler
   const handleLocalLogout = () => {
@@ -106,7 +100,7 @@ export function DashboardShell({
 
   return (
     <>
-    <div className="flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="app-shell flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       {mobileSidebarOpen && (
         <button
           type="button"
@@ -197,7 +191,7 @@ export function DashboardShell({
             <button
               type="button"
               onClick={() => {
-                setDarkMode((d) => !d);
+                toggleTheme();
                 toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
               }}
               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
@@ -380,7 +374,9 @@ export function DashboardShell({
 
         {/* Content Area */}
         <main
-          className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-6 lg:p-8"
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-6 lg:p-8 outline-none"
           style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}
         >
           {children}

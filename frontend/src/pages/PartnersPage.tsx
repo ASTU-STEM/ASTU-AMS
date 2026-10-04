@@ -169,7 +169,7 @@ export default function PartnersPage() {
   const goToRegister = () => navigate('/employers/register');
 
   return (
-    <div className="min-h-screen bg-background text-on-surface">
+    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
       {/* Hero */}
