@@ -3,6 +3,7 @@ import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Su
 import { AppSidebar, SidebarNavItem } from './AppSidebar';
 import HelpCenter from './HelpCenter';
 import toast from 'react-hot-toast';
+import { notificationService } from '../features/notifications/services/notification.service';
 import { useTheme } from '../hooks/useTheme';
 
 export interface DashboardShellProps {
@@ -24,7 +25,7 @@ export interface DashboardShellProps {
 }
 
 interface Notification {
-  id: number;
+  id: string;
   text: string;
   unread: boolean;
   time: string;
@@ -55,11 +56,59 @@ export function DashboardShell({
     () => localStorage.getItem(`dashboard_shell_${brand}_collapsed`) === 'true'
   );
   const [helpOpen, setHelpOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { id: 1, text: 'New system update available', unread: true, time: '2 hours ago' },
-    { id: 2, text: '3 pending approval requests', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Database backup completed', unread: false, time: '3 days ago' },
-  ]);
+  // Loaded from the API. This was seeded with three fabricated rows
+  // ("New system update available", "3 pending approval requests",
+  // "Database backup completed") that were never sent to anyone.
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setNotificationsLoading(true);
+      try {
+        const data = await notificationService.getMyNotifications();
+        if (cancelled) return;
+        setNotifications(
+          (Array.isArray(data) ? data : []).map((n: any) => ({
+            id: String(n.id),
+            text: n.title ? `${n.title}: ${n.content ?? n.message ?? ''}`.trim() : (n.content || n.message || ''),
+            unread: !(n.isRead || n.read),
+            time: n.createdAt ? new Date(n.createdAt).toLocaleString() : '',
+          }))
+        );
+        setNotificationsError(null);
+      } catch (err: any) {
+        if (cancelled) return;
+        setNotificationsError(err?.message || 'Could not load notifications.');
+      } finally {
+        if (!cancelled) setNotificationsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleClearAll = async () => {
+    try {
+      await notificationService.clearAll();
+      setNotifications([]);
+    } catch (err: any) {
+      setNotificationsError(err?.message || 'Could not clear notifications.');
+    }
+  };
+
+  const handleDeleteOne = async (id: string) => {
+    const previous = notifications;
+    setNotifications((prev) => prev.filter((x) => x.id !== id));
+    try {
+      await notificationService.deleteOne(id);
+    } catch (err: any) {
+      setNotifications(previous);
+      setNotificationsError(err?.message || 'Could not delete notification.');
+    }
+  };
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -227,21 +276,31 @@ export function DashboardShell({
                         <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
                         <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
                       </div>
-                      <button
-                        onClick={() => setNotifications([])}
-                        className="text-xs font-semibold text-[#E24B4A] hover:underline"
-                      >
-                        Clear All
-                      </button>
+                      {notifications.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleClearAll}
+                          className="text-xs font-semibold text-[#E24B4A] hover:underline"
+                        >
+                          Clear All
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div className="max-h-60 space-y-1 overflow-y-auto p-2">
-                    {notifications.length > 0 ? (
+                    {notificationsLoading && notifications.length === 0 ? (
+                      <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">
+                        Loading notifications…
+                      </p>
+                    ) : notificationsError && notifications.length === 0 ? (
+                      <p className="px-2 py-6 text-center text-sm text-rose-600">{notificationsError}</p>
+                    ) : notifications.length > 0 ? (
                       notifications.map((n) => (
                         <div
                           key={n.id}
                           onClick={() => {
                             setNotifications((prev) => prev.map((x) => x.id === n.id ? { ...x, unread: false } : x));
+                            notificationService.markAsRead(n.id).catch(() => {});
                             setNotificationOpen(false);
                             const lower = n.text.toLowerCase();
                             if (lower.includes('job')) onTabChange('jobs');
@@ -263,7 +322,7 @@ export function DashboardShell({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setNotifications((prev) => prev.filter((x) => x.id !== n.id));
+                              handleDeleteOne(n.id);
                             }}
                             className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                           >

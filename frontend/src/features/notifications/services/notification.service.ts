@@ -33,5 +33,21 @@ export const notificationService = {
       headers: getHeaders(),
     });
     return handleResponse(res);
+  },
+
+  async deleteOne(notificationId: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/notifications/${notificationId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
+  async clearAll(): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/notifications`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
   }
 };

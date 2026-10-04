@@ -153,17 +153,25 @@ export default function AdminLayout() {
 
   const [realNotifications, setRealNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [notificationsLoading, setNotificationsLoading] = useState<boolean>(true);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
 
   const fetchRealNotifications = async () => {
+    setNotificationsLoading(true);
     try {
       const data = await notificationService.getMyNotifications();
       if (Array.isArray(data)) {
         setRealNotifications(data);
         const unread = data.filter((n: any) => !n.isRead && !n.read).length;
         setUnreadCount(unread);
+        setNotificationsError(null);
       }
-    } catch (_) {
-      // Fallback fallback notifications if database has 0 items
+    } catch (err: any) {
+      // Surface the failure instead of substituting placeholder rows: a fetch
+      // error must not be indistinguishable from "you have no notifications".
+      setNotificationsError(err?.message || 'Could not load notifications.');
+    } finally {
+      setNotificationsLoading(false);
     }
   };
 
@@ -186,16 +194,27 @@ export default function AdminLayout() {
       setRealNotifications((prev) => prev.map((n) => ({ ...n, isRead: true, read: true })));
       toast.success('All notifications marked as read');
     } catch (err: any) {
-      setUnreadCount(0);
+      // Previously zeroed the badge on failure, reporting success for an action
+      // that never happened.
+      toast.error(err?.message || 'Could not mark notifications as read.');
     }
   };
 
-  const displayNotifications = realNotifications.length > 0 ? realNotifications : [
-    { id: '1', tone: '#1D9E75', title: 'Survey Dispatched', text: 'Survey Wave 3 sent to 2024 alumni batch', time: '6 min ago', isRead: false },
-    { id: '2', tone: '#003580', title: 'Employer Registration', text: 'New employer Safaricom registration approved', time: '18 min ago', isRead: false },
-    { id: '3', tone: '#E8A020', title: 'SIS Batch Sync', text: 'CSV import completed: 245 alumni records', time: '1 hour ago', isRead: false },
-    { id: '4', tone: '#E24B4A', title: 'Security Alert', text: 'Two failed login attempts blocked', time: '3 hours ago', isRead: false },
-  ];
+  const handleClearAll = async () => {
+    try {
+      const result = await notificationService.clearAll();
+      setRealNotifications([]);
+      setUnreadCount(0);
+      toast.success(`Cleared ${result?.deleted ?? 0} notification(s).`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not clear notifications.');
+    }
+  };
+
+  // Only ever real records from the API. This previously fell back to four
+  // hardcoded rows (including a fabricated "Security Alert") whenever the
+  // response was empty, so an inbox with nothing in it rendered fake alerts.
+  const displayNotifications = realNotifications;
 
   const menu = (
     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
@@ -373,15 +392,43 @@ export default function AdminLayout() {
                     )}
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-1 p-1">
-                    {displayNotifications.map((item: any, idx: number) => {
+                    {notificationsLoading && displayNotifications.length === 0 ? (
+                      <div className="px-3 py-6 text-center text-xs font-medium text-slate-500">
+                        Loading notifications…
+                      </div>
+                    ) : notificationsError && displayNotifications.length === 0 ? (
+                      <div className="px-3 py-6 text-center">
+                        <p className="text-xs font-semibold text-rose-600">{notificationsError}</p>
+                        <button
+                          type="button"
+                          onClick={fetchRealNotifications}
+                          className="mt-2 text-xs font-bold text-[#003580] hover:underline"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    ) : displayNotifications.length === 0 ? (
+                      <div className="px-3 py-6 text-center text-xs font-medium text-slate-500">
+                        You have no notifications yet.
+                      </div>
+                    ) : displayNotifications.map((item: any, idx: number) => {
                       const isUnread = !item.isRead && !item.read;
                       return (
                         <div
                           key={item.id || idx}
                           onClick={() => {
-                            if (item.id) notificationService.markAsRead(item.id).catch(() => {});
+                            if (!item.id) return;
+                            // Optimistic, but reverted on failure: the previous
+                            // `.catch(() => {})` left the row marked as read
+                            // even when the request never succeeded.
+                            const previous = realNotifications;
                             setRealNotifications((prev) => prev.map((n) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
                             setUnreadCount((prev) => Math.max(0, prev - 1));
+                            notificationService.markAsRead(item.id).catch((err: any) => {
+                              setRealNotifications(previous);
+                              setUnreadCount((prev) => prev + 1);
+                              toast.error(err?.message || 'Could not mark notification as read.');
+                            });
                           }}
                           className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
                         >
@@ -401,7 +448,7 @@ export default function AdminLayout() {
                       );
                     })}
                   </div>
-                  <div className="border-t border-slate-100 px-3 py-2.5 text-center">
+                  <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-3 py-2.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -412,6 +459,15 @@ export default function AdminLayout() {
                     >
                       View all notifications →
                     </button>
+                    {displayNotifications.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleClearAll}
+                        className="text-xs font-bold text-rose-600 hover:underline"
+                      >
+                        Clear all
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CmsSidebar from './CmsSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import { useTheme } from '../hooks/useTheme';
+import { notificationService } from '../features/notifications/services/notification.service';
 
 class CmsRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -150,12 +151,29 @@ export default function CmsLayout() {
     navigate('/login');
   };
 
-  const notifications = [
-    { color: 'bg-emerald-500', text: 'Homepage hero updated and published', time: '4 min ago' },
-    { color: 'bg-blue-500', text: 'New gallery album "Graduation 2026" created', time: '15 min ago' },
-    { color: 'bg-amber-500', text: 'Event "Career Fair" awaiting approval', time: '1 hour ago' },
-    { color: 'bg-rose-500', text: 'Community report flagged for review', time: '2 hours ago' },
-  ];
+  // Real notifications from the API. Previously four fabricated CMS events
+  // ("Homepage hero updated and published", etc.) were shown alongside a
+  // hardcoded "4 new" badge.
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
+
+  const loadNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const data = await notificationService.getMyNotifications();
+      setNotifications(Array.isArray(data) ? data : []);
+      setNotificationsError(null);
+    } catch (err: any) {
+      setNotificationsError(err?.message || 'Could not load notifications.');
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => { loadNotifications(); }, []);
+
+  const cmsUnread = notifications.filter((n: any) => !(n.isRead || n.read)).length;
 
   const filteredSuggestions = searchQuery.trim()
     ? searchSuggestions.filter(s => s.label.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -301,7 +319,11 @@ export default function CmsLayout() {
                 <button type="button" onClick={() => setNotificationOpen(v => !v)}
                   className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all">
                   <Bell className="h-4.5 w-4.5" />
-                  <span className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold leading-none text-white shadow-sm">4</span>
+                  {cmsUnread > 0 && (
+                    <span className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold leading-none text-white shadow-sm">
+                      {cmsUnread > 99 ? '99+' : cmsUnread}
+                    </span>
+                  )}
                 </button>
                 {notificationOpen && (
                   <div className="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg shadow-slate-200/50 dark:shadow-black/30">
@@ -310,18 +332,50 @@ export default function CmsLayout() {
                         <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
                         <div className="text-xs text-[var(--text-secondary)]">Your latest content updates</div>
                       </div>
-                      <span className="rounded-full bg-rose-100 dark:bg-rose-950/40 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:text-rose-400">4 new</span>
+                      {cmsUnread > 0 && (
+                        <span className="rounded-full bg-rose-100 dark:bg-rose-950/40 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:text-rose-400">{cmsUnread} new</span>
+                      )}
                     </div>
                     <div className="py-1">
-                      {notifications.map((item) => (
-                        <div key={item.text} className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--bg-page)] transition-all cursor-pointer">
-                          <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${item.color}`} />
-                          <div className="min-w-0">
-                            <p className="text-sm text-[var(--text-primary)]">{item.text}</p>
-                            <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.time}</p>
-                          </div>
+                      {notificationsLoading && notifications.length === 0 ? (
+                        <p className="px-4 py-6 text-center text-sm text-[var(--text-secondary)]">Loading notifications…</p>
+                      ) : notificationsError && notifications.length === 0 ? (
+                        <div className="px-4 py-6 text-center">
+                          <p className="text-sm text-rose-600">{notificationsError}</p>
+                          <button type="button" onClick={loadNotifications} className="mt-2 text-xs font-semibold text-[#003366] dark:text-[#3b82f6] hover:underline">
+                            Try again
+                          </button>
                         </div>
-                      ))}
+                      ) : notifications.length === 0 ? (
+                        <p className="px-4 py-6 text-center text-sm text-[var(--text-secondary)]">You have no notifications yet.</p>
+                      ) : (
+                        notifications.map((item: any) => {
+                          const unread = !(item.isRead || item.read);
+                          return (
+                            <div
+                              key={item.id}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => {
+                                if (!item.id) return;
+                                setNotifications((prev) => prev.map((n: any) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
+                                notificationService.markAsRead(item.id).catch(() => {});
+                              }}
+                              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
+                              className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--bg-page)] transition-all cursor-pointer"
+                            >
+                              <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${unread ? 'bg-[#003366] dark:bg-[#3b82f6]' : 'bg-gray-300 dark:bg-slate-600'}`} />
+                              <div className="min-w-0">
+                                {item.title && <p className="text-sm font-semibold text-[var(--text-primary)]">{item.title}</p>}
+                                <p className="text-sm text-[var(--text-primary)]">{item.content || item.message}</p>
+                                {item.createdAt && (
+                                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{new Date(item.createdAt).toLocaleString()}</p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                     <div className="border-t border-[var(--border-color)] px-4 py-3">
                       <button type="button" className="text-sm font-semibold text-[#003366] dark:text-[#3b82f6] hover:text-[#002a55] dark:hover:text-[#60a5fa] transition-colors">

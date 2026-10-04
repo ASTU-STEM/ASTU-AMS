@@ -194,7 +194,9 @@ const RegistrarDashboard = () => {
   }, [graduates, lastSeenRecordsTime]);
 
   // Real Chat Unread Messages state for sidebar badge
-  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(2);
+  // Starts at 0, not a hardcoded 2: the previous seed showed the registrar a
+  // phantom unread badge until the request resolved (and forever, on failure).
+  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
   const [realSurveyRate, setRealSurveyRate] = useState<number | null>(null);
 
   useEffect(() => {
@@ -490,13 +492,12 @@ const RegistrarDashboard = () => {
       });
     });
 
+    // No fabricated fallback: when there is genuinely no activity the panel
+    // renders its empty state. This previously invented four events about
+    // real-sounding people (e.g. "Abebe Bikila successfully cleared identity
+    // checks") that the registrar had never received.
     if (entries.length === 0) {
-      return [
-        { id: 1, type: 'verification', title: 'Alumni registration approved', description: 'Abebe Bikila successfully cleared identity checks.', timestamp: '1 hour ago', unread: true },
-        { id: 2, type: 'document', title: 'Transcript verification complete', description: 'Dean approved digital credential hash for student ID UG/12839/14.', timestamp: '3 hours ago', unread: true },
-        { id: 3, type: 'broadcast', title: 'Global tracer study published', description: 'Launched 24-month feedback inquiry to Class of 2024.', timestamp: '1 day ago' },
-        { id: 4, type: 'alert', title: 'SIS Database backup', description: 'Cloud replication completed successfully.', timestamp: '2 days ago' }
-      ] as ActivityEntry[];
+      return [];
     }
 
     return entries;
@@ -961,7 +962,7 @@ useEffect(() => {
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
                 aria-label="Toggle dark mode"
               >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
               </button>
 
               {/* Notification Bell */}
