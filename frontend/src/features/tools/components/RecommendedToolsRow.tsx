@@ -12,29 +12,39 @@ export const RecommendedToolsRow: React.FC<RecommendedToolsRowProps> = ({ profil
   const isEmployed = profile?.employmentStatus === 'EMPLOYED' || profile?.employmentStatus === 'SELF_EMPLOYED';
   const userName = profile?.fullName ? profile.fullName.split(' ')[0] : 'Alumni';
 
+  // Ten of these ids never existed in TOOL_REGISTRY, so this list resolved to
+  // 2 tools when employed and 3 when not, rendered into a 4-column grid under a
+  // heading that claims the list was "Shortlisted by employment status". It is a
+  // hand-picked shortlist, so it now says so.
   const recommendedIds = isEmployed
     ? [
-        'career-progress-tracker',
-        'salary-increase-calculator',
         'personal-development-plan',
-        'masters-readiness-checker',
         'mentor-match-assistant',
-        'professional-bio-generator',
+        'salary-negotiation-copilot',
+        'certification-roadmap-planner',
+        'application-tracker-pro',
+        'linkedin-profile-optimizer',
       ]
     : [
-        'first-job-planner',
-        'job-match-checker',
-        'ethiopian-salary-explorer',
         'career-skills-gap-checker',
         'cv-builder',
-        'interview-question-practice',
         'mentor-match-assistant',
-        'profile-strength-checker',
+        'interview-question-generator',
+        'cover-letter-generator',
+        'job-scam-risk-checker',
+        'career-goal-builder',
+        'thesis-topic-generator',
       ];
 
-  const recommendedTools = recommendedIds
-    .map((id) => TOOL_REGISTRY.find((t) => t.id === id))
-    .filter((t): t is ToolItem => t !== undefined);
+  const resolveTool = (id: string): ToolItem | undefined => {
+    const found = TOOL_REGISTRY.find((t) => t.id === id);
+    if (!found && import.meta.env.DEV) {
+      console.warn(`[tools] RecommendedToolsRow references unknown tool id: "${id}"`);
+    }
+    return found;
+  };
+
+  const recommendedTools = recommendedIds.map(resolveTool).filter((t): t is ToolItem => t !== undefined);
 
   return (
     <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/70 via-blue-50/50 to-white p-4 dark:border-indigo-900/40 dark:from-slate-900 dark:to-slate-800">
@@ -48,13 +58,13 @@ export const RecommendedToolsRow: React.FC<RecommendedToolsRowProps> = ({ profil
               Recommended for {userName}
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              {profile?.department?.name || 'ASTU Graduate'} • {isEmployed ? 'Career Advancement Track' : 'Graduate Employability Track'}
+              {profile?.department?.name || 'ASTU Graduate'} · {isEmployed ? 'Career growth picks' : 'Job-ready picks'}
             </p>
           </div>
         </div>
 
         <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 self-start sm:self-auto">
-          Tailored by ASTU Profile
+          Matched to your status
         </span>
       </div>
 
@@ -70,17 +80,17 @@ export const RecommendedToolsRow: React.FC<RecommendedToolsRowProps> = ({ profil
                 <span className="material-symbols-outlined text-xl">{tool.icon}</span>
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors dark:text-white truncate">
+                <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors dark:text-white line-clamp-2">
                   {tool.name}
                 </h4>
-                <p className="text-[10px] text-slate-500 line-clamp-2 mt-0.5 dark:text-slate-400">
+                <p className="text-[11px] text-slate-500 line-clamp-3 mt-0.5 dark:text-slate-400 leading-relaxed">
                   {tool.description}
                 </p>
               </div>
             </div>
 
             <div className="mt-2.5 flex items-center justify-between text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span>Open Tool</span>
+              <span>Open</span>
               <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
             </div>
           </div>

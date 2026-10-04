@@ -244,11 +244,6 @@ export const alumniService = {
     return unwrap(await apiClient.put('/alumni/preferences', preferences));
   },
 
-  // ─── Documents ────────────────────────────────────────────────────────────
-  async getDocumentRequests() {
-    return unwrap(await apiClient.get('/alumni/documents'));
-  },
-
   // ─── Change Password ─────────────────────────────────────────────────────
   async changePassword(currentPassword: string, newPassword: string) {
     return unwrap(await apiClient.put('/alumni/change-password', { currentPassword, newPassword }));

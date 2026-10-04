@@ -1,7 +1,18 @@
 import React from 'react';
 import { ToolCategory, ToolType } from '../types/tools.types';
 import { TOOL_CATEGORIES } from '../data/toolCategories';
+import { TOOL_REGISTRY } from '../data/toolRegistry';
 import { Search, Star, Filter, X } from 'lucide-react';
+
+const TOOL_TYPE_LABELS: Record<string, string> = {
+  FRONTEND_UTILITY: 'Instant Utilities (Calculators)',
+  AI_ASSISTED: 'AI Generators & Assistants',
+  GUIDED_WORKFLOW: 'Interactive Checklists',
+};
+
+const AVAILABLE_TOOL_TYPES = Object.keys(TOOL_TYPE_LABELS)
+  .filter((value) => TOOL_REGISTRY.some((tool) => tool.toolType === value))
+  .map((value) => ({ value, label: TOOL_TYPE_LABELS[value] }));
 
 interface ToolFiltersProps {
   searchQuery: string;
@@ -36,7 +47,7 @@ export const ToolFilters: React.FC<ToolFiltersProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search 160+ alumni tools (e.g. salary, CV, GPA, scholarship, Ethiopia, relocation, business)..."
+            placeholder={`Search ${TOOL_REGISTRY.length} alumni tools (e.g. salary, CV, GPA, scholarship, Ethiopia, business)`}
             className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-[#003366] focus:ring-2 focus:ring-[#003366]/10 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
           />
           {searchQuery && (
@@ -61,12 +72,16 @@ export const ToolFilters: React.FC<ToolFiltersProps> = ({
             onChange={(e) => onSelectType(e.target.value as any)}
             className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 outline-none focus:border-[#003366] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
           >
+            {/* Options are derived from the registry: DATA_DRIVEN and
+                VERIFIED_RESOURCE are in the ToolType union but no tool uses
+                them, so offering them produced a filter that always returned
+                zero results. */}
             <option value="all">All Tool Types</option>
-            <option value="FRONTEND_UTILITY">Instant Utilities (Calculators)</option>
-            <option value="DATA_DRIVEN">ASTU Portal Data-Driven</option>
-            <option value="AI_ASSISTED">AI Generators & Assistants</option>
-            <option value="GUIDED_WORKFLOW">Interactive Checklists</option>
-            <option value="VERIFIED_RESOURCE">Verified Resources</option>
+            {AVAILABLE_TOOL_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label} ({TOOL_REGISTRY.filter((tool) => tool.toolType === t.value).length})
+              </option>
+            ))}
           </select>
         </div>
       </div>

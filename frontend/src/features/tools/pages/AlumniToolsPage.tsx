@@ -2,6 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { ToolItem, ToolCategory, ToolType, SavedToolResult } from '../types/tools.types';
 import { TOOL_REGISTRY } from '../data/toolRegistry';
 import { TOOL_CATEGORIES } from '../data/toolCategories';
+
+// Categories that actually contain tools. TOOL_CATEGORIES also defines
+// ethiopia_jobs, which has zero tools, so counting the list overstated coverage.
+const POPULATED_CATEGORY_COUNT = new Set(TOOL_REGISTRY.map((t) => t.category)).size;
 import { toolsService } from '../services/toolsService';
 
 import { ToolCard } from '../components/ToolCard';
@@ -137,15 +141,15 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
           <div className="space-y-2 max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[10px] font-extrabold uppercase tracking-widest text-emerald-200 border border-white/20">
               <Wrench className="h-3.5 w-3.5" />
-              ASTU ALUMNI DIGITAL TOOLBOX
+              Career toolkit
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-              Alumni Tools Center
+              Alumni tools
             </h1>
 
             <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl">
-              Practical digital tools designed to help ASTU alumni build careers, find opportunities, manage professional life, continue education, start businesses, and navigate everyday challenges in Ethiopia.
+              Calculators, CV helpers, and career utilities for ASTU graduates in Ethiopia and abroad.
             </p>
           </div>
 
@@ -154,8 +158,8 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15">
               <span className="material-symbols-outlined text-amber-300 text-2xl">construction</span>
               <div>
-                <p className="text-sm font-black text-white">{TOOL_REGISTRY.length}+ Practical Tools</p>
-                <p className="text-[10px] text-white/70">Across 16 Professional Categories</p>
+                <p className="text-sm font-black text-white">{TOOL_REGISTRY.length} tools</p>
+                <p className="text-[10px] text-white/70">{POPULATED_CATEGORY_COUNT} categories</p>
               </div>
             </div>
 
@@ -167,7 +171,7 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                   activeTab === 'catalog' ? 'bg-white text-[#003366] shadow-sm' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
                 }`}
               >
-                Tools Catalog
+                Browse tools
               </button>
 
               <button
@@ -178,7 +182,7 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                 }`}
               >
                 <History className="h-3.5 w-3.5" />
-                <span>Saved Results ({savedResults.length})</span>
+                <span>Saved ({savedResults.length})</span>
               </button>
             </div>
           </div>
@@ -256,7 +260,7 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
               </div>
 
                 <span className="text-xs text-slate-400 hidden sm:inline-block">
-                  Showing 50 production-grade tools across 16 categories
+                  Showing {filteredTools.length} of {TOOL_REGISTRY.length} tools across {POPULATED_CATEGORY_COUNT} categories
                 </span>
             </div>
 
@@ -276,9 +280,19 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
             ) : (
               <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-dashed border-slate-200 bg-white text-center dark:border-slate-800 dark:bg-slate-900">
                 <Compass className="h-10 w-10 text-slate-300 mb-3" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">No tools found</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {searchQuery
+                    ? 'No tools matched your search'
+                    : selectedCategory !== 'all'
+                      ? 'This category has no tools yet'
+                      : 'No tools found'}
+                </h3>
                 <p className="mt-1 text-xs text-slate-500 max-w-sm dark:text-slate-400">
-                  No tools matched your search query "{searchQuery}" or selected filters. Try searching for terms like "salary", "CV", "GPA", or "Ethiopia".
+                  {searchQuery
+                    ? `Nothing matched "${searchQuery}". Try a broader term such as "salary", "CV", "GPA" or "Ethiopia".`
+                    : selectedCategory !== 'all'
+                      ? `"${TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || selectedCategory}" is defined but no tools have been added to it yet.`
+                      : 'No tools match the selected filters.'}
                 </p>
                 <button
                   type="button"

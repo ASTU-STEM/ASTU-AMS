@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToolItem, SavedToolResult, ToolInputField } from '../types/tools.types';
 import { X, Copy, Save, Check, RefreshCw, Play, Sparkles, CheckCircle2, Cpu, Download, ExternalLink, ArrowRight, UserCheck, FileText, Briefcase, GraduationCap, DollarSign, Award, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
+import api from '../../../services/api';
 
 interface ToolRunnerModalProps {
   tool: ToolItem | null;
@@ -18,7 +18,8 @@ interface ToolRunnerModalProps {
 // ─────────────────────────────────────────────────────────────
 // DYNAMIC INPUT SYNTHESIZER FOR TOOLS WITHOUT PREDEFINED FIELDS
 // ─────────────────────────────────────────────────────────────
-const getSynthesizedInputFields = (tool: ToolItem, profile: any): ToolInputField[] => {
+const getSynthesizedInputFields = (tool: ToolItem | null, profile: any): ToolInputField[] => {
+  if (!tool) return [];
   if (tool.inputFields && tool.inputFields.length > 0) {
     return tool.inputFields;
   }
@@ -53,7 +54,7 @@ const getSynthesizedInputFields = (tool: ToolItem, profile: any): ToolInputField
         { label: 'Asia (Japan / China / Korea / Singapore)', value: 'asia' },
         { label: 'Ethiopia (ASTU Postgraduate / AAU / Public Uni)', value: 'ethiopia' }
       ]},
-      { name: 'userCgpa', label: 'Current ASTU Cumulative CGPA', type: 'number', defaultValue: profile?.cgpa || 3.85 },
+      { name: 'userCgpa', label: 'Current ASTU Cumulative CGPA', type: 'number', defaultValue: profile?.cgpa || '' },
       { name: 'researchNotes', label: 'Research Proposal Interest & Requirements', type: 'textarea', placeholder: 'Describe thesis ideas, research methodology, or grant targets...' }
     ];
   }
@@ -114,11 +115,11 @@ const generateSynthesizedToolResult = (
   documents: any[],
   surveys: any[]
 ) => {
-  const userName = profile?.fullName || 'Wabi Tena';
+  const userName = profile?.fullName || '';
   const userDept = profile?.department?.name || 'Electrical and Computer Engineering';
-  const userCgpa = profile?.cgpa || '3.85';
+  const userCgpa = profile?.cgpa || 'not provided';
   const userGrad = profile?.graduationYear || '2024';
-  const userSkills = (profile?.skills && profile.skills.length > 0) ? profile.skills.join(', ') : 'Software Engineering, Systems Design, React, Python';
+  const userSkills = (Array.isArray(profile?.skills) && profile.skills.length > 0) ? profile.skills.join(', ') : 'the skills you add in Profile';
 
   const targetRole = formValues.targetRole || formValues.targetField || formValues.targetDegree || formValues.focusObjective || formValues.targetGoal || tool.name;
   const timeframe = formValues.timeframe || formValues.duration || '6 Months';
@@ -172,7 +173,7 @@ Report Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 
    [✓] Request official registrar documents if needed for applications.
 
 ===================================================================
-[ASTU Alumni Management System — Verified Dynamic Output]`;
+[ASTU Alumni Management System - locally generated draft. Not verified against any university record.]`;
 
   return {
     text: docText,
@@ -195,20 +196,22 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
   onSaveResult,
 }) => {
   // Effective inputs (predefined or synthesized)
-  const effectiveInputFields = tool ? getSynthesizedInputFields(tool, profile) : [];
+  const effectiveInputFields = getSynthesizedInputFields(tool, profile);
 
   // Form input state
-  const [formValues, setFormValues] = useState<Record<string, any>>(() => {
-    const initial: Record<string, any> = {};
-    if (effectiveInputFields.length > 0) {
-      effectiveInputFields.forEach((f) => {
-        initial[f.name] = f.defaultValue !== undefined ? f.defaultValue : '';
-      });
-    }
-    return initial;
-  });
+  //
+  // This was a lazy useState initialiser, which runs exactly once — and the
+  // modal is mounted unconditionally from the page with tool=null, so
+  // effectiveInputFields was always [] on that first run. Every one of the 70
+  // authored defaultValues was therefore dead and every <select> rendered
+  // blank. Seeding here and re-seeding on tool change also stops values leaking
+  // between tools (targetRole is reused by six different tools).
+  const [formValues, setFormValues] = useState<Record<string, any>>({});
 
   // Checklist state
+  const profileRef = React.useRef<any>(profile);
+  profileRef.current = profile;
+
   const [completedItems, setCompletedItems] = useState<Record<string, boolean>>({});
   const [userNotes, setUserNotes] = useState<string>('');
 
@@ -218,6 +221,22 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
 
   // Output state
   const [outputResult, setOutputResult] = useState<any>(null);
+  // 'ai' = the backend agent returned it; 'template' = generated on the client
+  // from the tool's own description. The user was never told which, so a canned
+  // template looked identical to a real AI result.
+  const [outputSource, setOutputSource] = useState<'llm' | 'template' | null>(null);
+  const activeToolIdRef = React.useRef<string | null>(null);
+  const pendingFallbackRef = React.useRef<any>(null);
+
+  React.useEffect(() => {
+    activeToolIdRef.current = tool?.id ?? null;
+    return () => {
+      if (pendingFallbackRef.current) {
+        clearTimeout(pendingFallbackRef.current);
+        pendingFallbackRef.current = null;
+      }
+    };
+  }, [tool]);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -228,7 +247,24 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
         initial[item.id] = false;
       });
       setCompletedItems(initial);
+    } else {
+      // Otherwise a previous tool's ticks leaked in and inflated this tool's
+      // checklist percentage.
+      setCompletedItems({});
     }
+
+    // Re-seed inputs from the newly selected tool's defaults.
+    const seeded: Record<string, any> = {};
+    getSynthesizedInputFields(tool, profileRef.current).forEach((f) => {
+      seeded[f.name] = f.defaultValue !== undefined ? f.defaultValue : '';
+    });
+    setFormValues(seeded);
+
+    setUserNotes('');
+    setCopied(false);
+    setOutputSource(null);
+    setTimerSeconds(25 * 60);
+    setTimerActive(false);
     setOutputResult(null);
   }, [tool]);
 
@@ -255,22 +291,38 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
     setCompletedItems((prev) => ({ ...prev, [itemId]: !prev[itemId] }));
   };
 
-  const handleCopyText = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast.success('Copied to clipboard!');
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyText = async (text: string) => {
+    // navigator.clipboard is undefined in any non-secure context, and the
+    // promise rejects on permission denial. Both previously threw unhandled
+    // while still showing a success toast.
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success('Copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Could not copy — your browser blocked clipboard access.');
+    }
   };
 
   // ─────────────────────────────────────────────────────────────
   // CORE TOOL EXECUTION ENGINE
   // ─────────────────────────────────────────────────────────────
   const runToolLogic = async () => {
+    // Captured so the deferred template write below can detect that the user
+    // switched tools in the meantime. Previously closing tool A and opening
+    // tool B inside 300 ms injected A's result into B's modal.
+    const runToolId = tool.id;
     setIsProcessing(true);
 
     if (tool.toolType === 'AI_ASSISTED') {
       try {
-        const response = await axios.post('/api/tools/execute-ai', {
+        // Shared client: absolute base URL plus the Bearer token and 401
+        // refresh. This used to be a raw axios.post on a relative '/api/...'
+        // with no Vite proxy, so it always 404'd; the catch below swallowed that
+        // and the user got a canned template behind a success toast.
+        const response = await api.post('/tools/execute-ai', {
           toolId: tool.id,
           inputs: formValues,
           userProfile: profile,
@@ -278,14 +330,30 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
 
         if (response.data?.data?.text) {
           const resData = response.data.data;
+          // The backend reports whether a real model answered. Without
+          // OPENROUTER_API_KEY the agent layer returns its own canned text, so
+          // treating any successful response as "AI" would be misleading.
           
-          const userName = profile?.fullName || 'Wabi Tena';
-          const userEmail = profile?.email || 'wabi.tena@alumni.astu.edu.et';
-          const userPhone = profile?.phone || '+251 91 123 4567';
-          const deptName = profile?.department?.name || 'Electrical and Computer Engineering';
-          const userCgpa = profile?.cgpa || 3.85;
-          const gradYear = profile?.graduationYear || 2024;
-          const userSkills = profile?.skills || ['React', 'Node.js', 'Python', 'PostgreSQL', 'System Architecture'];
+          const userName = profile?.fullName || '';
+          const userEmail = profile?.email || '';
+          const userPhone = profile?.phone || '';
+          const deptName = profile?.department?.name || profile?.department || 'your department';
+          const userCgpa = profile?.cgpa || 'not provided';
+          const gradYear = profile?.graduationYear || 'not provided';
+          const userSkills = (Array.isArray(profile?.skills) && profile.skills.length > 0)
+            ? profile.skills
+            : [];
+          // Only the graduate's own recorded role is used. Previously this
+          // invented a "Graduate Software Trainee" post at "Ethio Telecom /
+          // Safaricom Partner Firm" with a fabricated 40% improvement metric.
+          const realExperience = (profile?.currentRole || profile?.company)
+            ? [{
+                role: profile.currentRole || 'Role not specified',
+                company: profile.company || 'Employer not specified',
+                period: profile.employmentStatus || '',
+                bullets: ['Add your achievements in Profile so this section reflects your real work.'],
+              }]
+            : [];
 
           if (tool.id === 'cv-builder' && !resData.cvData) {
             const targetRole = formValues.targetRole || 'Junior Software Engineer';
@@ -299,16 +367,13 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
               location: 'Addis Ababa, Ethiopia',
               summary: "Motivated " + deptName + " graduate from ASTU (" + gradYear + ") with a CGPA of " + userCgpa + "/4.00. Specialized in " + userSkills.slice(0, 4).join(', ') + ". Demonstrated technical excellence through empirical engineering, project leadership, and continuous skill acquisition.",
               education: [
-                { school: 'Adama Science and Technology University (ASTU)', degree: "B.Sc. in " + deptName, year: String(gradYear), cgpa: userCgpa + " / 4.00 (Distinction)" }
+                { school: 'Adama Science and Technology University (ASTU)', degree: "B.Sc. in " + deptName, year: String(gradYear), cgpa: userCgpa + " / 4.00" }
               ],
-              experience: [
-                { role: 'Engineering Practicum / Graduate Software Trainee', company: 'Ethio Telecom / Safaricom Partner Firm', period: '2023 - Present', bullets: ['Engineered high-concurrency API services using Node.js & PostgreSQL, reducing report generation delay by 40%.', 'Collaborated on database optimization and automated unit testing pipelines.', 'Documented technical specifications and conducted User Acceptance Testing (UAT).'] }
-              ],
+              experience: realExperience,
               projects: [
                 { name: 'ASTU Senior Design Capstone Project', tech: userSkills.slice(0, 3).join(', '), description: achievements }
               ],
               skills: userSkills,
-              atsScore: 96,
               templateStyle
             };
           } else if (tool.id === 'career-goal-builder' && !resData.goalBuilderData) {
@@ -344,15 +409,15 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
               pathways: [
                 {
                   title: 'Cloud & Enterprise Systems Architecture',
-                  demandIndex: '98% High Demand',
+                  demandIndex: 'Commonly advertised pathway',
                   salaryRange: 'ETB 45,000 - 85,000 / mo ($1,500 - $3,500 USD Remote)',
                   employers: ['Ethio Telecom', 'Safaricom Ethiopia', 'Commercial Bank of Ethiopia', 'Global Remote'],
-                  skills: ['React', 'Node.js', 'PostgreSQL', 'Docker', 'AWS/Azure', 'Kubernetes'],
+                  skills: (Array.isArray(profile?.skills) && profile.skills.length ? profile.skills : ['Add your skills in Profile']),
                   description: 'Design and deploy scalable enterprise software infrastructure, microservices, and distributed data systems.'
                 },
                 {
                   title: 'AI Engineering & Intelligent Systems',
-                  demandIndex: '95% Rapid Growth',
+                  demandIndex: 'Commonly advertised pathway',
                   salaryRange: 'ETB 50,000 - 95,000 / mo ($2,000 - $4,000 USD Remote)',
                   employers: ['ICog Labs', 'EagleLion System Solutions', 'Telebirr FinTech Hub', 'AI Research Hubs'],
                   skills: ['Python', 'PyTorch / TensorFlow', 'LLM Agents', 'LangChain', 'FastAPI', 'MLOps'],
@@ -360,7 +425,7 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
                 },
                 {
                   title: 'DevOps & Site Reliability Engineering (SRE)',
-                  demandIndex: '92% High Demand',
+                  demandIndex: 'Commonly advertised pathway',
                   salaryRange: 'ETB 40,000 - 80,000 / mo ($1,800 - $3,800 USD Remote)',
                   employers: ['Ethio Telecom', 'Private Banking Sector', 'Global IT Contractors'],
                   skills: ['Linux', 'CI/CD Pipelines', 'Terraform', 'Kubernetes', 'Prometheus', 'Cybersecurity'],
@@ -372,8 +437,8 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
             const targetRole = formValues.targetRole || 'Senior Software Engineer';
             resData.gapData = {
               targetRole,
-              matchScore: 84,
-              acquiredSkills: (profile?.skills && profile.skills.length > 0) ? profile.skills : ['React', 'Python', 'Node.js', 'PostgreSQL', 'Git & Linux'],
+              matchScore: null,
+              acquiredSkills: (Array.isArray(profile?.skills) && profile.skills.length > 0) ? profile.skills : [],
               missingSkills: ['Kubernetes & Microservices', 'CI/CD Pipelines & DevOps', 'System Design & Distributed Caching'],
               plan90Days: [
                 { period: 'Month 1 (Days 1–30)', goal: 'Bridge Kubernetes & Cloud Fundamentals', action: 'Complete AWS/Cloud certification module and containerize capstone apps.' },
@@ -384,6 +449,7 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
           }
 
           setOutputResult(resData);
+          setOutputSource(resData.source === 'llm' ? 'llm' : 'template');
           setIsProcessing(false);
           toast.success('AI Tool response generated!');
           return;
@@ -393,15 +459,27 @@ export const ToolRunnerModal: React.FC<ToolRunnerModalProps> = ({
       }
     }
 
-    setTimeout(() => {
+    setOutputSource(null);
+    const fallbackTimer = setTimeout(() => {
+      if (activeToolIdRef.current !== runToolId) return;
       let resultData: any = null;
-      const userName = profile?.fullName || 'Wabi Tena';
-      const userEmail = profile?.email || 'wabi.tena@alumni.astu.edu.et';
-      const userPhone = profile?.phone || '+251 91 123 4567';
-      const deptName = profile?.department?.name || 'Electrical and Computer Engineering';
-      const userCgpa = profile?.cgpa || 3.85;
-      const gradYear = profile?.graduationYear || 2024;
-      const userSkills = profile?.skills || ['React', 'Node.js', 'Python', 'PostgreSQL', 'System Architecture'];
+      const userName = profile?.fullName || '';
+      const userEmail = profile?.email || '';
+      const userPhone = profile?.phone || '';
+      const deptName = profile?.department?.name || profile?.department || 'your department';
+      const userCgpa = profile?.cgpa || 'not provided';
+      const gradYear = profile?.graduationYear || 'not provided';
+      const userSkills = (Array.isArray(profile?.skills) && profile.skills.length > 0)
+        ? profile.skills
+        : [];
+      const realExperience = (profile?.currentRole || profile?.company)
+        ? [{
+            role: profile.currentRole || 'Role not specified',
+            company: profile.company || 'Employer not specified',
+            period: profile.employmentStatus || '',
+            bullets: ['Add your achievements in Profile so this section reflects your real work.'],
+          }]
+        : [];
 
       switch (tool.id) {
         // ── ASTU PROFESSIONAL CV BUILDER ──
@@ -425,7 +503,7 @@ EDUCATION
 -------------------------------------------------------------------
 Adama Science and Technology University (ASTU) — Adama, Ethiopia
 Bachelor of Science (B.Sc.) in ${deptName}
-Graduation Year: ${gradYear} | CGPA: ${userCgpa} / 4.00 (Distinction)
+Graduation Year: ${gradYear} | CGPA: ${userCgpa} / 4.00
 Relevant Coursework: Advanced Engineering Mathematics, Software Architecture, Embedded Systems, Database Management, Network Security.
 
 TECHNICAL SKILLS & COMPETENCIES
@@ -470,16 +548,13 @@ CERTIFICATIONS & HONORS
               location: 'Addis Ababa, Ethiopia',
               summary: `Motivated ${deptName} graduate from ASTU (${gradYear}) with a CGPA of ${userCgpa}/4.00. Specialized in ${userSkills.slice(0, 4).join(', ')}. Demonstrated technical excellence through empirical engineering, project leadership, and continuous skill acquisition.`,
               education: [
-                { school: 'Adama Science and Technology University (ASTU)', degree: `B.Sc. in ${deptName}`, year: String(gradYear), cgpa: `${userCgpa} / 4.00 (Distinction)` }
+                { school: 'Adama Science and Technology University (ASTU)', degree: `B.Sc. in ${deptName}`, year: String(gradYear), cgpa: `${userCgpa} / 4.00` }
               ],
-              experience: [
-                { role: 'Engineering Practicum / Graduate Software Trainee', company: 'Ethio Telecom / Safaricom Partner Firm', period: '2023 - Present', bullets: ['Engineered high-concurrency API services using Node.js & PostgreSQL, reducing report generation delay by 40%.', 'Collaborated on database optimization and automated unit testing pipelines.', 'Documented technical specifications and conducted User Acceptance Testing (UAT).'] }
-              ],
+              experience: realExperience,
               projects: [
                 { name: 'ASTU Senior Design Capstone Project', tech: userSkills.slice(0, 3).join(', '), description: achievements }
               ],
               skills: userSkills,
-              atsScore: 96,
               templateStyle
             }
           };
@@ -569,62 +644,78 @@ CERTIFICATIONS & HONORS
 
         // ── ASTU ALUMNI MENTOR MATCHER ──
         case 'mentor-match-assistant': {
-          const focusArea = formValues.targetRole || formValues.focusObjective || 'Tech Lead / Senior Engineering';
-          const matchedMentors = (mentors || []).map((m: any) => ({
-            ...m,
-            matchScore: 94,
-            availableSlots: 2
-          }));
+          // This previously listed two invented people with invented match
+          // scores and availability while the real `mentors` prop went unused.
+          // It now reports the mentors the API actually returned.
+          const focusArea = formValues.targetRole || formValues.focusObjective || 'general engineering';
+          const pool = Array.isArray(mentors) ? mentors : [];
+
+          const mentorLines = pool.length
+            ? pool.map((m: any, i: number) => {
+                const who = m.name || m.fullName || 'Alumni mentor';
+                const role = m.currentRole || m.title || 'Alumni';
+                const company = m.company ? ` @ ${m.company}` : '';
+                const expertise = Array.isArray(m.expertise) && m.expertise.length
+                  ? m.expertise.slice(0, 3).join(', ')
+                  : (m.specialties || 'Add expertise to your profile to improve matching');
+                return `${i + 1}. ${who} — ${role}${company}\n   • Expertise: ${expertise}`;
+              }).join('\n')
+            : 'No mentors are available on the platform right now.';
 
           const mentorReport = `===================================================================
-ASTU ALUMNI MENTOR MATCHING REPORT
+ASTU ALUMNI MENTOR MATCHING
 ===================================================================
 Target Focus: ${focusArea}
 Mentee: ${userName} (${deptName})
 
-MATCHED SENIOR ALUMNI MENTORS:
-1. Eng. Dawit Abraham (Class of 2017) — Senior Embedded Engineer @ Safaricom Ethiopia
-   • Match Score: 96% | Availability: 2 slots open
-   • Expertise: Hardware-Software Co-design, Career Growth
+AVAILABLE ASTU ALUMNI MENTORS (${pool.length}):
+${mentorLines}
 
-2. Tsehay Melaku (Class of 2018) — Lead Software Architect @ Ethio Telecom / Tech Partner
-   • Match Score: 92% | Availability: 1 slot open
-   • Expertise: Cloud Infrastructure, System Architecture
+NOTE: these are the mentors currently registered on the platform. No match score
+is shown because none has been computed — browse the Mentorship tab to review
+their full profiles and availability before requesting a session.
 
-RECOMMENDED NEXT STEPS:
-• Go to Mentorship tab to request 1-on-1 session.
-• Prepare 3 specific technical questions prior to your meeting.
+NEXT STEPS:
+• Open the Mentorship tab to see each mentor's profile and request a 1-on-1 session.
+• Come to the session with 3 specific questions.
 ===================================================================`;
 
           resultData = {
             text: mentorReport,
-            summary: `Found 2 high-matching ASTU mentors for ${focusArea} (${deptName}).`
+            summary: pool.length
+              ? `${pool.length} registered ASTU mentor${pool.length === 1 ? '' : 's'} listed. Review them in Mentorship to request a session.`
+              : 'No mentors are registered yet. Check back soon or update your profile to be matched later.'
           };
           break;
         }
 
         // ── DOCUMENT READINESS CHECKER ──
         case 'document-readiness-checker': {
+          // This tool has no registrar integration. It previously printed
+          // "[VERIFIED & READY]" against all four documents and summarised
+          // "All 4 core documents verified", implying a check that never ran.
           const docAuditReport = `===================================================================
-ASTU REGISTRAR DOCUMENT READINESS AUDIT
+ASTU DOCUMENT REQUEST GUIDE
 ===================================================================
 Student Candidate: ${userName}
 Department: ${deptName} | Batch: ${gradYear}
 
-DOCUMENT AUDIT STATUS:
-1. Official B.Sc. Academic Transcript: [VERIFIED & READY]
-2. Medium of Instruction Letter (English): [VERIFIED & READY]
-3. Official Degree Certificate (Original/Copy): [AVAILABLE ON REQUEST]
-4. Verified ASTU Digital Alumni Card: [ACTIVE]
+DOCUMENTS AVAILABLE TO REQUEST THROUGH THE REGISTRAR:
+1. Official B.Sc. Academic Transcript      -> request via Document Services
+2. Medium of Instruction Letter (English)  -> request via Document Services
+3. Official Degree Certificate             -> request via Document Services
+4. ASTU Digital Alumni Card                -> issued on account activation
 
-REGISTRAR DISPATCH INSTRUCTIONS:
-• Official digital transcripts can be dispatched directly to international universities or employers.
-• Visit the Document Services tab to submit official delivery requests.
+IMPORTANT: this tool is a guide, not a check. ASTU has not been queried and no
+document status has been confirmed. Only the registrar can confirm what you are
+entitled to, and only a submitted request produces a real document.
+
+NEXT STEP: open the Document Services tab and submit the request you need.
 ===================================================================`;
 
           resultData = {
             text: docAuditReport,
-            summary: `Registrar Document Audit Complete: All 4 core documents verified for ${userName}.`
+            summary: `Document guidance generated for ${userName}. No registrar lookup was performed - submit a request in Document Services for a verified document.`
           };
           break;
         }
@@ -663,7 +754,7 @@ Primary Competency Focus: ${skills}
    • Track your skill acquisition using the Career Skills Gap Checker.
 
 ===================================================================
-[ASTU Alumni Career Goal System — Verified Output]`;
+[ASTU Alumni Career Goal System - locally generated draft. Not verified against any university record.]`;
 
           resultData = {
             text: textDoc,
@@ -723,7 +814,7 @@ Technical Stack Focus: ${focusStack}
      - Deliverable: Transition to senior technical lead track.
 
 ===================================================================
-[ASTU Alumni Career Progression System — Verified Output]`;
+[ASTU Alumni Career Progression System - locally generated draft. Not verified against any university record.]`;
 
           resultData = {
             text: textDoc,
@@ -755,25 +846,25 @@ Market Region: Ethiopia (Addis Ababa, Adama) & Global Remote
 ===================================================================
 
 PATHWAY 1: Cloud & Enterprise Systems Architecture
-  • Demand Index: 98% High Demand (Top Growth Sector in Ethiopia)
+  • Demand: no ASTU demand data is recorded for this pathway
   • Salary Range: ETB 45,000 - 85,000 / month ($1,500 - $3,500 USD Remote)
   • Key Employers: Ethio Telecom, Safaricom Ethiopia, Commercial Bank of Ethiopia, International Tech Contractors
   • Required Skills: React, Node.js, PostgreSQL, Docker, AWS/Azure, Microservices Architecture
 
 PATHWAY 2: AI Engineering & Intelligent Systems
-  • Demand Index: 95% Rapid Growth
+  • Demand: no ASTU demand data is recorded for this pathway
   • Salary Range: ETB 50,000 - 95,000 / month ($2,000 - $4,000 USD Remote)
   • Key Employers: ICog Labs, EagleLion System Solutions, Telebirr FinTech Hub, AI Research Hubs
   • Required Skills: Python, PyTorch/TensorFlow, LLM Agents, LangChain, FastAPI, MLOps
 
 PATHWAY 3: DevOps & Site Reliability Engineering (SRE)
-  • Demand Index: 92% High Demand
+  • Demand: no ASTU demand data is recorded for this pathway
   • Salary Range: ETB 40,000 - 80,000 / month ($1,800 - $3,800 USD Remote)
   • Key Employers: Ethio Telecom, Private Banking Sector, Global IT Contractors
   • Required Skills: Linux System Admin, CI/CD Pipelines, Terraform, Kubernetes, Prometheus, Security
 
 ===================================================================
-[ASTU Alumni Pathway Intelligence — Verified Data]`;
+[ASTU Alumni Pathway Intelligence - illustrative template. Figures are not drawn from ASTU employment data.]`;
 
           resultData = {
             text: textDoc,
@@ -783,15 +874,15 @@ PATHWAY 3: DevOps & Site Reliability Engineering (SRE)
               pathways: [
                 {
                   title: 'Cloud & Enterprise Systems Architecture',
-                  demandIndex: '98% High Demand',
+                  demandIndex: 'Commonly advertised pathway',
                   salaryRange: 'ETB 45,000 - 85,000 / mo ($1,500 - $3,500 USD Remote)',
                   employers: ['Ethio Telecom', 'Safaricom Ethiopia', 'Commercial Bank of Ethiopia', 'Global Remote'],
-                  skills: ['React', 'Node.js', 'PostgreSQL', 'Docker', 'AWS/Azure', 'Kubernetes'],
+                  skills: (Array.isArray(profile?.skills) && profile.skills.length ? profile.skills : ['Add your skills in Profile']),
                   description: 'Design and deploy scalable enterprise software infrastructure, microservices, and distributed data systems.'
                 },
                 {
                   title: 'AI Engineering & Intelligent Systems',
-                  demandIndex: '95% Rapid Growth',
+                  demandIndex: 'Commonly advertised pathway',
                   salaryRange: 'ETB 50,000 - 95,000 / mo ($2,000 - $4,000 USD Remote)',
                   employers: ['ICog Labs', 'EagleLion System Solutions', 'Telebirr FinTech Hub', 'AI Research Hubs'],
                   skills: ['Python', 'PyTorch / TensorFlow', 'LLM Agents', 'LangChain', 'FastAPI', 'MLOps'],
@@ -799,7 +890,7 @@ PATHWAY 3: DevOps & Site Reliability Engineering (SRE)
                 },
                 {
                   title: 'DevOps & Site Reliability Engineering (SRE)',
-                  demandIndex: '92% High Demand',
+                  demandIndex: 'Commonly advertised pathway',
                   salaryRange: 'ETB 40,000 - 80,000 / mo ($1,800 - $3,800 USD Remote)',
                   employers: ['Ethio Telecom', 'Private Banking Sector', 'Global IT Contractors'],
                   skills: ['Linux', 'CI/CD Pipelines', 'Terraform', 'Kubernetes', 'Prometheus', 'Cybersecurity'],
@@ -841,14 +932,14 @@ Calculated Match Score: 84% Match
    • Month 3 (Days 61–90): Build & Deploy High-Concurrency System Design Capstone.
 
 ===================================================================
-[ASTU Alumni Skills Audit Engine — Verified Output]`;
+[ASTU Alumni Skills Audit Engine - locally generated draft. Score is computed from the skills you entered, not from a hiring outcome.]`;
 
           resultData = {
             text: textDoc,
-            summary: `Skills Gap Audit completed for ${targetRole}: Calculated Match Score is 84%. Identified 3 acquired skills & 3 missing skill gaps.`,
+            summary: `Skills gap draft for ${targetRole}: ${verifiedSkills.length} skill(s) from your profile were read, and 3 commonly requested gaps are listed for review.`,
             gapData: {
               targetRole,
-              matchScore: 84,
+              matchScore: null,
               acquiredSkills: verifiedSkills,
               missingSkills: ['Kubernetes & Container Orchestration', 'CI/CD Pipelines & DevOps Automation', 'Distributed Caching (Redis/Kafka)'],
               plan90Days: [
@@ -869,9 +960,12 @@ Calculated Match Score: 84% Match
       }
 
       setOutputResult(resultData);
+      setOutputSource('template');
       setIsProcessing(false);
-      toast.success(`${tool.name} processed successfully!`);
+      toast.success(`${tool.name} produced a local draft`);
     }, 300);
+
+    pendingFallbackRef.current = fallbackTimer;
   };
 
   // Checklist calculations
@@ -1125,9 +1219,15 @@ Calculated Match Score: 84% Match
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-200">
-                    Tool Execution Output & Dynamic Report
+                    {outputSource === 'llm' ? 'AI Agent Response' : 'Local Draft'}
                   </h4>
                 </div>
+
+                <p className="mb-3 rounded-lg border border-amber-300/70 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200">
+                  {outputSource === 'llm'
+                    ? 'Written by the ASTU assistant service from the values you entered. Review it before submitting anything to an employer.'
+                    : 'Produced from a fixed template using the values you entered — no AI provider is configured, so nothing here was written or checked by a model and no figure in it comes from university records.'}
+                </p>
 
                 <div className="flex items-center gap-2">
                   {outputResult.text && (
@@ -1178,7 +1278,7 @@ Calculated Match Score: 84% Match
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-bold text-white">Professional Interactive Resume Builder</h4>
                           <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300">
-                            {outputResult.cvData.atsScore || 96}% ATS Compatible
+                            {outputResult.cvData.atsScore ?? '—'} ATS Compatible
                           </span>
                         </div>
                         <p className="text-xs text-indigo-200">Adama Science and Technology University (ASTU) Official Resume Blueprint</p>
@@ -1440,7 +1540,7 @@ Calculated Match Score: 84% Match
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-right">
-                        <p className="text-2xl font-black text-emerald-400">{outputResult.gapData.matchScore}%</p>
+                        <p className="text-2xl font-black text-emerald-400">{outputResult.gapData.matchScore ?? '—'}</p>
                         <p className="text-[10px] font-bold text-slate-300">Skill Match Score</p>
                       </div>
                     </div>

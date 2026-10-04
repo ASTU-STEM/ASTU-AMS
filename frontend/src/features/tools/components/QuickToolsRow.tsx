@@ -8,21 +8,34 @@ interface QuickToolsRowProps {
 }
 
 export const QuickToolsRow: React.FC<QuickToolsRowProps> = ({ onOpenTool }) => {
+  // Five of the previous ten ids did not exist in TOOL_REGISTRY
+  // (cover-letter-builder, job-match-checker, relocation-cost-calculator,
+  // savings-goal-calculator, date-difference-calculator). They were dropped by a
+  // silent .filter(), so the "5 column" grid happened to look right while half
+  // the launchpad was empty. resolveTool() now warns instead of hiding it.
   const quickToolIds = [
     'gpa-calculator',
     'cgpa-calculator',
     'salary-after-living-costs-calculator',
     'cv-builder',
-    'cover-letter-builder',
-    'job-match-checker',
+    'cover-letter-generator',
+    'career-skills-gap-checker',
     'job-scam-risk-checker',
-    'relocation-cost-calculator',
-    'savings-goal-calculator',
-    'date-difference-calculator',
+    'grade-converter',
+    'cgpa-calculator',
+    'ethiopian-cost-of-living-estimator',
   ];
 
-  const quickTools = quickToolIds
-    .map((id) => TOOL_REGISTRY.find((t) => t.id === id))
+  const resolveTool = (id: string): ToolItem | undefined => {
+    const found = TOOL_REGISTRY.find((t) => t.id === id);
+    if (!found && import.meta.env.DEV) {
+      console.warn(`[tools] QuickToolsRow references unknown tool id: "${id}"`);
+    }
+    return found;
+  };
+
+  const quickTools = [...new Set(quickToolIds)]
+    .map(resolveTool)
     .filter((t): t is ToolItem => t !== undefined);
 
   return (
@@ -32,8 +45,8 @@ export const QuickToolsRow: React.FC<QuickToolsRowProps> = ({ onOpenTool }) => {
           <Zap className="h-4 w-4" />
         </div>
         <div>
-          <h3 className="text-sm font-bold tracking-tight">Quick Tools Launchpad</h3>
-          <p className="text-[11px] text-blue-200">Instant calculators and core utilities — no setup required</p>
+          <h3 className="text-sm font-bold tracking-tight">Quick launch</h3>
+          <p className="text-[11px] text-blue-200">Most-used calculators and career helpers</p>
         </div>
       </div>
 
