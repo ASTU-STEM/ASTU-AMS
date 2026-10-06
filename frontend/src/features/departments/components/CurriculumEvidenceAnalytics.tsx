@@ -8,12 +8,12 @@ interface CurriculumEvidenceAnalyticsProps {
 
 export const CurriculumEvidenceAnalytics: React.FC<CurriculumEvidenceAnalyticsProps> = ({ data }) => {
   const metrics = [
-    { label: 'Alignment Score', value: data.alignmentScore, color: 'astu-green' },
-    { label: 'Outdated Courses', value: data.outdatedCourses, color: 'astu-red' },
-    { label: 'New Course Recommendations', value: data.newCourseRecommendations, color: 'astu-navy' },
-    { label: 'Accreditation Compliance', value: data.accreditationCompliance, color: 'astu-green' },
-    { label: 'Practical vs Theory Balance', value: data.practicalTheoryBalance, color: 'purple-600' },
-    { label: 'Update Priorities', value: data.updatePriorities, color: 'orange-600' }
+    { label: 'Alignment Score', value: data?.alignmentScore ?? 0, color: 'astu-green' },
+    { label: 'Outdated Courses', value: data?.outdatedCourses ?? 0, color: 'astu-red' },
+    { label: 'New Course Recommendations', value: data?.newCourseRecommendations ?? 0, color: 'astu-navy' },
+    { label: 'Accreditation Compliance', value: data?.accreditationCompliance ?? 0, color: 'astu-green' },
+    { label: 'Practical vs Theory Balance', value: data?.practicalTheoryBalance ?? 0, color: 'purple-600' },
+    { label: 'Update Priorities', value: data?.updatePriorities ?? 0, color: 'orange-600' }
   ];
 
   return (

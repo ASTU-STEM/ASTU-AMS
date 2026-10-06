@@ -70,6 +70,14 @@ export const surveyService = {
     return handleResponse(res);
   },
 
+  async sendSurveyInstantly(id: string): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}/send-instantly`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return handleResponse(res);
+  },
+
   async deactivateSurvey(id: string): Promise<any> {
     const res = await fetch(`${getApiBaseUrl()}/surveys/templates/${id}/deactivate`, {
       method: 'POST',

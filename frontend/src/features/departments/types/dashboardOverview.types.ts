@@ -1,7 +1,7 @@
 // Dashboard Overview Type Definitions
 
 export interface DashboardOverviewFilters {
-  department: string;
+  department?: string;
   academicYear: string;
   tracerPeriod: string;
 }

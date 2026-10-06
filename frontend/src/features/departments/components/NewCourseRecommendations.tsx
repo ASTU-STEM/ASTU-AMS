@@ -8,7 +8,8 @@ interface NewCourseRecommendationsProps {
 }
 
 export const NewCourseRecommendations: React.FC<NewCourseRecommendationsProps> = ({ data, darkMode = false }) => {
-  const sortedByPriority = [...data].sort((a, b) => a.priorityRanking - b.priorityRanking);
+  const safeData = Array.isArray(data) ? data : [];
+  const sortedByPriority = [...safeData].sort((a, b) => (a?.priorityRanking || 0) - (b?.priorityRanking || 0));
 
   const getImpactColor = (impact: NewCourseRecommendation['expectedImpact']) => {
     switch (impact) {

@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { RefreshCw, Download, Lock } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../../contexts/AuthContext';
+import { departmentService } from '../services/department.service';
 import { AccreditationFilterState, AccreditationExportOption } from '../types/accreditation.types';
 
 // Sub-components
@@ -13,59 +17,190 @@ import { AccreditationEvidenceTable } from './AccreditationEvidenceTable';
 import { AccreditationInsightsPanel } from './AccreditationInsightsPanel';
 import { AccreditationExport } from './AccreditationExport';
 
-// Mock data
-import {
-  mockAccreditationKPIMetrics,
-  mockAccreditationOverview,
-  mockTracerEvidence,
-  mockEmployerEvidence,
-  mockSkillGapEvidence,
-  mockCurriculumEvidence,
-  mockComplianceStatus,
-  mockAccreditationInsights,
-  mockAccreditationEvidenceRecords
-} from '../services/mockAccreditationData';
-
 interface AccreditationReportsProps {
   data?: any;
   darkMode?: boolean;
 }
 
-export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data, darkMode = false }) => {
-  const [filters, setFilters] = useState<AccreditationFilterState>({
-    department: '',
-    academicYear: '',
-    graduationBatch: '',
-    accreditationCycle: '',
-    reportType: '',
-    dateRange: ''
+export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ darkMode = false }) => {
+  const { user } = useAuth();
+  const userDept = user?.department || 'Software Engineering';
+
+  const [filters, setFilters] = useState<AccreditationFilterState>(() => {
+    try {
+      const saved = localStorage.getItem(`astu_accreditation_filters_${userDept}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          department: userDept,
+          academicYear: parsed.academicYear || '',
+          graduationBatch: parsed.graduationBatch || '',
+          accreditationCycle: parsed.accreditationCycle || '',
+          reportType: parsed.reportType || '',
+          dateRange: parsed.dateRange || ''
+        };
+      }
+    } catch (e) {
+      console.error('Error loading saved accreditation view:', e);
+    }
+    return {
+      department: userDept,
+      academicYear: '',
+      graduationBatch: '',
+      accreditationCycle: '',
+      reportType: '',
+      dateRange: ''
+    };
   });
+
+  const [loading, setLoading] = useState(true);
+  const [accreditationAnalytics, setAccreditationAnalytics] = useState<any>(null);
   const [showExport, setShowExport] = useState(false);
 
-  const handleFilterChange = (newFilters: AccreditationFilterState) => {
-    setFilters(newFilters);
-  };
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await departmentService.getOverview({
+        department: userDept,
+        academicYear: filters.academicYear,
+        graduationBatch: filters.graduationBatch,
+      });
+
+      if (res?.accreditationAnalytics) {
+        setAccreditationAnalytics(res.accreditationAnalytics);
+      } else {
+        setAccreditationAnalytics(null);
+      }
+    } catch (err) {
+      console.error('Error loading accreditation analytics:', err);
+      toast.error('Failed to load accreditation evidence from database');
+    } finally {
+      setLoading(false);
+    }
+  }, [userDept, filters.academicYear, filters.graduationBatch]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleRefresh = () => {
-    console.log('Refreshing data...');
+    toast.promise(fetchData(), {
+      loading: 'Refreshing accreditation audit evidence...',
+      success: 'Accreditation evidence updated live from database',
+      error: 'Failed to refresh accreditation evidence'
+    });
   };
 
   const handleExport = () => {
     setShowExport(true);
   };
 
-  const handleExportOption = (option: AccreditationExportOption) => {
-    console.log('Exporting:', option);
-    // Implement actual export logic
+  const handleExportOption = async (option: AccreditationExportOption) => {
+    setShowExport(false);
+    toast.promise(
+      departmentService.downloadReport({
+        format: option.format as any,
+        department: userDept,
+        academicYear: filters.academicYear,
+        reportType: 'accreditation',
+        dashboardData: accreditationAnalytics ? { accreditationAnalytics, department: { name: userDept } } : undefined
+      }),
+      {
+        loading: 'Generating accreditation evidence report...',
+        success: 'Accreditation evidence report generated successfully',
+        error: 'Failed to generate report'
+      }
+    );
   };
 
   const handleSaveView = () => {
-    console.log('Saving view...');
+    try {
+      localStorage.setItem(`astu_accreditation_filters_${userDept}`, JSON.stringify(filters));
+      toast.success(`Accreditation view preferences saved for ${userDept}`);
+    } catch (e) {
+      console.error('Error saving accreditation view:', e);
+      toast.error('Failed to save view preferences');
+    }
   };
 
   const handleGeneratePack = () => {
-    console.log('Generating accreditation pack...');
+    toast.promise(
+      departmentService.downloadReport({
+        format: 'pdf',
+        department: userDept,
+        reportType: 'accreditation',
+        dashboardData: accreditationAnalytics ? { accreditationAnalytics, department: { name: userDept } } : undefined
+      }),
+      {
+        loading: 'Generating complete accreditation audit pack...',
+        success: 'Accreditation audit pack ready for download',
+        error: 'Failed to generate audit pack'
+      }
+    );
   };
+
+  if (loading && !accreditationAnalytics) {
+    return (
+      <div className={`rounded-2xl p-12 text-center shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
+        <RefreshCw className="h-10 w-10 text-astu-navy animate-spin mx-auto mb-4" />
+        <h3 className={`text-lg font-bold mb-2 ${darkMode ? 'text-white' : 'text-slate-900'}`}>Loading Accreditation Telemetry & Audit Evidence</h3>
+        <p className={`text-sm max-w-md mx-auto ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+          Extracting ABET audit evidence, employer evaluations, student outcomes, and tracer telemetry for {userDept}...
+        </p>
+      </div>
+    );
+  }
+
+  const kpiMetrics = accreditationAnalytics?.kpiMetrics || [];
+  const overviewData = accreditationAnalytics?.overview || {
+    overallReadinessStatus: 'needs-work',
+    totalEvidenceItems: 0,
+    missingEvidenceItems: 0,
+    completedEvidenceItems: 0,
+    pendingComplianceAreas: 0
+  };
+  const tracerEvidenceData = accreditationAnalytics?.tracerEvidence || {
+    surveyCompletionRate: 0,
+    responseRateByBatch: 0,
+    employmentOutcomes: 0,
+    salaryProgression: 0,
+    alignmentMetrics: 0,
+    geographicDistribution: 0
+  };
+  const employerEvidenceData = accreditationAnalytics?.employerEvidence || {
+    employerResponseRate: 0,
+    satisfactionScores: 0,
+    competencyRatings: 0,
+    industryDemandTrends: 0,
+    recommendationsFrequency: 0,
+    repeatEmployerEngagement: 0
+  };
+  const skillGapEvidenceData = accreditationAnalytics?.skillGapEvidence || {
+    criticalSkillGaps: 0,
+    industryDemand: 0,
+    coverageRate: 0,
+    trainingPriorities: 0,
+    certificationGaps: 0,
+    departmentRiskAreas: 0
+  };
+  const curriculumEvidenceData = accreditationAnalytics?.curriculumEvidence || {
+    alignmentScore: 0,
+    outdatedCourses: 0,
+    newCourseRecommendations: 0,
+    accreditationCompliance: 0,
+    practicalTheoryBalance: 0,
+    updatePriorities: 0
+  };
+  const complianceStatusData = accreditationAnalytics?.complianceStatus || {
+    compliantItems: 0,
+    partiallyCompliantItems: 0,
+    nonCompliantItems: 0,
+    actionRequired: 0,
+    completionEstimate: 'N/A',
+    responsibleArea: 'Department Academic Committee'
+  };
+  const insightsData = accreditationAnalytics?.accreditationInsights || [];
+  const evidenceRecords = accreditationAnalytics?.evidenceRecords || [];
 
   return (
     <div className="space-y-6">
@@ -73,14 +208,21 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
       <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
           <div>
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Accreditation Reports & Executive Reporting Center</h2>
-            <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Generate accreditation-ready evidence from tracer, employer, skill, and curriculum analytics</p>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Accreditation Reports & Executive Reporting Center</h2>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-astu-navy/10 text-astu-navy border border-astu-navy/20">
+                <Lock className="h-3.5 w-3.5" />
+                {userDept} Scope
+              </span>
+            </div>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Generate accreditation-ready evidence calculated dynamically from tracer, employer, skill, and curriculum analytics</p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleRefresh}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
             >
+              <RefreshCw className="h-4 w-4" />
               Refresh Data
             </button>
             <button
@@ -99,6 +241,7 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
               onClick={handleExport}
               className="flex items-center gap-2 px-4 py-2.5 bg-astu-navy hover:bg-blue-900 text-white rounded-xl transition-all duration-300 font-medium text-sm"
             >
+              <Download className="h-4 w-4" />
               Export Report
             </button>
           </div>
@@ -106,17 +249,15 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
 
         {/* Filter Bar */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <select
-            value={filters.department}
-            onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="">All Departments</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Software Engineering">Software Engineering</option>
-            <option value="Electrical Engineering">Electrical Engineering</option>
-            <option value="Mechanical Engineering">Mechanical Engineering</option>
-          </select>
+          <div className="relative">
+            <select
+              disabled
+              value={userDept}
+              className={`w-full px-4 py-2.5 rounded-xl text-sm font-semibold border focus:outline-none ${darkMode ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-gray-100 border-gray-200 text-slate-700'}`}
+            >
+              <option value={userDept}>{userDept} (Locked Scope)</option>
+            </select>
+          </div>
           <select
             value={filters.academicYear}
             onChange={(e) => setFilters({ ...filters, academicYear: e.target.value })}
@@ -137,59 +278,29 @@ export const AccreditationReports: React.FC<AccreditationReportsProps> = ({ data
             <option value="2024">Batch 2024</option>
             <option value="2023">Batch 2023</option>
           </select>
-          <select
-            value={filters.accreditationCycle}
-            onChange={(e) => setFilters({ ...filters, accreditationCycle: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="">All Cycles</option>
-            <option value="eta">ETA Cycle</option>
-            <option value="herqa">HERQA Cycle</option>
-          </select>
-          <select
-            value={filters.reportType}
-            onChange={(e) => setFilters({ ...filters, reportType: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="">All Report Types</option>
-            <option value="tracer">Tracer Evidence</option>
-            <option value="employer">Employer Evidence</option>
-            <option value="skill">Skill Gap Evidence</option>
-            <option value="curriculum">Curriculum Evidence</option>
-          </select>
-          <select
-            value={filters.dateRange}
-            onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
-            className={`px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 transition-all ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:bg-slate-600' : 'bg-gray-50 border-gray-200 text-gray-900 focus:bg-white'}`}
-          >
-            <option value="">All Time Ranges</option>
-            <option value="last-30-days">Last 30 Days</option>
-            <option value="last-90-days">Last 90 Days</option>
-            <option value="last-year">Last Year</option>
-          </select>
         </div>
       </div>
 
       {/* KPI Section */}
-      <TracerKPI metrics={mockAccreditationKPIMetrics} darkMode={darkMode} />
+      <TracerKPI metrics={kpiMetrics} darkMode={darkMode} />
 
       {/* Accreditation Overview */}
-      <AccreditationOverview data={mockAccreditationOverview} />
+      <AccreditationOverview data={overviewData} />
 
       {/* Evidence Analytics Sections */}
-      <TracerEvidenceAnalytics data={mockTracerEvidence} />
-      <EmployerEvidenceAnalytics data={mockEmployerEvidence} />
-      <SkillGapEvidenceAnalytics data={mockSkillGapEvidence} />
-      <CurriculumEvidenceAnalytics data={mockCurriculumEvidence} />
+      <TracerEvidenceAnalytics data={tracerEvidenceData} />
+      <EmployerEvidenceAnalytics data={employerEvidenceData} />
+      <SkillGapEvidenceAnalytics data={skillGapEvidenceData} />
+      <CurriculumEvidenceAnalytics data={curriculumEvidenceData} />
 
       {/* Compliance Status Panel */}
-      <ComplianceStatusPanel data={mockComplianceStatus} />
+      <ComplianceStatusPanel data={complianceStatusData} />
 
       {/* Executive Insights Panel */}
-      <AccreditationInsightsPanel insights={mockAccreditationInsights} />
+      <AccreditationInsightsPanel insights={insightsData} />
 
       {/* Accreditation Evidence Table */}
-      <AccreditationEvidenceTable records={mockAccreditationEvidenceRecords} />
+      <AccreditationEvidenceTable records={evidenceRecords} />
 
       {/* Export Modal */}
       {showExport && (
