@@ -80,7 +80,7 @@ export default function IctDataTable<T>({
                   key={col.key}
                   scope="col"
                   style={col.width ? { width: col.width } : undefined}
-                  className={`ictTh ${ALIGN[col.align || 'left']} ${col.headClassName || ''}`}
+                  className={`${ictTh} ${ALIGN[col.align || 'left']} ${col.headClassName || ''}`}
                 >
                   {col.header}
                 </th>
@@ -115,7 +115,7 @@ export default function IctDataTable<T>({
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className={`ictTd ${ALIGN[col.align || 'left']} ${col.cellClassName || ''}`}
+                        className={`${ictTd} ${ALIGN[col.align || 'left']} ${col.cellClassName || ''}`}
                       >
                         {col.cell(row)}
                       </td>

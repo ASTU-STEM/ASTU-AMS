@@ -118,7 +118,7 @@ export default function IctForensicsAuditPage() {
     {
       key: 'time',
       header: 'Timestamp',
-      width: '13%',
+      width: '14%',
       cell: (log) => (
         <div className="min-w-0">
           <span className="ict-mono ict-num font-extrabold text-[var(--ict-accent-text)]">{log.id}</span>
@@ -129,6 +129,7 @@ export default function IctForensicsAuditPage() {
     {
       key: 'actor',
       header: 'Actor',
+      width: '15%',
       cell: (log) => (
         <div className="min-w-0">
           <p className="ict-clamp-1 text-[12px] font-bold text-[var(--text-primary)] " title={log.who}>
@@ -141,6 +142,7 @@ export default function IctForensicsAuditPage() {
     {
       key: 'action',
       header: 'Action & resource',
+      width: '20%',
       cell: (log) => (
         <div className="min-w-0">
           <p className="ict-clamp-1 text-[11.5px] font-bold text-[var(--text-secondary)] ">
@@ -155,6 +157,7 @@ export default function IctForensicsAuditPage() {
     {
       key: 'diff',
       header: 'Before → after',
+      width: '21%',
       cell: (log) => (
         <div className="flex flex-col gap-0.5">
           <span className="ict-mono ict-num ict-break text-[10.5px] text-[var(--ict-warn)] line-through">
@@ -167,20 +170,20 @@ export default function IctForensicsAuditPage() {
     {
       key: 'ip',
       header: 'Source IP',
-      width: '12%',
+      width: '11%',
       cell: (log) => <span className="ict-mono ict-num whitespace-nowrap">{log.ip}</span>,
     },
     {
       key: 'result',
       header: 'Result',
-      width: '10%',
+      width: '8%',
       cell: (log) => <IctStatusBadge status={log.result.toLowerCase()} label={log.result} size="xs" />,
     },
     {
       key: 'actions',
       header: <span className="sr-only">Actions</span>,
       align: 'right',
-      width: '1%',
+      width: '180px',
       cell: (log) => (
         <button
           type="button"
@@ -283,7 +286,7 @@ export default function IctForensicsAuditPage() {
           rowKey={(log) => log.id}
           caption="Immutable forensic audit event register"
           summary={`${filteredLogs.length} audit events match the active filters`}
-          className="ict-bd-none ict-shadow-none"
+          className="ict-bd-none ict-shadow-none [&_table]:min-w-[1280px]"
           empty={
             <IctEmptyState
               icon={Shield}
