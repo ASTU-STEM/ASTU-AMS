@@ -201,6 +201,8 @@ export default function IctSidebar({
   const initials = user
     ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
     : 'IA';
+  const displayName = user?.name?.trim() || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Administrator';
+  const roleLabel = user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator';
   const logoSrc = '/ict/images/astu-seal-logo.png';
 
   const isActive = (item: NavItem) => activePath === item.path;
@@ -377,12 +379,12 @@ export default function IctSidebar({
               </span>
               <span className="min-w-0 flex-1">
                 <span className="ict-clamp-1 block text-[13px] font-semibold text-[var(--ict-nav-text-strong)]">
-                  {user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator'}
+                  {displayName}
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ict-ok)]" aria-hidden />
                   <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--ict-nav-muted)]">
-                    ICT Administrator
+                    {roleLabel}
                   </span>
                 </span>
               </span>
@@ -401,7 +403,7 @@ export default function IctSidebar({
           <div className="flex flex-col items-center gap-1.5">
             <span
               className="ict-avatar-brand inline-flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold"
-              title={user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator'}
+              title={displayName}
               aria-hidden
             >
               {initials}
