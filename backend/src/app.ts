@@ -38,6 +38,45 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+import { owaspSecurityInspectorMiddleware } from './core/security/owaspSecurityEngine';
+app.use(owaspSecurityInspectorMiddleware);
+
+import { serverLogBuffer } from './core/utils/logger.utils';
+
+// Live HTTP Traffic & Server Terminal Stream Logger Middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  const originalEnd = res.end;
+
+  res.end = function (...args: any[]) {
+    const latencyMs = Date.now() - start;
+    const reqPath = req.originalUrl || req.url;
+    if (reqPath && !reqPath.includes('/static') && !reqPath.includes('/assets') && !reqPath.includes('/uploads')) {
+      const rawIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '::1';
+      const clientIp = rawIp.replace(/^::ffff:/, '');
+      let clientName = 'Guest Client';
+      if ((req as any).user) {
+        clientName = (req as any).user.email || (req as any).user.name || 'Authenticated User';
+      }
+
+      serverLogBuffer.addLog({
+        type: 'HTTP_REQUEST',
+        level: res.statusCode >= 500 ? 'ERROR' : res.statusCode >= 400 ? 'WARN' : 'HTTP',
+        statusCode: res.statusCode,
+        method: req.method as any,
+        path: reqPath,
+        clientName,
+        ipAddress: clientIp,
+        latencyMs,
+        message: `${res.statusCode} ${req.method} ${reqPath} - Client: ${clientName} (IP: ${clientIp}) - ${latencyMs}ms`,
+        source: 'BACKEND',
+      });
+    }
+    return originalEnd.apply(res, args as any);
+  };
+  next();
+});
+
 // 5. Static Files Route for Uploads (CVs, profile images)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
   setHeaders: (res) => {

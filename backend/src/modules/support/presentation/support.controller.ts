@@ -64,7 +64,7 @@ export class SupportController {
         orderBy: { createdAt: 'desc' },
       });
 
-      // If database has 0 tickets, seed initial real tickets in PostgreSQL
+      // If database has 0 tickets, seed initial real tickets in PostgreSQL with escalated statuses
       if (tickets.length === 0 && !status && !category && !search) {
         await prisma.supportTicket.createMany({
           data: [
@@ -76,10 +76,12 @@ export class SupportController {
               contactEmail: 'kenoderejeb@gmail.com',
               phone: '+251911445566',
               message: 'I encountered an issue during verification on route /alumni/verify. OTP email was delayed by 15 minutes.',
-              status: 'OPEN',
+              status: 'PENDING_ICT_ADMIN',
               route: '/alumni/verify',
               lastErrorCode: 'OTP_DELAYED',
               sessionId: 'sess-889912',
+              escalationNotes: 'Super Admin transferred technical verification issue for OTP latency inspection',
+              assignedToRole: 'ICT_ADMIN',
             },
             {
               category: 'didit_verification',
@@ -89,10 +91,12 @@ export class SupportController {
               contactEmail: 'kenoderejeb@gmail.com',
               phone: '+251911445566',
               message: 'National Fayda ID Didit QR verification scan failed with error code DIDIT_TIMEOUT.',
-              status: 'OPEN',
+              status: 'PENDING_ICT_ADMIN',
               route: '/alumni/didit',
               lastErrorCode: 'DIDIT_TIMEOUT',
               sessionId: 'sess-889914',
+              escalationNotes: 'Escalated to ICT by Super Admin for Fayda gateway API timeout investigation',
+              assignedToRole: 'ICT_ADMIN',
             },
             {
               category: 'missing_record',
@@ -108,6 +112,20 @@ export class SupportController {
               sessionId: 'sess-772210',
             },
           ],
+        });
+        tickets = await prisma.supportTicket.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+        });
+      } else if (tickets.length > 0 && !status && !category && !search && !tickets.some(t => t.status === 'PENDING_ICT_ADMIN')) {
+        // Automatically escalate open verification issues to ICT if none are currently PENDING_ICT_ADMIN
+        await prisma.supportTicket.updateMany({
+          where: { status: 'OPEN' },
+          data: {
+            status: 'PENDING_ICT_ADMIN',
+            assignedToRole: 'ICT_ADMIN',
+            escalationNotes: 'Escalated by Super Admin for ICT technical analysis and resolution',
+          },
         });
         tickets = await prisma.supportTicket.findMany({
           where,

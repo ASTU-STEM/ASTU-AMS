@@ -174,19 +174,6 @@ export default function IctSidebar({
       <div className="relative border-t border-slate-100 p-3 space-y-2">
         {!collapsed ? (
           <>
-            {/* AI Assistant */}
-            <button
-              type="button"
-              onClick={onOpenAiAssistant}
-              className="flex w-full items-center gap-3 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 px-3.5 py-2.5 text-sm font-medium text-blue-900 transition-all hover:bg-blue-500/15 shadow-2xs group cursor-pointer"
-            >
-              <Sparkles className="h-4.5 w-4.5 text-blue-600 animate-pulse shrink-0" />
-              <div className="text-left flex-1 min-w-0">
-                <div className="text-xs font-extrabold uppercase tracking-wider text-blue-800">ICT AI Assistant</div>
-                <div className="text-[9px] text-blue-700/80 truncate">Diagnostics &amp; Security ASTU AI</div>
-              </div>
-            </button>
-
             <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-200/60 p-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white shrink-0">
                 {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'IA'}
@@ -211,15 +198,6 @@ export default function IctSidebar({
           </>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <button
-              type="button"
-              onClick={onOpenAiAssistant}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 border border-blue-200 text-blue-700 hover:bg-blue-200 transition-all shadow-xs cursor-pointer"
-              title="ICT AI Assistant"
-            >
-              <Sparkles className="h-4.5 w-4.5 text-blue-600 animate-pulse" />
-            </button>
-
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white"
               title={user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator'}

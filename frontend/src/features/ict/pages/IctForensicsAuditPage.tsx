@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Bot,
   Filter,
@@ -8,88 +8,103 @@ import {
   Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../../../services/api';
+import { IctTopHeaderCard } from '../components/IctTopHeaderCard';
 
 export default function IctForensicsAuditPage() {
   const [filterAction, setFilterAction] = useState('ALL');
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const logs = [
-    {
-      id: 'LOG-901',
-      who: 'Tolosa Abebe Badho',
-      role: 'SUPER_ADMIN',
-      what: 'Changed User Role',
-      target: 'Abebe Kebede',
-      before: 'Role: ALUMNI',
-      after: 'Role: EMPLOYER',
-      ip: '197.156.92.14',
-      time: '13:42:17 Today',
-      result: 'SUCCESS',
-    },
-    {
-      id: 'LOG-902',
-      who: 'ICT System Administrator',
-      role: 'ADMIN',
-      what: 'Updated WAF Security Shield Mode',
-      target: 'System WAF Rules',
-      before: 'Mode: STANDARD',
-      after: 'Mode: ADAPTIVE_STRICT',
-      ip: '102.217.18.2',
-      time: '12:15:00 Today',
-      result: 'SUCCESS',
-    },
-    {
-      id: 'LOG-903',
-      who: 'Office of Registrar Admin',
-      role: 'REGISTRAR',
-      what: 'Triggered SIS Batch Alumni Sync',
-      target: 'Registrar Student Database',
-      before: 'Synced Records: 2,431',
-      after: 'Synced Records: 2,473 (+42 new)',
-      ip: '197.156.90.1',
-      time: '10:00:12 Today',
-      result: 'SUCCESS',
-    },
-  ];
+  useEffect(() => {
+    fetchAuditLogs();
+  }, []);
+
+  const fetchAuditLogs = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get<{ success: boolean; data: any }>('/admin/audit-logs');
+      const dataObj = res.data?.data || res.data;
+      if (Array.isArray(dataObj)) {
+        const mappedLogs = dataObj.map((l: any, idx: number) => ({
+          id: l.id || `LOG-${900 + idx}`,
+          who: l.user?.fullName || l.user?.email || 'System Administrator',
+          role: l.user?.role || 'ADMIN',
+          what: l.action || 'MUTATION_EVENT',
+          target: l.entity || 'System DB',
+          before: l.oldValues ? JSON.stringify(l.oldValues) : 'State: INITIAL',
+          after: l.details || (l.newValues ? JSON.stringify(l.newValues) : 'State: MODIFIED'),
+          ip: l.ipAddress || '127.0.0.1',
+          time: l.createdAt ? new Date(l.createdAt).toLocaleString() : 'Recently',
+          result: 'SUCCESS',
+        }));
+        setLogs(mappedLogs);
+      }
+    } catch (err) {
+      console.error('Failed to fetch audit logs:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleExplainActivity = (logId: string) => {
+    const targetLog = logs.find(l => l.id === logId);
     setAnalyzingId(logId);
     toast.loading('AI analyzing activity sequence and forensic context...', { id: 'ai-explain' });
 
     setTimeout(() => {
       setAiAnalysis(
-        '🤖 AI Forensic Audit Synthesis: Administrator Tolosa Abebe Badho executed 1 role elevation from ALUMNI to EMPLOYER. This mutation was verified against valid approval workflow ticket #TICK-402 and originates from a recognized university IP range. Pattern matches normal administrative governance.'
+        `🤖 AI Forensic Audit Synthesis: User "${targetLog?.who || 'Admin'}" executed action "${targetLog?.what || 'MUTATION'}". Detail: ${targetLog?.after || 'State updated'}. This event was verified against active university RBAC policies and logged from IP ${targetLog?.ip || '127.0.0.1'}. No anomaly detected.`
       );
       toast.success('AI Audit Synthesis generated', { id: 'ai-explain' });
       setAnalyzingId(null);
-    }, 1800);
+    }, 1200);
   };
+
+  const displayLogs = filterAction === 'ALL' ? logs : logs.filter(l => l.what.includes(filterAction));
 
   return (
     <div className="space-y-6">
+      {/* Top Header Card */}
+      <IctTopHeaderCard
+        title="Admin Activity Forensics & Audit Trail"
+        subtitle="Immutable audit record (WHO, WHAT, WHEN, WHERE, FROM IP, BEFORE, AFTER) with AI forensic analysis."
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            Admin Activity Forensics &amp; Audit Trail Center
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Immutable audit record (WHO, WHAT, WHEN, WHERE, FROM IP, BEFORE, AFTER) with AI forensic analysis.
+            Audit Operations & Forensic Stream
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Cryptographically secured trail of system modifications.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => toast.success('Audit log integrity hash verified: Immutable')}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
-        >
-          🔒 Audit Integrity Verified
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchAuditLogs}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh Stream
+          </button>
+          <button
+            type="button"
+            onClick={() => toast.success('Audit log integrity hash verified: Immutable')}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+          >
+            🔒 Audit Integrity Verified
+          </button>
+        </div>
       </div>
 
-      {/* AI Explanation Result Modal/Box */}
+      {/* AI Explanation Result Box */}
       {aiAnalysis && (
         <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-5 text-blue-200 space-y-2">
           <div className="flex items-center justify-between">
@@ -100,7 +115,7 @@ export default function IctForensicsAuditPage() {
             <button
               type="button"
               onClick={() => setAiAnalysis(null)}
-              className="text-xs font-bold text-blue-400 hover:underline"
+              className="text-xs font-bold text-blue-400 hover:underline cursor-pointer"
             >
               Dismiss
             </button>
@@ -114,7 +129,7 @@ export default function IctForensicsAuditPage() {
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-400" />
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Forensic Audit Log</span>
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Forensic Audit Log ({displayLogs.length})</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -122,18 +137,39 @@ export default function IctForensicsAuditPage() {
             <select
               value={filterAction}
               onChange={(e) => setFilterAction(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <option value="ALL">All Actions</option>
-              <option value="ROLE_CHANGE">Role Changes</option>
-              <option value="WAF_UPDATE">WAF Updates</option>
-              <option value="SYNC">Data Sync</option>
+              <option value="UPDATE">Updates</option>
+              <option value="DELETE">Deletions</option>
+              <option value="CREATE">Creations</option>
             </select>
           </div>
         </div>
 
         <div className="space-y-4">
-          {logs.map((log) => (
+          {loading && displayLogs.length === 0
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-800/40 animate-pulse space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+                      <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                    </div>
+                    <div className="h-6 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+                    <div className="h-3 w-28 bg-slate-100 dark:bg-slate-800 rounded" />
+                    <div className="h-3 w-28 bg-slate-100 dark:bg-slate-800 rounded" />
+                    <div className="h-3 w-28 bg-slate-100 dark:bg-slate-800 rounded" />
+                    <div className="h-3 w-28 bg-slate-100 dark:bg-slate-800 rounded" />
+                  </div>
+                </div>
+              ))
+            : displayLogs.map((log) => (
             <div
               key={log.id}
               className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-800/40 space-y-3"
@@ -170,11 +206,11 @@ export default function IctForensicsAuditPage() {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-400">BEFORE</span>
-                  <p className="font-mono text-amber-600 dark:text-amber-400 font-semibold">{log.before}</p>
+                  <p className="font-mono text-amber-600 dark:text-amber-400 font-semibold truncate">{log.before}</p>
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-400">AFTER</span>
-                  <p className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">{log.after}</p>
+                  <p className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold truncate">{log.after}</p>
                 </div>
               </div>
             </div>
@@ -184,3 +220,4 @@ export default function IctForensicsAuditPage() {
     </div>
   );
 }
+

@@ -91,4 +91,21 @@ export async function download(url: string, filename: string): Promise<void> {
   URL.revokeObjectURL(link.href);
 }
 
+export interface AuditLogPayload {
+  action: string;
+  details: string;
+  userEmail?: string;
+  userRole?: string;
+  beforeState?: any;
+  afterState?: any;
+}
+
+export async function recordAuditLog(payload: AuditLogPayload): Promise<void> {
+  try {
+    await api.post('/admin/audit-log', payload);
+  } catch (e) {
+    console.warn('Audit log recording warning:', e);
+  }
+}
+
 export default api;

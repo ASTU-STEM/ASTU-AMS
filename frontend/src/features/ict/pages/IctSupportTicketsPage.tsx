@@ -16,7 +16,7 @@ import {
   BellRing,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import apiClient from '../../../services/api';
+import apiClient, { recordAuditLog } from '../../../services/api';
 
 interface SupportTicket {
   id: string;
@@ -40,6 +40,8 @@ interface SupportTicket {
   updatedAt: string;
 }
 
+import { IctTopHeaderCard } from '../components/IctTopHeaderCard';
+
 export default function IctSupportTicketsPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +50,17 @@ export default function IctSupportTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [isResolving, setIsResolving] = useState(false);
+  const tableRef = React.useRef<HTMLDivElement>(null);
+
+  const handleFilterClick = (filterStatus: string, label?: string) => {
+    setStatusFilter(filterStatus);
+    if (label) {
+      toast.success(`Showing ${label}`);
+    }
+    if (tableRef.current) {
+      tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const fetchTickets = async () => {
     setIsLoading(true);
@@ -56,6 +69,10 @@ export default function IctSupportTicketsPage() {
       const dataList = res?.data?.data || res?.data || [];
       if (Array.isArray(dataList)) {
         setTickets(dataList);
+        const pending = dataList.filter((t: any) => t.status === 'PENDING_ICT_ADMIN').length;
+        if (pending === 0 && dataList.length > 0) {
+          setStatusFilter('ALL');
+        }
       }
     } catch (err) {
       console.error('Failed to fetch ICT support tickets:', err);
@@ -86,6 +103,14 @@ export default function IctSupportTicketsPage() {
       });
 
       if (res?.data?.success || res?.status === 200) {
+        recordAuditLog({
+          action: 'RESOLVE_ESCALATED_SUPPORT_TICKET',
+          details: `ICT Admin resolved escalated support ticket #${selectedTicket.id.substring(0, 8)} (${selectedTicket.category}) for ${selectedTicket.fullName}`,
+          userEmail: 'admin@astust.edu.et',
+          userRole: 'ADMIN',
+          beforeState: { ticketId: selectedTicket.id, status: selectedTicket.status },
+          afterState: { ticketId: selectedTicket.id, status: 'RESOLVED', responseNotes: resolutionNotes }
+        });
         toast.success(`Ticket #${selectedTicket.id.substring(0, 8)} resolved! Super Admin & Alumni notified.`);
         setSelectedTicket(null);
         setResolutionNotes('');
@@ -158,9 +183,13 @@ export default function IctSupportTicketsPage() {
 
   return (
     <div className="space-y-6">
+      <IctTopHeaderCard
+        title="Escalated Technical Support Desk"
+        subtitle="Review, diagnose, and resolve technical support tickets escalated by Super Admin and system automation."
+      />
       {/* Top Banner Alert if Pending Tickets Exist */}
       {pendingIctCount > 0 && (
-        <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
               <ShieldAlert className="w-5 h-5" />
@@ -175,59 +204,55 @@ export default function IctSupportTicketsPage() {
             </div>
           </div>
           <button
-            onClick={() => setStatusFilter('PENDING_ICT_ADMIN')}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all"
+            type="button"
+            onClick={() => handleFilterClick('PENDING_ICT_ADMIN', `Escalated Queue (${pendingIctCount} tickets)`)}
+            className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5 hover:scale-[1.02]"
           >
-            View Escalated Queue ({pendingIctCount})
+            View Escalated Queue ({pendingIctCount}) →
           </button>
         </div>
       )}
 
       {/* Stats Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Escalated to ICT</p>
-            <p className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{pendingIctCount}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/50 flex items-center justify-center text-amber-600">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ICT Resolved</p>
-            <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{resolvedIctCount}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 flex items-center justify-center text-emerald-600">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Tickets</p>
-            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1">{tickets.length}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center text-blue-600">
-            <LifeBuoy className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Super Admin / General</p>
-            <p className="text-2xl font-black text-slate-700 dark:text-slate-300 mt-1">{tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 flex items-center justify-center text-purple-600">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs animate-pulse space-y-2"
+              >
+                <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div className="h-8 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+              </div>
+            ))
+          : [
+              { filter: 'PENDING_ICT_ADMIN', label: 'Escalated to ICT', value: pendingIctCount, tone: 'text-amber-600 dark:text-amber-400', icon: ShieldAlert, bg: 'bg-amber-100 dark:bg-amber-950/50 text-amber-600' },
+              { filter: 'RESOLVED', label: 'ICT Resolved', value: resolvedIctCount, tone: 'text-emerald-600 dark:text-emerald-400', icon: CheckCircle2, bg: 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600' },
+              { filter: 'ALL', label: 'Total Tickets', value: tickets.length, tone: 'text-slate-800 dark:text-white', icon: LifeBuoy, bg: 'bg-blue-100 dark:bg-blue-950/50 text-blue-600' },
+              { filter: 'OPEN', label: 'Super Admin / General', value: tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length, tone: 'text-slate-700 dark:text-slate-300', icon: Clock, bg: 'bg-purple-100 dark:bg-purple-950/50 text-purple-600' },
+            ].map((card) => {
+              const Icon = card.icon;
+              return (
+                <button
+                  key={card.label}
+                  type="button"
+                  onClick={() => handleFilterClick(card.filter, card.label)}
+                  className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between text-left transition-all hover:shadow-md hover:scale-[1.01] active:scale-98 cursor-pointer"
+                >
+                  <div>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{card.label}</p>
+                    <p className={`text-2xl font-black mt-1 ${card.tone}`}>{card.value}</p>
+                  </div>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.bg}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                </button>
+              );
+            })}
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div ref={tableRef} className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input

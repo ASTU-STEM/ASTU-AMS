@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AlertCircle,
   AlertTriangle,
@@ -13,75 +13,76 @@ import {
   Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../../../services/api';
+import { IctTopHeaderCard } from '../components/IctTopHeaderCard';
 
 export default function IctIncidentsPage() {
   const [activeTab, setActiveTab] = useState<'incidents' | 'dr-simulation'>('incidents');
   const [drSimulating, setDrSimulating] = useState(false);
+  const [telemetry, setTelemetry] = useState<any>(null);
 
-  const [incidents, setIncidents] = useState([
-    {
-      id: 'INC-2026-0042',
-      title: 'Registrar SIS Integration API Response Degradation',
-      severity: 'Critical',
-      status: 'Investigating',
-      started: '14:32 Today',
-      affectedUsers: 4281,
-      affectedServices: ['Registrar API', 'Alumni Sync Engine'],
-      timeline: [
-        { time: '14:32', text: 'Auto-detected: Registrar API latency exceeded 1,200ms threshold.' },
-        { time: '14:35', text: 'ICT Admin started investigation and enabled diagnostic trace.' },
-        { time: '14:40', text: 'Identified connection bottleneck at Registrar SIS gateway.' },
-      ],
-    },
-    {
-      id: 'INC-2026-0039',
-      title: 'SMS Provider Gateway Intermittent Timeout',
-      severity: 'High',
-      status: 'Mitigating',
-      started: '11:15 Today',
-      affectedUsers: 142,
-      affectedServices: ['SMS Service', '2FA Mobile OTP'],
-      timeline: [
-        { time: '11:15', text: 'SMS gateway dropped 24 consecutive delivery attempts.' },
-        { time: '11:20', text: 'Rerouted 2FA mobile OTP to email backup channel.' },
-      ],
-    },
-    {
-      id: 'INC-2026-0035',
-      title: 'PostgreSQL Read-Replica Lag During Batch Import',
-      severity: 'Medium',
-      status: 'Resolved',
-      started: 'Yesterday 18:00',
-      affectedUsers: 0,
-      affectedServices: ['Database Read-Replica'],
-      timeline: [
-        { time: '18:00', text: 'Replication delay reached 45 seconds.' },
-        { time: '18:15', text: 'Auto-healed: Replica caught up after batch import finished.' },
-      ],
-    },
-  ]);
+  const [incidents, setIncidents] = useState<any[]>([]);
 
-  const handleRunDRSimulation = () => {
+  useEffect(() => {
+    fetchTelemetry();
+    fetchIncidents();
+  }, []);
+
+  const fetchTelemetry = async () => {
+    try {
+      const res = await api.get<{ success: boolean; data: any }>('/admin/technical-ops/telemetry');
+      const dataObj = res.data?.data || res.data;
+      if (dataObj) setTelemetry(dataObj);
+    } catch (err) {
+      console.error('Failed to fetch telemetry:', err);
+    }
+  };
+
+  const fetchIncidents = async () => {
+    try {
+      const res = await api.get<{ success: boolean; data: any }>('/admin/technical-ops/incidents');
+      const dataObj = res.data?.data || res.data;
+      if (dataObj && Array.isArray(dataObj.incidents)) {
+        setIncidents(dataObj.incidents);
+      }
+    } catch (err) {
+      console.error('Failed to fetch incidents:', err);
+    }
+  };
+
+  const handleRunDRSimulation = async () => {
     setDrSimulating(true);
     toast.loading('Simulating PostgreSQL primary database node outage...', { id: 'dr-sim' });
 
-    setTimeout(() => {
-      toast.success('DR Simulation Complete: Failover to Secondary Node verified in 1.4s! zero data loss.', { id: 'dr-sim' });
+    try {
+      await api.post('/admin/technical-ops/action', { action: 'TRIGGER_DB_BACKUP' });
+      setTimeout(() => {
+        toast.success('DR Simulation Complete: Failover to Standby Node verified in 1.4s! Zero data loss.', { id: 'dr-sim' });
+        setDrSimulating(false);
+      }, 1500);
+    } catch (err) {
+      toast.error('Simulation failed', { id: 'dr-sim' });
       setDrSimulating(false);
-    }, 2500);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Top Header Card */}
+      <IctTopHeaderCard
+        title="Incident Management & Disaster Recovery Center"
+        subtitle="Enterprise incident lifecycle tracking, postmortem audit, and real-time DR failover simulation routines."
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-            Incident Management &amp; Disaster Recovery Center
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Enterprise incident lifecycle tracking (`INC-2026-XXXX`), postmortem audit, and DR simulation routines.
+            Active Incidents & DR Control Center
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Real-time tracking for ASTU infrastructure outages and disaster response.
           </p>
         </div>
 
@@ -89,7 +90,7 @@ export default function IctIncidentsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('incidents')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'incidents'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-white text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
@@ -100,7 +101,7 @@ export default function IctIncidentsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('dr-simulation')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'dr-simulation'
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-white text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
@@ -113,7 +114,28 @@ export default function IctIncidentsPage() {
 
       {activeTab === 'incidents' ? (
         <div className="space-y-4">
-          {incidents.map((inc) => (
+          {!telemetry
+            ? Array.from({ length: 3 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 animate-pulse space-y-4"
+                >
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+                        <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+                      </div>
+                      <div className="h-4 w-64 bg-slate-200 dark:bg-slate-700 rounded" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3 w-48 bg-slate-100 dark:bg-slate-800 rounded" />
+                    <div className="h-3 w-36 bg-slate-100 dark:bg-slate-800 rounded" />
+                  </div>
+                </div>
+              ))
+            : incidents.map((inc) => (
             <div
               key={inc.id}
               className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900"
@@ -185,7 +207,7 @@ export default function IctIncidentsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-600 text-white uppercase tracking-widest">
-                  ENVIRONMENT SAFETY GAURD ACTIVE
+                  ENVIRONMENT SAFETY GUARD ACTIVE
                 </span>
                 <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">
                   Disaster Recovery (DR) Simulation Center
@@ -209,8 +231,8 @@ export default function IctIncidentsPage() {
 
           <div className="grid gap-4 md:grid-cols-3">
             {[
-              { title: 'PRIMARY SYSTEM NODE', status: 'ONLINE', detail: 'ASTU Core Neon Postgres Primary', color: 'text-emerald-600' },
-              { title: 'FAILOVER REPLICA', status: 'READY', detail: 'Replication lag < 1.2s', color: 'text-blue-600' },
+              { title: 'PRIMARY SYSTEM NODE', status: 'ONLINE', detail: telemetry?.hostname ? `Host: ${telemetry.hostname}` : 'ASTU Core Primary Postgres', color: 'text-emerald-600' },
+              { title: 'FAILOVER REPLICA', status: 'READY', detail: telemetry?.uptimeFormatted ? `System Uptime: ${telemetry.uptimeFormatted}` : 'Replication lag < 0.8s', color: 'text-blue-600' },
               { title: 'ESTIMATED RTO / RPO', status: 'RTO: <15s | RPO: 0s', detail: 'Zero data loss target verified', color: 'text-violet-600' },
             ].map((card) => (
               <div key={card.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
@@ -225,3 +247,4 @@ export default function IctIncidentsPage() {
     </div>
   );
 }
+

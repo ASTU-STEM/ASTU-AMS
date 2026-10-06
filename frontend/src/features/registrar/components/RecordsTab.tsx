@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { GraduateRecord } from '../types/registrar.types';
 import toast from 'react-hot-toast';
+import { recordAuditLog } from '../../../services/api';
 
 interface RecordsTabProps {
   graduates: GraduateRecord[];
@@ -204,6 +205,13 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     e.preventDefault();
     if (editingGrad) {
       onEditGraduate(editingGrad);
+      recordAuditLog({
+        action: 'UPDATE_SIS_GRADUATE_RECORD',
+        details: `Registrar updated SIS graduate record for ${editingGrad.fullName} (${editingGrad.studentId})`,
+        userEmail: 'registrar@astust.edu.et',
+        userRole: 'REGISTRAR',
+        afterState: editingGrad
+      });
       setEditingGrad(null);
       toast.success('Graduate profile saved successfully.');
     }
@@ -225,6 +233,13 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       return;
     }
     selectedRecords.forEach((id: number) => onVerifyIdentity(id));
+    recordAuditLog({
+      action: 'VERIFY_SIS_GRADUATE_IDENTITY',
+      details: `Registrar verified identities for ${selectedRecords.length} graduate record(s)`,
+      userEmail: 'registrar@astust.edu.et',
+      userRole: 'REGISTRAR',
+      afterState: { verifiedRecordIds: selectedRecords }
+    });
     toast.success(`Verified ${selectedRecords.length} identities.`);
     setSelectedRecords([]);
   };
@@ -260,7 +275,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
 
-    const scrollContainers = document.querySelectorAll('main, .admin-shell, .overflow-y-auto');
+    const scrollContainers = document.querySelectorAll('main, .admin-shell');
     const savedOverflows: { el: HTMLElement; overflow: string }[] = [];
     scrollContainers.forEach((el) => {
       const htmlEl = el as HTMLElement;
@@ -461,6 +476,16 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     link.download = `ASTU_Graduates_Export_${exportFilters.batchYear !== 'All' ? exportFilters.batchYear + '_' : ''}${dateTag}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+
+    // Record audit log entry in database
+    recordAuditLog({
+      action: 'EXPORT_SIS_GRADUATES',
+      details: `Registrar exported ${exportMatchedRecords.length} SIS graduate roster record(s) to CSV file (ASTU_Graduates_Export_${dateTag}.csv)`,
+      userEmail: 'registrar@astust.edu.et',
+      userRole: 'REGISTRAR',
+      beforeState: { totalRecords: graduates.length, matchedCount: exportMatchedRecords.length, batchYear: exportFilters.batchYear, department: exportFilters.department },
+      afterState: { status: 'COMPLETED_DOWNLOAD', exportedColumns: activeCols.map(c => c.label) }
+    });
 
     toast.success(`Successfully exported ${exportMatchedRecords.length} records to CSV!`);
     setIsExportModalOpen(false);
@@ -990,10 +1015,12 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       {/* Advanced CSV Export Modal */}
       {isExportModalOpen && createPortal(
         <div 
-          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 bg-slate-950/75 backdrop-blur-md overflow-hidden"
-          onWheel={(e) => e.stopPropagation()}
+          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 bg-slate-950/75 backdrop-blur-md overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsExportModalOpen(false);
+          }}
         >
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 p-6 md:p-8 relative">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 p-6 md:p-8 relative my-auto">
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">

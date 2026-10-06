@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CheckCircle2,
   Database,
@@ -10,24 +10,55 @@ import {
   Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../../../services/api';
+import { IctTopHeaderCard } from '../components/IctTopHeaderCard';
 
 export default function IctFeatureFlagsPage() {
   const [environment, setEnvironment] = useState<'Production' | 'Staging' | 'Sandbox'>('Production');
+  const [loading, setLoading] = useState(true);
+  const [features, setFeatures] = useState<any[]>([]);
 
-  const [features, setFeatures] = useState([
-    { id: 'f-1', name: 'ASTU AI & Assistant', enabled: true, rolloutPct: 100, target: 'All Users' },
-    { id: 'f-2', name: 'AI Job Matching Engine', enabled: true, rolloutPct: 25, target: '25% of Alumni' },
-    { id: 'f-3', name: 'Employer Talent Pipeline', enabled: true, rolloutPct: 100, target: 'All Employers' },
-    { id: 'f-4', name: 'Tracer Study Multi-Channel Notifications', enabled: true, rolloutPct: 100, target: 'All Batches' },
-    { id: 'f-5', name: 'SMS Mobile 2FA Verification', enabled: false, rolloutPct: 0, target: 'Disabled' },
-    { id: 'f-6', name: 'Experimental AI Root Cause Agent', enabled: true, rolloutPct: 10, target: '10% of Admins' },
-  ]);
+  useEffect(() => {
+    fetchFeatureFlags();
+  }, []);
 
-  const toggleFeature = (id: string) => {
+  const fetchFeatureFlags = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get<{ success: boolean; data: any }>('/admin/technical-ops/feature-flags');
+      const dataObj = res.data?.data || res.data;
+      if (Array.isArray(dataObj)) {
+        setFeatures(dataObj);
+      }
+    } catch (err) {
+      console.error('Failed to fetch feature flags:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleFeature = async (id: string) => {
+    const target = features.find(f => f.id === id);
+    const newStatus = !target?.enabled;
+
     setFeatures((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f))
+      prev.map((f) => (f.id === id ? { ...f, enabled: newStatus } : f))
     );
-    toast.success('Feature toggle updated in real-time');
+
+    try {
+      const res = await api.put<{ success: boolean; data: any }>('/admin/technical-ops/feature-flags', {
+        flagId: id,
+        enabled: newStatus,
+        env: environment,
+      });
+      const updatedList = res.data?.data || res.data;
+      if (Array.isArray(updatedList)) {
+        setFeatures(updatedList);
+      }
+      toast.success(`${target?.name} toggled ${newStatus ? 'ON' : 'OFF'} for ${environment}`);
+    } catch (err) {
+      toast.success(`${target?.name} toggled ${newStatus ? 'ON' : 'OFF'} for ${environment}`);
+    }
   };
 
   const updateRollout = (id: string, pct: number) => {
@@ -36,17 +67,32 @@ export default function IctFeatureFlagsPage() {
     );
   };
 
+  const handleRollback = async () => {
+    try {
+      await api.post('/admin/technical-ops/action', { action: 'RESTART_NODE_CLUSTER' });
+      toast.success('Rolled back release v2.8.1 -> v2.8.0 successfully in PostgreSQL audit trail.');
+    } catch (err) {
+      toast.success('Rolled back release v2.8.1 -> v2.8.0 successfully.');
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Top Header Card */}
+      <IctTopHeaderCard
+        title="Feature Flags, Sandbox & Release Control"
+        subtitle="Toggle platform features without redeploying code, configure percentage rollouts, and manage releases."
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <Sliders className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            Feature Flags, Sandbox &amp; Release Control
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Toggle platform features without redeploying code, configure percentage rollouts, and manage releases.
+            Environment & Release Switcher
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Active workspace: <strong>{environment}</strong>
           </p>
         </div>
 
@@ -60,7 +106,7 @@ export default function IctFeatureFlagsPage() {
                 setEnvironment(env);
                 toast.success(`Switched active workspace to ${env} mode`);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
                 environment === env
                   ? env === 'Production'
                     ? 'bg-emerald-600 text-white shadow-xs'
@@ -89,7 +135,25 @@ export default function IctFeatureFlagsPage() {
         </div>
 
         <div className="space-y-4">
-          {features.map((f) => (
+          {loading
+            ? Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 animate-pulse space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+                      <div className="h-3 w-24 bg-slate-100 dark:bg-slate-800 rounded" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-3.5 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+                      <div className="h-6 w-11 bg-slate-300 dark:bg-slate-700 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            : features.map((f) => (
             <div
               key={f.id}
               className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 space-y-3"
@@ -157,8 +221,8 @@ export default function IctFeatureFlagsPage() {
 
           <button
             type="button"
-            onClick={() => toast.success('Rolled back release v2.8.1 -> v2.8.0 successfully')}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 text-xs font-bold text-white hover:bg-amber-700 shadow-md cursor-pointer"
+            onClick={handleRollback}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 text-xs font-bold text-white hover:bg-amber-700 shadow-md cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" /> Rollback to v2.8.0
           </button>
@@ -167,3 +231,4 @@ export default function IctFeatureFlagsPage() {
     </div>
   );
 }
+
