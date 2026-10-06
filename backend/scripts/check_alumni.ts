@@ -1,17 +1,18 @@
 import prisma from '../src/core/config/db';
 
 async function main() {
-  const alumni = await prisma.alumniProfile.findMany({
-    include: {
-      department: true,
-      experiences: true,
-      mentorProfile: true,
-    }
-  });
-  console.log(`Found ${alumni.length} alumni in database:`);
+  const alumni = await prisma.alumniProfile.findMany({});
+  console.log(`Found ${alumni.length} total alumni in database:`);
+  
+  const depts: Record<string, number> = {};
   for (const a of alumni) {
-    console.log(`- ${a.fullName} | ${a.department?.name} | Class of ${a.graduationYear} | Skills: ${a.skills.join(', ')}`);
+    const dept = a.department || a.departmentId || 'Unspecified';
+    depts[dept] = (depts[dept] || 0) + 1;
+    console.log(`- ID: ${a.id} | Name: ${a.fullName} | StudentID: ${a.studentId} | Dept: ${dept} | Year: ${a.graduationYear}`);
   }
+
+  console.log('\n--- Department Breakdown ---');
+  console.table(depts);
 }
 
 main()

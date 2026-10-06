@@ -1,20 +1,16 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
-  Bot,
-  Database,
   Globe,
   Key,
   Layers,
   LifeBuoy,
   LogOut,
-  MessageSquareText,
   PanelLeftClose,
   PanelLeftOpen,
   ScrollText,
-  Settings,
   Shield,
   ShieldAlert,
   Sliders,
@@ -22,7 +18,6 @@ import {
   Terminal,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useSystemSettings } from '../context/SystemSettingsContext';
 
 interface IctSidebarProps {
   onLogout: () => void;
@@ -35,33 +30,141 @@ interface IctSidebarProps {
 
 interface NavItem {
   label: string;
+  shortLabel: string;
   path: string;
   icon: any;
   exact?: boolean;
   section: string;
-  tooltip?: string;
-  badge?: string | number;
+  tooltip: string;
+  description: string;
 }
 
+/**
+ * Navigation model — paths and handlers are unchanged.
+ * Visual grouping only: Operations → Observability → Security → Data & Releases → Intelligence.
+ */
 const navItems: NavItem[] = [
-  { label: 'Command Center', path: '/ict/dashboard', icon: Terminal, exact: true, section: 'ops', tooltip: '360° System Health Matrix' },
-  { label: 'Escalated Support Desk', path: '/ict/support-tickets', icon: LifeBuoy, section: 'ops', tooltip: 'Review & Resolve Support Tickets Transferred by Super Admin' },
-  { label: 'Universal Logs & Diffs', path: '/ict/logs', icon: ScrollText, section: 'ops', tooltip: 'Cross-Portal Logs & State Mutation Diffs' },
-  { label: 'External API Gateway', path: '/ict/api-gateway', icon: Globe, section: 'ops', tooltip: 'API Provisioning, Rate Limits & Health' },
-  { label: 'Security SOC & OWASP Top 10', path: '/ict/security', icon: ShieldAlert, section: 'ops', tooltip: 'Threats, OWASP A01–A10 & Break Glass' },
-  { label: 'Observability & Traces', path: '/ict/observability', icon: Activity, section: 'ops', tooltip: 'Latency & Distributed Tracing' },
-  { label: 'Incidents & DR', path: '/ict/incidents', icon: AlertTriangle, section: 'ops', tooltip: 'Incident Lifecycle & DR Simulation' },
+  {
+    label: 'Command Center',
+    shortLabel: 'Command',
+    path: '/ict/dashboard',
+    icon: Terminal,
+    exact: true,
+    section: 'operations',
+    tooltip: '360° System Health Matrix',
+    description: 'Operational overview',
+  },
+  {
+    label: 'Escalated Support Desk',
+    shortLabel: 'Support',
+    path: '/ict/support-tickets',
+    icon: LifeBuoy,
+    section: 'operations',
+    tooltip: 'Review & Resolve Support Tickets Transferred by Super Admin',
+    description: 'Escalated ICT tickets',
+  },
+  {
+    label: 'Incidents & DR',
+    shortLabel: 'Incidents',
+    path: '/ict/incidents',
+    icon: AlertTriangle,
+    section: 'operations',
+    tooltip: 'Incident Lifecycle & DR Simulation',
+    description: 'Response & recovery',
+  },
 
-  { label: 'Forensic Audit Trail', path: '/ict/audit', icon: Shield, section: 'governance', tooltip: 'Immutable Audit & AI Forensics' },
-  { label: 'Integrations & Sync', path: '/ict/integrations', icon: Layers, section: 'governance', tooltip: 'Registrar Sync & Data Quality' },
-  { label: 'Feature Flags & Sandbox', path: '/ict/feature-flags', icon: Sliders, section: 'governance', tooltip: 'Rollouts & Release Rollback' },
-  { label: 'Policies & Sessions', path: '/ict/policies', icon: Key, section: 'governance', tooltip: 'Active Sessions & Red Button' },
-  { label: 'Architecture & ASTU AI', path: '/ict/architecture', icon: Sparkles, section: 'governance', tooltip: 'Interactive Topology & AI' },
+  {
+    label: 'Universal Logs & Diffs',
+    shortLabel: 'Logs',
+    path: '/ict/logs',
+    icon: ScrollText,
+    section: 'observability',
+    tooltip: 'Cross-Portal Logs & State Mutation Diffs',
+    description: 'Cross-portal audit logs',
+  },
+  {
+    label: 'Observability & Traces',
+    shortLabel: 'Traces',
+    path: '/ict/observability',
+    icon: Activity,
+    section: 'observability',
+    tooltip: 'Latency & Distributed Tracing',
+    description: 'Latency & tracing',
+  },
+  {
+    label: 'External API Gateway',
+    shortLabel: 'API',
+    path: '/ict/api-gateway',
+    icon: Globe,
+    section: 'observability',
+    tooltip: 'API Provisioning, Rate Limits & Health',
+    description: 'Keys, routes & health',
+  },
+
+  {
+    label: 'Security SOC & OWASP',
+    shortLabel: 'SOC',
+    path: '/ict/security',
+    icon: ShieldAlert,
+    section: 'security',
+    tooltip: 'Security SOC & OWASP Top 10 — Threats, A01–A10 & Break Glass',
+    description: 'Threats & OWASP posture',
+  },
+  {
+    label: 'Forensic Audit Trail',
+    shortLabel: 'Audit',
+    path: '/ict/audit',
+    icon: Shield,
+    section: 'security',
+    tooltip: 'Immutable Audit & AI Forensics',
+    description: 'Immutable event trail',
+  },
+  {
+    label: 'Policies & Sessions',
+    shortLabel: 'Policies',
+    path: '/ict/policies',
+    icon: Key,
+    section: 'security',
+    tooltip: 'Active Sessions & Red Button',
+    description: 'Auth & active sessions',
+  },
+
+  {
+    label: 'Integrations & Sync',
+    shortLabel: 'Integrations',
+    path: '/ict/integrations',
+    icon: Layers,
+    section: 'data',
+    tooltip: 'Registrar Sync & Data Quality',
+    description: 'Connectors & SIS sync',
+  },
+  {
+    label: 'Feature Flags & Sandbox',
+    shortLabel: 'Flags',
+    path: '/ict/feature-flags',
+    icon: Sliders,
+    section: 'data',
+    tooltip: 'Rollouts & Release Rollback',
+    description: 'Feature controls & sandbox',
+  },
+
+  {
+    label: 'Architecture & ASTU AI',
+    shortLabel: 'Topology',
+    path: '/ict/architecture',
+    icon: Sparkles,
+    section: 'intelligence',
+    tooltip: 'Interactive Topology & AI',
+    description: 'Topology & diagnostics',
+  },
 ];
 
 const sections = [
-  { key: 'ops', label: 'Core Technical Operations' },
-  { key: 'governance', label: 'Security, Data & Releases' },
+  { key: 'operations', label: 'Operations' },
+  { key: 'observability', label: 'Observability' },
+  { key: 'security', label: 'Security' },
+  { key: 'data', label: 'Data & Releases' },
+  { key: 'intelligence', label: 'Intelligence' },
 ];
 
 export default function IctSidebar({
@@ -74,183 +177,262 @@ export default function IctSidebar({
 }: IctSidebarProps) {
   const location = useLocation();
   const { user } = useAuth();
-  const { settings } = useSystemSettings();
+  const [hovered, setHovered] = useState<string | null>(null);
+  const collapseRef = useRef<HTMLButtonElement>(null);
 
-  const getSectionItems = (sectionKey: string) =>
-    navItems.filter((item) => item.section === sectionKey);
+  const activePath = navItems.find((item) =>
+    item.exact ? location.pathname === item.path : location.pathname.startsWith(item.path)
+  )?.path;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typing = target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === '[') {
+        e.preventDefault();
+        onToggleCollapse?.();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onToggleCollapse]);
+
+  const initials = user
+    ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
+    : 'IA';
+  const logoSrc = '/ict/images/astu-seal-logo.png';
+
+  const isActive = (item: NavItem) => activePath === item.path;
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/80 text-slate-800 shadow-xs transition-all duration-300 lg:translate-x-0 ${
-        collapsed ? 'w-20' : 'w-64'
-      } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      aria-label="ICT modules"
+      className={`fixed inset-y-0 left-0 z-40 flex w-[15rem] flex-col border-r bg-[var(--ict-nav-bg)] text-[var(--ict-nav-text)] shadow-xs transition-[transform,width] duration-200 ease-out lg:translate-x-0 ${
+        isOpen ? 'translate-x-0 shadow-[var(--ict-shadow-lg)]' : '-translate-x-full'
+      } ${collapsed ? 'lg:w-[4.5rem]' : 'lg:w-[15rem]'}`}
+      style={{ borderColor: 'var(--ict-nav-border)' }}
     >
-        {/* Header Logo */}
-        <div className="relative px-4 py-4 border-b border-slate-100">
-          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
-              <img
-                src={settings.appearance?.logoUrl || '/images/astu-seal-logo.png'}
-                alt={`${settings.general?.abbreviation || 'ASTU'} Seal`}
-                className="h-full w-full object-contain scale-110"
-              />
-            </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight flex items-center gap-1.5">
-                  <span>{settings.general?.abbreviation || 'ASTU'} ICT</span>
-                  <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-blue-50 text-[#003580] border border-blue-200/60 rounded">PORTAL</span>
-                </div>
-                <p className="text-[9px] text-[#003580] uppercase tracking-widest font-extrabold truncate">Systems Directorate</p>
-              </div>
-            )}
-          </div>
+      {/* Brand */}
+      <div
+        className={`flex h-16 shrink-0 items-center border-b ${collapsed ? 'justify-center px-2' : 'gap-2.5 px-3.5'}`}
+        style={{ borderColor: 'var(--ict-nav-border-soft)' }}
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[6px] bg-[var(--ict-logo-plate)] ring-1 ring-[var(--ict-nav-border)]">
+          <img src={logoSrc} alt="ASTU seal" className="h-full w-full object-contain p-0.5" />
         </div>
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="ict-clamp-1 text-[15px] font-bold tracking-tight text-[var(--ict-nav-text-strong)]">
+                ASTU ICT
+              </span>
+              <span className="shrink-0 rounded-[3px] bg-[var(--ict-nav-active)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[var(--ict-nav-accent)]">
+                Ops
+              </span>
+            </div>
+            <p className="ict-clamp-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--ict-nav-muted)]">
+              Systems Directorate
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Navigation */}
-      <nav className="relative flex-1 overflow-y-auto px-3 py-4 scrollbar-thin space-y-4">
+      <nav className="ict-scroll flex-1 overflow-y-auto px-2 py-3" aria-label="ICT modules">
         {sections.map((section) => {
-          const items = getSectionItems(section.key);
+          const items = navItems.filter((item) => item.section === section.key);
           if (items.length === 0) return null;
+
           return (
-            <div key={section.key}>
-              {!collapsed && (
-                <div className="px-3 mb-2">
-                  <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">{section.label}</p>
-                </div>
+            <div key={section.key} className="mb-4 last:mb-0">
+              {collapsed ? (
+                <div
+                  className="mx-auto mb-2 h-px w-5"
+                  style={{ background: 'var(--ict-nav-border)' }}
+                  aria-hidden
+                />
+              ) : (
+                <p className="mb-2 px-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--ict-nav-muted)]">
+                  {section.label}
+                </p>
               )}
-              <div className="space-y-1">
+
+              <ul className="space-y-1">
                 {items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = item.exact
-                    ? location.pathname === item.path
-                    : location.pathname.startsWith(item.path);
+                  const active = isActive(item);
+                  const showTooltip = collapsed && hovered === item.path;
 
                   return (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      end={item.exact}
-                      onClick={() => {
-                        if (onNavigate) onNavigate();
-                      }}
-                      title={collapsed ? item.tooltip || item.label : undefined}
-                      className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
-                        collapsed ? 'justify-center' : 'gap-2.5'
-                      } ${
-                        isActive
-                          ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                          : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
-                      }`}
-                    >
-                      <span
-                        className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                          isActive
-                            ? 'bg-[#003580] text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
-                        }`}
+                    <li key={item.path} className="relative">
+                      <NavLink
+                        to={item.path}
+                        end={item.exact}
+                        onClick={() => onNavigate?.()}
+                        onMouseEnter={() => setHovered(item.path)}
+                        onMouseLeave={() => setHovered((h) => (h === item.path ? null : h))}
+                        onFocus={() => setHovered(item.path)}
+                        onBlur={() => setHovered((h) => (h === item.path ? null : h))}
+                        aria-current={active ? 'page' : undefined}
+                        title={collapsed ? item.tooltip : undefined}
+                        className={`group relative flex items-center rounded-[7px] text-left transition-all duration-150 ict-focus ${
+                          collapsed ? 'justify-center px-1.5 py-2' : 'min-h-12 gap-2 px-2 py-2 pl-2.5'
+                        } ${active ? 'bg-[var(--ict-nav-active)] font-semibold text-[var(--ict-nav-accent)]' : 'font-medium text-[var(--ict-nav-text)] hover:bg-[var(--ict-nav-hover)] hover:text-[var(--ict-nav-text-strong)]'}`}
                       >
-                        <Icon className="h-4.5 w-4.5" />
-                      </span>
-                      {!collapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                      {isActive && !collapsed && (
-                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
+                        <span
+                          className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--ict-nav-accent)] transition-opacity duration-150"
+                          style={{ opacity: active ? 1 : 0 }}
+                          aria-hidden
+                        />
+
+                        <span
+                          className={`inline-flex shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150 ${
+                            collapsed ? 'h-9 w-9' : 'h-8 w-8'
+                          } ${
+                            active
+                              ? 'bg-[var(--ict-nav-active-strong)] text-[var(--ict-nav-icon-active)]'
+                              : 'text-[var(--ict-nav-icon)] group-hover:text-[var(--ict-nav-accent)]'
+                          }`}
+                          aria-hidden
+                        >
+                          <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.9} />
+                        </span>
+
+                        {!collapsed && (
+                          <span className="min-w-0 flex-1">
+                            <span className="ict-clamp-1 block text-[14px] font-semibold leading-[1.2]">{item.label}</span>
+                            <span
+                              className={`ict-clamp-1 mt-0.5 block text-[11px] font-normal leading-[1.3] ${
+                                active ? 'text-[var(--ict-nav-accent)]/70' : 'text-[var(--ict-nav-muted)]'
+                              }`}
+                            >
+                              {item.description}
+                            </span>
+                          </span>
+                        )}
+
+                        {active && <span className="sr-only">(current module)</span>}
+                      </NavLink>
+
+                      {showTooltip && (
+                        <span
+                          role="tooltip"
+                          className="ict-drop pointer-events-none absolute left-full top-1/2 z-50 ml-2 flex -translate-y-1/2 flex-col gap-0.5 whitespace-nowrap rounded-[6px] border border-[var(--ict-nav-border)] bg-[var(--bg-elevated)] px-2.5 py-1.5 shadow-[var(--ict-shadow-md)]"
+                        >
+                          <span className="text-[12px] font-semibold text-[var(--ict-nav-text-strong)]">
+                            {item.label}
+                          </span>
+                          <span className="text-[11px] text-[var(--ict-nav-muted)]">{item.tooltip}</span>
+                        </span>
                       )}
-                      {collapsed && (
-                        <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                          {item.label}
-                        </div>
-                      )}
-                    </NavLink>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
+              {section.key === 'intelligence' && (
+                <button
+                  type="button"
+                  onClick={onOpenAiAssistant}
+                  title="ICT AI Assistant · Diagnostics & security"
+                  aria-label="Open ICT AI Assistant"
+                  className={`group relative mt-1 flex w-full items-center rounded-[7px] text-left text-[var(--ict-nav-text)] transition-colors duration-150 hover:bg-[var(--ict-nav-hover)] hover:text-[var(--ict-nav-text-strong)] ict-focus ${
+                    collapsed ? 'min-h-12 justify-center px-1.5 py-2' : 'min-h-12 gap-2 px-2 py-2 pl-2.5'
+                  }`}
+                >
+                  <span className={`inline-flex shrink-0 items-center justify-center rounded-[6px] text-[var(--ict-ai)] ${collapsed ? 'h-9 w-9' : 'h-8 w-8'}`} aria-hidden>
+                    <Sparkles className="h-[18px] w-[18px]" strokeWidth={1.9} />
+                  </span>
+                  {!collapsed && (
+                    <span className="min-w-0 flex-1">
+                      <span className="ict-clamp-1 block text-[14px] font-semibold leading-[1.2]">ICT AI Assistant</span>
+                      <span className="ict-clamp-1 mt-0.5 block text-[11px] font-normal leading-[1.3] text-[var(--ict-nav-muted)]">
+                        Diagnostics &amp; security
+                      </span>
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           );
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="relative border-t border-slate-100 p-3 space-y-2">
+      {/* Footer — Administration + Logout */}
+      <div
+        className="shrink-0 space-y-2 border-t p-2"
+        style={{ borderColor: 'var(--ict-nav-border-soft)', background: 'var(--ict-nav-bg-2)' }}
+      >
         {!collapsed ? (
           <>
-            {/* AI Assistant */}
-            <button
-              type="button"
-              onClick={onOpenAiAssistant}
-              className="flex w-full items-center gap-3 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/40 px-3.5 py-2.5 text-sm font-medium text-blue-900 transition-all hover:bg-blue-500/15 shadow-2xs group cursor-pointer"
-            >
-              <Sparkles className="h-4.5 w-4.5 text-blue-600 animate-pulse shrink-0" />
-              <div className="text-left flex-1 min-w-0">
-                <div className="text-xs font-extrabold uppercase tracking-wider text-blue-800">ICT AI Assistant</div>
-                <div className="text-[9px] text-blue-700/80 truncate">Diagnostics &amp; Security ASTU AI</div>
-              </div>
-            </button>
-
-            <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-200/60 p-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white shrink-0">
-                {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'IA'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-slate-900">{user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator'}</p>
-                <div className="mt-0.5 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">ICT Administrator</span>
-                </div>
-              </div>
+            <p className="px-2.5 pt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--ict-nav-muted)]">
+              Administration
+            </p>
+            <div className="flex items-center gap-2.5 rounded-[7px] border border-[var(--ict-nav-border)] bg-[var(--bg-elevated)] px-2 py-2">
+              <span
+                className="ict-avatar-brand inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                aria-hidden
+              >
+                {initials}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="ict-clamp-1 block text-[13px] font-semibold text-[var(--ict-nav-text-strong)]">
+                  {user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator'}
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ict-ok)]" aria-hidden />
+                  <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--ict-nav-muted)]">
+                    ICT Administrator
+                  </span>
+                </span>
+              </span>
             </div>
 
             <button
               type="button"
               onClick={onLogout}
-              className="flex w-full items-center gap-2.5 rounded-xl border border-rose-100 bg-rose-50/50 px-3 py-2 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100 hover:text-rose-700 cursor-pointer"
+              className="flex w-full items-center gap-2 rounded-[7px] px-2.5 py-2 text-[13px] font-semibold text-[var(--ict-crit)] transition-colors duration-150 hover:bg-[var(--ict-crit-bg)] ict-focus"
             >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              <LogOut className="h-4 w-4" aria-hidden />
+              Logout
             </button>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-2">
-            <button
-              type="button"
-              onClick={onOpenAiAssistant}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 border border-blue-200 text-blue-700 hover:bg-blue-200 transition-all shadow-xs cursor-pointer"
-              title="ICT AI Assistant"
-            >
-              <Sparkles className="h-4.5 w-4.5 text-blue-600 animate-pulse" />
-            </button>
-
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white"
+          <div className="flex flex-col items-center gap-1.5">
+            <span
+              className="ict-avatar-brand inline-flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold"
               title={user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator'}
+              aria-hidden
             >
-              {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'IA'}
-            </div>
+              {initials}
+            </span>
             <button
               type="button"
               onClick={onLogout}
-              className="flex items-center justify-center w-8 h-8 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all cursor-pointer"
               title="Logout"
+              aria-label="Logout"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[6px] text-[var(--ict-crit)] transition-colors duration-150 hover:bg-[var(--ict-crit-bg)] ict-focus"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden />
             </button>
           </div>
         )}
 
         <button
+          ref={collapseRef}
           type="button"
           onClick={onToggleCollapse}
-          className={`flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all cursor-pointer ${
-            collapsed ? 'w-full py-1.5' : 'w-full py-2 gap-2'
-          }`}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={`${collapsed ? 'Expand' : 'Collapse'} sidebar  ·  [`}
+          aria-label={`${collapsed ? 'Expand' : 'Collapse'} sidebar`}
+          aria-expanded={!collapsed}
+          className="flex w-full items-center justify-center gap-1.5 rounded-[6px] py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--ict-nav-muted)] transition-colors duration-150 hover:bg-[var(--ict-nav-hover)] hover:text-[var(--ict-nav-text-strong)] ict-focus"
         >
           {collapsed ? (
-            <PanelLeftOpen className="h-4 w-4" />
+            <PanelLeftOpen className="h-4 w-4" aria-hidden />
           ) : (
             <>
-              <PanelLeftClose className="h-4 w-4" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Collapse</span>
+              <PanelLeftClose className="h-4 w-4" aria-hidden />
+              Collapse
             </>
           )}
         </button>

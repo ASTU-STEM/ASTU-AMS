@@ -520,11 +520,11 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       by: ['employmentType'],
       _count: { id: true }
     }).catch(() => []);
-    const jobPostingsByType = jobsGroupType.map(g => ({ jobType: g.employmentType || 'FULL_TIME', count: g._count.id }));
+    const jobPostingsByType = (jobsGroupType || []).map(g => ({ jobType: g.employmentType || 'FULL_TIME', count: g._count?.id || 0 }));
 
     // 8.16 University-Industry Relationship & Corporate MoU Suite
     const verifiedMoUs = await prisma.employerProfile.count({ where: { isVerified: true } }).catch(() => 0);
-    const placementDrivesCount = await prisma.job.groupBy({ by: ['employerId'] }).then(r => r.length).catch(() => 0);
+    const placementDrivesCount = await prisma.job.groupBy({ by: ['employerId'] }).then(r => (r || []).length).catch(() => 0);
     const totalEmpProfiles = await prisma.employerProfile.count().catch(() => 0);
     const mouRenewalRate = totalEmpProfiles > 0 ? Math.round((verifiedMoUs / totalEmpProfiles) * 100) : 0;
     const internshipCount = await prisma.job.count({ where: { employmentType: 'INTERNSHIP' } }).catch(() => 0);
@@ -539,10 +539,10 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
       by: ['industry'],
       _count: { id: true }
     }).catch(() => []);
-    const industryMoUBreakdown = indMoUGroup.map(g => ({
+    const industryMoUBreakdown = (indMoUGroup || []).map(g => ({
       industry: g.industry || 'Software & Technology',
-      mouCount: g._count.id,
-      placementCount: Math.round(g._count.id * 2.5)
+      mouCount: g._count?.id || 0,
+      placementCount: Math.round((g._count?.id || 0) * 2.5)
     }));
 
     const universityIndustryMoU = {
@@ -575,9 +575,9 @@ export class PrismaAnalyticsRepository implements IAnalyticsRepository {
     }[] = [];
 
     const matrixYears = [2023, 2024, 2025, 2026];
-    for (const d of deptListForMatrix) {
+    for (const d of (deptListForMatrix || [])) {
       for (const y of matrixYears) {
-        const matchingAlumni = d.alumniProfiles.filter((a: any) => a.graduationYear === y);
+        const matchingAlumni = (d.alumniProfiles || []).filter((a: any) => a.graduationYear === y);
         const totalGrads = matchingAlumni.length;
         const empCount = matchingAlumni.filter((a: any) => a.employmentStatus === 'EMPLOYED' || a.employmentStatus === 'SELF_EMPLOYED').length;
         const empRate = totalGrads > 0 ? Math.round((empCount / totalGrads) * 100) : 0;

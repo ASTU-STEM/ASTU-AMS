@@ -431,10 +431,18 @@ export class SurveysController {
         };
       });
 
+      const totalAssignments = await prisma.surveyAssignment.count({ where: { surveyId: templateId } });
+      const totalResponses = responses.length;
+      const responseRate = totalAssignments > 0
+        ? Math.round((totalResponses / totalAssignments) * 100)
+        : (totalResponses > 0 ? 100 : 0);
+
       return sendSuccess(res, 'Survey analysis retrieved.', {
         surveyId: templateId,
         surveyTitle: template.title,
-        totalResponses: responses.length,
+        totalResponses,
+        totalAssignments,
+        responseRate,
         questionAnalytics,
       });
     } catch (err) { next(err); }
