@@ -23,6 +23,7 @@ import IctCommandPalette from '../components/IctCommandPalette';
 import IctEmergencyBanner from '../components/IctEmergencyBanner';
 import { useTheme } from '../hooks/useTheme';
 import IctErrorState from '../features/ict/components/IctErrorState';
+import IctNotificationBell from '../features/notifications/components/IctNotificationBell';
 import IctBreadcrumbs from '../features/ict/components/IctBreadcrumbs';
 import { ictBtnIcon, ictKbd } from '../features/ict/components/ictUi';
 
@@ -241,15 +242,23 @@ export default function IctLayout() {
   const toggleCalendar = () => {
     setCalendarMode((prev) => {
       const next = prev === 'GC' ? 'EC' : 'GC';
+      const now = new Date();
+      const year = next === 'EC'
+        ? new Intl.DateTimeFormat('en-u-ca-ethiopic', { year: 'numeric' }).format(now).replace(/\s+\w+$/, '')
+        : String(now.getFullYear());
+      const calendarLabel = next === 'EC' ? `${year} E.C.` : `${year} G.C.`;
       toast.success(
-        `Calendar mode set to ${next === 'EC' ? 'Ethiopian (2018 E.C.)' : 'Gregorian (2026 G.C.)'}`
+        `Calendar mode set to ${next === 'EC' ? 'Ethiopian' : 'Gregorian'} (${calendarLabel})`
       );
       return next;
     });
   };
 
   const initials = user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'IA';
-  const displayName = user ? `${user.firstName} ${user.lastName}` : 'ICT Administrator';
+  const displayName = user?.name?.trim() || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Administrator';
+  const currentCalendarYear = calendarMode === 'EC'
+    ? new Intl.DateTimeFormat('en-u-ca-ethiopic', { year: 'numeric' }).format(new Date()).replace(/\s+\w+$/, '')
+    : String(new Date().getFullYear());
 
   return (
     <div className="ict-shell app-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] antialiased">
@@ -344,17 +353,20 @@ export default function IctLayout() {
             </button>
 
             {/* Academic year / calendar mode */}
-            <button
-              type="button"
-              onClick={toggleCalendar}
-              className="hidden h-9 items-center gap-1.5 rounded-[7px] border border-[var(--ict-nav-border)] bg-[var(--bg-card)] px-2.5 transition-colors duration-150 hover:border-[var(--ict-accent)] hover:bg-[var(--ict-accent-soft)] ict-focus sm:inline-flex"
-              title="Toggle Ethiopian / Gregorian calendar"
-            >
+              <button
+                type="button"
+                onClick={toggleCalendar}
+                className="hidden h-9 items-center gap-1.5 rounded-[7px] border border-[var(--ict-nav-border)] bg-[var(--bg-card)] px-2.5 transition-colors duration-150 hover:border-[var(--ict-accent)] hover:bg-[var(--ict-accent-soft)] ict-focus sm:inline-flex"
+                title="Toggle Ethiopian / Gregorian calendar"
+                aria-label={`Calendar year ${currentCalendarYear}, ${calendarMode === 'EC' ? 'Ethiopian' : 'Gregorian'}. Activate to switch calendar.`}
+              >
               <CalendarDays className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" aria-hidden />
               <span className="ict-mono ict-num text-[11px] font-extrabold text-[var(--text-primary)]">
-                {calendarMode === 'EC' ? '2018 E.C.' : '2026 G.C.'}
+                {calendarMode === 'EC' ? `${currentCalendarYear} E.C.` : `${currentCalendarYear} G.C.`}
               </span>
             </button>
+
+            <IctNotificationBell />
 
             {/* Theme */}
             <button
@@ -389,7 +401,7 @@ export default function IctLayout() {
                     {displayName}
                   </span>
                   <span className="block text-[9px] font-bold uppercase tracking-[0.08em] text-[var(--ict-accent-text)]">
-                    ICT Administrator
+                    {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}
                   </span>
                 </span>
                 <ChevronDown
@@ -428,7 +440,7 @@ export default function IctLayout() {
                       <div>
                         <dt className="ict-label">Role</dt>
                         <dd className="text-[10px] font-bold text-[var(--text-primary)]">
-                          ICT Administrator
+                          {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}
                         </dd>
                       </div>
                       <div>

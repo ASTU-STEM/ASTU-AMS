@@ -160,12 +160,11 @@ export default function AdminLayout() {
     setNotificationsLoading(true);
     try {
       const data = await notificationService.getMyNotifications();
-      if (Array.isArray(data)) {
-        setRealNotifications(data);
-        const unread = data.filter((n: any) => !n.isRead && !n.read).length;
-        setUnreadCount(unread);
-        setNotificationsError(null);
-      }
+      if (!Array.isArray(data)) throw new Error('The notification service returned an invalid response.');
+      setRealNotifications(data);
+      const unread = data.filter((n: any) => !n.isRead && !n.read).length;
+      setUnreadCount(unread);
+      setNotificationsError(null);
     } catch (err: any) {
       // Surface the failure instead of substituting placeholder rows: a fetch
       // error must not be indistinguishable from "you have no notifications".
@@ -176,7 +175,9 @@ export default function AdminLayout() {
   };
 
   useEffect(() => {
-    fetchRealNotifications();
+    void fetchRealNotifications();
+    const refreshTimer = window.setInterval(() => void fetchRealNotifications(), 60_000);
+    return () => window.clearInterval(refreshTimer);
   }, []);
 
   const handleToggleNotifications = async () => {
@@ -417,7 +418,7 @@ export default function AdminLayout() {
                         <div
                           key={item.id || idx}
                           onClick={() => {
-                            if (!item.id) return;
+                            if (!item.id || !isUnread) return;
                             // Optimistic, but reverted on failure: the previous
                             // `.catch(() => {})` left the row marked as read
                             // even when the request never succeeded.

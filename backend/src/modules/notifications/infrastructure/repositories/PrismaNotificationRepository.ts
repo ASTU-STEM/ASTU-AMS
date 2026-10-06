@@ -18,14 +18,15 @@ export class PrismaNotificationRepository implements INotificationRepository {
   }
 
   async create(data: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification> {
-    try {
-      const userExists = await prisma.user.findUnique({ where: { id: data.userId } });
-      if (!userExists) return { id: 'noop', ...data, createdAt: new Date() } as any;
-      const notif = await prisma.notification.create({ data: data as any });
-      return notif as any as Notification;
-    } catch {
-      return { id: 'noop', ...data, createdAt: new Date() } as any;
+    const userExists = await prisma.user.findUnique({ where: { id: data.userId } });
+    if (!userExists) {
+      throw new Error('Cannot create notification: the recipient does not exist.');
     }
+
+    // Let database failures reach the caller. Returning a synthetic "noop"
+    // notification made failed writes look like successful deliveries.
+    const notification = await prisma.notification.create({ data: data as any });
+    return notification as any as Notification;
   }
 
   /**
