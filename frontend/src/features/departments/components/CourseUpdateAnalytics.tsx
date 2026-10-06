@@ -7,9 +7,10 @@ interface CourseUpdateAnalyticsProps {
 }
 
 export const CourseUpdateAnalytics: React.FC<CourseUpdateAnalyticsProps> = ({ data }) => {
-  const sortedByPriority = [...data].sort((a, b) => {
-    const priorityOrder = { high: 0, medium: 1, low: 2 };
-    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  const safeData = Array.isArray(data) ? data : [];
+  const sortedByPriority = [...safeData].sort((a, b) => {
+    const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+    return (priorityOrder[a?.priority || 'low'] ?? 2) - (priorityOrder[b?.priority || 'low'] ?? 2);
   });
 
   const getPriorityColor = (priority: CourseUpdate['priority']) => {
@@ -49,7 +50,7 @@ export const CourseUpdateAnalytics: React.FC<CourseUpdateAnalyticsProps> = ({ da
               <div>
                 <p className="text-xs font-semibold text-gray-600 mb-2">Outdated Modules</p>
                 <div className="flex flex-wrap gap-2">
-                  {course.outdatedModules.map((module, i) => (
+                  {(course.outdatedModules || []).map((module, i) => (
                     <span key={i} className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
                       {module}
                     </span>
@@ -60,7 +61,7 @@ export const CourseUpdateAnalytics: React.FC<CourseUpdateAnalyticsProps> = ({ da
               <div>
                 <p className="text-xs font-semibold text-gray-600 mb-2">Missing Technologies</p>
                 <div className="flex flex-wrap gap-2">
-                  {course.missingTechnologies.map((tech, i) => (
+                  {(course.missingTechnologies || []).map((tech, i) => (
                     <span key={i} className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
                       {tech}
                     </span>
@@ -71,7 +72,7 @@ export const CourseUpdateAnalytics: React.FC<CourseUpdateAnalyticsProps> = ({ da
               <div>
                 <p className="text-xs font-semibold text-gray-600 mb-2">Lab Deficiencies</p>
                 <div className="flex flex-wrap gap-2">
-                  {course.labDeficiencies.map((lab, i) => (
+                  {(course.labDeficiencies || []).map((lab, i) => (
                     <span key={i} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
                       {lab}
                     </span>
@@ -83,7 +84,7 @@ export const CourseUpdateAnalytics: React.FC<CourseUpdateAnalyticsProps> = ({ da
             <div className="pt-3 border-t border-gray-200">
               <p className="text-xs font-semibold text-gray-600 mb-2">Suggested Updates</p>
               <ul className="space-y-1">
-                {course.suggestedUpdates.map((update, i) => (
+                {(course.suggestedUpdates || []).map((update, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-gray-700">
                     <CheckCircle className="h-3 w-3 text-astu-green mt-0.5 flex-shrink-0" />
                     {update}

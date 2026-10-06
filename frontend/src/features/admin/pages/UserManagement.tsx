@@ -975,9 +975,10 @@ export default function UserManagement() {
     let isMounted = true;
     import('../services/admin.service').then(({ adminService }) => {
       adminService.getDepartments().then((res) => {
-        if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
-          if (isMounted) {
-            setDbDepartments(res.data);
+        if (res.ok && res.data) {
+          const depts = Array.isArray(res.data) ? res.data : (res.data.departments || []);
+          if (depts.length > 0 && isMounted) {
+            setDbDepartments(depts);
           }
         }
       });
@@ -992,11 +993,11 @@ export default function UserManagement() {
     return [
       'Computer Science',
       'Software Engineering',
-      'Electrical Engineering',
+      'Electrical and Computer Engineering',
       'Mechanical Engineering',
       'Civil Engineering',
       'Chemical Engineering',
-      'Information Engineering',
+      'Applied Geology',
     ];
   }, [dbDepartments]);
 

@@ -8,12 +8,12 @@ interface SkillGapEvidenceAnalyticsProps {
 
 export const SkillGapEvidenceAnalytics: React.FC<SkillGapEvidenceAnalyticsProps> = ({ data }) => {
   const metrics = [
-    { label: 'Critical Skill Gaps', value: data.criticalSkillGaps, color: 'astu-red' },
-    { label: 'Industry Demand', value: data.industryDemand, color: 'astu-green' },
-    { label: 'Coverage Rate', value: data.coverageRate, color: 'astu-navy' },
-    { label: 'Training Priorities', value: data.trainingPriorities, color: 'purple-600' },
-    { label: 'Certification Gaps', value: data.certificationGaps, color: 'orange-600' },
-    { label: 'Department Risk Areas', value: data.departmentRiskAreas, color: 'astu-red' }
+    { label: 'Critical Skill Gaps', value: data?.criticalSkillGaps ?? 0, color: 'astu-red' },
+    { label: 'Industry Demand', value: data?.industryDemand ?? 0, color: 'astu-green' },
+    { label: 'Coverage Rate', value: data?.coverageRate ?? 0, color: 'astu-navy' },
+    { label: 'Training Priorities', value: data?.trainingPriorities ?? 0, color: 'purple-600' },
+    { label: 'Certification Gaps', value: data?.certificationGaps ?? 0, color: 'orange-600' },
+    { label: 'Department Risk Areas', value: data?.departmentRiskAreas ?? 0, color: 'astu-red' }
   ];
 
   return (

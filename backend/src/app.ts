@@ -71,6 +71,7 @@ app.use('/api/alumni', alumniRouter);
 app.use('/api/registrar', registrarRouter);
 app.use('/api/employer', employerRouter);
 app.use('/api/departments', departmentRouter);
+app.use('/api/department', departmentRouter);
 app.use('/api/surveys', surveyRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/documents', documentsRouter);

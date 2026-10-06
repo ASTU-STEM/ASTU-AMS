@@ -250,17 +250,104 @@ class FakePrisma {
 
   department = {
     findUnique: async ({ where }: any) => {
-      if (where.code) return this.store.departments.find((d: any) => d.code === where.code) || null;
-      if (where.id) return this.store.departments.find((d: any) => d.id === where.id) || null;
+      const store = readDevDb();
+      let depts = store.departments || [];
+      if (depts.length === 0) {
+        depts = [
+          { id: 'dept-com', name: 'Computer Science', code: 'COM', createdAt: new Date().toISOString() },
+          { id: 'dept-swe', name: 'Software Engineering', code: 'SWE', createdAt: new Date().toISOString() },
+          { id: 'dept-ece', name: 'Electrical and Computer Engineering', code: 'ECE', createdAt: new Date().toISOString() },
+          { id: 'dept-meg', name: 'Mechanical Engineering', code: 'MEG', createdAt: new Date().toISOString() },
+          { id: 'dept-cve', name: 'Civil Engineering', code: 'CVE', createdAt: new Date().toISOString() },
+          { id: 'dept-che', name: 'Chemical Engineering', code: 'CHE', createdAt: new Date().toISOString() },
+          { id: 'dept-geo', name: 'Applied Geology', code: 'GEO', createdAt: new Date().toISOString() },
+        ];
+        store.departments = depts;
+        writeDevDb(store);
+      }
+      if (where?.code) return depts.find((d: any) => d.code === where.code) || null;
+      if (where?.id) return depts.find((d: any) => d.id === where.id) || null;
+      if (where?.name) return depts.find((d: any) => d.name.toLowerCase() === where.name.toLowerCase()) || null;
       return null;
     },
+    findMany: async ({ orderBy }: any = {}) => {
+      const store = readDevDb();
+      let depts = store.departments || [];
+      if (depts.length === 0) {
+        depts = [
+          { id: 'dept-com', name: 'Computer Science', code: 'COM', createdAt: new Date().toISOString() },
+          { id: 'dept-swe', name: 'Software Engineering', code: 'SWE', createdAt: new Date().toISOString() },
+          { id: 'dept-ece', name: 'Electrical and Computer Engineering', code: 'ECE', createdAt: new Date().toISOString() },
+          { id: 'dept-meg', name: 'Mechanical Engineering', code: 'MEG', createdAt: new Date().toISOString() },
+          { id: 'dept-cve', name: 'Civil Engineering', code: 'CVE', createdAt: new Date().toISOString() },
+          { id: 'dept-che', name: 'Chemical Engineering', code: 'CHE', createdAt: new Date().toISOString() },
+          { id: 'dept-geo', name: 'Applied Geology', code: 'GEO', createdAt: new Date().toISOString() },
+        ];
+        store.departments = depts;
+        writeDevDb(store);
+      }
+      return [...depts];
+    },
     create: async ({ data }: any) => {
+      const store = readDevDb();
       const rec = { ...data, id: `dev-dept-${Date.now()}` };
-      this.store.departments.push(rec);
-      writeDevDb(this.store);
+      store.departments = store.departments || [];
+      store.departments.push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
+
+  departmentHeadProfile = {
+    findUnique: async ({ where, include }: any = {}) => {
+      const store = readDevDb();
+      let profile = (store.departmentHeadProfiles || []).find(
+        (p: any) => (where?.userId && p.userId === where.userId) || (where?.id && p.id === where.id)
+      );
+      if (!profile && where?.userId) {
+        const u = (store.users || []).find((usr: any) => usr.id === where.userId);
+        if (u) {
+          const email = (u.email || '').toLowerCase();
+          let deptCode = 'COM';
+          let deptName = 'Computer Science';
+          if (email.includes('swe') || email.includes('software')) {
+            deptCode = 'SWE';
+            deptName = 'Software Engineering';
+          } else if (email.includes('ece') || email.includes('electrical')) {
+            deptCode = 'ECE';
+            deptName = 'Electrical and Computer Engineering';
+          } else if (email.includes('meg') || email.includes('mechanical')) {
+            deptCode = 'MEG';
+            deptName = 'Mechanical Engineering';
+          } else if (email.includes('cve') || email.includes('civil')) {
+            deptCode = 'CVE';
+            deptName = 'Civil Engineering';
+          } else if (email.includes('che') || email.includes('chemical')) {
+            deptCode = 'CHE';
+            deptName = 'Chemical Engineering';
+          } else if (email.includes('geo') || email.includes('geology')) {
+            deptCode = 'GEO';
+            deptName = 'Applied Geology';
+          }
+          profile = {
+            id: `dev-head-${u.id}`,
+            userId: u.id,
+            department: { id: `dev-dept-${deptCode.toLowerCase()}`, name: deptName, code: deptCode }
+          };
+        }
+      }
+      if (profile && include?.department && !profile.department) {
+        const d = (store.departments || []).find((dept: any) => dept.id === profile.departmentId);
+        if (d) profile.department = d;
+      }
+      return profile;
+    },
+    findMany: async () => {
+      const store = readDevDb();
+      return store.departmentHeadProfiles || [];
+    },
+  };
+
 
   registrarStudent = {
     findUnique: async ({ where }: any) => {

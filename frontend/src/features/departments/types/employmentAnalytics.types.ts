@@ -65,13 +65,38 @@ export interface GraduateEmploymentRecord {
   studentId: string;
   graduateName: string;
   department: string;
-  graduationYear: string;
+  graduationYear?: string;
   employmentStatus: string;
   company: string;
   jobTitle: string;
   country: string;
   salaryRange: string;
   timeToHire: string;
+  email?: string;
+  phone?: string;
+  cgpa?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  profilePicture?: string | null;
+  bio?: string;
+  nationality?: string;
+  maritalStatus?: string;
+  address?: string;
+  skills?: string[];
+  languages?: string[];
+  resumeUrl?: string | null;
+  linkedIn?: string | null;
+  gitHub?: string | null;
+  portfolio?: string | null;
+  telegram?: string | null;
+  twitterUrl?: string | null;
+  isVerified?: boolean;
+  preferences?: any;
+  experiences?: any[];
+  certifications?: any[];
+  projects?: any[];
+  achievements?: any[];
+  [key: string]: any;
 }
 
 export interface TopEmployer {

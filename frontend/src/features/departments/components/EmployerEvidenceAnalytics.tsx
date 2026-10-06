@@ -8,12 +8,12 @@ interface EmployerEvidenceAnalyticsProps {
 
 export const EmployerEvidenceAnalytics: React.FC<EmployerEvidenceAnalyticsProps> = ({ data }) => {
   const metrics = [
-    { label: 'Employer Response Rate', value: data.employerResponseRate, color: 'astu-green' },
-    { label: 'Satisfaction Scores', value: data.satisfactionScores, color: 'astu-navy' },
-    { label: 'Competency Ratings', value: data.competencyRatings, color: 'astu-green' },
-    { label: 'Industry Demand Trends', value: data.industryDemandTrends, color: 'blue-600' },
-    { label: 'Recommendations Frequency', value: data.recommendationsFrequency, color: 'purple-600' },
-    { label: 'Repeat Employer Engagement', value: data.repeatEmployerEngagement, color: 'orange-600' }
+    { label: 'Employer Response Rate', value: data?.employerResponseRate ?? 0, color: 'astu-green' },
+    { label: 'Satisfaction Scores', value: data?.satisfactionScores ?? 0, color: 'astu-navy' },
+    { label: 'Competency Ratings', value: data?.competencyRatings ?? 0, color: 'astu-green' },
+    { label: 'Industry Demand Trends', value: data?.industryDemandTrends ?? 0, color: 'blue-600' },
+    { label: 'Recommendations Frequency', value: data?.recommendationsFrequency ?? 0, color: 'purple-600' },
+    { label: 'Repeat Employer Engagement', value: data?.repeatEmployerEngagement ?? 0, color: 'orange-600' }
   ];
 
   return (

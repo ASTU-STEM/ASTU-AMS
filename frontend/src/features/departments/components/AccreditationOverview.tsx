@@ -7,8 +7,14 @@ interface AccreditationOverviewProps {
 }
 
 export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ data }) => {
-  const completedPercentage = ((data.completedEvidenceItems / data.totalEvidenceItems) * 100).toFixed(0);
-  const missingPercentage = ((data.missingEvidenceItems / data.totalEvidenceItems) * 100).toFixed(0);
+  const totalEvidenceItems = data?.totalEvidenceItems || 0;
+  const completedEvidenceItems = data?.completedEvidenceItems || 0;
+  const missingEvidenceItems = data?.missingEvidenceItems || 0;
+  const pendingComplianceAreas = data?.pendingComplianceAreas || 0;
+  const overallReadinessStatus = data?.overallReadinessStatus || 'in-progress';
+
+  const completedPercentage = totalEvidenceItems > 0 ? ((completedEvidenceItems / totalEvidenceItems) * 100).toFixed(0) : '0';
+  const missingPercentage = totalEvidenceItems > 0 ? ((missingEvidenceItems / totalEvidenceItems) * 100).toFixed(0) : '0';
 
   const getStatusColor = (status: AccreditationOverviewData['overallReadinessStatus']) => {
     switch (status) {
@@ -47,11 +53,11 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Overall Status</p>
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(data.overallReadinessStatus)}`}>
-              {getStatusLabel(data.overallReadinessStatus)}
+            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(overallReadinessStatus)}`}>
+              {getStatusLabel(overallReadinessStatus)}
             </span>
           </div>
-          <p className="text-3xl font-bold text-astu-navy mb-1">{data.overallReadinessStatus}</p>
+          <p className="text-3xl font-bold text-astu-navy mb-1">{overallReadinessStatus}</p>
         </div>
 
         <div className="p-5 bg-gradient-to-br from-emerald-50 to-green-50 border border-gray-200/60 rounded-xl">
@@ -61,7 +67,7 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
             </div>
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Completed</p>
           </div>
-          <p className="text-3xl font-bold text-astu-green mb-1">{data.completedEvidenceItems}</p>
+          <p className="text-3xl font-bold text-astu-green mb-1">{completedEvidenceItems}</p>
           <p className="text-sm text-gray-600">{completedPercentage}% of total</p>
         </div>
 
@@ -72,7 +78,7 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
             </div>
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Missing</p>
           </div>
-          <p className="text-3xl font-bold text-astu-red mb-1">{data.missingEvidenceItems}</p>
+          <p className="text-3xl font-bold text-astu-red mb-1">{missingEvidenceItems}</p>
           <p className="text-sm text-gray-600">{missingPercentage}% of total</p>
         </div>
 
@@ -83,7 +89,7 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
             </div>
             <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Pending</p>
           </div>
-          <p className="text-3xl font-bold text-yellow-600 mb-1">{data.pendingComplianceAreas}</p>
+          <p className="text-3xl font-bold text-yellow-600 mb-1">{pendingComplianceAreas}</p>
           <p className="text-sm text-gray-600">Compliance areas</p>
         </div>
       </div>
@@ -92,7 +98,7 @@ export const AccreditationOverview: React.FC<AccreditationOverviewProps> = ({ da
       <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
         <div className="flex justify-between items-center mb-3">
           <p className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Total Evidence Items</p>
-          <p className="text-2xl font-bold text-astu-navy">{data.totalEvidenceItems}</p>
+          <p className="text-2xl font-bold text-astu-navy">{totalEvidenceItems}</p>
         </div>
         <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden flex">
           <div className="bg-astu-green h-full" style={{ width: `${completedPercentage}%` }}></div>

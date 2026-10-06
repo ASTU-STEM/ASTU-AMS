@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lightbulb, AlertTriangle, BookOpen, FlaskConical, Briefcase, GraduationCap, Award } from 'lucide-react';
+import { Lightbulb, BookOpen, FlaskConical, Briefcase, GraduationCap, Award, AlertCircle } from 'lucide-react';
 import { EmployerRecommendation } from '../types/employerFeedback.types';
 
 interface EmployerRecommendationsProps {
@@ -71,13 +71,15 @@ export const EmployerRecommendations: React.FC<EmployerRecommendationsProps> = (
     }
   };
 
-  const groupedData = data.reduce((acc, rec) => {
+  const hasData = Array.isArray(data) && data.length > 0;
+
+  const groupedData = hasData ? data.reduce((acc, rec) => {
     if (!acc[rec.category]) {
       acc[rec.category] = [];
     }
     acc[rec.category].push(rec);
     return acc;
-  }, {} as Record<string, EmployerRecommendation[]>);
+  }, {} as Record<string, EmployerRecommendation[]>) : {};
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60">
@@ -86,62 +88,70 @@ export const EmployerRecommendations: React.FC<EmployerRecommendationsProps> = (
         <h3 className="text-xl font-bold text-gray-900">Employer Recommendations</h3>
       </div>
 
-      <div className="space-y-6">
-        {Object.entries(groupedData).map(([category, recommendations]) => (
-          <div key={category} className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2 rounded-lg ${getCategoryColor(category as EmployerRecommendation['category'])}`}>
-                {getCategoryIcon(category as EmployerRecommendation['category'])}
+      {!hasData ? (
+        <div className="p-8 text-center bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
+          <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+          <p className="text-sm font-semibold text-gray-700">No Employer Recommendations</p>
+          <p className="text-xs text-gray-500 mt-1">There are no employer feedback recommendations recorded in the database for this department yet.</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {Object.entries(groupedData).map(([category, recommendations]) => (
+            <div key={category} className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`p-2 rounded-lg ${getCategoryColor(category as EmployerRecommendation['category'])}`}>
+                  {getCategoryIcon(category as EmployerRecommendation['category'])}
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 capitalize">{category}</h4>
               </div>
-              <h4 className="text-lg font-bold text-gray-900 capitalize">{category}</h4>
-            </div>
-            
-            <div className="space-y-3">
-              {recommendations.map((rec) => (
-                <div key={rec.id} className="p-4 bg-white border border-gray-200/60 rounded-xl hover:shadow-md transition-all">
-                  <div className="flex justify-between items-start mb-2">
-                    <h5 className="text-sm font-bold text-gray-900">{rec.title}</h5>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(rec.priority)}`}>
-                        {rec.priority}
-                      </span>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getImpactColor(rec.impactLevel)}`}>
-                        {rec.impactLevel} impact
-                      </span>
+              
+              <div className="space-y-3">
+                {recommendations.map((rec) => (
+                  <div key={rec.id} className="p-4 bg-white border border-gray-200/60 rounded-xl hover:shadow-md transition-all">
+                    <div className="flex justify-between items-start mb-2">
+                      <h5 className="text-sm font-bold text-gray-900">{rec.title}</h5>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(rec.priority)}`}>
+                          {rec.priority}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getImpactColor(rec.impactLevel)}`}>
+                          {rec.impactLevel} impact
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-xs text-gray-600 mb-3">{rec.description}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">Frequency:</span>
-                      <span className="text-xs font-bold text-astu-navy">{rec.frequency}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-500">From:</span>
-                      <div className="flex -space-x-2">
-                        {rec.sourceEmployers.slice(0, 3).map((employer, i) => (
-                          <div
-                            key={i}
-                            className="w-6 h-6 rounded-full bg-astu-navy/10 border-2 border-white flex items-center justify-center text-xs font-bold text-astu-navy"
-                            title={employer}
-                          >
-                            {employer.charAt(0)}
-                          </div>
-                        ))}
-                        {rec.sourceEmployers.length > 3 && (
-                          <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-bold text-gray-600">
-                            +{rec.sourceEmployers.length - 3}
-                          </div>
-                        )}
+                    <p className="text-xs text-gray-600 mb-3">{rec.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500">Frequency:</span>
+                        <span className="text-xs font-bold text-astu-navy">{rec.frequency}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">From:</span>
+                        <div className="flex -space-x-2">
+                          {rec.sourceEmployers.slice(0, 3).map((employer, i) => (
+                            <div
+                              key={i}
+                              className="w-6 h-6 rounded-full bg-astu-navy/10 border-2 border-white flex items-center justify-center text-xs font-bold text-astu-navy"
+                              title={employer}
+                            >
+                              {employer.charAt(0)}
+                            </div>
+                          ))}
+                          {rec.sourceEmployers.length > 3 && (
+                            <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-bold text-gray-600">
+                              +{rec.sourceEmployers.length - 3}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

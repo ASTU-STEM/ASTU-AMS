@@ -7,6 +7,12 @@ interface AccreditationAlignmentAnalyticsProps {
 }
 
 export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAnalyticsProps> = ({ data }) => {
+  const complianceScore = data?.complianceScore ?? 0;
+  const learningOutcomeCoverage = data?.learningOutcomeCoverage ?? 0;
+  const graduateOutcomeMapping = data?.graduateOutcomeMapping ?? 0;
+  const etaReadiness = data?.etaReadiness ?? 0;
+  const curriculumAuditStatus = data?.curriculumAuditStatus ?? 'compliant';
+
   const getStatusColor = (status: AccreditationAlignment['curriculumAuditStatus']) => {
     switch (status) {
       case 'compliant':
@@ -36,33 +42,33 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Compliance Score</p>
-          <p className="text-3xl font-bold text-astu-navy mb-3">{data.complianceScore}%</p>
+          <p className="text-3xl font-bold text-astu-navy mb-3">{complianceScore}%</p>
           <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-            <div className="bg-astu-navy h-full rounded-full" style={{ width: `${data.complianceScore}%` }}></div>
+            <div className="bg-astu-navy h-full rounded-full" style={{ width: `${complianceScore}%` }}></div>
           </div>
         </div>
 
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Learning Outcome Coverage</p>
-          <p className="text-3xl font-bold text-astu-green mb-3">{data.learningOutcomeCoverage}%</p>
+          <p className="text-3xl font-bold text-astu-green mb-3">{learningOutcomeCoverage}%</p>
           <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-            <div className="bg-astu-green h-full rounded-full" style={{ width: `${data.learningOutcomeCoverage}%` }}></div>
+            <div className="bg-astu-green h-full rounded-full" style={{ width: `${learningOutcomeCoverage}%` }}></div>
           </div>
         </div>
 
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Graduate Outcome Mapping</p>
-          <p className="text-3xl font-bold text-blue-600 mb-3">{data.graduateOutcomeMapping}%</p>
+          <p className="text-3xl font-bold text-blue-600 mb-3">{graduateOutcomeMapping}%</p>
           <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-            <div className="bg-blue-500 h-full rounded-full" style={{ width: `${data.graduateOutcomeMapping}%` }}></div>
+            <div className="bg-blue-500 h-full rounded-full" style={{ width: `${graduateOutcomeMapping}%` }}></div>
           </div>
         </div>
 
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">ETA Readiness</p>
-          <p className="text-3xl font-bold text-purple-600 mb-3">{data.etaReadiness}%</p>
+          <p className="text-3xl font-bold text-purple-600 mb-3">{etaReadiness}%</p>
           <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-            <div className="bg-purple-500 h-full rounded-full" style={{ width: `${data.etaReadiness}%` }}></div>
+            <div className="bg-purple-500 h-full rounded-full" style={{ width: `${etaReadiness}%` }}></div>
           </div>
         </div>
       </div>
@@ -72,8 +78,8 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Curriculum Audit Status</h4>
-            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(data.curriculumAuditStatus)}`}>
-              {data.curriculumAuditStatus}
+            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(curriculumAuditStatus)}`}>
+              {curriculumAuditStatus}
             </span>
           </div>
           <div className="space-y-3">
@@ -85,7 +91,7 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
               <CheckCircle className="h-4 w-4 text-astu-green" />
               <span className="text-sm text-gray-700">Assessment methods documented</span>
             </div>
-            {data.curriculumAuditStatus === 'partial' && (
+            {curriculumAuditStatus === 'partial' && (
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <span className="text-sm text-gray-700">Some courses require outcome alignment</span>
@@ -97,8 +103,8 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
         <div className="p-5 bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 rounded-xl">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">ETA Readiness Assessment</h4>
-            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getReadinessColor(data.etaReadiness)}`}>
-              {data.etaReadiness >= 80 ? 'Ready' : data.etaReadiness >= 60 ? 'In Progress' : 'Needs Work'}
+            <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getReadinessColor(etaReadiness)}`}>
+              {etaReadiness >= 80 ? 'Ready' : etaReadiness >= 60 ? 'In Progress' : 'Needs Work'}
             </span>
           </div>
           <div className="space-y-3">
@@ -110,7 +116,7 @@ export const AccreditationAlignmentAnalytics: React.FC<AccreditationAlignmentAna
               <CheckCircle className="h-4 w-4 text-astu-green" />
               <span className="text-sm text-gray-700">Graduate attributes mapped</span>
             </div>
-            {data.etaReadiness < 80 && (
+            {etaReadiness < 80 && (
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-4 w-4 text-yellow-600" />
                 <span className="text-sm text-gray-700">Additional documentation required</span>

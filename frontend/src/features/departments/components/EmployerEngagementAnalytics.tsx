@@ -29,7 +29,7 @@ export const EmployerEngagementAnalytics: React.FC<EmployerEngagementAnalyticsPr
                 <p className="text-xs text-gray-500">{engagement.industry}</p>
               </div>
             </div>
-            
+
             <div className="space-y-3">
               <div>
                 <div className="flex justify-between items-center text-xs mb-1">
@@ -40,17 +40,17 @@ export const EmployerEngagementAnalytics: React.FC<EmployerEngagementAnalyticsPr
                   <div className="bg-astu-navy h-full rounded-full" style={{ width: `${engagement.participationRate}%` }}></div>
                 </div>
               </div>
-              
+
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">Graduates Hired</span>
                 <span className="text-astu-green font-bold">{engagement.graduatesHired}</span>
               </div>
-              
+
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">Collaboration Score</span>
-                <span className="text-purple-600 font-bold">{engagement.collaborationScore}/100</span>
+                <span className="text-purple-600 font-bold">{engagement.collaborationScore}/10</span>
               </div>
-              
+
               <div className="flex items-center gap-2 mt-2">
                 {engagement.internshipProvided && (
                   <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full flex items-center gap-1">
@@ -123,3 +123,31 @@ export const EmployerEngagementAnalytics: React.FC<EmployerEngagementAnalyticsPr
 };
 
 export default EmployerEngagementAnalytics;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
