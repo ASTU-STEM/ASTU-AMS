@@ -28,7 +28,7 @@ export default function Select({
       )}
       <select
         id={selectId}
-        className={`w-full rounded-lg border bg-white px-4 py-2.5 text-sm text-on-surface
+        className={`w-full rounded-lg border bg-[var(--bg-card)] px-4 py-2.5 text-sm text-on-surface
           focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:border-astu-navy
           ${error ? 'border-red-500' : 'border-outline-variant'}
           ${className}`}

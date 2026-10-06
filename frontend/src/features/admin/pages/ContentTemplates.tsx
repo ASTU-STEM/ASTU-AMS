@@ -367,38 +367,38 @@ export default function ContentTemplates() {
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs flex items-center gap-3">
+            <div key={s.label} className="rounded-[10px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-4 shadow-xs flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
                 <Icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{s.label}</p>
-                <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{s.value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] dark:text-slate-400">{s.label}</p>
+                <p className="text-xl font-bold tracking-tight text-[var(--text-primary)] dark:text-white">{s.value}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="flex flex-col gap-3 rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
+      <div className="flex flex-col gap-3 rounded-[12px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search templates..."
-              className="w-full rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-8 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10"
+              className="w-full rounded-[8px] border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 py-2 pl-8 pr-3 text-sm text-[var(--text-primary)] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+              <button onClick={() => setSearch('')} className="absolute right-2.5 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 dark:border-slate-800 pt-3">
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--border-color)] dark:border-slate-800 pt-3">
           {CATEGORIES.map((c) => {
             const Icon = c.icon;
             const active = category === c.key;
@@ -410,7 +410,7 @@ export default function ContentTemplates() {
                 className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
                   active
                     ? 'border-[#003580] bg-[#003580] text-white'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    : 'border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700'
                 }`}
               >
                 <Icon className="h-3 w-3" />
@@ -427,7 +427,7 @@ export default function ContentTemplates() {
           return (
             <div
               key={template.id}
-              className="group relative flex flex-col overflow-hidden rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:border-slate-700"
+              className="group relative flex flex-col overflow-hidden rounded-[12px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:hover:border-slate-700"
             >
               <div
                 className="relative h-32 overflow-hidden"
@@ -441,30 +441,30 @@ export default function ContentTemplates() {
                   {template.isDefault && <span className="rounded-md bg-amber-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">Default</span>}
                   {template.isFeatured && <span className="rounded-md bg-violet-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">Featured</span>}
                 </div>
-                <span className="absolute right-2 top-2 rounded-md bg-white/95 dark:bg-slate-900/95 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: template.color }}>
+                <span className="absolute right-2 top-2 rounded-md bg-[var(--bg-card)] dark:bg-slate-900/95 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider" style={{ color: template.color }}>
                   {template.category}
                 </span>
               </div>
               <div className="flex flex-1 flex-col p-4">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1 group-hover:text-[#003580] dark:group-hover:text-sky-400 transition-colors">{template.name}</h3>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{template.description}</p>
+                <h3 className="text-sm font-bold text-[var(--text-primary)] dark:text-white line-clamp-1 group-hover:text-[#003580] dark:group-hover:text-sky-400 transition-colors">{template.name}</h3>
+                <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400 line-clamp-2 leading-relaxed">{template.description}</p>
                 <div className="mt-3 flex flex-wrap gap-1">
                   {template.fields.slice(0, 3).map((f) => (
-                    <span key={f} className="rounded-md bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                    <span key={f} className="rounded-md bg-[var(--bg-page)] dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-secondary)] dark:text-slate-300">
                       {f}
                     </span>
                   ))}
-                  {template.fields.length > 3 && <span className="text-[10px] text-slate-400 dark:text-slate-500">+{template.fields.length - 3} more</span>}
+                  {template.fields.length > 3 && <span className="text-[10px] text-[var(--text-muted)] dark:text-slate-500">+{template.fields.length - 3} more</span>}
                 </div>
-                <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-2.5">
+                <div className="mt-3 flex items-center justify-between text-[10px] text-[var(--text-muted)] dark:text-slate-500 border-t border-[var(--border-color)] dark:border-slate-800 pt-2.5">
                   <span>Used {template.usage} times</span>
                   <span>{template.lastUpdated}</span>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100 dark:border-slate-800 pt-3">
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[var(--border-color)] dark:border-slate-800 pt-3">
                   <button
                     type="button"
                     onClick={() => setPreviewTemplate(template)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-all"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 cursor-pointer transition-all"
                     title="Preview Template Structure"
                   >
                     <Eye className="h-4 w-4" />
@@ -472,7 +472,7 @@ export default function ContentTemplates() {
                   <button
                     type="button"
                     onClick={() => handleDuplicate(template)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-all"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-all"
                     title="Duplicate Template"
                   >
                     <Copy className="h-4 w-4" />
@@ -480,7 +480,7 @@ export default function ContentTemplates() {
                   <button
                     type="button"
                     onClick={() => openEditModal(template)}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600 dark:hover:text-emerald-400 cursor-pointer transition-all"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-600 dark:hover:text-emerald-400 cursor-pointer transition-all"
                     title="Edit Template"
                   >
                     <Edit3 className="h-4 w-4" />
@@ -489,7 +489,7 @@ export default function ContentTemplates() {
                     <button
                       type="button"
                       onClick={() => handleDelete(template)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-all"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-all"
                       title="Delete Template"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -523,7 +523,7 @@ export default function ContentTemplates() {
                 <button
                   type="button"
                   onClick={() => setPreviewTemplate(null)}
-                  className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                  className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] cursor-pointer"
                 >
                   Close
                 </button>
@@ -539,14 +539,14 @@ export default function ContentTemplates() {
           }
         >
           <div className="space-y-4">
-            <p className="text-sm text-slate-700 leading-relaxed">{previewTemplate.description}</p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{previewTemplate.description}</p>
             <div>
-              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Configured Content Fields</h3>
+              <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Configured Content Fields</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {previewTemplate.fields.map((f) => (
-                  <div key={f} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/70 px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-300">
-                    <span className="font-semibold text-slate-800 dark:text-white">{f}</span>
-                    <div className="mt-0.5 text-[10px] text-slate-400">Structured CMS input block</div>
+                  <div key={f} className="rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800/70 px-3.5 py-2.5 text-xs text-[var(--text-secondary)] dark:text-slate-300">
+                    <span className="font-semibold text-[var(--text-primary)] dark:text-white">{f}</span>
+                    <div className="mt-0.5 text-[10px] text-[var(--text-muted)]">Structured CMS input block</div>
                   </div>
                 ))}
               </div>
@@ -568,7 +568,7 @@ export default function ContentTemplates() {
       >
         <form onSubmit={handleSaveModal} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 mb-1">
               Template Name <span className="text-rose-500">*</span>
             </label>
             <input
@@ -577,17 +577,17 @@ export default function ContentTemplates() {
               value={formName}
               onChange={(e) => setFormName(e.target.value)}
               placeholder="e.g. Student Hackathon Banner"
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580]"
+              className="w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580]"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 mb-1">Category</label>
               <select
                 value={formCategory}
                 onChange={(e) => setFormCategory(e.target.value as TemplateCategory)}
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580] cursor-pointer"
+                className="w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580] cursor-pointer"
               >
                 <option value="Page">Page</option>
                 <option value="Post">Post (Article / News)</option>
@@ -598,11 +598,11 @@ export default function ContentTemplates() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Theme Accent Color</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 mb-1">Theme Accent Color</label>
               <select
                 value={formColor}
                 onChange={(e) => setFormColor(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580] cursor-pointer"
+                className="w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580] cursor-pointer"
               >
                 <option value="#003580">ASTU Navy (#003580)</option>
                 <option value="#7C3AED">Purple (#7C3AED)</option>
@@ -614,34 +614,34 @@ export default function ContentTemplates() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Description</label>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 mb-1">Description</label>
             <textarea
               rows={3}
               value={formDescription}
               onChange={(e) => setFormDescription(e.target.value)}
               placeholder="Explain the purpose and layout of this template..."
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580] resize-none"
+              className="w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580] resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Field Names <span className="text-slate-400 font-normal">(comma-separated)</span>
+            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+              Field Names <span className="text-[var(--text-muted)] font-normal">(comma-separated)</span>
             </label>
             <input
               type="text"
               value={formFieldsInput}
               onChange={(e) => setFormFieldsInput(e.target.value)}
               placeholder="Headline, Subtitle, Hero Image, Body Content"
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580]"
+              className="w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 dark:bg-slate-800 dark:text-white px-3 py-2 text-xs outline-none focus:border-[#003580]"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)] dark:border-slate-800">
             <button
               type="button"
               onClick={() => setTemplateModalOpen(false)}
-              className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+              className="rounded-lg border border-[var(--border-color)] dark:border-slate-700 px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 cursor-pointer"
             >
               Cancel
             </button>

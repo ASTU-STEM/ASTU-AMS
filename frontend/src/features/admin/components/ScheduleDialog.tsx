@@ -105,12 +105,12 @@ export default function ScheduleDialog({
       size="md"
       footer={
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500">Publishing happens server-side at the scheduled time.</span>
+          <span className="text-xs text-[var(--text-muted)]">Publishing happens server-side at the scheduled time.</span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -129,7 +129,7 @@ export default function ScheduleDialog({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               <Calendar className="mr-1 inline h-3 w-3" />
               Publish date
             </span>
@@ -138,11 +138,11 @@ export default function ScheduleDialog({
               value={date}
               min={today()}
               onChange={(event) => setDate(event.target.value)}
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
               <Clock className="mr-1 inline h-3 w-3" />
               Publish time
             </span>
@@ -150,19 +150,19 @@ export default function ScheduleDialog({
               type="time"
               value={time}
               onChange={(event) => setTime(event.target.value)}
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
             />
           </label>
         </div>
         <label className="block">
-          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             <Globe2 className="mr-1 inline h-3 w-3" />
             Timezone
           </span>
           <select
             value={timezone}
             onChange={(event) => setTimezone(event.target.value)}
-            className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+            className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
           >
             {TIMEZONES.map((tz) => (
               <option key={tz}>{tz}</option>
@@ -170,22 +170,22 @@ export default function ScheduleDialog({
           </select>
         </label>
 
-        <div className="rounded-[8px] border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs text-slate-600">
-          <span className="font-semibold text-slate-700">Will publish:</span> {preview}
+        <div className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs text-[var(--text-secondary)]">
+          <span className="font-semibold text-[var(--text-secondary)]">Will publish:</span> {preview}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-slate-700">
+        <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
           <input
             type="checkbox"
             checked={notifySubscribers}
             onChange={(event) => setNotifySubscribers(event.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+            className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580]"
           />
           Notify subscribers on publish
         </label>
 
         <div>
-          <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          <span className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Notification channels
           </span>
           <div className="flex flex-wrap gap-2">
@@ -199,7 +199,7 @@ export default function ScheduleDialog({
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all ${
                     active
                       ? 'border-[#003580] bg-[#003580] text-white'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-[#003580]/40'
+                      : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003580]/40'
                   }`}
                 >
                   {active ? '✓' : '+'} {channel.label}

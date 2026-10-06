@@ -30,7 +30,7 @@ interface DepartmentInsightsProps {
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
-  <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
+  <div className={`animate-pulse rounded-lg bg-[var(--bg-page)] dark:bg-slate-700/50 ${className}`} />
 );
 
 function skillEmploymentGaps(data: DepartmentDerivedData): Array<{
@@ -129,7 +129,7 @@ export function DepartmentInsights({
 
   const card = darkMode
     ? 'bg-slate-900 border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
-    : 'bg-white border-gray-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.06)]';
+    : 'bg-[var(--bg-card)] border-[var(--border-color)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]';
   const muted = darkMode ? 'text-slate-400' : 'text-slate-500';
   const titleCls = darkMode ? 'text-white' : 'text-slate-900';
 

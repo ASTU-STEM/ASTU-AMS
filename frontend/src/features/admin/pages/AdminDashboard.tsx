@@ -108,11 +108,11 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+    <div className="admin-card rounded-[10px] border border-[var(--border-color)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>
         </div>
         {action}
       </div>
@@ -354,7 +354,7 @@ export default function AdminDashboard() {
                   onClick={() => setTimeRange(range)}
                   className={`rounded-md px-2.5 py-1.5 font-semibold transition-all ${
                     timeRange === range
-                      ? 'bg-[#FFCC00] text-slate-900 shadow-sm'
+                      ? 'bg-[#FFCC00] text-[var(--text-primary)] shadow-sm'
                       : 'text-slate-200 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -394,14 +394,14 @@ export default function AdminDashboard() {
       </AdminPageHeader>
 
       {/* Admin Command Center */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-100">
+      <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-5 border-b border-[var(--border-color)]">
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <h2 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
               <Zap className="w-4 h-4 text-[#003580]" />
               Admin Command Center
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">
               Unified governance layer for system health, user approvals, active jobs, and database sync status.
             </p>
           </div>
@@ -448,43 +448,43 @@ export default function AdminDashboard() {
             ].map((sig) => {
               const Icon = sig.icon;
               return (
-                <div key={sig.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition-all hover:border-slate-200 hover:bg-white hover:shadow-sm">
+                <div key={sig.label} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-all hover:border-[var(--border-color)] hover:bg-[var(--bg-card)] hover:shadow-sm">
                   <div className="flex items-center gap-2">
                     <span className={`p-1.5 rounded-lg border text-sm ${sig.tone}`}>
                       <Icon className="w-4 h-4" />
                     </span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">{sig.label}</span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[var(--text-muted)]">{sig.label}</span>
                   </div>
-                  <p className="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">{sig.value}</p>
+                  <p className="mt-3 text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">{sig.value}</p>
                 </div>
               );
             })}
           </div>
 
-          <div className="lg:col-span-5 rounded-xl border border-slate-100 bg-slate-50/60 p-4 flex flex-col justify-between">
+          <div className="lg:col-span-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">System Data Quality</span>
+              <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">System Data Quality</span>
               <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200">
                 MONITORED
               </span>
             </div>
 
             <div className="grid grid-cols-3 gap-2 my-3">
-              <div className="p-3 rounded-lg bg-white border border-slate-100 text-center">
-                <p className="text-lg font-extrabold text-slate-900">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">DUPLICATE SCAN</p>
+              <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-center">
+                <p className="text-lg font-extrabold text-[var(--text-primary)]">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
+                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">DUPLICATE SCAN</p>
               </div>
-              <div className="p-3 rounded-lg bg-white border border-slate-100 text-center">
-                <p className="text-lg font-extrabold text-slate-900">{metrics?.commandCenter?.completeness || '0%'}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">COMPLETENESS</p>
+              <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-center">
+                <p className="text-lg font-extrabold text-[var(--text-primary)]">{metrics?.commandCenter?.completeness || '0%'}</p>
+                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">COMPLETENESS</p>
               </div>
-              <div className="p-3 rounded-lg bg-white border border-slate-100 text-center">
+              <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-center">
                 <p className="text-lg font-extrabold text-emerald-600">{metrics?.commandCenter?.auditTrail || 'Live'}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">AUDIT TRAIL</p>
+                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">AUDIT TRAIL</p>
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-500 font-medium">
+            <p className="text-[11px] text-[var(--text-muted)] font-medium">
               {metrics?.commandCenter?.healthStatusText || 'System database health verified conflict-free. All audit trails logging active.'}
             </p>
           </div>
@@ -501,7 +501,7 @@ export default function AdminDashboard() {
             <div
               key={card.label}
               onClick={() => navigate(card.path)}
-              className={`admin-card relative group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
+              className={`admin-card relative group rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${styles.circle} transition-transform duration-300 group-hover:scale-105`}>
@@ -512,12 +512,12 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400">{card.label}</p>
-                <p className="text-3xl font-extrabold tracking-tight text-slate-900">{card.value}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">{card.label}</p>
+                <p className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">{card.value}</p>
               </div>
-              <p className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 font-medium flex items-center justify-between">
+              <p className="mt-3 pt-3 border-t border-[var(--border-color)] text-xs text-[var(--text-muted)] font-medium flex items-center justify-between">
                 <span>{card.trend}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)]" />
               </p>
             </div>
           );
@@ -525,10 +525,10 @@ export default function AdminDashboard() {
       </section>
 
       {/* Quick Actions Bar */}
-      <section className="admin-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+      <section className="admin-card rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs">
         <div className="flex items-center gap-2 mb-4">
           <Zap className="w-4 h-4 text-amber-500" />
-          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">Quick Actions</span>
+          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">Quick Actions</span>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {quickActions.map((action) => {
@@ -538,7 +538,7 @@ export default function AdminDashboard() {
                 key={action.label}
                 type="button"
                 onClick={() => navigate(action.path)}
-                className="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 text-center transition-all duration-200 hover:border-slate-200 hover:bg-white hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-3.5 text-center transition-all duration-200 hover:border-[var(--border-color)] hover:bg-[var(--bg-card)] hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
               >
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 shadow-xs"
@@ -546,7 +546,7 @@ export default function AdminDashboard() {
                 >
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900">{action.label}</span>
+                <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">{action.label}</span>
               </button>
             );
           })}
@@ -572,10 +572,10 @@ export default function AdminDashboard() {
             <div className="h-[340px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="department" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <YAxis
-                    tick={{ fill: '#64748B', fontSize: 12 }}
+                    tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                     domain={[0, 100]}
@@ -593,7 +593,7 @@ export default function AdminDashboard() {
                     {activeEmploymentData.map((entry: any, index: number) => (
                       <Cell key={`cell-${entry.department}`} fill={index === 4 ? '#E8A020' : '#003580'} />
                     ))}
-                    <LabelList dataKey="value" position="top" formatter={(value: number) => `${value}%`} fill="#334155" fontSize={12} />
+                    <LabelList dataKey="value" position="top" formatter={(value: number) => `${value}%`} fill="var(--chart-label)" fontSize={12} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -661,10 +661,10 @@ export default function AdminDashboard() {
       </section>
 
       {/* System Status */}
-      <section className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+      <section className="admin-card rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xs">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="w-4 h-4 text-emerald-500" />
-          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">System Health</span>
+          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--text-muted)]">System Health</span>
           <span className="ml-auto flex items-center gap-1.5 text-xs font-bold" style={{ color: systemStatus.status === 'healthy' ? '#059669' : systemStatus.status === 'warning' ? '#d97706' : '#dc2626' }}>
             <StatusDot status={systemStatus.status} />
             {systemStatus.label}
@@ -677,13 +677,13 @@ export default function AdminDashboard() {
             { label: 'Profile Completeness', value: metrics?.systemHealth?.completeness || metrics?.commandCenter?.completeness || '0%', status: 'healthy' as const, trend: 'Data Verified' },
             { label: 'Active Sessions', value: metrics?.systemHealth?.activeSessions || metrics?.headerInfo?.activeSessions || '1 active session', status: 'healthy' as const, trend: 'User Accounts' },
           ].map((metric) => (
-            <div key={metric.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition-all duration-200 hover:border-slate-200 hover:bg-white hover:shadow-sm">
+            <div key={metric.label} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-all duration-200 hover:border-[var(--border-color)] hover:bg-[var(--bg-card)] hover:shadow-sm">
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400`}>{metric.label}</span>
+                <span className={`text-[10px] font-extrabold uppercase tracking-[0.14em] text-[var(--text-muted)]`}>{metric.label}</span>
                 <StatusDot status={metric.status} />
               </div>
-              <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">{metric.value}</p>
-              <p className="mt-1 text-xs text-slate-500 font-medium">{metric.trend}</p>
+              <p className="mt-2 text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">{metric.value}</p>
+              <p className="mt-1 text-xs text-[var(--text-muted)] font-medium">{metric.trend}</p>
             </div>
           ))}
         </div>
@@ -691,11 +691,11 @@ export default function AdminDashboard() {
 
       {/* Bottom Row */}
       <section className="grid gap-4 xl:grid-cols-3">
-        <div className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md">
+        <div className="admin-card rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Recent System Activity</h3>
-              <p className="mt-0.5 text-xs text-slate-500">Latest administrative actions and sync events.</p>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Recent System Activity</h3>
+              <p className="mt-0.5 text-xs text-[var(--text-muted)]">Latest administrative actions and sync events.</p>
             </div>
             <AdminBadge variant="neutral">Live Feed</AdminBadge>
           </div>
@@ -705,12 +705,12 @@ export default function AdminDashboard() {
               const Icon = entry.icon;
               return (
                 <div key={index} className="flex gap-3 group">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-blue-50 transition-colors">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-page)] group-hover:bg-blue-50 transition-colors">
                     <Icon className="h-4.5 w-4.5" style={{ color: entry.tone }} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-800">{entry.text}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-400 font-medium">{entry.time}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{entry.text}</p>
+                    <p className="mt-0.5 text-[11px] text-[var(--text-muted)] font-medium">{entry.time}</p>
                   </div>
                 </div>
               );
@@ -718,21 +718,21 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md">
+        <div className="admin-card rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Pending Actions</h3>
-            <p className="mt-0.5 text-xs text-slate-500">Tasks waiting for administrative review.</p>
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">Pending Actions</h3>
+            <p className="mt-0.5 text-xs text-[var(--text-muted)]">Tasks waiting for administrative review.</p>
           </div>
 
           <div className="mt-5 space-y-3">
             {activePendingActions.map((task: any, index: number) => (
               <div
                 key={index}
-                className="group rounded-xl border border-slate-200 border-l-4 bg-white p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                className="group rounded-xl border border-[var(--border-color)] border-l-4 bg-[var(--bg-card)] p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                 style={{ borderLeftColor: task.tone }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-800">{task.label}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{task.label}</p>
                   <button
                     type="button"
                     onClick={() => navigate(task.path || '/admin/users')}
@@ -746,7 +746,7 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100">
+          <div className="mt-4 pt-3 border-t border-[var(--border-color)]">
             <button
               type="button"
               onClick={() => navigate('/admin/users')}
@@ -757,11 +757,11 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md">
+        <div className="admin-card rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Skill Gap Alert</h3>
-              <p className="mt-0.5 text-xs text-slate-500">Top Missing Skills Reported by Employers</p>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Skill Gap Alert</h3>
+              <p className="mt-0.5 text-xs text-[var(--text-muted)]">Top Missing Skills Reported by Employers</p>
             </div>
             <AdminBadge variant="warning">Curriculum Input</AdminBadge>
           </div>
@@ -770,10 +770,10 @@ export default function AdminDashboard() {
             {activeSkillGaps.length > 0 ? activeSkillGaps.map((item) => (
               <div key={item.skill} className="space-y-2">
                 <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-semibold text-slate-700">{item.skill}</span>
-                  <span className="font-bold text-slate-500">{item.value}%</span>
+                  <span className="font-semibold text-[var(--text-secondary)]">{item.skill}</span>
+                  <span className="font-bold text-[var(--text-muted)]">{item.value}%</span>
                 </div>
-                <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-3 overflow-hidden rounded-full bg-[var(--bg-page)]">
                   <div className="relative h-full rounded-full bg-gradient-to-r from-[#003580] via-[#5B7FB8] to-[#E8A020] transition-all duration-500"
                     style={{ width: `${item.value}%` }}>
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
@@ -781,12 +781,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )) : (
-              <p className="text-sm text-slate-400 py-6 text-center">Skill gap data will appear as employer feedback is collected.</p>
+              <p className="text-sm text-[var(--text-muted)] py-6 text-center">Skill gap data will appear as employer feedback is collected.</p>
             )}
           </div>
 
-          <div className="mt-5 border-t border-slate-200 pt-4 flex items-center justify-between text-xs font-medium">
-            <span className="text-slate-500">Based on employer feedback submissions</span>
+          <div className="mt-5 border-t border-[var(--border-color)] pt-4 flex items-center justify-between text-xs font-medium">
+            <span className="text-[var(--text-muted)]">Based on employer feedback submissions</span>
             <button
               type="button"
               onClick={() => navigate('/admin/analytics')}
@@ -817,13 +817,13 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height="100%">
               {activeHiringCompanies.length > 0 ? (
               <BarChart data={activeHiringCompanies} layout="vertical" margin={{ top: 12, right: 24, left: 12, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" horizontal={false} />
-                <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+                <XAxis type="number" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={130}
-                  tick={{ fill: '#334155', fontSize: 12 }}
+                  tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -836,11 +836,11 @@ export default function AdminDashboard() {
                   }}
                 />
                 <Bar dataKey="hires" radius={[0, 8, 8, 0]} fill="#003580">
-                  <LabelList dataKey="hires" position="right" fill="#334155" fontSize={12} />
+                  <LabelList dataKey="hires" position="right" fill="var(--chart-label)" fontSize={12} />
                 </Bar>
               </BarChart>
               ) : (
-                <text x="50%" y="50%" textAnchor="middle" fill="#94a3b8" fontSize={14}>Hiring data will appear as employers submit records.</text>
+                <text x="50%" y="50%" textAnchor="middle" fill="var(--chart-axis)" fontSize={14}>Hiring data will appear as employers submit records.</text>
               )}
             </ResponsiveContainer>
           </div>
@@ -855,22 +855,22 @@ export default function AdminDashboard() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"
+            className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)]"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#003580]/10 flex items-center justify-center text-[#003580]">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                     Top Hiring Companies & Employer Market Analytics
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200">
                       Verified Placement Analytics
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--text-muted)]">
                     Comprehensive graduate hiring statistics, market percentage share, and active job postings across registered organizations.
                   </p>
                 </div>
@@ -878,7 +878,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setIsHiringModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] rounded-lg hover:bg-[var(--bg-page)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -918,25 +918,25 @@ export default function AdminDashboard() {
               {/* Search and Filter */}
               <div className="flex items-center justify-between gap-4">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                   <input
                     type="text"
                     value={hiringSearchQuery}
                     onChange={(e) => setHiringSearchQuery(e.target.value)}
                     placeholder="Search company by name or industry..."
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003580]/20 focus:border-[#003580]"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003580]/20 focus:border-[#003580]"
                   />
                 </div>
-                <div className="text-xs text-slate-500 font-medium">
+                <div className="text-xs text-[var(--text-muted)] font-medium">
                   Showing {filteredHiringCompanies.length} of {allHiringCompanies.length} companies
                 </div>
               </div>
 
               {/* Table of Companies */}
-              <div className="border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
+              <div className="border border-[var(--border-color)] rounded-xl overflow-x-auto shadow-sm">
                 <table className="w-full min-w-[920px] text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+                    <tr className="bg-[var(--bg-page)] border-b border-[var(--border-color)] text-[var(--text-secondary)] font-bold">
                       <th className="py-3 px-4 w-14">Rank</th>
                       <th className="py-3 px-4">Organization Name</th>
                       <th className="py-3 px-4">Industry / Sector</th>
@@ -946,26 +946,26 @@ export default function AdminDashboard() {
                       <th className="py-3 px-4 text-center">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {filteredHiringCompanies.map((comp, idx) => (
                       <tr
                         key={comp.id || idx}
                         onClick={() => setSelectedCompanyForAlumni(comp)}
                         className="hover:bg-blue-50/80 transition-colors cursor-pointer"
                       >
-                        <td className="py-3 px-4 font-bold text-slate-500">
+                        <td className="py-3 px-4 font-bold text-[var(--text-muted)]">
                           {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                          <div className="font-bold text-[var(--text-primary)] flex items-center gap-1.5">
                             {comp.name}
                             {comp.isVerified && (
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline-block" />
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-400">{comp.location}</div>
+                          <div className="text-[11px] text-[var(--text-muted)]">{comp.location}</div>
                         </td>
-                        <td className="py-3 px-4 text-slate-600 font-medium">
+                        <td className="py-3 px-4 text-[var(--text-secondary)] font-medium">
                           {comp.industry}
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -985,7 +985,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div className="flex-1 bg-[var(--bg-page)] rounded-full h-2 overflow-hidden">
                               <div
                                 className="bg-[#003580] h-full rounded-full transition-all duration-300"
                                 style={{ width: `${Math.min(100, Math.max(5, comp.percentage))}%` }}
@@ -994,13 +994,13 @@ export default function AdminDashboard() {
                             <span className="font-bold text-[#003580] w-9 text-right">{comp.percentage}%</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold text-slate-700">
+                        <td className="py-3 px-4 text-center font-semibold text-[var(--text-secondary)]">
                           {comp.postedJobs > 0 ? (
                             <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[11px]">
                               {comp.postedJobs} open
                             </span>
                           ) : (
-                            <span className="text-slate-400 font-normal">0</span>
+                            <span className="text-[var(--text-muted)] font-normal">0</span>
                           )}
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -1024,7 +1024,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 bg-slate-50 text-xs text-slate-500">
+            <div className="flex items-center justify-between px-6 py-3 border-t border-[var(--border-color)] bg-[var(--bg-page)] text-xs text-[var(--text-muted)]">
               <div>* Placement percentages and market analytics are aggregated from official graduate employment reports and verified partner records.</div>
               <button
                 type="button"
@@ -1047,22 +1047,22 @@ export default function AdminDashboard() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-200"
+            className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[var(--border-color)]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/90 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-700 font-bold">
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                     Hired Alumni at {selectedCompanyForAlumni.name}
                     {selectedCompanyForAlumni.isVerified && (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 inline-block" />
                     )}
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--text-muted)]">
                     {selectedCompanyForAlumni.industry} • {selectedCompanyForAlumni.location} • {selectedCompanyForAlumni.hires} total placed graduates
                   </p>
                 </div>
@@ -1070,7 +1070,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] rounded-lg hover:bg-[var(--bg-page)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1080,16 +1080,16 @@ export default function AdminDashboard() {
             <div className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0">
               <div className="flex items-center justify-between gap-4">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                   <input
                     type="text"
                     value={alumniSearchQuery}
                     onChange={(e) => setAlumniSearchQuery(e.target.value)}
                     placeholder="Search alumni by name, email, or department..."
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003580]/20 focus:border-[#003580]"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003580]/20 focus:border-[#003580]"
                   />
                 </div>
-                <div className="text-xs text-slate-500 font-medium">
+                <div className="text-xs text-[var(--text-muted)] font-medium">
                   {selectedCompanyForAlumni.alumniList?.length || 0} Placements Recorded
                 </div>
               </div>
@@ -1104,14 +1104,14 @@ export default function AdminDashboard() {
                          (a.email || '').toLowerCase().includes(q) ||
                          (a.position || '').toLowerCase().includes(q);
                 }).map((alumnus: any, idx: number) => (
-                  <div key={alumnus.id || idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all">
+                  <div key={alumnus.id || idx} className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-[var(--bg-card)] hover:shadow-md transition-all">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#003580] text-white font-bold flex items-center justify-center text-sm shadow-sm">
                         {(alumnus.name || 'A').charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-slate-900 truncate flex items-center gap-1.5">
+                          <h4 className="text-sm font-bold text-[var(--text-primary)] truncate flex items-center gap-1.5">
                             {alumnus.name}
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline-block" />
                           </h4>
@@ -1119,15 +1119,15 @@ export default function AdminDashboard() {
                             {alumnus.source}
                           </span>
                         </div>
-                        <div className="text-xs font-semibold text-slate-700 mt-0.5">
+                        <div className="text-xs font-semibold text-[var(--text-secondary)] mt-0.5">
                           {alumnus.position || 'Hired Graduate'}
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                        <div className="text-[11px] text-[var(--text-muted)] mt-1 flex items-center gap-2">
                           <span>🎓 {typeof alumnus.department === 'object' ? (alumnus.department?.name || alumnus.department?.code || 'Engineering') : (alumnus.department || 'Engineering')}</span>
                           <span>•</span>
                           <span>{alumnus.graduationYear}</span>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-1 truncate">
+                        <div className="text-[11px] text-[var(--text-muted)] mt-1 truncate">
                           ✉️ {alumnus.email} {alumnus.phone && `• 📞 ${alumnus.phone}`}
                         </div>
                       </div>
@@ -1137,14 +1137,14 @@ export default function AdminDashboard() {
               </div>
 
               {(!selectedCompanyForAlumni.alumniList || selectedCompanyForAlumni.alumniList.length === 0) && (
-                <div className="text-center py-12 text-slate-400 text-xs">
+                <div className="text-center py-12 text-[var(--text-muted)] text-xs">
                   No individual alumnus profiles recorded for this company entry yet.
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end px-6 py-3 border-t border-slate-100 bg-slate-50">
+            <div className="flex items-center justify-end px-6 py-3 border-t border-[var(--border-color)] bg-[var(--bg-page)]">
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}

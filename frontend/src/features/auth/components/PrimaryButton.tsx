@@ -23,7 +23,7 @@ export default function PrimaryButton({
   const variantStyles = {
     primary: 'bg-astu-navy text-white hover:brightness-110 hover:shadow-md focus:ring-astu-navy',
     secondary: 'bg-astu-red text-white hover:brightness-110 hover:shadow-md focus:ring-astu-red',
-    outline: 'border-2 border-outline-variant text-astu-navy hover:bg-slate-50 focus:ring-astu-navy bg-white',
+    outline: 'border-2 border-outline-variant text-astu-navy hover:bg-[var(--bg-page)] focus:ring-astu-navy bg-white',
   };
 
   return (

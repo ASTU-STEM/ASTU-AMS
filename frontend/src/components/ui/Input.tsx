@@ -36,7 +36,7 @@ export default function Input({
         )}
         <input
           id={inputId}
-          className={`w-full rounded-lg border bg-white px-4 py-2.5 text-sm text-on-surface 
+          className={`w-full rounded-lg border bg-[var(--bg-card)] px-4 py-2.5 text-sm text-on-surface 
             placeholder:text-on-surface-variant/50 
             focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:border-astu-navy
             ${error ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500' : 'border-outline-variant'}

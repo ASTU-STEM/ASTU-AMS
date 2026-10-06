@@ -36,7 +36,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
     <div className={`p-4 sm:p-8 border rounded-2xl sm:rounded-3xl shadow-sm transition-all duration-300 ${
       darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
     }`}>
-      <div className="pb-4 sm:pb-6 border-b border-gray-150 mb-4 sm:mb-6">
+      <div className="pb-4 sm:pb-6 border-b border-[var(--border-color)] mb-4 sm:mb-6">
         <h3 className="text-xl sm:text-2xl font-bold">Candidate Applications</h3>
         <p className={`text-xs sm:text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>Review academic transcripts, verified CGPAs, and skills match lists</p>
       </div>
@@ -45,7 +45,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left text-sm border-collapse">
           <thead>
-            <tr className={`border-b border-gray-150 text-xs font-bold uppercase tracking-wider ${
+            <tr className={`border-b border-[var(--border-color)] text-xs font-bold uppercase tracking-wider ${
               darkMode ? 'text-slate-400' : 'text-gray-500'
             }`}>
               <th className="pb-3 pr-2">Candidate</th>
@@ -55,7 +55,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
               <th className="pb-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100/50">
+          <tbody className="divide-y divide-[var(--border-color)]">
             {applications.map((app) => (
               <tr key={app.id} className="hover:bg-gray-50/5 hover:transition-colors group">
                 <td className="py-4 pr-2">
@@ -66,7 +66,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(app.alumnusName)}&background=003366&color=ffffff&bold=true`;
                       }}
                       alt={app.alumnusName}
-                      className="w-10 h-10 rounded-xl object-cover border border-gray-200 shadow-xs"
+                      className="w-10 h-10 rounded-xl object-cover border border-[var(--border-color)] shadow-xs"
                     />
                     <div>
                       <p className="font-bold">{app.alumnusName}</p>
@@ -109,7 +109,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
             ))}
             {applications.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-gray-400 italic">No candidate applications registered.</td>
+                <td colSpan={5} className="py-12 text-center text-[var(--text-muted)] italic">No candidate applications registered.</td>
               </tr>
             )}
           </tbody>
@@ -134,11 +134,11 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
                     e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(app.alumnusName)}&background=003366&color=ffffff&bold=true`;
                   }}
                   alt={app.alumnusName}
-                  className="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-xs shrink-0"
+                  className="w-12 h-12 rounded-xl object-cover border border-[var(--border-color)] shadow-xs shrink-0"
                 />
                 <div>
-                  <h4 className="font-extrabold text-sm text-gray-900 dark:text-white">{app.alumnusName}</h4>
-                  <p className="text-xs text-gray-500 truncate max-w-[180px]">{app.alumnusEmail}</p>
+                  <h4 className="font-extrabold text-sm text-[var(--text-primary)] dark:text-white">{app.alumnusName}</h4>
+                  <p className="text-xs text-[var(--text-muted)] truncate max-w-[180px]">{app.alumnusEmail}</p>
                 </div>
               </div>
 
@@ -148,17 +148,17 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
             </div>
 
             {/* Application & Academic Context */}
-            <div className="space-y-1.5 pt-1 text-xs border-t border-gray-200/60 dark:border-slate-700/60">
+            <div className="space-y-1.5 pt-1 text-xs border-t border-[var(--border-color)] dark:border-slate-700/60">
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 font-medium">Applied Position:</span>
+                <span className="text-[var(--text-muted)] font-medium">Applied Position:</span>
                 <span className="font-bold text-[#003366] dark:text-blue-400">{app.jobTitle}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 font-medium">Department:</span>
-                <span className="font-semibold text-gray-800 dark:text-slate-200">{app.department}</span>
+                <span className="text-[var(--text-muted)] font-medium">Department:</span>
+                <span className="font-semibold text-[var(--text-primary)] dark:text-slate-200">{app.department}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-500 font-medium">Academic Record:</span>
+                <span className="text-[var(--text-muted)] font-medium">Academic Record:</span>
                 <span className="font-medium">
                   CGPA: <strong className={app.cgpa.includes('Hidden') ? 'text-amber-600' : 'text-emerald-700'}>{app.cgpa}</strong> • Class of {app.graduationYear}
                 </span>
@@ -166,7 +166,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
             </div>
 
             {/* Mobile Actions Bar */}
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-200/60 dark:border-slate-700/60">
+            <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-color)] dark:border-slate-700/60">
               <button
                 onClick={() => setSelectedApp(app)}
                 className="flex-1 py-2 bg-[#003366] text-white rounded-xl text-xs font-bold hover:bg-[#002244] transition-colors flex items-center justify-center gap-1 shadow-xs"
@@ -184,7 +184,7 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({ applications, 
         ))}
 
         {applications.length === 0 && (
-          <div className="py-8 text-center text-gray-400 italic text-xs">No candidate applications registered.</div>
+          <div className="py-8 text-center text-[var(--text-muted)] italic text-xs">No candidate applications registered.</div>
         )}
       </div>
 

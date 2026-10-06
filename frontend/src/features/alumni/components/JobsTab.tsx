@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { JobMatch } from '../types/alumni.types';
 import { BrandMark } from './BrandMark';
 import { EmptyState } from '../../../components/EmptyState';
+import { ApplicationStatusBadge } from '../utils/statusUi';
 
 interface JobsTabProps {
   jobs: JobMatch[];
@@ -265,7 +266,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       <div className="bg-[var(--bg-card)] p-4 sm:p-5 rounded-xl border border-[var(--border-color)] shadow-xs space-y-3 sm:space-y-4">
         <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
           <div className="relative flex-1">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
               search
             </span>
             <input
@@ -277,7 +278,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] p-1 cursor-pointer"
                 title="Clear search"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
@@ -409,7 +410,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
         <div className="flex justify-between items-center px-1">
           <p className="text-xs sm:text-sm font-bold text-[var(--text-secondary)] uppercase tracking-wider">
             {sortedJobs.length} {sortedJobs.length === 1 ? 'Position' : 'Positions'} Found
-            {currentPage > 1 && <span className="text-gray-400 font-normal lowercase ml-1">(page {currentPage}/{totalPages})</span>}
+            {currentPage > 1 && <span className="text-[var(--text-muted)] font-normal lowercase ml-1">(page {currentPage}/{totalPages})</span>}
           </p>
           <div className="flex items-center gap-2">
             {totalPages > 1 && (
@@ -452,7 +453,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
 
         {sortedJobs.length === 0 ? (
           <EmptyState
-            icon={<span className="material-symbols-outlined text-5xl text-gray-400">find_in_page</span>}
+            icon={<span className="material-symbols-outlined text-5xl text-[var(--text-muted)]">find_in_page</span>}
             title={
               innerTab === 'saved'
                 ? 'No Saved Jobs'
@@ -517,16 +518,13 @@ export const JobsTab: React.FC<JobsTabProps> = ({
                     </span>
 
                     {job.applied && (
-                      <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-full flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        {job.applicationStatus || 'Applied'}
-                      </span>
+                      <ApplicationStatusBadge status={job.applicationStatus || 'Applied'} />
                     )}
                     
                     {/* Floating Save Button on Mobile */}
                     <button
                       onClick={(e) => handleToggleSave(e, job.id, job.saved)}
-                      className="md:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition text-gray-400 hover:text-yellow-500 cursor-pointer"
+                      className="md:hidden p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition text-[var(--text-muted)] hover:text-yellow-500 cursor-pointer"
                     >
                       <span className={`material-symbols-outlined ${job.saved ? 'text-yellow-500 fill-current' : ''}`}>
                         star
@@ -568,12 +566,19 @@ export const JobsTab: React.FC<JobsTabProps> = ({
                     </div>
                   )}
 
-                  {/* Metrics & Hiring Analytics Panel */}
-                  <div className="grid grid-cols-3 gap-2 max-w-sm pt-2 border-t border-[var(--border-color)] text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                    <div>👀 <span className="text-[var(--text-primary)] font-bold">{job.views || 0}</span> Views</div>
-                    <div>📝 <span className="text-[var(--text-primary)] font-bold">{job.applications || 0}</span> Applied</div>
-                    <div>🎯 <span className="text-emerald-600 font-bold">{job.shortlisted || 0}</span> Shortlisted</div>
-                  </div>
+                  {((job.views ?? 0) > 0 || (job.applications ?? 0) > 0 || (job.shortlisted ?? 0) > 0) && (
+                    <div className="grid max-w-sm grid-cols-3 gap-2 border-t border-[var(--border-color)] pt-2 text-xs font-medium text-[var(--text-secondary)] sm:text-sm">
+                      <div>
+                        <span className="text-[var(--text-primary)] font-bold">{job.views}</span> views
+                      </div>
+                      <div>
+                        <span className="text-[var(--text-primary)] font-bold">{job.applications}</span> applicants
+                      </div>
+                      <div>
+                        <span className="font-bold text-emerald-600">{job.shortlisted}</span> shortlisted
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Desktop Action Column */}
@@ -602,7 +607,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
                       type="button"
                       onClick={(e) => handleToggleSave(e, job.id, job.saved)}
                       className={`p-3 rounded-xl border border-[var(--border-color)] hover:bg-black/5 dark:hover:bg-white/5 transition cursor-pointer ${
-                        job.saved ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/20' : 'text-gray-400 hover:text-amber-500'
+                        job.saved ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/20' : 'text-[var(--text-muted)] hover:text-amber-500'
                       }`}
                       title={job.saved ? "Remove from saved" : "Save Opportunity"}
                     >

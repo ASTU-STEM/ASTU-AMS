@@ -24,22 +24,22 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     <div className="mb-6">
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-          <button className="hover:text-gray-700 transition-colors">
+        <nav className="flex items-center gap-2 text-sm text-[var(--text-muted)] mb-3">
+          <button className="hover:text-[var(--text-secondary)] transition-colors">
             <Home className="h-4 w-4" />
           </button>
           {breadcrumbs.map((item, index) => (
             <React.Fragment key={index}>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
               {item.path || item.onClick ? (
                 <button
                   onClick={item.onClick}
-                  className="hover:text-gray-700 transition-colors"
+                  className="hover:text-[var(--text-secondary)] transition-colors"
                 >
                   {item.label}
                 </button>
               ) : (
-                <span className="text-gray-900 font-medium">{item.label}</span>
+                <span className="text-[var(--text-primary)] font-medium">{item.label}</span>
               )}
             </React.Fragment>
           ))}
@@ -49,9 +49,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       {/* Title and Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{title}</h1>
           {subtitle && (
-            <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">{subtitle}</p>
           )}
         </div>
         {actions && (

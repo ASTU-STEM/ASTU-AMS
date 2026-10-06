@@ -221,7 +221,7 @@ const roleColorClass: Record<Role, string> = {
 
 const statusColorClass: Record<Status, string> = {
   Active: 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15',
-  Inactive: 'bg-slate-100 text-slate-600 border-slate-200',
+  Inactive: 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]',
   Suspended: 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15',
   'Pending Verification': 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20',
 };
@@ -1873,7 +1873,7 @@ export default function UserManagement() {
             <button
               type="button"
               onClick={openAddModal}
-              className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-100 text-[#002866] px-4 py-2.5 text-sm font-bold shadow-sm transition-all hover:shadow-md cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-page)] text-[#002866] px-4 py-2.5 text-sm font-bold shadow-sm transition-all hover:shadow-md cursor-pointer"
             >
               <Plus className="h-4 w-4 text-[#002866]" />
               <span>Add User</span>
@@ -1941,12 +1941,12 @@ export default function UserManagement() {
           return (
             <div
               key={card.label}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:shadow-xs"
+              className="group relative overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-2xs transition-all duration-200 hover:border-[var(--border-color)] hover:shadow-xs"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{card.label}</p>
-                  <div className="mt-1 text-3xl font-black tracking-tight text-slate-900">{card.value}</div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{card.label}</p>
+                  <div className="mt-1 text-3xl font-black tracking-tight text-[var(--text-primary)]">{card.value}</div>
                   <p className="mt-1 text-xs font-bold truncate max-w-[180px]" style={{ color: card.accent }}>
                     {card.meta}
                   </p>
@@ -1964,9 +1964,9 @@ export default function UserManagement() {
       </section>
 
       {/* Master Unified Directory Card: Pure Pearl White & Royal Indigo Accent Panel */}
-      <section className="relative overflow-hidden rounded-2xl bg-white border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-0 text-slate-900 transition-all">
+      <section className="relative overflow-hidden rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-0 text-[var(--text-primary)] transition-all">
         {/* Top Decorative Gradient Accent Bar & Shimmer Loading Indicator */}
-        <div className="relative h-1 w-full overflow-hidden bg-slate-100">
+        <div className="relative h-1 w-full overflow-hidden bg-[var(--bg-page)]">
           {(loading || isFiltering) ? (
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400 animate-[pulse_1s_infinite]" />
           ) : (
@@ -1979,14 +1979,14 @@ export default function UserManagement() {
         <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full bg-blue-50/60 blur-2xl pointer-events-none" />
 
         {/* Filter Engine Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3 relative z-10 bg-white">
+        <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between flex-wrap gap-3 relative z-10 bg-[var(--bg-card)]">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#001F4D] to-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-900/10 shrink-0">
               <Filter className={`h-4.5 w-4.5 text-sky-300 ${(loading || isFiltering) ? 'animate-bounce' : ''}`} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">Directory Filter & Query Engine</h3>
+                <h3 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">Directory Filter & Query Engine</h3>
                 {(loading || isFiltering) ? (
                   <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200/80 flex items-center gap-1.5 shadow-2xs transition-all animate-pulse">
                     <Loader2 className="h-3 w-3 animate-spin text-amber-600" />
@@ -1998,7 +1998,7 @@ export default function UserManagement() {
                   </span>
                 )}
               </div>
-              <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+              <p className="text-[11px] font-medium text-[var(--text-muted)] mt-0.5">
                 Filter system accounts by role, account status, academic division, or registration timeframe
               </p>
             </div>
@@ -2018,7 +2018,7 @@ export default function UserManagement() {
               <button
                 type="button"
                 onClick={resetFilters}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="px-3.5 py-1.5 rounded-xl bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] border border-[var(--border-color)] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <RotateCcw className={`h-3.5 w-3.5 text-indigo-600 ${(loading || isFiltering) ? 'animate-spin' : ''}`} />
                 <span>Reset ({activeFilterCount})</span>
@@ -2028,11 +2028,11 @@ export default function UserManagement() {
         </div>
 
         {/* Filter Controls Grid */}
-        <div className="p-5 bg-slate-50/40 border-b border-slate-100 space-y-3.5 relative z-10">
+        <div className="p-5 bg-[var(--bg-page)] border-b border-[var(--border-color)] space-y-3.5 relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5">
             {/* 1. Search Query */}
             <div className="lg:col-span-4 space-y-1">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">1. Search Query</label>
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">1. Search Query</label>
               <div className="relative flex items-center">
                 <Search className="absolute left-3.5 h-4 w-4 text-indigo-500/70 pointer-events-none" />
                 <input
@@ -2042,13 +2042,13 @@ export default function UserManagement() {
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
                   placeholder="Search by name, email, student ID..."
-                  className="w-full pl-10 pr-9 py-2 bg-white text-slate-900 border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold placeholder:text-slate-400 shadow-2xs transition-all"
+                  className="w-full pl-10 pr-9 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold placeholder:text-slate-400 shadow-2xs transition-all"
                 />
                 {query && (
                   <button
                     type="button"
                     onClick={() => setQuery('')}
-                    className="absolute right-3 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    className="absolute right-3 text-[var(--text-muted)] hover:text-[var(--text-secondary)] p-0.5 cursor-pointer"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -2058,55 +2058,55 @@ export default function UserManagement() {
 
             {/* 2. Target Role */}
             <div className="lg:col-span-2 space-y-1">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">2. Portal Role</label>
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">2. Portal Role</label>
               <div className="relative flex items-center">
                 <UserCog className="absolute left-3.5 h-4 w-4 text-indigo-500/70 pointer-events-none" />
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value as Role | 'All Roles')}
-                  className="w-full pl-10 pr-8 py-2 bg-white text-slate-900 border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all appearance-none cursor-pointer"
+                  className="w-full pl-10 pr-8 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all appearance-none cursor-pointer"
                 >
                   {roles.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
-                <ChevronDown className="absolute right-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
               </div>
             </div>
 
             {/* 3. Status */}
             <div className="lg:col-span-2 space-y-1">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">3. Status</label>
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">3. Status</label>
               <div className="relative flex items-center">
                 <Shield className="absolute left-3.5 h-4 w-4 text-indigo-500/70 pointer-events-none" />
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value as Status | 'All')}
-                  className="w-full pl-10 pr-8 py-2 bg-white text-slate-900 border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all appearance-none cursor-pointer"
+                  className="w-full pl-10 pr-8 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all appearance-none cursor-pointer"
                 >
                   {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-                <ChevronDown className="absolute right-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
               </div>
             </div>
 
             {/* 4. Department */}
             <div className="lg:col-span-4 space-y-1">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">4. Academic Division / Dept</label>
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">4. Academic Division / Dept</label>
               <div className="relative flex items-center">
                 <Building2 className="absolute left-3.5 h-4 w-4 text-indigo-500/70 pointer-events-none shrink-0" />
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="w-full pl-10 pr-8 py-2 bg-white text-slate-900 border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all appearance-none cursor-pointer truncate"
+                  className="w-full pl-10 pr-8 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all appearance-none cursor-pointer truncate"
                 >
                   {['All Departments', ...departmentList].map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
-                <ChevronDown className="absolute right-3 h-4 w-4 text-slate-400 pointer-events-none shrink-0" />
+                <ChevronDown className="absolute right-3 h-4 w-4 text-[var(--text-muted)] pointer-events-none shrink-0" />
               </div>
             </div>
 
             {/* 5. Date Range (From & To) */}
             <div className="lg:col-span-12 space-y-1 pt-1">
-              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">5. Registration Timeframe (Date Range)</label>
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">5. Registration Timeframe (Date Range)</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
                 <div className="relative flex items-center">
                   <CalendarDays className="absolute left-3 h-3.5 w-3.5 text-indigo-500/70 pointer-events-none" />
@@ -2114,7 +2114,7 @@ export default function UserManagement() {
                     type="date"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 bg-white text-slate-900 border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                    className="w-full pl-9 pr-3 py-1.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                   />
                 </div>
                 <div className="relative flex items-center">
@@ -2123,7 +2123,7 @@ export default function UserManagement() {
                     type="date"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 bg-white text-slate-900 border border-slate-200 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                    className="w-full pl-9 pr-3 py-1.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                   />
                 </div>
               </div>
@@ -2132,10 +2132,10 @@ export default function UserManagement() {
 
           {/* Active Filter Pills */}
           {hasActiveFilters && (
-            <div className="pt-2 border-t border-slate-200/80 flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mr-1">Active Criteria:</span>
+            <div className="pt-2 border-t border-[var(--border-color)] flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mr-1">Active Criteria:</span>
               {query && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white text-slate-800 border border-slate-200 rounded-full text-xs font-semibold shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-full text-xs font-semibold shadow-2xs">
                   <span>Query: "{query}"</span>
                   <button type="button" onClick={() => setQuery('')} className="hover:text-indigo-600 cursor-pointer">
                     <X className="h-3 w-3" />
@@ -2143,7 +2143,7 @@ export default function UserManagement() {
                 </span>
               )}
               {selectedRole !== 'All Roles' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white text-slate-800 border border-slate-200 rounded-full text-xs font-semibold shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-full text-xs font-semibold shadow-2xs">
                   <span>Role: {selectedRole}</span>
                   <button type="button" onClick={() => setSelectedRole('All Roles')} className="hover:text-indigo-600 cursor-pointer">
                     <X className="h-3 w-3" />
@@ -2151,7 +2151,7 @@ export default function UserManagement() {
                 </span>
               )}
               {selectedStatus !== 'All' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white text-slate-800 border border-slate-200 rounded-full text-xs font-semibold shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-full text-xs font-semibold shadow-2xs">
                   <span>Status: {selectedStatus}</span>
                   <button type="button" onClick={() => setSelectedStatus('All')} className="hover:text-indigo-600 cursor-pointer">
                     <X className="h-3 w-3" />
@@ -2159,7 +2159,7 @@ export default function UserManagement() {
                 </span>
               )}
               {selectedDepartment !== 'All Departments' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white text-slate-800 border border-slate-200 rounded-full text-xs font-semibold shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-full text-xs font-semibold shadow-2xs">
                   <span>Dept: {selectedDepartment}</span>
                   <button type="button" onClick={() => setSelectedDepartment('All Departments')} className="hover:text-indigo-600 cursor-pointer">
                     <X className="h-3 w-3" />
@@ -2167,7 +2167,7 @@ export default function UserManagement() {
                 </span>
               )}
               {(dateFrom || dateTo) && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white text-slate-800 border border-slate-200 rounded-full text-xs font-semibold shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-full text-xs font-semibold shadow-2xs">
                   <span>Dates: {dateFrom || '...'} to {dateTo || '...'}</span>
                   <button type="button" onClick={() => { setDateFrom(''); setDateTo(''); }} className="hover:text-indigo-600 cursor-pointer">
                     <X className="h-3 w-3" />
@@ -2184,7 +2184,7 @@ export default function UserManagement() {
             <span className="px-2.5 py-1 rounded-md bg-[#001F4D] text-white font-extrabold text-[10px] uppercase tracking-wider shadow-2xs">
               USER ROSTER
             </span>
-            <span className="font-extrabold text-slate-900 text-xs">
+            <span className="font-extrabold text-[var(--text-primary)] text-xs">
               {totalCountNum.toLocaleString()} Total Accounts
             </span>
             <span className="text-slate-300">•</span>
@@ -2195,15 +2195,15 @@ export default function UserManagement() {
               <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/80 font-bold text-[11px] shadow-2xs">
                 {pendingCount.toLocaleString()} Pending
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-slate-100/90 text-slate-700 border border-slate-200 font-bold text-[11px] shadow-2xs">
+              <span className="px-2.5 py-0.5 rounded-full bg-[var(--bg-page)] text-[var(--text-secondary)] border border-[var(--border-color)] font-bold text-[11px] shadow-2xs">
                 {(inactiveCount + suspendedCount).toLocaleString()} Inactive
               </span>
             </div>
           </div>
 
-          <div className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 text-xs font-semibold shadow-2xs">
-            Showing <strong className="text-slate-900 font-extrabold">{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)}</strong> of{' '}
-            <strong className="text-slate-900 font-extrabold">{totalCount}</strong> users
+          <div className="px-3 py-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)] text-xs font-semibold shadow-2xs">
+            Showing <strong className="text-[var(--text-primary)] font-extrabold">{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)}</strong> of{' '}
+            <strong className="text-[var(--text-primary)] font-extrabold">{totalCount}</strong> users
           </div>
         </div>
 
@@ -2221,7 +2221,7 @@ export default function UserManagement() {
                 <Download className="h-3.5 w-3.5" />
                 Export Selected
               </button>
-              <button type="button" onClick={() => bulkAction('delete')} className="rounded-lg border border-rose-300 bg-white hover:bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">
+              <button type="button" onClick={() => bulkAction('delete')} className="rounded-lg border border-rose-300 bg-[var(--bg-card)] hover:bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">
                 Delete Selected
               </button>
             </div>
@@ -2229,17 +2229,17 @@ export default function UserManagement() {
         )}
       </section>
 
-      <section className="admin-card overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm">
+      <section className="admin-card overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-0 text-sm">
-            <thead className="bg-slate-50">
+            <thead className="bg-[var(--bg-page)]">
               <tr>
-                <th className="w-12 border-b border-slate-200 px-4 py-3 text-left">
+                <th className="w-12 border-b border-[var(--border-color)] px-4 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={allPageSelected}
                     onChange={selectAllPage}
-                    className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                    className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580]"
                     aria-label="Select all rows on page"
                   />
                 </th>
@@ -2255,7 +2255,7 @@ export default function UserManagement() {
                 ].map((column) => (
                   <th
                     key={column.key}
-                    className={`border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 ${column.width ?? ''}`}
+                    className={`border-b border-[var(--border-color)] px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] ${column.width ?? ''}`}
                   >
                     <button
                       type="button"
@@ -2274,38 +2274,38 @@ export default function UserManagement() {
             <tbody>
               {(loading || isFiltering) ? (
                 Array.from({ length: 5 }).map((_, idx) => (
-                  <tr key={`skel-row-${idx}`} className="border-b border-slate-100 animate-pulse">
+                  <tr key={`skel-row-${idx}`} className="border-b border-[var(--border-color)] animate-pulse">
                     <td className="px-4 py-4 align-middle">
-                      <div className="h-4 w-4 rounded bg-slate-200" />
+                      <div className="h-4 w-4 rounded bg-[var(--bg-page)]" />
                     </td>
                     <td className="px-4 py-4 align-middle">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 shrink-0 rounded-full bg-slate-200" />
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-[var(--bg-page)]" />
                         <div className="space-y-1.5 flex-1">
-                          <div className="h-4 w-32 rounded bg-slate-200" />
-                          <div className="h-3 w-44 rounded bg-slate-100" />
+                          <div className="h-4 w-32 rounded bg-[var(--bg-page)]" />
+                          <div className="h-3 w-44 rounded bg-[var(--bg-page)]" />
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 align-middle"><div className="h-4 w-24 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4 align-middle"><div className="h-6 w-20 rounded-full bg-slate-200" /></td>
-                    <td className="px-4 py-4 align-middle"><div className="h-4 w-36 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4 align-middle"><div className="h-4 w-12 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4 align-middle"><div className="h-6 w-16 rounded-full bg-slate-200" /></td>
-                    <td className="px-4 py-4 align-middle"><div className="h-4 w-24 rounded bg-slate-200" /></td>
-                    <td className="px-4 py-4 align-middle"><div className="h-8 w-8 rounded-lg bg-slate-100" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-4 w-24 rounded bg-[var(--bg-page)]" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-6 w-20 rounded-full bg-[var(--bg-page)]" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-4 w-36 rounded bg-[var(--bg-page)]" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-4 w-12 rounded bg-[var(--bg-page)]" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-6 w-16 rounded-full bg-[var(--bg-page)]" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-4 w-24 rounded bg-[var(--bg-page)]" /></td>
+                    <td className="px-4 py-4 align-middle"><div className="h-8 w-8 rounded-lg bg-[var(--bg-page)]" /></td>
                   </tr>
                 ))
               ) : paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-                        <Search className="h-6 w-6 text-slate-400" />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--bg-page)]">
+                        <Search className="h-6 w-6 text-[var(--text-muted)]" />
                       </div>
                       <div>
-                        <p className="text-base font-semibold text-slate-700">No users found</p>
-                        <p className="mt-1 text-sm text-slate-500 max-w-sm mx-auto">Try adjusting your search or filter criteria to find what you are looking for.</p>
+                        <p className="text-base font-semibold text-[var(--text-secondary)]">No users found</p>
+                        <p className="mt-1 text-sm text-[var(--text-muted)] max-w-sm mx-auto">Try adjusting your search or filter criteria to find what you are looking for.</p>
                       </div>
                       <button type="button" onClick={resetFilters} className="mt-2 rounded-[8px] bg-[#003580] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:brightness-110 transition-all">
                         Clear All Filters
@@ -2317,7 +2317,7 @@ export default function UserManagement() {
                 paginatedUsers.map((user) => (
                 <tr
                   key={user.id}
-                  className={`cursor-pointer border-b border-slate-100 transition-all hover:bg-slate-50/80 ${
+                  className={`cursor-pointer border-b border-[var(--border-color)] transition-all hover:bg-[var(--bg-page)] ${
                     activeUser?.id === user.id ? 'bg-[#003580]/5 shadow-inner' : ''
                   } ${isFiltering ? 'opacity-60 animate-pulse' : ''}`}
                   onClick={() => setActiveUser(user)}
@@ -2331,7 +2331,7 @@ export default function UserManagement() {
                         toggleRow(user.id);
                       }}
                       onClick={(event) => event.stopPropagation()}
-                      className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                      className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580]"
                       aria-label={`Select ${user.name}`}
                     />
                   </td>
@@ -2349,7 +2349,7 @@ export default function UserManagement() {
                               <img
                                 src={avatar}
                                 alt={user.name}
-                                className="h-11 w-11 rounded-full object-cover border border-slate-200 shadow-2xs absolute inset-0 z-10"
+                                className="h-11 w-11 rounded-full object-cover border border-[var(--border-color)] shadow-2xs absolute inset-0 z-10"
                                 onError={(e) => {
                                   (e.target as HTMLElement).style.display = 'none';
                                 }}
@@ -2359,32 +2359,32 @@ export default function UserManagement() {
                         );
                       })()}
                       <div>
-                        <div className="font-semibold text-slate-900">{user.name}</div>
-                        <div className="text-xs text-slate-500">{user.email}</div>
+                        <div className="font-semibold text-[var(--text-primary)]">{user.name}</div>
+                        <div className="text-xs text-[var(--text-muted)]">{user.email}</div>
                       </div>
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 align-top text-slate-600">{user.studentId || 'N/A'}</td>
+                  <td className="px-4 py-4 align-top text-[var(--text-secondary)]">{user.studentId || 'N/A'}</td>
                   <td className="px-4 py-4 align-top">
                     <AdminBadge variant={roleTone[user.role]} className={roleColorClass[user.role]}>
                       {user.role}
                     </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 align-top text-slate-600">{user.department}</td>
-                  <td className="px-4 py-4 align-top text-slate-600">{user.batch}</td>
+                  <td className="px-4 py-4 align-top text-[var(--text-secondary)]">{user.department}</td>
+                  <td className="px-4 py-4 align-top text-[var(--text-secondary)]">{user.batch}</td>
                   <td className="px-4 py-4 align-top">
                     <AdminBadge variant={statusTone[user.status]} className={statusColorClass[user.status]}>
                       {user.status}
                     </AdminBadge>
                   </td>
-                  <td className="px-4 py-4 align-top text-slate-600">{formatRelative(user.lastLogin)}</td>
+                  <td className="px-4 py-4 align-top text-[var(--text-secondary)]">{formatRelative(user.lastLogin)}</td>
                   <td className="px-4 py-4 align-top">
                     <div className="relative" onClick={(event) => event.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => setMenuUserId((current) => (current === user.id ? null : user.id))}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-muted)] hover:bg-[var(--bg-page)]"
                         aria-label={`Open actions for ${user.name}`}
                       >
                         <EllipsisVertical className="h-4 w-4" />
@@ -2405,7 +2405,7 @@ export default function UserManagement() {
                                 className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
                                   action.label.includes('Delete')
                                     ? 'text-[#E24B4A] hover:bg-rose-50 font-medium'
-                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]'
                                 }`}
                               >
                                 <Icon className="h-4 w-4" />
@@ -2424,8 +2424,8 @@ export default function UserManagement() {
           </table>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-500">
+        <div className="flex flex-col gap-3 border-t border-[var(--border-color)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-[var(--text-muted)]">
             Showing {paginatedUsers.length} of {totalCount} filtered users
           </p>
 
@@ -2434,19 +2434,19 @@ export default function UserManagement() {
               type="button"
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               disabled={page === 1}
-              className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronLeft className="h-4 w-4" />
               Prev
             </button>
-            <div className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">
+            <div className="rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)]">
               Page {page} of {totalPages}
             </div>
             <button
               type="button"
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               disabled={page === totalPages}
-              className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Next
               <ChevronRight className="h-4 w-4" />
@@ -2462,7 +2462,7 @@ export default function UserManagement() {
         size="lg"
         footer={
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 font-medium border border-slate-200">
+            <div className="flex items-center gap-2 rounded-full bg-[var(--bg-page)] px-3 py-1 text-xs text-[var(--text-secondary)] font-medium border border-[var(--border-color)]">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Target Role: <strong className="text-[#003580] font-bold">{form.role}</strong></span>
             </div>
@@ -2470,7 +2470,7 @@ export default function UserManagement() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all active:scale-98"
+                className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all active:scale-98"
               >
                 Cancel
               </button>
@@ -2499,7 +2499,7 @@ export default function UserManagement() {
         <div className="space-y-6">
           {/* Role Selection Cards */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500 mb-2.5">
+            <label className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] mb-2.5">
               Select User Role & Account Type
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
@@ -2522,18 +2522,18 @@ export default function UserManagement() {
                     className={`group relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-all duration-150 ${
                       isSelected
                         ? 'border-[#003580] bg-gradient-to-b from-[#003580] to-[#002660] text-white shadow-md ring-2 ring-[#003580]/30 scale-[1.02]'
-                        : 'border-slate-200/90 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/80 shadow-sm'
+                        : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--border-color)] hover:bg-[var(--bg-page)] shadow-sm'
                     }`}
                   >
                     <div
                       className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                        isSelected ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/70 group-hover:text-slate-700'
+                        isSelected ? 'bg-white/15 text-white' : 'bg-[var(--bg-page)] text-[var(--text-muted)] group-hover:bg-black/5 dark:hover:bg-white/5 group-hover:text-[var(--text-secondary)]'
                       }`}
                     >
                       <RoleIcon className="h-4 w-4" />
                     </div>
                     <span className="text-center font-bold leading-tight">{r}</span>
-                    <span className={`text-[10px] font-medium ${isSelected ? 'text-blue-100/90' : 'text-slate-400'}`}>
+                    <span className={`text-[10px] font-medium ${isSelected ? 'text-blue-100/90' : 'text-[var(--text-muted)]'}`}>
                       {desc}
                     </span>
                   </button>
@@ -2543,17 +2543,17 @@ export default function UserManagement() {
           </div>
 
           {/* Credential & Password Management Card */}
-          <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 via-white to-blue-50/20 p-4 shadow-sm space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/70 pb-3">
+          <div className="rounded-xl border border-[var(--border-color)] bg-gradient-to-br from-slate-50 via-white to-blue-50/20 p-4 shadow-sm space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-color)] pb-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <KeyRound className="h-4 w-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
                     Account Security & Credentials
                   </h4>
-                  <p className="text-[11px] text-slate-500">Configure password policy and account status</p>
+                  <p className="text-[11px] text-[var(--text-muted)]">Configure password policy and account status</p>
                 </div>
               </div>
 
@@ -2570,26 +2570,26 @@ export default function UserManagement() {
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               <Field label="Initial Password" error={formErrors.password}>
                 <div className="relative flex items-center">
-                  <Lock className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <Lock className="absolute left-3 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
                   <input
                     value={form.password}
                     disabled={form.autoGeneratePassword}
                     onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
                     placeholder={form.autoGeneratePassword ? 'Auto-generated secure password' : 'Enter account password'}
-                    className="w-full rounded-lg border border-slate-200 pl-9 pr-9 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 disabled:bg-slate-100 disabled:text-slate-700 font-mono font-medium transition-all"
+                    className="w-full rounded-lg border border-[var(--border-color)] pl-9 pr-9 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 disabled:bg-slate-100 disabled:text-slate-700 font-mono font-medium transition-all"
                   />
                   {form.password && (
                     <button
                       type="button"
                       onClick={() => navigator.clipboard.writeText(form.password)}
-                      className="absolute right-3 text-slate-400 hover:text-slate-700 transition-colors"
+                      className="absolute right-3 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                       title="Copy Password"
                     >
                       <Copy className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
-                <label className="inline-flex items-center gap-2 text-[11px] text-slate-600 mt-1.5 cursor-pointer font-medium">
+                <label className="inline-flex items-center gap-2 text-[11px] text-[var(--text-secondary)] mt-1.5 cursor-pointer font-medium">
                   <input
                     type="checkbox"
                     checked={form.autoGeneratePassword}
@@ -2600,7 +2600,7 @@ export default function UserManagement() {
                         password: event.target.checked ? generatePassword() : '',
                       }))
                     }
-                    className="rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                    className="rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580]"
                   />
                   Auto-generate password & send welcome notification
                 </label>
@@ -2619,7 +2619,7 @@ export default function UserManagement() {
                       };
                     })
                   }
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 shadow-sm transition-all"
+                  className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] shadow-sm transition-all"
                 >
                   {statuses.filter((status): status is Status => status !== 'All').map((status) => (
                     <option key={status} value={status}>{status}</option>
@@ -2631,7 +2631,7 @@ export default function UserManagement() {
                 <select
                   value={form.isVerified ? 'Verified' : 'Unverified'}
                   onChange={(event) => setForm((current) => ({ ...current, isVerified: event.target.value === 'Verified' }))}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 shadow-sm transition-all"
+                  className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] shadow-sm transition-all"
                 >
                   <option value="Verified">Verified (Record Confirmed)</option>
                   <option value="Unverified">Unverified (Pending Review)</option>
@@ -2643,12 +2643,12 @@ export default function UserManagement() {
           {/* Role-Specific Dynamic Form Fields */}
           {form.role === 'Alumni' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-2">
                   <GraduationCap className="h-4 w-4 text-[#003580]" />
                   Alumni Profile & Academic Parameters
                 </h4>
-                <span className="text-[11px] font-medium text-slate-400">9 Core Fields</span>
+                <span className="text-[11px] font-medium text-[var(--text-muted)]">9 Core Fields</span>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -2657,7 +2657,7 @@ export default function UserManagement() {
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Full Legal Name"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2666,7 +2666,7 @@ export default function UserManagement() {
                     value={form.email}
                     onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="Primary Email Address"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2675,7 +2675,7 @@ export default function UserManagement() {
                     value={form.phone}
                     onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="Phone Number (e.g. +251...)"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2684,7 +2684,7 @@ export default function UserManagement() {
                     value={form.studentId}
                     onChange={(e) => setForm((prev) => ({ ...prev, studentId: e.target.value }))}
                     placeholder="e.g. UGR/77777/25"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-mono font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-mono font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2693,7 +2693,7 @@ export default function UserManagement() {
                     value={form.nationality}
                     onChange={(e) => setForm((prev) => ({ ...prev, nationality: e.target.value }))}
                     placeholder="Nationality (Default: Ethiopian)"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2702,7 +2702,7 @@ export default function UserManagement() {
                     type="date"
                     value={form.dateOfBirth}
                     onChange={(e) => setForm((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2710,7 +2710,7 @@ export default function UserManagement() {
                   <select
                     value={form.department}
                     onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   >
                     <option value="">Select Academic Department</option>
                     {departmentList.map((dept) => (
@@ -2724,7 +2724,7 @@ export default function UserManagement() {
                     value={form.graduationYear}
                     onChange={(e) => setForm((prev) => ({ ...prev, graduationYear: e.target.value }))}
                     placeholder="e.g. 2024"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2733,7 +2733,7 @@ export default function UserManagement() {
                     value={form.cgpa}
                     onChange={(e) => setForm((prev) => ({ ...prev, cgpa: e.target.value }))}
                     placeholder="e.g. 3.75"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
               </div>
@@ -2742,7 +2742,7 @@ export default function UserManagement() {
 
           {form.role === 'Employer' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-amber-600" />
                   Corporate Partner & HR Access Details
@@ -2756,7 +2756,7 @@ export default function UserManagement() {
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="e.g. Safaricom Ethiopia"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2765,7 +2765,7 @@ export default function UserManagement() {
                     value={form.email}
                     onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="hr@company.com"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2773,7 +2773,7 @@ export default function UserManagement() {
                   <select
                     value={form.industry}
                     onChange={(e) => setForm((prev) => ({ ...prev, industry: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   >
                     <option value="Telecommunications">Telecommunications</option>
                     <option value="Software & Information Technology">Software & Information Technology</option>
@@ -2790,7 +2790,7 @@ export default function UserManagement() {
                     value={form.hrContact}
                     onChange={(e) => setForm((prev) => ({ ...prev, hrContact: e.target.value }))}
                     placeholder="Full Name of HR Representative"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2799,7 +2799,7 @@ export default function UserManagement() {
                     value={form.phone}
                     onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="+251 911 000 000"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2808,7 +2808,7 @@ export default function UserManagement() {
                     value={form.location}
                     onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
                     placeholder="e.g. Addis Ababa, Ethiopia"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
               </div>
@@ -2817,7 +2817,7 @@ export default function UserManagement() {
 
           {form.role === 'Registrar' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-emerald-600" />
                   Registrar Officer Profile & Division
@@ -2831,7 +2831,7 @@ export default function UserManagement() {
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Full Officer Name"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2840,7 +2840,7 @@ export default function UserManagement() {
                     value={form.email}
                     onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="officer@astu.edu.et"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2848,7 +2848,7 @@ export default function UserManagement() {
                   <select
                     value={form.department}
                     onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   >
                     <option value="Main Registrar Office">Main Registrar Office</option>
                     <option value="Student Records & Transcripts">Student Records & Transcripts</option>
@@ -2862,7 +2862,7 @@ export default function UserManagement() {
                     value={form.phone}
                     onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="+251 22 111 0000"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
               </div>
@@ -2871,12 +2871,12 @@ export default function UserManagement() {
 
           {form.role === 'Department Head' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                   <Users className="h-4 w-4 text-[#003580]" />
                   Academic Lead & Department Supervisor
                 </h4>
-                <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Department Admin</span>
+                <span className="text-[11px] font-medium text-[var(--text-secondary)] bg-[var(--bg-page)] px-2 py-0.5 rounded-full border border-[var(--border-color)]">Department Admin</span>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -2885,7 +2885,7 @@ export default function UserManagement() {
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Dr. / Prof. Full Name"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2894,7 +2894,7 @@ export default function UserManagement() {
                     value={form.email}
                     onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="depthead@astu.edu.et"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2902,7 +2902,7 @@ export default function UserManagement() {
                   <select
                     value={form.department}
                     onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   >
                     <option value="">Select Academic Department</option>
                     {departmentList.map((dept) => (
@@ -2916,7 +2916,7 @@ export default function UserManagement() {
                     value={form.phone}
                     onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="+251 911 000 000"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
               </div>
@@ -2925,7 +2925,7 @@ export default function UserManagement() {
 
           {form.role === 'CMS Manager' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-purple-800 flex items-center gap-2">
                   <Newspaper className="h-4 w-4 text-purple-600" />
                   CMS Content Manager & Media Publisher
@@ -2939,7 +2939,7 @@ export default function UserManagement() {
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Full Manager Name"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2948,7 +2948,7 @@ export default function UserManagement() {
                     value={form.email}
                     onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="cms@astu.edu.et"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -2956,7 +2956,7 @@ export default function UserManagement() {
                   <select
                     value={form.cmsScope}
                     onChange={(e) => setForm((prev) => ({ ...prev, cmsScope: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   >
                     <option value="All Content & News Banners">All Content & News Banners</option>
                     <option value="News & Official Announcements">News & Official Announcements</option>
@@ -2970,7 +2970,7 @@ export default function UserManagement() {
                     value={form.phone}
                     onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="+251 911 000 000"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
               </div>
@@ -2979,7 +2979,7 @@ export default function UserManagement() {
 
           {form.role === 'Admin' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-2">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-rose-800 flex items-center gap-2">
                   <Shield className="h-4 w-4 text-rose-600" />
                   System Administrator Privileges
@@ -2993,7 +2993,7 @@ export default function UserManagement() {
                     value={form.name}
                     onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                     placeholder="Admin Full Name"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -3002,7 +3002,7 @@ export default function UserManagement() {
                     value={form.email}
                     onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="admin@astu.edu.et"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
 
@@ -3010,7 +3010,7 @@ export default function UserManagement() {
                   <select
                     value={form.department}
                     onChange={(e) => setForm((prev) => ({ ...prev, department: e.target.value }))}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   >
                     <option value="Super Admin">Full Super Admin</option>
                     <option value="User & Role Admin">User & Role Administrator</option>
@@ -3023,7 +3023,7 @@ export default function UserManagement() {
                     value={form.phone}
                     onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="+251 911 000 000"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-slate-50/40 hover:bg-white focus:bg-white font-medium text-slate-800 transition-all shadow-sm"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/15 bg-[var(--bg-page)] hover:bg-[var(--bg-card)] focus:bg-[var(--bg-card)] font-medium text-[var(--text-primary)] transition-all shadow-sm"
                   />
                 </Field>
               </div>
@@ -3043,7 +3043,7 @@ export default function UserManagement() {
               <button
                 type="button"
                 onClick={() => setActiveUser(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] text-xs font-bold transition-all cursor-pointer"
               >
                 Close Profile
               </button>
@@ -3065,7 +3065,7 @@ export default function UserManagement() {
                 <button
                   type="button"
                   onClick={() => handleRowAction(activeUser, 'Reset Password')}
-                  className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-3.5 py-2 rounded-xl bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] border border-[var(--border-color)] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <KeyRound className="h-3.5 w-3.5 text-indigo-600" />
                   <span>Reset Password</span>
@@ -3103,7 +3103,7 @@ export default function UserManagement() {
         >
           <div className="space-y-5">
             {/* Top User Header Card */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-[#001F4D]/5 via-indigo-50/40 to-sky-50/30 border border-slate-200/80 flex items-center justify-between flex-wrap gap-4 shadow-2xs">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-[#001F4D]/5 via-indigo-50/40 to-sky-50/30 border border-[var(--border-color)] flex items-center justify-between flex-wrap gap-4 shadow-2xs">
               <div className="flex items-center gap-3.5">
                 {(() => {
                   const avatar = getUserAvatarUrl(activeUser);
@@ -3127,12 +3127,12 @@ export default function UserManagement() {
                 })()}
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-base font-extrabold text-slate-900">{activeUser.name}</h4>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">
+                    <h4 className="text-base font-extrabold text-[var(--text-primary)]">{activeUser.name}</h4>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-[var(--bg-page)] text-[var(--text-secondary)] px-2 py-0.5 rounded-md border border-[var(--border-color)]">
                       ID: {activeUser.id}
                     </span>
                   </div>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">{activeUser.email}</p>
+                  <p className="text-xs font-medium text-[var(--text-muted)] mt-0.5">{activeUser.email}</p>
                 </div>
               </div>
 
@@ -3147,7 +3147,7 @@ export default function UserManagement() {
             </div>
 
             {/* Profile Navigation Tabs (Category Pills) */}
-            <div className="flex items-center gap-2 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200/80 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-2 p-1.5 bg-[var(--bg-page)] rounded-2xl border border-[var(--border-color)] overflow-x-auto scrollbar-none">
               {activeUser.role === 'Alumni' && [
                 { id: 'academic', label: 'Academic', icon: GraduationCap },
                 { id: 'personal', label: 'Personal', icon: User },
@@ -3172,11 +3172,11 @@ export default function UserManagement() {
                     onClick={() => setActiveDetailTab(t.id)}
                     className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
                       isActive
-                        ? 'bg-white text-[#001F4D] shadow-sm ring-1 ring-slate-200'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        ? 'bg-[var(--bg-card)] text-[#001F4D] shadow-sm ring-1 ring-[var(--border-color)]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
                     }`}
                   >
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-600' : 'text-[var(--text-muted)]'}`} />
                     <span>{t.label}</span>
                   </button>
                 );
@@ -3197,11 +3197,11 @@ export default function UserManagement() {
                     onClick={() => setActiveDetailTab(t.id)}
                     className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
                       isActive
-                        ? 'bg-white text-[#001F4D] shadow-sm ring-1 ring-slate-200'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        ? 'bg-[var(--bg-card)] text-[#001F4D] shadow-sm ring-1 ring-[var(--border-color)]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
                     }`}
                   >
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-amber-600' : 'text-slate-400'}`} />
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-amber-600' : 'text-[var(--text-muted)]'}`} />
                     <span>{t.label}</span>
                   </button>
                 );
@@ -3221,11 +3221,11 @@ export default function UserManagement() {
                     onClick={() => setActiveDetailTab(t.id)}
                     className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
                       isActive
-                        ? 'bg-white text-[#001F4D] shadow-sm ring-1 ring-slate-200'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        ? 'bg-[var(--bg-card)] text-[#001F4D] shadow-sm ring-1 ring-[var(--border-color)]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
                     }`}
                   >
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-indigo-600' : 'text-[var(--text-muted)]'}`} />
                     <span>{t.label}</span>
                   </button>
                 );
@@ -3233,12 +3233,12 @@ export default function UserManagement() {
             </div>
 
             {/* Tab Pane Contents */}
-            <div className="bg-slate-50/60 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+            <div className="bg-[var(--bg-page)] border border-[var(--border-color)] rounded-2xl p-5 space-y-4">
               {/* --- ALUMNI TABS --- */}
               {activeUser.role === 'Alumni' && (activeDetailTab === 'academic' || activeDetailTab === 'overview') && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <GraduationCap className="h-4 w-4 text-indigo-600" />
                       Academic Qualifications & Records
                     </h5>
@@ -3248,43 +3248,43 @@ export default function UserManagement() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Student ID Code</span>
-                      <p className="text-xs font-extrabold text-slate-900">{activeUser.studentId || 'Not Recorded'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Student ID Code</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.studentId || 'Not Recorded'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Academic Division / Dept</span>
-                      <p className="text-xs font-extrabold text-slate-900">{activeUser.department || 'Not Specified'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Academic Division / Dept</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.department || 'Not Specified'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Graduation Batch Year</span>
-                      <p className="text-xs font-extrabold text-slate-900">{activeUser.batch || activeUser.graduationYear || 'Not Recorded'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Graduation Batch Year</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.batch || activeUser.graduationYear || 'Not Recorded'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Degree Distinction</span>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Degree Distinction</span>
                       <p className="text-xs font-extrabold text-indigo-700">
                         {activeUser.degreeDistinction || (activeUser.cgpa ? (Number(activeUser.cgpa) >= 3.75 ? 'B.Sc. First Class Distinction' : Number(activeUser.cgpa) >= 3.4 ? 'B.Sc. Very Great Distinction' : 'B.Sc. Degree') : 'Degree Program')}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Cumulative GPA (CGPA)</span>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Cumulative GPA (CGPA)</span>
                       <p className="text-xs font-extrabold text-emerald-700">
                         {activeUser.cgpa ? `${Number(activeUser.cgpa).toFixed(2)} / 4.00` : 'Not Recorded'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Academic Advisor</span>
-                      <p className="text-xs font-bold text-slate-900">{activeUser.advisor || 'Not Assigned'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Academic Advisor</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.advisor || 'Not Assigned'}</p>
                     </div>
 
-                    <div className="lg:col-span-3 p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">B.Sc. Senior Capstone / Thesis Title</span>
-                      <p className="text-xs font-bold text-slate-800">
+                    <div className="lg:col-span-3 p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">B.Sc. Senior Capstone / Thesis Title</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.thesisTitle ? `"${activeUser.thesisTitle}"` : 'Not Registered'}
                       </p>
                     </div>
@@ -3294,58 +3294,58 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'personal' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <User className="h-4 w-4 text-blue-600" />
                       Personal Bio & Contact Information
                     </h5>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Full Legal Name</span>
-                      <p className="text-xs font-extrabold text-slate-900">{activeUser.name}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Full Legal Name</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.name}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Primary Email Address</span>
-                      <p className="text-xs font-extrabold text-slate-900">{activeUser.email}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Primary Email Address</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.email}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Contact Phone Number</span>
-                      <p className="text-xs font-extrabold text-slate-900">{activeUser.phone || 'Not Provided'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Contact Phone Number</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.phone || 'Not Provided'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Date of Birth</span>
-                      <p className="text-xs font-bold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Date of Birth</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.dateOfBirth ? format(new Date(activeUser.dateOfBirth), 'MMM dd, yyyy') : 'Not Recorded'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Gender & Nationality</span>
-                      <p className="text-xs font-bold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Gender & Nationality</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.gender || 'Not Specified'} • {activeUser.nationality || 'Not Recorded'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Current Residence City</span>
-                      <p className="text-xs font-bold text-slate-900">{activeUser.address || activeUser.workLocation || 'Not Recorded'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Current Residence City</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.address || activeUser.workLocation || 'Not Recorded'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">National ID / Passport</span>
-                      <p className="text-xs font-bold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">National ID / Passport</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.nationalId || 'Not Recorded'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Emergency Contact</span>
-                      <p className="text-xs font-bold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Emergency Contact</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.emergencyContact || 'Not Listed'}
                       </p>
                     </div>
@@ -3355,8 +3355,8 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'employment' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-amber-600" />
                       Professional Employment & Career Profile
                     </h5>
@@ -3366,39 +3366,39 @@ export default function UserManagement() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Current Organization / Company</span>
-                      <p className="text-xs font-extrabold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Current Organization / Company</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">
                         {activeUser.employerName || activeUser.companyName || (activeUser.employmentStatus === 'UNEMPLOYED' ? 'Seeking Placement' : 'Not Listed')}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Official Job Title</span>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Official Job Title</span>
                       <p className="text-xs font-extrabold text-indigo-700">
                         {activeUser.jobTitle || activeUser.position || (activeUser.employmentStatus === 'UNEMPLOYED' ? 'Candidate' : 'Not Listed')}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Industry Sector</span>
-                      <p className="text-xs font-bold text-slate-900">{activeUser.industry || 'Not Specified'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Industry Sector</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.industry || 'Not Specified'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Professional Experience</span>
-                      <p className="text-xs font-bold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Professional Experience</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.experienceYears ? `${activeUser.experienceYears} Years` : 'No Experience Listed'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Work Location</span>
-                      <p className="text-xs font-bold text-slate-900">{activeUser.workLocation || activeUser.location || 'Not Specified'}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Work Location</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.workLocation || activeUser.location || 'Not Specified'}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Estimated Salary Bracket</span>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Estimated Salary Bracket</span>
                       <p className="text-xs font-bold text-emerald-700">{activeUser.salaryRange || 'Not Disclosed'}</p>
                     </div>
                   </div>
@@ -3407,8 +3407,8 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'social' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Link className="h-4 w-4 text-blue-600" />
                       Social Links & Digital Footprint
                     </h5>
@@ -3417,43 +3417,43 @@ export default function UserManagement() {
                   {activeUser.linkedIn || activeUser.gitHub || activeUser.portfolio || activeUser.telegram || activeUser.twitterUrl ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                       {activeUser.linkedIn && (
-                        <a href={activeUser.linkedIn} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs hover:border-blue-300 block">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">LinkedIn Profile</span>
+                        <a href={activeUser.linkedIn} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs hover:border-blue-300 block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">LinkedIn Profile</span>
                           <p className="text-xs font-extrabold text-blue-600 truncate">{activeUser.linkedIn}</p>
                         </a>
                       )}
                       {activeUser.gitHub && (
-                        <a href={activeUser.gitHub} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs hover:border-slate-400 block">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">GitHub Handle / Profile</span>
-                          <p className="text-xs font-extrabold text-slate-900 truncate">{activeUser.gitHub}</p>
+                        <a href={activeUser.gitHub} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs hover:border-slate-400 block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">GitHub Handle / Profile</span>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)] truncate">{activeUser.gitHub}</p>
                         </a>
                       )}
                       {activeUser.portfolio && (
-                        <a href={activeUser.portfolio} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs hover:border-purple-300 block">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Portfolio Website</span>
+                        <a href={activeUser.portfolio} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs hover:border-purple-300 block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Portfolio Website</span>
                           <p className="text-xs font-extrabold text-purple-600 truncate">{activeUser.portfolio}</p>
                         </a>
                       )}
                       {activeUser.telegram && (
-                        <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Telegram Username</span>
+                        <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Telegram Username</span>
                           <p className="text-xs font-extrabold text-sky-600">{activeUser.telegram}</p>
                         </div>
                       )}
                       {activeUser.twitterUrl && (
-                        <a href={activeUser.twitterUrl} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs hover:border-sky-300 block">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">X / Twitter Handle</span>
+                        <a href={activeUser.twitterUrl} target="_blank" rel="noreferrer" className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs hover:border-sky-300 block">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">X / Twitter Handle</span>
                           <p className="text-xs font-extrabold text-sky-600 truncate">{activeUser.twitterUrl}</p>
                         </a>
                       )}
                     </div>
                   ) : (
-                    <div className="p-8 rounded-2xl bg-white border border-slate-200/70 text-center space-y-2">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <div className="p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-center space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)] flex items-center justify-center mx-auto">
                         <Link className="h-6 w-6" />
                       </div>
-                      <h6 className="text-xs font-extrabold text-slate-700">No Social Profile Links in Database</h6>
-                      <p className="text-[11px] font-medium text-slate-400 max-w-sm mx-auto">
+                      <h6 className="text-xs font-extrabold text-[var(--text-secondary)]">No Social Profile Links in Database</h6>
+                      <p className="text-[11px] font-medium text-[var(--text-muted)] max-w-sm mx-auto">
                         No external social profile URLs (LinkedIn, GitHub, Portfolio, Telegram, or Twitter) have been provided by this alumnus.
                       </p>
                     </div>
@@ -3463,16 +3463,16 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'skills' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-purple-600" />
                       Core Technical Skills & Competencies
                     </h5>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-2">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Core Technical Competencies</span>
+                    <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-2">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Core Technical Competencies</span>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {activeUser.skills && activeUser.skills.length > 0 ? (
                           activeUser.skills.map((s) => (
@@ -3481,14 +3481,14 @@ export default function UserManagement() {
                             </span>
                           ))
                         ) : (
-                          <span className="text-xs font-medium text-slate-400 italic">No Skills Registered in Database</span>
+                          <span className="text-xs font-medium text-[var(--text-muted)] italic">No Skills Registered in Database</span>
                         )}
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Languages Spoken</span>
-                      <p className="text-xs font-bold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Languages Spoken</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         {activeUser.languages && activeUser.languages.length > 0
                           ? activeUser.languages.join(' • ')
                           : 'Not Specified'}
@@ -3500,8 +3500,8 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'certifications' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Award className="h-4 w-4 text-emerald-600" />
                       Professional Certifications & Credentials
                     </h5>
@@ -3514,20 +3514,20 @@ export default function UserManagement() {
                         const certIssuer = typeof c === 'string' ? 'Verified Issuer' : c.issuer || 'Certified Professional';
                         const certYear = typeof c === 'string' ? '' : c.year;
                         return (
-                          <div key={idx} className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{certIssuer} {certYear ? `• ${certYear}` : ''}</span>
-                            <p className="text-xs font-extrabold text-slate-900">{certName}</p>
+                          <div key={idx} className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">{certIssuer} {certYear ? `• ${certYear}` : ''}</span>
+                            <p className="text-xs font-extrabold text-[var(--text-primary)]">{certName}</p>
                           </div>
                         );
                       })}
                     </div>
                   ) : (
-                    <div className="p-8 rounded-2xl bg-white border border-slate-200/70 text-center space-y-2">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <div className="p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-center space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)] flex items-center justify-center mx-auto">
                         <Award className="h-6 w-6" />
                       </div>
-                      <h6 className="text-xs font-extrabold text-slate-700">No Certifications Registered in Database</h6>
-                      <p className="text-[11px] font-medium text-slate-400 max-w-sm mx-auto">
+                      <h6 className="text-xs font-extrabold text-[var(--text-secondary)]">No Certifications Registered in Database</h6>
+                      <p className="text-[11px] font-medium text-[var(--text-muted)] max-w-sm mx-auto">
                         No professional certifications or technical credentials have been logged for this profile in the database.
                       </p>
                     </div>
@@ -3537,8 +3537,8 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'projects' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Code className="h-4 w-4 text-indigo-600" />
                       Engineering & Research Projects
                     </h5>
@@ -3547,9 +3547,9 @@ export default function UserManagement() {
                   {activeUser.projects && activeUser.projects.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {activeUser.projects.map((p: any, idx: number) => (
-                        <div key={idx} className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-2 shadow-2xs">
-                          <h6 className="text-xs font-extrabold text-slate-900">{p.title || p.name || 'Unnamed Project'}</h6>
-                          <p className="text-[11px] font-medium text-slate-600">{p.description || 'No project description provided.'}</p>
+                        <div key={idx} className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-2 shadow-2xs">
+                          <h6 className="text-xs font-extrabold text-[var(--text-primary)]">{p.title || p.name || 'Unnamed Project'}</h6>
+                          <p className="text-[11px] font-medium text-[var(--text-secondary)]">{p.description || 'No project description provided.'}</p>
                           {p.link && (
                             <a href={p.link} target="_blank" rel="noreferrer" className="text-[10px] font-extrabold text-indigo-600 hover:underline block truncate">
                               {p.link}
@@ -3559,12 +3559,12 @@ export default function UserManagement() {
                       ))}
                     </div>
                   ) : (
-                    <div className="p-8 rounded-2xl bg-white border border-slate-200/70 text-center space-y-2">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <div className="p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-center space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)] flex items-center justify-center mx-auto">
                         <Code className="h-6 w-6" />
                       </div>
-                      <h6 className="text-xs font-extrabold text-slate-700">No Projects Registered in Database</h6>
-                      <p className="text-[11px] font-medium text-slate-400 max-w-sm mx-auto">
+                      <h6 className="text-xs font-extrabold text-[var(--text-secondary)]">No Projects Registered in Database</h6>
+                      <p className="text-[11px] font-medium text-[var(--text-muted)] max-w-sm mx-auto">
                         No capstone projects, software repositories, or engineering research projects are registered in the database for this user.
                       </p>
                     </div>
@@ -3574,8 +3574,8 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'achievements' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-amber-600" />
                       Honors & Academic Achievements
                     </h5>
@@ -3584,20 +3584,20 @@ export default function UserManagement() {
                   {activeUser.achievements && activeUser.achievements.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {activeUser.achievements.map((a: any, idx: number) => (
-                        <div key={idx} className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-1.5 shadow-2xs">
+                        <div key={idx} className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1.5 shadow-2xs">
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600">{a.issuer || 'Academic Honor'}</span>
-                          <h6 className="text-xs font-extrabold text-slate-900">{a.title || a.name || 'Honors Award'}</h6>
-                          <p className="text-[11px] font-medium text-slate-600">{a.description || 'Recognized achievement.'}</p>
+                          <h6 className="text-xs font-extrabold text-[var(--text-primary)]">{a.title || a.name || 'Honors Award'}</h6>
+                          <p className="text-[11px] font-medium text-[var(--text-secondary)]">{a.description || 'Recognized achievement.'}</p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="p-8 rounded-2xl bg-white border border-slate-200/70 text-center space-y-2">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <div className="p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-center space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)] flex items-center justify-center mx-auto">
                         <Sparkles className="h-6 w-6" />
                       </div>
-                      <h6 className="text-xs font-extrabold text-slate-700">No Achievements or Honors Registered in Database</h6>
-                      <p className="text-[11px] font-medium text-slate-400 max-w-sm mx-auto">
+                      <h6 className="text-xs font-extrabold text-[var(--text-secondary)]">No Achievements or Honors Registered in Database</h6>
+                      <p className="text-[11px] font-medium text-[var(--text-muted)] max-w-sm mx-auto">
                         No institutional honors, Dean's list distinctions, or competition awards have been entered for this user account.
                       </p>
                     </div>
@@ -3669,8 +3669,8 @@ export default function UserManagement() {
 
                 return (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-emerald-600" />
                         Verified Academic Files & Clearances
                       </h5>
@@ -3679,14 +3679,14 @@ export default function UserManagement() {
                     {userRealFiles.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                         {userRealFiles.map((file, idx) => (
-                          <div key={idx} className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                          <div key={idx} className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                             <div className="flex items-center gap-3">
                               <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${file.type === 'PDF' ? 'bg-rose-50 text-rose-600' : 'bg-purple-50 text-purple-600'}`}>
                                 {file.type}
                               </div>
                               <div>
-                                <p className="text-xs font-bold text-slate-900">{file.name}</p>
-                                <p className="text-[11px] text-slate-500">{file.sub}</p>
+                                <p className="text-xs font-bold text-[var(--text-primary)]">{file.name}</p>
+                                <p className="text-[11px] text-[var(--text-muted)]">{file.sub}</p>
                               </div>
                             </div>
                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${file.badgeClass}`}>
@@ -3696,12 +3696,12 @@ export default function UserManagement() {
                         ))}
                       </div>
                     ) : (
-                      <div className="p-8 rounded-2xl bg-white border border-slate-200/70 text-center space-y-2">
-                        <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                      <div className="p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-center space-y-2">
+                        <div className="w-12 h-12 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)] flex items-center justify-center mx-auto">
                           <BookOpen className="h-6 w-6" />
                         </div>
-                        <h6 className="text-xs font-extrabold text-slate-700">No Academic Files or Clearances in Database</h6>
-                        <p className="text-[11px] font-medium text-slate-400 max-w-sm mx-auto">
+                        <h6 className="text-xs font-extrabold text-[var(--text-secondary)]">No Academic Files or Clearances in Database</h6>
+                        <p className="text-[11px] font-medium text-[var(--text-muted)] max-w-sm mx-auto">
                           No document files, degree certificates, transcripts, or clearance requests have been uploaded to the database for this user account.
                         </p>
                       </div>
@@ -3721,68 +3721,68 @@ export default function UserManagement() {
 
                 return (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                         <Bell className="h-4 w-4 text-indigo-600" />
                         Alumni Notification & Communication Settings
                       </h5>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Job & Career Alerts</p>
-                          <p className="text-[11px] text-slate-500">Automated job openings matching profile</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Job & Career Alerts</p>
+                          <p className="text-[11px] text-[var(--text-muted)]">Automated job openings matching profile</p>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${isJobsEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           {isJobsEnabled ? 'ENABLED' : 'DISABLED'}
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Campus Event Announcements</p>
-                          <p className="text-[11px] text-slate-500">ASTU alumni reunions and webinars</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Campus Event Announcements</p>
+                          <p className="text-[11px] text-[var(--text-muted)]">ASTU alumni reunions and webinars</p>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${isEventsEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           {isEventsEnabled ? 'ENABLED' : 'DISABLED'}
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Direct Networking & Mentorship</p>
-                          <p className="text-[11px] text-slate-500">Messages & requests from alumni & mentors</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Direct Networking & Mentorship</p>
+                          <p className="text-[11px] text-[var(--text-muted)]">Messages & requests from alumni & mentors</p>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${isMentorshipEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           {isMentorshipEnabled ? 'ENABLED' : 'DISABLED'}
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">ASTU Alumni Newsletter</p>
-                          <p className="text-[11px] text-slate-500">Monthly stories and campus highlights</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">ASTU Alumni Newsletter</p>
+                          <p className="text-[11px] text-[var(--text-muted)]">Monthly stories and campus highlights</p>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${isNewsletterEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           {isNewsletterEnabled ? 'ENABLED' : 'DISABLED'}
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">SMS Critical Notifications</p>
-                          <p className="text-[11px] text-slate-500">Urgent document and clearance SMS alerts</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">SMS Critical Notifications</p>
+                          <p className="text-[11px] text-[var(--text-muted)]">Urgent document and clearance SMS alerts</p>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${isSmsEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
                           {isSmsEnabled ? 'ENABLED' : 'DISABLED'}
                         </span>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Email Digest Frequency</p>
-                          <p className="text-[11px] text-slate-500">Scheduled notification summaries</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Email Digest Frequency</p>
+                          <p className="text-[11px] text-[var(--text-muted)]">Scheduled notification summaries</p>
                         </div>
                         <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border bg-indigo-50 text-indigo-700 border-indigo-200">
                           {digestFreq}
@@ -3801,54 +3801,54 @@ export default function UserManagement() {
 
                 return (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                         <Shield className="h-4 w-4 text-emerald-600" />
                         Privacy Controls & Public Profile Visibility
                       </h5>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Cumulative GPA Privacy</span>
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Cumulative GPA Privacy</span>
                         <div className="flex items-center justify-between pt-1">
-                          <p className="text-xs font-extrabold text-slate-900">
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">
                             {isCgpaPublic ? 'Public to Employers & Partners' : 'Private (Hidden from Employers)'}
                           </p>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isCgpaPublic ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isCgpaPublic ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]'}`}>
                             {isCgpaPublic ? 'PUBLIC' : 'PRIVATE'}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Directory Searchability</span>
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Directory Searchability</span>
                         <div className="flex items-center justify-between pt-1">
-                          <p className="text-xs font-extrabold text-slate-900">
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">
                             {isDirectoryVisible ? 'Visible in Alumni Directory' : 'Hidden from Directory Search'}
                           </p>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isDirectoryVisible ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isDirectoryVisible ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]'}`}>
                             {isDirectoryVisible ? 'INDEXED' : 'HIDDEN'}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Employer Profile Visibility</span>
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Employer Profile Visibility</span>
                         <div className="flex items-center justify-between pt-1">
-                          <p className="text-xs font-extrabold text-slate-900">
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">
                             {isEmployerVisible ? 'Visible to Corporate Recruiters' : 'Hidden from Employers'}
                           </p>
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isEmployerVisible ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isEmployerVisible ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]'}`}>
                             {isEmployerVisible ? 'VISIBLE' : 'RESTRICTED'}
                           </span>
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tracer Response Privacy</span>
+                      <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Tracer Response Privacy</span>
                         <div className="flex items-center justify-between pt-1">
-                          <p className="text-xs font-extrabold text-slate-900">
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">
                             {isAnonymousTracer ? 'Anonymous Responses Enabled' : 'Standard Verified Responses'}
                           </p>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isAnonymousTracer ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
@@ -3869,40 +3869,40 @@ export default function UserManagement() {
 
                 return (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                      <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                         <SlidersHorizontal className="h-4 w-4 text-purple-600" />
                         System Preferences & User Configurations
                       </h5>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Interface Language</span>
-                        <p className="text-xs font-extrabold text-slate-900">{langDisplay}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Interface Language</span>
+                        <p className="text-xs font-extrabold text-[var(--text-primary)]">{langDisplay}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Visual Display Theme</span>
-                        <p className="text-xs font-extrabold text-slate-900 capitalize">{themeDisplay}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Visual Display Theme</span>
+                        <p className="text-xs font-extrabold text-[var(--text-primary)] capitalize">{themeDisplay}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Mentorship Availability</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Mentorship Availability</span>
                         <p className="text-xs font-extrabold text-indigo-700">
                           {prefs.openToMentorship ? 'Available as Alumni Mentor' : 'Not Currently Mentoring'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Career Placement Intent</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Career Placement Intent</span>
                         <p className="text-xs font-extrabold text-emerald-700">
                           {activeUser.employmentStatus === 'UNEMPLOYED' || prefs.seekingJob ? 'Actively Seeking Placement' : 'Employed / Neutral'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Alumni Giving Prompts</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Alumni Giving Prompts</span>
                         <p className="text-xs font-extrabold text-purple-700">
                           {isGivingEnabled ? 'Active Giving Prompts' : 'Giving Prompts Paused'}
                         </p>
@@ -3914,41 +3914,41 @@ export default function UserManagement() {
 
               {activeUser.role === 'Alumni' && activeDetailTab === 'security' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Lock className="h-4 w-4 text-rose-600" />
                       Account Security, 2FA & Authentication Audit
                     </h5>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Database Verification Status</span>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Database Verification Status</span>
                       <p className="text-xs font-extrabold text-emerald-700">
                         {activeUser.isVerified ? 'VERIFIED (Registrar Match)' : 'PENDING VERIFICATION'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Two-Factor Authentication (2FA)</span>
-                      <p className="text-xs font-extrabold text-slate-900">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Two-Factor Authentication (2FA)</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">
                         {activeUser.twoFactorEnabled ? '2FA Active (App OTP)' : '2FA Disabled (Password Only)'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Password Encryption</span>
-                      <p className="text-xs font-extrabold text-slate-900">Secure Hash (Argon2id/Bcrypt)</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Password Encryption</span>
+                      <p className="text-xs font-extrabold text-[var(--text-primary)]">Secure Hash (Argon2id/Bcrypt)</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Last System Authentication</span>
-                      <p className="text-xs font-bold text-slate-900">{activeUser.lastLogin}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Last System Authentication</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.lastLogin}</p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Creation Timestamp</span>
-                      <p className="text-xs font-bold text-slate-900">{activeUser.registeredAt}</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Creation Timestamp</span>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.registeredAt}</p>
                     </div>
                   </div>
                 </div>
@@ -3958,8 +3958,8 @@ export default function UserManagement() {
               {/* Tab 1: Company Overview */}
               {activeUser.role === 'Employer' && (activeDetailTab === 'company' || activeDetailTab === 'academic' || activeDetailTab === 'overview') && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-amber-600" />
                       Company Overview & Profile Details
                     </h5>
@@ -3979,7 +3979,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4003,31 +4003,31 @@ export default function UserManagement() {
                   {editingTab === 'company' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-amber-50/40 p-4 rounded-xl border border-amber-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Organization / Company Name</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Organization / Company Name</label>
                         <input
                           type="text"
                           value={inlineForm.companyName}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, companyName: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Industry Sector</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Industry Sector</label>
                         <input
                           type="text"
                           value={inlineForm.industry}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, industry: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Company Size</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Company Size</label>
                         <select
                           value={inlineForm.companySize}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, companySize: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                         >
                           <option value="Startup (1-10)">Startup (1-10)</option>
                           <option value="Small (10-50)">Small (10-50)</option>
@@ -4037,31 +4037,31 @@ export default function UserManagement() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Headquarters / Location</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Headquarters / Location</label>
                         <input
                           type="text"
                           value={inlineForm.location}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, location: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Company Website</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Company Website</label>
                         <input
                           type="text"
                           value={inlineForm.website}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, website: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Account Partnership Level</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Partnership Level</label>
                         <select
                           value={inlineForm.partnershipAgreement}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, partnershipAgreement: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                         >
                           <option value="Tier 1 Strategic Partnership Agreement">Tier 1 Strategic Partnership Agreement</option>
                           <option value="ASTU Strategic Partnership Agreement">ASTU Strategic Partnership Agreement</option>
@@ -4071,39 +4071,39 @@ export default function UserManagement() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Organization / Company Name</span>
-                        <p className="text-xs font-extrabold text-slate-900">{activeUser.companyName || activeUser.name}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Organization / Company Name</span>
+                        <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.companyName || activeUser.name}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Industry Sector</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.industry || 'Technology & Innovation'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Industry Sector</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.industry || 'Technology & Innovation'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Company Size</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.companySize || 'Enterprise'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Company Size</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.companySize || 'Enterprise'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Headquarters / Location</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.location || activeUser.address || 'Not Specified'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Headquarters / Location</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.location || activeUser.address || 'Not Specified'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Company Website</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Company Website</span>
                         {activeUser.website ? (
                           <a href={activeUser.website.startsWith('http') ? activeUser.website : `https://${activeUser.website}`} target="_blank" rel="noreferrer" className="text-xs font-bold text-indigo-600 hover:underline block truncate">
                             {activeUser.website}
                           </a>
                         ) : (
-                          <p className="text-xs font-bold text-slate-400">Not Listed</p>
+                          <p className="text-xs font-bold text-[var(--text-muted)]">Not Listed</p>
                         )}
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Partnership Level</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Partnership Level</span>
                         <p className="text-xs font-extrabold text-emerald-700">
                           {activeUser.partnershipAgreement || (activeUser.isPremium ? 'Premium Employer Partner' : 'Registered Employer Partner')}
                         </p>
@@ -4116,8 +4116,8 @@ export default function UserManagement() {
               {/* Tab 2: HR Contact */}
               {activeUser.role === 'Employer' && activeDetailTab === 'hr' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <User className="h-4 w-4 text-blue-600" />
                       Human Resources & Contact Information
                     </h5>
@@ -4137,7 +4137,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4158,41 +4158,41 @@ export default function UserManagement() {
                   {editingTab === 'hr' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-blue-50/40 p-4 rounded-xl border border-blue-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Primary HR Contact Person</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Primary HR Contact Person</label>
                         <input
                           type="text"
                           value={inlineForm.contactPerson}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, contactPerson: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Official HR Email</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Official HR Email</label>
                         <input
                           type="email"
                           value={inlineForm.contactEmail}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, contactEmail: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">HR Contact Phone</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">HR Contact Phone</label>
                         <input
                           type="text"
                           value={inlineForm.phone}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Verification Status</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Verification Status</label>
                         <select
                           value={inlineForm.verificationStatus}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, verificationStatus: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                           <option value="Active">VERIFIED_PARTNER (Active)</option>
                           <option value="Pending Verification">PENDING_VERIFICATION</option>
@@ -4202,34 +4202,34 @@ export default function UserManagement() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Primary HR Contact Person</span>
-                        <p className="text-xs font-extrabold text-slate-900">{activeUser.contactPerson || activeUser.hrContact || activeUser.name}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Primary HR Contact Person</span>
+                        <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.contactPerson || activeUser.hrContact || activeUser.name}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Official HR Email</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Official HR Email</span>
                         <p className="text-xs font-bold text-indigo-700">{activeUser.contactEmail || activeUser.email}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">HR Contact Phone</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.phone || activeUser.hrContact || 'Not Provided'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">HR Contact Phone</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.phone || activeUser.hrContact || 'Not Provided'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Designated Role</span>
-                        <p className="text-xs font-bold text-slate-900">Talent Acquisition & University Liaison</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Designated Role</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">Talent Acquisition & University Liaison</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Direct Messaging Status</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Direct Messaging Status</span>
                         <p className="text-xs font-bold text-emerald-700">Active & Enabled</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Authorization</span>
-                        <p className="text-xs font-bold text-slate-900">Verified Representative</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Authorization</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">Verified Representative</p>
                       </div>
                     </div>
                   )}
@@ -4239,8 +4239,8 @@ export default function UserManagement() {
               {/* Tab 3: Recruitment Activity */}
               {activeUser.role === 'Employer' && activeDetailTab === 'recruitment' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-indigo-600" />
                       ASTU Campus Recruitment & Job Postings Activity
                     </h5>
@@ -4260,7 +4260,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4284,20 +4284,20 @@ export default function UserManagement() {
                   {editingTab === 'recruitment' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-indigo-50/40 p-4 rounded-xl border border-indigo-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Industry / Recruitment Scope</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Industry / Recruitment Scope</label>
                         <input
                           type="text"
                           value={inlineForm.industry}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, industry: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Recruitment Status</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Recruitment Status</label>
                         <select
                           value={inlineForm.verificationStatus}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, verificationStatus: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         >
                           <option value="Active">Active Campus Hiring Authorized</option>
                           <option value="Pending Verification">Pending Hiring Authorization</option>
@@ -4307,16 +4307,16 @@ export default function UserManagement() {
                   ) : (
                     <>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                        <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Postings Created</span>
-                          <p className="text-sm font-extrabold text-slate-900">{activeUser.jobPosts?.length || 0} Jobs</p>
+                        <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Postings Created</span>
+                          <p className="text-sm font-extrabold text-[var(--text-primary)]">{activeUser.jobPosts?.length || 0} Jobs</p>
                         </div>
-                        <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Active Open Positions</span>
+                        <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Active Open Positions</span>
                           <p className="text-sm font-extrabold text-emerald-700">{activeUser.activeJobsCount !== undefined ? activeUser.activeJobsCount : (activeUser.jobPosts?.filter(j => j.status === 'ACTIVE' || j.status === 'PUBLISHED' || j.status === 'Open').length || 0)} Active</p>
                         </div>
-                        <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Student Applications</span>
+                        <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Total Student Applications</span>
                           <p className="text-sm font-extrabold text-indigo-700">{activeUser.totalApplicationsCount || 0} Applications</p>
                         </div>
                       </div>
@@ -4324,16 +4324,16 @@ export default function UserManagement() {
                       {activeUser.jobPosts && activeUser.jobPosts.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                           {activeUser.jobPosts.map((job) => (
-                            <div key={job.id} className="p-4 rounded-xl bg-white border border-slate-200/70 flex items-center justify-between shadow-2xs">
+                            <div key={job.id} className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-2xs">
                               <div className="space-y-1">
-                                <h6 className="text-xs font-extrabold text-slate-900">{job.title}</h6>
-                                <p className="text-[11px] font-medium text-slate-500">{job.type || 'Full-time'} • {job.location || 'Adama / Remote'}</p>
+                                <h6 className="text-xs font-extrabold text-[var(--text-primary)]">{job.title}</h6>
+                                <p className="text-[11px] font-medium text-[var(--text-muted)]">{job.type || 'Full-time'} • {job.location || 'Adama / Remote'}</p>
                                 {job.createdAt && (
-                                  <p className="text-[10px] font-semibold text-slate-400">Posted on {format(new Date(job.createdAt), 'MMM dd, yyyy')}</p>
+                                  <p className="text-[10px] font-semibold text-[var(--text-muted)]">Posted on {format(new Date(job.createdAt), 'MMM dd, yyyy')}</p>
                                 )}
                               </div>
                               <div className="text-right space-y-1">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${job.status === 'ACTIVE' || job.status === 'PUBLISHED' || job.status === 'Open' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${job.status === 'ACTIVE' || job.status === 'PUBLISHED' || job.status === 'Open' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]'}`}>
                                   {job.status || 'ACTIVE'}
                                 </span>
                                 <p className="text-[10px] font-extrabold text-indigo-600">{job.applicantCount || 0} Applicants</p>
@@ -4342,12 +4342,12 @@ export default function UserManagement() {
                           ))}
                         </div>
                       ) : (
-                        <div className="p-8 rounded-2xl bg-white border border-slate-200/70 text-center space-y-2">
-                          <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                        <div className="p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-center space-y-2">
+                          <div className="w-12 h-12 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)] flex items-center justify-center mx-auto">
                             <Sparkles className="h-6 w-6" />
                           </div>
-                          <h6 className="text-xs font-extrabold text-slate-700">No Job Postings in Database Yet</h6>
-                          <p className="text-[11px] font-medium text-slate-400 max-w-sm mx-auto">
+                          <h6 className="text-xs font-extrabold text-[var(--text-secondary)]">No Job Postings in Database Yet</h6>
+                          <p className="text-[11px] font-medium text-[var(--text-muted)] max-w-sm mx-auto">
                             No active job offers or campus recruitment drives have been submitted by this employer in the database yet.
                           </p>
                         </div>
@@ -4360,8 +4360,8 @@ export default function UserManagement() {
               {/* Tab 4: MOU & Governance */}
               {activeUser.role === 'Employer' && activeDetailTab === 'mou' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Shield className="h-4 w-4 text-emerald-600" />
                       ASTU Partnership MOU & Governance Details
                     </h5>
@@ -4381,7 +4381,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4405,31 +4405,31 @@ export default function UserManagement() {
                   {editingTab === 'mou' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-emerald-50/40 p-4 rounded-xl border border-emerald-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">ASTU Partnership MOU</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">ASTU Partnership MOU</label>
                         <input
                           type="text"
                           value={inlineForm.partnershipAgreement}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, partnershipAgreement: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Tax Identification Number (TIN)</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Tax Identification Number (TIN)</label>
                         <input
                           type="text"
                           value={inlineForm.tin}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, tin: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">NDA & Data Governance</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">NDA & Data Governance</label>
                         <select
                           value={inlineForm.ndaSigned ? 'true' : 'false'}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, ndaSigned: e.target.value === 'true' }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                         >
                           <option value="true">Signed & Fully Compliant</option>
                           <option value="false">Pending Signature</option>
@@ -4437,11 +4437,11 @@ export default function UserManagement() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Partnership Status</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Partnership Status</label>
                         <select
                           value={inlineForm.verificationStatus}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, verificationStatus: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                         >
                           <option value="Active">VERIFIED_PARTNER (Active)</option>
                           <option value="Pending Verification">PENDING_VERIFICATION</option>
@@ -4451,42 +4451,42 @@ export default function UserManagement() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">ASTU Partnership MOU</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">ASTU Partnership MOU</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.partnershipAgreement || (activeUser.isPremium ? 'Tier 1 Strategic Partnership Agreement' : 'ASTU Strategic Partnership Agreement')}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tax Identification Number (TIN)</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Tax Identification Number (TIN)</span>
                         <p className="text-xs font-bold text-indigo-700">{activeUser.tin ? `Tax ID: ${activeUser.tin}` : 'Not Registered'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">NDA & Data Governance</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">NDA & Data Governance</span>
                         <p className="text-xs font-bold text-emerald-700">
                           {activeUser.ndaSigned === true ? 'Signed & Fully Compliant' : activeUser.ndaSigned === false ? 'Pending Signature' : 'Signed & Fully Compliant'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Partnership Status</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Partnership Status</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.verificationStatus || activeUser.status || 'PENDING'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Clearance Verification</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Clearance Verification</span>
                         <p className="text-xs font-bold text-emerald-700">
                           {activeUser.clearanceStatus || (activeUser.status === 'Active' || activeUser.isVerified ? 'Institutional Audit Approved' : 'Pending Audit Clearance')}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Active MOU Frameworks</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Active MOU Frameworks</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.partnerships && activeUser.partnerships.length > 0
                             ? activeUser.partnerships.join(' • ')
                             : 'Graduate Placement & Research Internships'}
@@ -4501,8 +4501,8 @@ export default function UserManagement() {
               {/* Tab 1: Account Profile */}
               {activeUser.role !== 'Alumni' && activeUser.role !== 'Employer' && (activeDetailTab === 'overview' || activeDetailTab === 'academic') && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Shield className="h-4 w-4 text-indigo-600" />
                       Institutional Account & System Profile
                     </h5>
@@ -4522,7 +4522,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4546,41 +4546,41 @@ export default function UserManagement() {
                   {editingTab === 'staff_overview' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-indigo-50/40 p-4 rounded-xl border border-indigo-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Staff / Officer Name</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Staff / Officer Name</label>
                         <input
                           type="text"
                           value={inlineStaffForm.name}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Official Email</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Official Email</label>
                         <input
                           type="email"
                           value={inlineStaffForm.email}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, email: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Assigned Department</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Assigned Department</label>
                         <input
                           type="text"
                           value={inlineStaffForm.department}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, department: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">System Role</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">System Role</label>
                         <select
                           value={inlineStaffForm.role}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, role: e.target.value as Role }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         >
                           <option value="Registrar">Registrar</option>
                           <option value="Department Head">Department Head</option>
@@ -4590,11 +4590,11 @@ export default function UserManagement() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Account Status</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Status</label>
                         <select
                           value={inlineStaffForm.status}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, status: e.target.value as Status }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         >
                           <option value="Active">Active</option>
                           <option value="Inactive">Inactive</option>
@@ -4604,46 +4604,46 @@ export default function UserManagement() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Contact Phone</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Contact Phone</label>
                         <input
                           type="text"
                           value={inlineStaffForm.phone}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                         />
                       </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Staff / Officer Name</span>
-                        <p className="text-xs font-extrabold text-slate-900">{activeUser.name}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Staff / Officer Name</span>
+                        <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.name}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Official Email</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Official Email</span>
                         <p className="text-xs font-bold text-indigo-700">{activeUser.email}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Assigned Department</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.department || 'System Office'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Assigned Department</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.department || 'System Office'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Security Clearance Level</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Security Clearance Level</span>
                         <p className="text-xs font-bold text-emerald-700">
                           {activeUser.role === 'Admin' || activeUser.role === 'SuperAdmin' ? 'Super Admin Level 5' : 'Level 3 Senior Privilege'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Contact Phone</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.phone || 'Not Registered'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Contact Phone</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.phone || 'Not Registered'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Audit State</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Audit State</span>
                         <p className="text-xs font-bold text-emerald-700">Verified Compliant</p>
                       </div>
                     </div>
@@ -4654,8 +4654,8 @@ export default function UserManagement() {
               {/* Tab 2: Role & Clearances */}
               {activeUser.role !== 'Alumni' && activeUser.role !== 'Employer' && activeDetailTab === 'duties' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <BookOpen className="h-4 w-4 text-purple-600" />
                       Role Privileges & Institutional Clearances
                     </h5>
@@ -4675,7 +4675,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4696,11 +4696,11 @@ export default function UserManagement() {
                   {editingTab === 'staff_duties' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-purple-50/40 p-4 rounded-xl border border-purple-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Designated System Role</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Designated System Role</label>
                         <select
                           value={inlineStaffForm.role}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, role: e.target.value as Role }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                         >
                           <option value="Registrar">Registrar</option>
                           <option value="Department Head">Department Head</option>
@@ -4710,21 +4710,21 @@ export default function UserManagement() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Assigned Department / Scope</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Assigned Department / Scope</label>
                         <input
                           type="text"
                           value={inlineStaffForm.department}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, department: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Account Authorization Status</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Authorization Status</label>
                         <select
                           value={inlineStaffForm.status}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, status: e.target.value as Status }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                         >
                           <option value="Active">Active & Authorized</option>
                           <option value="Inactive">Inactive</option>
@@ -4734,26 +4734,26 @@ export default function UserManagement() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Designated System Role</span>
-                        <p className="text-xs font-extrabold text-slate-900">{activeUser.role}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Designated System Role</span>
+                        <p className="text-xs font-extrabold text-[var(--text-primary)]">{activeUser.role}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Department Access Scope</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Department Access Scope</span>
                         <p className="text-xs font-bold text-indigo-700">{activeUser.department || 'System Office'}</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Security Clearance Level</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Security Clearance Level</span>
                         <p className="text-xs font-bold text-emerald-700">
                           {activeUser.role === 'Admin' || activeUser.role === 'SuperAdmin' ? 'Super Admin Level 5' : 'Level 3 Senior Privilege'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Portal Authority Scope</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Portal Authority Scope</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.role === 'Registrar' || activeUser.role === 'RegistrarStaff'
                             ? 'Full Student & Degree Clearance Audit'
                             : activeUser.role === 'Department Head'
@@ -4762,16 +4762,16 @@ export default function UserManagement() {
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Authorization Status</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Authorization Status</span>
                         <p className="text-xs font-bold text-emerald-700">
                           {activeUser.status === 'Active' ? 'Active & Authorized' : activeUser.status}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Institutional Audit</span>
-                        <p className="text-xs font-bold text-slate-900">Verified Officer Profile</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Institutional Audit</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">Verified Officer Profile</p>
                       </div>
                     </div>
                   )}
@@ -4781,8 +4781,8 @@ export default function UserManagement() {
               {/* Tab 3: Security & Audit Log */}
               {activeUser.role !== 'Alumni' && activeUser.role !== 'Employer' && activeDetailTab === 'audit' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 pb-2 flex-wrap gap-2">
-                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 flex-wrap gap-2">
+                    <h5 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
                       <Clock3 className="h-4 w-4 text-emerald-600" />
                       Security, Authentication & Audit Activity
                     </h5>
@@ -4802,7 +4802,7 @@ export default function UserManagement() {
                             type="button"
                             onClick={() => setEditingTab(null)}
                             disabled={savingInline}
-                            className="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] font-bold text-xs cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -4823,11 +4823,11 @@ export default function UserManagement() {
                   {editingTab === 'staff_audit' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-emerald-50/40 p-4 rounded-xl border border-emerald-200/60">
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Account Status</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Status</label>
                         <select
                           value={inlineStaffForm.status}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, status: e.target.value as Status }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                         >
                           <option value="Active">Active</option>
                           <option value="Inactive">Inactive</option>
@@ -4835,51 +4835,51 @@ export default function UserManagement() {
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Contact Phone</label>
+                        <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Contact Phone</label>
                         <input
                           type="text"
                           value={inlineStaffForm.phone}
                           onChange={(e) => setInlineStaffForm((prev) => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-900 bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                          className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                         />
                       </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Two-Factor Authentication</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Two-Factor Authentication</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.twoFactorEnabled ? '2FA Enforced & Active' : '2FA Standard Setup'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Last Authentication Timestamp</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Last Authentication Timestamp</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.lastLogin ? format(new Date(activeUser.lastLogin), 'MMM dd, yyyy HH:mm') : 'Recent Login'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Registration Date</span>
-                        <p className="text-xs font-bold text-slate-900">
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Registration Date</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">
                           {activeUser.registeredAt ? format(new Date(activeUser.registeredAt), 'MMM dd, yyyy') : 'Registered'}
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Audit State</span>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Account Audit State</span>
                         <p className="text-xs font-bold text-emerald-700">Verified Compliant</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Password Encryption</span>
-                        <p className="text-xs font-bold text-slate-900">Bcrypt Enterprise Hash</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Password Encryption</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">Bcrypt Enterprise Hash</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 space-y-1 shadow-2xs">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Contact Phone Number</span>
-                        <p className="text-xs font-bold text-slate-900">{activeUser.phone || 'Not Provided'}</p>
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-2xs">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Contact Phone Number</span>
+                        <p className="text-xs font-bold text-[var(--text-primary)]">{activeUser.phone || 'Not Provided'}</p>
                       </div>
                     </div>
                   )}
@@ -4888,11 +4888,11 @@ export default function UserManagement() {
             </div>
 
             {/* Admin Notes Section */}
-            <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+            <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse" />
-                  <h5 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">Administrative Audit Notes</h5>
+                  <h5 className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-primary)]">Administrative Audit Notes</h5>
                 </div>
                 {notesSuccessMsg && (
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 animate-in fade-in duration-200">
@@ -4906,10 +4906,10 @@ export default function UserManagement() {
                 onChange={(e) => setAdminNotesInput(e.target.value)}
                 placeholder="Click here to type administrative audit notes, compliance logs, or profile observations for this user account..."
                 rows={3}
-                className="w-full text-xs font-medium text-slate-900 bg-white p-3 rounded-xl border border-slate-300 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all resize-y placeholder:text-slate-400 cursor-text select-text relative z-10"
+                className="w-full text-xs font-medium text-[var(--text-primary)] bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all resize-y placeholder:text-slate-400 cursor-text select-text relative z-10"
               />
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-medium text-slate-400">
+                <p className="text-[10px] font-medium text-[var(--text-muted)]">
                   * Administrative notes are stored permanently in the user profile database.
                 </p>
                 <button
@@ -4940,7 +4940,7 @@ export default function UserManagement() {
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/80 backdrop-blur-md z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden"
           onWheel={(e) => e.stopPropagation()}
         >
-          <div className="bg-white rounded-3xl w-full max-w-5xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-slate-300/80 my-auto flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[var(--bg-card)] rounded-3xl w-full max-w-5xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-[var(--border-color)] my-auto flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-[#002866] via-[#003580] to-[#004b99] px-6 py-4 text-white flex items-center justify-between shadow-md shrink-0">
               <div className="flex items-center gap-3.5">
@@ -4966,15 +4966,15 @@ export default function UserManagement() {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/40 min-h-[380px] flex flex-col">
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-[var(--bg-page)] min-h-[380px] flex flex-col">
               {isExportLoading ? (
                 <div className="flex flex-col items-center justify-center p-16 space-y-4 my-auto">
                   <div className="w-14 h-14 rounded-2xl bg-[#003580]/10 flex items-center justify-center border border-[#003580]/20 shadow-inner">
                     <Loader2 className="h-7 w-7 text-[#003580] animate-spin" />
                   </div>
                   <div className="text-center space-y-1">
-                    <h4 className="text-base font-extrabold text-slate-800 tracking-tight">Fetching Enterprise Multi-Portal Directory...</h4>
-                    <p className="text-xs font-semibold text-slate-500">Synchronizing complete user database records across all 5 ASTU portals...</p>
+                    <h4 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">Fetching Enterprise Multi-Portal Directory...</h4>
+                    <p className="text-xs font-semibold text-[var(--text-muted)]">Synchronizing complete user database records across all 5 ASTU portals...</p>
                   </div>
                 </div>
               ) : (
@@ -4982,11 +4982,11 @@ export default function UserManagement() {
                   {/* Portal Preset Tabs */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5">
                         <Building2 className="h-3.5 w-3.5 text-[#003580]" />
                         Quick Portal Preset Filters
                       </span>
-                      <span className="text-[10px] font-semibold text-slate-400">Click a portal tab to instantly isolate records</span>
+                      <span className="text-[10px] font-semibold text-[var(--text-muted)]">Click a portal tab to instantly isolate records</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
                       <button
@@ -4995,12 +4995,12 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'ALL'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">All Portals</span>
                         <span className={`text-[10px] mt-0.5 font-extrabold px-2 py-0.5 rounded-full ${
-                          activePortalTab === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                          activePortalTab === 'ALL' ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]'
                         }`}>
                           {portalMetrics.all}
                         </span>
@@ -5012,7 +5012,7 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'ALUMNI'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">Alumni Portal</span>
@@ -5029,7 +5029,7 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'REGISTRAR'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">Registrar SIS</span>
@@ -5046,7 +5046,7 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'DEPARTMENT'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">Dept & Faculty</span>
@@ -5063,7 +5063,7 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'EMPLOYER'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">Employer Net</span>
@@ -5080,7 +5080,7 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'CMS'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">CMS Manager</span>
@@ -5097,7 +5097,7 @@ export default function UserManagement() {
                         className={`flex flex-col items-center justify-center py-2.5 px-2.5 rounded-2xl border text-center transition-all cursor-pointer ${
                           activePortalTab === 'ADMIN'
                             ? 'bg-[#003580] border-[#003580] text-white shadow-md font-bold'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                            : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)]'
                         }`}
                       >
                         <span className="text-xs truncate">Super Admin</span>
@@ -5128,8 +5128,8 @@ export default function UserManagement() {
 
                   {/* Dynamic Filtering Criteria Section Based on Active Portal */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                         <Filter className="h-4 w-4 text-[#003580]" />
                         Filtering Criteria Configuration ({activePortalTab === 'ALL' ? 'Cross-Portal Multi-Filter' : `${activePortalTab} Portal Tailored Filters`})
                       </h4>
@@ -5141,7 +5141,7 @@ export default function UserManagement() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                       {/* 1. Keyword / Search Query */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">1. Search Query</label>
+                        <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">1. Search Query</label>
                         <input
                           type="text"
                           placeholder={
@@ -5154,14 +5154,14 @@ export default function UserManagement() {
                           }
                           value={exportFilters.search}
                           onChange={(e) => setExportFilters(prev => ({ ...prev, search: e.target.value }))}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-[#003580]"
+                          className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-medium text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                         />
                       </div>
 
                       {/* 2. Target User Role (Only in ALL Portals) */}
                       {activePortalTab === 'ALL' && (
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">2. Target Portal Role</label>
+                          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">2. Target Portal Role</label>
                           <select
                             value={exportFilters.role}
                             onChange={(e) => {
@@ -5175,7 +5175,7 @@ export default function UserManagement() {
                               else if (val === 'CMS Manager') setActivePortalTab('CMS');
                               else if (val === 'Admin' || val === 'SuperAdmin') setActivePortalTab('ADMIN');
                             }}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                            className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                           >
                             <option value="All Roles">All Roles (Alumni, Staff, Employers, Admins)</option>
                             {roles.map(r => <option key={r} value={r}>{r}</option>)}
@@ -5185,13 +5185,13 @@ export default function UserManagement() {
 
                       {/* 3. Account Status */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                        <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">
                           {activePortalTab === 'ALL' ? '3.' : '2.'} Account Status
                         </label>
                         <select
                           value={exportFilters.status}
                           onChange={(e) => setExportFilters(prev => ({ ...prev, status: e.target.value }))}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                          className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                         >
                           <option value="All">All Account Statuses</option>
                           <option value="Active">Active</option>
@@ -5204,11 +5204,11 @@ export default function UserManagement() {
                       {/* 4. Academic Department (Relevant for ALL, ALUMNI, DEPARTMENT) */}
                       {['ALL', 'ALUMNI', 'DEPARTMENT'].includes(activePortalTab) && (
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Academic Department</label>
+                          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">Academic Department</label>
                           <select
                             value={exportFilters.department}
                             onChange={(e) => setExportFilters(prev => ({ ...prev, department: e.target.value }))}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                            className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                           >
                             <option value="All Departments">All Departments</option>
                             {departmentList.map(d => <option key={d} value={d}>{d}</option>)}
@@ -5219,11 +5219,11 @@ export default function UserManagement() {
                       {/* 5. Graduation Batch Year (Relevant for ALL, ALUMNI) */}
                       {['ALL', 'ALUMNI'].includes(activePortalTab) && (
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Batch / Graduation Year</label>
+                          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">Batch / Graduation Year</label>
                           <select
                             value={exportFilters.batchYear}
                             onChange={(e) => setExportFilters(prev => ({ ...prev, batchYear: e.target.value }))}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                            className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                           >
                             <option value="All">All Batches (2000 - 2026)</option>
                             {['2026', '2025', '2024', '2023', '2022', '2021', '2020'].map(b => (
@@ -5236,13 +5236,13 @@ export default function UserManagement() {
                       {/* 6. Profile Verification (Relevant for ALL, ALUMNI, REGISTRAR, DEPARTMENT, EMPLOYER) */}
                       {['ALL', 'ALUMNI', 'REGISTRAR', 'DEPARTMENT', 'EMPLOYER'].includes(activePortalTab) && (
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">
                             {activePortalTab === 'ALUMNI' ? 'Graduate Verification' : activePortalTab === 'EMPLOYER' ? 'Partner Verification' : 'Verification Status'}
                           </label>
                           <select
                             value={exportFilters.verification}
                             onChange={(e) => setExportFilters(prev => ({ ...prev, verification: e.target.value }))}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                            className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                           >
                             <option value="All">All Identities (Verified & Unverified)</option>
                             <option value="Verified">Verified Only</option>
@@ -5253,11 +5253,11 @@ export default function UserManagement() {
 
                       {/* 7. Record Timeframe */}
                       <div>
-                        <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Record Timeframe</label>
+                        <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">Record Timeframe</label>
                         <select
                           value={exportFilters.dateRange}
                           onChange={(e) => setExportFilters(prev => ({ ...prev, dateRange: e.target.value }))}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                          className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                         >
                           <option value="All">All Time Records</option>
                           <option value="30d">Last 30 Days</option>
@@ -5269,11 +5269,11 @@ export default function UserManagement() {
                       {/* 8. Industry Sector (Relevant for ALL, ALUMNI, EMPLOYER) */}
                       {['ALL', 'ALUMNI', 'EMPLOYER'].includes(activePortalTab) && (
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Sector / Industry Scope</label>
+                          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">Sector / Industry Scope</label>
                           <select
                             value={exportFilters.industry}
                             onChange={(e) => setExportFilters(prev => ({ ...prev, industry: e.target.value }))}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                            className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                           >
                             <option value="All">All Sectors & Partners</option>
                             <option value="Technology">Technology & Software</option>
@@ -5287,11 +5287,11 @@ export default function UserManagement() {
                       {/* 9. Data Source / Origin (Relevant for ALL, REGISTRAR, ADMIN) */}
                       {['ALL', 'REGISTRAR', 'ADMIN'].includes(activePortalTab) && (
                         <div>
-                          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Data Source / Origin</label>
+                          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-1">Data Source / Origin</label>
                           <select
                             value={exportFilters.source}
                             onChange={(e) => setExportFilters(prev => ({ ...prev, source: e.target.value }))}
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                            className="w-full px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                           >
                             <option value="All">All Sources (Admin Provision, Self-Reg, SIS Import)</option>
                             <option value="Admin">Admin Portal Provisioned</option>
@@ -5304,14 +5304,14 @@ export default function UserManagement() {
                   </div>
 
                   {/* Column Selector & Reorder Cards Section */}
-                  <div className="space-y-3 border-t border-slate-200 pt-4">
+                  <div className="space-y-3 border-t border-[var(--border-color)] pt-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
-                        <h4 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <h4 className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
                           <BookOpen className="h-4 w-4 text-emerald-600" />
                           Select & Reorder Export Columns (Sequence #1 – #{columnSequence.length})
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Use the ◀ / ▶ arrows on any column card to dynamically adjust its output position in the CSV header</p>
+                        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Use the ◀ / ▶ arrows on any column card to dynamically adjust its output position in the CSV header</p>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -5326,7 +5326,7 @@ export default function UserManagement() {
                         <button
                           type="button"
                           onClick={() => toggleAllExportColumns(false)}
-                          className="text-[10px] font-bold text-slate-500 hover:underline cursor-pointer"
+                          className="text-[10px] font-bold text-[var(--text-muted)] hover:underline cursor-pointer"
                         >
                           Deselect All
                         </button>
@@ -5342,7 +5342,7 @@ export default function UserManagement() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 bg-slate-50 rounded-2xl border border-slate-200 max-h-[320px] overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 bg-[var(--bg-page)] rounded-2xl border border-[var(--border-color)] max-h-[320px] overflow-y-auto">
                       {columnSequence.map((col, idx) => {
                         const isChecked = exportColumns[col.key];
                         return (
@@ -5350,16 +5350,16 @@ export default function UserManagement() {
                             key={col.key}
                             className={`flex items-center justify-between gap-1 p-2 rounded-xl border transition-all ${
                               isChecked
-                                ? 'bg-white border-emerald-300 shadow-xs'
-                                : 'bg-slate-100/70 border-slate-200 opacity-60'
+                                ? 'bg-[var(--bg-card)] border-emerald-300 shadow-xs'
+                                : 'bg-[var(--bg-page)] border-[var(--border-color)] opacity-60'
                             }`}
                           >
-                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer select-none truncate">
+                            <label className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)] cursor-pointer select-none truncate">
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={(e) => setExportColumns(prev => ({ ...prev, [col.key]: e.target.checked }))}
-                                className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                                className="w-4 h-4 text-emerald-600 rounded border-[var(--border-color)] focus:ring-emerald-500 cursor-pointer shrink-0"
                               />
                               <span className="flex items-center gap-1.5 truncate">
                                 <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-md shrink-0">
@@ -5374,7 +5374,7 @@ export default function UserManagement() {
                                 type="button"
                                 disabled={idx === 0}
                                 onClick={() => moveColumnSequence(idx, 'up')}
-                                className="w-5 h-5 rounded hover:bg-slate-100 text-slate-500 hover:text-emerald-700 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
+                                className="w-5 h-5 rounded hover:bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-emerald-700 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
                                 title="Move Left in CSV sequence"
                               >
                                 <ChevronLeft className="h-3 w-3" />
@@ -5383,7 +5383,7 @@ export default function UserManagement() {
                                 type="button"
                                 disabled={idx === columnSequence.length - 1}
                                 onClick={() => moveColumnSequence(idx, 'down')}
-                                className="w-5 h-5 rounded hover:bg-slate-100 text-slate-500 hover:text-emerald-700 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
+                                className="w-5 h-5 rounded hover:bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-emerald-700 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
                                 title="Move Right in CSV sequence"
                               >
                                 <ChevronRight className="h-3 w-3" />
@@ -5399,11 +5399,11 @@ export default function UserManagement() {
             </div>
 
             {/* Modal Footer with Multi-Format Options */}
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div className="bg-[var(--bg-page)] border-t border-[var(--border-color)] px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsExportModalOpen(false)}
-                className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all cursor-pointer w-full sm:w-auto text-center"
+                className="px-5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-xl text-xs font-bold hover:bg-[var(--bg-page)] transition-all cursor-pointer w-full sm:w-auto text-center"
               >
                 Cancel
               </button>
@@ -5413,10 +5413,10 @@ export default function UserManagement() {
                   type="button"
                   onClick={executeCopySummary}
                   disabled={isExportLoading || exportMatchedUsers.length === 0}
-                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-2.5 bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
                   title="Copy formatted text summary to clipboard"
                 >
-                  <FileSpreadsheet className="h-3.5 w-3.5 text-slate-600" />
+                  <FileSpreadsheet className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                   <span>Copy Summary</span>
                 </button>
 
@@ -5424,7 +5424,7 @@ export default function UserManagement() {
                   type="button"
                   onClick={executeExportJSON}
                   disabled={isExportLoading || exportMatchedUsers.length === 0}
-                  className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                  className="px-3.5 py-2.5 bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
                   title="Export raw structured JSON data dump"
                 >
                   <Code className="h-3.5 w-3.5 text-[#003580]" />
@@ -5457,7 +5457,7 @@ export default function UserManagement() {
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/80 backdrop-blur-md z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden"
           onWheel={(e) => e.stopPropagation()}
         >
-          <div className="bg-white rounded-3xl w-full max-w-4xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-slate-300/80 my-auto flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[var(--bg-card)] rounded-3xl w-full max-w-4xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-[var(--border-color)] my-auto flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
             <div className="bg-gradient-to-r from-[#002866] via-[#003580] to-[#004b99] px-6 py-4 text-white flex items-center justify-between shadow-md shrink-0">
               <div className="flex items-center gap-3.5">
@@ -5482,21 +5482,21 @@ export default function UserManagement() {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-slate-50/50">
+            <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-[var(--bg-page)]">
               {/* Summary Stats Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Import Batches</div>
-                  <div className="text-2xl font-black text-slate-900 mt-1">{importLogs.length}</div>
+                <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-xs">
+                  <div className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Total Import Batches</div>
+                  <div className="text-2xl font-black text-[var(--text-primary)] mt-1">{importLogs.length}</div>
                 </div>
-                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Records Imported</div>
+                <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-xs">
+                  <div className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Total Records Imported</div>
                   <div className="text-2xl font-black text-emerald-700 mt-1">
                     {importLogs.reduce((acc, log) => acc + (log.recordsCount || 0), 0)}
                   </div>
                 </div>
-                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Latest Sync Status</div>
+                <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-xs">
+                  <div className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Latest Sync Status</div>
                   <div className="text-sm font-extrabold text-emerald-600 mt-2 flex items-center gap-1.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     <span>Active & Verified</span>
@@ -5505,9 +5505,9 @@ export default function UserManagement() {
               </div>
 
               {/* Import History Table */}
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-                <div className="px-5 py-3.5 bg-slate-100/70 border-b border-slate-200 flex items-center justify-between">
-                  <h4 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xs">
+                <div className="px-5 py-3.5 bg-[var(--bg-page)] border-b border-[var(--border-color)] flex items-center justify-between">
+                  <h4 className="text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-2">
                     <Clock3 className="h-4 w-4 text-[#003580]" />
                     Import Trajectory & Audit Trail ({importLogs.length} logs)
                   </h4>
@@ -5524,7 +5524,7 @@ export default function UserManagement() {
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+                    <thead className="bg-[var(--bg-page)] text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)] text-[10px]">
                       <tr>
                         <th className="px-4 py-3">Import Date & Time</th>
                         <th className="px-4 py-3">Records Count</th>
@@ -5533,35 +5533,35 @@ export default function UserManagement() {
                         <th className="px-4 py-3 text-right">Details</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[var(--border-color)]">
                       {loadingImportLogs ? (
                         <tr>
-                          <td colSpan={5} className="p-8 text-center text-slate-500">
+                          <td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">
                             <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-[#003580]" />
                             <span>Loading import history records...</span>
                           </td>
                         </tr>
                       ) : importLogs.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="p-8 text-center text-slate-500">
+                          <td colSpan={5} className="p-8 text-center text-[var(--text-muted)]">
                             No import logs recorded yet.
                           </td>
                         </tr>
                       ) : (
                         importLogs.map((log, idx) => (
-                          <tr key={log.id || idx} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="px-4 py-3.5 font-semibold text-slate-800">
+                          <tr key={log.id || idx} className="hover:bg-[var(--bg-page)] transition-colors">
+                            <td className="px-4 py-3.5 font-semibold text-[var(--text-primary)]">
                               <div>{format(new Date(log.syncedAt), 'MMM d, yyyy · HH:mm')}</div>
-                              <div className="text-[10px] text-slate-400 font-normal">{formatDistanceToNow(new Date(log.syncedAt), { addSuffix: true })}</div>
+                              <div className="text-[10px] text-[var(--text-muted)] font-normal">{formatDistanceToNow(new Date(log.syncedAt), { addSuffix: true })}</div>
                             </td>
-                            <td className="px-4 py-3.5 font-black text-slate-900">
+                            <td className="px-4 py-3.5 font-black text-[var(--text-primary)]">
                               <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-bold">
                                 {log.recordsCount} records
                               </span>
                             </td>
-                            <td className="px-4 py-3.5 font-medium text-slate-700">
+                            <td className="px-4 py-3.5 font-medium text-[var(--text-secondary)]">
                               <div className="flex items-center gap-1.5">
-                                <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                                <Building2 className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                                 <span>Registrar Office SIS Sync</span>
                               </div>
                             </td>
@@ -5575,7 +5575,7 @@ export default function UserManagement() {
                                 {log.status}
                               </span>
                             </td>
-                            <td className="px-4 py-3.5 text-right font-medium text-slate-500">
+                            <td className="px-4 py-3.5 text-right font-medium text-[var(--text-muted)]">
                               {log.errors ? (
                                 <span className="text-rose-600 font-semibold">{log.errors}</span>
                               ) : (
@@ -5592,8 +5592,8 @@ export default function UserManagement() {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-3.5 flex items-center justify-between shrink-0">
-              <span className="text-xs text-slate-500 font-medium">ASTU Enterprise Directory Sync Audit</span>
+            <div className="bg-[var(--bg-page)] border-t border-[var(--border-color)] px-6 py-3.5 flex items-center justify-between shrink-0">
+              <span className="text-xs text-[var(--text-muted)] font-medium">ASTU Enterprise Directory Sync Audit</span>
               <button
                 type="button"
                 onClick={() => setIsImportHistoryOpen(false)}
@@ -5633,7 +5633,7 @@ export default function UserManagement() {
           </div>
 
           {/* Portal Tabs Navigation Bar (6 Portals) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200 scrollbar-none">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-[var(--border-color)] scrollbar-none">
             {[
               { key: 'ALUMNI', label: 'Alumni Portal', icon: GraduationCap, color: 'text-indigo-600' },
               { key: 'EMPLOYER', label: 'Employer Portal', icon: Building2, color: 'text-amber-600' },
@@ -5652,7 +5652,7 @@ export default function UserManagement() {
                   className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
                     isActive
                       ? 'bg-[#001F4D] text-white shadow-md'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/70'
+                      : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)] border border-[var(--border-color)]'
                   }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'text-sky-300' : tab.color}`} />
@@ -5663,26 +5663,26 @@ export default function UserManagement() {
           </div>
 
           {/* Portal Filter Criteria Panes */}
-          <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+          <div className="bg-[var(--bg-page)] border border-[var(--border-color)] rounded-2xl p-5 space-y-4">
             {activeFilterPortalTab === 'ALUMNI' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                   <div className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4 text-indigo-600" />
-                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">Alumni Directory Criteria</h5>
+                    <h5 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">Alumni Directory Criteria</h5>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Filter tracer surveys & graduation records</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Filter tracer surveys & graduation records</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Graduation Batch Year</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Graduation Batch Year</label>
                     <select
                       value={advancedFilters.batchYear}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, batchYear: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Batch Years</option>
                       {['2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027'].map(b => (
@@ -5692,13 +5692,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Identity Verification</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Identity Verification</label>
                     <select
                       value={advancedFilters.verificationStatus}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, verificationStatus: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Statuses</option>
                       <option value="Verified Alumni">Verified Alumni</option>
@@ -5707,13 +5707,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Employment Status</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Employment Status</label>
                     <select
                       value={advancedFilters.employmentStatus}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, employmentStatus: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Employment Types</option>
                       <option value="Employed">Employed (Full-Time)</option>
@@ -5724,13 +5724,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Degree Distinction</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Degree Distinction</label>
                     <select
                       value={advancedFilters.degreeLevel}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, degreeLevel: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Degrees</option>
                       <option value="B.Sc. Degree">B.Sc. Undergraduate</option>
@@ -5740,13 +5740,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Academic Performance (CGPA)</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Academic Performance (CGPA)</label>
                     <select
                       value={advancedFilters.cgpaThreshold}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, cgpaThreshold: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All CGPA Ranges</option>
                       <option value="Above 3.50">3.50+ (First Class Distinction)</option>
@@ -5756,13 +5756,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Tracer Survey Participation</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Tracer Survey Participation</label>
                     <select
                       value={advancedFilters.tracerSurvey}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, tracerSurvey: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Survey Statuses</option>
                       <option value="Submitted Tracer Survey">Submitted Tracer Survey</option>
@@ -5772,13 +5772,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Work Experience Range</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Work Experience Range</label>
                     <select
                       value={advancedFilters.workExperience}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, workExperience: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Experience Levels</option>
                       <option value="Fresh Graduate (0-1 Yrs)">Fresh Graduate (0-1 Yrs)</option>
@@ -5789,13 +5789,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Current Residence / Region</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Current Residence / Region</label>
                     <select
                       value={advancedFilters.residenceRegion}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, residenceRegion: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Regions</option>
                       <option value="Addis Ababa HQ">Addis Ababa HQ</option>
@@ -5810,23 +5810,23 @@ export default function UserManagement() {
 
             {activeFilterPortalTab === 'EMPLOYER' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-amber-600" />
-                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">Employer Portal Criteria</h5>
+                    <h5 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">Employer Portal Criteria</h5>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Filter recruiting partners & company profiles</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Filter recruiting partners & company profiles</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Industry Sector</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Industry Sector</label>
                     <select
                       value={advancedFilters.industrySector}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, industrySector: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Industry Sectors</option>
                       <option value="Technology & Enterprise">Technology & Software</option>
@@ -5837,13 +5837,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Company Scale</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Company Scale</label>
                     <select
                       value={advancedFilters.companySize}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, companySize: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Company Sizes</option>
                       <option value="Enterprise (500+)">Enterprise (500+ Employees)</option>
@@ -5853,13 +5853,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">HR Official Verification</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">HR Official Verification</label>
                     <select
                       value={advancedFilters.hrVerified}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, hrVerified: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Accounts</option>
                       <option value="Verified HR Official">Verified HR Official</option>
@@ -5868,13 +5868,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Active Job Postings</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Active Job Postings</label>
                     <select
                       value={advancedFilters.activeJobPosts}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, activeJobPosts: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Employers</option>
                       <option value="Has Active Job Postings">Has Active Job Postings</option>
@@ -5884,13 +5884,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Internship Program Partner</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Internship Program Partner</label>
                     <select
                       value={advancedFilters.internshipOffer}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, internshipOffer: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Partners</option>
                       <option value="Offers Student Internships">Offers Student Internships</option>
@@ -5899,13 +5899,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">ASTU Partnership MOU</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">ASTU Partnership MOU</label>
                     <select
                       value={advancedFilters.mouStatus}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, mouStatus: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Agreement Statuses</option>
                       <option value="Active MOU Partner">Active MOU Partner (Signed)</option>
@@ -5918,23 +5918,23 @@ export default function UserManagement() {
 
             {activeFilterPortalTab === 'REGISTRAR' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-emerald-600" />
-                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">Registrar Portal Criteria</h5>
+                    <h5 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">Registrar Portal Criteria</h5>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Filter academic record clearance officers</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Filter academic record clearance officers</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Security Access Level</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Security Access Level</label>
                     <select
                       value={advancedFilters.securityLevel}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, securityLevel: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Security Levels</option>
                       <option value="Level 3 (Senior Registrar)">Level 3 (Senior Registrar)</option>
@@ -5944,13 +5944,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Record Sync State</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Record Sync State</label>
                     <select
                       value={advancedFilters.recordSyncState}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, recordSyncState: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Sync States</option>
                       <option value="Synced with Core DB">Synced with Core DB</option>
@@ -5959,13 +5959,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Clearance Duty Authority</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Clearance Duty Authority</label>
                     <select
                       value={advancedFilters.clearanceDuty}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, clearanceDuty: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Duty Scope</option>
                       <option value="Graduation Clearance Officer">Graduation Clearance Officer</option>
@@ -5975,13 +5975,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Audit Log Compliance</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Audit Log Compliance</label>
                     <select
                       value={advancedFilters.auditLogStatus}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, auditLogStatus: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Audit Logs</option>
                       <option value="Verified Compliant Log">Verified Compliant Log</option>
@@ -5994,23 +5994,23 @@ export default function UserManagement() {
 
             {activeFilterPortalTab === 'DEPARTMENT' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-purple-600" />
-                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">Department Head Criteria</h5>
+                    <h5 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">Department Head Criteria</h5>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Filter faculty chairs & department heads</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Filter faculty chairs & department heads</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Faculty School</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Faculty School</label>
                     <select
                       value={advancedFilters.facultyScope}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, facultyScope: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Faculty Schools</option>
                       <option value="School of Computing & IT">School of Computing & IT</option>
@@ -6020,13 +6020,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Supervisory Level</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Supervisory Level</label>
                     <select
                       value={advancedFilters.supervisoryLevel}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, supervisoryLevel: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Roles</option>
                       <option value="Department Chair">Department Chair</option>
@@ -6035,13 +6035,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Academic Rank / Title</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Academic Rank / Title</label>
                     <select
                       value={advancedFilters.academicRank}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, academicRank: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Ranks</option>
                       <option value="Full Professor">Full Professor</option>
@@ -6051,13 +6051,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Research & Academic Focus</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Research & Academic Focus</label>
                     <select
                       value={advancedFilters.researchScope}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, researchScope: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Academic Program Focus</option>
                       <option value="Undergraduate Curriculum Chair">Undergraduate Curriculum Chair</option>
@@ -6070,23 +6070,23 @@ export default function UserManagement() {
 
             {activeFilterPortalTab === 'CMS' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                   <div className="flex items-center gap-2">
                     <Newspaper className="h-4 w-4 text-teal-600" />
-                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">CMS Manager Criteria</h5>
+                    <h5 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">CMS Manager Criteria</h5>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Filter news editors & content managers</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Filter news editors & content managers</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Editorial Scope</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Editorial Scope</label>
                     <select
                       value={advancedFilters.cmsRoleScope}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, cmsRoleScope: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Scope Permissions</option>
                       <option value="All Portal & News Content">All Portal & News Content</option>
@@ -6095,13 +6095,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Publishing Rights</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Publishing Rights</label>
                     <select
                       value={advancedFilters.publishingAuthority}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, publishingAuthority: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Permissions</option>
                       <option value="Direct Auto-Publish">Direct Auto-Publish</option>
@@ -6110,13 +6110,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Media Asset License</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Media Asset License</label>
                     <select
                       value={advancedFilters.mediaLicense}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, mediaLicense: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Asset Rights</option>
                       <option value="Full Asset Library Access">Full Asset Library Access</option>
@@ -6129,23 +6129,23 @@ export default function UserManagement() {
 
             {activeFilterPortalTab === 'ADMIN' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                   <div className="flex items-center gap-2">
                     <UserCog className="h-4 w-4 text-rose-600" />
-                    <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">System Admin Criteria</h5>
+                    <h5 className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">System Admin Criteria</h5>
                   </div>
-                  <span className="text-[11px] font-semibold text-slate-500">Filter SuperAdmins & System Officers</span>
+                  <span className="text-[11px] font-semibold text-[var(--text-muted)]">Filter SuperAdmins & System Officers</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Administration Level</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Administration Level</label>
                     <select
                       value={advancedFilters.adminPrivilege}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, adminPrivilege: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Privileges</option>
                       <option value="Full Super Admin">Full Super Admin</option>
@@ -6154,13 +6154,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Two-Factor Auth (2FA)</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Two-Factor Auth (2FA)</label>
                     <select
                       value={advancedFilters.hasTwoFactor}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, hasTwoFactor: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All 2FA States</option>
                       <option value="2FA Enforced & Active">2FA Enforced & Active</option>
@@ -6169,13 +6169,13 @@ export default function UserManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Security Alert Status</label>
+                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] mb-1">Security Alert Status</label>
                     <select
                       value={advancedFilters.securityAlert}
                       onChange={(e) => {
                         setAdvancedFilters(prev => ({ ...prev, securityAlert: e.target.value }));
                       }}
-                      className="w-full px-3 py-2 bg-white text-slate-900 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
+                      className="w-full px-3 py-2 bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/10 shadow-2xs"
                     >
                       <option value="All">All Alerts</option>
                       <option value="Normal Operation">Normal Operation</option>
@@ -6188,7 +6188,7 @@ export default function UserManagement() {
           </div>
 
           {/* Modal Footer Controls */}
-          <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200">
+          <div className="flex items-center justify-between gap-3 pt-3 border-t border-[var(--border-color)]">
             <button
               type="button"
               onClick={() => {
@@ -6228,9 +6228,9 @@ export default function UserManagement() {
                   securityAlert: 'All',
                 });
               }}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <RotateCcw className="h-3.5 w-3.5 text-slate-500" />
+              <RotateCcw className="h-3.5 w-3.5 text-[var(--text-muted)]" />
               <span>Reset Multi-Portal Parameters</span>
             </button>
 
@@ -6265,17 +6265,17 @@ export default function UserManagement() {
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-600">
+              <label className="block text-xs font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
                 New Temporary Password
               </label>
               <div className="relative flex items-center">
-                <Lock className="absolute left-3.5 h-4 w-4 text-slate-400" />
+                <Lock className="absolute left-3.5 h-4 w-4 text-[var(--text-muted)]" />
                 <input
                   type="text"
                   value={resetPasswordInputValue}
                   onChange={(e) => setResetPasswordInputValue(e.target.value)}
                   placeholder="Enter custom password or click generate"
-                  className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                  className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                 />
                 <button
                   type="button"
@@ -6288,11 +6288,11 @@ export default function UserManagement() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)]">
               <button
                 type="button"
                 onClick={() => setResetPasswordModalUser(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[var(--bg-page)] text-xs font-bold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
               >
                 Cancel
               </button>
@@ -6344,21 +6344,21 @@ export default function UserManagement() {
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? 'border-[#003580] bg-[#003580]/10 ring-2 ring-[#003580]/30 font-bold text-[#003580]'
-                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                        : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)] text-[var(--text-secondary)]'
                     }`}
                   >
                     <div className="text-xs font-bold">{item.label}</div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">{item.desc}</div>
+                    <div className="text-[10px] text-[var(--text-muted)] mt-0.5">{item.desc}</div>
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)]">
               <button
                 type="button"
                 onClick={() => setChangeRoleModalUser(null)}
-                className="px-4 py-2 rounded-xl bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200 cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[var(--bg-page)] text-xs font-bold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
               >
                 Cancel
               </button>
@@ -6396,13 +6396,13 @@ function Field({
     locked: 'bg-amber-50 text-amber-700 border-amber-200/80',
     editable: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
     required: 'bg-rose-50 text-rose-700 border-rose-200/80',
-    neutral: 'bg-slate-100 text-slate-600 border-slate-200',
+    neutral: 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]',
   };
 
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-600">
+        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-secondary)]">
           {label}
         </label>
         {badge && (
@@ -6419,9 +6419,9 @@ function Field({
 
 function KeyValue({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-3">
-      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{label}</span>
-      <span className="max-w-[55%] text-right text-sm font-medium text-slate-700">{value}</span>
+    <div className="flex items-start justify-between gap-4 border-b border-[var(--border-color)] pb-3">
+      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">{label}</span>
+      <span className="max-w-[55%] text-right text-sm font-medium text-[var(--text-secondary)]">{value}</span>
     </div>
   );
 }

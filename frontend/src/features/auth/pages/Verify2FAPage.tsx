@@ -113,7 +113,7 @@ export default function Verify2FAPage() {
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wider font-extrabold text-[#003366]">Signing in as</p>
-              <p className="text-xs font-bold text-gray-800 truncate max-w-[200px]">{email}</p>
+              <p className="text-xs font-bold text-[var(--text-primary)] truncate max-w-[200px]">{email}</p>
             </div>
           </div>
           <span className="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-2 py-0.5 rounded-full">
@@ -122,14 +122,14 @@ export default function Verify2FAPage() {
         </div>
 
         {/* Verification Method Selection Tabs */}
-        <div className="flex rounded-xl bg-gray-100 p-1 border border-gray-200">
+        <div className="flex rounded-xl bg-[var(--bg-page)] p-1 border border-[var(--border-color)]">
           <button
             type="button"
             onClick={() => { setActiveTab('app'); setCode(''); }}
             className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 flex items-center justify-center gap-1.5 ${
               activeTab === 'app'
                 ? 'bg-white text-[#003366] shadow-sm'
-                : 'text-gray-500 hover:text-gray-800'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <span>📱</span> Authenticator App
@@ -145,7 +145,7 @@ export default function Verify2FAPage() {
             className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 flex items-center justify-center gap-1.5 ${
               activeTab === 'email'
                 ? 'bg-white text-[#003366] shadow-sm'
-                : 'text-gray-500 hover:text-gray-800'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <span>✉️</span> Email Verification
@@ -156,11 +156,11 @@ export default function Verify2FAPage() {
         <form onSubmit={handleVerify} className="space-y-5">
           {activeTab === 'app' ? (
             <div className="space-y-3 text-center">
-              <p className="text-xs text-gray-600">
-                Open your <span className="font-bold text-gray-800">Google Authenticator</span> or TOTP app and enter your 6-digit code:
+              <p className="text-xs text-[var(--text-secondary)]">
+                Open your <span className="font-bold text-[var(--text-primary)]">Google Authenticator</span> or TOTP app and enter your 6-digit code:
               </p>
               <div>
-                <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-2">
+                <label className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider block mb-2">
                   6-Digit App Code
                 </label>
                 <input
@@ -169,7 +169,7 @@ export default function Verify2FAPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="e.g. 123456"
-                  className="w-full text-center text-2xl font-mono tracking-[0.4em] p-3.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#003366] text-gray-900 font-extrabold shadow-inner"
+                  className="w-full text-center text-2xl font-mono tracking-[0.4em] p-3.5 rounded-xl border border-[var(--border-color)] focus:ring-2 focus:ring-[#003366] text-[var(--text-primary)] font-extrabold shadow-inner"
                   required
                   autoFocus
                 />
@@ -177,7 +177,7 @@ export default function Verify2FAPage() {
             </div>
           ) : (
             <div className="space-y-4 text-center">
-              <p className="text-xs text-gray-600 leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 We send a 6-digit security code directly to <span className="font-bold text-[#003366]">{email}</span>:
               </p>
 
@@ -186,14 +186,14 @@ export default function Verify2FAPage() {
                   type="button"
                   disabled={resendTimer > 0 || sendingEmailOtp}
                   onClick={handleSendEmailOtp}
-                  className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-all border border-gray-300 disabled:opacity-60 flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] text-xs font-bold transition-all border border-[var(--border-color)] disabled:opacity-60 flex items-center gap-2"
                 >
                   <span>{sendingEmailOtp ? '⏳ Sending Code...' : resendTimer > 0 ? `Resend Code in ${resendTimer}s` : '📩 Send Code to Email'}</span>
                 </button>
               </div>
 
               <div>
-                <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-2">
+                <label className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-wider block mb-2">
                   6-Digit Email Code
                 </label>
                 <input
@@ -202,7 +202,7 @@ export default function Verify2FAPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="e.g. 849204"
-                  className="w-full text-center text-2xl font-mono tracking-[0.4em] p-3.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-[#003366] text-gray-900 font-extrabold shadow-inner"
+                  className="w-full text-center text-2xl font-mono tracking-[0.4em] p-3.5 rounded-xl border border-[var(--border-color)] focus:ring-2 focus:ring-[#003366] text-[var(--text-primary)] font-extrabold shadow-inner"
                   required
                 />
               </div>
@@ -221,7 +221,7 @@ export default function Verify2FAPage() {
         <div className="text-center pt-2">
           <Link
             to="/login"
-            className="text-xs font-semibold text-gray-500 hover:text-[#003366] transition-colors"
+            className="text-xs font-semibold text-[var(--text-muted)] hover:text-[#003366] transition-colors"
           >
             ← Back to Login
           </Link>

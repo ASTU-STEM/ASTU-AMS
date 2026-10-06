@@ -201,7 +201,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 dark:bg-slate-900/95 dark:border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-colors">
+    <header className="sticky top-0 z-50 bg-[var(--bg-card)] backdrop-blur-md border-b border-[var(--border-color)] dark:bg-slate-900/95 dark:border-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-colors">
       <div className="hidden bg-astu-navy dark:bg-slate-950 text-white md:block border-b border-white/10 dark:border-slate-800">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
           <div className="flex items-center gap-4 text-xs text-white/80">
@@ -258,7 +258,7 @@ export default function Navbar() {
               <button
                 key={item.sectionId || item.route}
                 onClick={() => handleNavClick(item)}
-                className="relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide text-slate-700 hover:text-astu-navy dark:text-slate-300 dark:hover:text-amber-400 transition-colors duration-200"
+                className="relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide text-[var(--text-secondary)] hover:text-astu-navy dark:text-slate-300 dark:hover:text-amber-400 transition-colors duration-200"
               >
                 <Icon className="h-4 w-4" />
                 {item.label}
@@ -280,7 +280,7 @@ export default function Navbar() {
                   className={`relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide transition-colors duration-200 ${
                     isOpen
                       ? "text-astu-navy dark:text-amber-400"
-                      : "text-slate-700 hover:text-astu-navy dark:text-slate-300 dark:hover:text-amber-400"
+                      : "text-[var(--text-secondary)] hover:text-astu-navy dark:text-slate-300 dark:hover:text-amber-400"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -294,20 +294,20 @@ export default function Navbar() {
 
                 {isOpen && (
                   <div className="absolute left-0 top-full animate-[mega-menu-fade-in_150ms_ease-out_both]">
-                    <div className="mt-1 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl min-w-[260px]">
+                    <div className="mt-1 overflow-hidden rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-xl min-w-[260px]">
                       <div className="p-2">
                         {menu.items.map((item) => (
                           <button
                             key={item.sectionId}
                             onClick={() => handleMegaItemClick(item.sectionId)}
-                            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-[var(--bg-page)] dark:hover:bg-slate-800"
                           >
                             <div>
                               <p className="text-sm font-bold text-astu-navy dark:text-amber-400">
                                 {item.label}
                               </p>
                               {item.description && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                <p className="text-xs text-[var(--text-muted)] dark:text-slate-400 mt-0.5">
                                   {item.description}
                                 </p>
                               )}
@@ -325,7 +325,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           <div ref={searchWrapRef} className="relative hidden lg:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
             <input
               value={searchQuery}
               onChange={(e) => {
@@ -335,17 +335,17 @@ export default function Navbar() {
               onFocus={() => setIsSearchOpen(true)}
               onKeyDown={handleSearchKeyDown}
               onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
-              className="w-48 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white py-2.5 pl-8 pr-3 text-sm focus:w-60 focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-48 rounded-full border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white py-2.5 pl-8 pr-3 text-sm focus:w-60 focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
               placeholder="Search sections..."
               type="text"
             />
             {isSearchOpen && filteredSearch.length > 0 && (
-              <div className="absolute right-0 top-11 w-64 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl animate-[mega-menu-fade-in_150ms_ease-out_both]">
+              <div className="absolute right-0 top-11 w-64 overflow-hidden rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-xl animate-[mega-menu-fade-in_150ms_ease-out_both]">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}
                     onClick={() => handleSearchSelect(item)}
-                    className="flex w-full items-center border-b border-slate-100 dark:border-slate-800 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-800 dark:text-slate-200"
+                    className="flex w-full items-center border-b border-[var(--border-color)] dark:border-slate-800 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors text-[var(--text-primary)] dark:text-slate-200"
                   >
                     <span className="font-semibold">
                       {item.label}
@@ -361,14 +361,14 @@ export default function Navbar() {
             onClick={toggleTheme}
             aria-label="Toggle dark mode"
             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            className="rounded-full p-2 text-slate-600 hover:bg-slate-100 hover:text-astu-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-amber-400 transition-all"
+            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-astu-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-amber-400 transition-all"
           >
             {darkMode ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5" />}
           </button>
 
           <button
             aria-label="Announcements"
-            className="relative rounded-full p-2 text-slate-600 hover:bg-slate-100 hover:text-astu-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-amber-400 transition-all"
+            className="relative rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-astu-navy dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-amber-400 transition-all"
             onClick={() => setIsAnnouncementOpen(true)}
             title="Announcements"
           >
@@ -384,7 +384,7 @@ export default function Navbar() {
 
           <button
             aria-label="Open navigation menu"
-            className="rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
+            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
             onClick={() => setIsMobileNavOpen((prev) => !prev)}
           >
             {isMobileNavOpen ? (
@@ -397,14 +397,14 @@ export default function Navbar() {
       </div>
 
       {isMobileNavOpen && (
-        <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 lg:hidden shadow-xl text-slate-800 dark:text-slate-200">
-          <div className="mb-4 pb-4 border-b border-slate-200/80 dark:border-slate-800 space-y-3">
+        <div className="border-t border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 px-4 py-4 lg:hidden shadow-xl text-[var(--text-primary)] dark:text-slate-200">
+          <div className="mb-4 pb-4 border-b border-[var(--border-color)] dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Appearance</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] dark:text-slate-400">Appearance</span>
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 text-xs font-bold text-[var(--text-secondary)] dark:text-slate-200"
               >
                 {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-600" />}
                 <span>{darkMode ? "Dark Theme" : "Light Theme"}</span>
@@ -415,7 +415,7 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2.5 text-sm font-bold text-astu-navy dark:text-amber-400 text-center hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-[var(--border-color)] dark:border-slate-700 px-3 py-2.5 text-sm font-bold text-astu-navy dark:text-amber-400 text-center hover:bg-[var(--bg-page)] dark:hover:bg-slate-800"
                 >
                   Login
                 </Link>
@@ -429,7 +429,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Signed in</span>
+                <span className="text-xs text-[var(--text-muted)] dark:text-slate-400 font-medium">Signed in</span>
                 <button
                   onClick={() => {
                     setIsMobileNavOpen(false);
@@ -445,25 +445,25 @@ export default function Navbar() {
 
           <div className="flex flex-col gap-2 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant dark:text-slate-400" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
-                className="w-full rounded-full border border-outline-variant bg-surface-container-low py-2.5 pl-10 pr-3 text-base focus:outline-none"
+                className="w-full rounded-full border border-outline-variant dark:border-slate-700 bg-surface-container-low dark:bg-slate-800 text-[var(--text-primary)] dark:text-white py-2.5 pl-10 pr-3 text-base focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 placeholder="Search sections..."
                 type="text"
               />
             </div>
             {filteredSearch.length > 0 && (
-              <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-md max-h-60 overflow-y-auto">
+              <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-md max-h-60 overflow-y-auto">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}
                     onClick={() => handleSearchSelect(item)}
-                    className="flex w-full items-center border-b border-outline-variant/50 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-astu-navy/5 transition-colors"
+                    className="flex w-full items-center border-b border-outline-variant/50 dark:border-slate-800/80 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-astu-navy/5 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <span className="font-semibold text-on-surface">
+                    <span className="font-semibold text-on-surface dark:text-slate-200">
                       {item.label}
                     </span>
                   </button>

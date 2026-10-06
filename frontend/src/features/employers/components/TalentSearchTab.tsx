@@ -118,13 +118,13 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
           </h3>
 
           {/* View Mode Toggle Controls */}
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl border border-gray-200 dark:border-slate-700 self-start sm:self-auto">
+          <div className="flex items-center gap-1 bg-[var(--bg-page)] dark:bg-slate-800 p-1 rounded-xl border border-[var(--border-color)] dark:border-slate-700 self-start sm:self-auto">
             <button
               onClick={() => setViewMode('grid')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 viewMode === 'grid'
                   ? 'bg-white dark:bg-slate-700 text-[#003366] dark:text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] dark:hover:text-white'
               }`}
               title="Grid View"
             >
@@ -136,7 +136,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                 viewMode === 'list'
                   ? 'bg-white dark:bg-slate-700 text-[#003366] dark:text-white shadow-xs'
-                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] dark:hover:text-white'
               }`}
               title="List View"
             >
@@ -148,7 +148,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative md:col-span-1">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">search</span>
             <input
               type="text"
               value={searchQuery}
@@ -233,7 +233,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                     className="w-16 h-16 rounded-2xl object-cover border-2 border-astu-navy/20"
                   />
                   <div>
-                    <h4 className="font-bold text-base text-gray-900 dark:text-white">{alum.alumnusName}</h4>
+                    <h4 className="font-bold text-base text-[var(--text-primary)] dark:text-white">{alum.alumnusName}</h4>
                     <p className="text-xs text-astu-navy font-bold">{alum.department}</p>
                     <p className={`text-[11px] mt-0.5 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                       Class of {alum.graduationYear} • CGPA: <span className={`font-bold ${alum.cgpa.includes('Hidden') ? 'text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded text-[10px]' : 'text-astu-green'}`}>{alum.cgpa}</span>
@@ -243,19 +243,19 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {alum.skills && alum.skills.map(s => (
-                    <span key={s} className="px-2.5 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-150 dark:border-slate-700 text-[10px] font-bold text-gray-700 dark:text-slate-300 rounded-lg">
+                    <span key={s} className="px-2.5 py-1 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 text-[10px] font-bold text-[var(--text-secondary)] dark:text-slate-300 rounded-lg">
                       {s}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex justify-between items-center text-xs pt-1 text-gray-500 dark:text-slate-400">
-                  <span>Contact: <strong className="text-gray-800 dark:text-slate-200">{alum.alumnusEmail}</strong></span>
-                  <span>Applied Date: <strong className="text-gray-800 dark:text-slate-200">{alum.appliedDate}</strong></span>
+                <div className="flex justify-between items-center text-xs pt-1 text-[var(--text-muted)] dark:text-slate-400">
+                  <span>Contact: <strong className="text-[var(--text-primary)] dark:text-slate-200">{alum.alumnusEmail}</strong></span>
+                  <span>Applied Date: <strong className="text-[var(--text-primary)] dark:text-slate-200">{alum.appliedDate}</strong></span>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-gray-100 dark:border-slate-800 flex flex-wrap gap-2">
+              <div className="pt-4 mt-4 border-t border-[var(--border-color)] dark:border-slate-800 flex flex-wrap gap-2">
                 <button
                   onClick={() => setSelectedProfileAlumni(alum)}
                   className="flex-1 py-2 px-3 bg-[#003366]/10 border border-[#003366]/20 text-[#003366] dark:text-blue-300 dark:bg-blue-900/30 rounded-xl text-xs font-bold hover:bg-[#003366] hover:text-white transition-all flex items-center justify-center gap-1"
@@ -270,7 +270,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                 </button>
                 <button
                   onClick={() => handleRequestCv(alum)}
-                  className="py-2 px-3 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300 transition-colors"
+                  className="py-2 px-3 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-bold hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 transition-colors"
                 >
                   📄 Request CV
                 </button>
@@ -303,9 +303,9 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800 text-xs">
                 {alumniData.map((alum) => (
-                  <tr key={alum.id} className="hover:bg-gray-50/60 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={alum.id} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/50 transition-colors">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <img 
@@ -314,17 +314,17 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                             e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(alum.alumnusName)}&background=003366&color=ffffff&bold=true`;
                           }}
                           alt={alum.alumnusName} 
-                          className="w-10 h-10 rounded-xl object-cover border border-gray-200 shrink-0"
+                          className="w-10 h-10 rounded-xl object-cover border border-[var(--border-color)] shrink-0"
                         />
                         <div>
-                          <p className="font-bold text-sm text-gray-900 dark:text-white">{alum.alumnusName}</p>
-                          <p className="text-[10px] text-gray-400">ID: {alum.studentId || 'N/A'}</p>
+                          <p className="font-bold text-sm text-[var(--text-primary)] dark:text-white">{alum.alumnusName}</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">ID: {alum.studentId || 'N/A'}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-4">
                       <p className="font-bold text-[#003366] dark:text-blue-400">{alum.department}</p>
-                      <p className="text-gray-500 font-medium">Class of {alum.graduationYear}</p>
+                      <p className="text-[var(--text-muted)] font-medium">Class of {alum.graduationYear}</p>
                     </td>
                     <td className="py-4 px-4">
                       <span className={`font-extrabold ${alum.cgpa.includes('Hidden') ? 'text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-[10px]' : 'text-emerald-700 font-bold text-sm'}`}>
@@ -334,14 +334,14 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                     <td className="py-4 px-4">
                       <div className="flex flex-wrap gap-1 max-w-[200px]">
                         {alum.skills && alum.skills.slice(0, 3).map(s => (
-                          <span key={s} className="px-2 py-0.5 bg-gray-100 dark:bg-slate-800 text-[10px] font-bold text-gray-700 dark:text-slate-300 rounded">
+                          <span key={s} className="px-2 py-0.5 bg-[var(--bg-page)] dark:bg-slate-800 text-[10px] font-bold text-[var(--text-secondary)] dark:text-slate-300 rounded">
                             {s}
                           </span>
                         ))}
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="font-medium text-gray-700 dark:text-slate-300">{alum.alumnusEmail}</span>
+                      <span className="font-medium text-[var(--text-secondary)] dark:text-slate-300">{alum.alumnusEmail}</span>
                     </td>
                     <td className="py-4 px-6 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -359,7 +359,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                         </button>
                         <button
                           onClick={() => handleRequestCv(alum)}
-                          className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-bold hover:bg-gray-50 text-gray-700 dark:text-slate-300 transition-colors"
+                          className="px-3 py-1.5 border border-[var(--border-color)] dark:border-slate-700 rounded-lg text-xs font-bold hover:bg-[var(--bg-page)] text-[var(--text-secondary)] dark:text-slate-300 transition-colors"
                         >
                           Request CV
                         </button>
@@ -369,7 +369,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                 ))}
                 {alumniData.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center italic text-gray-400">
+                    <td colSpan={6} className="py-12 text-center italic text-[var(--text-muted)]">
                       No graduates matching your search criteria.
                     </td>
                   </tr>
@@ -395,10 +395,10 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                         e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(alum.alumnusName)}&background=003366&color=ffffff&bold=true`;
                       }}
                       alt={alum.alumnusName} 
-                      className="w-12 h-12 rounded-xl object-cover border border-gray-200 shrink-0"
+                      className="w-12 h-12 rounded-xl object-cover border border-[var(--border-color)] shrink-0"
                     />
                     <div>
-                      <p className="font-extrabold text-sm text-gray-900 dark:text-white">{alum.alumnusName}</p>
+                      <p className="font-extrabold text-sm text-[var(--text-primary)] dark:text-white">{alum.alumnusName}</p>
                       <p className="text-xs text-[#003366] dark:text-blue-400 font-bold">{alum.department}</p>
                     </div>
                   </div>
@@ -407,12 +407,12 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs text-gray-500 pt-1 border-t border-gray-200/60 dark:border-slate-700">
+                <div className="flex justify-between items-center text-xs text-[var(--text-muted)] pt-1 border-t border-[var(--border-color)] dark:border-slate-700">
                   <span>Class of <strong>{alum.graduationYear}</strong></span>
                   <span className="truncate max-w-[170px]"><strong>{alum.alumnusEmail}</strong></span>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-200/60 dark:border-slate-700">
+                <div className="flex items-center gap-2 pt-2 border-t border-[var(--border-color)] dark:border-slate-700">
                   <button
                     onClick={() => setSelectedProfileAlumni(alum)}
                     className="flex-1 py-2 bg-[#003366] text-white rounded-xl text-xs font-bold hover:bg-[#002244] transition-colors flex items-center justify-center gap-1 shadow-xs"
@@ -429,7 +429,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
               </div>
             ))}
             {alumniData.length === 0 && (
-              <div className="py-8 text-center italic text-gray-400 text-xs">No graduates matching your search criteria.</div>
+              <div className="py-8 text-center italic text-[var(--text-muted)] text-xs">No graduates matching your search criteria.</div>
             )}
           </div>
 
@@ -439,14 +439,14 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
               darkMode ? 'border-slate-800 bg-slate-900/60 text-slate-400' : 'border-gray-150 bg-gray-50/50 text-gray-500'
             }`}>
               <div>
-                Showing <strong className="text-gray-900 dark:text-white">{Math.min((page - 1) * pageSize + 1, totalCount)}</strong> to <strong className="text-gray-900 dark:text-white">{Math.min(page * pageSize, totalCount)}</strong> of <strong className="text-astu-navy dark:text-blue-400 font-bold">{totalCount}</strong> Verified ASTU Alumni
+                Showing <strong className="text-[var(--text-primary)] dark:text-white">{Math.min((page - 1) * pageSize + 1, totalCount)}</strong> to <strong className="text-[var(--text-primary)] dark:text-white">{Math.min(page * pageSize, totalCount)}</strong> of <strong className="text-astu-navy dark:text-blue-400 font-bold">{totalCount}</strong> Verified ASTU Alumni
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   disabled={page <= 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className="px-3 py-1.5 rounded-lg border font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  className="px-3 py-1.5 rounded-lg border font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors"
                 >
                   &larr; Previous
                 </button>
@@ -456,7 +456,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
                 <button
                   disabled={page >= Math.ceil(totalCount / pageSize)}
                   onClick={() => setPage(p => p + 1)}
-                  className="px-3 py-1.5 rounded-lg border font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  className="px-3 py-1.5 rounded-lg border font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors"
                 >
                   Next &rarr;
                 </button>
@@ -485,7 +485,7 @@ export const TalentSearchTab: React.FC<TalentSearchTabProps> = ({ darkMode, onSe
               <h3 className="text-xl font-bold">Message {selectedAlumniForMessage.alumnusName}</h3>
               <button 
                 onClick={() => setMessageModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>

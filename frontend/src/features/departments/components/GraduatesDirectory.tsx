@@ -37,7 +37,7 @@ interface GraduatesDirectoryProps {
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
-  <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
+  <div className={`animate-pulse rounded-lg bg-[var(--bg-page)] dark:bg-slate-700/50 ${className}`} />
 );
 
 const DetailItem = ({
@@ -292,7 +292,7 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
               className={`w-full rounded-xl border py-2.5 pl-10 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-[#003580]/30 ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'}`}
             />
             {searchTerm && (
-              <button type="button" onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400">
+              <button type="button" onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--text-muted)]">
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -322,7 +322,7 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
                     ? 'bg-[#003580] text-white'
                     : darkMode
                       ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
                 {label}

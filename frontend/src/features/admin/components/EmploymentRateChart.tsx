@@ -24,9 +24,9 @@ export default function EmploymentRateChart({
   data?: Array<{ label: string; value: number }>;
 }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <h3 className="text-sm font-semibold text-slate-900">Employment Rate</h3>
-      <p className="mt-1 text-xs text-slate-500">Tracked alumni employment growth over time</p>
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)]">Employment Rate</h3>
+      <p className="mt-1 text-xs text-[var(--text-muted)]">Tracked alumni employment growth over time</p>
       <div className="mt-4 h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
@@ -36,7 +36,7 @@ export default function EmploymentRateChart({
                 <stop offset="95%" stopColor="#003580" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
             <XAxis dataKey="label" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
             <Tooltip

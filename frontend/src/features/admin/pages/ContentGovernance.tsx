@@ -77,12 +77,12 @@ const statusClasses: Record<ContentStatus, string> = {
   Published: 'border-[#1D9E75]/20 bg-[#1D9E75]/10 text-[#1D9E75]',
   Scheduled: 'border-[#003580]/20 bg-[#003580]/10 text-[#003580] dark:text-sky-300',
   Pinned: 'border-violet-200 bg-violet-100 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300',
-  Draft: 'border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400',
+  Draft: 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400',
   'Needs Review': 'border-[#E8A020]/20 bg-[#E8A020]/10 text-[#B87900] dark:text-amber-300',
 };
 
 const audienceClasses: Record<Audience, string> = {
-  Public: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  Public: 'bg-[var(--bg-page)] text-[var(--text-secondary)] dark:bg-slate-800 dark:text-slate-300',
   Internal: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300',
   Emergency: 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300',
   Department: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300',
@@ -352,12 +352,12 @@ export default function ContentGovernance() {
         ].map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.label} className="fade-up rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
+            <div key={metric.label} className="fade-up rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
               <span className={`inline-flex h-10 w-10 items-center justify-center rounded-[8px] ${metric.color}`}>
                 <Icon className="h-5 w-5" />
               </span>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{metric.label}</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{metric.value}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] dark:text-slate-400">{metric.label}</p>
+              <p className="mt-1 text-2xl font-bold text-[var(--text-primary)] dark:text-white">{metric.value}</p>
             </div>
           );
         })}
@@ -365,27 +365,27 @@ export default function ContentGovernance() {
 
       {/* Tab Selector + Search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center gap-1.5 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 dark:border-slate-800 dark:bg-slate-900">
           {tabs.map(tab => (
             <button
               key={tab.key}
               type="button"
               onClick={() => setSelectedTab(tab.key)}
               className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm dark:bg-sky-600' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm dark:bg-sky-600' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:text-slate-400 dark:hover:bg-slate-800'
               }`}
             >
               {tab.key === 'announcements' ? <Megaphone className="h-3.5 w-3.5" /> : <MessageSquareWarning className="h-3.5 w-3.5" />}
               {tab.label}
               <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] ${
-                selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-muted)] dark:bg-slate-800 dark:text-slate-400'
               }`}>{tab.count}</span>
             </button>
           ))}
         </div>
         <div className="relative max-w-xs w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search content..." className="w-full rounded-[8px] border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search content..." className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] py-2 pl-9 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
         </div>
       </div>
 
@@ -393,33 +393,33 @@ export default function ContentGovernance() {
         <section className="grid gap-4 xl:grid-cols-[420px_1fr]">
           {/* Editor Panel */}
           {(showEditor || editingId) && (
-            <div className="fade-up rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
+            <div className="fade-up rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Newspaper className="h-5 w-5 text-[#003580] dark:text-sky-400" />
-                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Rich Text Announcement Editor</h2>
+                  <h2 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white">Rich Text Announcement Editor</h2>
                 </div>
-                <button onClick={() => { setShowEditor(false); setEditingId(null); }} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"><X className="h-4 w-4" /></button>
+                <button onClick={() => { setShowEditor(false); setEditingId(null); }} className="rounded-lg p-1 text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 cursor-pointer"><X className="h-4 w-4" /></button>
               </div>
               <div className="mt-4 space-y-3">
                 <select value={audience} onChange={e => setAudience(e.target.value as Audience)}
-                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#003580] bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 text-sm outline-none focus:border-[#003580] bg-[var(--bg-card)] dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                   {(['Public', 'Internal', 'Emergency', 'Department', 'Alumni', 'Employer'] as Audience[]).map(opt => (
                     <option key={opt}>{opt}</option>
                   ))}
                 </select>
                 <input value={headline} onChange={e => setHeadline(e.target.value)} placeholder="Announcement headline"
-                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 text-sm outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
                 <textarea value={body} onChange={e => setBody(e.target.value)} rows={5} placeholder="Compose announcement body with links, headings, and publication metadata..."
-                  className="min-h-32 w-full rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#003580] resize-none dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
-                <label className="flex cursor-pointer items-center justify-between rounded-[8px] border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-600 hover:border-[#003580]/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  className="min-h-32 w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 text-sm outline-none focus:border-[#003580] resize-none dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                <label className="flex cursor-pointer items-center justify-between rounded-[8px] border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-3 text-sm text-[var(--text-secondary)] hover:border-[#003580]/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <span className="inline-flex items-center gap-2"><FileText className="h-4 w-4" /> Attach PDF notice</span>
                   <input type="file" accept="application/pdf" className="sr-only" onChange={() => toast.success('PDF attached')} />
                 </label>
                 <ImageUploader label="Upload Announcement Featured Image" value={image} onChange={setImage} />
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={schedule}
-                    className="inline-flex items-center justify-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
+                    className="inline-flex items-center justify-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer">
                     <CalendarClock className="h-4 w-4" /> Schedule
                   </button>
                   <button onClick={publish}
@@ -432,16 +432,16 @@ export default function ContentGovernance() {
           )}
 
           {/* Announcement Table */}
-          <div className={`${showEditor || editingId ? '' : 'xl:col-span-2'} rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900`}>
+          <div className={`${showEditor || editingId ? '' : 'xl:col-span-2'} rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Announcement Management</h2>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Filter by audience to see relevant announcements.</p>
+                <h2 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white">Announcement Management</h2>
+                <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400">Filter by audience to see relevant announcements.</p>
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {(['Public', 'Internal', 'Emergency', 'Department', 'Alumni', 'Employer'] as Audience[]).map(a => (
                   <button key={a} type="button" onClick={() => setAudience(a)}
-                    className={`rounded-md px-2.5 py-1 text-[10px] font-semibold transition-all cursor-pointer ${audience === a ? 'bg-[#003580] text-white shadow-sm dark:bg-sky-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>
+                    className={`rounded-md px-2.5 py-1 text-[10px] font-semibold transition-all cursor-pointer ${audience === a ? 'bg-[#003580] text-white shadow-sm dark:bg-sky-600' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]  dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>
                     {a}
                   </button>
                 ))}
@@ -450,13 +450,13 @@ export default function ContentGovernance() {
 
             <div className="mt-4 space-y-2">
               {filteredAnnouncements.map((row) => (
-                <div key={row.id} className="flex flex-col gap-2 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 transition-all hover:border-slate-200 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-slate-700">
+                <div key={row.id} className="flex flex-col gap-2 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-all hover:border-[var(--border-color)] hover:shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-slate-700">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{row.title}</h3>
+                      <h3 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white">{row.title}</h3>
                       <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-semibold ${audienceClasses[row.audience]}`}>{row.audience}</span>
                     </div>
-                    <div className="mt-1 flex items-center gap-3 text-[10px] text-slate-400">
+                    <div className="mt-1 flex items-center gap-3 text-[10px] text-[var(--text-muted)]">
                       <span className="flex items-center gap-1"><Megaphone className="w-3 h-3" /> {row.owner}</span>
                       <span>{row.updated}</span>
                       {row.views > 0 && <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {row.views}</span>}
@@ -473,9 +473,9 @@ export default function ContentGovernance() {
                     </span>
                     <div className="flex items-center gap-1">
                       <button onClick={() => navigate(`/announcements/${row.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-slate-100 hover:text-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-sky-300 transition-all cursor-pointer" title="View Full Notice Page"><Eye className="h-3.5 w-3.5" /></button>
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] bg-white text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-sky-300 transition-all cursor-pointer" title="View Full Notice Page"><Eye className="h-3.5 w-3.5" /></button>
                       <button onClick={() => { setHeadline(row.title); setAudience(row.audience); setShowEditor(true); setEditingId(row.id); }}
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-400 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-sky-300 transition-all cursor-pointer" title="Edit"><Edit3 className="h-3.5 w-3.5" /></button>
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-sky-300 transition-all cursor-pointer" title="Edit"><Edit3 className="h-3.5 w-3.5" /></button>
                       {row.status !== 'Pinned' && (
                         <button onClick={() => changeStatus(row.id, 'Pinned')}
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-violet-200 bg-violet-50 text-violet-500 hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300 dark:hover:bg-violet-900/60 transition-all cursor-pointer" title="Pin"><Pin className="h-3.5 w-3.5" /></button>
@@ -493,7 +493,7 @@ export default function ContentGovernance() {
               {filteredAnnouncements.length === 0 && (
                 <div className="py-8 text-center">
                   <Megaphone className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600" />
-                  <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">No announcements match your filter.</p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)] dark:text-slate-400">No announcements match your filter.</p>
                 </div>
               )}
             </div>
@@ -504,15 +504,15 @@ export default function ContentGovernance() {
       {selectedTab === 'community' && (
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredCommunity.map((row, idx) => (
-            <div key={row.id} className="fade-up rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+            <div key={row.id} className="fade-up rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               style={{ animationDelay: `${idx * 0.05}s` }}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     {row.pinned && <Pin className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" />}
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white truncate">{row.title}</h3>
+                    <h3 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white truncate">{row.title}</h3>
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{row.author} · {row.date}</p>
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)] dark:text-slate-400">{row.author} · {row.date}</p>
                 </div>
                 {row.reports > 0 ? (
                   <div className="flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-600 dark:bg-rose-950/50 dark:text-rose-300">
@@ -522,13 +522,13 @@ export default function ContentGovernance() {
                   <CheckCircle2 className="h-5 w-5 text-[#1D9E75] dark:text-emerald-400 shrink-0" />
                 )}
               </div>
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-1.5">
+              <div className="mt-4 pt-3 border-t border-[var(--border-color)] dark:border-slate-800 flex flex-wrap gap-1.5">
                 <button onClick={() => approvePost(row.id)}
-                  className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold transition-all cursor-pointer ${row.approved ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>
+                  className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold transition-all cursor-pointer ${row.approved ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>
                   <CheckCircle2 className="h-3 w-3" /> {row.approved ? 'Approved' : 'Approve'}
                 </button>
                 <button onClick={() => togglePin(row.id)}
-                  className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold transition-all cursor-pointer ${row.pinned ? 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>
+                  className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold transition-all cursor-pointer ${row.pinned ? 'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300' : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>
                   <Pin className="h-3 w-3" /> {row.pinned ? 'Pinned' : 'Pin'}
                 </button>
                 <button onClick={() => toast.success(`Analytics for "${row.title}"`)}

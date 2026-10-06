@@ -16,9 +16,9 @@ export default function DepartmentBreakdownChart({
   data?: Array<{ name: string; value: number }>;
 }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <h3 className="text-sm font-semibold text-slate-900">Department Breakdown</h3>
-      <p className="mt-1 text-xs text-slate-500">Distribution of alumni across primary departments</p>
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)]">Department Breakdown</h3>
+      <p className="mt-1 text-xs text-[var(--text-muted)]">Distribution of alumni across primary departments</p>
       <div className="mt-4 h-72">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

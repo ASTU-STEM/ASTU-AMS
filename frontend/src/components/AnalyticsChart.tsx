@@ -56,7 +56,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
       )}
       {payload.map((entry, idx) => (
         <div key={idx} className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-slate-400">
+          <span className="flex items-center gap-1.5 text-[var(--text-muted)]">
             <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: entry.color || COLORS.navy }} />
             {entry.name}
           </span>

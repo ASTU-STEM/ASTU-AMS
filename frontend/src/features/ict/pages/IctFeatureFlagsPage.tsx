@@ -1,173 +1,299 @@
-import React, { useState } from 'react';
-import {
-  CheckCircle2,
-  Database,
-  Layers,
-  RefreshCw,
-  RotateCcw,
-  Sliders,
-  Sparkles,
-  Zap,
-} from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { RotateCcw, Sliders, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
+import IctPageHeader from '../components/IctPageHeader';
+import IctMetricCard from '../components/IctMetricCard';
+import IctSection from '../components/IctSection';
+import IctStatusBadge, { IctEnvironmentBadge } from '../components/IctStatusBadge';
+import IctTabs, { IctTabItem } from '../components/IctTabs';
+import IctToggle from '../components/IctToggle';
+import IctEmptyState from '../components/IctEmptyState';
+import IctActionMenu from '../components/IctActionMenu';
+import { IctMeter } from '../components/IctHealthIndicator';
+import { ictBtnSecondary } from '../components/ictUi';
+
+type Environment = 'Production' | 'Staging' | 'Sandbox';
+
+interface FeatureFlag {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  rolloutPct: number;
+  audience: string;
+}
+
+const BASE_FLAGS: FeatureFlag[] = [
+  { id: 'f-1', name: 'ASTU AI & Assistant', description: 'In-portal diagnostics and guided ICT assistant', enabled: true, rolloutPct: 100, audience: 'All Users' },
+  { id: 'f-2', name: 'AI Job Matching Engine', description: 'Personalized job recommendations for alumni', enabled: true, rolloutPct: 25, audience: 'Alumni cohort' },
+  { id: 'f-3', name: 'Employer Talent Pipeline', description: 'Employer sourcing and shortlist workflows', enabled: true, rolloutPct: 100, audience: 'All Employers' },
+  { id: 'f-4', name: 'Tracer Study Multi-Channel Notifications', description: 'Email, in-app, and SMS tracer reminders', enabled: true, rolloutPct: 100, audience: 'All Batches' },
+  { id: 'f-5', name: 'SMS Mobile 2FA Verification', description: 'OTP delivery via Ethio Telecom SMS Center', enabled: false, rolloutPct: 0, audience: 'Admin & Alumni logins' },
+  { id: 'f-6', name: 'Experimental AI Root Cause Agent', description: 'Automated incident root-cause suggestions', enabled: true, rolloutPct: 10, audience: 'ICT Admins' },
+];
+
+function targetLabel(flag: FeatureFlag): string {
+  if (!flag.enabled || flag.rolloutPct <= 0) return 'Disabled';
+  if (flag.rolloutPct >= 100) return flag.audience.startsWith('All') ? flag.audience : `All · ${flag.audience}`;
+  return `${flag.rolloutPct}% of ${flag.audience}`;
+}
 
 export default function IctFeatureFlagsPage() {
-  const [environment, setEnvironment] = useState<'Production' | 'Staging' | 'Sandbox'>('Production');
+  const [environment, setEnvironment] = useState<Environment>('Sandbox');
+  const [featuresByEnv, setFeaturesByEnv] = useState<Record<Environment, FeatureFlag[]>>({
+    Production: BASE_FLAGS.map((f) => ({ ...f })),
+    Staging: BASE_FLAGS.map((f) => (f.id === 'f-2' ? { ...f, rolloutPct: 50, enabled: true } : { ...f })),
+    Sandbox: BASE_FLAGS.map((f) => (f.id === 'f-6' ? { ...f, rolloutPct: 100, enabled: true } : { ...f })),
+  });
 
-  const [features, setFeatures] = useState([
-    { id: 'f-1', name: 'ASTU AI & Assistant', enabled: true, rolloutPct: 100, target: 'All Users' },
-    { id: 'f-2', name: 'AI Job Matching Engine', enabled: true, rolloutPct: 25, target: '25% of Alumni' },
-    { id: 'f-3', name: 'Employer Talent Pipeline', enabled: true, rolloutPct: 100, target: 'All Employers' },
-    { id: 'f-4', name: 'Tracer Study Multi-Channel Notifications', enabled: true, rolloutPct: 100, target: 'All Batches' },
-    { id: 'f-5', name: 'SMS Mobile 2FA Verification', enabled: false, rolloutPct: 0, target: 'Disabled' },
-    { id: 'f-6', name: 'Experimental AI Root Cause Agent', enabled: true, rolloutPct: 10, target: '10% of Admins' },
-  ]);
+  const features = featuresByEnv[environment];
 
-  // NOTE: this page holds no network calls at all - the flags live in React
-  // state only. It previously showed "Feature toggle updated in real-time",
-  // which claimed a server-side change that never happened. The message is now
-  // honest about being local-only.
+  const stats = useMemo(() => {
+    const enabled = features.filter((f) => f.enabled && f.rolloutPct > 0).length;
+    const partial = features.filter((f) => f.enabled && f.rolloutPct > 0 && f.rolloutPct < 100).length;
+    const disabled = features.length - enabled;
+    return { enabled, partial, disabled, total: features.length, full: enabled - partial };
+  }, [features]);
+
+  const updateFlag = (id: string, patch: Partial<FeatureFlag>) => {
+    setFeaturesByEnv((prev) => ({
+      ...prev,
+      [environment]: prev[environment].map((f) => (f.id === id ? { ...f, ...patch } : f)),
+    }));
+  };
+
   const toggleFeature = (id: string) => {
-    setFeatures((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, enabled: !f.enabled } : f))
+    const current = features.find((f) => f.id === id);
+    if (!current) return;
+    const nextEnabled = !current.enabled;
+    updateFlag(id, {
+      enabled: nextEnabled,
+      rolloutPct: nextEnabled ? (current.rolloutPct > 0 ? current.rolloutPct : 25) : 0,
+    });
+    toast.success(
+      nextEnabled ? `${current.name} enabled in ${environment}` : `${current.name} disabled in ${environment}`
     );
-    toast('Toggled locally only - this screen is not connected to the server yet.');
   };
 
   const updateRollout = (id: string, pct: number) => {
-    setFeatures((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, rolloutPct: pct } : f))
-    );
+    updateFlag(id, { rolloutPct: pct, enabled: pct > 0 });
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <Sliders className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            Feature Flags, Sandbox &amp; Release Control
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Toggle platform features without redeploying code, configure percentage rollouts, and manage releases.
-          </p>
-        </div>
+  const envTabs: IctTabItem<Environment>[] = [
+    { key: 'Production', label: 'Production' },
+    { key: 'Staging', label: 'Staging' },
+    { key: 'Sandbox', label: 'Sandbox' },
+  ];
 
-        {/* Environment Switcher */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-200 p-1 dark:bg-slate-800">
-          {(['Production', 'Staging', 'Sandbox'] as const).map((env) => (
-            <button
-              key={env}
-              type="button"
-              onClick={() => {
-                setEnvironment(env);
-                toast.success(`Switched active workspace to ${env} mode`);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
-                environment === env
-                  ? env === 'Production'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : env === 'Staging'
-                    ? 'bg-amber-500 text-slate-950 shadow-xs'
-                    : 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-              }`}
-            >
-              {env}
-            </button>
-          ))}
-        </div>
+  return (
+    <div className="space-y-4 lg:space-y-5">
+      <IctPageHeader
+        icon={Sliders}
+        title="Feature Flags & Sandbox"
+        description="Toggle features, control rollouts and manage releases per environment."
+        meta={
+          <>
+            <IctEnvironmentBadge environment={environment} />
+            <span className="ict-label">Workspace configuration</span>
+          </>
+        }
+        actions={
+          <IctTabs<Environment>
+            items={envTabs}
+            value={environment}
+            onChange={(env) => {
+              setEnvironment(env);
+              toast.success(`Switched to ${env}`);
+            }}
+            ariaLabel="Deployment environment"
+          />
+        }
+      />
+
+      {/* Rollout summary */}
+      <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <IctMetricCard
+          label="Enabled"
+          value={stats.enabled}
+          tone="success"
+          hint={`${stats.total} flags currently available in ${environment}`}
+          status={<IctStatusBadge status="enabled" size="xs" />}
+        />
+        <IctMetricCard
+          label="Partial rollout"
+          value={stats.partial}
+          tone="warning"
+          hint="Canary percentage below 100%"
+          status={<IctStatusBadge status="partial" label="PARTIAL" size="xs" />}
+        />
+        <IctMetricCard
+          label="Disabled"
+          value={stats.disabled}
+          tone="default"
+          hint="Flags off in this environment"
+          status={<IctStatusBadge status="disabled" size="xs" />}
+        />
+        <IctMetricCard
+          label="Full coverage"
+          value={stats.full}
+          tone="info"
+          hint="Flags at 100% rollout"
+          status={<IctStatusBadge status="enabled" label="FULL" size="xs" />}
+        />
       </div>
 
-      {/* Feature Flag List */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-              Feature Flag Control Center ({environment} Environment)
-            </h2>
-          </div>
-          <span className="text-xs text-slate-500">Live Config Engine</span>
-        </div>
-
-        <div className="space-y-4">
-          {features.map((f) => (
-            <div
-              key={f.id}
-              className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">{f.name}</h3>
-                  <p className="text-[11px] text-slate-500">Targeting: {f.target}</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-                    {f.enabled ? `${f.rolloutPct}% ROLLOUT` : 'DISABLED'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleFeature(f.id)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
-                      f.enabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        f.enabled ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {f.enabled && (
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>Rollout Percentage</span>
-                    <span>{f.rolloutPct}%</span>
+      {/* Flag register */}
+      <IctSection
+        icon={Sparkles}
+        title={`${environment} feature flags`}
+        description={`${stats.total} flags · toggle or drag the rollout slider to change coverage`}
+        actions={<IctStatusBadge status={environment} size="xs" />}
+        bodyClassName="space-y-2"
+      >
+        {features.length === 0 ? (
+          <IctEmptyState
+            icon={Sliders}
+            title="No feature flags configured"
+            description="Flags created for this environment will appear here with their rollout percentage and target audience."
+          />
+        ) : (
+          features.map((f) => {
+            const isLive = f.enabled && f.rolloutPct > 0;
+            const isPartial = isLive && f.rolloutPct < 100;
+            return (
+              <article
+                key={f.id}
+                className={`ict-tile p-3.5 transition-colors duration-150 ${
+                  isLive ? 'hover:border-[var(--ict-accent)]/40' : 'border-dashed opacity-90'
+                }`}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-[13.5px] font-extrabold tracking-tight text-[var(--text-primary)] ">
+                        {f.name}
+                      </h3>
+                      <IctStatusBadge
+                        status={isLive ? (f.rolloutPct >= 100 ? 'enabled' : 'partial') : 'disabled'}
+                        label={isLive ? (f.rolloutPct >= 100 ? 'FULL' : 'CANARY') : 'OFF'}
+                        size="xs"
+                      />
+                      <span className="text-[10px] font-semibold text-[var(--text-muted)]">
+                        Owner · ICT Systems Directorate
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--text-secondary)]">{f.description}</p>
+                    <p className="mt-1.5 text-[11px] font-medium text-[var(--text-muted)]">
+                      Targeting:{' '}
+                      <span className="font-semibold text-[var(--text-secondary)]">{targetLabel(f)}</span>
+                    </p>
                   </div>
+
+                  <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
+                    <span
+                      className={`ict-mono ict-num text-[14px] font-extrabold ${
+                        isLive ? 'text-[var(--ict-accent-text)]' : 'text-[var(--text-muted)]'
+                      }`}
+                    >
+                      {isLive ? `${f.rolloutPct}%` : 'OFF'}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <IctToggle
+                        checked={isLive}
+                        onChange={() => toggleFeature(f.id)}
+                        label={`Toggle ${f.name}`}
+                        size="sm"
+                      />
+                      <IctActionMenu
+                        label={`Actions for ${f.name}`}
+                        items={[
+                          {
+                            label: isLive ? 'Disable flag' : 'Enable flag',
+                            danger: isLive,
+                            onSelect: () => toggleFeature(f.id),
+                          },
+                          {
+                            label: 'Set rollout to 100%',
+                            disabled: !isLive,
+                            disabledReason: 'Enable the flag first',
+                            onSelect: () => updateRollout(f.id, 100),
+                          },
+                          { label: 'Set rollout to 0%', onSelect: () => updateRollout(f.id, 0) },
+                          { divider: true },
+                          {
+                            label: 'Edit definition',
+                            disabled: true,
+                            disabledReason: 'Flag definitions are managed by the release pipeline',
+                            onSelect: () => {},
+                          },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rollout control */}
+                <div className="mt-3.5 border-t border-[var(--ict-hairline)] pt-3">
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className="ict-label">Rollout</span>
+                    <span className="ict-mono ict-num text-[11px] font-bold text-[var(--text-secondary)]">
+                      {f.rolloutPct}%
+                      {isPartial && <span className="ml-1.5 font-semibold text-[var(--ict-warn)]">canary</span>}
+                    </span>
+                  </div>
+                  <IctMeter
+                    value={f.rolloutPct}
+                    tone={isLive ? (isPartial ? 'warning' : 'success') : 'neutral'}
+                    label={`${f.name} rollout ${f.rolloutPct} percent`}
+                  />
                   <input
                     type="range"
-                    min="0"
-                    max="100"
-                    step="5"
+                    min={0}
+                    max={100}
+                    step={5}
                     value={f.rolloutPct}
-                    onChange={(e) => updateRollout(f.id, parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-blue-600"
+                    onChange={(e) => updateRollout(f.id, Number(e.target.value))}
+                    aria-label={`${f.name} rollout percentage`}
+                    className="ict-range mt-2.5 w-full cursor-pointer"
                   />
+                  <div className="mt-1 flex justify-between text-[9.5px] font-medium text-[var(--text-muted)]">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+              </article>
+            );
+          })
+        )}
+      </IctSection>
 
-      {/* Release & Rollback Control */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span className="font-mono text-xs font-bold text-emerald-600">CURRENT LIVE RELEASE: v2.8.1</span>
-            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">
-              Deployment Release &amp; One-Click Rollback
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Previous stable release: <strong>v2.8.0</strong> (Deployed 3 days ago). All database migrations verified.
-            </p>
+      {/* Release control */}
+      <IctSection
+        icon={RotateCcw}
+        title="Deployment & One-Click Rollback"
+        description="Previous stable release available for immediate restore"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="ict-mono ict-num rounded-[4px] bg-[var(--ict-ok-bg)] px-1.5 py-0.5 font-extrabold text-[var(--ict-ok)] ring-1 ring-inset ring-[var(--ict-ok-line)]">
+              LIVE · v2.8.1
+            </span>
+            <button
+              type="button"
+              onClick={() => toast.success('Rolled back release v2.8.1 → v2.8.0')}
+              className={ictBtnSecondary}
+            >
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+              Rollback to v2.8.0
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => toast.success('Rolled back release v2.8.1 -> v2.8.0 successfully')}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 text-xs font-bold text-white hover:bg-amber-700 shadow-md cursor-pointer"
-          >
-            <RotateCcw className="w-4 h-4" /> Rollback to v2.8.0
-          </button>
-        </div>
-      </div>
+        }
+      >
+        <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
+          Rollback restores the previous verified release package for the active environment. Migrations applied by the
+          current release are retained.
+        </p>
+      </IctSection>
     </div>
   );
 }

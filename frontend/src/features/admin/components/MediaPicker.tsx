@@ -173,7 +173,7 @@ const typeColor: Record<MediaAsset['type'], string> = {
   image: 'bg-blue-100 text-blue-700',
   video: 'bg-rose-100 text-rose-700',
   audio: 'bg-violet-100 text-violet-700',
-  document: 'bg-slate-100 text-slate-700',
+  document: 'bg-[var(--bg-page)] text-[var(--text-secondary)]',
 };
 
 export default function MediaPicker({
@@ -241,14 +241,14 @@ export default function MediaPicker({
       size="xl"
       footer={
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-[var(--text-muted)]">
             {selectedIds.length} selected · {filtered.length} available
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -268,13 +268,13 @@ export default function MediaPicker({
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by filename or tag..."
-              className="w-full rounded-[8px] border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+              className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] py-2 pl-8 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
             />
           </div>
           <button
@@ -284,11 +284,11 @@ export default function MediaPicker({
             <Upload className="h-3.5 w-3.5" />
             Upload
           </button>
-          <div className="inline-flex rounded-md border border-slate-200 bg-white p-0.5">
+          <div className="inline-flex rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] p-0.5">
             <button
               type="button"
               onClick={() => setView('grid')}
-              className={`inline-flex h-7 w-7 items-center justify-center rounded ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`inline-flex h-7 w-7 items-center justify-center rounded ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
               title="Grid view"
             >
               <Grid3x3 className="h-3.5 w-3.5" />
@@ -296,7 +296,7 @@ export default function MediaPicker({
             <button
               type="button"
               onClick={() => setView('list')}
-              className={`inline-flex h-7 w-7 items-center justify-center rounded ${view === 'list' ? 'bg-[#003580] text-white' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`inline-flex h-7 w-7 items-center justify-center rounded ${view === 'list' ? 'bg-[#003580] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
               title="List view"
             >
               <List className="h-3.5 w-3.5" />
@@ -313,7 +313,7 @@ export default function MediaPicker({
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all ${
                 folder === folderOption
                   ? 'border-[#003580] bg-[#003580] text-white'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-[#003580]/40'
+                  : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003580]/40'
               }`}
             >
               {folderOption === 'All' ? <Filter className="h-3 w-3" /> : <Folder className="h-3 w-3" />}
@@ -335,15 +335,15 @@ export default function MediaPicker({
                   className={`group relative flex flex-col overflow-hidden rounded-[10px] border text-left transition-all ${
                     selected
                       ? 'border-[#003580] ring-2 ring-[#003580]/30'
-                      : 'border-slate-200 hover:border-[#003580]/40'
-                  } bg-white`}
+                      : 'border-[var(--border-color)] hover:border-[#003580]/40'
+                  } bg-[var(--bg-card)]`}
                 >
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                  <div className="relative aspect-video w-full overflow-hidden bg-[var(--bg-page)]">
                     {asset.type === 'image' && asset.url ? (
                       <img src={asset.url} alt={asset.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">
-                        <Icon className="h-8 w-8 text-slate-400" />
+                        <Icon className="h-8 w-8 text-[var(--text-muted)]" />
                       </div>
                     )}
                     <span className={`absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${typeColor[asset.type]}`}>
@@ -356,21 +356,21 @@ export default function MediaPicker({
                     )}
                   </div>
                   <div className="p-2">
-                    <p className="truncate text-[11px] font-semibold text-slate-800">{asset.name}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">{formatBytes(asset.size)}</p>
+                    <p className="truncate text-[11px] font-semibold text-[var(--text-primary)]">{asset.name}</p>
+                    <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">{formatBytes(asset.size)}</p>
                   </div>
                 </button>
               );
             })}
             {filtered.length === 0 && (
-              <div className="col-span-full py-12 text-center text-sm text-slate-500">No media files match your filters.</div>
+              <div className="col-span-full py-12 text-center text-sm text-[var(--text-muted)]">No media files match your filters.</div>
             )}
           </div>
         ) : (
-          <div className="max-h-[420px] overflow-y-auto rounded-[8px] border border-slate-200">
+          <div className="max-h-[420px] overflow-y-auto rounded-[8px] border border-[var(--border-color)]">
             <table className="min-w-full text-sm">
-              <thead className="sticky top-0 bg-slate-50">
-                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500">
+              <thead className="sticky top-0 bg-[var(--bg-page)]">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                   <th className="px-3 py-2 font-semibold">Name</th>
                   <th className="px-3 py-2 font-semibold">Type</th>
                   <th className="px-3 py-2 font-semibold">Folder</th>
@@ -378,7 +378,7 @@ export default function MediaPicker({
                   <th className="px-3 py-2 font-semibold">Uploaded</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[var(--border-color)]">
                 {filtered.map((asset) => {
                   const Icon = typeIcon[asset.type];
                   const selected = selectedIds.includes(asset.id);
@@ -386,23 +386,23 @@ export default function MediaPicker({
                     <tr
                       key={asset.id}
                       onClick={() => toggleSelect(asset.id)}
-                      className={`cursor-pointer transition-colors ${selected ? 'bg-[#003580]/5' : 'hover:bg-slate-50'}`}
+                      className={`cursor-pointer transition-colors ${selected ? 'bg-[#003580]/5' : 'hover:bg-[var(--bg-page)]'}`}
                     >
                       <td className="flex items-center gap-2 px-3 py-2">
-                        <Icon className="h-4 w-4 text-slate-400" />
-                        <span className="font-medium text-slate-800">{asset.name}</span>
+                        <Icon className="h-4 w-4 text-[var(--text-muted)]" />
+                        <span className="font-medium text-[var(--text-primary)]">{asset.name}</span>
                       </td>
-                      <td className="px-3 py-2 text-xs uppercase text-slate-500">{asset.type}</td>
-                      <td className="px-3 py-2 text-xs text-slate-500">{asset.folder}</td>
-                      <td className="px-3 py-2 text-xs text-slate-500">{formatBytes(asset.size)}</td>
-                      <td className="px-3 py-2 text-xs text-slate-500">{asset.uploadedAt}</td>
+                      <td className="px-3 py-2 text-xs uppercase text-[var(--text-muted)]">{asset.type}</td>
+                      <td className="px-3 py-2 text-xs text-[var(--text-muted)]">{asset.folder}</td>
+                      <td className="px-3 py-2 text-xs text-[var(--text-muted)]">{formatBytes(asset.size)}</td>
+                      <td className="px-3 py-2 text-xs text-[var(--text-muted)]">{asset.uploadedAt}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
             {filtered.length === 0 && (
-              <div className="py-12 text-center text-sm text-slate-500">No media files match your filters.</div>
+              <div className="py-12 text-center text-sm text-[var(--text-muted)]">No media files match your filters.</div>
             )}
           </div>
         )}

@@ -440,13 +440,13 @@ function Toggle({
       onClick={onChange}
       className={[
         'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors cursor-pointer',
-        checked ? 'border-[#1D9E75] bg-[#1D9E75]' : 'border-slate-300 bg-slate-200',
+        checked ? 'border-[#1D9E75] bg-[#1D9E75]' : 'border-[var(--border-color)] bg-[var(--bg-page)]',
       ].join(' ')}
       aria-pressed={checked}
     >
       <span
         className={[
-          'inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm transition-transform',
+          'inline-block h-4 w-4 translate-x-1 rounded-full bg-[var(--bg-card)] shadow-sm transition-transform',
           checked ? 'translate-x-6' : 'translate-x-1',
         ].join(' ')}
       />
@@ -742,15 +742,15 @@ export default function RoleManagement() {
       </div>
 
       {/* Per-Portal Permission Matrix View Selector */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+      <div className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-color)] shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Monitor className="w-4 h-4 text-blue-900" />
-            <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">
+            <h3 className="font-extrabold text-[var(--text-primary)] text-xs uppercase tracking-wider">
               Select Specific Portal Permission Matrix
             </h3>
           </div>
-          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--bg-page)] px-2.5 py-0.5 rounded-full">
             Direct Database Policy Binding
           </span>
         </div>
@@ -772,7 +772,7 @@ export default function RoleManagement() {
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                   isSelected
                     ? 'bg-blue-900 text-white shadow-sm ring-2 ring-blue-950/20'
-                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -785,11 +785,11 @@ export default function RoleManagement() {
 
       <div className="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Roles Navigation Sidebar List */}
-        <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Roles Roster</h2>
-              <p className="mt-1 text-xs text-slate-500">Select a system role to edit its permissions.</p>
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">Roles Roster</h2>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">Select a system role to edit its permissions.</p>
             </div>
             <AdminBadge variant="neutral">{customRolesList.length} roles</AdminBadge>
           </div>
@@ -813,7 +813,7 @@ export default function RoleManagement() {
                     'w-full rounded-[10px] border p-4 text-left transition-all cursor-pointer',
                     isActive
                       ? 'border-[#003580]/30 bg-[#003580]/5 shadow-[0_2px_4px_rgba(0,53,128,0.08)] ring-1 ring-[#003580]/20'
-                      : 'border-slate-200 hover:border-[#003580]/20 hover:bg-slate-50',
+                      : 'border-[var(--border-color)] hover:border-[#003580]/20 hover:bg-[var(--bg-page)]',
                   ].join(' ')}
                 >
                   <div className="flex items-start gap-3">
@@ -826,17 +826,17 @@ export default function RoleManagement() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-xs font-extrabold text-slate-900 tracking-tight">{meta.name}</h3>
+                        <h3 className="text-xs font-extrabold text-[var(--text-primary)] tracking-tight">{meta.name}</h3>
                         <AdminBadge variant={isActive ? 'default' : 'neutral'}>
                           {(roleStats[roleKey] || 0).toLocaleString()} users
                         </AdminBadge>
                       </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-500 line-clamp-2">{meta.description}</p>
+                      <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-muted)] line-clamp-2">{meta.description}</p>
                     </div>
                   </div>
 
-                  <div className="mt-3.5 flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
-                    <span className="text-[11px] font-semibold text-slate-500">
+                  <div className="mt-3.5 flex items-center justify-between gap-3 pt-3 border-t border-[var(--border-color)]">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)]">
                       {meta.name} Role Policy
                     </span>
                     <span className="text-xs font-bold text-[#003580] flex items-center gap-1">
@@ -860,16 +860,16 @@ export default function RoleManagement() {
         </section>
 
         {/* Permission Matrix Configuration Section */}
-        <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
+        <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-col gap-4 border-b border-[var(--border-color)] pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-slate-900">
+                <h2 className="text-sm font-semibold text-[var(--text-primary)]">
                   {activePortalMatrix.name}
                 </h2>
                 <AdminBadge variant="default">{selectedMeta.name}</AdminBadge>
               </div>
-              <p className="mt-1 max-w-2xl text-xs text-slate-500">
+              <p className="mt-1 max-w-2xl text-xs text-[var(--text-muted)]">
                 Toggle functional capability rules for <strong>{selectedMeta.name}</strong>. Turning OFF a toggle restricts the feature both on the frontend portal UI and backend API middleware.
               </p>
             </div>
@@ -878,7 +878,7 @@ export default function RoleManagement() {
               <button
                 type="button"
                 onClick={revertToDefault}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-2 rounded-lg bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Revert to Default
@@ -901,11 +901,11 @@ export default function RoleManagement() {
               const sectionEnabled = section.permissions.filter(p => rolePerms[p.key] !== false).length;
 
               return (
-                <div key={section.title} className="rounded-[10px] border border-slate-200 bg-slate-50/60 p-4">
+                <div key={section.title} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">{section.title}</h3>
-                      <p className="mt-0.5 text-[11px] text-slate-500">Functional access controls for this section.</p>
+                      <h3 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">{section.title}</h3>
+                      <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">Functional access controls for this section.</p>
                     </div>
                     <AdminBadge variant={sectionEnabled === section.permissions.length ? 'success' : 'neutral'}>
                       {sectionEnabled} / {section.permissions.length} Enabled
@@ -919,18 +919,18 @@ export default function RoleManagement() {
                       return (
                         <div
                           key={permission.key}
-                          className="flex items-center justify-between gap-4 rounded-[10px] border border-slate-200/80 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                          className="flex items-center justify-between gap-4 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-slate-800">{permission.label}</span>
+                              <span className="text-xs font-bold text-[var(--text-primary)]">{permission.label}</span>
                               {checked ? (
                                 <AdminBadge variant="success">Allowed & Active</AdminBadge>
                               ) : (
                                 <AdminBadge variant="neutral">Restricted (OFF)</AdminBadge>
                               )}
                             </div>
-                            <p className="mt-0.5 text-[11px] text-slate-500">{permission.description}</p>
+                            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{permission.description}</p>
                           </div>
                           <Toggle checked={checked} onChange={() => togglePermission(permission.key, permission.label)} />
                         </div>
@@ -948,7 +948,7 @@ export default function RoleManagement() {
       {isAddRoleOpen &&
         createPortal(
           <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200">
+            <div className="bg-[var(--bg-card)] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-[var(--border-color)]">
               <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck className="w-5 h-5 text-cyan-400" />
@@ -964,33 +964,33 @@ export default function RoleManagement() {
 
               <form onSubmit={handleAddCustomRole} className="p-6 space-y-4 text-xs">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role Name</label>
+                  <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Role Name</label>
                   <input
                     type="text"
                     placeholder="e.g. AUDITOR, ACADEMIC_DEAN"
                     value={customRoleName}
                     onChange={e => setCustomRoleName(e.target.value)}
-                    className="w-full text-xs p-3 border border-slate-300 rounded-xl font-mono uppercase font-bold text-slate-900 focus:outline-none focus:border-astu-navy shadow-xs"
+                    className="w-full text-xs p-3 border border-[var(--border-color)] rounded-xl font-mono uppercase font-bold text-[var(--text-primary)] focus:outline-none focus:border-astu-navy shadow-xs"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role Description</label>
+                  <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase mb-1">Role Description</label>
                   <textarea
                     rows={3}
                     placeholder="Describe the access scope and responsibility for this custom role..."
                     value={customRoleDesc}
                     onChange={e => setCustomRoleDesc(e.target.value)}
-                    className="w-full text-xs p-3 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-astu-navy shadow-xs"
+                    className="w-full text-xs p-3 border border-[var(--border-color)] rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-astu-navy shadow-xs"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[var(--border-color)]">
                   <button
                     type="button"
                     onClick={() => setIsAddRoleOpen(false)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                    className="px-4 py-2.5 bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-secondary)] rounded-xl text-xs font-bold transition-all"
                   >
                     Cancel
                   </button>

@@ -55,19 +55,40 @@ export default {
         'primary-fixed-dim': '#adc6ff',
         'outline-variant': '#c4c6d1',
         'astu-red': '#E31E24',
-        tertiary: '#003013'
+        tertiary: '#003013',
+        // Tailwind's gray/slate scales jump 200 -> 300, but the codebase uses
+        // in-between tints for dividers and table rules. Without these the
+        // class compiles to nothing and the divider silently disappears.
+        gray: { 150: '#d7dce3', 250: '#c3c8d1' },
+        slate: { 250: '#cbd5e1' }
+      },
+      // `shadow-xs` and `shadow-2xs` do not exist in Tailwind 3's default
+      // scale (they arrived in v4). The codebase relies on them for every card
+      // elevation, and dark-mode.css overrides `.shadow-xs` for dark mode, so
+      // both need real values.
+      boxShadow: {
+        '2xs': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+      },
+      borderWidth: {
+        3: '3px'
       },
       borderRadius: {
         DEFAULT: '0.125rem',
+        xs: '0.125rem',
         lg: '0.25rem',
-        xl: '0.5rem'
+        xl: '0.5rem',
+        full: '0.75rem'
       },
       spacing: {
         gutter: '24px',
         base: '8px',
         'container-max': '1280px',
         'margin-mobile': '16px',
-        'margin-desktop': '40px'
+        'margin-desktop': '40px',
+        // h-4.5 / w-4.5 are used by every icon toggle; the default scale has
+        // no half-steps so these compiled to nothing.
+        '4.5': '1.125rem'
       },
       fontFamily: {
         'body-lg': ['Hanken Grotesk'],

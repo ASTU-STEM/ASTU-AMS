@@ -2093,8 +2093,8 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
           ? 'bg-transparent text-white'
           : 'bg-slate-900 border-slate-800 text-white shadow-black/40'
         : embedded
-          ? 'bg-transparent text-slate-900'
-          : 'bg-white border-slate-200/90 text-slate-900 shadow-slate-200/60'
+          ? 'bg-transparent text-[var(--text-primary)]'
+          : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] shadow-slate-200/60'
     }`}>
 
       {/* ── Left Sidebar (Telegram Style) ────────────────────────────────────────── */}
@@ -2152,10 +2152,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               className={`w-full rounded-xl border py-2.5 pl-9 pr-3 text-xs transition-all focus:outline-none focus:ring-2 focus:ring-[#003580]/20 ${
                 darkMode
                   ? 'border-slate-700 bg-slate-800/90 text-white placeholder-slate-400'
-                  : 'border-slate-200 bg-white text-slate-800 placeholder-slate-400'
+                  : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-slate-400'
               }`}
             />
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-400">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-[var(--text-muted)]">search</span>
           </div>
 
           {/* Filter Pills */}
@@ -2173,8 +2173,8 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                   activeFilter === f.id
                     ? 'bg-[#003580] text-white shadow-sm'
                     : darkMode
-                    ? 'bg-slate-800 text-slate-400 hover:text-white'
-                    : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'
+                    ? 'bg-slate-800 text-[var(--text-muted)] hover:text-white'
+                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] ring-1 ring-[var(--border-color)] hover:bg-[var(--bg-page)]'
                 }`}
               >
                 {f.label}
@@ -2190,7 +2190,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
           {isLoading ? (
             <div className="flex flex-col items-center justify-center space-y-3 px-4 py-16">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent" />
-              <p className="animate-pulse text-xs font-bold text-slate-500 dark:text-slate-400">Loading messages...</p>
+              <p className="animate-pulse text-xs font-bold text-[var(--text-muted)] dark:text-slate-400">Loading messages...</p>
             </div>
           ) : filteredThreads.length === 0 ? (
             <div className="space-y-3 p-8 text-center">
@@ -2198,8 +2198,8 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-2xl">chat_bubble_outline</span>
               </div>
               <div>
-                <p className="text-xs font-extrabold text-slate-800 dark:text-slate-200">No conversations yet</p>
-                <p className="mx-auto mt-1 max-w-[200px] text-[11px] leading-relaxed text-slate-400">
+                <p className="text-xs font-extrabold text-[var(--text-primary)] dark:text-slate-200">No conversations yet</p>
+                <p className="mx-auto mt-1 max-w-[200px] text-[11px] leading-relaxed text-[var(--text-muted)]">
                   Start a chat with alumni, employers, or university staff.
                 </p>
               </div>
@@ -2223,7 +2223,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       ? darkMode
                         ? 'border-l-[3px] border-l-blue-400 bg-slate-800/90'
                         : 'border-l-[3px] border-l-[#003580] bg-blue-50/70'
-                      : 'hover:bg-slate-100/80 dark:hover:bg-slate-800/40'
+                      : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40'
                   }`}
                 >
                   <div className="relative flex-shrink-0">
@@ -2249,15 +2249,15 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <p className={`truncate text-xs font-extrabold ${isActive ? 'text-[#003580] dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{thread.name}</p>
+                      <p className={`truncate text-xs font-extrabold ${isActive ? 'text-[#003580] dark:text-blue-400' : 'text-[var(--text-primary)] dark:text-white'}`}>{thread.name}</p>
                       {thread.lastMessageTime && (
-                        <span className="flex-shrink-0 text-[9px] font-semibold text-slate-400 dark:text-slate-500">
+                        <span className="flex-shrink-0 text-[9px] font-semibold text-[var(--text-muted)] dark:text-slate-500">
                           {formatMessageTime(thread.lastMessageTime)}
                         </span>
                       )}
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-1">
-                      <p className="max-w-[160px] truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                      <p className="max-w-[160px] truncate text-[11px] font-medium text-[var(--text-muted)] dark:text-slate-400">
                         {thread.lastMessage}
                       </p>
                       {thread.unreadCount > 0 && (
@@ -2269,7 +2269,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[8px] font-extrabold ${
                       thread.role === 'EMPLOYER' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300' :
                       thread.role === 'ALUMNI' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300' :
-                      'bg-slate-100 text-[#003580] dark:bg-slate-800 dark:text-blue-300'
+                      'bg-[var(--bg-page)] text-[#003580] dark:bg-slate-800 dark:text-blue-300'
                     }`}>
                       {thread.roleLabel || thread.role}
                     </span>
@@ -2289,18 +2289,18 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               <span className="material-symbols-outlined text-3xl animate-spin">sync</span>
             </div>
             <div className="text-center space-y-1">
-              <h4 className="text-sm font-extrabold text-slate-800 dark:text-white">Connecting to ASTU Messenger...</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Loading your secure conversations from database</p>
+              <h4 className="text-sm font-extrabold text-[var(--text-primary)] dark:text-white">Connecting to ASTU Messenger...</h4>
+              <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">Loading your secure conversations from database</p>
             </div>
           </div>
         ) : activeThread ? (
           <>
             {/* Chat Header */}
-            <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xs min-w-0 z-20 shrink-0 sticky top-0">
+            <div className="p-3 sm:p-4 border-b border-[var(--border-color)] dark:border-slate-800 flex items-center justify-between bg-[var(--bg-card)] dark:bg-slate-900/95 backdrop-blur-md shadow-xs min-w-0 z-20 shrink-0 sticky top-0">
               <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
                 <button
                   onClick={() => setActiveThread(null)}
-                  className="md:hidden w-8.5 h-8.5 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex-shrink-0 shadow-xs"
+                  className="md:hidden w-8.5 h-8.5 flex items-center justify-center rounded-xl bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-200  dark:hover:bg-slate-700 transition-colors flex-shrink-0 shadow-xs"
                   title="Back to Contact List"
                 >
                   <span className="material-symbols-outlined text-lg font-bold">arrow_back</span>
@@ -2326,7 +2326,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center gap-1.5 sm:gap-2 truncate">
+                  <h4 className="font-extrabold text-xs sm:text-sm text-[var(--text-primary)] dark:text-white flex items-center gap-1.5 sm:gap-2 truncate">
                     <span className="truncate">{activeThread.name}</span>
                     <span className={`px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] font-extrabold ${
                       activeThread.role === 'EMPLOYER' ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300' :
@@ -2337,7 +2337,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     </span>
                   </h4>
                   <p className={`text-[9px] sm:text-[10px] font-semibold flex items-center gap-1 sm:gap-1.5 truncate mt-0.5 ${
-                    isThreadOnline(activeThread) ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'
+                    isThreadOnline(activeThread) ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-muted)] dark:text-slate-500'
                   }`}>
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                       isThreadOnline(activeThread) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-slate-600'
@@ -2349,13 +2349,13 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-0.5 sm:gap-1 text-slate-500 flex-shrink-0">
+              <div className="flex items-center gap-0.5 sm:gap-1 text-[var(--text-muted)] flex-shrink-0">
                 <button
                   onClick={() => handleStartCall('voice')}
                   className={`p-2 sm:p-2.5 rounded-xl transition-colors ${
                     isThreadOnline(activeThread)
-                      ? 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 opacity-60'
+                      ? 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300'
+                      : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)] dark:text-slate-500 opacity-60'
                   }`}
                   title={isThreadOnline(activeThread) ? 'Voice Call' : `${activeThread.name} is Offline (Cannot Call)`}
                 >
@@ -2365,8 +2365,8 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                   onClick={() => handleStartCall('video')}
                   className={`p-2 sm:p-2.5 rounded-xl transition-colors ${
                     isThreadOnline(activeThread)
-                      ? 'hover:bg-slate-100 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-indigo-400/50 dark:text-indigo-400/40 opacity-60'
+                      ? 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400'
+                      : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-indigo-400/50 dark:text-indigo-400/40 opacity-60'
                   }`}
                   title={isThreadOnline(activeThread) ? 'HD Video Call' : `${activeThread.name} is Offline (Cannot Call)`}
                 >
@@ -2375,7 +2375,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <button
                   onClick={() => setIsSearchingInChat(!isSearchingInChat)}
                   className={`p-2 sm:p-2.5 rounded-xl transition-colors ${
-                    isSearchingInChat ? 'bg-[#003366] text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    isSearchingInChat ? 'bg-[#003366] text-white' : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300'
                   }`}
                   title="Search Messages"
                 >
@@ -2393,18 +2393,18 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
             {/* Inline Header Search Bar */}
             {isSearchingInChat && (
-              <div className="p-3 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
-                <span className="material-symbols-outlined text-slate-400 text-sm">search</span>
+              <div className="p-3 bg-[var(--bg-page)] dark:bg-slate-850 border-b border-[var(--border-color)] dark:border-slate-800 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[var(--text-muted)] text-sm">search</span>
                 <input
                   type="text"
                   value={chatSearchQuery}
                   onChange={(e) => setChatSearchQuery(e.target.value)}
                   placeholder={`Search messages with ${activeThread.name}...`}
-                  className="flex-1 text-xs bg-transparent focus:outline-none text-slate-800 dark:text-white"
+                  className="flex-1 text-xs bg-transparent focus:outline-none text-[var(--text-primary)] dark:text-white"
                   autoFocus
                 />
                 {chatSearchQuery && (
-                  <button onClick={() => setChatSearchQuery('')} className="text-xs text-slate-400 hover:text-slate-600">
+                  <button onClick={() => setChatSearchQuery('')} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                     ✕
                   </button>
                 )}
@@ -2412,10 +2412,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
             )}
 
             {/* Message History */}
-            <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto space-y-3 sm:space-y-4 bg-slate-100/50 dark:bg-[#0b1120] min-w-0 touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto space-y-3 sm:space-y-4 bg-[var(--bg-page)] dark:bg-[#0b1120] min-w-0 touch-pan-y" style={{ WebkitOverflowScrolling: 'touch' }}>
               {/* Date Badge */}
               <div className="flex items-center justify-center my-2 sm:my-3">
-                <span className="px-3.5 py-1 bg-white/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[10px] font-extrabold rounded-full shadow-xs uppercase tracking-wider border border-slate-200/60 dark:border-slate-700/60">
+                <span className="px-3.5 py-1 bg-[var(--bg-card)] dark:bg-slate-800/80 text-[var(--text-muted)] dark:text-slate-400 text-[10px] font-extrabold rounded-full shadow-xs uppercase tracking-wider border border-[var(--border-color)] dark:border-slate-700/60">
                   Today
                 </span>
               </div>
@@ -2471,7 +2471,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     {isMe && (
                       <button
                         onClick={() => setSelectedMessageForDelete(msg)}
-                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 sm:p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-500 transition-all"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 sm:p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-[var(--text-muted)] hover:text-rose-500 transition-all"
                         title="Delete Message"
                       >
                         <span className="material-symbols-outlined text-xs sm:text-sm">delete</span>
@@ -2482,7 +2482,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         ? 'bg-gradient-to-br from-[#004080] via-[#003366] to-[#002244] text-white rounded-tr-xs border border-blue-400/20 shadow-blue-950/20'
                         : darkMode
                         ? 'bg-slate-800/95 border border-slate-700/80 text-white rounded-tl-xs shadow-slate-950/30'
-                        : 'bg-white border border-slate-200/90 text-slate-900 rounded-tl-xs shadow-slate-200/50'
+                        : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-tl-xs shadow-slate-200/50'
                     }`}>
                       {!isMe && (
                         <p className="font-black text-[10px] text-[#003366] dark:text-blue-400 mb-0.5 tracking-tight">{activeThread.name}</p>
@@ -2519,7 +2519,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       )}
 
                       <div className="flex items-center justify-end gap-1 pt-1">
-                        <span className={`text-[9px] font-semibold ${isMe ? 'text-blue-200' : 'text-slate-400'}`}>
+                        <span className={`text-[9px] font-semibold ${isMe ? 'text-blue-200' : 'text-[var(--text-muted)]'}`}>
                           {formatMessageTime(msg.createdAt)}
                         </span>
                         {isMe && (
@@ -2530,7 +2530,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     {!isMe && (
                       <button
                         onClick={() => setSelectedMessageForDelete(msg)}
-                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 sm:p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-500 transition-all"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 sm:p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-[var(--text-muted)] hover:text-rose-500 transition-all"
                         title="Delete Message"
                       >
                         <span className="material-symbols-outlined text-xs sm:text-sm">delete</span>
@@ -2544,7 +2544,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
             {/* Selected File Banner Preview */}
             {selectedFile && (
-              <div className="px-4 py-2 bg-blue-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="px-4 py-2 bg-blue-50 dark:bg-slate-800 border-t border-[var(--border-color)] dark:border-slate-700 flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
                   {selectedFile.type.startsWith('image/') ? (
                     <img src={selectedFile.previewUrl} alt="" className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
@@ -2552,14 +2552,14 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     <span className="material-symbols-outlined text-blue-600 text-xl">description</span>
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-800 dark:text-white truncate">{selectedFile.file.name}</p>
-                    <p className="text-[9px] text-slate-400">{(selectedFile.file.size / 1024).toFixed(1)} KB • Ready to send</p>
+                    <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white truncate">{selectedFile.file.name}</p>
+                    <p className="text-[9px] text-[var(--text-muted)]">{(selectedFile.file.size / 1024).toFixed(1)} KB • Ready to send</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedFile(null)}
-                  className="p-1 rounded-full text-slate-400 hover:text-rose-500 transition-colors"
+                  className="p-1 rounded-full text-[var(--text-muted)] hover:text-rose-500 transition-colors"
                 >
                   <span className="material-symbols-outlined text-base">close</span>
                 </button>
@@ -2567,13 +2567,13 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
             )}
 
             {/* Quick Reply Pills */}
-            <div className="w-full max-w-full px-3 sm:px-4 py-2 sm:py-2.5 border-t border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 flex items-center gap-2 overflow-x-auto shrink-0 min-w-0 no-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="w-full max-w-full px-3 sm:px-4 py-2 sm:py-2.5 border-t border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900/90 flex items-center gap-2 overflow-x-auto shrink-0 min-w-0 no-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {quickReplies.map((reply, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setTypedMessage(reply)}
-                  className="px-3 py-1.5 text-[9px] sm:text-[10px] font-extrabold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-[#003366] hover:text-white dark:hover:bg-blue-600 whitespace-nowrap transition-all hover:scale-105 active:scale-95 shadow-xs flex-shrink-0"
+                  className="px-3 py-1.5 text-[9px] sm:text-[10px] font-extrabold rounded-full bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[#003366] hover:text-white dark:hover:bg-blue-600 whitespace-nowrap transition-all hover:scale-105 active:scale-95 shadow-xs flex-shrink-0"
                 >
                   {reply}
                 </button>
@@ -2581,13 +2581,13 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
             </div>
 
             {/* Message Input Form */}
-            <form onSubmit={handleSendMessage} className="w-full max-w-full p-2.5 sm:p-3.5 md:p-4 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2 sm:gap-3 rounded-b-2xl md:rounded-b-3xl shrink-0 min-w-0 relative">
+            <form onSubmit={handleSendMessage} className="w-full max-w-full p-2.5 sm:p-3.5 md:p-4 border-t border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 flex items-center gap-2 sm:gap-3 rounded-b-2xl md:rounded-b-3xl shrink-0 min-w-0 relative">
               
               {/* Tabbed Emoji Picker Popover */}
               {showEmojiPicker && (
-                <div className="absolute bottom-full mb-3 left-2 sm:left-4 z-50 p-3 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl w-72 sm:w-80 space-y-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
+                <div className="absolute bottom-full mb-3 left-2 sm:left-4 z-50 p-3 rounded-3xl bg-[var(--bg-card)] dark:bg-slate-900/95 border border-[var(--border-color)] dark:border-slate-800 shadow-2xl backdrop-blur-xl w-72 sm:w-80 space-y-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
                   {/* Category Tabs Header */}
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2 px-1">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] dark:border-slate-800 pb-2 px-1">
                     <div className="flex items-center gap-1">
                       {emojiCategories.map((cat, i) => (
                         <button
@@ -2595,7 +2595,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                           type="button"
                           onClick={() => setActiveEmojiTab(i)}
                           className={`px-2.5 py-1 rounded-xl text-sm transition-all ${
-                            activeEmojiTab === i ? 'bg-amber-100 dark:bg-amber-950/60 shadow-xs scale-110' : 'hover:bg-slate-100 dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
+                            activeEmojiTab === i ? 'bg-amber-100 dark:bg-amber-950/60 shadow-xs scale-110' : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 opacity-60 hover:opacity-100'
                           }`}
                           title={cat.name}
                         >
@@ -2606,7 +2606,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowEmojiPicker(false)}
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-white hover:bg-[var(--bg-page)] dark:hover:bg-slate-800"
                     >
                       ✕
                     </button>
@@ -2619,7 +2619,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         key={idx}
                         type="button"
                         onClick={() => handleInsertEmoji(emoji)}
-                        className="w-8 h-8 flex items-center justify-center text-xl hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all hover:scale-125 active:scale-95"
+                        className="w-8 h-8 flex items-center justify-center text-xl hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 rounded-xl transition-all hover:scale-125 active:scale-95"
                       >
                         {emoji}
                       </button>
@@ -2633,7 +2633,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 type="button"
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 className={`p-2.5 rounded-xl transition-colors flex-shrink-0 ${
-                  showEmojiPicker ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-600' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#003366]'
+                  showEmojiPicker ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-600' : 'text-[var(--text-muted)] dark:text-slate-400 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 hover:text-[#003366]'
                 }`}
                 title="Insert Emoji"
               >
@@ -2651,7 +2651,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#003366] transition-colors flex-shrink-0"
+                className="p-2.5 rounded-xl text-[var(--text-muted)] dark:text-slate-400 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 hover:text-[#003366] transition-colors flex-shrink-0"
                 title="Attach photo or document"
               >
                 <span className="material-symbols-outlined text-xl">attach_file</span>
@@ -2686,10 +2686,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#003580]/10 text-[#003580] dark:bg-slate-800 dark:text-blue-400">
                 <span className="material-symbols-outlined text-3xl">forum</span>
               </div>
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              <h3 className="text-base font-extrabold text-[var(--text-primary)] dark:text-white">
                 {clean || embedded ? 'Select a conversation' : 'ASTU_AMS Hub'}
               </h3>
-              <p className="mx-auto mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              <p className="mx-auto mt-1.5 text-xs leading-relaxed text-[var(--text-muted)] dark:text-slate-400">
                 {clean || embedded
                   ? 'Choose a contact on the left, or start a new chat with alumni, employers, or staff.'
                   : <>Select a contact from the left or click <strong>"+ New Chat"</strong> to start messaging across ASTU portals.</>}
@@ -2718,18 +2718,18 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               </div>
               <div>
                 <h3 className="font-extrabold text-sm">Delete Message</h3>
-                <p className="text-[11px] text-slate-400">Choose deletion option for this message</p>
+                <p className="text-[11px] text-[var(--text-muted)]">Choose deletion option for this message</p>
               </div>
             </div>
 
-            <p className="text-xs italic p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 truncate">
+            <p className="text-xs italic p-3 rounded-xl bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 truncate">
               "{selectedMessageForDelete.text}"
             </p>
 
             <div className="space-y-2 pt-2">
               <button
                 onClick={() => handleDeleteMessage(selectedMessageForDelete.id, false)}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-extrabold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition-all text-left flex items-center justify-between"
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-extrabold bg-[var(--bg-page)] dark:bg-slate-800  dark:hover:bg-slate-700 text-[var(--text-primary)] dark:text-white transition-all text-left flex items-center justify-between"
               >
                 <span>Delete for me</span>
                 <span className="material-symbols-outlined text-base">person</span>
@@ -2746,7 +2746,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
             <button
               onClick={() => setSelectedMessageForDelete(null)}
-              className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+              className="w-full py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-white transition-colors"
             >
               Cancel
             </button>
@@ -2766,18 +2766,18 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               </div>
               <div>
                 <h3 className="font-extrabold text-sm">Delete Conversation</h3>
-                <p className="text-[11px] text-slate-400">Clear chat with {activeThread.name}</p>
+                <p className="text-[11px] text-[var(--text-muted)]">Clear chat with {activeThread.name}</p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p className="text-xs text-[var(--text-secondary)] dark:text-slate-300 leading-relaxed">
               Are you sure you want to delete this entire conversation with <strong>{activeThread.name}</strong>? This action cannot be undone for your account.
             </p>
 
             <div className="flex items-center gap-2 pt-2">
               <button
                 onClick={() => setShowDeleteThreadModal(false)}
-                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-all"
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 Cancel
               </button>
@@ -2799,14 +2799,14 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
             darkMode ? 'bg-slate-900 text-white border border-slate-800' : 'bg-white text-gray-900'
           }`}>
 
-            <div className="flex items-center justify-between border-b pb-3 border-gray-100 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-[var(--border-color)] dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <span className="text-xl">✈️</span>
                 <h3 className="font-extrabold text-base">New Conversation</h3>
               </div>
               <button
                 onClick={() => setShowNewChatModal(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500"
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)]"
               >
                 ✕
               </button>
@@ -2823,31 +2823,31 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                   darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-800'
                 }`}
               />
-              <span className="material-symbols-outlined text-sm absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+              <span className="material-symbols-outlined text-sm absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">search</span>
             </div>
 
             {/* Contact List */}
             <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[350px]">
               {filteredContacts.length === 0 ? (
-                <p className="text-xs text-center text-gray-400 py-6">No contacts found matching "{contactSearchQuery}".</p>
+                <p className="text-xs text-center text-[var(--text-muted)] py-6">No contacts found matching "{contactSearchQuery}".</p>
               ) : (
                 filteredContacts.map(c => (
                   <button
                     key={c.id}
                     onClick={() => handleStartChatWithContact(c)}
-                    className="w-full p-3 rounded-2xl flex items-center gap-3 text-left hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-all border border-gray-100 dark:border-slate-800/60"
+                    className="w-full p-3 rounded-2xl flex items-center gap-3 text-left hover:bg-blue-50/70 dark:hover:bg-slate-800 transition-all border border-[var(--border-color)] dark:border-slate-800/60"
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#003366] to-[#0055a5] text-white font-extrabold text-xs flex items-center justify-center shadow-sm flex-shrink-0">
                       {getInitials(c.name)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold truncate text-gray-900 dark:text-white">{c.name}</p>
+                        <p className="text-xs font-bold truncate text-[var(--text-primary)] dark:text-white">{c.name}</p>
                         <span className="px-2 py-0.5 text-[8px] font-extrabold rounded-md bg-blue-100 dark:bg-slate-800 text-[#003366] dark:text-blue-300">
                           {c.roleLabel}
                         </span>
                       </div>
-                      <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate mt-0.5">{c.secondaryInfo}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] dark:text-slate-400 truncate mt-0.5">{c.secondaryInfo}</p>
                     </div>
                   </button>
                 ))
@@ -3034,7 +3034,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     }`}
                   />
                   {activeCall.isVideoOff && (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-400 relative z-20">
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-[var(--text-muted)] relative z-20">
                       <span className="material-symbols-outlined text-2xl">videocam_off</span>
                       <span className="text-[9px] font-bold mt-1">Camera Off</span>
                     </div>
@@ -3059,7 +3059,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 {/* Live REC Recording Badge Indicator Overlay */}
                 {isRecording && (
                   <div className="absolute top-4 left-48 sm:left-52 z-20 px-3.5 py-2 rounded-2xl bg-rose-600/90 border border-rose-500/80 backdrop-blur-md flex items-center gap-2 text-white shadow-lg animate-pulse">
-                    <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--bg-card)] animate-ping"></span>
                     <span className="text-xs font-black tracking-wider uppercase">REC</span>
                     <span className="text-xs font-mono font-bold">{formatCallDuration(recordTimer)}</span>
                   </div>
@@ -3073,7 +3073,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
                         <span>In-call messages</span>
                       </h3>
-                      <button onClick={() => setShowInCallChat(false)} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800">
+                      <button onClick={() => setShowInCallChat(false)} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-slate-800">
                         ✕
                       </button>
                     </div>
@@ -3086,7 +3086,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         onClick={() => setAllowInCallMessages(!allowInCallMessages)}
                         className={`w-10 h-5 rounded-full transition-colors relative ${allowInCallMessages ? 'bg-blue-600' : 'bg-slate-700'}`}
                       >
-                        <span className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${allowInCallMessages ? 'right-0.5' : 'left-0.5'}`} />
+                        <span className={`w-4 h-4 rounded-full bg-[var(--bg-card)] absolute top-0.5 transition-transform ${allowInCallMessages ? 'right-0.5' : 'left-0.5'}`} />
                       </button>
                     </div>
 
@@ -3095,7 +3095,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       <span className="material-symbols-outlined text-base text-blue-400">chat</span>
                       <div>
                         <p className="font-bold text-white">Continuous chat is turned off</p>
-                        <p className="mt-0.5 text-slate-400">Messages will not be saved for meeting participants when the call ends.</p>
+                        <p className="mt-0.5 text-[var(--text-muted)]">Messages will not be saved for meeting participants when the call ends.</p>
                       </div>
                     </div>
 
@@ -3103,8 +3103,8 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     <div className="flex-1 overflow-y-auto space-y-2.5 my-2 pr-1">
                       {inCallMessages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2">
-                          <span className="material-symbols-outlined text-4xl text-slate-600">chat_bubble_outline</span>
-                          <p className="text-xs text-slate-400 font-bold">No chat messages yet</p>
+                          <span className="material-symbols-outlined text-4xl text-[var(--text-secondary)]">chat_bubble_outline</span>
+                          <p className="text-xs text-[var(--text-muted)] font-bold">No chat messages yet</p>
                         </div>
                       ) : (
                         inCallMessages.map(m => (
@@ -3134,7 +3134,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         </button>
                       </form>
                     ) : (
-                      <p className="text-[10px] text-center text-slate-500 py-2">In-call messaging is disabled by host.</p>
+                      <p className="text-[10px] text-center text-[var(--text-muted)] py-2">In-call messaging is disabled by host.</p>
                     )}
                   </div>
                 )}
@@ -3472,7 +3472,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       <span className="material-symbols-outlined text-blue-400">groups</span>
                       <span>People ({2 + extraParticipants.length})</span>
                     </h3>
-                    <button onClick={() => setShowParticipantsDrawer(false)} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800">
+                    <button onClick={() => setShowParticipantsDrawer(false)} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-slate-800">
                       ✕
                     </button>
                   </div>
@@ -3492,7 +3492,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                           <p className="text-[10px] text-emerald-400 font-semibold">Active Speaker</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-400">
+                      <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                         <button
                           type="button"
                           onClick={() => setActiveCall(prev => prev ? { ...prev, isMuted: !prev.isMuted } : null)}
@@ -3523,10 +3523,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                             <span>{activeCall.recipientName || activeThread?.name || 'System Admin'}</span>
                             {peerHandRaised && <span className="text-xs">✋</span>}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-semibold">{activeThread?.roleLabel || 'Participant'}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] font-semibold">{activeThread?.roleLabel || 'Participant'}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-slate-400">
+                      <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                         <button
                           type="button"
                           onClick={() => {
@@ -3549,10 +3549,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                           </div>
                           <div>
                             <p className="text-xs font-bold text-white">{p.name}</p>
-                            <p className="text-[10px] text-slate-400 font-semibold">{p.role}</p>
+                            <p className="text-[10px] text-[var(--text-muted)] font-semibold">{p.role}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-slate-400">
+                        <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                           <button
                             type="button"
                             onClick={() => {
@@ -3620,12 +3620,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-blue-400">settings</span>
                         <span>Meeting Settings</span>
                       </h3>
-                      <button onClick={() => setShowSettingsModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowSettingsModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="space-y-3 text-xs">
                       <div>
-                        <label className="block text-slate-400 font-bold mb-1">Video Resolution</label>
+                        <label className="block text-[var(--text-muted)] font-bold mb-1">Video Resolution</label>
                         <select
                           value={selectedQuality}
                           onChange={(e) => setSelectedQuality(e.target.value as '360p' | '720p' | '1080p')}
@@ -3640,14 +3640,14 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       <div className="flex items-center justify-between py-2 border-t border-slate-800">
                         <div>
                           <p className="font-bold text-white">AI Noise Suppression</p>
-                          <p className="text-[10px] text-slate-400">Filter background keyboard & room noise</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Filter background keyboard & room noise</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setIsNoiseSuppressionOn(!isNoiseSuppressionOn)}
                           className={`w-10 h-5 rounded-full transition-colors relative ${isNoiseSuppressionOn ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
-                          <span className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${isNoiseSuppressionOn ? 'right-0.5' : 'left-0.5'}`} />
+                          <span className={`w-4 h-4 rounded-full bg-[var(--bg-card)] absolute top-0.5 transition-transform ${isNoiseSuppressionOn ? 'right-0.5' : 'left-0.5'}`} />
                         </button>
                       </div>
                     </div>
@@ -3670,49 +3670,49 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-amber-400">security</span>
                         <span>Host Security & Permissions</span>
                       </h3>
-                      <button onClick={() => setShowSecurityModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowSecurityModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="space-y-3 text-xs">
                       <div className="flex items-center justify-between py-2 border-b border-slate-800">
                         <div>
                           <p className="font-bold text-white">Lock Meeting</p>
-                          <p className="text-[10px] text-slate-400">Prevent new participants from joining</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Prevent new participants from joining</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setIsMeetingLocked(!isMeetingLocked)}
                           className={`w-10 h-5 rounded-full transition-colors relative ${isMeetingLocked ? 'bg-rose-600' : 'bg-slate-700'}`}
                         >
-                          <span className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${isMeetingLocked ? 'right-0.5' : 'left-0.5'}`} />
+                          <span className={`w-4 h-4 rounded-full bg-[var(--bg-card)] absolute top-0.5 transition-transform ${isMeetingLocked ? 'right-0.5' : 'left-0.5'}`} />
                         </button>
                       </div>
 
                       <div className="flex items-center justify-between py-2 border-b border-slate-800">
                         <div>
                           <p className="font-bold text-white">Allow Screen Sharing</p>
-                          <p className="text-[10px] text-slate-400">Let participants present their screen</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Let participants present their screen</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setAllowScreenShare(!allowScreenShare)}
                           className={`w-10 h-5 rounded-full transition-colors relative ${allowScreenShare ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
-                          <span className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${allowScreenShare ? 'right-0.5' : 'left-0.5'}`} />
+                          <span className={`w-4 h-4 rounded-full bg-[var(--bg-card)] absolute top-0.5 transition-transform ${allowScreenShare ? 'right-0.5' : 'left-0.5'}`} />
                         </button>
                       </div>
 
                       <div className="flex items-center justify-between py-2">
                         <div>
                           <p className="font-bold text-white">Allow In-Call Chat</p>
-                          <p className="text-[10px] text-slate-400">Let participants send text messages</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Let participants send text messages</p>
                         </div>
                         <button
                           type="button"
                           onClick={() => setAllowInCallMessages(!allowInCallMessages)}
                           className={`w-10 h-5 rounded-full transition-colors relative ${allowInCallMessages ? 'bg-blue-600' : 'bg-slate-700'}`}
                         >
-                          <span className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${allowInCallMessages ? 'right-0.5' : 'left-0.5'}`} />
+                          <span className={`w-4 h-4 rounded-full bg-[var(--bg-card)] absolute top-0.5 transition-transform ${allowInCallMessages ? 'right-0.5' : 'left-0.5'}`} />
                         </button>
                       </div>
                     </div>
@@ -3735,7 +3735,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="p-2 rounded-xl bg-indigo-600 text-white material-symbols-outlined text-sm">draw</span>
                         <div>
                           <h3 className="font-extrabold text-sm text-white">Interactive Virtual Whiteboard</h3>
-                          <p className="text-[10px] text-slate-400">Collaborative drawing canvas for architecture diagrams & mentorship notes</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Collaborative drawing canvas for architecture diagrams & mentorship notes</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -3764,7 +3764,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         >
                           Export PNG
                         </button>
-                        <button onClick={() => setShowWhiteboardModal(false)} className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 hover:text-white">✕</button>
+                        <button onClick={() => setShowWhiteboardModal(false)} className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[var(--text-muted)] hover:text-white">✕</button>
                       </div>
                     </div>
 
@@ -3783,7 +3783,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                             key={t.id}
                             onClick={() => setWhiteboardTool(t.id as any)}
                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                              whiteboardTool === t.id ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:bg-slate-800'
+                              whiteboardTool === t.id ? 'bg-indigo-600 text-white shadow-md' : 'text-[var(--text-muted)] hover:bg-slate-800'
                             }`}
                             title={t.label}
                           >
@@ -3841,7 +3841,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                           <div
                             key={n.id}
                             style={{ left: n.x, top: n.y, backgroundColor: n.color }}
-                            className="absolute p-3 rounded-xl shadow-lg w-48 text-slate-900 text-xs font-semibold leading-relaxed border border-amber-300/60"
+                            className="absolute p-3 rounded-xl shadow-lg w-48 text-[var(--text-primary)] text-xs font-semibold leading-relaxed border border-amber-300/60"
                           >
                             <div className="flex justify-between items-center mb-1 pb-1 border-b border-black/10">
                               <span className="text-[9px] font-extrabold uppercase opacity-60">Sticky Note</span>
@@ -3865,7 +3865,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="p-2 rounded-xl bg-[#003366] text-white material-symbols-outlined text-sm">code</span>
                         <div>
                           <h3 className="font-extrabold text-sm text-white">Live Pair Programming Code Sandbox</h3>
-                          <p className="text-[10px] text-slate-400">Collaborative code editor for Technical Mentorship & Code Reviews</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Collaborative code editor for Technical Mentorship & Code Reviews</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -3901,14 +3901,14 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                           <span className="material-symbols-outlined text-sm">play_arrow</span>
                           Run Code
                         </button>
-                        <button onClick={() => setShowCodeSandboxModal(false)} className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-400 hover:text-white">✕</button>
+                        <button onClick={() => setShowCodeSandboxModal(false)} className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[var(--text-muted)] hover:text-white">✕</button>
                       </div>
                     </div>
 
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 p-3 bg-slate-950 overflow-hidden">
                       {/* Code Input */}
                       <div className="flex flex-col rounded-2xl bg-slate-900 border border-slate-800 p-3">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-slate-400 font-bold">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-[var(--text-muted)] font-bold">
                           <span>SOURCE CODE ({sandboxLang.toUpperCase()})</span>
                           <span>Auto-Sync Active</span>
                         </div>
@@ -3922,7 +3922,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
                       {/* Code Execution Output Terminal */}
                       <div className="flex flex-col rounded-2xl bg-slate-950 border border-slate-800 p-3 font-mono">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-slate-400 font-bold">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px] text-[var(--text-muted)] font-bold">
                           <span>TERMINAL OUTPUT</span>
                           {isCompilingCode && <span className="text-emerald-400 animate-pulse">Running...</span>}
                         </div>
@@ -3944,7 +3944,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-amber-400">auto_awesome</span>
                         <span>AI Meeting Auto-Summarizer</span>
                       </h3>
-                      <button onClick={() => setShowAiSummarizerModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowAiSummarizerModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="space-y-3 text-xs">
@@ -4001,7 +4001,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-emerald-400">poll</span>
                         <span>Live Meeting Polls</span>
                       </h3>
-                      <button onClick={() => setShowPollsModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowPollsModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     {activePoll ? (
@@ -4040,7 +4040,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                             );
                           })}
                         </div>
-                        <p className="text-[10px] text-slate-400 text-center font-semibold">Total Votes: {activePoll.totalVotes}</p>
+                        <p className="text-[10px] text-[var(--text-muted)] text-center font-semibold">Total Votes: {activePoll.totalVotes}</p>
                       </div>
                     ) : null}
 
@@ -4061,7 +4061,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       <span className="material-symbols-outlined text-purple-400">help_center</span>
                       <span>Q&A Queue ({qaQuestions.length})</span>
                     </h3>
-                    <button onClick={() => setShowQaDrawer(false)} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white">✕</button>
+                    <button onClick={() => setShowQaDrawer(false)} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-white">✕</button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto space-y-3 py-3">
@@ -4069,7 +4069,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       <div key={q.id} className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60 space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-bold text-purple-300">{q.author}</span>
-                          <span className="text-[9px] text-slate-400">{q.timestamp}</span>
+                          <span className="text-[9px] text-[var(--text-muted)]">{q.timestamp}</span>
                         </div>
                         <p className="text-xs text-white leading-relaxed">{q.text}</p>
                         <div className="flex items-center justify-between pt-1">
@@ -4169,7 +4169,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-blue-400">wallpaper</span>
                         <span>Virtual Background Wallpapers</span>
                       </h3>
-                      <button onClick={() => setShowVirtualBgModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowVirtualBgModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
@@ -4225,7 +4225,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-teal-400">meeting_room</span>
                         <span>Breakout Rooms Manager</span>
                       </h3>
-                      <button onClick={() => setShowBreakoutModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowBreakoutModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="space-y-3">
@@ -4235,7 +4235,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                             <span>{room.name}</span>
                             <span className="text-teal-400">{room.participants.length} Participants</span>
                           </div>
-                          <p className="text-[10px] text-slate-400">{room.participants.join(', ')}</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">{room.participants.join(', ')}</p>
                         </div>
                       ))}
                     </div>
@@ -4267,22 +4267,22 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-blue-400">dialpad</span>
                         <span>SIP & Phone Audio Dial-In</span>
                       </h3>
-                      <button onClick={() => setShowSipDialInModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowSipDialInModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="space-y-3 text-xs">
                       <div className="p-3 rounded-2xl bg-slate-800 border border-slate-700 space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Ethiopia Telephony Bridge</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Ethiopia Telephony Bridge</p>
                         <p className="font-mono text-sm font-extrabold text-emerald-400">+251 (0) 22 110 0000</p>
                       </div>
 
                       <div className="p-3 rounded-2xl bg-slate-800 border border-slate-700 space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Conference Passcode / PIN</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Conference Passcode / PIN</p>
                         <p className="font-mono text-sm font-extrabold text-blue-400">849-302#</p>
                       </div>
 
                       <div className="p-3 rounded-2xl bg-slate-800 border border-slate-700 space-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">SIP Video Bridge URI</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">SIP Video Bridge URI</p>
                         <p className="font-mono text-xs font-semibold text-purple-300">sip:meeting-849302@astu.edu.et</p>
                       </div>
                     </div>
@@ -4311,12 +4311,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <span className="material-symbols-outlined text-blue-400">analytics</span>
                         <span>Speaker Engagement & Attendance Analytics</span>
                       </h3>
-                      <button onClick={() => setShowAttendanceReportModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                      <button onClick={() => setShowAttendanceReportModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
                     </div>
 
                     <div className="space-y-3 text-xs">
                       <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Speak Time Distribution</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Speak Time Distribution</p>
                         <div className="space-y-2">
                           <div>
                             <div className="flex justify-between text-[11px] font-bold mb-1">
@@ -4340,7 +4340,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-800 flex justify-between text-[11px] text-slate-400 font-semibold">
+                      <div className="pt-2 border-t border-slate-800 flex justify-between text-[11px] text-[var(--text-muted)] font-semibold">
                         <span>Attendance Verification: 100% Verified</span>
                         <span>Quality Index: 99.4% HD</span>
                       </div>
@@ -4384,7 +4384,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                   <span className="text-xs font-extrabold tracking-wide uppercase text-slate-300">
                     HD Voice Call
                   </span>
-                  <span className="text-xs text-slate-400 font-mono bg-slate-800/80 px-2.5 py-0.5 rounded-md border border-slate-700">
+                  <span className="text-xs text-[var(--text-muted)] font-mono bg-slate-800/80 px-2.5 py-0.5 rounded-md border border-slate-700">
                     {activeCall.isConnected ? formatCallDuration(activeCall.duration) : 'Connecting...'}
                   </span>
                   {isRecording && (
@@ -4412,7 +4412,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 ${
                       isNoiseSuppressionOn
                         ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300'
-                        : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                        : 'bg-slate-800/60 border-slate-700 text-[var(--text-muted)] hover:text-white'
                     }`}
                     title="Toggle AI CrispVoice Noise Cancellation"
                   >
@@ -4428,7 +4428,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all flex items-center gap-1 ${
                       isSpatialAudioActive
                         ? 'bg-blue-950/60 border-blue-700/60 text-blue-300'
-                        : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                        : 'bg-slate-800/60 border-slate-700 text-[var(--text-muted)] hover:text-white'
                     }`}
                     title="Toggle Spatial 3D Audio"
                   >
@@ -4497,7 +4497,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     <span>{activeCall.recipientName || activeThread?.name}</span>
                     <span className="material-symbols-outlined text-blue-400 text-base" title="Verified ASTU Member">verified</span>
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  <p className="text-xs text-[var(--text-muted)] font-medium mt-0.5">
                     {activeThread?.roleLabel || 'Senior ASTU Alumnus & Industry Mentor'}
                   </p>
                   
@@ -4528,7 +4528,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               {/* 3. Live Speech Subtitles & Real-Time Closed Captions (CC) Overlay */}
               {showVoiceCaptions && (
                 <div className="bg-slate-950/90 border border-slate-800 rounded-2xl p-3 text-xs space-y-1 relative z-10 animate-fade-in">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase mb-1">
+                  <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-bold uppercase mb-1">
                     <span className="flex items-center gap-1 text-emerald-400">
                       <span className="material-symbols-outlined text-xs">closed_caption</span>
                       <span>Live Speech Subtitles (CC)</span>
@@ -4538,7 +4538,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                         <button
                           key={lang}
                           onClick={() => setVoiceCaptionLang(lang)}
-                          className={`px-1.5 py-0.5 rounded ${voiceCaptionLang === lang ? 'bg-blue-600 text-white font-bold' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                          className={`px-1.5 py-0.5 rounded ${voiceCaptionLang === lang ? 'bg-blue-600 text-white font-bold' : 'bg-slate-800 text-[var(--text-muted)] hover:text-white'}`}
                         >
                           {lang}
                         </button>
@@ -4572,7 +4572,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                       onChange={(e) => setAmbienceVolume(Number(e.target.value))}
                       className="w-20 accent-blue-500"
                     />
-                    <button onClick={() => setVoiceAmbience('none')} className="text-slate-400 hover:text-rose-400 text-xs font-bold">✕</button>
+                    <button onClick={() => setVoiceAmbience('none')} className="text-[var(--text-muted)] hover:text-rose-400 text-xs font-bold">✕</button>
                   </div>
                 </div>
               )}
@@ -4746,8 +4746,8 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               </div>
 
               {/* 7. Focus Ambience Selector Quick Tabs */}
-              <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/80 text-xs text-slate-400">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Focus Ambience:</span>
+              <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/80 text-xs text-[var(--text-muted)]">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">Focus Ambience:</span>
                 {(['none', 'lofi', 'rain', 'library'] as const).map((mode) => (
                   <button
                     key={mode}
@@ -4755,7 +4755,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
                       voiceAmbience === mode
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-700'
+                        : 'bg-slate-800/60 text-[var(--text-muted)] hover:text-white hover:bg-slate-700'
                     }`}
                   >
                     {mode === 'none' ? 'Off 🔇' : mode === 'lofi' ? 'Lo-Fi Beats 🎧' : mode === 'rain' ? 'Rain 🌧️' : 'Library 📚'}
@@ -4793,13 +4793,13 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-rose-500">videocam</span>
                 <span>HD Meeting Recording Exported</span>
               </h3>
-              <button onClick={() => setShowRecordingPreviewModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowRecordingPreviewModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             {recordedVideoUrl ? (
               <video src={recordedVideoUrl} controls autoPlay className="w-full h-64 rounded-2xl bg-black border border-slate-800 object-contain shadow-inner" />
             ) : (
-              <div className="w-full h-64 rounded-2xl bg-slate-950 flex flex-col items-center justify-center text-slate-400">
+              <div className="w-full h-64 rounded-2xl bg-slate-950 flex flex-col items-center justify-center text-[var(--text-muted)]">
                 <span className="material-symbols-outlined text-4xl mb-2">video_file</span>
                 <p className="text-xs font-bold">Processing video stream output...</p>
               </div>
@@ -4808,7 +4808,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
             <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-between text-xs">
               <div>
                 <p className="font-bold text-white">ASTU_Mentorship_Meeting_Recording.webm</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Format: WebM Video (VP9/Opus) • Duration: {formatCallDuration(recordTimer || 12)} • Status: Saved</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-0.5">Format: WebM Video (VP9/Opus) • Duration: {formatCallDuration(recordTimer || 12)} • Status: Saved</p>
               </div>
               <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold">Ready</span>
             </div>
@@ -4856,12 +4856,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-blue-400">person_add</span>
                 <span>Add People to HD Meeting</span>
               </h3>
-              <button onClick={() => setShowAddPeopleModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowAddPeopleModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             {/* Share Meeting Link Section */}
             <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60 space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Share Meeting Link</label>
+              <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Share Meeting Link</label>
               <div className="flex items-center gap-2">
                 <input
                   type="text"
@@ -4886,7 +4886,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
             {/* Direct Email / Username Invite Form */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Invite via Email or Username</label>
+              <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Invite via Email or Username</label>
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
@@ -4953,16 +4953,16 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
 
             {/* Quick Add ASTU Alumni Directory Suggestions — Real DB Contacts */}
             <div className="space-y-2 pt-2 border-t border-slate-800">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Suggested ASTU Alumni & Mentors</label>
+              <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Suggested ASTU Alumni & Mentors</label>
               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                 {isLoadingSuggested ? (
                   <div className="flex items-center justify-center py-6">
                     <span className="animate-spin inline-block w-5 h-5 border-2 border-blue-400/30 border-t-blue-400 rounded-full"></span>
-                    <span className="ml-2 text-xs text-slate-400">Loading contacts from database...</span>
+                    <span className="ml-2 text-xs text-[var(--text-muted)]">Loading contacts from database...</span>
                   </div>
                 ) : suggestedContacts.length === 0 ? (
                   <div className="text-center py-4">
-                    <span className="text-slate-500 text-xs">No contacts available</span>
+                    <span className="text-[var(--text-muted)] text-xs">No contacts available</span>
                   </div>
                 ) : (
                   suggestedContacts.map(user => {
@@ -4979,7 +4979,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                           )}
                           <div>
                             <p className="font-bold text-white">{user.name}</p>
-                            <p className="text-[10px] text-slate-400">{user.roleLabel}{user.email ? ` • ${user.email}` : ''}</p>
+                            <p className="text-[10px] text-[var(--text-muted)]">{user.roleLabel}{user.email ? ` • ${user.email}` : ''}</p>
                           </div>
                         </div>
                         <button
@@ -5013,7 +5013,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                             }
                           }}
                           className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                            alreadyAdded ? 'bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            alreadyAdded ? 'bg-slate-700 text-[var(--text-muted)] cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
                           }`}
                         >
                           {alreadyAdded ? 'Added ✓' : '+ Add'}
@@ -5046,12 +5046,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-blue-400">headphones</span>
                 <span>Audio Input & Output Hardware</span>
               </h3>
-              <button onClick={() => setShowAudioDeviceModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowAudioDeviceModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Microphone Input Device</label>
+                <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-1.5">Microphone Input Device</label>
                 <select
                   value={selectedAudioInput}
                   onChange={e => setSelectedAudioInput(e.target.value)}
@@ -5064,7 +5064,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Audio Output Speaker Device</label>
+                <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase mb-1.5">Audio Output Speaker Device</label>
                 <select
                   value={selectedAudioOutput}
                   onChange={e => setSelectedAudioOutput(e.target.value)}
@@ -5108,32 +5108,32 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-emerald-400">signal_cellular_alt</span>
                 <span>Voice Call Network Telemetry</span>
               </h3>
-              <button onClick={() => setShowVoiceDiagnostics(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowVoiceDiagnostics(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Roundtrip Latency</p>
-                <p className="text-lg font-extrabold text-emerald-400 mt-1">16 ms <span className="text-[10px] text-slate-400">(Optimal)</span></p>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Roundtrip Latency</p>
+                <p className="text-lg font-extrabold text-emerald-400 mt-1">16 ms <span className="text-[10px] text-[var(--text-muted)]">(Optimal)</span></p>
               </div>
               <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Audio Bitrate</p>
-                <p className="text-lg font-extrabold text-blue-400 mt-1">96 kbps <span className="text-[10px] text-slate-400">(Opus HD)</span></p>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Audio Bitrate</p>
+                <p className="text-lg font-extrabold text-blue-400 mt-1">96 kbps <span className="text-[10px] text-[var(--text-muted)]">(Opus HD)</span></p>
               </div>
               <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Packet Loss</p>
-                <p className="text-lg font-extrabold text-emerald-400 mt-1">0.0 % <span className="text-[10px] text-slate-400">(Zero Loss)</span></p>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Packet Loss</p>
+                <p className="text-lg font-extrabold text-emerald-400 mt-1">0.0 % <span className="text-[10px] text-[var(--text-muted)]">(Zero Loss)</span></p>
               </div>
               <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Jitter Buffer</p>
-                <p className="text-lg font-extrabold text-indigo-400 mt-1">1.2 ms <span className="text-[10px] text-slate-400">(Stable)</span></p>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Jitter Buffer</p>
+                <p className="text-lg font-extrabold text-indigo-400 mt-1">1.2 ms <span className="text-[10px] text-[var(--text-muted)]">(Stable)</span></p>
               </div>
             </div>
 
             <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
               <div>
                 <p className="font-bold text-slate-200">Eco Data-Saver Mode</p>
-                <p className="text-[10px] text-slate-400">Optimize for 2G/3G mobile networks</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Optimize for 2G/3G mobile networks</p>
               </div>
               <button
                 onClick={() => {
@@ -5142,7 +5142,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 }}
                 className={`w-11 h-6 rounded-full transition-colors relative ${isEcoDataSaverOn ? 'bg-emerald-600' : 'bg-slate-700'}`}
               >
-                <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${isEcoDataSaverOn ? 'translate-x-5' : ''}`} />
+                <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-[var(--bg-card)] transition-transform ${isEcoDataSaverOn ? 'translate-x-5' : ''}`} />
               </button>
             </div>
           </div>
@@ -5158,7 +5158,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-rose-400">graphic_eq</span>
                 <span>Voice Call Recording Exported</span>
               </h3>
-              <button onClick={() => setShowVoiceExportModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowVoiceExportModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
@@ -5168,7 +5168,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 ))}
               </div>
               <p className="text-xs text-slate-300 font-extrabold">HD Voice Note • {Math.floor(recordTimer / 60)}:{(recordTimer % 60).toString().padStart(2, '0')}</p>
-              <p className="text-[10px] text-slate-400">Captured at 48kHz Opus High Definition</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Captured at 48kHz Opus High Definition</p>
             </div>
 
             <div className="space-y-2">
@@ -5205,7 +5205,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-purple-400">auto_awesome</span>
                 <span>AI Voice Executive Summary Notes</span>
               </h3>
-              <button onClick={() => setShowVoiceAiNotesModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowVoiceAiNotesModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             {isGeneratingVoiceAiNotes ? (
@@ -5266,12 +5266,12 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-blue-400">person_add</span>
                 <span>Invite / Transfer Voice Call</span>
               </h3>
-              <button onClick={() => setShowVoiceTransferModal(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowVoiceTransferModal(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Direct Voice Meeting Link</label>
+                <label className="block text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1.5">Direct Voice Meeting Link</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -5292,7 +5292,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
               </div>
 
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Available ASTU Alumni & Mentors to Transfer Call</p>
+                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-2">Available ASTU Alumni & Mentors to Transfer Call</p>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {[
                     { name: 'Dr. Abebe Bikila', role: 'Head of Computer Science', status: 'Online' },
@@ -5302,7 +5302,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                     <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800">
                       <div>
                         <p className="font-bold text-slate-200">{m.name}</p>
-                        <p className="text-[10px] text-slate-400">{m.role}</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">{m.role}</p>
                       </div>
                       <button
                         onClick={() => {
@@ -5331,7 +5331,7 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({
                 <span className="material-symbols-outlined text-blue-400">chat</span>
                 <span>In-Call Voice Chat</span>
               </h3>
-              <button onClick={() => setShowVoiceInCallChat(false)} className="text-slate-400 hover:text-white">✕</button>
+              <button onClick={() => setShowVoiceInCallChat(false)} className="text-[var(--text-muted)] hover:text-white">✕</button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 p-2 bg-slate-950 rounded-2xl border border-slate-800 text-xs min-h-[160px]">

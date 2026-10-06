@@ -392,13 +392,13 @@ ${xmlUrls}
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-xs flex items-center gap-3 dark:border-slate-800 dark:bg-slate-900">
+            <div key={s.label} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-xs flex items-center gap-3 dark:border-slate-800 dark:bg-slate-900">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
                 <Icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{s.label}</p>
-                <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{s.value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] dark:text-slate-400">{s.label}</p>
+                <p className="text-xl font-bold tracking-tight text-[var(--text-primary)] dark:text-white">{s.value}</p>
               </div>
             </div>
           );
@@ -406,19 +406,19 @@ ${xmlUrls}
       </div>
 
       {/* Search & Audit Bar */}
-      <div className="flex flex-col gap-3 rounded-[12px] border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-col gap-3 rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search URLs, titles, or focus keywords..."
-              className="w-full rounded-[8px] border border-slate-200 bg-white py-2 pl-8 pr-8 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] py-2 pl-8 pr-8 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <button onClick={() => setSearch('')} className="absolute right-2.5 top-2.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200">
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
@@ -427,21 +427,21 @@ ${xmlUrls}
             type="button"
             onClick={runReaudit}
             disabled={isAuditing}
-            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer transition-all disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isAuditing ? 'animate-spin text-[#003580] dark:text-sky-400' : ''}`} />
             {isAuditing ? 'Auditing...' : 'Re-audit Pages'}
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--border-color)] pt-3 dark:border-slate-800">
           {(['all', 'Excellent', 'Good', 'Needs Work', 'Critical'] as const).map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setStatusFilter(s)}
               className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all cursor-pointer ${
-                statusFilter === s ? 'bg-[#003580] text-white shadow-xs dark:bg-sky-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                statusFilter === s ? 'bg-[#003580] text-white shadow-xs dark:bg-sky-600' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]  dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
               }`}
             >
               {s === 'all' ? `All Pages (${seoItems.length})` : s}
@@ -453,22 +453,22 @@ ${xmlUrls}
       {/* Pages List */}
       <div className="space-y-3">
         {filtered.map((item) => (
-          <div key={item.id} className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-xs transition-all hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
+          <div key={item.id} className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs transition-all hover:border-[var(--border-color)] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusStyles[item.status]}`}>
                     {item.status}
                   </span>
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-mono text-slate-700 font-semibold dark:bg-slate-800 dark:text-slate-300">
+                  <span className="rounded-md bg-[var(--bg-page)] px-2 py-0.5 text-[11px] font-mono text-[var(--text-secondary)] font-semibold dark:bg-slate-800 dark:text-slate-300">
                     {item.url}
                   </span>
-                  <span className="text-[10px] font-medium text-slate-400">
+                  <span className="text-[10px] font-medium text-[var(--text-muted)]">
                     Robots: {item.robots || 'index, follow'}
                   </span>
                 </div>
-                <h3 className="mt-2 text-base font-bold text-slate-900 dark:text-white">{item.title}</h3>
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">{item.description}</p>
+                <h3 className="mt-2 text-base font-bold text-[var(--text-primary)] dark:text-white">{item.title}</h3>
+                <p className="mt-1 text-xs text-[var(--text-secondary)] dark:text-slate-300 line-clamp-2 leading-relaxed">{item.description}</p>
                 <div className="mt-2.5 flex flex-wrap gap-1.5">
                   {item.keywords.map((kw) => (
                     <span key={kw} className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-[#003580] dark:bg-blue-950/50 dark:text-sky-300">
@@ -481,8 +481,8 @@ ${xmlUrls}
 
               {/* Metrics pill */}
               <div className="grid grid-cols-3 gap-2 text-center shrink-0">
-                <div className="rounded-xl bg-slate-50 border border-slate-100 px-3.5 py-2 dark:border-slate-700 dark:bg-slate-800/80">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Score</p>
+                <div className="rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] px-3.5 py-2 dark:border-slate-700 dark:bg-slate-800/80">
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">Score</p>
                   <p
                     className="text-base font-extrabold"
                     style={{ color: item.score >= 80 ? '#1D9E75' : item.score >= 60 ? '#E8A020' : '#E24B4A' }}
@@ -490,13 +490,13 @@ ${xmlUrls}
                     {item.score}
                   </p>
                 </div>
-                <div className="rounded-xl bg-slate-50 border border-slate-100 px-3.5 py-2 dark:border-slate-700 dark:bg-slate-800/80">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Position</p>
-                  <p className="text-base font-extrabold text-slate-800 dark:text-white">#{item.position.toFixed(1)}</p>
+                <div className="rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] px-3.5 py-2 dark:border-slate-700 dark:bg-slate-800/80">
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">Position</p>
+                  <p className="text-base font-extrabold text-[var(--text-primary)] dark:text-white">#{item.position.toFixed(1)}</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 border border-slate-100 px-3.5 py-2 dark:border-slate-700 dark:bg-slate-800/80">
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Traffic</p>
-                  <p className="text-base font-extrabold text-slate-800 dark:text-white">{item.traffic.toLocaleString()}</p>
+                <div className="rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] px-3.5 py-2 dark:border-slate-700 dark:bg-slate-800/80">
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-[var(--text-muted)]">Traffic</p>
+                  <p className="text-base font-extrabold text-[var(--text-primary)] dark:text-white">{item.traffic.toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -511,7 +511,7 @@ ${xmlUrls}
             )}
 
             {/* Action Bar */}
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--border-color)] pt-3 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => openEditor(item)}
@@ -522,21 +522,21 @@ ${xmlUrls}
               <button
                 type="button"
                 onClick={() => window.open(item.url, '_blank')}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
               >
                 <ExternalLink className="h-3.5 w-3.5" /> Open Page
               </button>
               <button
                 type="button"
                 onClick={generateAndDownloadSitemap}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
               >
                 <Globe className="h-3.5 w-3.5" /> Sync Sitemap
               </button>
               <button
                 type="button"
                 onClick={() => copyPageUrl(item)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer"
               >
                 <Link2 className="h-3.5 w-3.5" /> Copy URL
               </button>
@@ -545,9 +545,9 @@ ${xmlUrls}
         ))}
 
         {filtered.length === 0 && (
-          <div className="rounded-[12px] border-2 border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No pages found matching criteria</p>
-            <p className="text-xs text-slate-400 mt-1">Try changing the status filter or clearing your search term.</p>
+          <div className="rounded-[12px] border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-card)] p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-sm font-semibold text-[var(--text-secondary)] dark:text-slate-300">No pages found matching criteria</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Try changing the status filter or clearing your search term.</p>
           </div>
         )}
       </div>
@@ -566,7 +566,7 @@ ${xmlUrls}
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Meta Title</label>
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200">Meta Title</label>
                     <span className={`text-[11px] font-bold ${titleOptimal ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {liveTitleLen}/65 chars {titleOptimal ? '✓' : '(optimal 30-65)'}
                     </span>
@@ -576,13 +576,13 @@ ${xmlUrls}
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Meta Description</label>
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200">Meta Description</label>
                     <span className={`text-[11px] font-bold ${descOptimal ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {liveDescLen}/165 chars {descOptimal ? '✓' : '(optimal 110-165)'}
                     </span>
@@ -592,29 +592,29 @@ ${xmlUrls}
                     required
                     value={editDesc}
                     onChange={(e) => setEditDesc(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] resize-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] resize-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                    Focus Keywords <span className="text-slate-400 font-normal">(comma-separated)</span>
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
+                    Focus Keywords <span className="text-[var(--text-muted)] font-normal">(comma-separated)</span>
                   </label>
                   <input
                     type="text"
                     value={editKeywordsInput}
                     onChange={(e) => setEditKeywordsInput(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Robots Tag</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Robots Tag</label>
                     <select
                       value={editRobots}
                       onChange={(e) => setEditRobots(e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     >
                       <option value="index, follow">index, follow (Default)</option>
                       <option value="noindex, follow">noindex, follow</option>
@@ -622,12 +622,12 @@ ${xmlUrls}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Canonical URL</label>
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Canonical URL</label>
                     <input
                       type="text"
                       value={editCanonical}
                       onChange={(e) => setEditCanonical(e.target.value)}
-                      className="w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className="w-full rounded-lg border border-[var(--border-color)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
                 </div>
@@ -636,47 +636,47 @@ ${xmlUrls}
               {/* Right Column: Google & Social Previews */}
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-center gap-1.5">
                     <Globe className="h-3.5 w-3.5 text-blue-600" /> Google Search Preview
                   </h4>
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-700 dark:bg-slate-800/90">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
-                      <span className="font-semibold text-slate-900 dark:text-white">ASTU Public Portal</span>
+                  <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-xs dark:border-slate-700 dark:bg-slate-800/90">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] dark:text-slate-300">
+                      <span className="font-semibold text-[var(--text-primary)] dark:text-white">ASTU Public Portal</span>
                       <span>·</span>
-                      <span className="text-slate-400 text-[11px] truncate">{editCanonical || 'https://astu-ams.et'}</span>
+                      <span className="text-[var(--text-muted)] text-[11px] truncate">{editCanonical || 'https://astu-ams.et'}</span>
                     </div>
                     <div className="mt-1 text-sm font-semibold text-[#1a0dab] dark:text-sky-400 hover:underline line-clamp-1 cursor-pointer">
                       {editTitle || 'Your Page Title'}
                     </div>
-                    <div className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                    <div className="mt-1 text-xs text-[var(--text-secondary)] dark:text-slate-300 line-clamp-2 leading-relaxed">
                       {editDesc || 'Your page meta description appears here in Google search engine result snippets.'}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-center gap-1.5">
                     <Share2 className="h-3.5 w-3.5 text-purple-600" /> Social Card Preview (Open Graph)
                   </h4>
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden shadow-xs dark:border-slate-700 dark:bg-slate-800">
+                  <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] overflow-hidden shadow-xs dark:border-slate-700 dark:bg-slate-800">
                     <div className="h-20 bg-gradient-to-r from-[#003580] to-[#004080] flex items-center justify-center text-white text-xs font-bold">
                       ASTU Institutional Portal
                     </div>
-                    <div className="p-3 bg-white dark:bg-slate-900">
-                      <p className="text-[10px] uppercase font-bold text-slate-400">astu-ams.et</p>
-                      <p className="text-xs font-bold text-slate-800 dark:text-white line-clamp-1 mt-0.5">{editTitle || 'Page Title'}</p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">{editDesc || 'Description'}</p>
+                    <div className="p-3 bg-[var(--bg-card)] dark:bg-slate-900">
+                      <p className="text-[10px] uppercase font-bold text-[var(--text-muted)]">astu-ams.et</p>
+                      <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white line-clamp-1 mt-0.5">{editTitle || 'Page Title'}</p>
+                      <p className="text-[11px] text-[var(--text-muted)] dark:text-slate-400 line-clamp-1 mt-0.5">{editDesc || 'Description'}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--border-color)] dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setEditingItem(null)}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
+                className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
               >
                 Cancel
               </button>

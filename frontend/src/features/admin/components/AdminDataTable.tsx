@@ -142,14 +142,14 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
   if (isLoading) {
     return (
       <div className="admin-card overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        <div className="border-b border-slate-200 px-5 py-4">
-          <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
+        <div className="border-b border-[var(--border-color)] px-5 py-4">
+          <div className="h-4 w-40 animate-pulse rounded bg-[var(--bg-page)]" />
         </div>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-[var(--border-color)]">
           {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="grid animate-pulse grid-cols-6 gap-4 px-5 py-4">
               {Array.from({ length: 6 }).map((__, cellIndex) => (
-                <div key={cellIndex} className="h-4 rounded bg-slate-100" />
+                <div key={cellIndex} className="h-4 rounded bg-[var(--bg-page)]" />
               ))}
             </div>
           ))}
@@ -160,9 +160,9 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
 
   return (
     <div className="admin-card overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="border-b border-slate-200 px-5 py-3 flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-1.5 text-sm flex-1 max-w-sm">
-          <Search className="h-4 w-4 text-slate-400" />
+      <div className="border-b border-[var(--border-color)] px-5 py-3 flex items-center justify-between gap-3">
+        <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-sm flex-1 max-w-sm">
+          <Search className="h-4 w-4 text-[var(--text-muted)]" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -173,15 +173,15 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
         <button
           type="button"
           onClick={exportCsv}
-          className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-[#003580] transition-all"
+          className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[#003580] transition-all"
         >
           <Download className="h-3.5 w-3.5" />
           Export CSV
         </button>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
+        <table className="min-w-full divide-y divide-[var(--border-color)] text-sm">
+          <thead className="bg-[var(--bg-page)]">
             <tr>
               {bulkSelection && (
                 <th className="w-12 px-5 py-3 text-left">
@@ -189,7 +189,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
                     type="checkbox"
                     checked={isAllSelected}
                     onChange={(event) => togglePageSelection(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                    className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580]"
                   />
                 </th>
               )}
@@ -199,7 +199,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
                   role={column.sortable ? 'button' : undefined}
                   onClick={() => toggleSort(column.key, column.sortable)}
                   className={[
-                    'px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500',
+                    'px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]',
                     column.align === 'center' && 'text-center',
                     column.align === 'right' && 'text-right',
                     column.className || '',
@@ -218,17 +218,17 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-[var(--border-color)]">
             {pageRows.length === 0 ? (
               <tr>
                 <td className="px-5 py-16" colSpan={columns.length + (bulkSelection ? 1 : 0)}>
                   <div className="flex flex-col items-center justify-center gap-3 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
-                      {EmptyIcon ? <EmptyIcon className="h-6 w-6 text-slate-400" /> : <Search className="h-6 w-6 text-slate-400" />}
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--bg-page)]">
+                      {EmptyIcon ? <EmptyIcon className="h-6 w-6 text-[var(--text-muted)]" /> : <Search className="h-6 w-6 text-[var(--text-muted)]" />}
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-slate-700">{emptyState}</p>
-                      <p className="mt-1 text-sm text-slate-500">Try adjusting your search or filter criteria.</p>
+                      <p className="text-base font-semibold text-[var(--text-secondary)]">{emptyState}</p>
+                      <p className="mt-1 text-sm text-[var(--text-muted)]">Try adjusting your search or filter criteria.</p>
                     </div>
                   </div>
                 </td>
@@ -242,7 +242,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
                   <tr
                     key={rowId}
                     className={[
-                      'transition-colors hover:bg-slate-50/80',
+                      'transition-colors hover:bg-[var(--bg-page)]',
                       onRowClick ? 'cursor-pointer' : '',
                       isSelected ? 'bg-[#003580]/5' : '',
                     ]
@@ -257,7 +257,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
                           checked={isSelected}
                           onChange={(event) => toggleRow(row, rowIndex, event.target.checked)}
                           onClick={(event) => event.stopPropagation()}
-                          className="h-4 w-4 rounded border-slate-300 text-[#003580] focus:ring-[#003580]"
+                          className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580]"
                         />
                       </td>
                     )}
@@ -273,7 +273,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
                         <td
                           key={column.key}
                           className={[
-                            'px-5 py-4 text-slate-600',
+                            'px-5 py-4 text-[var(--text-secondary)]',
                             column.align === 'center' && 'text-center',
                             column.align === 'right' && 'text-right',
                             column.className || '',
@@ -294,8 +294,8 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
       </div>
 
       {sorted.length > 0 && (
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-slate-500">
+        <div className="flex flex-col gap-3 border-t border-[var(--border-color)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[var(--text-muted)]">
             Showing {pageRows.length === 0 ? 0 : startingIndex(page, pageSize) + 1}-{Math.min(page * pageSize, sorted.length)} of {sorted.length}
             {searchQuery && ` (filtered from ${data.length})`}
           </p>
@@ -304,7 +304,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
               type="button"
               onClick={() => setPage(1)}
               disabled={page === 1}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 text-slate-500 hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
             >
               <ChevronsLeft className="h-4 w-4" />
             </button>
@@ -312,18 +312,18 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
               type="button"
               onClick={() => setPage((current) => Math.max(1, current - 1))}
               disabled={page === 1}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 text-slate-500 hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="min-w-20 text-center text-xs font-medium text-slate-600">
+            <span className="min-w-20 text-center text-xs font-medium text-[var(--text-secondary)]">
               Page {page} of {totalPages}
             </span>
             <button
               type="button"
               onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
               disabled={page === totalPages}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 text-slate-500 hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -331,7 +331,7 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
               type="button"
               onClick={() => setPage(totalPages)}
               disabled={page === totalPages}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 text-slate-500 hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-color)] text-[var(--text-muted)] hover:border-[#003580] hover:text-[#003580] disabled:cursor-not-allowed disabled:opacity-40 transition-all"
             >
               <ChevronsRight className="h-4 w-4" />
             </button>

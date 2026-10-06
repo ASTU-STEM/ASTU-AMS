@@ -264,7 +264,7 @@ const statusClass: Record<ModuleStatus, string> = {
   Live: 'border-emerald-500/20 bg-emerald-50 text-emerald-700 font-extrabold',
   Configured: 'border-[#003580]/20 bg-[#003580]/10 text-[#003580] font-extrabold',
   'Needs Review': 'border-amber-500/20 bg-amber-50 text-amber-700 font-extrabold',
-  Planned: 'border-slate-200 bg-slate-100 text-slate-600 font-bold',
+  Planned: 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] font-bold',
 };
 
 interface ModuleConfigState {
@@ -498,16 +498,16 @@ export default function SuperAdminModules() {
               className={`rounded-2xl border p-5 text-left transition-all ${
                 isActive
                   ? 'border-[#003580] bg-[#003580]/5 shadow-sm ring-1 ring-[#003580]/30'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                  : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:border-[var(--border-color)] hover:shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-extrabold text-slate-900">{group.name}</p>
+                <p className="text-sm font-extrabold text-[var(--text-primary)]">{group.name}</p>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
                   {activeCount}/{group.modules.length} Live
                 </span>
               </div>
-              <p className="mt-2 text-xs text-slate-500 leading-relaxed">{group.description}</p>
+              <p className="mt-2 text-xs text-[var(--text-muted)] leading-relaxed">{group.description}</p>
             </button>
           );
         })}
@@ -516,14 +516,14 @@ export default function SuperAdminModules() {
       {/* Main Governance Grid & Sidebar */}
       <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
         {/* Governed Modules Panel */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-color)] pb-4">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <h2 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
                 <span>{currentGroup.name}</span>
-                <span className="text-xs font-normal text-slate-400">({currentGroup.modules.length} Governed Subsystems)</span>
+                <span className="text-xs font-normal text-[var(--text-muted)]">({currentGroup.modules.length} Governed Subsystems)</span>
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                 Click any module card to inspect configuration, update status, or launch the subsystem route.
               </p>
             </div>
@@ -552,11 +552,11 @@ export default function SuperAdminModules() {
                 <div
                   key={module.id}
                   onClick={() => handleOpenModuleModal(module)}
-                  className="group rounded-2xl border border-slate-200 bg-slate-50/60 p-4 hover:bg-white hover:border-[#003580]/40 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3"
+                  className="group rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 hover:bg-[var(--bg-card)] hover:border-[#003580]/40 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-3"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-3">
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#003580] shadow-xs border border-slate-200/80 group-hover:scale-105 transition-transform">
+                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#003580] shadow-xs border border-[var(--border-color)] group-hover:scale-105 transition-transform">
                         <Icon className="h-5 w-5" />
                       </span>
                       <span className={`rounded-lg border px-2.5 py-1 text-[10px] uppercase tracking-wider ${statusClass[cfg.status]}`}>
@@ -564,16 +564,16 @@ export default function SuperAdminModules() {
                       </span>
                     </div>
 
-                    <h3 className="mt-3 text-sm font-extrabold text-slate-900 group-hover:text-[#003580] transition-colors">
+                    <h3 className="mt-3 text-sm font-extrabold text-[var(--text-primary)] group-hover:text-[#003580] transition-colors">
                       {module.title}
                     </h3>
-                    <p className="mt-1 text-xs text-slate-500 leading-relaxed line-clamp-2">
+                    <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed line-clamp-2">
                       {module.description}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 font-bold">
-                    <span className="flex items-center gap-1 text-slate-500">
+                  <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)] text-[10px] text-[var(--text-muted)] font-bold">
+                    <span className="flex items-center gap-1 text-[var(--text-muted)]">
                       <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Audit Logged
                     </span>
                     <span className="text-[#003580] group-hover:underline flex items-center gap-0.5 font-extrabold">
@@ -589,17 +589,17 @@ export default function SuperAdminModules() {
         {/* Right Sidebar: System Monitoring & Security Center */}
         <aside className="space-y-5">
           {/* Real-time System Monitoring */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-emerald-600" />
-                <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">System Telemetry</h2>
+                <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wider">System Telemetry</h2>
               </div>
 
               <button
                 onClick={handleRefreshTelemetry}
                 disabled={isRefreshingTelemetry}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
                 title="Refresh Telemetry"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshingTelemetry ? 'animate-spin' : ''}`} />
@@ -607,30 +607,30 @@ export default function SuperAdminModules() {
             </div>
 
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">API Response Latency</span>
+              <div className="flex items-center justify-between rounded-xl bg-[var(--bg-page)] p-3 border border-[var(--border-color)]">
+                <span className="text-xs font-semibold text-[var(--text-secondary)]">API Response Latency</span>
                 <span className="text-xs font-black text-emerald-700 font-mono">
-                  {telemetry !== null ? `${telemetry.apiLatency} ms` : <RefreshCw className="h-3 w-3 animate-spin text-slate-400" />}
+                  {telemetry !== null ? `${telemetry.apiLatency} ms` : <RefreshCw className="h-3 w-3 animate-spin text-[var(--text-muted)]" />}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">PostgreSQL Snapshots</span>
+              <div className="flex items-center justify-between rounded-xl bg-[var(--bg-page)] p-3 border border-[var(--border-color)]">
+                <span className="text-xs font-semibold text-[var(--text-secondary)]">PostgreSQL Snapshots</span>
                 <span className="text-xs font-black text-emerald-700 inline-flex items-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {telemetry?.backupIntegrity || 'Verified'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">Security Posture Score</span>
+              <div className="flex items-center justify-between rounded-xl bg-[var(--bg-page)] p-3 border border-[var(--border-color)]">
+                <span className="text-xs font-semibold text-[var(--text-secondary)]">Security Posture Score</span>
                 <span className="text-xs font-black text-blue-700">
                   {telemetry !== null ? `${telemetry.securityPostureScore} / 100` : '...'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">Threat Anomaly Shield</span>
-                <span className="text-xs font-black text-slate-700">
+              <div className="flex items-center justify-between rounded-xl bg-[var(--bg-page)] p-3 border border-[var(--border-color)]">
+                <span className="text-xs font-semibold text-[var(--text-secondary)]">Threat Anomaly Shield</span>
+                <span className="text-xs font-black text-[var(--text-secondary)]">
                   {telemetry !== null ? `${telemetry.blockedThreatsCount} Blocked IPs` : '...'}
                 </span>
               </div>
@@ -638,8 +638,8 @@ export default function SuperAdminModules() {
           </div>
 
           {/* Interactive Security Controls */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center gap-2">
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs space-y-4">
+            <h2 className="text-sm font-black text-[var(--text-primary)] uppercase tracking-wider border-b border-[var(--border-color)] pb-3 flex items-center gap-2">
               <Shield className="h-4.5 w-4.5 text-[#003580]" />
               Security Governance
             </h2>
@@ -647,7 +647,7 @@ export default function SuperAdminModules() {
             <div className="space-y-3">
               <label
                 onClick={() => handleToggleSecuritySetting('mfa')}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex items-center justify-between rounded-xl border border-[var(--border-color)] p-3 text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-colors cursor-pointer"
               >
                 <span>Enforce MFA for Admin Roles</span>
                 <input
@@ -660,7 +660,7 @@ export default function SuperAdminModules() {
 
               <label
                 onClick={() => handleToggleSecuritySetting('export')}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex items-center justify-between rounded-xl border border-[var(--border-color)] p-3 text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-colors cursor-pointer"
               >
                 <span>Audit CSV/PDF Data Exports</span>
                 <input
@@ -673,7 +673,7 @@ export default function SuperAdminModules() {
 
               <label
                 onClick={() => handleToggleSecuritySetting('keyRot')}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex items-center justify-between rounded-xl border border-[var(--border-color)] p-3 text-xs font-bold text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-colors cursor-pointer"
               >
                 <span>Automated API Key Rotation</span>
                 <input
@@ -697,9 +697,9 @@ export default function SuperAdminModules() {
               if (e.target === e.currentTarget) setSelectedModule(null);
             }}
           >
-            <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-[var(--border-color)] space-y-5 animate-in zoom-in-95 duration-200">
               {/* Header */}
-              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="h-11 w-11 rounded-2xl bg-[#003580]/10 text-[#003580] flex items-center justify-center border border-[#003580]/20 font-bold shadow-sm">
                     {React.createElement(selectedModule.icon, { className: 'h-6 w-6' })}
@@ -708,32 +708,32 @@ export default function SuperAdminModules() {
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#003580] block">
                       Subsystem Governance
                     </span>
-                    <h3 className="text-lg font-black text-slate-900">{selectedModule.title}</h3>
+                    <h3 className="text-lg font-black text-[var(--text-primary)]">{selectedModule.title}</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedModule(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-full transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Module Description Box */}
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-xs text-[var(--text-secondary)] leading-relaxed">
                 {selectedModule.description}
               </div>
 
               {/* Controls Form */}
               <div className="space-y-4 text-xs">
                 <div>
-                  <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                  <label className="font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                     Deployment Status
                   </label>
                   <select
                     value={modalStatus}
                     onChange={(e) => setModalStatus(e.target.value as ModuleStatus)}
-                    className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-white font-extrabold text-slate-800 focus:border-[#003580] focus:outline-none"
+                    className="w-full text-xs p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] font-extrabold text-[var(--text-primary)] focus:border-[#003580] focus:outline-none"
                   >
                     <option value="Live">🟢 Live (Active System Route)</option>
                     <option value="Configured">🔵 Configured (Role Scoped)</option>
@@ -744,13 +744,13 @@ export default function SuperAdminModules() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className="font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                       Required Access Role
                     </label>
                     <select
                       value={modalRole}
                       onChange={(e) => setModalRole(e.target.value)}
-                      className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:border-[#003580] focus:outline-none"
+                      className="w-full text-xs p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] font-bold text-[var(--text-primary)] focus:border-[#003580] focus:outline-none"
                     >
                       <option value="SUPER_ADMIN">Super Admin Only</option>
                       <option value="ADMIN">Full Administrator</option>
@@ -760,10 +760,10 @@ export default function SuperAdminModules() {
                   </div>
 
                   <div>
-                    <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className="font-extrabold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                       Audit Logging
                     </label>
-                    <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 cursor-pointer">
+                    <label className="flex items-center gap-2 p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] font-bold text-[var(--text-primary)] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={modalAudit}
@@ -777,14 +777,14 @@ export default function SuperAdminModules() {
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
+              <div className="space-y-2 pt-2 border-t border-[var(--border-color)]">
                 <button
                   type="button"
                   onClick={() => {
                     navigate(selectedModule.route);
                     setSelectedModule(null);
                   }}
-                  className="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] text-xs font-extrabold transition-all flex items-center justify-center gap-2"
                 >
                   <ExternalLink className="h-4 w-4 text-[#003580]" />
                   <span>Launch / Open Subsystem Page ({selectedModule.route})</span>
@@ -794,7 +794,7 @@ export default function SuperAdminModules() {
                   <button
                     type="button"
                     onClick={() => setSelectedModule(null)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="flex-1 py-3 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
                   >
                     Cancel
                   </button>
@@ -822,21 +822,21 @@ export default function SuperAdminModules() {
               if (e.target === e.currentTarget) setShowGroupModal(false);
             }}
           >
-            <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-200">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[var(--border-color)] space-y-5 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
                 <div className="flex items-center gap-2.5">
                   <SlidersHorizontal className="h-5 w-5 text-[#003580]" />
-                  <h3 className="text-base font-black text-slate-900">Configure "{activeGroup}"</h3>
+                  <h3 className="text-base font-black text-[var(--text-primary)]">Configure "{activeGroup}"</h3>
                 </div>
                 <button
                   onClick={() => setShowGroupModal(false)}
-                  className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-full transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 Apply bulk deployment status updates across all {currentGroup.modules.length} governed subsystems in{' '}
                 <strong>{activeGroup}</strong>.
               </p>
@@ -870,11 +870,11 @@ export default function SuperAdminModules() {
                 </button>
               </div>
 
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-[var(--border-color)]">
                 <button
                   type="button"
                   onClick={() => setShowGroupModal(false)}
-                  className="w-full py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                  className="w-full py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
                 >
                   Close Group Settings
                 </button>

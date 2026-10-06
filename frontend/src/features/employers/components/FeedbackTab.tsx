@@ -256,10 +256,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
   const renderProgressBar = (value: number, max: number, color: string, label: string) => (
     <div className="space-y-1">
       <div className="flex justify-between items-center">
-        <span className="text-[10px] font-semibold text-gray-500">{label}</span>
-        <span className="text-[10px] font-bold text-gray-700">{value}/{max}</span>
+        <span className="text-[10px] font-semibold text-[var(--text-muted)]">{label}</span>
+        <span className="text-[10px] font-bold text-[var(--text-secondary)]">{value}/{max}</span>
       </div>
-      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="h-2 bg-[var(--bg-page)] rounded-full overflow-hidden">
         <div
           className={`h-full ${color} transition-all duration-500`}
           style={{ width: `${(value / max) * 100}%` }}
@@ -272,7 +272,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
     <div className="space-y-8">
       {/* Assigned Employer Surveys Section */}
       <section className={`p-6 border rounded-3xl shadow-sm transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'}`}>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-gray-150">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-[var(--border-color)]">
           <div>
             <h3 className="text-lg font-extrabold flex items-center gap-2">
               <ClipboardCheck className="w-5 h-5 text-astu-navy" />
@@ -288,11 +288,11 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
         </div>
 
         {surveysLoading ? (
-          <div className="p-8 text-center text-xs text-gray-400">Loading active employer surveys...</div>
+          <div className="p-8 text-center text-xs text-[var(--text-muted)]">Loading active employer surveys...</div>
         ) : assignedSurveys.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
-            <p className="text-sm font-semibold text-gray-600">No pending employer surveys at this time.</p>
-            <p className="text-xs text-gray-400 mt-1">ASTU Administration will notify your organization via In-App, Email, and SMS when new surveys are published.</p>
+          <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-page)]">
+            <p className="text-sm font-semibold text-[var(--text-secondary)]">No pending employer surveys at this time.</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">ASTU Administration will notify your organization via In-App, Email, and SMS when new surveys are published.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -316,15 +316,15 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                       }`}>
                         {isDone ? 'COMPLETED' : 'PENDING ACTION'}
                       </span>
-                      <span className="text-[10px] text-gray-400 font-semibold">{qCount} Questions</span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-semibold">{qCount} Questions</span>
                     </div>
 
-                    <h4 className="font-bold text-sm text-gray-900 line-clamp-1">{survey.title}</h4>
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{survey.description || 'ASTU Partner Employer Survey'}</p>
+                    <h4 className="font-bold text-sm text-[var(--text-primary)] line-clamp-1">{survey.title}</h4>
+                    <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-2">{survey.description || 'ASTU Partner Employer Survey'}</p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-gray-150 flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-gray-400">ASTU Quality Board</span>
+                  <div className="mt-4 pt-3 border-t border-[var(--border-color)] flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-[var(--text-muted)]">ASTU Quality Board</span>
                     {isDone ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
                         <CheckCircle className="w-4 h-4" /> Submitted
@@ -349,19 +349,19 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
       {/* Survey Modal */}
       {activeSurveyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b border-gray-150 pb-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[var(--bg-card)] p-6 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
               <div>
                 <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-100 text-blue-700 uppercase tracking-wider">
                   Employer Survey
                 </span>
-                <h3 className="text-lg font-extrabold text-gray-900 mt-1">{activeSurveyModal.title}</h3>
-                <p className="text-xs text-gray-500">{activeSurveyModal.description}</p>
+                <h3 className="text-lg font-extrabold text-[var(--text-primary)] mt-1">{activeSurveyModal.title}</h3>
+                <p className="text-xs text-[var(--text-muted)]">{activeSurveyModal.description}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveSurveyModal(null)}
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+                className="p-2 rounded-full hover:bg-[var(--bg-page)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -377,11 +377,11 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                 if (questions.length === 0) {
                   return (
                     <div className="space-y-4">
-                      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50">
-                        <label className="block text-xs font-bold text-gray-800 mb-2">1. Technical &amp; Practical Skill Preparedness (Rating 1-5)</label>
+                      <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]">
+                        <label className="block text-xs font-bold text-[var(--text-primary)] mb-2">1. Technical &amp; Practical Skill Preparedness (Rating 1-5)</label>
                         <select
                           onChange={(e) => setSurveyAnswers(prev => ({ ...prev, q1: e.target.value }))}
-                          className="w-full p-2.5 text-xs rounded-xl border border-gray-200"
+                          className="w-full p-2.5 text-xs rounded-xl border border-[var(--border-color)]"
                           required
                         >
                           <option value="">Select rating...</option>
@@ -392,11 +392,11 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                           <option value="1 - Poor">1 - Poor</option>
                         </select>
                       </div>
-                      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50">
-                        <label className="block text-xs font-bold text-gray-800 mb-2">2. Missing Skills &amp; Technology Frameworks in ASTU Curriculum</label>
+                      <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]">
+                        <label className="block text-xs font-bold text-[var(--text-primary)] mb-2">2. Missing Skills &amp; Technology Frameworks in ASTU Curriculum</label>
                         <textarea
                           onChange={(e) => setSurveyAnswers(prev => ({ ...prev, q2: e.target.value }))}
-                          className="w-full p-2.5 text-xs rounded-xl border border-gray-200 h-20"
+                          className="w-full p-2.5 text-xs rounded-xl border border-[var(--border-color)] h-20"
                           placeholder="e.g. Cloud Architecture, Docker/Kubernetes, Mobile App Development..."
                           required
                         />
@@ -406,8 +406,8 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                 }
 
                 return questions.map((q: any, idx: number) => (
-                  <div key={q.id || idx} className="p-4 rounded-2xl border border-gray-150 bg-gray-50/50 space-y-2">
-                    <label className="block text-xs font-bold text-gray-800">
+                  <div key={q.id || idx} className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-2">
+                    <label className="block text-xs font-bold text-[var(--text-primary)]">
                       {idx + 1}. {q.questionText} {q.required && <span className="text-red-500">*</span>}
                     </label>
 
@@ -421,7 +421,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                             className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
                               surveyAnswers[q.id] === String(val)
                                 ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                                : 'bg-white border-gray-200 text-gray-700 hover:bg-amber-50'
+                                : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-amber-50'
                             }`}
                           >
                             ★ {val}
@@ -432,14 +432,14 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                       <textarea
                         value={surveyAnswers[q.id] || ''}
                         onChange={(e) => setSurveyAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-                        className="w-full p-2.5 text-xs rounded-xl border border-gray-200 h-20 outline-none focus:border-astu-navy"
+                        className="w-full p-2.5 text-xs rounded-xl border border-[var(--border-color)] h-20 outline-none focus:border-astu-navy"
                         placeholder="Your detailed response..."
                         required={q.required}
                       />
                     ) : q.options && q.options.length > 0 ? (
                       <div className="space-y-1.5 pt-1">
                         {q.options.map((opt: string, optIdx: number) => (
-                          <label key={optIdx} className="flex items-center gap-2.5 text-xs text-gray-700 font-semibold cursor-pointer">
+                          <label key={optIdx} className="flex items-center gap-2.5 text-xs text-[var(--text-secondary)] font-semibold cursor-pointer">
                             <input
                               type="radio"
                               name={`q_${q.id}`}
@@ -458,7 +458,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                         type="text"
                         value={surveyAnswers[q.id] || ''}
                         onChange={(e) => setSurveyAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-                        className="w-full p-2.5 text-xs rounded-xl border border-gray-200 outline-none focus:border-astu-navy"
+                        className="w-full p-2.5 text-xs rounded-xl border border-[var(--border-color)] outline-none focus:border-astu-navy"
                         placeholder="Your answer..."
                         required={q.required}
                       />
@@ -467,11 +467,11 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                 ));
               })()}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-150">
+              <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-color)]">
                 <button
                   type="button"
                   onClick={() => setActiveSurveyModal(null)}
-                  className="px-4 py-2 text-xs font-bold text-gray-600 rounded-xl hover:bg-gray-100"
+                  className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] rounded-xl hover:bg-[var(--bg-page)]"
                 >
                   Cancel
                 </button>
@@ -495,10 +495,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             <div className="p-1.5 rounded-lg bg-astu-navy/10">
               <Award className="w-4 h-4 text-astu-navy" />
             </div>
-            <span className="text-[10px] font-semibold text-gray-500">Overall</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)]">Overall</span>
           </div>
           <p className="text-2xl font-extrabold text-astu-navy">{stats.avgOverall}</p>
-          <p className="text-[10px] text-gray-500">/ 5.0 average</p>
+          <p className="text-[10px] text-[var(--text-muted)]">/ 5.0 average</p>
         </div>
 
         <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
@@ -506,10 +506,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             <div className="p-1.5 rounded-lg bg-emerald-500/10">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
             </div>
-            <span className="text-[10px] font-semibold text-gray-500">Technical</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)]">Technical</span>
           </div>
           <p className="text-2xl font-extrabold text-emerald-600">{stats.avgTechnical}</p>
-          <p className="text-[10px] text-gray-500">/ 5.0 average</p>
+          <p className="text-[10px] text-[var(--text-muted)]">/ 5.0 average</p>
         </div>
 
         <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
@@ -517,10 +517,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             <div className="p-1.5 rounded-lg bg-blue-500/10">
               <Users className="w-4 h-4 text-blue-500" />
             </div>
-            <span className="text-[10px] font-semibold text-gray-500">Teamwork</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)]">Teamwork</span>
           </div>
           <p className="text-2xl font-extrabold text-blue-600">{stats.avgTeamwork}</p>
-          <p className="text-[10px] text-gray-500">/ 5.0 average</p>
+          <p className="text-[10px] text-[var(--text-muted)]">/ 5.0 average</p>
         </div>
 
         <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
@@ -528,10 +528,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             <div className="p-1.5 rounded-lg bg-purple-500/10">
               <Star className="w-4 h-4 text-purple-500" />
             </div>
-            <span className="text-[10px] font-semibold text-gray-500">Communication</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)]">Communication</span>
           </div>
           <p className="text-2xl font-extrabold text-purple-600">{stats.avgCommunication}</p>
-          <p className="text-[10px] text-gray-500">/ 5.0 average</p>
+          <p className="text-[10px] text-[var(--text-muted)]">/ 5.0 average</p>
         </div>
 
         <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
@@ -539,10 +539,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             <div className="p-1.5 rounded-lg bg-amber-500/10">
               <Award className="w-4 h-4 text-amber-500" />
             </div>
-            <span className="text-[10px] font-semibold text-gray-500">Leadership</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)]">Leadership</span>
           </div>
           <p className="text-2xl font-extrabold text-amber-600">{stats.avgLeadership}</p>
-          <p className="text-[10px] text-gray-500">/ 5.0 average</p>
+          <p className="text-[10px] text-[var(--text-muted)]">/ 5.0 average</p>
         </div>
 
         <div className={`p-4 rounded-2xl border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
@@ -550,10 +550,10 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             <div className="p-1.5 rounded-lg bg-rose-500/10">
               <TrendingUp className="w-4 h-4 text-rose-500" />
             </div>
-            <span className="text-[10px] font-semibold text-gray-500">Total</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)]">Total</span>
           </div>
           <p className="text-2xl font-extrabold text-rose-600">{stats.totalFeedbacks}</p>
-          <p className="text-[10px] text-gray-500">feedbacks</p>
+          <p className="text-[10px] text-[var(--text-muted)]">feedbacks</p>
         </div>
       </div>
 
@@ -599,7 +599,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             </div>
 
             {/* Core rating sliders */}
-            <div className="space-y-3 pt-2 border-t border-gray-150">
+            <div className="space-y-3 pt-2 border-t border-[var(--border-color)]">
               {[
                 { key: 'technicalSkills' as const, label: 'Technical & Practical Skills' },
                 { key: 'communication' as const, label: 'Professional Communication' },
@@ -614,7 +614,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
               ))}
             </div>
 
-            <div className="space-y-1 pt-2 border-t border-gray-150">
+            <div className="space-y-1 pt-2 border-t border-[var(--border-color)]">
               <label className="text-[10px] font-bold uppercase tracking-wider">Academic Recommendations</label>
               <textarea
                 value={formData.comments}
@@ -661,7 +661,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -699,7 +699,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
 <div className="space-y-4">
                 {filteredFeedbacks.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-sm text-gray-500">No feedback found matching your criteria.</p>
+                    <p className="text-sm text-[var(--text-muted)]">No feedback found matching your criteria.</p>
                   </div>
                 ) : (
                   filteredFeedbacks.map((fb) => (
@@ -711,7 +711,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                         <div>
                           <h4 className="font-bold text-sm">{fb.alumnusName}</h4>
                           <p className="text-xs text-astu-navy font-bold">{fb.department}</p>
-                          <span className="text-[10px] text-gray-500 font-semibold">Submitted {fb.submittedAt}</span>
+                          <span className="text-[10px] text-[var(--text-muted)] font-semibold">Submitted {fb.submittedAt}</span>
                         </div>
                         <div className="text-right">
                           <span className="px-2.5 py-1 bg-amber-100 text-amber-800 font-extrabold rounded-lg text-xs">
@@ -725,7 +725,7 @@ export const FeedbackTab: React.FC<FeedbackTabProps> = ({ feedbacks, onSubmitFee
                       </p>
 
                       {/* Rating dots */}
-                      <div className="grid grid-cols-5 gap-2 pt-4 mt-3 border-t border-gray-150 text-[10px] font-bold text-gray-500">
+                      <div className="grid grid-cols-5 gap-2 pt-4 mt-3 border-t border-[var(--border-color)] text-[10px] font-bold text-[var(--text-muted)]">
                         <div>Tech: <span className="text-amber-500">{fb.technicalSkills}/5</span></div>
                         <div>Comm: <span className="text-amber-500">{fb.communication}/5</span></div>
                         <div>Lead: <span className="text-amber-500">{fb.leadership}/5</span></div>

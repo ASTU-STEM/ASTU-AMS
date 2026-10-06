@@ -58,10 +58,10 @@ export default function EmployersPage() {
   }, []);
 
   return (
-    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-200">
       <Navbar />
 
-      <header className="border-b border-outline-variant bg-white dark:bg-slate-900/90 dark:border-slate-800 transition-colors">
+      <header className="border-b border-outline-variant bg-[var(--bg-card)] dark:bg-slate-900/90 dark:border-slate-800 transition-colors">
         <div className="mx-auto max-w-[1440px] px-4 py-8 md:px-8">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Employer Network</p>
           <h1 className="mt-2 text-3xl font-bold text-astu-navy dark:text-white">Featured Employers and Partners</h1>
@@ -93,7 +93,7 @@ export default function EmployersPage() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featuredEmployers.map((employer) => (
-              <article key={employer.name} className="reveal rounded-xl border border-outline-variant bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <article key={employer.name} className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 {employer.image && (
                   <img src={employer.image} alt={employer.name} className="h-40 w-full rounded-lg object-cover" />
                 )}
@@ -123,7 +123,7 @@ export default function EmployersPage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {partnerCompanies.map((company) => (
-              <div key={company.name} className="reveal rounded-xl border border-outline-variant bg-white p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <div key={company.name} className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-lg bg-astu-navy/10 mb-3">
                   <Building2 className="h-7 w-7 text-astu-navy" />
                 </div>
@@ -159,17 +159,17 @@ export default function EmployersPage() {
             <p className="mt-2 text-sm text-on-surface-variant">Connect with the ASTU Alumni Relations Office</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
-            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
+            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-[var(--bg-card)]">
               <MapPin className="h-8 w-8 mx-auto text-astu-navy mb-3" />
               <h4 className="font-semibold text-astu-navy">Address</h4>
               <p className="mt-1 text-xs text-on-surface-variant">Adama, Oromia, Ethiopia</p>
             </div>
-            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
+            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-[var(--bg-card)]">
               <Phone className="h-8 w-8 mx-auto text-astu-navy mb-3" />
               <h4 className="font-semibold text-astu-navy">Phone</h4>
               <p className="mt-1 text-xs text-on-surface-variant">+251-221-110000</p>
             </div>
-            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
+            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-[var(--bg-card)]">
               <Mail className="h-8 w-8 mx-auto text-astu-navy mb-3" />
               <h4 className="font-semibold text-astu-navy">Email</h4>
               <p className="mt-1 text-xs text-on-surface-variant">irccd@astu.edu.et</p>

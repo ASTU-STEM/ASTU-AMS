@@ -7,12 +7,14 @@ interface SavedResultsViewProps {
   savedResults: SavedToolResult[];
   onDeleteResult: (id: string) => void;
   onClearAll: () => void;
+  onBrowseTools?: () => void;
 }
 
 export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
   savedResults,
   onDeleteResult,
   onClearAll,
+  onBrowseTools,
 }) => {
   const handleCopy = async (res: SavedToolResult) => {
     const text = `${res.title} (${res.timestamp})\n${res.resultSummary || ''}\n${JSON.stringify(res.data, null, 2)}`;
@@ -27,14 +29,23 @@ export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
 
   if (savedResults.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 rounded-2xl border border-dashed border-slate-200 bg-white text-center dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 mb-3 dark:bg-slate-800">
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] p-10 text-center">
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-card)] text-[var(--text-muted)]">
           <History className="h-6 w-6" />
         </div>
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">No Saved Calculations Yet</h3>
-        <p className="mt-1 text-xs text-slate-500 max-w-sm dark:text-slate-400">
-          Run any tool calculator or generator and click <span className="font-semibold text-[#003366]">"Save Result"</span> to store your calculations here.
+        <h3 className="text-sm font-bold text-[var(--text-primary)]">No saved calculations yet</h3>
+        <p className="mt-1 max-w-sm text-xs text-[var(--text-secondary)]">
+          Run any calculator or generator and choose <span className="font-semibold text-[#003366] dark:text-[#FFD700]">Save result</span> to keep outputs here.
         </p>
+        {onBrowseTools && (
+          <button
+            type="button"
+            onClick={onBrowseTools}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#003366] px-4 py-2 text-xs font-bold text-white hover:bg-[#002244] dark:bg-blue-600"
+          >
+            Browse tools
+          </button>
+        )}
       </div>
     );
   }
@@ -44,8 +55,8 @@ export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-[#003366] dark:text-blue-400" />
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-            Saved Tool History ({savedResults.length})
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">
+            Saved tool history ({savedResults.length})
           </h3>
         </div>
 
@@ -58,11 +69,11 @@ export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {savedResults.map((res) => (
           <div
             key={res.id}
-            className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900"
+            className="flex flex-col justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-xs"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
@@ -70,23 +81,23 @@ export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
                   {res.toolName}
                 </span>
 
-                <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                <div className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
                   <Calendar className="h-3 w-3" />
                   <span>{res.timestamp}</span>
                 </div>
               </div>
 
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white">{res.title}</h4>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 line-clamp-3">
+              <h4 className="text-xs font-bold text-[var(--text-primary)] dark:text-white">{res.title}</h4>
+              <p className="mt-1 text-xs text-[var(--text-secondary)] dark:text-slate-300 line-clamp-3">
                 {res.resultSummary || 'Calculated data saved.'}
               </p>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between dark:border-slate-800">
+            <div className="mt-3 pt-2.5 border-t border-[var(--border-color)] flex items-center justify-between dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => handleCopy(res)}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 hover:text-[#003366] dark:text-slate-400 dark:hover:text-blue-400"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[#003366] dark:text-slate-400 dark:hover:text-blue-400"
               >
                 <Copy className="h-3.5 w-3.5" />
                 <span>Copy Summary</span>
@@ -95,7 +106,7 @@ export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
               <button
                 type="button"
                 onClick={() => onDeleteResult(res.id)}
-                className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                className="p-1 text-[var(--text-muted)] hover:text-rose-600 dark:hover:text-rose-400"
                 title="Delete saved result"
               >
                 <Trash2 className="h-3.5 w-3.5" />

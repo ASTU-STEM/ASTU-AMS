@@ -34,7 +34,7 @@ interface DashboardOverviewProps {
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
-  <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
+  <div className={`animate-pulse rounded-lg bg-[var(--bg-page)] dark:bg-slate-700/50 ${className}`} />
 );
 
 function formatLastUpdated(timestamp: number): string {
@@ -370,7 +370,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               className={`group flex w-full items-center gap-3 rounded-[10px] border p-3.5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition ${
                 darkMode
                   ? 'border-slate-800 bg-slate-900 hover:bg-slate-800'
-                  : 'border-gray-200/60 bg-white hover:bg-slate-50'
+                  : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)]'
               }`}
             >
               <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${darkMode ? 'bg-slate-800 text-slate-300' : 'bg-[#003580]/10 text-[#003580]'}`}>

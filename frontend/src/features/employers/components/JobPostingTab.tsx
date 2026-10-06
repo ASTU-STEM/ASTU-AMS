@@ -170,7 +170,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
               <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded ${
                 stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-700' :
                 stat.color === 'blue' ? 'bg-blue-50 text-blue-700' :
-                'bg-gray-100 text-gray-600'
+                'bg-[var(--bg-page)] text-[var(--text-secondary)]'
               }`}>{stat.label}</span>
             </div>
             <p className="text-xl font-extrabold text-[var(--text-primary)]">{stat.value}</p>
@@ -312,7 +312,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                           {job.experienceRequired}
                         </span>
-                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold border ${TYPE_COLORS[job.type] || 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold border ${TYPE_COLORS[job.type] || 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]'}`}>
                           {job.type}
                         </span>
                       </div>
@@ -442,7 +442,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1.5">
                         {alumni.skills.slice(0, 3).map((skill, idx) => (
-                          <span key={idx} className="px-2 py-0.5 bg-white/50 dark:bg-black/20 border border-[var(--border-color)] rounded-md text-[9px] font-bold text-[var(--text-secondary)]">
+                          <span key={idx} className="px-2 py-0.5 bg-[var(--bg-card)] dark:bg-black/20 border border-[var(--border-color)] rounded-md text-[9px] font-bold text-[var(--text-secondary)]">
                             {skill}
                           </span>
                         ))}

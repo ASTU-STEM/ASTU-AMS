@@ -1,27 +1,27 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
-  AlertTriangle,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Code,
+  Code2,
   Download,
-  Eye,
-  Filter,
-  Globe,
-  Key,
-  Layers,
+  FileJson,
   RefreshCw,
+  ScrollText,
   Search,
-  Shield,
-  ShieldAlert,
-  Terminal,
-  UserCheck,
-  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import IctPageHeader from '../components/IctPageHeader';
+import IctMetricCard from '../components/IctMetricCard';
+import IctSection from '../components/IctSection';
+import IctStatusBadge from '../components/IctStatusBadge';
+import IctToolbar, { IctFilterSelect } from '../components/IctToolbar';
+import IctSearchInput from '../components/IctSearchInput';
+import IctDataTable, { IctColumn } from '../components/IctDataTable';
+import IctEmptyState from '../components/IctEmptyState';
+import IctDiffView from '../components/IctDiffView';
+import IctModal from '../components/IctModal';
+import { ictBtnPrimary, ictBtnSecondary, ictBtnXs, ictTableFooter } from '../components/ictUi';
 
 interface LogItem {
   id: string;
@@ -38,6 +38,7 @@ interface LogItem {
   afterState?: Record<string, any>;
 }
 
+/** Existing log stream retained verbatim. */
 const mockLogs: LogItem[] = [
   {
     id: 'LOG-88421',
@@ -47,7 +48,7 @@ const mockLogs: LogItem[] = [
     severity: 'CRITICAL',
     action: 'BREAK_GLASS_ELEVATION',
     actor: 'System Admin',
-    actorEmail: 'admin@astust.edu.et',
+    actorEmail: 'admin@astu.edu.et',
     ipAddress: '197.156.90.12',
     details: 'Break Glass emergency privilege elevation invoked for 30 minutes. Reason: High database latency diagnosis.',
     beforeState: { role: 'ICT_ADMIN', elevatedPermissions: false, sessionDuration: '1h' },
@@ -61,11 +62,11 @@ const mockLogs: LogItem[] = [
     severity: 'WARN',
     action: 'USER_ROLE_CHANGE',
     actor: 'Executive Admin',
-    actorEmail: 'admin@astust.edu.et',
+    actorEmail: 'admin@astu.edu.et',
     ipAddress: '197.156.90.12',
     details: 'User account role changed from ADMIN to SUPER_ADMIN',
-    beforeState: { id: 'usr-9012', email: 'admin@astust.edu.et', role: 'ADMIN', permissions: ['manage_users'] },
-    afterState: { id: 'usr-9012', email: 'admin@astust.edu.et', role: 'SUPER_ADMIN', permissions: ['ALL_PERMISSIONS'] },
+    beforeState: { id: 'usr-9012', email: 'admin@astu.edu.et', role: 'ADMIN', permissions: ['manage_users'] },
+    afterState: { id: 'usr-9012', email: 'admin@astu.edu.et', role: 'SUPER_ADMIN', permissions: ['ALL_PERMISSIONS'] },
   },
   {
     id: 'LOG-88419',
@@ -147,56 +148,29 @@ const mockLogs: LogItem[] = [
   },
 ];
 
-function PaginationFooter({
-  currentPage,
-  totalPages,
-  totalItems,
-  itemsPerPage,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (totalItems <= itemsPerPage) return null;
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+const PORTAL_LABELS: Record<LogItem['portal'], string> = {
+  ALUMNI: 'Alumni',
+  EMPLOYER: 'Employer',
+  REGISTRAR: 'Registrar',
+  DEPT_HEAD: 'Dept Head',
+  SUPER_ADMIN: 'Super Admin',
+  ICT: 'ICT',
+};
 
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-400">
-      <div>
-        Showing <span className="font-semibold text-slate-800 dark:text-white">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-800 dark:text-white">{endItem}</span> of{' '}
-        <span className="font-semibold text-slate-800 dark:text-white">{totalItems}</span> log entries
-      </div>
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          disabled={currentPage <= 1}
-          onClick={() => onPageChange(currentPage - 1)}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          Prev
-        </button>
-        <span className="px-2 font-medium text-slate-500 dark:text-slate-400">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          type="button"
-          disabled={currentPage >= totalPages}
-          onClick={() => onPageChange(currentPage + 1)}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          Next
-          <ChevronRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-    </div>
-  );
+function severityStatus(severity: LogItem['severity']): string {
+  switch (severity) {
+    case 'CRITICAL':
+      return 'critical';
+    case 'ERROR':
+      return 'error';
+    case 'WARN':
+      return 'warning';
+    default:
+      return 'info';
+  }
 }
+
+const LOGS_PER_PAGE = 10;
 
 export default function IctUniversalLogsPage() {
   const [logs] = useState<LogItem[]>(mockLogs);
@@ -205,26 +179,29 @@ export default function IctUniversalLogsPage() {
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDiffLog, setSelectedDiffLog] = useState<LogItem | null>(null);
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const LOGS_PER_PAGE = 10;
 
-  const filteredLogs = logs.filter((log) => {
-    if (selectedPortal !== 'ALL' && log.portal !== selectedPortal) return false;
-    if (selectedCategory !== 'ALL' && log.category !== selectedCategory) return false;
-    if (selectedSeverity !== 'ALL' && log.severity !== selectedSeverity) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchAction = log.action.toLowerCase().includes(q);
-      const matchActor = log.actor.toLowerCase().includes(q);
-      const matchEmail = log.actorEmail.toLowerCase().includes(q);
-      const matchIp = log.ipAddress.includes(q);
-      const matchDetails = log.details.toLowerCase().includes(q);
-      return matchAction || matchActor || matchEmail || matchIp || matchDetails;
-    }
-    return true;
-  });
+  const filteredLogs = useMemo(
+    () =>
+      logs.filter((log) => {
+        if (selectedPortal !== 'ALL' && log.portal !== selectedPortal) return false;
+        if (selectedCategory !== 'ALL' && log.category !== selectedCategory) return false;
+        if (selectedSeverity !== 'ALL' && log.severity !== selectedSeverity) return false;
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          return (
+            log.action.toLowerCase().includes(q) ||
+            log.actor.toLowerCase().includes(q) ||
+            log.actorEmail.toLowerCase().includes(q) ||
+            log.ipAddress.includes(q) ||
+            log.details.toLowerCase().includes(q) ||
+            log.id.toLowerCase().includes(q)
+          );
+        }
+        return true;
+      }),
+    [logs, selectedPortal, selectedCategory, selectedSeverity, searchQuery]
+  );
 
   useEffect(() => {
     setCurrentPage(1);
@@ -240,308 +217,308 @@ export default function IctUniversalLogsPage() {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [totalPages, currentPage]);
 
-  const getPortalBadge = (portal: LogItem['portal']) => {
-    const map = {
-      ALUMNI: { bg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', label: '🎓 Alumni Portal' },
-      EMPLOYER: { bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20', label: '🏢 Employer Portal' },
-      REGISTRAR: { bg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20', label: '🏛️ Registrar Portal' },
-      DEPT_HEAD: { bg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', label: '🎓 Dept Head Portal' },
-      SUPER_ADMIN: { bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', label: '👑 Super Admin' },
-      ICT: { bg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', label: '⚡ ICT Tech Portal' },
-    };
-    return map[portal] || { bg: 'bg-slate-100 text-slate-700', label: portal };
+  const resetFilters = () => {
+    setSelectedPortal('ALL');
+    setSelectedCategory('ALL');
+    setSelectedSeverity('ALL');
+    setSearchQuery('');
   };
 
-  const getSeverityBadge = (severity: LogItem['severity']) => {
-    switch (severity) {
-      case 'CRITICAL':
-        return 'bg-rose-500/20 text-rose-600 dark:text-rose-400 font-extrabold border-rose-500/30';
-      case 'ERROR':
-        return 'bg-red-500/10 text-red-600 dark:text-red-400 font-bold border-red-500/20';
-      case 'WARN':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border-amber-500/20';
-      default:
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium border-emerald-500/20';
-    }
-  };
+  const filtersActive =
+    selectedPortal !== 'ALL' || selectedCategory !== 'ALL' || selectedSeverity !== 'ALL' || searchQuery.trim() !== '';
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <Terminal className="w-5 h-5 text-blue-500" />
-            Universal System &amp; Cross-Portal Log Center
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Centralized immutable audit stream capturing logins, background tasks, portal activities, and before/after data state mutation diffs.
+  const startItem = filteredLogs.length === 0 ? 0 : (currentPage - 1) * LOGS_PER_PAGE + 1;
+  const endItem = Math.min(currentPage * LOGS_PER_PAGE, filteredLogs.length);
+
+  const columns: IctColumn<LogItem>[] = [
+    {
+      key: 'timestamp',
+      header: 'Timestamp',
+      width: '13%',
+      cell: (log) => (
+        <span className="ict-mono ict-num flex items-center gap-1.5 whitespace-nowrap text-[var(--text-muted)]">
+          <Clock className="h-3 w-3 shrink-0" aria-hidden />
+          {log.timestamp}
+        </span>
+      ),
+    },
+    {
+      key: 'source',
+      header: 'Source',
+      width: '10%',
+      cell: (log) => (
+        <IctStatusBadge status="neutral" label={PORTAL_LABELS[log.portal]} showDot={false} className="ict-mono" />
+      ),
+    },
+    {
+      key: 'severity',
+      header: 'Severity',
+      width: '10%',
+      cell: (log) => (
+        <div className="flex flex-wrap items-center gap-1">
+          <IctStatusBadge status={severityStatus(log.severity)} label={log.severity} />
+          <span className="ict-label">{log.category}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'action',
+      header: 'Action & actor',
+      cell: (log) => (
+        <div className="min-w-0">
+          <p className="ict-mono ict-num text-[11px] font-extrabold text-[var(--text-primary)] ">
+            {log.action}
+          </p>
+          <p className="ict-clamp-1 text-[10.5px] text-[var(--text-muted)]" title={`${log.actor} (${log.actorEmail})`}>
+            {log.actor} · {log.actorEmail}
           </p>
         </div>
+      ),
+    },
+    {
+      key: 'ip',
+      header: 'Source IP',
+      width: '11%',
+      cell: (log) => <span className="ict-mono ict-num whitespace-nowrap">{log.ipAddress}</span>,
+    },
+    {
+      key: 'details',
+      header: 'Details',
+      cell: (log) => (
+        <p className="ict-clamp-2 max-w-sm text-[11px]" title={log.details}>
+          {log.details}
+        </p>
+      ),
+    },
+    {
+      key: 'diff',
+      header: <span className="sr-only">State diff</span>,
+      align: 'right',
+      width: '1%',
+      cell: (log) =>
+        log.beforeState || log.afterState ? (
+          <button type="button" onClick={() => setSelectedDiffLog(log)} className={ictBtnXs}>
+            <Code2 className="h-3 w-3" aria-hidden />
+            Diff
+          </button>
+        ) : (
+          <span className="text-[10.5px] italic text-[var(--text-muted)]">—</span>
+        ),
+    },
+  ];
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => toast.success('Exporting logs to CSV archive...')}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            Export Audit Logs
-          </button>
-          <button
-            type="button"
-            onClick={() => toast.success('Logs refreshed from central Elasticsearch pipeline')}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-700 cursor-pointer"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Live Refresh
-          </button>
-        </div>
+  return (
+    <div className="space-y-4 lg:space-y-5">
+      <IctPageHeader
+        icon={ScrollText}
+        title="Universal Logs & Diffs"
+        description="Cross-portal log stream with mutations and before/after state diffs."
+        meta={
+          <>
+            <IctStatusBadge status="operational" label="STREAMING" />
+            <span className="ict-label">6 portals · 5 categories</span>
+          </>
+        }
+        actions={
+          <>
+            <button type="button" onClick={() => toast.success('Exporting logs to CSV archive...')} className={ictBtnSecondary}>
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              Export Audit Logs
+            </button>
+            <button
+              type="button"
+              onClick={() => toast.success('Logs refreshed from central Elasticsearch pipeline')}
+              className={ictBtnPrimary}
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+              Live Refresh
+            </button>
+          </>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <IctMetricCard label="Total system logs (24h)" value="28,410" hint="100% ingestion integrity" icon={ScrollText} />
+        <IctMetricCard label="Logins & auth stream" value="4,892" hint="Across 6 portals" tone="info" />
+        <IctMetricCard label="Background & sync tasks" value="1,240" hint="Cron jobs & SIS syncs" tone="info" />
+        <IctMetricCard label="State mutation diffs" value="854" hint="With before/after snapshots" icon={Code2} />
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total System Logs (24h)</span>
-          <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">28,410</p>
-          <p className="mt-0.5 text-[11px] text-emerald-600 font-semibold">100% Ingestion Integrity</p>
-        </div>
+      {/* Filter bar */}
+      <IctSection
+        icon={Search}
+        title="Search & Filters"
+        description="Narrow the immutable log stream by portal, category, severity or free text"
+      >
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+          <IctSearchInput
+            label="Search logs by action, actor, email, IP or details"
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Action, actor, email, IP address, request ID or details…"
+            resultCount={filteredLogs.length}
+            className="w-full lg:max-w-md"
+          />
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Logins &amp; Auth Stream</span>
-          <p className="mt-1 text-2xl font-extrabold text-blue-600 tracking-tight">4,892</p>
-          <p className="mt-0.5 text-[11px] text-slate-500">Across 6 Portals</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Background &amp; Sync Tasks</span>
-          <p className="mt-1 text-2xl font-extrabold text-cyan-600 tracking-tight">1,240</p>
-          <p className="mt-0.5 text-[11px] text-slate-500">Cron Jobs &amp; SIS Syncs</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Data State Mutation Diffs</span>
-          <p className="mt-1 text-2xl font-extrabold text-purple-600 tracking-tight">854</p>
-          <p className="mt-0.5 text-[11px] text-purple-500 font-medium">With Before/After Snapshots</p>
-        </div>
-      </div>
-
-      {/* Filters Bar */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-          {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by action, actor, email, IP address, or details..."
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Portal Filter */}
-            <select
+          <div className="flex flex-wrap items-center gap-2">
+            <IctFilterSelect
+              label="Portal"
               value={selectedPortal}
-              onChange={(e) => setSelectedPortal(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 font-medium focus:outline-none"
-            >
-              <option value="ALL">All Portals (6)</option>
-              <option value="ALUMNI">Alumni Portal</option>
-              <option value="EMPLOYER">Employer Portal</option>
-              <option value="REGISTRAR">Registrar Portal</option>
-              <option value="DEPT_HEAD">Department Head Portal</option>
-              <option value="SUPER_ADMIN">Super Admin Portal</option>
-              <option value="ICT">ICT Technical Portal</option>
-            </select>
-
-            {/* Category Filter */}
-            <select
+              onChange={setSelectedPortal}
+              options={[
+                { value: 'ALL', label: 'All portals (6)' },
+                { value: 'ALUMNI', label: 'Alumni Portal' },
+                { value: 'EMPLOYER', label: 'Employer Portal' },
+                { value: 'REGISTRAR', label: 'Registrar Portal' },
+                { value: 'DEPT_HEAD', label: 'Dept Head Portal' },
+                { value: 'SUPER_ADMIN', label: 'Super Admin Portal' },
+                { value: 'ICT', label: 'ICT Technical Portal' },
+              ]}
+            />
+            <IctFilterSelect
+              label="Category"
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 font-medium focus:outline-none"
-            >
-              <option value="ALL">All Categories</option>
-              <option value="AUTH">Authentication &amp; Logins</option>
-              <option value="TASK">Background Tasks &amp; Jobs</option>
-              <option value="MUTATION">Data Mutations &amp; Diffs</option>
-              <option value="SECURITY">Security &amp; WAF</option>
-              <option value="SYSTEM">System Infrastructure</option>
-            </select>
-
-            {/* Severity Filter */}
-            <select
+              onChange={setSelectedCategory}
+              options={[
+                { value: 'ALL', label: 'All categories' },
+                { value: 'AUTH', label: 'Authentication & logins' },
+                { value: 'TASK', label: 'Background tasks & jobs' },
+                { value: 'MUTATION', label: 'Data mutations & diffs' },
+                { value: 'SECURITY', label: 'Security & WAF' },
+                { value: 'SYSTEM', label: 'System infrastructure' },
+              ]}
+            />
+            <IctFilterSelect
+              label="Severity"
               value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 font-medium focus:outline-none"
-            >
-              <option value="ALL">All Severities</option>
-              <option value="INFO">INFO</option>
-              <option value="WARN">WARN</option>
-              <option value="ERROR">ERROR</option>
-              <option value="CRITICAL">CRITICAL</option>
-            </select>
+              onChange={setSelectedSeverity}
+              options={[
+                { value: 'ALL', label: 'All severities' },
+                { value: 'INFO', label: 'INFO' },
+                { value: 'WARN', label: 'WARN' },
+                { value: 'ERROR', label: 'ERROR' },
+                { value: 'CRITICAL', label: 'CRITICAL' },
+              ]}
+            />
+            {filtersActive && (
+              <button type="button" onClick={resetFilters} className={ictBtnXs}>
+                Reset filters
+              </button>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Logs Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
-        <div className="max-h-[520px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-xs shadow-xs z-10">
-              <tr className="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                <th className="px-4 py-3.5">Timestamp</th>
-                <th className="px-4 py-3.5">Portal</th>
-                <th className="px-4 py-3.5">Category</th>
-                <th className="px-4 py-3.5">Action &amp; Actor</th>
-                <th className="px-4 py-3.5">IP Address</th>
-                <th className="px-4 py-3.5">Details</th>
-                <th className="px-4 py-3.5 text-right">Data Diff</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
-              {paginatedLogs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                    No system logs found matching your filter criteria.
-                  </td>
-                </tr>
-              ) : (
-                paginatedLogs.map((log) => {
-                  const portalMeta = getPortalBadge(log.portal);
-                  return (
-                    <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="px-4 py-3.5 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{log.timestamp}</span>
-                        </div>
-                      </td>
+        {filtersActive && (
+          <p className="mt-2.5 flex items-center gap-1.5 text-[10.5px] text-[var(--text-muted)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--ict-info)]" aria-hidden />
+            Filtered view · {filteredLogs.length} matching log entries
+          </p>
+        )}
+      </IctSection>
 
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold border ${portalMeta.bg}`}>
-                          {portalMeta.label}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] border ${getSeverityBadge(log.severity)}`}>
-                          {log.category} • {log.severity}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3.5">
-                        <div className="font-bold text-slate-900 dark:text-white">{log.action}</div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-[180px]">
-                          {log.actor} ({log.actorEmail})
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3.5 font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {log.ipAddress}
-                      </td>
-
-                      <td className="px-4 py-3.5 max-w-xs">
-                        <p className="truncate text-slate-600 dark:text-slate-300">{log.details}</p>
-                      </td>
-
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        {log.beforeState || log.afterState ? (
-                          <button
-                            type="button"
-                            onClick={() => setSelectedDiffLog(log)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60 cursor-pointer border border-blue-200 dark:border-blue-800"
-                          >
-                            <Code className="w-3.5 h-3.5" />
-                            View Diff
-                          </button>
-                        ) : (
-                          <span className="text-[11px] text-slate-400 italic">No Diff</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-        <PaginationFooter
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredLogs.length}
-          itemsPerPage={LOGS_PER_PAGE}
-          onPageChange={setCurrentPage}
-        />
-      </div>
-
-      {/* State Diff Modal */}
-      {selectedDiffLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-100 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Code className="w-5 h-5 text-blue-400" />
-                <h3 className="text-sm font-extrabold text-white">
-                  State Mutation Diff — {selectedDiffLog.id} ({selectedDiffLog.action})
-                </h3>
-              </div>
+      {/* Log stream */}
+      <IctDataTable
+        columns={columns}
+        rows={paginatedLogs}
+        rowKey={(log) => log.id}
+        caption="Cross-portal immutable log stream"
+        summary={`Page ${currentPage} of ${totalPages}. ${filteredLogs.length} log entries match the active filters.`}
+        maxHeight="34rem"
+        empty={
+          <IctEmptyState
+            icon={filtersActive ? Search : ScrollText}
+            title={filtersActive ? 'No audit events found' : 'No audit events recorded'}
+            description={
+              filtersActive
+                ? 'No log entries match the current filters. Widen the portal, category or severity selection, or clear the search term.'
+                : 'The immutable log stream is empty. Events appear here as soon as portals, workers and background jobs emit them.'
+            }
+            action={
+              filtersActive ? (
+                <button type="button" onClick={resetFilters} className={ictBtnSecondary}>
+                  Reset filters
+                </button>
+              ) : undefined
+            }
+          />
+        }
+        footer={
+          <div className={ictTableFooter}>
+            <span>
+              Showing <strong className="text-[var(--text-primary)] ">{startItem}</strong>–
+              <strong className="text-[var(--text-primary)] ">{endItem}</strong> of{' '}
+              <strong className="text-[var(--text-primary)] ">{filteredLogs.length}</strong> log entries
+            </span>
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => setSelectedDiffLog(null)}
-                className="text-slate-400 hover:text-white cursor-pointer"
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className={ictBtnXs}
+                aria-label="Previous page"
               >
-                <X className="w-5 h-5" />
+                <ChevronLeft className="h-3 w-3" aria-hidden />
+                Prev
+              </button>
+              <span className="ict-mono px-1">
+                Page {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className={ictBtnXs}
+                aria-label="Next page"
+              >
+                Next
+                <ChevronRight className="h-3 w-3" aria-hidden />
               </button>
             </div>
+          </div>
+        }
+      />
 
-            <p className="text-xs text-slate-400">
-              Triggered by <span className="text-white font-bold">{selectedDiffLog.actor}</span> ({selectedDiffLog.actorEmail}) at {selectedDiffLog.timestamp}
+      {/* ── Diff inspector ──────────────────────────────────────── */}
+      <IctModal
+        isOpen={Boolean(selectedDiffLog)}
+        onClose={() => setSelectedDiffLog(null)}
+        width="xl"
+        icon={<FileJson className="h-3.5 w-3.5" aria-hidden />}
+        title={
+          selectedDiffLog ? (
+            <span className="flex flex-wrap items-center gap-2">
+              <span className="ict-mono text-[var(--ict-accent-text)]">{selectedDiffLog.id}</span>
+              <span className="ict-mono text-[var(--text-muted)]">{selectedDiffLog.action}</span>
+            </span>
+          ) : null
+        }
+        description={
+          selectedDiffLog && (
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--text-muted)]">
+              <span>
+                Actor <strong className="text-[var(--text-primary)] ">{selectedDiffLog.actor}</strong>{' '}
+                ({selectedDiffLog.actorEmail})
+              </span>
+              <span className="ict-mono">{selectedDiffLog.timestamp}</span>
+              <span className="ict-mono">IP {selectedDiffLog.ipAddress}</span>
+            </span>
+          )
+        }
+        footer={
+          <button type="button" onClick={() => setSelectedDiffLog(null)} className={ictBtnSecondary}>
+            Close inspector
+          </button>
+        }
+      >
+        {selectedDiffLog && (
+          <div className="space-y-3.5">
+            <p className="text-[11px] leading-relaxed text-[var(--text-secondary)] ">
+              {selectedDiffLog.details}
             </p>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* BEFORE */}
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  BEFORE STATE (Previous)
-                </div>
-                <pre className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-rose-300 overflow-x-auto h-48 scrollbar-thin">
-                  {selectedDiffLog.beforeState
-                    ? JSON.stringify(selectedDiffLog.beforeState, null, 2)
-                    : '// No prior state (Entity created)'}
-                </pre>
-              </div>
-
-              {/* AFTER */}
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  AFTER STATE (Mutated)
-                </div>
-                <pre className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-emerald-300 overflow-x-auto h-48 scrollbar-thin">
-                  {selectedDiffLog.afterState
-                    ? JSON.stringify(selectedDiffLog.afterState, null, 2)
-                    : '// No after state (Entity deleted)'}
-                </pre>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => setSelectedDiffLog(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-200 hover:bg-slate-700 cursor-pointer"
-              >
-                Close Diff Inspector
-              </button>
-            </div>
+            <IctDiffView before={selectedDiffLog.beforeState} after={selectedDiffLog.afterState} />
           </div>
-        </div>
-      )}
+        )}
+      </IctModal>
     </div>
   );
 }

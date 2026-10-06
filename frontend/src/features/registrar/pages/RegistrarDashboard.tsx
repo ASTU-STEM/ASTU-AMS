@@ -708,7 +708,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="app-shell min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] dark:text-slate-100 antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -752,9 +752,9 @@ useEffect(() => {
       )}
 
         {/* Sidebar Container */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-card)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
           {/* Sidebar Logo Header */}
-          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white">
+          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-[var(--border-color)] bg-[var(--bg-card)]">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative shrink-0 flex items-center justify-center h-11 w-11">
                 <img
@@ -765,7 +765,7 @@ useEffect(() => {
               </div>
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight">ASTU Registrar</h1>
+                  <h1 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight leading-tight">ASTU Registrar</h1>
                   <p className="text-[11px] text-[#003580] uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
                 </div>
               )}
@@ -813,7 +813,7 @@ useEffect(() => {
               <div key={group.sectionKey}>
                 {!sidebarCollapsed && (
                   <div className="px-2.5 mb-1.5 mt-1">
-                    <p className="text-[11.5px] font-extrabold text-slate-400 uppercase tracking-[0.16em]">{group.sectionLabel}</p>
+                    <p className="text-[11.5px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.16em]">{group.sectionLabel}</p>
                   </div>
                 )}
                 <div className="space-y-1">
@@ -824,10 +824,10 @@ useEffect(() => {
                       title={sidebarCollapsed ? item.label : item.tooltip}
                       className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
                         ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                        : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
+                        : 'text-[var(--text-secondary)] hover:text-[#003580] hover:bg-[var(--bg-page)]'
                       }`}
                     >
-                      <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
+                      <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-[var(--bg-page)] text-[var(--text-muted)] group-hover:text-[#003580]'}`}>
                         <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
                         {item.badge && sidebarCollapsed && (
                           <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
@@ -839,7 +839,7 @@ useEffect(() => {
                         <>
                           <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
                           {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
                           )}
@@ -856,16 +856,16 @@ useEffect(() => {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
+          <div className="relative z-10 p-3 border-t border-[var(--border-color)] space-y-1">
             {!sidebarCollapsed ? (
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 text-left group gap-3.5"
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all duration-200 text-left group gap-3.5"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-slate-900 material-symbols-outlined text-[18px]">help</span>
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-page)] flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] material-symbols-outlined text-[18px]">help</span>
                   <span className="text-sm font-semibold">Help Center</span>
-                  <span className="ml-auto text-[9px] text-slate-400 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded-md border border-slate-200">v1.4</span>
+                  <span className="ml-auto text-[9px] text-[var(--text-muted)] font-extrabold px-1.5 py-0.5 bg-[var(--bg-page)] rounded-md border border-[var(--border-color)]">v1.4</span>
                 </button>
                 <button
                   onClick={handleLogout}
@@ -880,10 +880,10 @@ useEffect(() => {
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 group relative"
+                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)] transition-all duration-200 group relative"
                   title="Help Center"
                 >
-                  <span className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-slate-900 material-symbols-outlined text-[17px]">help</span>
+                  <span className="w-7 h-7 rounded-md bg-[var(--bg-page)] flex items-center justify-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] material-symbols-outlined text-[17px]">help</span>
                 </button>
                 <button
                   onClick={handleLogout}
@@ -901,7 +901,7 @@ useEffect(() => {
       <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
         <div>
           {/* Header bar */}
-          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 shadow-2xs">
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-card)] backdrop-blur-md px-4 sm:px-6 shadow-2xs">
              <div className="flex min-w-0 items-center gap-3">
                <button
                  type="button"
@@ -998,7 +998,7 @@ useEffect(() => {
                     <div className="space-y-1 p-2">
                       {notifications.map((notif) => (
                         <div key={notif.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
-                          <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notif.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                          <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notif.unread ? 'bg-[#003580]' : 'bg-[var(--bg-page)]'}`} />
                           <div className="min-w-0 flex-1">
                             <p className="text-sm text-[var(--text-primary)]">{notif.text}</p>
                             <p className="text-xs text-[var(--text-secondary)]">{notif.time}</p>
@@ -1033,7 +1033,7 @@ useEffect(() => {
                     <div className="text-sm font-medium text-[var(--text-primary)]">{registrarName}</div>
                     <div className="text-[11px] text-[var(--text-secondary)]">{registrarTitle}</div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                  <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
@@ -1073,7 +1073,7 @@ useEffect(() => {
             )}
 
           {/* Dynamic tabs routing */}
-          <div className="flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <div className="flex-grow bg-[var(--bg-page)] p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
               <section className="space-y-6 p-4 md:p-6">
                 {/* Management Hub Hero */}
@@ -1108,31 +1108,31 @@ useEffect(() => {
 
                 {/* Quick Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-astu-navy">verified_user</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Pending Verification</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Pending Verification</p>
                     </div>
                     <p className="text-2xl font-extrabold text-amber-600 mt-2">{pendingVerificationsCount}</p>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-astu-navy">description</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Document Queue</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Document Queue</p>
                     </div>
                     <p className="text-2xl font-extrabold text-astu-navy mt-2">{documentRequestsCount}</p>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-astu-navy">people</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Graduate Records</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Graduate Records</p>
                     </div>
                     <p className="text-2xl font-extrabold text-emerald-600 mt-2">{totalGraduatesCount.toLocaleString()}</p>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                  <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-astu-navy">analytics</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Verification Rate</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Verification Rate</p>
                     </div>
                     <p className="text-2xl font-extrabold text-astu-navy mt-2">{verificationRate}%</p>
                   </div>
@@ -1142,10 +1142,10 @@ useEffect(() => {
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {registrarManagementActions.map((action) => (
                     <button key={action.title} onClick={() => setActiveTab(action.tab)}
-                      className="group rounded-2xl border border-gray-200/60 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:border-astu-navy/30 hover:shadow-md hover:-translate-y-0.5">
+                      className="group rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 text-left shadow-sm transition-all duration-300 hover:border-astu-navy/30 hover:shadow-md hover:-translate-y-0.5">
                       <span className="material-symbols-outlined rounded-xl bg-astu-navy/10 p-2.5 text-astu-navy group-hover:scale-110 transition-transform duration-300 text-xl">{action.icon}</span>
-                      <h3 className="mt-4 text-sm font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{action.title}</h3>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
+                      <h3 className="mt-4 text-sm font-bold text-[var(--text-primary)] group-hover:text-astu-navy transition-colors">{action.title}</h3>
+                      <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{action.desc}</p>
                       <span className="mt-4 inline-flex rounded-xl bg-gradient-to-r from-astu-navy to-[#004d99] px-3 py-2 text-xs font-bold text-white shadow-sm group-hover:shadow-md transition-all">
                         Manage / Create
                       </span>
@@ -1209,8 +1209,8 @@ useEffect(() => {
                 <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
                   <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Registrar Command Center</h3>
-                      <p className="mt-1 text-xs text-gray-500">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
+                      <h3 className="text-sm font-semibold text-[var(--text-primary)]">Registrar Command Center</h3>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
                     </div>
                     <button
                       onClick={() => setActiveTab('reporting')}
@@ -1230,24 +1230,24 @@ useEffect(() => {
                         >
                           <div className="flex items-center gap-2">
                             <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{signal.label}</p>
                           </div>
-                          <p className="mt-2 text-2xl font-extrabold text-gray-900">{signal.value}</p>
+                          <p className="mt-2 text-2xl font-extrabold text-[var(--text-primary)]">{signal.value}</p>
                         </button>
                       ))}
                     </div>
                     <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
                       <div className="mb-3 flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-gray-900">SIS Data Quality</h4>
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">SIS Data Quality</h4>
                         <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Monitored</span>
                       </div>
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                         {dataQualityPanels.map((item) => (
                           <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
                             <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
-                            <p className="mt-2 text-xl font-extrabold text-gray-900">{item.value}</p>
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-                            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
+                            <p className="mt-2 text-xl font-extrabold text-[var(--text-primary)]">{item.value}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{item.label}</p>
+                            <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-muted)]">{item.helper}</p>
                           </div>
                         ))}
                       </div>
@@ -1267,7 +1267,7 @@ useEffect(() => {
                         if (stat.id === 3) setActiveTab('verification');
                         if (stat.id === 4) setActiveTab('documents');
                       }}
-                      className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
+                      className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
                     >
                       <div className="relative z-10 space-y-3">
                         <div className="flex items-start justify-between">
@@ -1277,10 +1277,10 @@ useEffect(() => {
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">SIS Verified</span>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                          <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider">{stat.label}</p>
                           <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t">
+                        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)] font-semibold pt-1 border-t">
                           <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
                           {stat.trend}
                         </div>
@@ -1299,24 +1299,24 @@ useEffect(() => {
                     <div
                       key={idx}
                       onClick={() => setActiveTab(act.tab)}
-                      className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-white p-5 text-center transition-all hover:border-astu-navy/30 hover:shadow-md space-y-4"
+                      className="group cursor-pointer rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 text-center transition-all hover:border-astu-navy/30 hover:shadow-md space-y-4"
                     >
                       <div className="mx-auto w-12 h-12 rounded-2xl bg-astu-navy/10 flex items-center justify-center group-hover:bg-astu-navy/20 transition-colors text-astu-navy">
                         <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900 text-sm">{act.title}</h3>
-                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{act.desc}</p>
+                        <h3 className="font-bold text-[var(--text-primary)] text-sm">{act.title}</h3>
+                        <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{act.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Registrar Feature Control</h3>
-                      <p className="mt-1 text-xs text-gray-500">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
+                      <h3 className="text-sm font-semibold text-[var(--text-primary)]">Registrar Feature Control</h3>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
                     </div>
                     <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
                       Accreditation ready
@@ -1327,22 +1327,22 @@ useEffect(() => {
                       <button
                         key={card.title}
                         onClick={() => setActiveTab(card.tab)}
-                        className="rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+                        className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-[var(--bg-card)] hover:shadow-sm"
                       >
                         <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
-                        <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
-                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                        <h4 className="mt-3 text-sm font-bold text-[var(--text-primary)]">{card.title}</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{card.desc}</p>
                       </button>
                     ))}
                   </div>
                   <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                     {complianceSignals.map((signal) => (
-                      <div key={signal.label} className="rounded-[10px] border border-gray-200 bg-white p-4">
+                      <div key={signal.label} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4">
                         <div className="flex items-center gap-2">
                           <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{signal.label}</p>
                         </div>
-                        <p className="mt-2 text-lg font-extrabold text-gray-900">{signal.value}</p>
+                        <p className="mt-2 text-lg font-extrabold text-[var(--text-primary)]">{signal.value}</p>
                       </div>
                     ))}
                   </div>

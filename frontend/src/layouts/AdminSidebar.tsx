@@ -175,12 +175,12 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/80 text-slate-800 shadow-xs transition-all duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-[var(--bg-card)] border-r border-[var(--border-color)] text-[var(--text-primary)] shadow-xs transition-all duration-300 lg:translate-x-0 ${
           collapsed ? 'w-20' : 'w-64'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Sidebar Logo Header */}
-        <div className="relative px-4 py-4 border-b border-slate-100">
+        <div className="relative px-4 py-4 border-b border-[var(--border-color)]">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
               <img
@@ -195,7 +195,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
             </div>
             {!collapsed && (
               <div>
-                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">
+                <div className="font-bold tracking-tight text-[var(--text-primary)] text-[18px] leading-tight">
                   {settings.general?.abbreviation || 'ASTU'} Admin
                 </div>
                 <p className="text-[9.5px] text-[#003580] uppercase tracking-wider font-extrabold leading-snug">
@@ -215,7 +215,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
               <div key={section.key}>
                 {!collapsed && (
                   <div className="px-3 mb-2">
-                    <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">{section.label}</p>
+                    <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest">{section.label}</p>
                   </div>
                 )}
                 <div className="space-y-1">
@@ -239,11 +239,11 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                         } ${
                           isActive
                             ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                            : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
+                            : 'text-[var(--text-secondary)] hover:text-[#003580] hover:bg-[var(--bg-page)]'
                         }`}
                       >
                         <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                          isActive ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
+                          isActive ? 'bg-[#003580] text-white shadow-xs' : 'bg-[var(--bg-page)] text-[var(--text-muted)] group-hover:text-[#003580]'
                         }`}>
                           <Icon className="h-4.5 w-4.5" />
                         </span>
@@ -281,7 +281,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
         </nav>
 
         {/* Footer */}
-        <div className="relative border-t border-slate-100 p-3 space-y-2">
+        <div className="relative border-t border-[var(--border-color)] p-3 space-y-2">
           {!collapsed ? (
             <>
               {/* AI Copilot Launch Button */}
@@ -297,15 +297,15 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                 </div>
               </button>
 
-              <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-200/60 p-2.5">
+              <div className="flex items-center gap-3 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] p-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#003580] text-xs font-bold text-white shrink-0">
                   {user ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() : 'SA'}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-bold text-slate-900">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
+                  <p className="truncate text-xs font-bold text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</p>
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">{user?.role === 'SUPER_ADMIN' ? 'Root Admin' : 'ICT Administrator'}</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase">{user?.role === 'SUPER_ADMIN' ? 'Root Admin' : 'ICT Administrator'}</span>
                   </div>
                 </div>
               </div>
@@ -342,7 +342,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
           <button
             type="button"
             onClick={onToggleCollapse}
-            className={`flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all ${collapsed ? 'w-full py-1.5' : 'w-full py-2 gap-2'}`}
+            className={`flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all ${collapsed ? 'w-full py-1.5' : 'w-full py-2 gap-2'}`}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[10px] font-bold uppercase tracking-wider">Collapse</span></>}

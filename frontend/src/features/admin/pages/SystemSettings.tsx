@@ -117,11 +117,11 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+          {subtitle && <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -139,7 +139,7 @@ function InputLabel({
 }) {
   return (
     <label className="space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</span>
       {children}
     </label>
   );
@@ -172,11 +172,11 @@ function IntegrationItem({
   onTest: () => void;
 }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-          <p className="mt-1 text-xs text-slate-500">{description}</p>
+          <h4 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h4>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">{description}</p>
         </div>
         <StatusBadge status={status} />
       </div>
@@ -184,9 +184,9 @@ function IntegrationItem({
         <button
           type="button"
           onClick={onToggle}
-          className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
         >
-          {toggleActive ? <ToggleRight className="h-4 w-4 text-[#1D9E75]" /> : <ToggleLeft className="h-4 w-4 text-slate-400" />}
+          {toggleActive ? <ToggleRight className="h-4 w-4 text-[#1D9E75]" /> : <ToggleLeft className="h-4 w-4 text-[var(--text-muted)]" />}
           {toggleActive ? 'Enabled' : 'Disabled'}
         </button>
         <button
@@ -767,7 +767,7 @@ export default function SystemSettings() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-[10px] border border-slate-200 bg-white p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-wrap gap-2 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -778,7 +778,7 @@ export default function SystemSettings() {
               onClick={() => setActiveTab(tab.key)}
               className={[
                 'inline-flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors',
-                isActive ? 'bg-[#003580] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]' : 'text-slate-600 hover:bg-slate-100',
+                isActive ? 'bg-[#003580] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)]',
               ].join(' ')}
             >
               <Icon className="h-4 w-4" />
@@ -792,50 +792,50 @@ export default function SystemSettings() {
         <SectionCard title="General Settings" subtitle="University identity and core regional settings.">
           <div className="grid gap-4 md:grid-cols-2">
             <InputLabel label="University name">
-              <input value={universityName} onChange={(e) => setUniversityName(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={universityName} onChange={(e) => setUniversityName(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Abbreviation">
-              <input value={abbreviation} onChange={(e) => setAbbreviation(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={abbreviation} onChange={(e) => setAbbreviation(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Website">
-              <input value={website} onChange={(e) => setWebsite(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={website} onChange={(e) => setWebsite(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Contact email">
-              <input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Address">
-              <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Academic year format">
-              <input value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Default language">
-              <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]">
                 <option>English</option>
                 <option>Amharic</option>
               </select>
             </InputLabel>
             <InputLabel label="Timezone">
-              <input value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Date format">
-              <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]">
+              <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]">
                 <option>DD/MM/YYYY</option>
                 <option>MM/DD/YYYY</option>
                 <option>YYYY-MM-DD</option>
               </select>
             </InputLabel>
             <InputLabel label="System Portal Title">
-              <input value={portalTitle} onChange={(e) => setPortalTitle(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={portalTitle} onChange={(e) => setPortalTitle(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Phone number">
-              <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Support email">
-              <input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Postal code / Box">
-              <input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
           </div>
           <div className="mt-5 flex justify-end">
@@ -856,13 +856,13 @@ export default function SystemSettings() {
         <SectionCard title="Email Configuration" subtitle="SMTP settings and outbound email identity.">
           <div className="grid gap-4 md:grid-cols-2">
             <InputLabel label="SMTP Host">
-              <input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Port">
-              <input value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} type="number" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} type="number" className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Username">
-              <input value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="Password">
               <div className="relative flex items-center">
@@ -870,7 +870,7 @@ export default function SystemSettings() {
                   type={smtpPasswordVisible ? 'text' : 'password'}
                   value={smtpPassword}
                   onChange={(e) => setSmtpPassword(e.target.value)}
-                  className="w-full rounded-[8px] border border-slate-200 py-2.5 pl-3 pr-16 outline-none focus:border-[#003580]"
+                  className="w-full rounded-[8px] border border-[var(--border-color)] py-2.5 pl-3 pr-16 outline-none focus:border-[#003580]"
                 />
                 <button
                   type="button"
@@ -886,10 +886,10 @@ export default function SystemSettings() {
               </div>
             </InputLabel>
             <InputLabel label="From name">
-              <input value={fromName} onChange={(e) => setFromName(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={fromName} onChange={(e) => setFromName(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
             <InputLabel label="From email">
-              <input value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+              <input value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
             </InputLabel>
           </div>
 
@@ -937,7 +937,7 @@ export default function SystemSettings() {
                       placeholder="sk-or-v1-..."
                       value={openRouterApiKey}
                       onChange={(e) => setOpenRouterApiKey(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </InputLabel>
                   <InputLabel label="AI Model">
@@ -945,7 +945,7 @@ export default function SystemSettings() {
                       placeholder="deepseek/deepseek-r1:free"
                       value={openRouterModel}
                       onChange={(e) => setOpenRouterModel(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </InputLabel>
                 </div>
@@ -969,7 +969,7 @@ export default function SystemSettings() {
                       placeholder="Enter your Chapa secret key"
                       value={chapaSecretKey}
                       onChange={(e) => setChapaSecretKey(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </InputLabel>
                   <InputLabel label="Chapa Public Key">
@@ -977,7 +977,7 @@ export default function SystemSettings() {
                       placeholder="Enter your Chapa public key"
                       value={chapaPublicKey}
                       onChange={(e) => setChapaPublicKey(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </InputLabel>
                 </div>
@@ -1001,7 +1001,7 @@ export default function SystemSettings() {
                       placeholder="Enter your Didit API key"
                       value={diditApiKey}
                       onChange={(e) => setDiditApiKey(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </InputLabel>
                 </div>
@@ -1020,10 +1020,10 @@ export default function SystemSettings() {
                 />
                 <div className="mt-3 grid gap-4 md:grid-cols-2">
                   <InputLabel label="API Endpoint">
-                    <input value={regApiEndpoint} onChange={(e) => setRegApiEndpoint(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                    <input value={regApiEndpoint} onChange={(e) => setRegApiEndpoint(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
                   </InputLabel>
                   <InputLabel label="API Key">
-                    <input value={regApiKey} onChange={(e) => setRegApiKey(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                    <input value={regApiKey} onChange={(e) => setRegApiKey(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
                   </InputLabel>
                 </div>
               </div>
@@ -1041,10 +1041,10 @@ export default function SystemSettings() {
                 />
                 <div className="mt-3 grid gap-4 md:grid-cols-2">
                   <InputLabel label="Gateway Username">
-                    <input value={smsGatewayUser} onChange={(e) => setSmsGatewayUser(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                    <input value={smsGatewayUser} onChange={(e) => setSmsGatewayUser(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
                   </InputLabel>
                   <InputLabel label="Gateway Password">
-                    <input value={smsGatewayPass} onChange={(e) => setSmsGatewayPass(e.target.value)} type="password" className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                    <input value={smsGatewayPass} onChange={(e) => setSmsGatewayPass(e.target.value)} type="password" className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
                   </InputLabel>
                 </div>
               </div>
@@ -1062,7 +1062,7 @@ export default function SystemSettings() {
                 />
                 <div className="mt-3">
                   <InputLabel label="Client ID">
-                    <input value={googleClientId} onChange={(e) => setGoogleClientId(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]" />
+                    <input value={googleClientId} onChange={(e) => setGoogleClientId(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]" />
                   </InputLabel>
                 </div>
               </div>
@@ -1108,11 +1108,11 @@ export default function SystemSettings() {
               />
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer rounded-[10px] border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center transition-colors hover:border-[#003580]/40 hover:bg-slate-100/50"
+                className="cursor-pointer rounded-[10px] border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-page)] p-8 text-center transition-colors hover:border-[#003580]/40 hover:bg-black/5 dark:hover:bg-white/5"
               >
                 <CloudUpload className="mx-auto h-10 w-10 text-[#003580]" />
-                <p className="mt-4 text-sm font-semibold text-slate-700">Drag &amp; drop graduate CSV/Excel here</p>
-                <p className="mt-1 text-xs text-slate-500">or browse files from your computer (Supports 9 SIS fields)</p>
+                <p className="mt-4 text-sm font-semibold text-[var(--text-secondary)]">Drag &amp; drop graduate CSV/Excel here</p>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">or browse files from your computer (Supports 9 SIS fields)</p>
                 <div className="mt-4">
                   <button
                     type="button"
@@ -1125,8 +1125,8 @@ export default function SystemSettings() {
                     Choose File
                   </button>
                 </div>
-                <div className="mt-4 rounded-[8px] bg-white px-3 py-2 text-sm text-slate-600 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-between">
-                  <span>Selected file: <span className="font-semibold text-slate-900">{importFileName}</span></span>
+                <div className="mt-4 rounded-[8px] bg-[var(--bg-card)] px-3 py-2 text-sm text-[var(--text-secondary)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex items-center justify-between">
+                  <span>Selected file: <span className="font-semibold text-[var(--text-primary)]">{importFileName}</span></span>
                   {parsedRows.length > 0 && (
                     <AdminBadge variant="info">{parsedRows.length} Records Parsed</AdminBadge>
                   )}
@@ -1159,12 +1159,12 @@ export default function SystemSettings() {
           <SectionCard title="Column Mapping (9 Required SIS Fields)" subtitle="Map system fields to CSV columns before importing to PostgreSQL.">
             <div className="space-y-3">
               {systemFields.map((field) => (
-                <div key={field} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[10px] border border-slate-200 bg-slate-50 p-3">
-                  <div className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                <div key={field} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-3">
+                  <div className="text-sm font-medium text-[var(--text-secondary)] flex items-center gap-2">
                     <span>{field}</span>
                     <span className="text-[10px] uppercase font-bold text-red-500">*</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
                   <select
                     value={columnMapping[field] || ''}
                     onChange={(event) =>
@@ -1173,7 +1173,7 @@ export default function SystemSettings() {
                         [field]: event.target.value,
                       }))
                     }
-                    className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] bg-white"
+                    className="rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] bg-[var(--bg-card)]"
                   >
                     {availableColumns.map((column) => (
                       <option key={column} value={column}>
@@ -1194,20 +1194,20 @@ export default function SystemSettings() {
                 <button
                   type="button"
                   onClick={refreshImportHistory}
-                  className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   Refresh History
                 </button>
               }
             >
-              <div className="overflow-hidden rounded-[10px] border border-slate-200">
+              <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)]">
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-slate-50">
+                    <thead className="bg-[var(--bg-page)]">
                       <tr>
                         {['Filename', 'Date & Time', 'Records Processed', 'Status', 'Errors'].map((head) => (
-                          <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                             {head}
                           </th>
                         ))}
@@ -1216,27 +1216,27 @@ export default function SystemSettings() {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
+                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-[var(--text-muted)]">
                             Loading import history...
                           </td>
                         </tr>
                       ) : importHistory.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
+                          <td colSpan={5} className="px-4 py-8 text-center text-sm text-[var(--text-muted)]">
                             No data imports recorded yet.
                           </td>
                         </tr>
                       ) : (
                         importHistory.map((row, idx) => (
-                          <tr key={row.id || row.filename + idx} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
-                            <td className="px-4 py-3 font-mono text-xs font-semibold text-slate-800 flex items-center gap-2">
+                          <tr key={row.id || row.filename + idx} className="border-t border-[var(--border-color)] hover:bg-[var(--bg-page)] transition-colors">
+                            <td className="px-4 py-3 font-mono text-xs font-semibold text-[var(--text-primary)] flex items-center gap-2">
                               <Database className="h-3.5 w-3.5 text-[#003580]" />
                               {row.filename}
                             </td>
-                            <td className="px-4 py-3 text-slate-600 text-xs">{row.date}</td>
-                            <td className="px-4 py-3 text-slate-700 text-xs font-medium">
+                            <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">{row.date}</td>
+                            <td className="px-4 py-3 text-[var(--text-secondary)] text-xs font-medium">
                               {row.records} {row.records === 1 ? 'record' : 'records'}
-                              {row.duplicates ? <span className="ml-1 text-[11px] text-slate-400">({row.duplicates} updated)</span> : null}
+                              {row.duplicates ? <span className="ml-1 text-[11px] text-[var(--text-muted)]">({row.duplicates} updated)</span> : null}
                             </td>
                             <td className="px-4 py-3">
                               <AdminBadge
@@ -1255,7 +1255,7 @@ export default function SystemSettings() {
                               {row.errors > 0 ? (
                                 <span className="text-red-600 font-bold">{row.errors} errors</span>
                               ) : (
-                                <span className="text-slate-400">0</span>
+                                <span className="text-[var(--text-muted)]">0</span>
                               )}
                             </td>
                           </tr>
@@ -1281,16 +1281,16 @@ export default function SystemSettings() {
           />
           <div className="grid gap-4 xl:grid-cols-2">
             <div className="space-y-4">
-              <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900">University Logo</h4>
-                    <p className="mt-1 text-xs text-slate-500">Upload and preview the institution logo.</p>
+                    <h4 className="text-sm font-semibold text-[var(--text-primary)]">University Logo</h4>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">Upload and preview the institution logo.</p>
                   </div>
                   <AdminBadge variant="neutral">Preview</AdminBadge>
                 </div>
                 <div className="mt-4 flex items-center gap-4">
-                  <img src={logoPreview} alt="University logo preview" className="h-20 w-20 rounded-[10px] border border-slate-200 bg-white object-contain p-2 shadow-xs" />
+                  <img src={logoPreview} alt="University logo preview" className="h-20 w-20 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] object-contain p-2 shadow-xs" />
                   <button
                     type="button"
                     onClick={() => logoFileInputRef.current?.click()}
@@ -1305,7 +1305,7 @@ export default function SystemSettings() {
               <button
                 type="button"
                 onClick={resetDefaults}
-                className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-xs"
+                className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] shadow-xs"
               >
                 <WandSparkles className="h-4 w-4 text-[#E8A020]" />
                 Reset to ASTU Defaults
@@ -1314,30 +1314,30 @@ export default function SystemSettings() {
 
             <div className="space-y-4">
               <InputLabel label="Primary color">
-                <div className="flex items-center gap-3 rounded-[8px] border border-slate-200 bg-white px-3 py-2">
-                  <input type="color" value={primaryColor} onChange={(event) => setPrimaryColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-slate-200" />
+                <div className="flex items-center gap-3 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2">
+                  <input type="color" value={primaryColor} onChange={(event) => setPrimaryColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-[var(--border-color)]" />
                   <input
                     type="text"
                     value={primaryColor}
                     onChange={(event) => setPrimaryColor(event.target.value)}
-                    className="w-full text-sm font-medium text-slate-700 outline-none uppercase"
+                    className="w-full text-sm font-medium text-[var(--text-secondary)] outline-none uppercase"
                   />
                 </div>
               </InputLabel>
               <InputLabel label="Accent color">
-                <div className="flex items-center gap-3 rounded-[8px] border border-slate-200 bg-white px-3 py-2">
-                  <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-slate-200" />
+                <div className="flex items-center gap-3 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2">
+                  <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-[var(--border-color)]" />
                   <input
                     type="text"
                     value={accentColor}
                     onChange={(event) => setAccentColor(event.target.value)}
-                    className="w-full text-sm font-medium text-slate-700 outline-none uppercase"
+                    className="w-full text-sm font-medium text-[var(--text-secondary)] outline-none uppercase"
                   />
                 </div>
               </InputLabel>
 
-              <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
-                <h4 className="text-sm font-semibold text-slate-900">Palette Preview</h4>
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">Palette Preview</h4>
                 <div className="mt-3 flex gap-3">
                   <div className="flex h-14 w-28 items-center justify-center rounded-[10px] text-xs font-bold text-white shadow-inner" style={{ backgroundColor: primaryColor }}>
                     Primary
@@ -1370,7 +1370,7 @@ export default function SystemSettings() {
         onClose={() => setTestEmailOpen(false)}
         footer={
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => setTestEmailOpen(false)} className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+            <button type="button" onClick={() => setTestEmailOpen(false)} className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">
               Cancel
             </button>
             <button type="button" onClick={sendTestEmail} className="rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110">
@@ -1379,7 +1379,7 @@ export default function SystemSettings() {
           </div>
         }
       >
-        <p className="text-sm text-slate-600">This sends a test email to the configured from address and confirms SMTP delivery.</p>
+        <p className="text-sm text-[var(--text-secondary)]">This sends a test email to the configured from address and confirms SMTP delivery.</p>
       </AdminModal>
 
       <AdminModal
@@ -1388,7 +1388,7 @@ export default function SystemSettings() {
         onClose={() => setTestConnectionOpen(false)}
         footer={
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => setTestConnectionOpen(false)} className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+            <button type="button" onClick={() => setTestConnectionOpen(false)} className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">
               Close
             </button>
             <button type="button" onClick={() => { setTestConnectionOpen(false); handleTestIntegration('openrouter'); }} className="rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110">
@@ -1397,7 +1397,7 @@ export default function SystemSettings() {
           </div>
         }
       >
-        <p className="text-sm text-slate-600">This validates the selected integration endpoint and returns the connection status.</p>
+        <p className="text-sm text-[var(--text-secondary)]">This validates the selected integration endpoint and returns the connection status.</p>
       </AdminModal>
     </div>
   );

@@ -26,7 +26,7 @@ const TONES: Record<StatusTone, { badge: string; dot: string }> = {
   info: { badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200', dot: 'bg-blue-500' },
   warning: { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200', dot: 'bg-amber-500' },
   danger: { badge: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200', dot: 'bg-rose-500' },
-  neutral: { badge: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200', dot: 'bg-slate-400' },
+  neutral: { badge: 'bg-[var(--bg-page)] text-[var(--text-secondary)] ring-1 ring-[var(--border-color)]', dot: 'bg-slate-400' },
 };
 
 const STATUS_META: Record<string, StatusMeta> = {

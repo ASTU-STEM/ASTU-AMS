@@ -124,7 +124,7 @@ export default function TelebirrDonationModal({
           onClick={step === "form" ? onClose : undefined}
         />
 
-        <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden border border-emerald-100">
+        <div className="relative w-full max-w-md bg-[var(--bg-card)] rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden border border-emerald-100">
           {step === "form" && (
             <>
               <div className="bg-gradient-to-r from-[#003366] via-emerald-800 to-teal-800 p-6 text-white">
@@ -153,35 +153,35 @@ export default function TelebirrDonationModal({
 
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                  <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5 mb-2">
                     <MdPerson className="h-4 w-4 text-emerald-600" />
                     Donor Full Name
                   </label>
                   <input
                     value={donorName}
                     onChange={(e) => setDonorName(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-medium text-gray-900"
+                    className="w-full rounded-xl border border-[var(--border-color)] px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-medium text-[var(--text-primary)]"
                     placeholder="e.g. Wabi Tena"
                     type="text"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                  <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5 mb-2">
                     <MdPhone className="h-4 w-4 text-emerald-600" />
                     Phone Number (Optional)
                   </label>
                   <input
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-medium text-gray-900"
+                    className="w-full rounded-xl border border-[var(--border-color)] px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-medium text-[var(--text-primary)]"
                     placeholder="e.g. +251 911 234 567"
                     type="tel"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                  <label className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1.5 mb-2">
                     <MdMoney className="h-4 w-4 text-emerald-600" />
                     Donation Amount (ETB)
                   </label>
@@ -194,7 +194,7 @@ export default function TelebirrDonationModal({
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border transition-all ${
                           amount === val.toString()
                             ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
-                            : "bg-gray-50 text-gray-700 border-gray-200 hover:border-emerald-600/40"
+                            : "bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-emerald-600/40"
                         }`}
                       >
                         {val.toLocaleString()} ETB
@@ -204,7 +204,7 @@ export default function TelebirrDonationModal({
                   <input
                     value={amount}
                     onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-extrabold text-emerald-900 text-base"
+                    className="w-full rounded-xl border border-[var(--border-color)] px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-extrabold text-emerald-900 text-base"
                     placeholder="Custom amount"
                     type="text"
                     inputMode="numeric"
@@ -212,7 +212,7 @@ export default function TelebirrDonationModal({
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">Select Chapa Method</p>
+                  <p className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest">Select Chapa Method</p>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
@@ -220,7 +220,7 @@ export default function TelebirrDonationModal({
                       className={`p-2 rounded-xl border text-center transition-all ${
                         selectedMethod === 'telebirr'
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-extrabold ring-1 ring-emerald-500'
-                          : 'border-gray-200 bg-gray-50 text-gray-600'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)]'
                       }`}
                     >
                       <p className="text-xs font-extrabold">Telebirr</p>
@@ -233,7 +233,7 @@ export default function TelebirrDonationModal({
                       className={`p-2 rounded-xl border text-center transition-all ${
                         selectedMethod === 'cbe'
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-extrabold ring-1 ring-emerald-500'
-                          : 'border-gray-200 bg-gray-50 text-gray-600'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)]'
                       }`}
                     >
                       <p className="text-xs font-extrabold">CBE Birr</p>
@@ -246,7 +246,7 @@ export default function TelebirrDonationModal({
                       className={`p-2 rounded-xl border text-center transition-all ${
                         selectedMethod === 'card'
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-extrabold ring-1 ring-emerald-500'
-                          : 'border-gray-200 bg-gray-50 text-gray-600'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)]'
                       }`}
                     >
                       <p className="text-xs font-extrabold">Chapa Card</p>
@@ -286,31 +286,31 @@ export default function TelebirrDonationModal({
                 <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3 shadow-inner">
                   <CreditCard className="h-7 w-7" />
                 </div>
-                <h3 className="text-lg font-extrabold text-gray-900">
+                <h3 className="text-lg font-extrabold text-[var(--text-primary)]">
                   Confirm Chapa Donation
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[var(--text-muted)] mt-1">
                   Secure processing by Chapa Payment Gateway
                 </p>
               </div>
 
               <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 space-y-2.5 border border-emerald-100">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500 font-medium">Campaign</span>
-                  <span className="font-bold text-gray-900 text-right max-w-xs truncate">
+                  <span className="text-[var(--text-muted)] font-medium">Campaign</span>
+                  <span className="font-bold text-[var(--text-primary)] text-right max-w-xs truncate">
                     {campaign.title}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500 font-medium">Donor Name</span>
-                  <span className="font-bold text-gray-900">{donorName || "ASTU Supporter"}</span>
+                  <span className="text-[var(--text-muted)] font-medium">Donor Name</span>
+                  <span className="font-bold text-[var(--text-primary)]">{donorName || "ASTU Supporter"}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500 font-medium">Payment Method</span>
+                  <span className="text-[var(--text-muted)] font-medium">Payment Method</span>
                   <span className="font-bold text-emerald-800 uppercase">{selectedMethod} (Chapa)</span>
                 </div>
                 <div className="border-t border-emerald-200/60 pt-2.5 flex justify-between items-center text-xs">
-                  <span className="font-bold text-gray-700">Total Contribution</span>
+                  <span className="font-bold text-[var(--text-secondary)]">Total Contribution</span>
                   <span className="text-xl font-black text-emerald-700">
                     {parseInt(amount || "500").toLocaleString()} ETB
                   </span>
@@ -320,7 +320,7 @@ export default function TelebirrDonationModal({
               <div className="flex gap-3">
                 <button
                   onClick={() => setStep("form")}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all"
+                  className="flex-1 py-3 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all"
                   disabled={isProcessing}
                 >
                   Back
@@ -352,17 +352,17 @@ export default function TelebirrDonationModal({
                 <HiCheckCircle className="h-12 w-12 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900">
+                <h3 className="text-xl font-extrabold text-[var(--text-primary)]">
                   Donation Verified!
                 </h3>
-                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                <p className="text-xs text-[var(--text-secondary)] mt-1.5 leading-relaxed">
                   Thank you, <strong>{donorName || "Generous Supporter"}</strong>! Your contribution of{" "}
                   <strong className="text-emerald-700">{parseInt(amount || "500").toLocaleString()} ETB</strong> to{" "}
                   <strong>{campaign.title}</strong> has been successfully processed via Chapa.
                 </p>
               </div>
               <div className="bg-emerald-50 rounded-2xl p-4 text-left text-xs space-y-1 border border-emerald-100">
-                <p className="text-gray-500 font-medium">Chapa Transaction Reference:</p>
+                <p className="text-[var(--text-muted)] font-medium">Chapa Transaction Reference:</p>
                 <p className="font-mono font-bold text-emerald-800 text-sm">
                   {txRef || `ASTU-DON-${Date.now()}`}
                 </p>
@@ -385,10 +385,10 @@ export default function TelebirrDonationModal({
                 <HiXCircle className="h-12 w-12 text-red-600" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900">
+                <h3 className="text-xl font-extrabold text-[var(--text-primary)]">
                   Donation Not Completed
                 </h3>
-                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                <p className="text-xs text-[var(--text-secondary)] mt-1.5 leading-relaxed">
                   Your payment could not be verified, so no donation was recorded and no
                   money was taken. If you were charged, please contact the finance office
                   with the reference below.
@@ -396,7 +396,7 @@ export default function TelebirrDonationModal({
               </div>
               {txRef && (
                 <div className="bg-red-50 rounded-2xl p-4 text-left text-xs space-y-1 border border-red-100">
-                  <p className="text-gray-500 font-medium">Transaction Reference:</p>
+                  <p className="text-[var(--text-muted)] font-medium">Transaction Reference:</p>
                   <p className="font-mono font-bold text-red-800 text-sm">{txRef}</p>
                   <p className="text-[10px] text-red-600 pt-1">Status: Failed</p>
                 </div>
@@ -414,7 +414,7 @@ export default function TelebirrDonationModal({
 
       {/* Full Screen Chapa Checkout Portal Page View for Donations */}
       {showFullChapaPage && (
-        <div className="fixed inset-0 z-[120] overflow-y-auto bg-slate-100 flex flex-col font-sans">
+        <div className="fixed inset-0 z-[120] overflow-y-auto bg-[var(--bg-page)] flex flex-col font-sans">
           {/* Top Browser Bar */}
           <div className="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs border-b border-slate-800 shadow-md">
             <div className="flex items-center gap-3">
@@ -438,7 +438,7 @@ export default function TelebirrDonationModal({
 
           {/* Main Checkout Box */}
           <div className="flex-1 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden grid grid-cols-1 md:grid-cols-5">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-2xl w-full shadow-2xl border border-[var(--border-color)] overflow-hidden grid grid-cols-1 md:grid-cols-5">
               
               {/* Left Column: Order Summary */}
               <div className="md:col-span-2 bg-slate-900 text-white p-6 space-y-6 flex flex-col justify-between">
@@ -449,39 +449,39 @@ export default function TelebirrDonationModal({
                     </div>
                     <div>
                       <h4 className="font-extrabold text-sm text-white">Chapa Pay</h4>
-                      <p className="text-[10px] text-slate-400">Secure Donation Gateway</p>
+                      <p className="text-[10px] text-[var(--text-muted)]">Secure Donation Gateway</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Recipient</p>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Recipient</p>
                       <p className="text-sm font-extrabold text-emerald-400">ASTU Alumni Fund</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Campaign</p>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Campaign</p>
                       <p className="text-sm font-bold text-white leading-snug">{campaign.title}</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Transaction Ref</p>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Transaction Ref</p>
                       <p className="text-[11px] font-mono font-bold text-slate-300">{txRef || 'ASTU-DON-DEMO'}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-800 pt-4">
-                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Contribution Amount</p>
+                  <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Contribution Amount</p>
                   <p className="text-3xl font-black text-emerald-400">{parseInt(amount || "500").toLocaleString()} ETB</p>
                 </div>
               </div>
 
               {/* Right Column: Interactive Payment Options */}
-              <div className="md:col-span-3 p-6 space-y-5 flex flex-col justify-between bg-white">
+              <div className="md:col-span-3 p-6 space-y-5 flex flex-col justify-between bg-[var(--bg-card)]">
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">Complete Chapa Donation</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Select your preferred payment method below</p>
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)]">Complete Chapa Donation</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Select your preferred payment method below</p>
 
                   <div className="mt-4 space-y-3">
                     <div
@@ -489,7 +489,7 @@ export default function TelebirrDonationModal({
                       className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                         selectedMethod === 'telebirr'
                           ? 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -497,8 +497,8 @@ export default function TelebirrDonationModal({
                           tb
                         </div>
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Telebirr Mobile Money</p>
-                          <p className="text-[10px] text-slate-500">Test PIN: 1234</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Telebirr Mobile Money</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Test PIN: 1234</p>
                         </div>
                       </div>
                       {selectedMethod === 'telebirr' && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -509,7 +509,7 @@ export default function TelebirrDonationModal({
                       className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                         selectedMethod === 'cbe'
                           ? 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -517,8 +517,8 @@ export default function TelebirrDonationModal({
                           CBE
                         </div>
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">CBE Birr Account</p>
-                          <p className="text-[10px] text-slate-500">Direct Bank Transfer</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">CBE Birr Account</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Direct Bank Transfer</p>
                         </div>
                       </div>
                       {selectedMethod === 'cbe' && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -529,7 +529,7 @@ export default function TelebirrDonationModal({
                       className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                         selectedMethod === 'card'
                           ? 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -537,8 +537,8 @@ export default function TelebirrDonationModal({
                           CARD
                         </div>
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Visa / Mastercard</p>
-                          <p className="text-[10px] text-slate-500">4000 0000 0000 0002</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Visa / Mastercard</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">4000 0000 0000 0002</p>
                         </div>
                       </div>
                       {selectedMethod === 'card' && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -546,7 +546,7 @@ export default function TelebirrDonationModal({
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-4 border-t border-slate-100">
+                <div className="space-y-2 pt-4 border-t border-[var(--border-color)]">
                   <button
                     type="button"
                     onClick={handleConfirm}
@@ -569,7 +569,7 @@ export default function TelebirrDonationModal({
                   <button
                     type="button"
                     onClick={() => setShowFullChapaPage(false)}
-                    className="w-full py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                    className="w-full py-2 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                   >
                     Cancel & Return to Portal
                   </button>

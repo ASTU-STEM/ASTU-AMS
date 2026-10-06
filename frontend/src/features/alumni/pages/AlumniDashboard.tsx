@@ -42,6 +42,17 @@ import { AlumniToolsPage } from '../../tools/pages/AlumniToolsPage';
 import { useSystemSettings } from '../../../context/SystemSettingsContext';
 import config from '../../../config';
 import { useTheme } from '../../../hooks/useTheme';
+import {
+  ALUMNI_TAB_LABELS,
+  alumniPageClass,
+  alumniSidebarActiveDotClass,
+  alumniSidebarNavBadgeClass,
+  alumniSidebarNavIcon,
+  alumniSidebarNavItem,
+  alumniSidebarSectionLabelClass,
+  alumniSidebarNavListClass,
+  alumniGridGapClass,
+} from '../components/alumniUi';
 
 interface AlumniDashboardProps {
   defaultTab?: string;
@@ -160,10 +171,10 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const connectedMentorsCount = statsData?.activeMentorships || (Array.isArray(mentors) ? mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length : 0);
 
   const stats = [
-    { id: 1, label: 'Profile Status', value: `${profileCompletion}%`, color: 'astu-navy', icon: 'account_circle', bgGradient: 'from-blue-50 to-indigo-50', trend: 'Complete fields to boost', trendIcon: 'trending_up', trendColor: 'astu-green' },
-    { id: 2, label: 'Job Matches', value: `${matchCount}`, color: 'astu-green', icon: 'work', bgGradient: 'from-emerald-50 to-green-50', trend: `${matchCount} open matches`, trendIcon: 'work', trendColor: 'astu-green' },
-    { id: 3, label: 'Pending Surveys', value: `${pendingSurveysCount}`, color: 'astu-red', icon: 'assignment', bgGradient: 'from-red-50 to-orange-50', trend: pendingSurveysCount > 0 ? 'Urgent Tracer studies' : 'All studies submitted', trendIcon: pendingSurveysCount > 0 ? 'schedule' : 'check_circle', trendColor: pendingSurveysCount > 0 ? 'astu-red' : 'astu-green' },
-    { id: 4, label: 'Network Peers', value: `${connectedMentorsCount}`, color: 'purple-600', icon: 'people', bgGradient: 'from-purple-50 to-pink-50', trend: `${connectedMentorsCount} connected`, trendIcon: 'people', trendColor: 'astu-purple' },
+    { id: 1, label: 'Profile Status', value: `${profileCompletion}%`, color: 'text-[#003366] dark:text-[#FFD700]', icon: 'account_circle', iconBg: 'bg-[#003366]/10 dark:bg-[#FFCC00]/15', bgGradient: 'from-blue-50 to-indigo-50', trend: 'Complete fields to boost', trendIcon: 'trending_up', trendColor: 'text-emerald-600 dark:text-emerald-400' },
+    { id: 2, label: 'Job Matches', value: `${matchCount}`, color: 'text-emerald-700 dark:text-emerald-400', icon: 'work', iconBg: 'bg-emerald-500/10', bgGradient: 'from-emerald-50 to-green-50', trend: `${matchCount} open matches`, trendIcon: 'work', trendColor: 'text-emerald-600 dark:text-emerald-400' },
+    { id: 3, label: 'Pending Surveys', value: `${pendingSurveysCount}`, color: 'text-rose-700 dark:text-rose-400', icon: 'assignment', iconBg: 'bg-rose-500/10', bgGradient: 'from-red-50 to-orange-50', trend: pendingSurveysCount > 0 ? 'Urgent Tracer studies' : 'All studies submitted', trendIcon: pendingSurveysCount > 0 ? 'schedule' : 'check_circle', trendColor: pendingSurveysCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' },
+    { id: 4, label: 'Network Peers', value: `${connectedMentorsCount}`, color: 'text-purple-700 dark:text-purple-300', icon: 'people', iconBg: 'bg-purple-500/10', bgGradient: 'from-purple-50 to-pink-50', trend: `${connectedMentorsCount} connected`, trendIcon: 'people', trendColor: 'text-purple-600 dark:text-purple-300' },
   ];
 
   const managementActions = [
@@ -919,7 +930,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
           <span>Theme</span>
         </span>
-        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[var(--text-secondary)]">
+        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)]">
           {darkMode ? 'Dark' : 'Light'}
         </span>
       </button>
@@ -927,7 +938,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         <HelpCircle className="h-4 w-4" /> Help
       </button>
       <div className="my-1 h-px bg-[var(--border-color)]" />
-      <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50">
+      <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40">
         <LogOut className="h-4 w-4" /> Logout
       </button>
     </div>
@@ -950,11 +961,50 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
     { id: 'donations', label: 'Giving', icon: 'volunteer_activism' },
   ];
 
+  const pendingDocumentsCount = documents.filter(
+    (d) => d.status === 'Pending' || d.status === 'In Progress',
+  ).length;
+
   const serviceItems = [
-    { id: 'documents', label: 'Documents', icon: 'description', badge: null as string | null },
+    {
+      id: 'documents',
+      label: 'Documents',
+      icon: 'description',
+      badge: pendingDocumentsCount > 0 ? pendingDocumentsCount.toString() : null,
+    },
     { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadMessagesCount > 0 ? unreadMessagesCount.toString() : null },
     { id: 'settings', label: 'Settings', icon: 'settings', badge: null },
   ];
+
+  type SidebarNavItem = { id: string; label: string; icon: string; badge?: string | null };
+
+  const renderSidebarNavItem = (item: SidebarNavItem) => {
+    const isActive = activeTab === item.id;
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => setActiveTab(item.id)}
+        title={sidebarCollapsed ? item.label : undefined}
+        className={`${alumniSidebarNavItem(isActive)} ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'}`}
+      >
+        <span className={alumniSidebarNavIcon(isActive)}>
+          <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+        </span>
+        {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+        {item.badge && !sidebarCollapsed && (
+          <span className={alumniSidebarNavBadgeClass} aria-label={`${item.badge} pending`}>
+            {item.badge}
+          </span>
+        )}
+        {isActive && !sidebarCollapsed && !item.badge && (
+          <div className={alumniSidebarActiveDotClass} aria-hidden />
+        )}
+      </button>
+    );
+  };
+
+  const tabTitle = ALUMNI_TAB_LABELS[activeTab] ?? activeTab.replace(/_/g, ' ');
 
   return (
     <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
@@ -1028,141 +1078,56 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin space-y-5">
-          {/* Section 1: Recruiting & Career */}
+        <nav className="relative z-10 flex-grow px-3 py-5 overflow-y-auto scrollbar-thin space-y-8">
           <div>
             {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-2">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Recruiting & Career</p>
-              </div>
+              <p className={alumniSidebarSectionLabelClass}>Recruiting & Career</p>
             )}
-            <div className="space-y-1">
-              {recruitingItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                      {item.badge}
-                    </span>
-                  )}
-                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
-            </div>
+            <div className="space-y-0.5">{recruitingItems.map(renderSidebarNavItem)}</div>
           </div>
 
-          {/* Section 2: Community & Network */}
           <div>
             {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-2 pt-1">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Community</p>
-              </div>
+              <p className={`${alumniSidebarSectionLabelClass} pt-0.5`}>Community</p>
             )}
-            <div className="space-y-1">
-              {communityItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {activeTab === item.id && !sidebarCollapsed && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
-            </div>
+            <div className="space-y-0.5">{communityItems.map(renderSidebarNavItem)}</div>
           </div>
 
-          {/* Section 3: Services & Account */}
           <div>
             {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-2 pt-1">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Services</p>
-              </div>
+              <p className={`${alumniSidebarSectionLabelClass} pt-0.5`}>Services</p>
             )}
-            <div className="space-y-1">
-              {serviceItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                      {item.badge}
-                    </span>
-                  )}
-                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
-            </div>
+            <div className="space-y-0.5">{serviceItems.map(renderSidebarNavItem)}</div>
           </div>
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
+        <div className="relative z-10 p-3 border-t border-[var(--border-color)] space-y-0.5">
           <button
             type="button"
             onClick={() => {
               toggleTheme();
               toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
             }}
-            className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)] transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
             title={sidebarCollapsed ? (darkMode ? 'Light Mode' : 'Dark Mode') : undefined}
           >
-            {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-500 shrink-0" /> : <Moon className="h-4.5 w-4.5 text-slate-600 shrink-0" />}
+            {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-500 shrink-0" /> : <Moon className="h-4.5 w-4.5 text-[var(--text-secondary)] shrink-0" />}
             {!sidebarCollapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
           </button>
           <button
             onClick={() => setHelpOpen(true)}
-            className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)] transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
             title={sidebarCollapsed ? 'Help Center' : undefined}
           >
-            <HelpCircle className="h-4.5 w-4.5 text-[#003366] shrink-0" />
+            <HelpCircle className="h-4.5 w-4.5 text-[#003366] dark:text-[#FFD700] shrink-0" />
             {!sidebarCollapsed && <span>Help Center</span>}
           </button>
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
             title={sidebarCollapsed ? 'Logout' : undefined}
           >
@@ -1173,7 +1138,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       </aside>
 
       {/* Main Content Area */}
-      <div className={`app-shell min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+      <div className={`min-h-screen flex flex-col bg-[var(--bg-page)] transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
         {/* Enhanced Header with Glass Effect */}
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 shrink-0"
@@ -1184,29 +1149,32 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         >
           <div className="flex min-w-0 items-center gap-3">
             <button type="button" onClick={() => setSidebarCollapsed((v) => !v)}
-              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 md:inline-flex"
               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
               <Menu className="h-5 w-5" />
             </button>
             <button type="button" onClick={() => { setSidebarCollapsed(false); setMobileSidebarOpen(true); }}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden" aria-label="Open navigation">
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 md:hidden" aria-label="Open navigation">
               <Menu className="h-5 w-5" />
             </button>
             <div className="min-w-0">
               <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
-                {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
+                {tabTitle}
               </h1>
+              <p className="truncate text-[11px] font-medium text-[var(--text-muted)] hidden sm:block">
+                Alumni workspace
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <label className="group hidden h-11 w-full max-w-[300px] xl:max-w-[400px] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
+            <label className="group hidden h-11 w-full max-w-[300px] xl:max-w-[400px] items-center rounded-full border bg-[var(--bg-page)] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:shadow-none"
               style={{ borderColor: 'var(--border-color)' }}>
-              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
+              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[var(--text-muted)]">
                 <Search className="h-4.5 w-4.5 flex-none" />
               </span>
               <input type="text" placeholder="Search alumni, companies, or mentors..."
-                className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
+                className="w-full bg-transparent text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
                 onChange={(e) => { if (activeTab === 'dashboard' && e.target.value.trim().length > 1) setActiveTab('jobs'); }} />
             </label>
 
@@ -1216,16 +1184,16 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 toggleTheme();
                 toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
               }}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)] transition-colors"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-primary)] transition-colors"
               aria-label="Toggle dark mode"
               title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5 text-slate-600 dark:text-slate-300" />}
+              {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5 text-[var(--text-secondary)] dark:text-slate-300" />}
             </button>
 
             <div className="relative shrink-0" data-admin-notifications>
               <button type="button" onClick={() => setNotificationOpen((v) => !v)}
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5">
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5">
                 <Bell className="h-4 w-4" />
                 {unreadNotificationsCount > 0 && (
                   <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">{unreadNotificationsCount}</span>
@@ -1263,7 +1231,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                         }}
                         className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
                       >
-                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-[var(--bg-page)]'}`} />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-[var(--text-primary)] truncate">{n.title || 'Notification'}</p>
                           <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{n.text}</p>
@@ -1275,7 +1243,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                             e.stopPropagation();
                             await handleClearNotification(n.id);
                           }}
-                          className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--bg-page)] dark:hover:bg-gray-800"
                           title="Mark as read"
                         >
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -1290,7 +1258,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                         setNotificationOpen(false);
                         setShowAllNotificationsModal(true);
                       }}
-                      className="text-sm font-semibold text-[#003580] hover:underline"
+                      className="text-sm font-semibold text-[#003580] dark:text-[#93c5fd] hover:underline"
                     >
                       View all →
                     </button>
@@ -1310,7 +1278,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                   <div className="text-sm font-medium text-[var(--text-primary)]">{profile?.fullName || 'Loading...'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">Alumni</div>
                 </div>
-                <ChevronDown className="h-4 w-4 text-slate-400" />
+                <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
               </button>
               {menuOpen && menu}
             </div>
@@ -1318,7 +1286,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         </header>
 
         {/* Main Workspace Board */}
-        <main id="main-content" tabIndex={-1} className="flex-1 w-full overflow-y-auto overflow-x-hidden bg-[#f8fafc] dark:bg-slate-950 p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1} className="flex-1 w-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           {/* Partial-failure banner. Previously every fetch had an inline
               `.catch(() => fallback)`, so a failed request looked exactly like
               empty data and the user had no way to tell the difference. */}
@@ -1349,7 +1317,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               </button>
             </div>
           )}
-          <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-6">
+          <div className={`max-w-[1600px] mx-auto ${alumniPageClass}`}>
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
@@ -1372,7 +1340,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               )}
 
               {activeTab === 'management' && (
-                <section className="space-y-6 p-4 md:p-6">
+                <section className={alumniPageClass}>
                   <div className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#1D9E75)] p-5 text-white md:p-6">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
                     <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#FFD700]/10 rounded-full translate-y-1/3 -translate-x-1/4" />
@@ -1388,8 +1356,8 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     {managementActions.map((action) => (
                       <button key={action.title} onClick={() => setActiveTab(action.tab)}
                         className="group rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:border-[#003580]/30 hover:shadow-md hover:-translate-y-0.5">
-                        <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 p-2 text-[#003580] group-hover:scale-110 transition-transform duration-300">{action.icon}</span>
-                        <h3 className="mt-4 text-sm font-semibold text-[var(--text-primary)] group-hover:text-[#003580] transition-colors">{action.title}</h3>
+                        <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 dark:bg-[#FFCC00]/15 p-2 text-[#003580] dark:text-[#FFD700] group-hover:scale-110 transition-transform duration-300">{action.icon}</span>
+                        <h3 className="mt-4 text-sm font-semibold text-[var(--text-primary)] group-hover:text-[#003580] dark:group-hover:text-[#FFD700] transition-colors">{action.title}</h3>
                         <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">{action.desc}</p>
                         <span className="mt-4 inline-flex rounded-[8px] bg-gradient-to-r from-[#003580] to-[#004d99] px-3 py-2 text-xs font-semibold text-white shadow-sm group-hover:shadow-md transition-all">Manage / Create</span>
                       </button>
@@ -1418,6 +1386,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                   onApplyJob={handleApplyJob}
                   onViewJob={handleViewJob}
                   onRequestMentorship={handleRequestMentorship}
+                  onTabChange={setActiveTab}
                 />
               )}
               {activeTab === 'surveys' && <SurveysTab />}
@@ -1463,7 +1432,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               {activeTab === 'messages' && <MessagingTab darkMode={darkMode} userId={(profile as any)?.userId} initialTarget={chatTarget} initialCallId={pendingCallId} />}
               {activeTab === 'settings' && <SettingsTab preferences={preferences as any} onSavePreferences={handleSavePreferences} />}
               {activeTab === 'forum' && (
-                <div className="space-y-4 sm:space-y-6 p-1 sm:p-4 md:p-6 max-w-7xl mx-auto">
+                <div className={`${alumniPageClass} max-w-7xl mx-auto`}>
 
                   {/* ── 1. Hero Header Banner ───────────────────────────────────────── */}
                   <section className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[var(--border-color)] bg-gradient-to-r from-[#003366] via-[#004d99] to-[#1d9e75] p-4 sm:p-6 md:p-8 text-white shadow-xl">
@@ -1502,10 +1471,10 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase">Official</span>
-                        <span className="text-[10px] text-slate-400">ASTU Registrar Office</span>
+                        <span className="text-[10px] text-[var(--text-muted)]">ASTU Registrar Office</span>
                       </div>
-                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white mt-1">Alumni Summit & Technology Expo 2026</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
+                      <h4 className="text-xs font-extrabold text-[var(--text-primary)] dark:text-white mt-1">Alumni Summit & Technology Expo 2026</h4>
+                      <p className="text-xs text-[var(--text-secondary)] dark:text-slate-300 mt-0.5 leading-relaxed">
                         Registration is open — join on campus or online for keynotes, networking, and project showcases.
                       </p>
                     </div>
@@ -1528,7 +1497,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                           onClick={() => setForumCategory(cat.id)}
                           className={`px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 ${forumCategory === cat.id
                               ? 'bg-[#003366] text-white shadow-md shadow-blue-950/20 scale-105'
-                              : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800'
+                              : 'bg-[var(--bg-page)] text-[var(--text-secondary)]  dark:hover:bg-slate-800'
                             }`}
                         >
                           <span className="material-symbols-outlined text-[16px] leading-none">{cat.icon}</span>
@@ -1547,7 +1516,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                           onChange={(e) => setForumSearchQuery(e.target.value)}
                           className="w-full text-xs pl-8 pr-3 py-2 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none text-[var(--text-primary)]"
                         />
-                        <span className="material-symbols-outlined text-sm absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        <span className="material-symbols-outlined text-sm absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">search</span>
                       </div>
 
                       <select
@@ -1613,7 +1582,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
                             {/* Attachment Previews */}
                             {(attachedImageUrl || attachedLinkUrl) && (
-                              <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                              <div className="flex flex-wrap items-center gap-2 p-2 rounded-xl bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700">
                                 {attachedImageUrl && (
                                   <div className="relative inline-block">
                                     <img src={attachedImageUrl} alt="Attachment" className="w-16 h-12 rounded-lg object-cover ring-1 ring-blue-500/30" />
@@ -1658,7 +1627,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                 <button
                                   type="button"
                                   onClick={() => document.getElementById('forum-photo-upload')?.click()}
-                                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 text-xs flex items-center gap-1 font-semibold transition-colors"
+                                  className="p-1.5 rounded-lg hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)] text-xs flex items-center gap-1 font-semibold transition-colors"
                                 >
                                   <span className="material-symbols-outlined text-sm">image</span> Photo
                                 </button>
@@ -1671,7 +1640,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                       toast.success('Link attached');
                                     }
                                   }}
-                                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 text-xs flex items-center gap-1 font-semibold transition-colors"
+                                  className="p-1.5 rounded-lg hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)] text-xs flex items-center gap-1 font-semibold transition-colors"
                                 >
                                   <span className="material-symbols-outlined text-sm">link</span> Link
                                 </button>
@@ -1779,7 +1748,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                             <div className="text-[10px] text-[var(--text-muted)] font-medium mt-0.5 flex items-center gap-1.5 flex-wrap">
                                               <span>{post.time || (post.timestamp ? new Date(post.timestamp).toLocaleDateString() : 'Recently')}</span>
                                               <span>•</span>
-                                              <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-[9px]">
+                                              <span className="px-1.5 py-0.5 rounded-md bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 font-bold text-[9px]">
                                                 🏷️ {post.category || 'Discussion'}
                                               </span>
                                             </div>
@@ -1807,14 +1776,14 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                                     linkAttachment: linkMatch ? linkMatch[0] : ''
                                                   });
                                                 }}
-                                                className="text-[9px] text-blue-600 hover:text-blue-800 font-bold px-1.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 transition-all flex items-center gap-0.5"
+                                                className="text-[9px] text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 font-bold px-1.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-500/15 hover:bg-blue-100 dark:hover:bg-blue-500/25 transition-all flex items-center gap-0.5"
                                                 title="Edit Post"
                                               >
                                                 ✏️ Edit
                                               </button>
                                               <button
                                                 onClick={() => handleDeletePost(post.id)}
-                                                className="text-[9px] text-rose-600 hover:text-rose-800 font-bold px-1.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 transition-all flex items-center gap-0.5"
+                                                className="text-[9px] text-rose-600 dark:text-rose-300 hover:text-rose-800 dark:hover:text-rose-200 font-bold px-1.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-500/15 hover:bg-rose-100 dark:hover:bg-rose-500/25 transition-all flex items-center gap-0.5"
                                                 title="Delete Post"
                                               >
                                                 🗑️ Delete
@@ -1823,7 +1792,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                           )}
                                           <button
                                             onClick={() => post.id && handleToggleBookmark(post.id)}
-                                            className={`p-1.5 rounded-lg transition-colors ${isBookmarked ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/60' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400'
+                                            className={`p-1.5 rounded-lg transition-colors ${isBookmarked ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/60' : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)]'
                                               }`}
                                             title={isBookmarked ? 'Bookmark Saved' : 'Save Bookmark'}
                                           >
@@ -1874,7 +1843,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                                   <p className="font-extrabold text-[#003366] dark:text-blue-300 group-hover:underline truncate">
                                                     {linkMatch[1]}
                                                   </p>
-                                                  <p className="text-[10px] text-slate-400 font-medium">Click to open external link ↗</p>
+                                                  <p className="text-[10px] text-[var(--text-muted)] font-medium">Click to open external link ↗</p>
                                                 </div>
                                               </a>
                                             )}
@@ -1887,7 +1856,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                                   onClick={() => post.id && handleToggleLike(post.id)}
                                                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${post.liked
                                                       ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 font-extrabold shadow-xs'
-                                                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 font-semibold'
+                                                      : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)] font-semibold'
                                                     } ${likingPosts[post.id] ? 'opacity-60 cursor-not-allowed' : ''}`}
                                                 >
                                                   <svg className="w-4 h-4" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1900,7 +1869,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                                   onClick={() => setActiveCommentsPostId(activeCommentsPostId === post.id ? null : post.id)}
                                                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${activeCommentsPostId === post.id
                                                       ? 'bg-blue-50 dark:bg-slate-800 text-[#003366] dark:text-blue-300 font-extrabold shadow-xs'
-                                                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 font-semibold'
+                                                      : 'hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)] font-semibold'
                                                     }`}
                                                 >
                                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1911,14 +1880,14 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
                                                 <button
                                                   onClick={() => handleSharePost(post)}
-                                                  className="px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 font-semibold transition-colors flex items-center gap-1"
+                                                  className="px-3 py-1.5 rounded-xl hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 text-[var(--text-muted)] font-semibold transition-colors flex items-center gap-1"
                                                 >
                                                   <span className="material-symbols-outlined text-sm">share</span>
                                                   Share
                                                 </button>
                                               </div>
 
-                                              <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium self-end sm:self-auto">
+                                              <div className="flex items-center gap-2 text-[10px] text-[var(--text-muted)] font-medium self-end sm:self-auto">
                                                 <span>👁️ {dynamicViewsCount} views</span>
                                                 <span>•</span>
                                                 <span>⏱️ {dynamicReadTime} min read</span>
@@ -1947,7 +1916,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                               ))}
                                             </div>
                                           ) : (
-                                            <p className="text-xs text-slate-400 italic py-1 text-center">No comments yet. Start the conversation below!</p>
+                                            <p className="text-xs text-[var(--text-muted)] italic py-1 text-center">No comments yet. Start the conversation below!</p>
                                           )}
 
                                           {/* Comment Submission Box */}
@@ -1976,7 +1945,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
                               {/* Pagination / Load More & Total Counter Bar */}
                               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[var(--border-color)]">
-                                <p className="text-xs text-slate-400 font-medium">
+                                <p className="text-xs text-[var(--text-muted)] font-medium">
                                   Showing <span className="font-bold text-[var(--text-primary)]">{Math.min(visiblePostsCount, filteredPosts.length)}</span> of{' '}
                                   <span className="font-bold text-[var(--text-primary)]">{filteredPosts.length}</span> community discussions
                                 </p>
@@ -2064,7 +2033,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                 setActiveTab('messages');
                                 toast.success(`Opening direct chat with ${member.name}...`);
                               }}
-                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                              className="flex items-center gap-3 p-2 rounded-xl hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
                             >
                               <img src={member.avatar} alt="" className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/30" />
                               <div className="min-w-0 flex-1">
@@ -2084,7 +2053,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                         <h4 className="font-extrabold text-[#003366] dark:text-blue-400 flex items-center gap-1.5">
                           <span>🛡️</span> ASTU Community Principles
                         </h4>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <p className="text-[11px] text-[var(--text-secondary)] dark:text-slate-300 leading-relaxed">
                           Respect fellow graduates, share authentic career opportunities, and support ASTU's vision of technical excellence.
                         </p>
                       </div>
@@ -2099,17 +2068,17 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               {/* Edit Forum Post Modal */}
               {editingPost && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                  <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                      <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2">
+                  <div className="bg-[var(--bg-card)] rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+                    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+                      <h3 className="text-sm font-extrabold text-[var(--text-primary)] flex items-center gap-2">
                         ✏️ Edit Forum Post
                       </h3>
-                      <button onClick={() => setEditingPost(null)} className="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+                      <button onClick={() => setEditingPost(null)} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] font-bold text-sm">✕</button>
                     </div>
                     <textarea
                       value={editingPost.textContent}
                       onChange={(e) => setEditingPost({ ...editingPost, textContent: e.target.value })}
-                      className="w-full text-xs p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] h-28 resize-none text-gray-800 font-medium"
+                      className="w-full text-xs p-3 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] h-28 resize-none text-[var(--text-primary)] font-medium"
                       placeholder="Edit your post text..."
                       required
                     />
@@ -2117,7 +2086,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     {/* Attachment Management & Upload Controls in Edit Modal */}
                     <div className="space-y-2">
                       {editingPost.imageAttachment ? (
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-100 border border-slate-200">
+                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)]">
                           <div className="flex items-center gap-2.5 min-w-0">
                             {(() => {
                               const match = editingPost.imageAttachment.match(/!\[.*?\]\((.*?)\)/);
@@ -2126,7 +2095,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                                 <img src={url} alt="Current" className="w-10 h-10 rounded-lg object-cover ring-1 ring-blue-500/30 shrink-0" />
                               ) : <span className="text-sm">📷</span>;
                             })()}
-                            <span className="text-xs font-bold text-slate-700 truncate">Current Attached Photo</span>
+                            <span className="text-xs font-bold text-[var(--text-secondary)] truncate">Current Attached Photo</span>
                           </div>
 
                           <div className="flex items-center gap-3 shrink-0">
@@ -2161,9 +2130,9 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/60 border border-blue-200/80">
-                          <span className="text-xs font-medium text-slate-600">No photo attached</span>
-                          <label className="text-[11px] font-bold text-[#003366] hover:underline cursor-pointer flex items-center gap-1 bg-white px-3 py-1 rounded-lg border border-blue-200 shadow-xs">
+                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/60 dark:bg-blue-500/10 border border-blue-200/80 dark:border-blue-500/25">
+                          <span className="text-xs font-medium text-[var(--text-secondary)]">No photo attached</span>
+                          <label className="text-[11px] font-bold text-[#003366] hover:underline cursor-pointer flex items-center gap-1 bg-[var(--bg-card)] px-3 py-1 rounded-lg border border-blue-200 shadow-xs">
                             <span>📷 Attach New Photo</span>
                             <input
                               type="file"
@@ -2188,7 +2157,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       )}
 
                       {editingPost.linkAttachment && (
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50 border border-blue-200">
+                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/25">
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-[#003366]">🔗 Link Attachment Preserved</span>
                           </div>
@@ -2206,7 +2175,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     <div className="flex gap-2 justify-end pt-2">
                       <button
                         onClick={() => setEditingPost(null)}
-                        className="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-all"
+                        className="px-4 py-2 border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all"
                       >
                         Cancel
                       </button>
@@ -2225,7 +2194,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 </div>
               )}
               {activeTab === 'donations' && (
-                <div className="space-y-6 p-4 md:p-6">
+                <div className={alumniPageClass}>
                   <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#1d9e75,#003580)] p-5 text-white md:p-6">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
                     <div className="relative z-10">
@@ -2250,7 +2219,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                             <span className="font-bold text-[#003366]">{campaign.raised} ETB</span>
                             <span className="text-[var(--text-muted)]">of {campaign.targetAmount || campaign.goal} ETB</span>
                           </div>
-                          <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="h-2.5 bg-[var(--bg-page)] rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${Math.min(100, Math.round(((campaign.raised || 0) / (campaign.targetAmount || 1)) * 100))}%` }}></div>
                           </div>
                         </div>
@@ -2284,22 +2253,22 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       {/* Notification Detail Modal */}
       {selectedNotificationDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-2xl transition-all">
+          <div className="w-full max-w-lg overflow-hidden rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl transition-all">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-page)] px-5 py-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <Bell className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Notification Detail</h3>
-                  <p className="text-[11px] font-medium text-slate-500">ASTU AMS Official Broadcast</p>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Notification Detail</h3>
+                  <p className="text-[11px] font-medium text-[var(--text-muted)]">ASTU AMS Official Broadcast</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedNotificationDetail(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -2310,34 +2279,34 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               {/* Badges Bar */}
               <div className="flex flex-wrap items-center gap-2">
                 {selectedNotificationDetail.type && (
-                  <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-[#003580] border border-blue-200">
+                  <span className="rounded-full bg-blue-50 dark:bg-blue-500/15 px-2.5 py-0.5 text-[10px] font-bold text-[#003580] dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
                     {selectedNotificationDetail.type}
                   </span>
                 )}
                 {selectedNotificationDetail.priority && (
                   <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold border ${
                     selectedNotificationDetail.priority === 'Urgent'
-                      ? 'bg-rose-50 text-rose-700 border-rose-200'
+                      ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/30'
                       : selectedNotificationDetail.priority === 'High'
-                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                      ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'
+                      : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]'
                   }`}>
                     {selectedNotificationDetail.priority} Priority
                   </span>
                 )}
                 {selectedNotificationDetail.category && (
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                  <span className="rounded-full bg-emerald-50 dark:bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
                     {selectedNotificationDetail.category}
                   </span>
                 )}
-                <span className="text-[11px] text-slate-400 font-medium ml-auto">
+                <span className="text-[11px] text-[var(--text-muted)] font-medium ml-auto">
                   {selectedNotificationDetail.time}
                 </span>
               </div>
 
               {/* Hero Image Banner (if exists) */}
               {selectedNotificationDetail.imageUrl && (
-                <div className="overflow-hidden rounded-xl border border-slate-200 shadow-xs">
+                <div className="overflow-hidden rounded-xl border border-[var(--border-color)] shadow-xs">
                   <img
                     src={selectedNotificationDetail.imageUrl}
                     alt="Notification Banner"
@@ -2348,16 +2317,16 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
               {/* Title */}
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Subject</p>
-                <h2 className="mt-1 text-base font-bold text-slate-900 leading-snug">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Subject</p>
+                <h2 className="mt-1 text-base font-bold text-[var(--text-primary)] leading-snug">
                   {selectedNotificationDetail.title || selectedNotificationDetail.subject || 'ASTU Broadcast Notice'}
                 </h2>
               </div>
 
               {/* Message Content */}
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Message Content</p>
-                <div className="mt-1.5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-xs leading-6 text-slate-800 whitespace-pre-wrap">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Message Content</p>
+                <div className="mt-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-xs leading-6 text-[var(--text-primary)] whitespace-pre-wrap">
                   {selectedNotificationDetail.content || selectedNotificationDetail.text || 'No additional message details.'}
                 </div>
               </div>
@@ -2426,12 +2395,12 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs">
-              <span className="text-slate-400 font-medium">Adama Science & Technology University</span>
+            <div className="flex items-center justify-between border-t border-[var(--border-color)] bg-[var(--bg-page)] px-5 py-3 text-xs">
+              <span className="text-[var(--text-muted)] font-medium">Adama Science & Technology University</span>
               <button
                 type="button"
                 onClick={() => setSelectedNotificationDetail(null)}
-                className="rounded-lg bg-slate-200 px-4 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-300 transition-colors"
+                className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-1.5 text-xs font-bold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 Close
               </button>
@@ -2443,28 +2412,28 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       {/* All Notifications Center Modal */}
       {showAllNotificationsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-2xl overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-2xl transition-all">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4">
+          <div className="w-full max-w-2xl overflow-hidden rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl transition-all">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-page)] px-5 py-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <Bell className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Notifications Center</h3>
-                  <p className="text-[11px] font-medium text-slate-500">All announcements, survey alerts, and updates</p>
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">Notifications Center</h3>
+                  <p className="text-[11px] font-medium text-[var(--text-muted)]">All announcements, survey alerts, and updates</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAllNotificationsModal(false)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
-              <span className="text-xs text-slate-600 font-medium">
+            <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between bg-[var(--bg-page)]">
+              <span className="text-xs text-[var(--text-secondary)] font-medium">
                 Total: <strong>{notifications.length}</strong> notifications ({unreadNotificationsCount} unread)
               </span>
               <button
@@ -2494,19 +2463,19 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                     className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all ${
                       n.unread
                         ? 'border-blue-200 bg-blue-50/40 hover:bg-blue-50/80'
-                        : 'border-slate-100 bg-white hover:bg-slate-50'
+                        : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)]'
                     }`}
                   >
-                    <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-slate-300'}`} />
+                    <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-[var(--bg-page)]'}`} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-xs font-bold text-slate-900 truncate">{n.title || 'Notification'}</h4>
-                        <span className="text-[10px] font-medium text-slate-400 shrink-0">{n.time}</span>
+                        <h4 className="text-xs font-bold text-[var(--text-primary)] truncate">{n.title || 'Notification'}</h4>
+                        <span className="text-[10px] font-medium text-[var(--text-muted)] shrink-0">{n.time}</span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-600 line-clamp-2">{n.text}</p>
+                      <p className="mt-1 text-xs text-[var(--text-secondary)] line-clamp-2">{n.text}</p>
                       <div className="mt-2 flex items-center gap-2">
                         {n.category && (
-                          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-600">
+                          <span className="rounded-md bg-[var(--bg-page)] px-2 py-0.5 text-[9px] font-semibold text-[var(--text-secondary)]">
                             {n.category}
                           </span>
                         )}
@@ -2520,15 +2489,15 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                   </div>
                 ))
               ) : (
-                <p className="py-12 text-center text-xs text-slate-500">No notifications found.</p>
+                <p className="py-12 text-center text-xs text-[var(--text-muted)]">No notifications found.</p>
               )}
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 bg-slate-50/50 px-5 py-3">
+            <div className="flex justify-end border-t border-[var(--border-color)] bg-[var(--bg-page)] px-5 py-3">
               <button
                 type="button"
                 onClick={() => setShowAllNotificationsModal(false)}
-                className="rounded-lg bg-slate-200 px-4 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-300"
+                className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-1.5 text-xs font-bold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5"
               >
                 Close
               </button>

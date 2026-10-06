@@ -361,12 +361,12 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
               activeStep === step.id ? 'bg-astu-navy text-white shadow-md' :
               ['upload', 'validate', 'import'].indexOf(activeStep) > i || processingStatus === 'done'
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'bg-gray-50 text-gray-400 border border-gray-200'
+                : 'bg-[var(--bg-page)] text-[var(--text-muted)] border border-[var(--border-color)]'
             }`}>
               <span className="material-symbols-outlined text-sm">{step.icon}</span>
               {step.label}
             </div>
-            {i < 2 && <div className={`h-px flex-1 ${['upload', 'validate', 'import'].indexOf(activeStep) > i || processingStatus === 'done' ? 'bg-emerald-300' : 'bg-gray-200'}`} />}
+            {i < 2 && <div className={`h-px flex-1 ${['upload', 'validate', 'import'].indexOf(activeStep) > i || processingStatus === 'done' ? 'bg-emerald-300' : 'bg-[var(--bg-page)]'}`} />}
           </React.Fragment>
         ))}
       </div>
@@ -375,13 +375,13 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
       {activeStep === 'upload' && (
         <div className="space-y-6">
           {/* Method Selection Tabs */}
-          <div className="flex items-center gap-2 p-1.5 bg-gray-100 rounded-2xl max-w-md">
+          <div className="flex items-center gap-2 p-1.5 bg-[var(--bg-page)] rounded-2xl max-w-md">
             <button
               onClick={() => setImportMethod('file')}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all ${
                 importMethod === 'file'
                   ? 'bg-white text-astu-navy shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <span className="material-symbols-outlined text-sm">upload_file</span>
@@ -392,7 +392,7 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-extrabold transition-all ${
                 importMethod === 'api'
                   ? 'bg-white text-astu-navy shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <span className="material-symbols-outlined text-sm text-emerald-600">sync_alt</span>
@@ -404,34 +404,34 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
           </div>
 
           {importMethod === 'file' ? (
-            <section className="bg-white border border-gray-200/60 rounded-3xl p-8 shadow-sm">
+            <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-8 shadow-sm">
               <div className="text-center max-w-lg mx-auto">
                 <div className="w-16 h-16 bg-astu-navy/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <span className="material-symbols-outlined text-3xl text-astu-navy">cloud_upload</span>
                 </div>
                 <h3 className="text-lg font-bold mb-2">Upload Graduate Roster</h3>
-                <p className="text-sm text-gray-500 mb-6">Select an Excel (.xlsx) or CSV file exported from the university SIS system.</p>
-                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 relative group hover:border-astu-navy/50 transition-colors cursor-pointer bg-gray-50/50">
+                <p className="text-sm text-[var(--text-muted)] mb-6">Select an Excel (.xlsx) or CSV file exported from the university SIS system.</p>
+                <div className="border-2 border-dashed border-[var(--border-color)] rounded-2xl p-8 relative group hover:border-astu-navy/50 transition-colors cursor-pointer bg-[var(--bg-page)]">
                   <input type="file" accept=".csv,.xlsx" onChange={handleFileChange}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                   <div className="space-y-2">
                     <span className="material-symbols-outlined text-4xl text-gray-300 group-hover:text-astu-navy/50 transition-colors">upload</span>
-                    <p className="text-sm font-bold text-gray-900">Drop your file here or click to browse</p>
-                    <p className="text-xs text-gray-400">Supports: .csv, .xlsx (max 10MB)</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">Drop your file here or click to browse</p>
+                    <p className="text-xs text-[var(--text-muted)]">Supports: .csv, .xlsx (max 10MB)</p>
                   </div>
                 </div>
               </div>
             </section>
           ) : (
-            <section className="bg-white border border-gray-200/60 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+            <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-color)] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
                     <span className="material-symbols-outlined text-2xl">api</span>
                   </div>
                   <div>
-                    <h3 className="text-base font-extrabold text-gray-900">ASTU University SIS API Server Integration</h3>
-                    <p className="text-xs text-gray-500">Fetch & synchronize graduate rosters directly from your university SIS database via API</p>
+                    <h3 className="text-base font-extrabold text-[var(--text-primary)]">ASTU University SIS API Server Integration</h3>
+                    <p className="text-xs text-[var(--text-muted)]">Fetch & synchronize graduate rosters directly from your university SIS database via API</p>
                   </div>
                 </div>
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold self-start sm:self-auto ${
@@ -444,17 +444,17 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                 </div>
               </div>
 
-              <div className="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-5 md:p-6 space-y-4">
+              <div className="bg-[var(--bg-page)] border border-[var(--border-color)] rounded-2xl p-5 md:p-6 space-y-4">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                   <div className="flex-1 max-w-xl">
-                    <label className="block text-xs font-extrabold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <label className="block text-xs font-extrabold text-[var(--text-secondary)] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-sm text-astu-navy">school</span>
                       Select Graduation Batch Year
                     </label>
                     <select
                       value={apiBatchYear}
                       onChange={(e) => setApiBatchYear(e.target.value)}
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-astu-navy shadow-sm"
+                      className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-primary)] focus:outline-none focus:border-astu-navy shadow-sm"
                     >
                       <option value="2026">Class of 2026 (Upcoming Roster)</option>
                       <option value="2025">Class of 2025 (Latest Graduated)</option>
@@ -491,7 +491,7 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
 
       {/* Validation Step */}
       {(activeStep === 'validate' || activeStep === 'import' || processingStatus !== 'idle') && (
-        <section className="bg-white border border-gray-200/60 rounded-3xl p-6 shadow-sm space-y-6">
+        <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 shadow-sm space-y-6">
           <div className="flex justify-between items-center border-b pb-3">
             <h4 className="font-bold text-md flex items-center gap-2">
               <span className="material-symbols-outlined text-astu-green">verified_user</span>
@@ -499,23 +499,23 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
             </h4>
             <span className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold uppercase rounded">Engine v1.4</span>
-              {csvFile && <span className="text-[10px] text-gray-400">{csvFile.name}</span>}
+              {csvFile && <span className="text-[10px] text-[var(--text-muted)]">{csvFile.name}</span>}
             </span>
           </div>
 
           {isValidating ? (
             <div className="py-8 text-center">
               <div className="w-12 h-12 border-4 border-astu-navy/20 border-t-astu-navy rounded-full animate-spin mx-auto" />
-              <p className="mt-4 text-sm font-bold text-gray-600">Running SIS validation engine...</p>
-              <p className="text-xs text-gray-400 mt-1">Checking for duplicates, format errors, and data integrity</p>
+              <p className="mt-4 text-sm font-bold text-[var(--text-secondary)]">Running SIS validation engine...</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Checking for duplicates, format errors, and data integrity</p>
             </div>
           ) : validationReport && (
             <>
               <div className="grid grid-cols-3 gap-4 md:gap-6">
-                <div className="p-5 bg-gray-50 rounded-2xl text-center border border-gray-100">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Total Attempted</p>
-                  <p className="text-3xl font-extrabold text-gray-800 mt-1">{validationReport.total}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">records scanned</p>
+                <div className="p-5 bg-[var(--bg-page)] rounded-2xl text-center border border-[var(--border-color)]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Attempted</p>
+                  <p className="text-3xl font-extrabold text-[var(--text-primary)] mt-1">{validationReport.total}</p>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-1">records scanned</p>
                 </div>
                 <div className="p-5 bg-emerald-50 rounded-2xl text-center border border-emerald-100">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Valid Records</p>
@@ -531,13 +531,13 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
 
               {/* Automatic Batch Categorization Breakdown Banner */}
               {validationReport.records.length > 0 && (
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-2xl space-y-3">
+                <div className="p-4 bg-[var(--bg-page)] dark:bg-slate-800/40 border border-[var(--border-color)] dark:border-slate-700/60 rounded-2xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-200 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-sm text-astu-navy">auto_awesome</span>
                       Automatic Batch Categorization Breakdown
                     </span>
-                    <span className="text-[10px] text-slate-500 font-semibold">Categorized by Graduation Year</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-semibold">Categorized by Graduation Year</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -545,7 +545,7 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                       className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                         selectedBatchFilter === 'ALL'
                           ? 'bg-astu-navy text-white shadow-sm'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                          : 'bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-secondary)] border border-[var(--border-color)] hover:bg-[var(--bg-page)]'
                       }`}
                     >
                       All Batches ({validationReport.records.length})
@@ -557,11 +557,11 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                         className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                           selectedBatchFilter === batchYear
                             ? 'bg-astu-navy text-white shadow-sm'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 border border-slate-200 hover:bg-slate-100'
+                            : 'bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-secondary)] border border-[var(--border-color)] hover:bg-[var(--bg-page)]'
                         }`}
                       >
                         <span>🎓 Batch {batchYear}</span>
-                        <span className="px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full text-[10px]">{count}</span>
+                        <span className="px-1.5 py-0.2 bg-[var(--bg-page)] dark:bg-slate-700 text-[var(--text-primary)] dark:text-slate-200 rounded-full text-[10px]">{count}</span>
                       </button>
                     ))}
                   </div>
@@ -575,16 +575,16 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                     Validation Issues Detected
                   </p>
                   {validationReport.errors.map((err, i) => (
-                    <p key={i} className="text-xs text-gray-700 pl-6 border-l-2 border-red-200 ml-1 py-1">{err}</p>
+                    <p key={i} className="text-xs text-[var(--text-secondary)] pl-6 border-l-2 border-red-200 ml-1 py-1">{err}</p>
                   ))}
                 </div>
               )}
 
               {/* Valid Records Preview */}
-              <div className="overflow-x-auto rounded-2xl border border-gray-100">
+              <div className="overflow-x-auto rounded-2xl border border-[var(--border-color)]">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b">
+                    <tr className="bg-[var(--bg-page)] text-[var(--text-muted)] font-bold uppercase tracking-wider border-b">
                       <th className="p-3">Student ID</th>
                       <th className="p-3">Full Name</th>
                       <th className="p-3">Department</th>
@@ -593,15 +593,15 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                       <th className="p-3">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {validationReport.records
                       .filter(r => selectedBatchFilter === 'ALL' || String(r.graduationYear || 'Unspecified').trim() === selectedBatchFilter)
                       .map((r, i) => (
-                        <tr key={i} className={r.isDuplicate ? 'bg-red-50/50' : 'hover:bg-gray-50/50'}>
+                        <tr key={i} className={r.isDuplicate ? 'bg-red-50/50' : 'hover:bg-[var(--bg-page)]'}>
                           <td className="p-3 font-mono font-bold">{r.studentId}</td>
                           <td className="p-3 font-medium">{r.fullName}</td>
-                          <td className="p-3 text-gray-600">{r.department}</td>
-                          <td className="p-3 text-gray-600 font-semibold">{r.graduationYear || '2024'}</td>
+                          <td className="p-3 text-[var(--text-secondary)]">{r.department}</td>
+                          <td className="p-3 text-[var(--text-secondary)] font-semibold">{r.graduationYear || '2024'}</td>
                           <td className="p-3 font-semibold">{r.cgpa}</td>
                           <td className="p-3">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
@@ -618,7 +618,7 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
 
               {processingStatus === 'idle' ? (
                 <div className="pt-4 border-t flex justify-end gap-3">
-                  <button onClick={handleReset} className="px-5 py-2.5 border border-gray-200 text-gray-600 text-xs font-bold rounded-xl hover:bg-gray-50 transition-all">
+                  <button onClick={handleReset} className="px-5 py-2.5 border border-[var(--border-color)] text-[var(--text-secondary)] text-xs font-bold rounded-xl hover:bg-[var(--bg-page)] transition-all">
                     Cancel
                   </button>
                   <button onClick={handleProcessBatch}
@@ -628,7 +628,7 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                 </div>
               ) : (
                 <div className="pt-4 border-t space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-secondary)]">
                     {processingStatus === 'processing' ? (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
@@ -641,7 +641,7 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                       </>
                     )}
                   </div>
-                  <div className="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-[var(--bg-page)] h-2.5 rounded-full overflow-hidden">
                     <div className="bg-astu-green h-full rounded-full transition-all duration-1000"
                       style={{ width: processingStatus === 'processing' ? '60%' : '100%' }} />
                   </div>
@@ -661,20 +661,20 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
       )}
 
       {/* Import History */}
-      <section className="bg-white border border-gray-200/60 rounded-3xl p-6 shadow-sm">
+      <section className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h4 className="font-bold text-md flex items-center gap-2">
             <span className="material-symbols-outlined text-astu-navy">history</span>
             Import History
           </h4>
-          <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded-lg font-medium">
+          <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-page)] px-2 py-1 rounded-lg font-medium">
             {importHistory.length} imports
           </span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="text-gray-500 font-bold uppercase tracking-wider border-b border-gray-100">
+              <tr className="text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)]">
                 <th className="pb-3 pr-2">Date</th>
                 <th className="pb-3 pr-2">File Name</th>
                 <th className="pb-3 pr-2">Total</th>
@@ -683,16 +683,16 @@ UG/12346/14,Jane Smith,jane.smith@gmail.com,+251911556677,Ethiopian,2000-08-22,E
                 <th className="pb-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {importHistory.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-gray-400 italic">No previous import logs found in database.</td>
+                  <td colSpan={6} className="py-6 text-center text-[var(--text-muted)] italic">No previous import logs found in database.</td>
                 </tr>
               ) : (
                 importHistory.map(entry => (
-                  <tr key={entry.id} className="hover:bg-gray-50/50">
-                    <td className="py-3 pr-2 text-gray-500">{entry.timestamp}</td>
-                    <td className="py-3 pr-2 font-medium text-gray-800">{entry.fileName}</td>
+                  <tr key={entry.id} className="hover:bg-[var(--bg-page)]">
+                    <td className="py-3 pr-2 text-[var(--text-muted)]">{entry.timestamp}</td>
+                    <td className="py-3 pr-2 font-medium text-[var(--text-primary)]">{entry.fileName}</td>
                     <td className="py-3 pr-2 font-semibold">{entry.totalRecords}</td>
                     <td className="py-3 pr-2 text-emerald-600 font-bold">{entry.importedRecords}</td>
                     <td className="py-3 pr-2 text-amber-600 font-bold">{entry.duplicates}</td>

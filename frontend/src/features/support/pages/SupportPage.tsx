@@ -153,7 +153,7 @@ export default function SupportPage() {
                 <Field
                   name="category"
                   as="select"
-                  className={`w-full px-4 py-3 text-sm rounded-lg border bg-white text-on-surface focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all ${
+                  className={`w-full px-4 py-3 text-sm rounded-lg border bg-[var(--bg-card)] text-on-surface focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all ${
                     errors.category && touched.category
                       ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20'
                       : 'border-outline-variant focus:border-astu-navy'
@@ -279,7 +279,7 @@ export default function SupportPage() {
             </div>
 
             {/* Consent Checkbox */}
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-slate-50 border border-outline-variant">
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-[var(--bg-page)] border border-outline-variant">
               <Field
                 name="consent"
                 type="checkbox"

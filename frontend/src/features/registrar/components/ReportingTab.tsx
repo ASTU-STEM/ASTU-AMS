@@ -340,11 +340,11 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
               { label: 'Employment Rate', value: employmentRate, change: `Real-time`, trend: '↑' },
               { label: 'Data Exports Generated', value: exportLogs.length.toLocaleString(), change: 'Live Counter', trend: '↑' },
             ].map((kpi, i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-all">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{kpi.label}</p>
-                <p className="text-3xl font-extrabold text-gray-900 mt-1">{kpi.value}</p>
+              <div key={i} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 hover:shadow-lg transition-all">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{kpi.label}</p>
+                <p className="text-3xl font-extrabold text-[var(--text-primary)] mt-1">{kpi.value}</p>
                 <div className="flex items-center gap-1 text-emerald-600 text-xs font-semibold mt-2">
-                  {kpi.trend} {kpi.change} <span className="text-gray-400 font-normal">this year</span>
+                  {kpi.trend} {kpi.change} <span className="text-[var(--text-muted)] font-normal">this year</span>
                 </div>
               </div>
             ))}
@@ -352,22 +352,22 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
 
           {/* Department Performance & Employment */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-7 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div className="lg:col-span-7 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
               <div className="flex justify-between items-end mb-5">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Department Performance</h3>
-                  <p className="text-xs text-gray-500">Live Average CGPA by Department Roster</p>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">Department Performance</h3>
+                  <p className="text-xs text-[var(--text-muted)]">Live Average CGPA by Department Roster</p>
                 </div>
-                <span className="text-[10px] px-3 py-1 bg-gray-100 rounded-lg font-bold text-gray-500">{departmentPerformance.length} Departments</span>
+                <span className="text-[10px] px-3 py-1 bg-[var(--bg-page)] rounded-lg font-bold text-[var(--text-muted)]">{departmentPerformance.length} Departments</span>
               </div>
               <div className="space-y-5">
                 {departmentPerformance.map((item, idx) => (
                   <div key={idx}>
                     <div className="flex justify-between mb-1.5 text-xs">
-                      <span className="font-semibold text-gray-800">{item.dept} <span className="text-gray-400 font-normal">({item.count} grads)</span></span>
+                      <span className="font-semibold text-[var(--text-primary)]">{item.dept} <span className="text-[var(--text-muted)] font-normal">({item.count} grads)</span></span>
                       <span className="font-bold text-astu-navy">Avg CGPA: {item.gpa}</span>
                     </div>
-                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-3 bg-[var(--bg-page)] rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-700"
                         style={{ width: item.width, background: `linear-gradient(90deg, ${item.color}, #00C853)` }} />
                     </div>
@@ -376,15 +376,15 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div className="lg:col-span-5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
               <h3 className="text-lg font-bold mb-1">Graduate Destination & Verification</h3>
-              <p className="text-xs text-gray-500 mb-5">Live Database Status Summary</p>
+              <p className="text-xs text-[var(--text-muted)] mb-5">Live Database Status Summary</p>
               <div className="space-y-3">
                 {destinationStats.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 p-4 rounded-xl transition-all">
+                  <div key={i} className="flex items-center justify-between bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 p-4 rounded-xl transition-all">
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">{item.status}</p>
-                      <p className="text-[10px] text-gray-500">{item.count} graduates</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)]">{item.status}</p>
+                      <p className="text-[10px] text-[var(--text-muted)]">{item.count} graduates</p>
                     </div>
                     <div className="text-2xl font-extrabold px-5 py-2 rounded-xl" style={{ color: item.color, backgroundColor: `${item.color}15` }}>
                       {item.percent}
@@ -396,9 +396,9 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
           </div>
 
           {/* Recent Reports & Quick Access */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-gray-900">Recent Reports & Quick Access</h3>
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Recent Reports & Quick Access</h3>
               <button onClick={() => setActiveReportTab('exports')} className="text-xs font-bold text-astu-navy hover:text-astu-navy/70 transition-all flex items-center gap-1">
                 View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
@@ -406,13 +406,13 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {exportLogs.slice(0, 3).map((report, i) => (
                 <div key={i} onClick={() => handleExport(report.format as any, report.reportName)}
-                  className="border border-gray-200 hover:border-emerald-400 p-5 rounded-xl transition-all group cursor-pointer hover:shadow-md">
+                  className="border border-[var(--border-color)] hover:border-emerald-400 p-5 rounded-xl transition-all group cursor-pointer hover:shadow-md">
                   <div className="flex justify-between mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 px-3 py-1 rounded-lg">{report.format}</span>
-                    <span className="text-xs text-gray-400">{report.fileSize || '1.2 MB'}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[var(--bg-page)] px-3 py-1 rounded-lg">{report.format}</span>
+                    <span className="text-xs text-[var(--text-muted)]">{report.fileSize || '1.2 MB'}</span>
                   </div>
                   <p className="text-sm font-semibold leading-tight group-hover:text-astu-navy transition-colors">{report.reportName}</p>
-                  <p className="text-xs text-gray-400 mt-3">{new Date(report.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-3">{new Date(report.createdAt).toLocaleDateString()}</p>
                 </div>
               ))}
             </div>
@@ -423,9 +423,9 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
       {/* Export Center Tab */}
       {activeReportTab === 'exports' && (
         <div className="space-y-4">
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">Export Center</h3>
-            <p className="text-xs text-gray-500 mb-6">Generate and download reports in your preferred format for analysis, accreditation, and archival.</p>
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">Export Center</h3>
+            <p className="text-xs text-[var(--text-muted)] mb-6">Generate and download reports in your preferred format for analysis, accreditation, and archival.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { format: 'PDF' as const, icon: 'picture_as_pdf', desc: 'Executive Summary', color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', scope: 'Graduate Executive Summary' },
@@ -437,36 +437,36 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                   className={`${item.bg} ${item.border} border rounded-2xl p-5 text-center hover:shadow-md transition-all group hover:scale-[1.02]`}>
                   <span className={`material-symbols-outlined text-3xl ${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</span>
                   <p className={`text-lg font-extrabold ${item.color} mt-2`}>{item.format}</p>
-                  <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{item.desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Export History (Database Backed) */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+              <h4 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-astu-navy">history</span>
                 Recent Exports ({exportLogs.length})
               </h4>
-              <button onClick={fetchReportingData} className="text-xs text-gray-500 hover:text-astu-navy flex items-center gap-1 font-semibold">
+              <button onClick={fetchReportingData} className="text-xs text-[var(--text-muted)] hover:text-astu-navy flex items-center gap-1 font-semibold">
                 <span className="material-symbols-outlined text-sm">refresh</span>
                 Refresh
               </button>
             </div>
 
             {loading ? (
-              <div className="py-8 text-center text-xs text-gray-500">Loading export audit logs...</div>
+              <div className="py-8 text-center text-xs text-[var(--text-muted)]">Loading export audit logs...</div>
             ) : exportLogs.length === 0 ? (
-              <div className="py-8 text-center text-xs text-gray-500 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="py-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-page)] rounded-xl border border-[var(--border-color)]">
                 No data exports generated yet. Click any format above to generate your first export!
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="text-gray-500 font-bold uppercase tracking-wider border-b border-gray-100">
+                    <tr className="text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)]">
                       <th className="pb-3 pr-2">Report Name</th>
                       <th className="pb-3 pr-2">Format</th>
                       <th className="pb-3 pr-2">Exported By</th>
@@ -474,10 +474,10 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                       <th className="pb-3">Size</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {exportLogs.map((exp) => (
-                      <tr key={exp.id} className="hover:bg-gray-50/50">
-                        <td className="py-3 pr-2 font-medium text-gray-800">{exp.reportName}</td>
+                      <tr key={exp.id} className="hover:bg-[var(--bg-page)]">
+                        <td className="py-3 pr-2 font-medium text-[var(--text-primary)]">{exp.reportName}</td>
                         <td className="py-3 pr-2">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             exp.format === 'PDF' ? 'bg-red-50 text-red-700' :
@@ -487,9 +487,9 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                             {exp.format}
                           </span>
                         </td>
-                        <td className="py-3 pr-2 text-gray-500">{exp.exportedBy || 'Registrar Admin'}</td>
-                        <td className="py-3 pr-2 text-gray-500">{new Date(exp.createdAt).toLocaleDateString()}</td>
-                        <td className="py-3 text-gray-400">{exp.fileSize}</td>
+                        <td className="py-3 pr-2 text-[var(--text-muted)]">{exp.exportedBy || 'Registrar Admin'}</td>
+                        <td className="py-3 pr-2 text-[var(--text-muted)]">{new Date(exp.createdAt).toLocaleDateString()}</td>
+                        <td className="py-3 text-[var(--text-muted)]">{exp.fileSize}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -502,17 +502,17 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
 
       {/* Scheduled Reports Tab */}
       {activeReportTab === 'scheduled' && (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-astu-navy">schedule</span>
                 Scheduled Reports ({scheduledReports.length})
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">Automate recurring report generation for university leadership & accreditation stakeholders.</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Automate recurring report generation for university leadership & accreditation stakeholders.</p>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={fetchReportingData} className="p-2.5 text-gray-500 hover:text-astu-navy bg-gray-50 hover:bg-gray-100 rounded-xl transition-all" title="Refresh">
+              <button onClick={fetchReportingData} className="p-2.5 text-[var(--text-muted)] hover:text-astu-navy bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all" title="Refresh">
                 <span className="material-symbols-outlined text-sm">refresh</span>
               </button>
               <button onClick={() => setShowScheduleModal(true)}
@@ -524,12 +524,12 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-xs text-gray-500">Loading scheduled reports from database...</div>
+            <div className="py-12 text-center text-xs text-[var(--text-muted)]">Loading scheduled reports from database...</div>
           ) : scheduledReports.length === 0 ? (
-            <div className="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200 p-8">
-              <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">event_repeat</span>
-              <p className="text-sm font-bold text-gray-700">No Scheduled Reports Configured</p>
-              <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto">Create recurring schedule rules to automatically compile and distribute institutional reports.</p>
+            <div className="py-12 text-center bg-[var(--bg-page)] rounded-2xl border border-dashed border-[var(--border-color)] p-8">
+              <span className="material-symbols-outlined text-4xl text-[var(--text-muted)] mb-2">event_repeat</span>
+              <p className="text-sm font-bold text-[var(--text-secondary)]">No Scheduled Reports Configured</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 max-w-md mx-auto">Create recurring schedule rules to automatically compile and distribute institutional reports.</p>
               <button onClick={() => setShowScheduleModal(true)}
                 className="mt-4 px-4 py-2 bg-astu-navy text-white text-xs font-bold rounded-xl hover:bg-astu-navy/90 transition-all">
                 + Create First Schedule
@@ -539,7 +539,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="text-gray-500 font-bold uppercase tracking-wider border-b border-gray-100">
+                  <tr className="text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)]">
                     <th className="pb-3 pr-2">Report Title</th>
                     <th className="pb-3 pr-2">Format</th>
                     <th className="pb-3 pr-2">Schedule</th>
@@ -548,13 +548,13 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                     <th className="pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[var(--border-color)]">
                   {scheduledReports.map(report => (
-                    <tr key={report.id} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="py-3.5 pr-2 font-semibold text-gray-800">
+                    <tr key={report.id} className="hover:bg-[var(--bg-page)] transition-colors">
+                      <td className="py-3.5 pr-2 font-semibold text-[var(--text-primary)]">
                         <div>
                           {report.title}
-                          <p className="text-[10px] text-gray-400 font-normal">Created by {report.createdBy || 'Registrar Admin'}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] font-normal">Created by {report.createdBy || 'Registrar Admin'}</p>
                         </div>
                       </td>
                       <td className="py-3.5 pr-2">
@@ -567,15 +567,15 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                           {report.format}
                         </span>
                       </td>
-                      <td className="py-3.5 pr-2 text-gray-600 font-medium">
+                      <td className="py-3.5 pr-2 text-[var(--text-secondary)] font-medium">
                         <span className="inline-flex items-center gap-1">
-                          <span className="material-symbols-outlined text-xs text-gray-400">repeat</span>
+                          <span className="material-symbols-outlined text-xs text-[var(--text-muted)]">repeat</span>
                           {report.schedule}
                         </span>
                       </td>
-                      <td className="py-3.5 pr-2 text-gray-600">
-                        <span className="inline-flex items-center gap-1 text-[11px] bg-slate-50 px-2 py-1 rounded-md border border-slate-100 font-mono">
-                          <span className="material-symbols-outlined text-xs text-slate-400">schedule</span>
+                      <td className="py-3.5 pr-2 text-[var(--text-secondary)]">
+                        <span className="inline-flex items-center gap-1 text-[11px] bg-[var(--bg-page)] px-2 py-1 rounded-md border border-[var(--border-color)] font-mono">
+                          <span className="material-symbols-outlined text-xs text-[var(--text-muted)]">schedule</span>
                           {report.nextRun}
                         </span>
                       </td>
@@ -603,7 +603,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                           </button>
                           <button
                             onClick={() => handleDeleteSchedule(report.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-1.5 text-[var(--text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             title="Delete Schedule"
                           >
                             <span className="material-symbols-outlined text-sm">delete</span>
@@ -622,9 +622,9 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
       {/* Export Center Tab */}
       {activeReportTab === 'exports' && (
         <div className="space-y-4">
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">Export Center</h3>
-            <p className="text-xs text-gray-500 mb-6">Generate and download reports in your preferred format for analysis, accreditation, and archival.</p>
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">Export Center</h3>
+            <p className="text-xs text-[var(--text-muted)] mb-6">Generate and download reports in your preferred format for analysis, accreditation, and archival.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { format: 'PDF' as const, icon: 'picture_as_pdf', desc: 'Executive Summary', color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', scope: 'Graduate Executive Summary' },
@@ -636,36 +636,36 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                   className={`${item.bg} ${item.border} border rounded-2xl p-5 text-center hover:shadow-md transition-all group hover:scale-[1.02]`}>
                   <span className={`material-symbols-outlined text-3xl ${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</span>
                   <p className={`text-lg font-extrabold ${item.color} mt-2`}>{item.format}</p>
-                  <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{item.desc}</p>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Export History (Database Backed) */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+              <h4 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-astu-navy">history</span>
                 Recent Exports ({exportLogs.length})
               </h4>
-              <button onClick={fetchReportingData} className="text-xs text-gray-500 hover:text-astu-navy flex items-center gap-1 font-semibold">
+              <button onClick={fetchReportingData} className="text-xs text-[var(--text-muted)] hover:text-astu-navy flex items-center gap-1 font-semibold">
                 <span className="material-symbols-outlined text-sm">refresh</span>
                 Refresh
               </button>
             </div>
 
             {loading ? (
-              <div className="py-8 text-center text-xs text-gray-500">Loading export audit logs...</div>
+              <div className="py-8 text-center text-xs text-[var(--text-muted)]">Loading export audit logs...</div>
             ) : exportLogs.length === 0 ? (
-              <div className="py-8 text-center text-xs text-gray-500 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="py-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-page)] rounded-xl border border-[var(--border-color)]">
                 No data exports generated yet. Click any format above to generate your first export!
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="text-gray-500 font-bold uppercase tracking-wider border-b border-gray-100">
+                    <tr className="text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)]">
                       <th className="pb-3 pr-2">Report Name</th>
                       <th className="pb-3 pr-2">Format</th>
                       <th className="pb-3 pr-2">Exported By</th>
@@ -673,10 +673,10 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                       <th className="pb-3">Size</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {exportLogs.map((exp) => (
-                      <tr key={exp.id} className="hover:bg-gray-50/50">
-                        <td className="py-3 pr-2 font-medium text-gray-800">{exp.reportName}</td>
+                      <tr key={exp.id} className="hover:bg-[var(--bg-page)]">
+                        <td className="py-3 pr-2 font-medium text-[var(--text-primary)]">{exp.reportName}</td>
                         <td className="py-3 pr-2">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             exp.format === 'PDF' ? 'bg-red-50 text-red-700' :
@@ -686,9 +686,9 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                             {exp.format}
                           </span>
                         </td>
-                        <td className="py-3 pr-2 text-gray-500">{exp.exportedBy || 'Registrar Admin'}</td>
-                        <td className="py-3 pr-2 text-gray-500">{new Date(exp.createdAt).toLocaleDateString()}</td>
-                        <td className="py-3 text-gray-400">{exp.fileSize}</td>
+                        <td className="py-3 pr-2 text-[var(--text-muted)]">{exp.exportedBy || 'Registrar Admin'}</td>
+                        <td className="py-3 pr-2 text-[var(--text-muted)]">{new Date(exp.createdAt).toLocaleDateString()}</td>
+                        <td className="py-3 text-[var(--text-muted)]">{exp.fileSize}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -701,17 +701,17 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
 
       {/* Scheduled Reports Tab */}
       {activeReportTab === 'scheduled' && (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-astu-navy">schedule</span>
                 Scheduled Reports ({scheduledReports.length})
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">Automate recurring report generation for university leadership & accreditation stakeholders.</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Automate recurring report generation for university leadership & accreditation stakeholders.</p>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={fetchReportingData} className="p-2.5 text-gray-500 hover:text-astu-navy bg-gray-50 hover:bg-gray-100 rounded-xl transition-all" title="Refresh">
+              <button onClick={fetchReportingData} className="p-2.5 text-[var(--text-muted)] hover:text-astu-navy bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all" title="Refresh">
                 <span className="material-symbols-outlined text-sm">refresh</span>
               </button>
               <button onClick={() => setShowScheduleModal(true)}
@@ -723,12 +723,12 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-xs text-gray-500">Loading scheduled reports from database...</div>
+            <div className="py-12 text-center text-xs text-[var(--text-muted)]">Loading scheduled reports from database...</div>
           ) : scheduledReports.length === 0 ? (
-            <div className="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200 p-8">
-              <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">event_repeat</span>
-              <p className="text-sm font-bold text-gray-700">No Scheduled Reports Configured</p>
-              <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto">Create recurring schedule rules to automatically compile and distribute institutional reports.</p>
+            <div className="py-12 text-center bg-[var(--bg-page)] rounded-2xl border border-dashed border-[var(--border-color)] p-8">
+              <span className="material-symbols-outlined text-4xl text-[var(--text-muted)] mb-2">event_repeat</span>
+              <p className="text-sm font-bold text-[var(--text-secondary)]">No Scheduled Reports Configured</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 max-w-md mx-auto">Create recurring schedule rules to automatically compile and distribute institutional reports.</p>
               <button onClick={() => setShowScheduleModal(true)}
                 className="mt-4 px-4 py-2 bg-astu-navy text-white text-xs font-bold rounded-xl hover:bg-astu-navy/90 transition-all">
                 + Create First Schedule
@@ -738,7 +738,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="text-gray-500 font-bold uppercase tracking-wider border-b border-gray-100">
+                  <tr className="text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)]">
                     <th className="pb-3 pr-2">Report Title</th>
                     <th className="pb-3 pr-2">Format</th>
                     <th className="pb-3 pr-2">Schedule</th>
@@ -747,13 +747,13 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                     <th className="pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[var(--border-color)]">
                   {scheduledReports.map(report => (
-                    <tr key={report.id} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="py-3.5 pr-2 font-semibold text-gray-800">
+                    <tr key={report.id} className="hover:bg-[var(--bg-page)] transition-colors">
+                      <td className="py-3.5 pr-2 font-semibold text-[var(--text-primary)]">
                         <div>
                           {report.title}
-                          <p className="text-[10px] text-gray-400 font-normal">Created by {report.createdBy || 'Registrar Admin'}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] font-normal">Created by {report.createdBy || 'Registrar Admin'}</p>
                         </div>
                       </td>
                       <td className="py-3.5 pr-2">
@@ -766,15 +766,15 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                           {report.format}
                         </span>
                       </td>
-                      <td className="py-3.5 pr-2 text-gray-600 font-medium">
+                      <td className="py-3.5 pr-2 text-[var(--text-secondary)] font-medium">
                         <span className="inline-flex items-center gap-1">
-                          <span className="material-symbols-outlined text-xs text-gray-400">repeat</span>
+                          <span className="material-symbols-outlined text-xs text-[var(--text-muted)]">repeat</span>
                           {report.schedule}
                         </span>
                       </td>
-                      <td className="py-3.5 pr-2 text-gray-600">
-                        <span className="inline-flex items-center gap-1 text-[11px] bg-slate-50 px-2 py-1 rounded-md border border-slate-100 font-mono">
-                          <span className="material-symbols-outlined text-xs text-slate-400">schedule</span>
+                      <td className="py-3.5 pr-2 text-[var(--text-secondary)]">
+                        <span className="inline-flex items-center gap-1 text-[11px] bg-[var(--bg-page)] px-2 py-1 rounded-md border border-[var(--border-color)] font-mono">
+                          <span className="material-symbols-outlined text-xs text-[var(--text-muted)]">schedule</span>
                           {report.nextRun}
                         </span>
                       </td>
@@ -802,7 +802,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                           </button>
                           <button
                             onClick={() => handleDeleteSchedule(report.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            className="p-1.5 text-[var(--text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             title="Delete Schedule"
                           >
                             <span className="material-symbols-outlined text-sm">delete</span>
@@ -837,8 +837,8 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                       Audit Readiness: 96%
                     </span>
                   </div>
-                  <h3 className="text-xl font-extrabold text-slate-900 mt-2">Accreditation-Ready Reports & Audit Suite</h3>
-                  <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                  <h3 className="text-xl font-extrabold text-[var(--text-primary)] mt-2">Accreditation-Ready Reports & Audit Suite</h3>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1 max-w-2xl leading-relaxed">
                     Pre-formatted institutional reports compliant with ABET (Accreditation Board for Engineering and Technology) and HERQA (Higher Education Relevance and Quality Agency) audit standards.
                   </p>
                 </div>
@@ -854,14 +854,14 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                 </button>
                 <button
                   onClick={() => handleExport('PDF', 'HERQA Institutional Self-Study')}
-                  className="px-4 py-2.5 bg-white border border-amber-300 text-amber-900 hover:bg-amber-50 text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-[var(--bg-card)] border border-amber-300 text-amber-900 hover:bg-amber-50 text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-sm">description</span>
                   HERQA Self-Study
                 </button>
                 <button
                   onClick={() => handleExport('Excel', 'Institutional Program Review')}
-                  className="px-4 py-2.5 bg-white border border-amber-300 text-amber-900 hover:bg-amber-50 text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-[var(--bg-card)] border border-amber-300 text-amber-900 hover:bg-amber-50 text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-sm">table_chart</span>
                   Program Review
@@ -878,26 +878,26 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
               { label: 'Verification Audit Trail', value: `${totalGrads} Grads`, status: '100% Verified', icon: 'verified_user', color: 'text-purple-600', bg: 'bg-purple-50' },
               { label: 'Continuous Improvement Docs', value: `${exportLogs.length + 8}`, status: 'Up to Date', icon: 'description', color: 'text-amber-600', bg: 'bg-amber-50' },
             ].map((item, i) => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
+              <div key={i} className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`material-symbols-outlined ${item.color} text-2xl`}>{item.icon}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{item.status}</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--bg-page)] text-[var(--text-secondary)]">{item.status}</span>
                 </div>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{item.label}</p>
-                <p className="text-2xl font-extrabold text-gray-900 mt-1">{item.value}</p>
+                <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{item.label}</p>
+                <p className="text-2xl font-extrabold text-[var(--text-primary)] mt-1">{item.value}</p>
               </div>
             ))}
           </div>
 
           {/* ABET Engineering Criteria Audit Matrix */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h4 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   <span className="material-symbols-outlined text-amber-600">fact_check</span>
                   ABET EAC/CAC Criteria Compliance Matrix
                 </h4>
-                <p className="text-xs text-gray-500 mt-0.5">Automated assessment mapping across ASTU engineering & science programs.</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Automated assessment mapping across ASTU engineering & science programs.</p>
               </div>
               <button
                 onClick={() => handleExport('PDF', 'Complete ABET Criteria Audit Matrix')}
@@ -911,7 +911,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="text-gray-500 font-bold uppercase tracking-wider border-b border-gray-100">
+                  <tr className="text-[var(--text-muted)] font-bold uppercase tracking-wider border-b border-[var(--border-color)]">
                     <th className="pb-3 pr-2">Criterion</th>
                     <th className="pb-3 pr-2">Scope / Standard Description</th>
                     <th className="pb-3 pr-2">Data Source</th>
@@ -919,7 +919,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                     <th className="pb-3 text-right">Evidence Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[var(--border-color)]">
                   {[
                     { code: 'Criterion 1', title: 'Students & Alumni Tracking', desc: 'Admission, academic progress, & graduate career verification', source: 'Live Database', status: '100% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
                     { code: 'Criterion 2', title: 'Program Educational Objectives', desc: 'Consistency with institutional mission & employer demand', source: 'Tracer Survey Engine', status: '95% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
@@ -928,13 +928,13 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                     { code: 'Criterion 5', title: 'Curriculum & Credit Hours', desc: 'Math, basic sciences, engineering topics, & general education', source: 'SIS Academic Records', status: '98% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
                     { code: 'Criterion 8', title: 'Institutional Support', desc: 'Leadership, administrative services, & digital infrastructure', source: 'ASTU Management Hub', status: '100% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
                   ].map((crit, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/60 transition-colors">
+                    <tr key={idx} className="hover:bg-[var(--bg-page)] transition-colors">
                       <td className="py-3.5 pr-2 font-bold text-astu-navy">{crit.code}</td>
                       <td className="py-3.5 pr-2">
-                        <p className="font-semibold text-gray-800">{crit.title}</p>
-                        <p className="text-[10px] text-gray-400">{crit.desc}</p>
+                        <p className="font-semibold text-[var(--text-primary)]">{crit.title}</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">{crit.desc}</p>
                       </td>
-                      <td className="py-3.5 pr-2 text-gray-500">{crit.source}</td>
+                      <td className="py-3.5 pr-2 text-[var(--text-muted)]">{crit.source}</td>
                       <td className="py-3.5 pr-2">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${crit.badge}`}>
                           {crit.status}
@@ -960,34 +960,34 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
       {/* New Schedule Modal */}
       {showScheduleModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <form onSubmit={handleCreateScheduleSubmit} className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-100 dark:border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <form onSubmit={handleCreateScheduleSubmit} className="w-full max-w-md bg-[var(--bg-card)] dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-[var(--border-color)] dark:border-slate-800 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] dark:border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] dark:text-white flex items-center gap-2">
                 <span className="material-symbols-outlined text-astu-navy">add_alarm</span>
                 Create New Scheduled Report
               </h3>
-              <button type="button" onClick={() => setShowScheduleModal(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+              <button type="button" onClick={() => setShowScheduleModal(false)} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] text-lg">✕</button>
             </div>
             
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Report Title</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 block mb-1">Report Title</label>
               <input
                 type="text"
                 value={newScheduleTitle}
                 onChange={e => setNewScheduleTitle(e.target.value)}
                 placeholder="e.g. Quarterly ABET Compliance Audit"
-                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-astu-navy dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                className="w-full px-3 py-2 text-xs border border-[var(--border-color)] rounded-xl focus:outline-none focus:border-astu-navy dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Format</label>
+                <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 block mb-1">Format</label>
                 <select
                   value={newScheduleFormat}
                   onChange={e => setNewScheduleFormat(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-astu-navy bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                  className="w-full px-3 py-2 text-xs border border-[var(--border-color)] rounded-xl focus:outline-none focus:border-astu-navy bg-[var(--bg-card)] dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 >
                   <option value="PDF">PDF</option>
                   <option value="Excel">Excel</option>
@@ -997,11 +997,11 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Schedule Frequency</label>
+                <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 block mb-1">Schedule Frequency</label>
                 <select
                   value={newScheduleFreq}
                   onChange={e => setNewScheduleFreq(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-astu-navy bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                  className="w-full px-3 py-2 text-xs border border-[var(--border-color)] rounded-xl focus:outline-none focus:border-astu-navy bg-[var(--bg-card)] dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 >
                   <option value="Every 1st of month">Every 1st of month</option>
                   <option value="Every Monday">Every Monday</option>
@@ -1012,21 +1012,21 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Next Scheduled Run</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 block mb-1">Next Scheduled Run</label>
               <input
                 type="text"
                 value={newScheduleDate}
                 onChange={e => setNewScheduleDate(e.target.value)}
                 placeholder="e.g. Jun 15, 2026 or Next Month"
-                className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-astu-navy dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                className="w-full px-3 py-2 text-xs border border-[var(--border-color)] rounded-xl focus:outline-none focus:border-astu-navy dark:bg-slate-800 dark:border-slate-700 dark:text-white"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--border-color)] dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowScheduleModal(false)}
-                className="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-xl"
+                className="px-4 py-2 text-xs font-bold text-[var(--text-muted)] hover:bg-[var(--bg-page)] rounded-xl"
               >
                 Cancel
               </button>

@@ -5,18 +5,25 @@ import toast from 'react-hot-toast';
 import {
   CalendarDays, MapPin, Users, TrendingUp, Award, FileText, BarChart3, Target,
   CheckCircle2, BookOpen, Briefcase, GraduationCap, Rocket, Lightbulb,
-  Code2, Cloud, Shield, Smartphone, Star, ExternalLink, Download, Check, Cpu, Wrench
+  Code2, Cloud, Shield, Smartphone, Star, ExternalLink, Download, Check, Cpu, Wrench, X,
+  Sparkles, ChevronRight,
 } from 'lucide-react';
 import { EmptyState } from '../../../components/EmptyState';
-import Modal from '../../../components/ui/Modal';
 import { AlumniSectionShell } from './AlumniSectionShell';
+import { AlumniSectionBlock } from './AlumniSectionBlock';
 import {
   alumniCardClass,
+  alumniGhostBtnClass,
+  alumniGridGapClass,
   alumniLabelClass,
   alumniPanelClass,
+  alumniPrimaryBtnClass,
   alumniSectionTitleClass,
   alumniStatusBadge,
+  alumniTabBtn,
+  alumniTabRailClass,
 } from './alumniUi';
+import { ApplicationStatusBadge, formatEmploymentStatus } from '../utils/statusUi';
 
 interface CareerTabProps {
   events: CareerEvent[];
@@ -28,7 +35,10 @@ interface CareerTabProps {
   onApplyJob?: (jobId: number | string) => void;
   onViewJob?: (job: JobMatch) => void;
   onRequestMentorship?: (mentorId: number | string) => void;
+  onTabChange?: (tab: string) => void;
 }
+
+type CareerWorkspaceSection = 'overview' | 'events' | 'jobs' | 'mentors' | 'pathways' | 'resources';
 
 interface ResourceItem {
   id: string;
@@ -51,7 +61,9 @@ export const CareerTab: React.FC<CareerTabProps> = ({
   onApplyJob,
   onViewJob,
   onRequestMentorship,
+  onTabChange,
 }) => {
+  const [workspaceSection, setWorkspaceSection] = useState<CareerWorkspaceSection>('overview');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [showAllJobs, setShowAllJobs] = useState(false);
   const [showAllMentors, setShowAllMentors] = useState(false);
@@ -266,6 +278,42 @@ export const CareerTab: React.FC<CareerTabProps> = ({
     return score || 65;
   }, [profile, statsData]);
 
+  const appliedJobsCount = useMemo(() => jobs.filter((j) => j.applied).length, [jobs]);
+  const registeredEventsCount = useMemo(() => events.filter((e) => e.registered).length, [events]);
+  const connectedMentorsCount = useMemo(
+    () => mentors.filter((m) => m.status === 'CONNECTED').length,
+    [mentors],
+  );
+
+  const readinessDimensions = useMemo(
+    () => [
+      {
+        label: 'Profile & identity',
+        score: profile?.fullName && profile?.email ? 100 : profile?.fullName ? 70 : 40,
+        hint: 'Name, contact, and verified alumni record',
+      },
+      {
+        label: 'Skills & portfolio',
+        score: userSkills.length >= 5 ? 95 : userSkills.length >= 2 ? 72 : userSkills.length > 0 ? 50 : 25,
+        hint: 'Technical skills employers match against',
+      },
+      {
+        label: 'Employment signal',
+        score: profile?.currentRole || profile?.company ? 90 : profile?.employmentStatus ? 55 : 30,
+        hint: 'Role, company, and tracer employment status',
+      },
+      {
+        label: 'Market activity',
+        score: Math.min(100, appliedJobsCount * 18 + enrolledPathways.length * 12 + registeredEventsCount * 10),
+        hint: 'Applications, pathways, and event RSVPs',
+      },
+    ],
+    [profile, userSkills.length, appliedJobsCount, enrolledPathways.length, registeredEventsCount],
+  );
+
+  const showSection = (section: CareerWorkspaceSection) =>
+    workspaceSection === 'overview' || workspaceSection === section;
+
   // Helper for formatting event dates dynamically
   const formatEventDate = (dateStr: string) => {
     if (!dateStr) return 'Date TBA';
@@ -420,194 +468,296 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
     }
   ];
 
+  const workspaceNav: { id: CareerWorkspaceSection; label: string; count?: number }[] = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'events', label: 'Events', count: events.length },
+    { id: 'jobs', label: 'Job matches', count: jobs.length },
+    { id: 'mentors', label: 'Mentors', count: mentors.length },
+    { id: 'pathways', label: 'Pathways', count: skillPathways.length },
+    { id: 'resources', label: 'Resources', count: careerResources.length },
+  ];
+
+  const exploreWorkspaceCards = [
+    {
+      id: 'events' as const,
+      title: 'Events & RSVP',
+      detail: 'Career fairs, reunions, and workshops with one-click registration.',
+      stat: `${registeredEventsCount} registered · ${events.length} upcoming`,
+      icon: CalendarDays,
+    },
+    {
+      id: 'jobs' as const,
+      title: 'Matched openings',
+      detail: 'Live roles scored against your skills and department.',
+      stat: `${appliedJobsCount} applied · ${jobs.length} matches`,
+      icon: Briefcase,
+    },
+    {
+      id: 'mentors' as const,
+      title: 'Alumni mentors',
+      detail: 'Request guidance from graduates in your field.',
+      stat: `${connectedMentorsCount} connected · ${mentors.length} available`,
+      icon: Users,
+    },
+    {
+      id: 'pathways' as const,
+      title: 'Skill pathways',
+      detail: 'AI-ranked learning tracks for your department.',
+      stat: `${enrolledPathways.length} enrolled · ${skillPathways.length} tracks`,
+      icon: Rocket,
+    },
+    {
+      id: 'resources' as const,
+      title: 'Downloadable kits',
+      detail: 'Resume, interview, cover letter, and salary playbooks.',
+      stat: `${careerResources.length} guides · personalized exports`,
+      icon: BookOpen,
+    },
+  ];
+
   return (
     <AlumniSectionShell
-      eyebrow="Career hub"
-      title="Grow your career"
-      description={`Events, jobs, and mentors tailored for ASTU ${userDept} graduates.`}
+      eyebrow="Alumni workspace"
+      title="Career Center"
+      description={`Your ASTU career workspace — events, employer matches, mentorship, AI skill pathways, and downloadable playbooks for ${userDept} graduates.`}
       metrics={[
-        { value: jobs.length > 0 ? jobs.length : (statsData?.openJobMatches || 0), label: 'Job Matches', accent: 'gold' },
+        { value: jobs.length > 0 ? jobs.length : (statsData?.openJobMatches || 0), label: 'Job matches', accent: 'gold' },
         { value: mentors.length, label: 'Mentors', accent: 'green' },
         { value: events.length, label: 'Events', accent: 'white' },
+        { value: `${profileScore}%`, label: 'Readiness', accent: 'green' },
       ]}
+      actions={
+        <div className="flex flex-col gap-3 w-full max-w-xl">
+          <div className={`${alumniTabRailClass} !border-white/20 !bg-white/10`}>
+            {workspaceNav.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setWorkspaceSection(item.id)}
+                className={`${alumniTabBtn(workspaceSection === item.id)} !min-w-[5.5rem] !text-xs ${
+                  workspaceSection === item.id ? '!bg-white !text-[#003366]' : '!text-white/85 hover:!bg-white/10'
+                }`}
+              >
+                {item.label}
+                {item.count != null && item.id !== 'overview' && (
+                  <span className="ml-1 rounded-full bg-black/10 px-1.5 py-0.5 text-[9px] font-bold">{item.count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {onTabChange && (
+              <>
+                <button type="button" onClick={() => onTabChange('jobs')} className={alumniGhostBtnClass + ' !text-white/90 border border-white/25 px-3 py-1.5 text-xs'}>
+                  Full jobs board
+                </button>
+                <button type="button" onClick={() => onTabChange('tools')} className={alumniGhostBtnClass + ' !text-white/90 border border-white/25 px-3 py-1.5 text-xs'}>
+                  Alumni tools
+                </button>
+                <button type="button" onClick={() => onTabChange('mentorship')} className={alumniGhostBtnClass + ' !text-white/90 border border-white/25 px-3 py-1.5 text-xs'}>
+                  Mentorship hub
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      }
     >
 
-      {/* Dynamic Metrics Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className={`${alumniCardClass} p-5 transition-all hover:shadow-md`}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-astu-navy/10 flex items-center justify-center">
-              <Briefcase className="h-5 w-5 text-astu-navy" />
+      {workspaceSection === 'overview' && (
+        <>
+          <AlumniSectionBlock
+            step={1}
+            title="Workspace snapshot"
+            description="Live signals from your profile, applications, and career activity."
+          >
+            <div className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 ${alumniGridGapClass}`}>
+              <div className={`${alumniCardClass} p-4`}>
+                <p className={alumniLabelClass}>Department</p>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{userDept}</p>
+                <span className={`${alumniStatusBadge.brand} mt-2`}>ASTU graduate</span>
+              </div>
+              <div className={`${alumniCardClass} p-4`}>
+                <p className={alumniLabelClass}>Employment</p>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{formatEmploymentStatus(profile?.employmentStatus)}</p>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">{profile?.currentRole || profile?.company || 'Add role in Profile for better matches'}</p>
+              </div>
+              <div className={`${alumniCardClass} p-4`}>
+                <p className={alumniLabelClass}>Applications</p>
+                <p className="text-2xl font-extrabold text-[var(--text-primary)]">{appliedJobsCount}</p>
+                <p className="text-xs text-[var(--text-secondary)]">of {jobs.length} open matches</p>
+              </div>
+              <div className={`${alumniCardClass} p-4`}>
+                <p className={alumniLabelClass}>Event RSVPs</p>
+                <p className="text-2xl font-extrabold text-[var(--text-primary)]">{registeredEventsCount}</p>
+                <p className="text-xs text-[var(--text-secondary)]">{events.length} events in portal</p>
+              </div>
             </div>
-            <p className={`${alumniLabelClass} mb-0`}>Job Matches Available</p>
-          </div>
-          <p className="text-3xl font-extrabold text-[var(--text-primary)]">
-            {jobs.length > 0 ? jobs.length : (statsData?.openJobMatches || 0)}
-          </p>
-          <p className="text-[10px] text-astu-green font-semibold mt-1">
-            {jobs.filter(j => j.applied).length > 0
-              ? `${jobs.filter(j => j.applied).length} applications submitted • Live matches`
-              : `Updated live for ${userDept}`}
-          </p>
-        </div>
+          </AlumniSectionBlock>
 
-        <div className={`${alumniCardClass} p-5 transition-all hover:shadow-md`}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-astu-green/10 flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-astu-green" />
-            </div>
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Skill Pathways</p>
-          </div>
-          <p className="text-3xl font-extrabold text-[var(--text-primary)]">{skillPathways.length}</p>
-          <p className="text-[10px] text-astu-navy font-semibold mt-1">
-            {enrolledPathways.length > 0
-              ? `${enrolledPathways.length} active track(s) enrolled`
-              : `AI matched for ${userDept}`}
-          </p>
-        </div>
-
-        <div className={`${alumniCardClass} p-5 transition-all hover:shadow-md`}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-              <Users className="h-5 w-5 text-purple-600" />
-            </div>
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Alumni Mentors Online</p>
-          </div>
-          <p className="text-3xl font-extrabold text-[var(--text-primary)]">
-            {mentors.length > 0 ? mentors.length : (statsData?.activeMentorships || 0)}
-          </p>
-          <p className="text-[10px] text-purple-600 font-semibold mt-1">
-            {mentors.filter(m => m.status === 'CONNECTED').length > 0
-              ? `${mentors.filter(m => m.status === 'CONNECTED').length} active connections`
-              : 'Available for mentorship & guidance'}
-          </p>
-        </div>
-      </div>
-
-      {/* Main Grid: Resources (left) and Events (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column: Dynamic Resources & Readiness Score */}
-        <div className="space-y-6 lg:col-span-1">
-          <div className={`${alumniPanelClass} space-y-6`}>
-            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
-              <BookOpen className="h-5 w-5 text-astu-navy" />
-              Career Resource Center
-            </h3>
-
-            <div className="space-y-4">
-              {careerResources.map((res) => {
-                const currentDownloads = resourceDownloads[res.id] || 1000;
-                return (
-                  <div
-                    key={res.id}
-                    onClick={() => handleDownloadResource(res)}
-                    className="flex items-start gap-4 p-4 hover:bg-gray-50 border border-gray-100 rounded-xl cursor-pointer transition-all hover:border-astu-navy/20 group"
-                  >
-                    <div className="p-2.5 rounded-xl bg-gray-50 group-hover:scale-105 transition-transform">
-                      <res.icon className={`h-5 w-5 ${res.color}`} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{res.title}</h4>
-                        <Download className="h-3.5 w-3.5 text-gray-400 group-hover:text-astu-navy transition-colors" />
-                      </div>
-                      <p className="text-xs text-gray-600 mt-1">{res.desc}</p>
-                      <div className="flex items-center gap-3 mt-2 text-[10px]">
-                        <span className="text-astu-navy font-semibold">{res.stats}</span>
-                        <span className="text-gray-400">{currentDownloads.toLocaleString()} downloads</span>
-                      </div>
-                    </div>
+          <AlumniSectionBlock
+            step={2}
+            title="Explore career features"
+            description="Each area opens focused tools — pick a card to jump in."
+          >
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${alumniGridGapClass}`}>
+              {exploreWorkspaceCards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => setWorkspaceSection(card.id)}
+                  className={`${alumniCardClass} group p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#003366]/30 hover:shadow-md dark:hover:border-[#FFCC00]/30`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#003366]/10 text-[#003366] dark:bg-[#FFCC00]/15 dark:text-[#FFD700]">
+                      <card.icon className="h-5 w-5" />
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
                   </div>
-                );
-              })}
+                  <h4 className="mt-4 text-sm font-bold text-[var(--text-primary)]">{card.title}</h4>
+                  <p className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)]">{card.detail}</p>
+                  <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-[#003366] dark:text-[#FFD700]">{card.stat}</p>
+                </button>
+              ))}
             </div>
-          </div>
+          </AlumniSectionBlock>
 
-          {/* Dynamic Career Progress Tracker */}
-          <div className={alumniPanelClass}>
-            <h3 className={`${alumniSectionTitleClass} mb-4 flex items-center gap-2`}>
-              <TrendingUp className="h-4 w-4 text-astu-navy" />
-              Career Readiness Score
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-gray-600">Profile Strength</span>
-                <span className="text-xs font-bold text-astu-navy">{profileScore}%</span>
-              </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-astu-navy to-astu-green rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.max(0, profileScore))}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-gray-500">
-                {profileScore >= 85
-                  ? 'Your profile is complete and highly visible to top employers.'
-                  : profileScore >= 60
-                  ? 'Add skills, work experience, and bio to reach top employer visibility.'
-                  : 'Complete your profile details to unlock personalized job recommendations.'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Events Portal */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className={`${alumniPanelClass} space-y-6`}>
-            
-            {/* Header and Filter Category Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
-              <div>
-                <h3 className={alumniSectionTitleClass}>Alumni Events Portal</h3>
-                <p className="text-sm text-gray-600">Register for exclusive recruitment workshops and technology reunions</p>
-              </div>
-              <div className="flex gap-1.5 overflow-x-auto py-1">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all border whitespace-nowrap ${
-                      selectedCategory === cat 
-                        ? 'bg-[#003366] border-[#003366] text-white shadow-md'
-                        : 'bg-[var(--bg-page)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
-                    }`}
-                  >
-                    {cat}
-                  </button>
+          <AlumniSectionBlock step={3} title="Career readiness" description="Four dimensions employers and ASTU tracer surveys care about.">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="space-y-4">
+                {readinessDimensions.map((dim) => (
+                  <div key={dim.label}>
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <span className="text-xs font-semibold text-[var(--text-primary)]">{dim.label}</span>
+                      <span className="text-xs font-bold text-[#003366] dark:text-[#FFD700]">{dim.score}%</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-page)]">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#003366] to-emerald-500 transition-all duration-500"
+                        style={{ width: `${dim.score}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-[10px] text-[var(--text-muted)]">{dim.hint}</p>
+                  </div>
                 ))}
               </div>
+              <div className={`${alumniCardClass} p-5`}>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  <h4 className="text-sm font-bold text-[var(--text-primary)]">Overall readiness</h4>
+                </div>
+                <p className="mt-3 text-4xl font-extrabold text-[var(--text-primary)]">{profileScore}%</p>
+                <p className="mt-2 text-xs leading-relaxed text-[var(--text-secondary)]">
+                  {profileScore >= 85
+                    ? 'Strong visibility to recruiters. Keep applying and attending events.'
+                    : profileScore >= 60
+                      ? 'Good progress — add skills, bio, and employment details to unlock top-tier matches.'
+                      : 'Complete your profile and enroll in a pathway to unlock personalized recommendations.'}
+                </p>
+                {onTabChange && (
+                  <button type="button" onClick={() => onTabChange('profile')} className={alumniPrimaryBtnClass + ' mt-4 w-full text-xs'}>
+                    Improve profile
+                  </button>
+                )}
+              </div>
             </div>
+          </AlumniSectionBlock>
+        </>
+      )}
 
-            {/* Dynamic Event Cards Listing */}
-            <div className="space-y-6">
-              {filteredEvents.map(event => (
-                <div 
-                  key={event.id}
-                  className="group flex flex-col gap-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 transition-all hover:shadow-md"
+      {showSection('resources') && (
+        <AlumniSectionBlock
+          step={1}
+          title="Career Resource Center"
+          description="Personalized Markdown kits you can download and edit — resume, interviews, cover letters, and salary negotiation."
+        >
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${alumniGridGapClass}`}>
+            {careerResources.map((res) => {
+              const currentDownloads = resourceDownloads[res.id] || 1000;
+              return (
+                <button
+                  key={res.id}
+                  type="button"
+                  onClick={() => handleDownloadResource(res)}
+                  className="flex items-start gap-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-left transition-all hover:border-[#003366]/25 hover:shadow-md group"
                 >
-                  <img 
-                    src={event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&auto=format&fit=crop&q=60'} 
-                    alt={event.title} 
-                    className="w-full md:w-44 h-32 object-cover rounded-xl shadow-sm group-hover:opacity-90 transition-opacity"
-                  />
-                  <div className="flex-1 flex flex-col justify-between">
+                  <div className="rounded-xl bg-[var(--bg-card)] p-2.5 transition-transform group-hover:scale-105">
+                    <res.icon className={`h-5 w-5 ${res.color}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-[var(--text-primary)] group-hover:text-[#003366] dark:group-hover:text-[#FFD700]">{res.title}</h4>
+                      <Download className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
+                    </div>
+                    <p className="mt-1 text-xs text-[var(--text-secondary)]">{res.desc}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px]">
+                      <span className={alumniStatusBadge.brand}>{res.stats}</span>
+                      <span className="text-[var(--text-muted)]">{currentDownloads.toLocaleString()} downloads</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </AlumniSectionBlock>
+      )}
+
+      {showSection('events') && (
+        <AlumniSectionBlock
+          step={1}
+          title="Alumni Events Portal"
+          description="Register for career fairs, reunions, and workshops. RSVPs sync to your dashboard reminders."
+          aside={
+            <span className={alumniStatusBadge.info}>
+              {registeredEventsCount} registered · {filteredEvents.length} shown
+            </span>
+          }
+        >
+          <div className="mb-5 flex gap-1.5 overflow-x-auto pb-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-bold transition-all ${
+                  selectedCategory === cat
+                    ? 'border-[#003366] bg-[#003366] text-white shadow-md'
+                    : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            {filteredEvents.map((event) => (
+              <div
+                key={event.id}
+                className="group flex flex-col gap-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 transition-all hover:shadow-md md:flex-row md:items-stretch"
+              >
+                <img
+                  src={event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&auto=format&fit=crop&q=60'}
+                  alt={event.title}
+                  className="h-36 w-full shrink-0 rounded-xl object-cover shadow-sm md:h-auto md:w-44"
+                />
+                <div className="flex min-w-0 flex-1 flex-col justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className={alumniStatusBadge.brand}>{event.category || 'Workshop'}</span>
                         {event.registered && (
-                          <span className="flex items-center gap-1 text-xs font-bold text-astu-green bg-astu-green/10 px-2.5 py-0.5 rounded-full">
+                          <span className={alumniStatusBadge.success}>
                             <CheckCircle2 className="h-3.5 w-3.5" />
                             Registered
                           </span>
                         )}
                       </div>
-                      <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{event.title}</h4>
-                      <p className="text-xs text-gray-600 leading-relaxed">{event.description}</p>
+                      <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-astu-navy transition-colors">{event.title}</h4>
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{event.description}</p>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-4 pt-4 mt-2 border-t border-gray-100">
-                      <div className="flex items-center gap-4 text-xs text-gray-600">
+                    <div className="flex flex-wrap items-center justify-between gap-4 pt-4 mt-2 border-t border-[var(--border-color)]">
+                      <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                         <span className="flex items-center gap-1.5">
                           <CalendarDays className="h-4 w-4 text-astu-navy" />
                           {formatEventDate(event.date)}
@@ -625,7 +775,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                         }}
                         className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
                           event.registered 
-                            ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed' 
+                            ? 'bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-muted)] cursor-not-allowed' 
                             : 'bg-astu-navy hover:bg-astu-navy/90 text-white hover:scale-105'
                         }`}
                         disabled={event.registered}
@@ -635,42 +785,37 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     </div>
                   </div>
                 </div>
-              ))}
-              
-              {filteredEvents.length === 0 && (
-                <div className="p-12 text-center border-2 border-dashed border-gray-200 rounded-2xl text-gray-500">
-                  <CalendarDays className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm font-semibold">No events found for category "{selectedCategory}"</p>
-                  <p className="text-xs text-gray-400 mt-1">Check back soon for new career fairs, tech talks, and reunions.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+            ))}
 
-      </div>
-
-      {/* Dynamic Featured Jobs Section */}
-      <section className={`${alumniPanelClass} space-y-6`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
-              <Briefcase className="h-5 w-5 text-astu-navy" />
-              Featured Job Openings
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">Top matches based on your profile and skills</p>
+            {filteredEvents.length === 0 && (
+              <div className="rounded-2xl border-2 border-dashed border-[var(--border-color)] p-12 text-center text-[var(--text-muted)]">
+                <CalendarDays className="mx-auto mb-2 h-10 w-10 text-gray-300" />
+                <p className="text-sm font-semibold">No events found for category &quot;{selectedCategory}&quot;</p>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">Check back soon for new career fairs, tech talks, and reunions.</p>
+              </div>
+            )}
           </div>
-          {jobs.length > 3 && (
+        </AlumniSectionBlock>
+      )}
+
+      {showSection('jobs') && (
+      <AlumniSectionBlock
+        step={1}
+        title="Featured job openings"
+        description="Top matches scored from your skills, department, and live employer postings."
+        aside={
+          jobs.length > 3 ? (
             <button
+              type="button"
               onClick={() => setShowAllJobs(!showAllJobs)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-astu-navy hover:bg-astu-navy/5 border border-astu-navy/20 transition-all"
+              className={alumniGhostBtnClass + ' text-xs'}
             >
-              {showAllJobs ? 'Show Less' : `View All (${jobs.length})`}
+              {showAllJobs ? 'Show less' : `View all (${jobs.length})`}
             </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ) : null
+        }
+      >
+        <div className={`grid grid-cols-1 md:grid-cols-3 ${alumniGridGapClass}`}>
           {featuredJobs.map((job) => {
             const matchScore = getJobMatchPercentage(job);
             return (
@@ -692,32 +837,24 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                       {matchScore}% match
                     </span>
                   </div>
-                  <h4 className="font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{job.title}</h4>
-                  <p className="text-xs text-gray-500 mt-1">{job.company} • {job.location}</p>
+                  <h4 className="font-bold text-[var(--text-primary)] group-hover:text-astu-navy transition-colors">{job.title}</h4>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">{job.company} • {job.location}</p>
                   
                   {job.skills && job.skills.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {job.skills.slice(0, 3).map((skill, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-md">{skill}</span>
+                        <span key={i} className="px-2 py-0.5 bg-[var(--bg-page)] text-[var(--text-secondary)] text-[10px] font-bold rounded-md">{skill}</span>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--border-color)]">
                   <span className="text-xs font-bold text-astu-green">{job.salary || 'Competitive'}</span>
                   {job.applied ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toast.info(`You have already submitted an application for ${job.title} at ${job.company}.`);
-                      }}
-                      className="text-[10px] text-astu-green font-bold flex items-center gap-1 bg-astu-green/10 px-2.5 py-1 rounded-md transition-colors"
-                    >
-                      <CheckCircle2 className="h-3 w-3" />
-                      Applied
-                    </button>
+                    <span onClick={(e) => e.stopPropagation()} role="presentation">
+                      <ApplicationStatusBadge status={job.applicationStatus || 'Applied'} className="!text-[9px]" />
+                    </span>
                   ) : (
                     <button
                       type="button"
@@ -741,35 +878,29 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           {jobs.length === 0 && (
             <EmptyState
               className="col-span-3"
-              icon={<Briefcase className="h-10 w-10 text-slate-400" />}
+              icon={<Briefcase className="h-10 w-10 text-[var(--text-muted)]" />}
               title="No active job matches yet"
               description="No openings match your profile right now. New roles appear here as employers post them."
             />
           )}
         </div>
-      </section>
+      </AlumniSectionBlock>
+      )}
 
-      {/* Dynamic Top Mentors Section */}
-      <section className={`${alumniPanelClass} space-y-6`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
-              <Star className="h-5 w-5 text-astu-navy" />
-              Top Alumni Mentors
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">Connect with experienced alumni in your field</p>
-          </div>
-          {mentors.length > 3 && (
-            <button
-              onClick={() => setShowAllMentors(!showAllMentors)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-astu-navy hover:bg-astu-navy/5 border border-astu-navy/20 transition-all"
-            >
-              {showAllMentors ? 'Show Less' : `View All (${mentors.length})`}
+      {showSection('mentors') && (
+      <AlumniSectionBlock
+        step={1}
+        title="Top alumni mentors"
+        description="Connect with experienced graduates for architecture, career, and industry guidance."
+        aside={
+          mentors.length > 3 ? (
+            <button type="button" onClick={() => setShowAllMentors(!showAllMentors)} className={alumniGhostBtnClass + ' text-xs'}>
+              {showAllMentors ? 'Show less' : `View all (${mentors.length})`}
             </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ) : null
+        }
+      >
+        <div className={`grid grid-cols-1 md:grid-cols-3 ${alumniGridGapClass}`}>
           {featuredMentors.map((mentor) => (
             <div
               key={mentor.id}
@@ -781,7 +912,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                   toast.info(`Status with ${mentor.name}: ${mentor.status || 'Connected'}`);
                 }
               }}
-              className="rounded-2xl border border-gray-200 p-5 hover:border-astu-navy/30 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+              className="rounded-2xl border border-[var(--border-color)] p-5 hover:border-astu-navy/30 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center gap-3 mb-3">
@@ -791,30 +922,28 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     className="w-12 h-12 rounded-full object-cover border-2 border-astu-navy/10"
                   />
                   <div>
-                    <h4 className="font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{mentor.name}</h4>
-                    <p className="text-xs text-gray-500">{mentor.title || mentor.role || 'Senior Engineer'} {mentor.company ? `at ${mentor.company}` : ''}</p>
+                    <h4 className="font-bold text-[var(--text-primary)] group-hover:text-astu-navy transition-colors">{mentor.name}</h4>
+                    <p className="text-xs text-[var(--text-muted)]">{mentor.title || mentor.role || 'Senior Engineer'} {mentor.company ? `at ${mentor.company}` : ''}</p>
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">{mentor.bio || 'ASTU alumnus experienced in engineering & technical guidance.'}</p>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">{mentor.bio || 'ASTU alumnus experienced in engineering & technical guidance.'}</p>
               </div>
 
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--border-color)]">
                 <span className="flex items-center gap-1 text-xs text-amber-600">
                   <Star className="h-3.5 w-3.5 fill-amber-500" />
                   {mentor.rating || '4.9'} ({mentor.reviewCount || mentor.reviews || 12})
                 </span>
-                <span className="flex items-center gap-1 text-[10px] text-astu-green font-bold">
-                  {mentor.status === 'REQUEST_PENDING' ? (
-                    <span className="text-amber-600">Request Pending</span>
-                  ) : mentor.status === 'CONNECTED' ? (
-                    <span className="text-astu-navy">Connected</span>
-                  ) : (
-                    <>
-                      <Users className="h-3 w-3" />
-                      {mentor.mentees || 15}+ mentees
-                    </>
-                  )}
-                </span>
+                {mentor.status === 'REQUEST_PENDING' ? (
+                  <span className={alumniStatusBadge.warning}>Request pending</span>
+                ) : mentor.status === 'CONNECTED' ? (
+                  <span className={alumniStatusBadge.success}>Connected</span>
+                ) : (
+                  <span className={`${alumniStatusBadge.neutral} gap-1`}>
+                    <Users className="h-3 w-3" />
+                    {mentor.mentees || 15}+ mentees
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -822,27 +951,22 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           {mentors.length === 0 && (
             <EmptyState
               className="col-span-3"
-              icon={<Users className="h-10 w-10 text-slate-400" />}
+              icon={<Users className="h-10 w-10 text-[var(--text-muted)]" />}
               title="No mentors listed yet"
               description="No alumni mentors are available right now. Check back soon, or check the Mentorship tab for the full directory."
             />
           )}
         </div>
-      </section>
+      </AlumniSectionBlock>
+      )}
 
-      {/* Dynamic Skill Pathways Section */}
-      <section className={`${alumniPanelClass} space-y-6`}>
-        <div>
-          <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
-            <Rocket className="h-5 w-5 text-astu-navy" />
-            Skill Development Pathways
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Recommended learning tracks based on your ASTU Department (<span className="font-semibold text-astu-navy">{userDept}</span>) and market demand
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {showSection('pathways') && (
+      <AlumniSectionBlock
+        step={1}
+        title="Skill development pathways"
+        description={`AI-ranked learning tracks for ${userDept} — tap a card for skills, target roles, and enrollment.`}
+      >
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${alumniGridGapClass}`}>
           {skillPathways.map((pathway) => {
             const IconComponent = pathwayIcons[pathway.title] || Code2;
             const isEnrolled = enrolledPathways.includes(pathway.id);
@@ -857,7 +981,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     ? 'border-astu-navy bg-astu-navy/5 shadow-md'
                     : isEnrolled
                     ? 'border-astu-green/40 bg-astu-green/5 hover:border-astu-green'
-                    : 'border-gray-200 hover:border-astu-navy/30 bg-white hover:shadow-sm'
+                    : 'border-[var(--border-color)] hover:border-astu-navy/30 bg-[var(--bg-card)] hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -865,8 +989,11 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     <IconComponent className="h-6 w-6 text-astu-navy" />
                   </div>
                   <div className="flex items-center gap-1.5">
+                    {pathway.aiRecommended && (
+                      <span className={alumniStatusBadge.brand + ' !text-[9px]'}>AI pick</span>
+                    )}
                     {isEnrolled && (
-                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-astu-green/20 text-astu-green flex items-center gap-1">
+                      <span className={alumniStatusBadge.success + ' !text-[9px]'}>
                         <Check className="h-3 w-3" />
                         Enrolled
                       </span>
@@ -881,19 +1008,19 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                   </div>
                 </div>
 
-                <h4 className="font-bold text-gray-900 mb-1">{pathway.title}</h4>
-                <p className="text-xs text-gray-500 leading-relaxed mb-3">{pathway.description}</p>
+                <h4 className="font-bold text-[var(--text-primary)] mb-1">{pathway.title}</h4>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-3">{pathway.description}</p>
                 
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {pathway.skills.slice(0, 4).map((skill, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-md">{skill}</span>
+                    <span key={i} className="px-2 py-0.5 bg-[var(--bg-page)] text-[var(--text-secondary)] text-[10px] font-bold rounded-md">{skill}</span>
                   ))}
                   {pathway.skills.length > 4 && (
-                    <span className="px-2 py-0.5 bg-gray-100 text-gray-400 text-[10px] font-bold rounded-md">+{pathway.skills.length - 4}</span>
+                    <span className="px-2 py-0.5 bg-[var(--bg-page)] text-[var(--text-muted)] text-[10px] font-bold rounded-md">+{pathway.skills.length - 4}</span>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-gray-500">
+                <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
                   <span className="flex items-center gap-1">
                     <GraduationCap className="h-3.5 w-3.5 text-astu-navy" />
                     {pathway.duration}
@@ -905,9 +1032,12 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                 </div>
 
                 {isSelected && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                  <div className="mt-4 space-y-3 border-t border-[var(--border-color)] pt-4">
+                    <p className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                      {pathway.aiReason}
+                    </p>
                     <div>
-                      <p className="text-[10px] font-bold uppercase text-gray-500 mb-2">All Required Skills</p>
+                      <p className="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-2">All Required Skills</p>
                       <div className="flex flex-wrap gap-1.5">
                         {pathway.skills.map((skill, i) => (
                           <span key={i} className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-bold rounded-md">{skill}</span>
@@ -916,10 +1046,10 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold uppercase text-gray-500 mb-2">Target Roles</p>
+                      <p className="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-2">Target Roles</p>
                       <div className="space-y-1">
                         {pathway.jobs.map((jobRole, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                          <div key={i} className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                             <span className="w-1.5 h-1.5 rounded-full bg-astu-green" />
                             {jobRole}
                           </div>
@@ -934,7 +1064,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                       }}
                       className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
                         isEnrolled
-                          ? 'bg-gray-100 hover:bg-red-50 text-gray-700 hover:text-red-600 border border-gray-200'
+                          ? 'bg-[var(--bg-page)] hover:bg-red-50 text-[var(--text-secondary)] hover:text-red-600 border border-[var(--border-color)]'
                           : 'bg-gradient-to-r from-astu-navy to-[#004d99] text-white hover:shadow-md'
                       }`}
                     >
@@ -946,23 +1076,24 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
             );
           })}
         </div>
-      </section>
+      </AlumniSectionBlock>
+      )}
 
       {/* Event Registration Confirmation Modal */}
       {confirmEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-5 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="bg-[var(--bg-card)] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[var(--border-color)] space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
               <div className="flex items-center gap-2">
                 <span className="p-2 bg-astu-navy/10 text-astu-navy rounded-xl">
                   <CalendarDays className="h-5 w-5" />
                 </span>
-                <h3 className="text-lg font-bold text-gray-900">Confirm Event RSVP</h3>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Confirm Event RSVP</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setConfirmEvent(null)}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -972,10 +1103,10 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
               <span className="px-2.5 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-extrabold uppercase tracking-widest rounded">
                 {confirmEvent.category || 'Event'}
               </span>
-              <h4 className="text-lg font-extrabold text-gray-900">{confirmEvent.title}</h4>
-              <p className="text-xs text-gray-600 leading-relaxed">{confirmEvent.description}</p>
+              <h4 className="text-lg font-extrabold text-[var(--text-primary)]">{confirmEvent.title}</h4>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{confirmEvent.description}</p>
               
-              <div className="p-3 bg-gray-50 rounded-xl space-y-2 border border-gray-100 text-xs text-gray-700">
+              <div className="p-3 bg-[var(--bg-page)] rounded-xl space-y-2 border border-[var(--border-color)] text-xs text-[var(--text-secondary)]">
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-astu-navy shrink-0" />
                   <span className="font-semibold">{formatEventDate(confirmEvent.date)}</span>
@@ -988,16 +1119,16 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                 )}
               </div>
 
-              <p className="text-xs font-semibold text-astu-navy/90 bg-blue-50 p-3 rounded-xl border border-blue-100">
+              <p className="text-xs font-semibold text-astu-navy/90 dark:text-blue-200 bg-blue-50 dark:bg-blue-500/10 p-3 rounded-xl border border-blue-100 dark:border-blue-500/25">
                 Are you sure you want to register for this event? A seat will be reserved for your account and reminders will be sent to your dashboard.
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-color)]">
               <button
                 type="button"
                 onClick={() => setConfirmEvent(null)}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-[var(--text-secondary)] border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
               >
                 Cancel
               </button>

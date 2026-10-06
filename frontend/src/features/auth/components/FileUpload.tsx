@@ -91,8 +91,8 @@ export default function FileUpload({
         onDragLeave={handleDrag}
         onDrop={handleDrop}
         onClick={onButtonClick}
-        className={`border-2 border-dashed rounded-lg p-6 hover:bg-slate-50 transition-all relative flex flex-col items-center justify-center cursor-pointer ${
-          dragActive ? 'border-astu-navy bg-slate-50' : 'border-outline-variant'
+        className={`border-2 border-dashed rounded-lg p-6 hover:bg-[var(--bg-page)] transition-all relative flex flex-col items-center justify-center cursor-pointer ${
+          dragActive ? 'border-astu-navy bg-[var(--bg-page)]' : 'border-outline-variant'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <input
@@ -127,11 +127,11 @@ export default function FileUpload({
           <p className="text-xs font-semibold text-on-surface-variant">
             Uploaded Files ({files.length}/{maxFiles}):
           </p>
-          <div className="space-y-1 bg-slate-50/50 p-2 rounded-lg border border-outline-variant/60">
+          <div className="space-y-1 bg-[var(--bg-page)] p-2 rounded-lg border border-outline-variant/60">
             {files.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between border border-outline-variant bg-white rounded-md p-2.5 text-xs shadow-sm"
+                className="flex items-center justify-between border border-outline-variant bg-[var(--bg-card)] rounded-md p-2.5 text-xs shadow-sm"
               >
                 <div className="flex items-center gap-2 truncate">
                   <FileText className="h-4 w-4 text-astu-navy flex-shrink-0" />

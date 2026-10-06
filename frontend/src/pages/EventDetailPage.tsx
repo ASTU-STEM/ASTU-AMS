@@ -157,25 +157,25 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--bg-page)]">
         <div className="text-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#003580] mx-auto"></div>
-          <p className="mt-3 text-xs font-semibold text-slate-500">Loading Event Details...</p>
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--border-color)] border-t-[#003580] mx-auto"></div>
+          <p className="mt-3 text-xs font-semibold text-[var(--text-muted)]">Loading Event Details...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-sans text-[var(--text-primary)] dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
       {/* Header Banner Navigation */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors">
+      <header className="sticky top-0 z-40 border-b border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900/95 backdrop-blur-md transition-colors">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <button
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 transition-all shadow-sm"
           >
             <ArrowLeft className="h-4 w-4 text-[#003580] dark:text-blue-300" /> Back to Homepage
           </button>
@@ -185,9 +185,9 @@ export default function EventDetailPage() {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success('Link copied to clipboard');
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 transition-colors"
             >
-              <Share2 className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" /> Share
+              <Share2 className="h-3.5 w-3.5 text-[var(--text-muted)] dark:text-slate-400" /> Share
             </button>
           </div>
         </div>
@@ -199,7 +199,7 @@ export default function EventDetailPage() {
           {/* Left Column: Media & Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Hero Poster */}
-            <div className="relative h-72 sm:h-96 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg bg-slate-900">
+            <div className="relative h-72 sm:h-96 w-full overflow-hidden rounded-2xl border border-[var(--border-color)] dark:border-slate-800 shadow-lg bg-slate-900">
               <img
                 src={bannerImg}
                 alt={eventData?.title}
@@ -222,14 +222,14 @@ export default function EventDetailPage() {
             </div>
 
             {/* Quick Specs Bar */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm transition-colors">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-4 shadow-sm transition-colors">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#003580] dark:text-blue-300">
                   <CalendarDays className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date</p>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{eventData?.date}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Date</p>
+                  <p className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-100">{eventData?.date}</p>
                 </div>
               </div>
 
@@ -238,8 +238,8 @@ export default function EventDetailPage() {
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Venue</p>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{eventData?.location || 'ASTU Campus'}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Venue</p>
+                  <p className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-100">{eventData?.location || 'ASTU Campus'}</p>
                 </div>
               </div>
 
@@ -248,34 +248,34 @@ export default function EventDetailPage() {
                   <Building className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Organizer</p>
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">ASTU Alumni Office</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Organizer</p>
+                  <p className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-100">ASTU Alumni Office</p>
                 </div>
               </div>
             </div>
 
             {/* Detailed Overview */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm space-y-4 transition-colors">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <div className="rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 shadow-sm space-y-4 transition-colors">
+              <h2 className="text-lg font-bold text-[var(--text-primary)] dark:text-white flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-[#003580] dark:text-blue-400" /> About This {isWorkshop ? 'Workshop' : 'Event'}
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm text-[var(--text-secondary)] dark:text-slate-300 leading-relaxed">
                 {eventData?.description || 'Join ASTU graduates, researchers, and corporate partners for technical workshops, career networking, keynotes, and strategic tracer feedback sessions at Adama Science and Technology University.'}
               </p>
 
-              <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Key Highlights</h3>
-                <ul className="grid gap-2 sm:grid-cols-2 text-xs text-slate-700 dark:text-slate-200">
-                  <li className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5">
+              <div className="mt-4 border-t border-[var(--border-color)] dark:border-slate-800 pt-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3">Key Highlights</h3>
+                <ul className="grid gap-2 sm:grid-cols-2 text-xs text-[var(--text-secondary)] dark:text-slate-200">
+                  <li className="flex items-center gap-2 rounded-lg bg-[var(--bg-page)] dark:bg-slate-800/60 p-2.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /> Certificate of Participation
                   </li>
-                  <li className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5">
+                  <li className="flex items-center gap-2 rounded-lg bg-[var(--bg-page)] dark:bg-slate-800/60 p-2.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /> Corporate & Executive Networking
                   </li>
-                  <li className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5">
+                  <li className="flex items-center gap-2 rounded-lg bg-[var(--bg-page)] dark:bg-slate-800/60 p-2.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /> Hands-on Practical Lab Sessions
                   </li>
-                  <li className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5">
+                  <li className="flex items-center gap-2 rounded-lg bg-[var(--bg-page)] dark:bg-slate-800/60 p-2.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" /> Instant QR Check-in Pass
                   </li>
                 </ul>
@@ -285,24 +285,24 @@ export default function EventDetailPage() {
 
           {/* Right Column: RSVP Action Card */}
           <div className="space-y-6">
-            <div className="sticky top-20 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-md space-y-5 transition-colors">
+            <div className="sticky top-20 rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 shadow-md space-y-5 transition-colors">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
                   Open Registration
                 </span>
-                <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">Registration & Seat Booking</h3>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Free registration for all verified ASTU alumni, students, and partners.</p>
+                <h3 className="mt-2 text-lg font-bold text-[var(--text-primary)] dark:text-white">Registration & Seat Booking</h3>
+                <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400">Free registration for all verified ASTU alumni, students, and partners.</p>
               </div>
 
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4 border border-slate-100 dark:border-slate-800 space-y-2 text-xs">
-                <div className="flex justify-between text-slate-600 dark:text-slate-300">
+              <div className="rounded-xl bg-[var(--bg-page)] dark:bg-slate-800/60 p-4 border border-[var(--border-color)] dark:border-slate-800 space-y-2 text-xs">
+                <div className="flex justify-between text-[var(--text-secondary)] dark:text-slate-300">
                   <span>Registered Attendees</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{isRegistered ? '121' : '120'} Registered</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{isRegistered ? '121' : '120'} Registered</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-[var(--bg-page)] dark:bg-slate-700 overflow-hidden">
                   <div className="h-full bg-[#003580] rounded-full" style={{ width: '65%' }}></div>
                 </div>
-                <p className="text-[10px] text-slate-400 text-right">65% Capacity Filled</p>
+                <p className="text-[10px] text-[var(--text-muted)] text-right">65% Capacity Filled</p>
               </div>
 
               <button
@@ -336,66 +336,66 @@ export default function EventDetailPage() {
       {/* Full Participant Registration Form Modal */}
       {showRegModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-md animate-fade-in" onClick={() => setShowRegModal(false)}>
-          <div className="relative max-w-lg w-full rounded-2xl bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+          <div className="relative max-w-lg w-full rounded-2xl bg-[var(--bg-card)] dark:bg-slate-900 border border-transparent dark:border-slate-800 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b pb-3 border-[var(--border-color)] dark:border-slate-800">
               <div>
                 <span className="rounded-md bg-[#003580] px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
                   {isWorkshop ? 'Workshop' : 'Event'} Registration Form
                 </span>
-                <h3 className="mt-1.5 text-lg font-bold text-slate-900 dark:text-white">{eventData?.title}</h3>
+                <h3 className="mt-1.5 text-lg font-bold text-[var(--text-primary)] dark:text-white">{eventData?.title}</h3>
               </div>
-              <button onClick={() => setShowRegModal(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => setShowRegModal(false)} className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors">
                 ✕
               </button>
             </div>
 
-            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-xs space-y-1 border border-slate-100 dark:border-slate-700">
-              <p className="text-slate-600 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-white">Scheduled Date:</span> {eventData?.date}</p>
-              <p className="text-slate-600 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-white">Venue:</span> {eventData?.location || 'ASTU Main Campus'}</p>
+            <div className="rounded-xl bg-[var(--bg-page)] dark:bg-slate-800/60 p-3.5 text-xs space-y-1 border border-[var(--border-color)] dark:border-slate-700">
+              <p className="text-[var(--text-secondary)] dark:text-slate-300"><span className="font-semibold text-[var(--text-primary)] dark:text-white">Scheduled Date:</span> {eventData?.date}</p>
+              <p className="text-[var(--text-secondary)] dark:text-slate-300"><span className="font-semibold text-[var(--text-primary)] dark:text-white">Venue:</span> {eventData?.location || 'ASTU Main Campus'}</p>
               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium pt-1">Free Admission • Instant Digital Pass Issued Upon Submission</p>
             </div>
 
             <div className="space-y-3 pt-1">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Full Name <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Full Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder="e.g. Dr. Abebe Yosef"
-                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                    className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Email Address <span className="text-red-500">*</span></label>
                   <input
                     type="email"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="e.g. abebe@astu.edu.et"
-                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                    className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                   />
                 </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Phone Number</label>
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Phone Number</label>
                   <input
                     type="tel"
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="e.g. +251 911 234 567"
-                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                    className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Participant Status</label>
+                  <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Participant Status</label>
                   <select
                     value={regRole}
                     onChange={(e) => setRegRole(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                    className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                   >
                     <option value="Alumni">ASTU Alumni</option>
                     <option value="Student">Graduating Senior Student</option>
@@ -406,30 +406,30 @@ export default function EventDetailPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Department / Organization</label>
+                <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Department / Organization</label>
                 <input
                   type="text"
                   value={regAffiliation}
                   onChange={(e) => setRegAffiliation(e.target.value)}
                   placeholder="e.g. School of Electrical Engineering & Computing"
-                  className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                  className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Special Accommodations / Dietary Notes (Optional)</label>
+                <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Special Accommodations / Dietary Notes (Optional)</label>
                 <input
                   type="text"
                   value={regNotes}
                   onChange={(e) => setRegNotes(e.target.value)}
                   placeholder="e.g. Wheelchair access / Vegetarian meal"
-                  className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                  className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <button onClick={() => setShowRegModal(false)} className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+            <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-color)] dark:border-slate-800">
+              <button onClick={() => setShowRegModal(false)} className="rounded-lg border border-[var(--border-color)] dark:border-slate-700 px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors">
                 Cancel
               </button>
               <button onClick={confirmRegForm} className="rounded-lg bg-[#003580] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
@@ -443,17 +443,17 @@ export default function EventDetailPage() {
       {/* QR Event Pass Modal */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in" onClick={() => setShowQrModal(false)}>
-          <div className="relative max-w-sm w-full rounded-2xl bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 p-6 shadow-2xl text-center space-y-4" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-sm w-full rounded-2xl bg-[var(--bg-card)] dark:bg-slate-900 border border-transparent dark:border-slate-800 p-6 shadow-2xl text-center space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Registration Confirmed!</h3>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{eventData?.title}</p>
-              {regName && <p className="text-[11px] text-slate-400 mt-0.5">Participant: {regName}</p>}
+              <h3 className="text-lg font-bold text-[var(--text-primary)] dark:text-white">Registration Confirmed!</h3>
+              <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400">{eventData?.title}</p>
+              {regName && <p className="text-[11px] text-[var(--text-muted)] mt-0.5">Participant: {regName}</p>}
             </div>
 
-            <div className="mx-auto w-48 h-48 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-3 bg-white flex items-center justify-center shadow-inner">
+            <div className="mx-auto w-48 h-48 rounded-xl border-2 border-[var(--border-color)] dark:border-slate-700 p-3 bg-[var(--bg-card)] flex items-center justify-center shadow-inner">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`ASTU-EVENT-${eventData?.id}-${regName || 'USER'}`)}`}
                 alt="QR Pass Code"
@@ -461,7 +461,7 @@ export default function EventDetailPage() {
               />
             </div>
 
-            <p className="text-[11px] text-slate-400">Scan at entry venue for instant automated attendance check-in.</p>
+            <p className="text-[11px] text-[var(--text-muted)]">Scan at entry venue for instant automated attendance check-in.</p>
 
             <button
               onClick={() => setShowQrModal(false)}

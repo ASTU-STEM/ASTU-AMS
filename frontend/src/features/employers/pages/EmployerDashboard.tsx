@@ -689,7 +689,7 @@ const EmployerDashboard = () => {
         )}
 
         {/* Enhanced Sidebar Navigation */}
-        <aside className={`fixed left-0 top-0 z-[60] flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-white border-r border-gray-200 dark:bg-slate-900 dark:border-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        <aside className={`fixed left-0 top-0 z-[60] flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-[var(--bg-card)] border-r border-[var(--border-color)] dark:bg-slate-900 dark:border-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
           {/* Animated overlay */}
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(0,0,0,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] dark:bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(0,107,60,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite] pointer-events-none" />
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -699,7 +699,7 @@ const EmployerDashboard = () => {
           </div>
 
           {/* Sidebar Logo with Enhanced Status */}
-          <div className="relative z-10 px-4 py-4 border-b border-gray-100 dark:border-white/10">
+          <div className="relative z-10 px-4 py-4 border-b border-[var(--border-color)] dark:border-white/10">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative group/logo">
                 <div className="w-11 h-11 flex items-center justify-center">
@@ -710,7 +710,7 @@ const EmployerDashboard = () => {
 
               </div>
               {!sidebarCollapsed && <div>
-                <h1 className="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">ASTU Employer</h1>
+                <h1 className="text-base font-extrabold text-[var(--text-primary)] dark:text-white tracking-tight">ASTU Employer</h1>
                 <p className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] font-extrabold">Recruitment Hub</p>
               </div>}
             </div>
@@ -720,7 +720,7 @@ const EmployerDashboard = () => {
           <nav className="relative z-10 flex-grow px-2 py-4 overflow-y-auto scrollbar-thin">
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-2 mb-2">
-                <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">Recruiting</p>
+                <p className="text-[9px] font-extrabold text-[var(--text-muted)] dark:text-white/30 uppercase tracking-[0.2em]">Recruiting</p>
               </div>
             )}
             <div className="space-y-0.5">
@@ -733,8 +733,8 @@ const EmployerDashboard = () => {
               ].map((item) => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-2 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-gray-600 hover:text-astu-navy hover:bg-gray-50 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
+                  className={`nav-btn w-full flex items-center px-2 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-[var(--text-secondary)] hover:text-astu-navy hover:bg-[var(--bg-page)] dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}>
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-[var(--bg-page)] text-[var(--text-muted)] group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
                     <span className="material-symbols-outlined">{item.icon}</span>
                     {item.badge && sidebarCollapsed && (
                       <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg animate-pulse">
@@ -746,7 +746,7 @@ const EmployerDashboard = () => {
                     <>
                       <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
                       {item.badge && (
-                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' ? 'bg-rose-500/20 text-rose-600 ring-1 ring-rose-500/30 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-500/30' : 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-white/70'}`}>
+                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' ? 'bg-rose-500/20 text-rose-600 ring-1 ring-rose-500/30 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-500/30' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] dark:bg-white/10 dark:text-white/70'}`}>
                           {item.badge > 9 ? '9+' : item.badge}
                         </span>
                       )}
@@ -765,7 +765,7 @@ const EmployerDashboard = () => {
 
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-2 mt-5 mb-2">
-                <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">Management</p>
+                <p className="text-[9px] font-extrabold text-[var(--text-muted)] dark:text-white/30 uppercase tracking-[0.2em]">Management</p>
                 <span className="w-1.5 h-1.5 rounded-full bg-astu-navy dark:bg-emerald-400 animate-pulse" />
               </div>
             )}
@@ -778,8 +778,8 @@ const EmployerDashboard = () => {
               ].map((item) => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-gray-600 hover:text-astu-navy hover:bg-gray-50 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
+                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-[var(--text-secondary)] hover:text-astu-navy hover:bg-[var(--bg-page)] dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}>
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-[var(--bg-page)] text-[var(--text-muted)] group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
                     <span className="material-symbols-outlined">{item.icon}</span>
                     {item.badge && sidebarCollapsed && (
                       <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg animate-pulse">
@@ -818,28 +818,28 @@ const EmployerDashboard = () => {
           </nav>
 
           {/* Sidebar Footer with Enhanced Actions */}
-          <div className="relative z-10 px-2 py-4 border-t border-gray-100 dark:border-white/10 space-y-1">
+          <div className="relative z-10 px-2 py-4 border-t border-[var(--border-color)] dark:border-white/10 space-y-1">
             {!sidebarCollapsed && (
               <>
                 <button onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-gray-500 hover:text-astu-navy hover:bg-gray-50 dark:text-white/50 dark:hover:text-white dark:hover:bg-white/5 transition-all duration-200 text-left group gap-2.5">
-                  <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-astu-navy dark:text-white/40 dark:group-hover:text-white/70 material-symbols-outlined">help</span>
+                  className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-[var(--text-muted)] hover:text-astu-navy hover:bg-[var(--bg-page)] dark:text-white/50 dark:hover:text-white dark:hover:bg-white/5 transition-all duration-200 text-left group gap-2.5">
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-page)] dark:bg-white/5 flex items-center justify-center text-[var(--text-muted)] group-hover:text-astu-navy dark:text-white/40 dark:group-hover:text-white/70 material-symbols-outlined">help</span>
                   <span className="text-sm font-medium">Help Center</span>
-                  <span className="ml-auto text-[8px] text-gray-400 dark:text-white/20 font-bold px-1.5 py-0.5 bg-gray-100 dark:bg-white/5 rounded border border-gray-200 dark:border-white/10">v1.4</span>
+                  <span className="ml-auto text-[8px] text-[var(--text-muted)] dark:text-white/20 font-bold px-1.5 py-0.5 bg-[var(--bg-page)] dark:bg-white/5 rounded border border-[var(--border-color)] dark:border-white/10">v1.4</span>
                 </button>
                 <button onClick={handleLogout}
                   className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:text-rose-400/70 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 transition-all duration-200 text-left group gap-2.5">
                   <span className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 material-symbols-outlined text-rose-500 dark:text-rose-400/70 group-hover:text-rose-600 dark:group-hover:text-rose-400">logout</span>
                   <span className="text-sm font-medium">Logout</span>
-                  <span className="ml-auto text-[8px] text-gray-400 dark:text-white/10 font-medium">Alt+L</span>
+                  <span className="ml-auto text-[8px] text-[var(--text-muted)] dark:text-white/10 font-medium">Alt+L</span>
                 </button>
               </>
             )}
             {sidebarCollapsed && (
               <>
                 <button onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-gray-500 hover:text-astu-navy hover:bg-gray-50 dark:text-white/50 dark:hover:text-white dark:hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
-                  <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-astu-navy dark:text-white/40 dark:group-hover:text-white/70 material-symbols-outlined">help</span>
+                  className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-[var(--text-muted)] hover:text-astu-navy hover:bg-[var(--bg-page)] dark:text-white/50 dark:hover:text-white dark:hover:bg-white/5 transition-all duration-200 group relative" title="Help Center">
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-page)] dark:bg-white/5 flex items-center justify-center text-[var(--text-muted)] group-hover:text-astu-navy dark:text-white/40 dark:group-hover:text-white/70 material-symbols-outlined">help</span>
                   <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
                 </button>
                 <button onClick={handleLogout}
@@ -857,7 +857,7 @@ const EmployerDashboard = () => {
 
           {/* Header Section - Admin Layout Style */}
           <header
-            className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-sm sm:px-6 bg-white border-gray-200 dark:bg-slate-900 dark:border-slate-800"
+            className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-sm sm:px-6 bg-[var(--bg-card)] border-[var(--border-color)] dark:bg-slate-900 dark:border-slate-800"
           >
             <div className="flex min-w-0 items-center gap-3">
               <button
@@ -891,7 +891,7 @@ const EmployerDashboard = () => {
               {/* Live Search Bar with Floating Dropdown Overlay */}
               <div className="relative hidden md:block" data-admin-search>
                 <label
-                  className="group flex h-11 w-[420px] max-w-[36vw] items-center rounded-full border border-gray-200 dark:border-slate-700 bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
+                  className="group flex h-11 w-[420px] max-w-[36vw] items-center rounded-full border border-[var(--border-color)] dark:border-slate-700 bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
                 >
                   <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
                     <Search className="h-4.5 w-4.5 flex-none" />
@@ -907,7 +907,7 @@ const EmployerDashboard = () => {
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="text-gray-400 hover:text-gray-600 p-1 text-xs font-bold"
+                      className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] p-1 text-xs font-bold"
                     >
                       ✕
                     </button>
@@ -916,9 +916,9 @@ const EmployerDashboard = () => {
 
                 {/* Floating Search Results Dropdown */}
                 {searchResults && (
-                  <div className="absolute left-0 top-13 z-50 w-full max-h-[28rem] overflow-y-auto rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-3 space-y-3">
-                    <div className="flex justify-between items-center px-2 pb-2 border-b border-gray-150 dark:border-slate-800">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <div className="absolute left-0 top-13 z-50 w-full max-h-[28rem] overflow-y-auto rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-2xl p-3 space-y-3">
+                    <div className="flex justify-between items-center px-2 pb-2 border-b border-[var(--border-color)] dark:border-slate-800">
+                      <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
                         Search Results ({searchResults.totalMatches} matches)
                       </span>
                       <button onClick={() => setSearchQuery('')} className="text-[10px] font-bold text-rose-500 hover:underline">
@@ -927,7 +927,7 @@ const EmployerDashboard = () => {
                     </div>
 
                     {searchResults.totalMatches === 0 ? (
-                      <div className="p-4 text-center text-xs text-gray-500">
+                      <div className="p-4 text-center text-xs text-[var(--text-muted)]">
                         No matches found for "{searchQuery}". Try searching by skill, department, or candidate name.
                       </div>
                     ) : (
@@ -945,15 +945,15 @@ const EmployerDashboard = () => {
                                   setSelectedSearchCandidate(candidate);
                                   setSearchQuery('');
                                 }}
-                                className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                                className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 cursor-pointer transition-colors"
                               >
                                 <div className="flex items-center gap-2.5">
                                   <div className="w-7 h-7 rounded-full bg-astu-navy/10 text-astu-navy font-bold flex items-center justify-center text-xs">
                                     {candidate.alumnusName[0]}
                                   </div>
                                   <div>
-                                    <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{candidate.alumnusName}</p>
-                                    <p className="text-[10px] text-gray-500 mt-0.5">{candidate.department} • CGPA {candidate.cgpa}</p>
+                                    <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white leading-none">{candidate.alumnusName}</p>
+                                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{candidate.department} • CGPA {candidate.cgpa}</p>
                                   </div>
                                 </div>
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-astu-navy text-white">
@@ -966,7 +966,7 @@ const EmployerDashboard = () => {
 
                         {/* Matched Jobs */}
                         {searchResults.jobs.length > 0 && (
-                          <div className="space-y-1 border-t border-gray-150 dark:border-slate-800 pt-2">
+                          <div className="space-y-1 border-t border-[var(--border-color)] dark:border-slate-800 pt-2">
                             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#003366] dark:text-amber-400 px-2 block">
                               💼 Job Openings ({searchResults.jobs.length})
                             </span>
@@ -977,11 +977,11 @@ const EmployerDashboard = () => {
                                   setActiveTab('post_job');
                                   setSearchQuery('');
                                 }}
-                                className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                                className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 cursor-pointer transition-colors"
                               >
                                 <div>
-                                  <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{job.title}</p>
-                                  <p className="text-[10px] text-gray-500 mt-0.5">{job.location} • {job.type}</p>
+                                  <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white leading-none">{job.title}</p>
+                                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{job.location} • {job.type}</p>
                                 </div>
                                 <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
                                   {job.status}
@@ -993,7 +993,7 @@ const EmployerDashboard = () => {
 
                         {/* Matched Feedback */}
                         {searchResults.feedbacks.length > 0 && (
-                          <div className="space-y-1 border-t border-gray-150 dark:border-slate-800 pt-2">
+                          <div className="space-y-1 border-t border-[var(--border-color)] dark:border-slate-800 pt-2">
                             <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 px-2 block">
                               📝 Feedback Audits ({searchResults.feedbacks.length})
                             </span>
@@ -1004,10 +1004,10 @@ const EmployerDashboard = () => {
                                   setActiveTab('feedback');
                                   setSearchQuery('');
                                 }}
-                                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                                className="p-2 rounded-xl hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 cursor-pointer transition-colors"
                               >
-                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{fb.alumnusName} - {fb.department}</p>
-                                <p className="text-[10px] text-gray-500 mt-0.5 truncate">"{fb.comments}"</p>
+                                <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white leading-none">{fb.alumnusName} - {fb.department}</p>
+                                <p className="text-[10px] text-[var(--text-muted)] mt-0.5 truncate">"{fb.comments}"</p>
                               </div>
                             ))}
                           </div>
@@ -1084,7 +1084,7 @@ const EmployerDashboard = () => {
                           }}
                           className="flex items-start gap-3 rounded-xl px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                         >
-                          <span className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${notif.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                          <span className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${notif.unread ? 'bg-[#003580]' : 'bg-[var(--bg-page)]'}`} />
                           <div className="min-w-0 flex-1">
                             <p className="text-xs font-semibold text-[var(--text-primary)] leading-snug">{notif.text}</p>
                             <p className="text-[10px] text-[var(--text-secondary)] font-medium mt-1">{notif.time}</p>
@@ -1094,7 +1094,7 @@ const EmployerDashboard = () => {
                               e.stopPropagation();
                               handleRemoveNotification(notif.id);
                             }}
-                            className="flex-shrink-0 text-gray-400 hover:text-rose-500"
+                            className="flex-shrink-0 text-[var(--text-muted)] hover:text-rose-500"
                           >
                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1115,7 +1115,7 @@ const EmployerDashboard = () => {
                 <button
                   type="button"
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-3 rounded-[8px] border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 py-1.5 shadow-sm"
+                  className="flex items-center gap-3 rounded-[8px] border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-900 px-2.5 py-1.5 shadow-sm"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
                     {initials}
@@ -1124,7 +1124,7 @@ const EmployerDashboard = () => {
                     <div className="text-sm font-medium text-[var(--text-primary)]">{profile.name}</div>
                     <div className="text-[11px] text-[var(--text-secondary)]">HR Manager</div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                  <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
                 </button>
                 {menuOpen && menu}
               </div>
@@ -1132,7 +1132,7 @@ const EmployerDashboard = () => {
           </header>
 
           {/* Main Content */}
-          <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
 
@@ -1161,7 +1161,7 @@ const EmployerDashboard = () => {
                   <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <h3 className="text-sm font-semibold">Employer Command Center</h3>
-                      <p className="mt-1 text-xs text-gray-500">One clear snapshot for hiring, review queues, curriculum feedback, and recruiter follow-up.</p>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">One clear snapshot for hiring, review queues, curriculum feedback, and recruiter follow-up.</p>
                     </div>
                     <button
                       onClick={() => setActiveTab('analytics')}
@@ -1181,7 +1181,7 @@ const EmployerDashboard = () => {
                         >
                           <div className="flex items-center gap-2">
                             <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{signal.label}</p>
                           </div>
                           <p className="mt-2 text-2xl font-extrabold">{signal.value}</p>
                         </button>
@@ -1197,8 +1197,8 @@ const EmployerDashboard = () => {
                           <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
                             <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
                             <p className="mt-2 text-xl font-extrabold">{item.value}</p>
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-                            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{item.label}</p>
+                            <p className="mt-1 text-[11px] leading-relaxed text-[var(--text-muted)]">{item.helper}</p>
                           </div>
                         ))}
                       </div>
@@ -1231,10 +1231,10 @@ const EmployerDashboard = () => {
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">Active</span>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                          <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider">{stat.label}</p>
                           <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t border-gray-100/5">
+                        <div className="flex items-center gap-1 text-xs text-[var(--text-muted)] font-semibold pt-1 border-t border-gray-100/5">
                           <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
                           {stat.trend}
                         </div>
@@ -1246,10 +1246,10 @@ const EmployerDashboard = () => {
                 {/* Active Jobs list overview */}
                 <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
                   }`}>
-                  <div className="mb-4 flex items-center justify-between border-b border-gray-150 pb-2">
+                  <div className="mb-4 flex items-center justify-between border-b border-[var(--border-color)] pb-2">
                     <div>
                       <h3 className="text-sm font-semibold">Your Posted Positions</h3>
-                      <p className="text-xs text-gray-500 font-semibold">Quick updates on recent vacancies</p>
+                      <p className="text-xs text-[var(--text-muted)] font-semibold">Quick updates on recent vacancies</p>
                     </div>
                     <button
                       onClick={() => setActiveTab('post_job')}
@@ -1269,7 +1269,7 @@ const EmployerDashboard = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-bold text-sm">{job.title}</h4>
-                            <p className="text-xs text-gray-500">{job.location} • {job.type}</p>
+                            <p className="text-xs text-[var(--text-muted)]">{job.location} • {job.type}</p>
                           </div>
                           <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-extrabold rounded">
                             {job.applicationsCount} Applied
@@ -1285,7 +1285,7 @@ const EmployerDashboard = () => {
                   <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <h3 className="text-sm font-semibold">Employer Feature Control</h3>
-                      <p className="mt-1 text-xs text-gray-500">Recruitment, talent search, feedback, and partnership actions in one place.</p>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">Recruitment, talent search, feedback, and partnership actions in one place.</p>
                     </div>
                     <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
                       Hiring workflow active
@@ -1300,7 +1300,7 @@ const EmployerDashboard = () => {
                       >
                         <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
                         <h4 className="mt-3 text-sm font-bold">{card.title}</h4>
-                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{card.desc}</p>
                       </button>
                     ))}
                   </div>
@@ -1309,7 +1309,7 @@ const EmployerDashboard = () => {
                       <div key={signal.label} className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
                         <div className="flex items-center gap-2">
                           <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{signal.label}</p>
                         </div>
                         <p className="mt-2 text-lg font-extrabold">{signal.value}</p>
                       </div>
@@ -1386,13 +1386,13 @@ const EmployerDashboard = () => {
                   <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
                     }`}>
                     <h3 className="font-bold text-md mb-4 font-body-md">Recruitment Partner Perks</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
                       Get access to verified academic records directly from the ASTU Registrar office.
                       Your feedback provides high-value guidelines to the dean board during curriculum modernization cycles.
                     </p>
                     <div className="p-3 bg-gray-50/5 border border-gray-100/5 rounded-xl text-xs flex items-center gap-2">
                       <span className="material-symbols-outlined text-astu-green">verified</span>
-                      <span className="font-semibold text-gray-600">Verified ASTU Academic Records Integration Active</span>
+                      <span className="font-semibold text-[var(--text-secondary)]">Verified ASTU Academic Records Integration Active</span>
                     </div>
                   </section>
                 </div>
@@ -1414,7 +1414,7 @@ const EmployerDashboard = () => {
                     <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-[#003580]/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
                       <span className="material-symbols-outlined rounded-[8px] bg-[#003580]/10 p-2 text-[#003580]">{action.icon}</span>
                       <h3 className="mt-4 text-sm font-semibold">{action.title}</h3>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{action.desc}</p>
                       <span className="mt-4 inline-flex rounded-[8px] bg-[#003580] px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
                     </button>
                   ))}

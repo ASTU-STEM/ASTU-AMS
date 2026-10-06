@@ -42,7 +42,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
   const [otpSent, setOtpSent] = useState(false);
 
   const getPasswordStrength = (pwd: string) => {
-    if (!pwd) return { score: 0, label: '', color: 'bg-slate-200 dark:bg-slate-800', text: 'text-slate-400', width: 'w-0' };
+    if (!pwd) return { score: 0, label: '', color: 'bg-[var(--bg-page)] dark:bg-slate-800', text: 'text-[var(--text-muted)]', width: 'w-0' };
     let score = 0;
     if (pwd.length >= 6) score += 1;
     if (pwd.length >= 10) score += 1;
@@ -252,7 +252,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <div className="relative group cursor-pointer" onClick={triggerLogoUpload}>
-              <img src={formData.logoUrl ? (formData.logoUrl.startsWith('http') ? formData.logoUrl : `${UPLOAD_BASE}${formData.logoUrl}`) : '/default-logo.png'} alt="Logo" className="w-20 h-20 rounded-2xl border-3 border-white/20 shadow-xl object-cover transition-transform group-hover:scale-105 bg-white" />
+              <img src={formData.logoUrl ? (formData.logoUrl.startsWith('http') ? formData.logoUrl : `${UPLOAD_BASE}${formData.logoUrl}`) : '/default-logo.png'} alt="Logo" className="w-20 h-20 rounded-2xl border-3 border-white/20 shadow-xl object-cover transition-transform group-hover:scale-105 bg-[var(--bg-card)]" />
               <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               </div>
@@ -422,7 +422,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                         <button
                           type="button"
                           onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200"
                         >
                           <span className="material-symbols-outlined text-lg">{showCurrentPwd ? 'visibility_off' : 'visibility'}</span>
                         </button>
@@ -443,7 +443,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                           <button
                             type="button"
                             onClick={() => setShowNewPwd(!showNewPwd)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200"
                           >
                             <span className="material-symbols-outlined text-lg">{showNewPwd ? 'visibility_off' : 'visibility'}</span>
                           </button>
@@ -463,7 +463,7 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                           <button
                             type="button"
                             onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200"
                           >
                             <span className="material-symbols-outlined text-lg">{showConfirmPwd ? 'visibility_off' : 'visibility'}</span>
                           </button>
@@ -474,10 +474,10 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                     {/* Password Strength Meter */}
                     {newPassword && (
                       <div className="space-y-1 pt-1">
-                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-full bg-[var(--bg-page)] dark:bg-slate-800 rounded-full overflow-hidden">
                           <div className={`h-full transition-all duration-500 rounded-full ${getPasswordStrength(newPassword).color} ${getPasswordStrength(newPassword).width}`} />
                         </div>
-                        <p className="text-[10px] text-slate-400 font-medium">Use 8+ characters with letters, numbers & symbols for maximum security.</p>
+                        <p className="text-[10px] text-[var(--text-muted)] font-medium">Use 8+ characters with letters, numbers & symbols for maximum security.</p>
                       </div>
                     )}
                   </div>
@@ -507,20 +507,20 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                       </span>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Two-Factor Authentication (2FA)</h4>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Email OTP & Authenticator</span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wide">Email OTP & Authenticator</span>
                   </div>
 
                   <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
                     Enforce secondary one-time verification codes (Email OTP or Authenticator app) whenever logging into your employer recruitment console.
                   </p>
 
-                  <div className="rounded-xl border border-[var(--border-color)] p-3 bg-white/50 dark:bg-slate-900/50 space-y-2">
+                  <div className="rounded-xl border border-[var(--border-color)] p-3 bg-[var(--bg-card)] dark:bg-slate-900/50 space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-sm text-emerald-500">mark_email_read</span>
                         HR Contact Email 2FA
                       </span>
-                      <span className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-300">
+                      <span className="text-[10px] font-mono bg-[var(--bg-page)] dark:bg-slate-800 px-2 py-0.5 rounded text-[var(--text-secondary)] dark:text-slate-300">
                         {getTarget2FAEmail() || 'No Email Configured'}
                       </span>
                     </div>
@@ -557,14 +557,14 @@ export const CompanyProfileTab: React.FC<CompanyProfileTabProps> = ({ profile, o
                           placeholder="e.g. 849201"
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value)}
-                          className={`${inputClass} tracking-widest font-mono text-center font-bold text-lg bg-slate-50 dark:bg-slate-950 border-emerald-500/50 focus:border-emerald-500`}
+                          className={`${inputClass} tracking-widest font-mono text-center font-bold text-lg bg-[var(--bg-page)] dark:bg-slate-950 border-emerald-500/50 focus:border-emerald-500`}
                         />
                       </div>
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => setOtpSent(false)}
-                          className="flex-1 px-3 py-2 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="flex-1 px-3 py-2 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors"
                         >
                           Cancel
                         </button>

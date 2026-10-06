@@ -42,10 +42,10 @@ export type ContentCardItem = {
 
 const statusStyles: Record<ContentStatus, string> = {
   Published: 'bg-emerald-50 text-emerald-700',
-  Draft: 'bg-slate-100 text-slate-500',
+  Draft: 'bg-[var(--bg-page)] text-[var(--text-muted)]',
   Scheduled: 'bg-blue-50 text-blue-700',
   'Needs Review': 'bg-orange-50 text-orange-700',
-  Archived: 'bg-slate-100 text-slate-400',
+  Archived: 'bg-[var(--bg-page)] text-[var(--text-muted)]',
 };
 
 const statusIcons: Record<ContentStatus, React.ComponentType<{ className?: string }>> = {
@@ -62,7 +62,7 @@ const typeColors: Record<ContentType, string> = {
   announcement: 'bg-amber-100 text-amber-700',
   gallery: 'bg-purple-100 text-purple-700',
   event: 'bg-rose-100 text-rose-700',
-  template: 'bg-slate-100 text-slate-700',
+  template: 'bg-[var(--bg-page)] text-[var(--text-secondary)]',
 };
 
 export type ContentCardProps = {
@@ -103,8 +103,8 @@ export default function ContentCard({
   return (
     <div
       onClick={() => onClick?.(item.id)}
-      className={`group relative flex flex-col gap-5 rounded-xl border bg-white dark:bg-slate-900 dark:border-slate-800 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:border-slate-700 ${
-        selected ? 'border-[#003580] bg-[#003580]/3 shadow-md ring-1 ring-[#003580]/10 dark:border-sky-500 dark:ring-sky-500/20' : 'border-slate-200 shadow-sm hover:border-slate-300'
+      className={`group relative flex flex-col gap-5 rounded-xl border bg-[var(--bg-card)] dark:bg-slate-900 dark:border-slate-800 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:hover:border-slate-700 ${
+        selected ? 'border-[#003580] bg-[#003580]/3 shadow-md ring-1 ring-[#003580]/10 dark:border-sky-500 dark:ring-sky-500/20' : 'border-[var(--border-color)] shadow-sm hover:border-[var(--border-color)]'
       } ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* Top row: badges */}
@@ -116,7 +116,7 @@ export default function ContentCard({
               checked={!!selected}
               onClick={(event) => event.stopPropagation()}
               onChange={() => onSelect(item.id)}
-              className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
+              className="h-4 w-4 rounded border-[var(--border-color)] dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
             />
           )}
           <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColors[item.type]}`}>
@@ -140,7 +140,7 @@ export default function ContentCard({
           )}
         </div>
         {item.language && (
-          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-slate-400 bg-slate-100 dark:bg-slate-800 dark:text-slate-400 px-2 py-0.5 rounded-md">
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-page)] dark:bg-slate-800 dark:text-slate-400 px-2 py-0.5 rounded-md">
             {item.language}
           </span>
         )}
@@ -148,11 +148,11 @@ export default function ContentCard({
 
       {/* Title + excerpt */}
       <div>
-        <h3 className="text-base font-semibold text-slate-900 dark:text-white line-clamp-2 group-hover:text-[#003580] dark:group-hover:text-sky-400 transition-colors">
+        <h3 className="text-base font-semibold text-[var(--text-primary)] dark:text-white line-clamp-2 group-hover:text-[#003580] dark:group-hover:text-sky-400 transition-colors">
           {item.title}
         </h3>
         {!compact && item.excerpt && (
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{item.excerpt}</p>
+          <p className="mt-2 text-sm text-[var(--text-muted)] dark:text-slate-400 line-clamp-2 leading-relaxed">{item.excerpt}</p>
         )}
       </div>
 
@@ -160,18 +160,18 @@ export default function ContentCard({
       {!compact && item.tags && item.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {item.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+            <span key={tag} className="inline-flex items-center rounded-full bg-[var(--bg-page)] dark:bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-[var(--text-secondary)] dark:text-slate-300">
               {tag}
             </span>
           ))}
           {item.tags.length > 3 && (
-            <span className="text-[11px] font-medium text-slate-400">+{item.tags.length - 3}</span>
+            <span className="text-[11px] font-medium text-[var(--text-muted)]">+{item.tags.length - 3}</span>
           )}
         </div>
       )}
 
       {/* Metadata */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-400 dark:text-slate-500">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-[var(--text-muted)] dark:text-slate-500">
         {item.author && (
           <span className="flex items-center gap-1.5">
             <User className="h-3.5 w-3.5" /> {item.author}
@@ -193,22 +193,22 @@ export default function ContentCard({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-4" onClick={(event) => event.stopPropagation()}>
+      <div className="flex items-center gap-2 border-t border-[var(--border-color)] dark:border-slate-800 pt-4" onClick={(event) => event.stopPropagation()}>
         {onPreview && (
           <button type="button" onClick={() => onPreview(item.id)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white transition-all cursor-pointer" title="Preview">
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 hover:text-[var(--text-secondary)] dark:hover:text-white transition-all cursor-pointer" title="Preview">
             <Eye className="h-5 w-5" />
           </button>
         )}
         {onEdit && (
           <button type="button" onClick={() => onEdit(item.id)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all cursor-pointer" title="Edit">
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 transition-all cursor-pointer" title="Edit">
             <Edit3 className="h-5 w-5" />
           </button>
         )}
         {onDuplicate && (
           <button type="button" onClick={() => onDuplicate(item.id)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all cursor-pointer" title="Duplicate / Copy">
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all cursor-pointer" title="Duplicate / Copy">
             <Copy className="h-4 w-4" />
           </button>
         )}
@@ -227,7 +227,7 @@ export default function ContentCard({
         {onTogglePin && (
           <button type="button" onClick={() => onTogglePin(item.id)}
             className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border transition-all cursor-pointer ${
-              item.pinned ? 'border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 dark:hover:text-amber-400'
+              item.pinned ? 'border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300' : 'border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 dark:hover:text-amber-400'
             }`} title={item.pinned ? 'Unpin' : 'Pin'}>
             <Pin className="h-5 w-5" />
           </button>
@@ -235,7 +235,7 @@ export default function ContentCard({
         {onToggleFeature && (
           <button type="button" onClick={() => onToggleFeature(item.id)}
             className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border transition-all cursor-pointer ${
-              item.featured ? 'border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-300 hover:bg-violet-50 dark:hover:bg-violet-950/40 hover:text-violet-600 dark:hover:text-violet-400'
+              item.featured ? 'border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300' : 'border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-violet-50 dark:hover:bg-violet-950/40 hover:text-violet-600 dark:hover:text-violet-400'
             }`} title={item.featured ? 'Remove Featured' : 'Mark Featured'}>
             <Star className="h-5 w-5" />
           </button>
@@ -247,7 +247,7 @@ export default function ContentCard({
           </button>
         )}
         <button type="button" onClick={() => (onMore ? onMore(item.id) : onPreview?.(item.id))}
-          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white transition-all cursor-pointer" title="More Options">
+          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 hover:text-[var(--text-secondary)] dark:hover:text-white transition-all cursor-pointer" title="More Options">
           <MoreHorizontal className="h-5 w-5" />
         </button>
       </div>

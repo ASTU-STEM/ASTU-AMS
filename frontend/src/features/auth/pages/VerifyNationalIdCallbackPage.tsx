@@ -184,7 +184,7 @@ export default function VerifyNationalIdCallbackPage() {
     >
       <div className="space-y-5">
         {/* Step Indicator */}
-        <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-slate-50 p-3 rounded-lg border border-outline-variant">
+        <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-[var(--bg-page)] p-3 rounded-lg border border-outline-variant">
           <span>Step 2 of 3: Verify identity</span>
           <span className="bg-astu-navy/10 text-astu-navy px-2 py-0.5 rounded-full text-[10px]">
             {step === 'camera' || step === 'preview' ? 'Capture ID' : step === 'scanning' ? 'Scanning...' : step === 'verifying' ? 'Verifying...' : step === 'success' ? 'Verified ✓' : 'Failed'}
@@ -264,7 +264,7 @@ export default function VerifyNationalIdCallbackPage() {
             <div className="flex gap-3">
               <button
                 onClick={retake}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold border-2 border-outline-variant rounded-lg hover:bg-slate-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold border-2 border-outline-variant rounded-lg hover:bg-[var(--bg-page)] transition-colors"
               >
                 <RotateCcw className="h-4 w-4" />
                 Retake
@@ -296,7 +296,7 @@ export default function VerifyNationalIdCallbackPage() {
             </div>
             {/* Progress bar */}
             <div className="max-w-xs mx-auto space-y-1">
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-[var(--bg-page)] rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-astu-navy to-astu-teal rounded-full transition-all duration-300"
                   style={{ width: `${ocrProgress}%` }}
@@ -323,7 +323,7 @@ export default function VerifyNationalIdCallbackPage() {
               </p>
               {extractedName && (
                 <p className="text-xs mt-2">
-                  Extracted name: <span className="font-mono bg-slate-100 px-2 py-0.5 rounded border border-outline-variant font-semibold">{extractedName}</span>
+                  Extracted name: <span className="font-mono bg-[var(--bg-page)] px-2 py-0.5 rounded border border-outline-variant font-semibold">{extractedName}</span>
                 </p>
               )}
             </div>

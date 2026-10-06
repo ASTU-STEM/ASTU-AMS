@@ -108,7 +108,7 @@ export const PartnershipModal: React.FC<PartnershipModalProps> = ({
 
           {/* 1. Collaboration Types */}
           <div className="space-y-2">
-            <label className="text-xs font-extrabold uppercase tracking-wider text-gray-500">1. Select Collaboration Types</label>
+            <label className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-muted)]">1. Select Collaboration Types</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {partnershipOptions.map((opt) => {
                 const isSelected = selectedTypes.includes(opt.title);
@@ -121,16 +121,16 @@ export const PartnershipModal: React.FC<PartnershipModalProps> = ({
                         ? 'border-violet-600 bg-violet-600/10 text-violet-900 dark:text-violet-200 font-bold shadow-xs'
                         : darkMode
                           ? 'border-slate-800 bg-slate-800/40 text-slate-300 hover:border-slate-700'
-                          : 'border-gray-200 bg-gray-50/60 text-gray-700 hover:border-gray-300'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:border-[var(--border-color)]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold">{opt.title}</span>
-                      <span className={`text-sm font-bold ${isSelected ? 'text-violet-600' : 'text-gray-400'}`}>
+                      <span className={`text-sm font-bold ${isSelected ? 'text-violet-600' : 'text-[var(--text-muted)]'}`}>
                         {isSelected ? '✓' : '+'}
                       </span>
                     </div>
-                    <p className="text-[10px] text-gray-500 font-normal mt-1 leading-tight">{opt.desc}</p>
+                    <p className="text-[10px] text-[var(--text-muted)] font-normal mt-1 leading-tight">{opt.desc}</p>
                   </div>
                 );
               })}
@@ -140,24 +140,24 @@ export const PartnershipModal: React.FC<PartnershipModalProps> = ({
           {/* 2. Proposal Overview & Budget */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Proposal Title</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">Proposal Title</label>
               <input
                 type="text"
                 value={proposalTitle}
                 onChange={e => setProposalTitle(e.target.value)}
                 placeholder="e.g. 2026 Software Intern Cohort & Lab Sponsorship"
-                className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 outline-none"
+                className="w-full text-xs p-2.5 rounded-xl border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 outline-none"
                 required
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Estimated Annual Budget / Value</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">Estimated Annual Budget / Value</label>
               <input
                 type="text"
                 value={annualBudget}
                 onChange={e => setAnnualBudget(e.target.value)}
                 placeholder="e.g. 250,000 ETB"
-                className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 outline-none"
+                className="w-full text-xs p-2.5 rounded-xl border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 outline-none"
                 required
               />
             </div>
@@ -165,7 +165,7 @@ export const PartnershipModal: React.FC<PartnershipModalProps> = ({
 
           {/* 3. Target ASTU Departments */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Target ASTU Departments</label>
+            <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">Target ASTU Departments</label>
             <div className="flex flex-wrap gap-2">
               {astuDepartments.map(dept => {
                 const isSelected = targetDepartments.includes(dept);
@@ -177,7 +177,7 @@ export const PartnershipModal: React.FC<PartnershipModalProps> = ({
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                       isSelected
                         ? 'bg-[#003366] text-white border-[#003366] shadow-xs'
-                        : 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300'
+                        : 'bg-[var(--bg-page)] dark:bg-slate-800 border-[var(--border-color)] dark:border-slate-700 text-[var(--text-secondary)] dark:text-slate-300'
                     }`}
                   >
                     {isSelected && '✓ '} {dept}
@@ -189,21 +189,21 @@ export const PartnershipModal: React.FC<PartnershipModalProps> = ({
 
           {/* 4. Details / Scope */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Scope of Work & Objectives</label>
+            <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">Scope of Work & Objectives</label>
             <textarea
               value={scopeDetails}
               onChange={e => setScopeDetails(e.target.value)}
               placeholder="Outline specific expectations, student intake capacity, lab equipment support, or hackathon timeline..."
-              className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 outline-none h-20 resize-none"
+              className="w-full text-xs p-2.5 rounded-xl border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 outline-none h-20 resize-none"
             />
           </div>
 
           {/* Buttons */}
-          <div className="pt-4 border-t border-gray-150 flex justify-end gap-3">
+          <div className="pt-4 border-t border-[var(--border-color)] flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700"
+              className="px-4 py-2.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             >
               Cancel
             </button>

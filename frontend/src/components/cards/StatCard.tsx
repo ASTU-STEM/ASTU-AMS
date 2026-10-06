@@ -14,7 +14,7 @@ export default function StatCard({ title, value, icon, trend, subtitle, color, o
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl border border-outline-variant bg-white p-5 shadow-sm transition-all
+      className={`rounded-xl border border-outline-variant bg-[var(--bg-card)] p-5 shadow-sm transition-all
         ${onClick ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5' : ''}`}
     >
       <div className="flex items-start justify-between">

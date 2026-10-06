@@ -133,7 +133,7 @@ function statusClass(status: JobStatus | ApplicationStatus | string) {
       return 'bg-[#003580]/10 text-[#003580] border-[#003580]/15';
     case 'DRAFT':
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   }
 }
 
@@ -146,7 +146,7 @@ function typeClass(type: JobType | string) {
     case 'PART_TIME':
       return 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   }
 }
 
@@ -160,10 +160,10 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+        {subtitle && <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -595,7 +595,7 @@ export default function JobsManagement() {
       onClick={onClick}
       className={[
         'rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors',
-        isActive ? 'bg-[#003580] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]' : 'text-slate-600 hover:bg-slate-100',
+        isActive ? 'bg-[#003580] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)]',
       ].join(' ')}
     >
       {label}
@@ -633,7 +633,7 @@ export default function JobsManagement() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-[10px] border border-slate-200 bg-white p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-wrap gap-2 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         {statusButton('All Jobs', activeTab === 'jobs', () => setActiveTab('jobs'))}
         {statusButton('Applications', activeTab === 'applications', () => setActiveTab('applications'))}
         {statusButton('Analytics', activeTab === 'analytics', () => setActiveTab('analytics'))}
@@ -642,9 +642,9 @@ export default function JobsManagement() {
       {activeTab === 'jobs' && (
         <div className="space-y-4">
           {/* Modern Source Segment Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mr-1 flex items-center gap-1.5">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Source:
               </span>
               <button
@@ -653,11 +653,11 @@ export default function JobsManagement() {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedSource === 'All'
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
                 <span>All Listings</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]'}`}>
                   {jobSourceCounts.all}
                 </span>
               </button>
@@ -681,11 +681,11 @@ export default function JobsManagement() {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedSource === 'EXTERNAL'
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)]'
                 }`}
               >
                 <span>🏢 External Employers</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]'}`}>
                   {jobSourceCounts.external}
                 </span>
               </button>
@@ -704,26 +704,26 @@ export default function JobsManagement() {
           </div>
 
           {/* Detailed Filters Controls Toolbar */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-4 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
-                <Search className="h-4 w-4 text-slate-400" />
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm xl:col-span-4 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
+                <Search className="h-4 w-4 text-[var(--text-muted)]" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search job title, description, or company..."
-                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-slate-800"
+                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-[var(--text-primary)]"
                 />
                 {query && (
-                  <button type="button" onClick={() => setQuery('')} className="text-slate-400 hover:text-slate-600">
+                  <button type="button" onClick={() => setQuery('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-2 focus-within:border-[#003580] focus-within:bg-white transition-all">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm xl:col-span-2 focus-within:border-[#003580] focus-within:bg-white transition-all">
                 <ShieldCheck className="h-4 w-4 text-[#003580]" />
-                <select value={selectedJobStatus} onChange={(event) => setSelectedJobStatus(event.target.value as typeof selectedJobStatus)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
+                <select value={selectedJobStatus} onChange={(event) => setSelectedJobStatus(event.target.value as typeof selectedJobStatus)} className="w-full bg-transparent outline-none text-[var(--text-secondary)] font-medium">
                   {jobStatuses.map((status) => (
                     <option key={status} value={status}>
                       {status === 'All' ? 'All Statuses' : status}
@@ -732,9 +732,9 @@ export default function JobsManagement() {
                 </select>
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Building2 className="h-4 w-4 text-slate-500" />
-                <select value={selectedEmployer} onChange={(event) => setSelectedEmployer(event.target.value)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
+                <Building2 className="h-4 w-4 text-[var(--text-muted)]" />
+                <select value={selectedEmployer} onChange={(event) => setSelectedEmployer(event.target.value)} className="w-full bg-transparent outline-none text-[var(--text-secondary)] font-medium">
                   {employers.map((employer) => (
                     <option key={employer} value={employer}>
                       {employer === 'All' ? 'All Employers' : employer}
@@ -743,9 +743,9 @@ export default function JobsManagement() {
                 </select>
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Briefcase className="h-4 w-4 text-slate-500" />
-                <select value={selectedJobType} onChange={(event) => setSelectedJobType(event.target.value as typeof selectedJobType)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
+                <Briefcase className="h-4 w-4 text-[var(--text-muted)]" />
+                <select value={selectedJobType} onChange={(event) => setSelectedJobType(event.target.value as typeof selectedJobType)} className="w-full bg-transparent outline-none text-[var(--text-secondary)] font-medium">
                   {jobTypes.map((type) => (
                     <option key={type} value={type}>
                       {type === 'All' ? 'All Job Types' : type}
@@ -757,8 +757,8 @@ export default function JobsManagement() {
 
             {/* Active Filter Tags */}
             {hasActiveJobFilters && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-400 font-medium">Active filters:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border-color)] text-xs">
+                <span className="text-[var(--text-muted)] font-medium">Active filters:</span>
                 {selectedSource !== 'All' && (
                   <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-semibold text-[#003580] border border-blue-100">
                     Source: {selectedSource === 'ASTU_ADMIN' ? '🎓 ASTU / Admin' : '🏢 External'}
@@ -772,7 +772,7 @@ export default function JobsManagement() {
                   </span>
                 )}
                 {selectedEmployer !== 'All' && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700 border border-slate-200">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-page)] px-2 py-1 font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
                     Employer: {selectedEmployer}
                     <button type="button" onClick={() => setSelectedEmployer('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
                   </span>
@@ -798,19 +798,19 @@ export default function JobsManagement() {
             subtitle={`Showing ${filteredJobs.length} of ${jobs.length} employer job listings.`}
           >
             <div className="flex items-center justify-between mb-3 text-xs">
-              <div className="text-slate-500 font-medium">
+              <div className="text-[var(--text-muted)] font-medium">
                 Showing {filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0} to{' '}
                 {jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)} of {filteredJobs.length} jobs
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <span className="text-[var(--text-muted)] font-semibold">Per Page:</span>
                 <select
                   value={jobsLimit}
                   onChange={(e) => {
                     setJobsLimit(e.target.value as any);
                     setJobsPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-[#003580] outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-1 text-xs font-bold text-[#003580] outline-none"
                 >
                   <option value="10">10 per page</option>
                   <option value="25">25 per page</option>
@@ -821,40 +821,40 @@ export default function JobsManagement() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-[var(--bg-page)]">
                     <tr>
                       {['Job Title', 'Employer & Source', 'Type', 'Posted Date', 'Deadline', 'Applicants', 'Status', 'Actions'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                           {head}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {paginatedJobs.map((job) => {
                       const selfPosted = isEmployerSelfPosted(job.employer);
                       return (
-                        <tr key={job.id} className="hover:bg-slate-50/70">
+                        <tr key={job.id} className="hover:bg-[var(--bg-page)]">
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
                               {job.featured && <Pin className="h-4 w-4 text-[#E8A020]" />}
                               <div>
-                                <div className="font-semibold text-slate-900">{job.title}</div>
-                                <div className="text-xs text-slate-500 font-mono">{job.id.substring(0, 8)}...</div>
+                                <div className="font-semibold text-[var(--text-primary)]">{job.title}</div>
+                                <div className="text-xs text-[var(--text-muted)] font-mono">{job.id.substring(0, 8)}...</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            <div className="font-semibold text-slate-900">{job.employer}</div>
+                            <div className="font-semibold text-[var(--text-primary)]">{job.employer}</div>
                             {selfPosted ? (
                               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded border border-blue-100 mt-1">
                                 🎓 ASTU Admin
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mt-1">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] px-2 py-0.5 rounded border border-[var(--border-color)] mt-1">
                                 🏢 External Partner
                               </span>
                             )}
@@ -864,9 +864,9 @@ export default function JobsManagement() {
                               {job.type}
                             </AdminBadge>
                           </td>
-                          <td className="px-4 py-4 text-slate-600">{formatDate(job.postedDate)}</td>
-                          <td className="px-4 py-4 text-slate-600">{formatDate(job.deadline)}</td>
-                          <td className="px-4 py-4 font-bold text-slate-800">{job.applicants}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)]">{formatDate(job.postedDate)}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)]">{formatDate(job.deadline)}</td>
+                          <td className="px-4 py-4 font-bold text-[var(--text-primary)]">{job.applicants}</td>
                           <td className="px-4 py-4">
                             <AdminBadge variant="success" className={statusClass(job.status)}>
                               {job.status}
@@ -874,11 +874,11 @@ export default function JobsManagement() {
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
-                              <button title="Edit Job" type="button" onClick={() => openEditJob(job)} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                              <button title="Edit Job" type="button" onClick={() => openEditJob(job)} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-muted)] hover:bg-[var(--bg-page)]">
                                 <PencilLine className="h-4 w-4" />
                               </button>
                               {job.status === 'PUBLISHED' ? (
-                                <button title="Close Job Listing" type="button" onClick={() => handleUpdateStatus(job.id, 'CLOSED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                                <button title="Close Job Listing" type="button" onClick={() => handleUpdateStatus(job.id, 'CLOSED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-muted)] hover:bg-[var(--bg-page)]">
                                   <ShieldX className="h-4 w-4" />
                                 </button>
                               ) : (
@@ -896,7 +896,7 @@ export default function JobsManagement() {
                     })}
                     {paginatedJobs.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="py-12 text-center text-slate-400 italic">No job listings found matching active filter options.</td>
+                        <td colSpan={8} className="py-12 text-center text-[var(--text-muted)] italic">No job listings found matching active filter options.</td>
                       </tr>
                     )}
                   </tbody>
@@ -904,11 +904,11 @@ export default function JobsManagement() {
               </div>
 
               {/* Jobs Table Pagination Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--bg-page)] border-t border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)]">
                 <div>
-                  Showing <span className="font-bold text-slate-900">{filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0}</span> to{' '}
-                  <span className="font-bold text-slate-900">{jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)}</span> of{' '}
-                  <span className="font-bold text-slate-900">{filteredJobs.length}</span> listings
+                  Showing <span className="font-bold text-[var(--text-primary)]">{filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)}</span> of{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{filteredJobs.length}</span> listings
                 </div>
                 {jobsLimit !== 'all' && totalJobPages > 1 && (
                   <div className="flex items-center gap-1.5">
@@ -916,18 +916,18 @@ export default function JobsManagement() {
                       type="button"
                       disabled={jobsPage === 1}
                       onClick={() => setJobsPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Previous
                     </button>
-                    <span className="px-2 font-bold text-slate-800">
+                    <span className="px-2 font-bold text-[var(--text-primary)]">
                       Page {jobsPage} of {totalJobPages}
                     </span>
                     <button
                       type="button"
                       disabled={jobsPage >= totalJobPages}
                       onClick={() => setJobsPage((p) => Math.min(totalJobPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Next
                     </button>
@@ -942,9 +942,9 @@ export default function JobsManagement() {
       {activeTab === 'applications' && (
         <div className="space-y-4">
           {/* Modern Source Segment Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mr-1 flex items-center gap-1.5">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Job Owner:
               </span>
               <button
@@ -953,11 +953,11 @@ export default function JobsManagement() {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedSource === 'All'
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
                 <span>All Applications</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]'}`}>
                   {appSourceCounts.all}
                 </span>
               </button>
@@ -981,11 +981,11 @@ export default function JobsManagement() {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedSource === 'EXTERNAL'
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)]'
                 }`}
               >
                 <span>🏢 External Employer Jobs</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]'}`}>
                   {appSourceCounts.external}
                 </span>
               </button>
@@ -1004,26 +1004,26 @@ export default function JobsManagement() {
           </div>
 
           {/* Detailed Applications Filter Controls Toolbar */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-5 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
-                <Search className="h-4 w-4 text-slate-400" />
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm xl:col-span-5 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
+                <Search className="h-4 w-4 text-[var(--text-muted)]" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search alumni name, job title, or company..."
-                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-slate-800"
+                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-[var(--text-primary)]"
                 />
                 {query && (
-                  <button type="button" onClick={() => setQuery('')} className="text-slate-400 hover:text-slate-600">
+                  <button type="button" onClick={() => setQuery('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Filter className="h-4 w-4 text-slate-400" />
-                <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
+                <Filter className="h-4 w-4 text-[var(--text-muted)]" />
+                <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none text-[var(--text-secondary)] font-medium">
                   <option value="All">All Candidate Statuses</option>
                   {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((status) => (
                     <option key={status} value={status}>
@@ -1033,15 +1033,15 @@ export default function JobsManagement() {
                 </select>
               </label>
 
-              <div className="xl:col-span-4 flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                <span className="text-xs font-semibold text-slate-500 px-2">
+              <div className="xl:col-span-4 flex flex-wrap items-center justify-between gap-2 bg-[var(--bg-page)] p-1.5 rounded-lg border border-[var(--border-color)]">
+                <span className="text-xs font-semibold text-[var(--text-muted)] px-2">
                   {selectedApplications.length} selected
                 </span>
                 <div className="flex items-center gap-1.5">
                   <select
                     value={bulkStatus}
                     onChange={(event) => setBulkStatus(event.target.value as ApplicationStatus)}
-                    className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 outline-none"
+                    className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] outline-none"
                   >
                     {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((status) => (
                       <option key={status} value={status}>
@@ -1059,8 +1059,8 @@ export default function JobsManagement() {
 
             {/* Active Filter Tags */}
             {hasActiveAppFilters && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-400 font-medium">Active filters:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border-color)] text-xs">
+                <span className="text-[var(--text-muted)] font-medium">Active filters:</span>
                 {selectedSource !== 'All' && (
                   <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-semibold text-[#003580] border border-blue-100">
                     Owner: {selectedSource === 'ASTU_ADMIN' ? '🎓 ASTU / Admin Jobs' : '🏢 External Jobs'}
@@ -1074,7 +1074,7 @@ export default function JobsManagement() {
                   </span>
                 )}
                 {query && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700 border border-slate-200">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-page)] px-2 py-1 font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
                     Search: "{query}"
                     <button type="button" onClick={() => setQuery('')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
                   </span>
@@ -1085,19 +1085,19 @@ export default function JobsManagement() {
 
           <SectionCard title="Applications" subtitle={`Showing ${filteredApplications.length} of ${applicationRows.length} applicant reviews.`}>
             <div className="flex items-center justify-between mb-3 text-xs">
-              <div className="text-slate-500 font-medium">
+              <div className="text-[var(--text-muted)] font-medium">
                 Showing {filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0} to{' '}
                 {appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)} of {filteredApplications.length} applications
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <span className="text-[var(--text-muted)] font-semibold">Per Page:</span>
                 <select
                   value={appsLimit}
                   onChange={(e) => {
                     setAppsLimit(e.target.value as any);
                     setAppsPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-[#003580] outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-1 text-xs font-bold text-[#003580] outline-none"
                 >
                   <option value="10">10 per page</option>
                   <option value="25">25 per page</option>
@@ -1108,31 +1108,31 @@ export default function JobsManagement() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-[var(--bg-page)]">
                     <tr>
                       <th className="w-12 px-4 py-3 text-left">
                         <input
                           type="checkbox"
                           checked={selectableApplications.length > 0 && selectedApplications.length === selectableApplications.length}
                           onChange={toggleSelectAllApplications}
-                          className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                          className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580]"
                         />
                       </th>
                       {['Applicant (alumni)', 'Job Title', 'Employer & Source', 'Applied Date', 'Status', 'Actions'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                           {head}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {paginatedApplications.map((application) => {
                       const selfPosted = isAppSelfPosted(application);
                       return (
-                        <tr key={application.id} className="hover:bg-slate-50/70">
+                        <tr key={application.id} className="hover:bg-[var(--bg-page)]">
                           <td className="px-4 py-4">
                             <input
                               type="checkbox"
@@ -1140,7 +1140,7 @@ export default function JobsManagement() {
                               title={selfPosted ? 'Select for bulk update' : 'Only ASTU / Super Admin job applications can be bulk updated by admin'}
                               checked={selectedApplications.includes(application.id)}
                               onChange={() => toggleApplication(application.id)}
-                              className="h-4 w-4 rounded border-slate-300 text-[#003580] disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] disabled:opacity-40 disabled:cursor-not-allowed"
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -1151,22 +1151,22 @@ export default function JobsManagement() {
                             >
                               {application.applicant}
                             </button>
-                            <span className="text-[10px] text-slate-400 block font-mono">{application.email || 'alumni@astu.edu.et'}</span>
+                            <span className="text-[10px] text-[var(--text-muted)] block font-mono">{application.email || 'alumni@astu.edu.et'}</span>
                           </td>
-                          <td className="px-4 py-4 text-slate-700 font-semibold">{application.jobTitle}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)] font-semibold">{application.jobTitle}</td>
                           <td className="px-4 py-4">
-                            <div className="font-semibold text-slate-800">{application.employer}</div>
+                            <div className="font-semibold text-[var(--text-primary)]">{application.employer}</div>
                             {selfPosted ? (
                               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded border border-blue-100 mt-1">
                                 🎓 ASTU Official
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mt-1">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] px-2 py-0.5 rounded border border-[var(--border-color)] mt-1">
                                 🏢 External Partner
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-4 text-slate-600">{formatDate(application.appliedDate)}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)]">{formatDate(application.appliedDate)}</td>
                           <td className="px-4 py-4">
                             <AdminBadge variant="default" className={statusClass(application.status)}>
                               {application.status}
@@ -1178,7 +1178,7 @@ export default function JobsManagement() {
                                 type="button"
                                 title="View Application Details & Cover Letter"
                                 onClick={() => setSelectedAppModal(application)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-[#003580] shadow-sm transition-colors"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-color)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[#003580] shadow-sm transition-colors"
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
@@ -1186,7 +1186,7 @@ export default function JobsManagement() {
                                 type="button"
                                 title="Open Chat in ASTU_AMS Hub"
                                 onClick={() => handleOpenChatWithAlumni(application)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-slate-200 bg-white text-[#003580] hover:bg-blue-50 shadow-sm transition-colors"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-color)] bg-white text-[#003580] hover:bg-blue-50 shadow-sm transition-colors"
                               >
                                 <MessageSquare className="h-4 w-4" />
                               </button>
@@ -1194,7 +1194,7 @@ export default function JobsManagement() {
                                 <select
                                   value={application.status}
                                   onChange={(e) => handleSingleAppStatusChange(application.id, e.target.value as ApplicationStatus)}
-                                  className="rounded-[6px] border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-[#003580]"
+                                  className="rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] shadow-sm hover:border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[#003580]"
                                 >
                                   {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((st) => (
                                     <option key={st} value={st}>
@@ -1203,7 +1203,7 @@ export default function JobsManagement() {
                                   ))}
                                 </select>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-xs text-slate-400 font-medium italic">
+                                <span className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] font-medium italic">
                                   Employer Managed
                                 </span>
                               )}
@@ -1214,7 +1214,7 @@ export default function JobsManagement() {
                     })}
                     {filteredApplications.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-400 italic">No application records found matching active filter options.</td>
+                        <td colSpan={7} className="py-12 text-center text-[var(--text-muted)] italic">No application records found matching active filter options.</td>
                       </tr>
                     )}
                   </tbody>
@@ -1222,11 +1222,11 @@ export default function JobsManagement() {
               </div>
 
               {/* Applications Table Pagination Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--bg-page)] border-t border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)]">
                 <div>
-                  Showing <span className="font-bold text-slate-900">{filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0}</span> to{' '}
-                  <span className="font-bold text-slate-900">{appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)}</span> of{' '}
-                  <span className="font-bold text-slate-900">{filteredApplications.length}</span> applications
+                  Showing <span className="font-bold text-[var(--text-primary)]">{filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)}</span> of{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{filteredApplications.length}</span> applications
                 </div>
                 {appsLimit !== 'all' && totalAppPages > 1 && (
                   <div className="flex items-center gap-1.5">
@@ -1234,18 +1234,18 @@ export default function JobsManagement() {
                       type="button"
                       disabled={appsPage === 1}
                       onClick={() => setAppsPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Previous
                     </button>
-                    <span className="px-2 font-bold text-slate-800">
+                    <span className="px-2 font-bold text-[var(--text-primary)]">
                       Page {appsPage} of {totalAppPages}
                     </span>
                     <button
                       type="button"
                       disabled={appsPage >= totalAppPages}
                       onClick={() => setAppsPage((p) => Math.min(totalAppPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Next
                     </button>
@@ -1260,14 +1260,14 @@ export default function JobsManagement() {
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Detailed Hired Alumni Placement Breakdown */}
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   <UserCheck className="h-5 w-5 text-emerald-600" />
                   Alumni Hiring & Placement Breakdown
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   Real database tracking of total hired alumni separated by placement origin and employer category.
                 </p>
               </div>
@@ -1287,7 +1287,7 @@ export default function JobsManagement() {
                   <span className="text-xs font-bold uppercase tracking-wider text-blue-800">System Job Board Hired</span>
                   <span className="text-2xl font-black text-[#003580]">{hiredAnalytics.jobBoardHired}</span>
                 </div>
-                <p className="text-[11px] text-slate-600 leading-snug">
+                <p className="text-[11px] text-[var(--text-secondary)] leading-snug">
                   Alumni hired directly through ASTU-AMS platform job board applications.
                 </p>
                 <div className="pt-2 text-[10px] font-bold text-blue-900 border-t border-blue-100 flex items-center justify-between">
@@ -1302,7 +1302,7 @@ export default function JobsManagement() {
                   <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">Non-Job Board Hired</span>
                   <span className="text-2xl font-black text-emerald-700">{hiredAnalytics.nonJobBoardHired}</span>
                 </div>
-                <p className="text-[11px] text-slate-600 leading-snug">
+                <p className="text-[11px] text-[var(--text-secondary)] leading-snug">
                   Employed alumni reported via tracer surveys & profile updates.
                 </p>
                 <div className="pt-2 text-[10px] font-bold text-emerald-900 border-t border-emerald-100">
@@ -1316,7 +1316,7 @@ export default function JobsManagement() {
                   <span className="text-xs font-bold uppercase tracking-wider text-amber-800">External Employer Hires</span>
                   <span className="text-2xl font-black text-amber-700">{hiredAnalytics.externalHired}</span>
                 </div>
-                <p className="text-[11px] text-slate-600 leading-snug">
+                <p className="text-[11px] text-[var(--text-secondary)] leading-snug">
                   Hired by external corporate partners (Safaricom, INSA, etc.).
                 </p>
                 <div className="pt-2 text-[10px] font-bold text-amber-900 border-t border-amber-100">
@@ -1330,7 +1330,7 @@ export default function JobsManagement() {
                   <span className="text-xs font-bold uppercase tracking-wider text-indigo-800">University (ASTU) Hires</span>
                   <span className="text-2xl font-black text-indigo-700">{hiredAnalytics.astuHired}</span>
                 </div>
-                <p className="text-[11px] text-slate-600 leading-snug">
+                <p className="text-[11px] text-[var(--text-secondary)] leading-snug">
                   Hired for internal ASTU campus openings & academic staff.
                 </p>
                 <div className="pt-2 text-[10px] font-bold text-indigo-900 border-t border-indigo-100">
@@ -1345,15 +1345,15 @@ export default function JobsManagement() {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={hiredAnalytics.hiredChannelData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                      <XAxis dataKey="name" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                      <XAxis dataKey="name" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                       <Tooltip />
                       <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                         {hiredAnalytics.hiredChannelData.map((entry, index) => (
                           <Cell key={index} fill={entry.fill || '#003580'} />
                         ))}
-                        <LabelList dataKey="value" position="top" fill="#1E293B" fontSize={12} fontWeight="bold" />
+                        <LabelList dataKey="value" position="top" fill="var(--chart-label)" fontSize={12} fontWeight="bold" />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -1364,15 +1364,15 @@ export default function JobsManagement() {
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={hiredAnalytics.hiredEmployerData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                      <XAxis dataKey="name" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                      <XAxis dataKey="name" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                       <Tooltip />
                       <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                         {hiredAnalytics.hiredEmployerData.map((entry, index) => (
                           <Cell key={index} fill={entry.fill || '#E8A020'} />
                         ))}
-                        <LabelList dataKey="value" position="top" fill="#1E293B" fontSize={12} fontWeight="bold" />
+                        <LabelList dataKey="value" position="top" fill="var(--chart-label)" fontSize={12} fontWeight="bold" />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -1386,9 +1386,9 @@ export default function JobsManagement() {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={jobsPostedData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                    <XAxis dataKey="month" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                    <XAxis dataKey="month" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                     <Tooltip />
                     <Bar dataKey="jobs" fill="#003580" radius={[8, 8, 0, 0]} />
                   </BarChart>
@@ -1405,7 +1405,7 @@ export default function JobsManagement() {
                       {funnelData.map((entry, index) => (
                         <Cell key={entry.name} fill={['#003580', '#5B7FB8', '#E8A020', '#1D9E75'][index % 4]} />
                       ))}
-                      <LabelList position="right" fill="#334155" stroke="none" dataKey="name" />
+                      <LabelList position="right" fill="var(--chart-label)" stroke="none" dataKey="name" />
                     </Funnel>
                   </FunnelChart>
                 </ResponsiveContainer>
@@ -1416,12 +1416,12 @@ export default function JobsManagement() {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={employerPosts} layout="vertical" margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" horizontal={false} />
-                    <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis type="category" dataKey="name" width={130} tick={{ fill: '#334155', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+                    <XAxis type="number" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="name" width={130} tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                     <Tooltip />
                     <Bar dataKey="jobs" fill="#E8A020" radius={[0, 8, 8, 0]}>
-                      <LabelList dataKey="jobs" position="right" fill="#334155" fontSize={11} />
+                      <LabelList dataKey="jobs" position="right" fill="var(--chart-label)" fontSize={11} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -1441,7 +1441,7 @@ export default function JobsManagement() {
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -1460,7 +1460,7 @@ export default function JobsManagement() {
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Job Title">
             <input
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
               value={formTitle}
               onChange={(e) => setFormTitle(e.target.value)}
               placeholder="e.g. Senior Lecturer / Software Engineer"
@@ -1468,16 +1468,16 @@ export default function JobsManagement() {
           </Field>
           <Field label="Employer / Organization">
             <input
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
               value={formEmployer}
               onChange={(e) => setFormEmployer(e.target.value)}
               placeholder="ASTU University (or Company Name)"
             />
-            <span className="text-[10px] text-slate-400 font-medium">Leave blank for official ASTU Campus Placement</span>
+            <span className="text-[10px] text-[var(--text-muted)] font-medium">Leave blank for official ASTU Campus Placement</span>
           </Field>
           <Field label="Type">
             <select
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
               value={formType}
               onChange={(e) => setFormType(e.target.value as JobType)}
             >
@@ -1491,14 +1491,14 @@ export default function JobsManagement() {
           <Field label="Deadline">
             <input
               type="date"
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
               value={formDeadline}
               onChange={(e) => setFormDeadline(e.target.value)}
             />
           </Field>
           <Field label="Location">
             <input
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
               value={formLocation}
               onChange={(e) => setFormLocation(e.target.value)}
               placeholder="e.g. Adama, Ethiopia (ASTU Main Campus)"
@@ -1506,7 +1506,7 @@ export default function JobsManagement() {
           </Field>
           <Field label="Salary / Scale">
             <input
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
               value={formSalary}
               onChange={(e) => setFormSalary(e.target.value)}
               placeholder="e.g. 25,000 ETB - 35,000 ETB / Scale"
@@ -1516,7 +1516,7 @@ export default function JobsManagement() {
             <Field label="Job Description & Qualifications">
               <textarea
                 rows={3}
-                className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="Key responsibilities, eligibility criteria, department requirements..."
@@ -1533,16 +1533,16 @@ export default function JobsManagement() {
           onClose={() => setSelectedAppModal(null)}
           size="lg"
         >
-          <div className="space-y-5 text-slate-800">
+          <div className="space-y-5 text-[var(--text-primary)]">
             {/* Header Profile Info */}
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#003580] text-lg font-bold text-white shadow-md">
                   {selectedAppModal.applicant.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-slate-900">{selectedAppModal.applicant}</h4>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium mt-0.5">
+                  <h4 className="text-base font-bold text-[var(--text-primary)]">{selectedAppModal.applicant}</h4>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)] font-medium mt-0.5">
                     <span>{selectedAppModal.email || 'alumni@astu.edu.et'}</span>
                     <span>•</span>
                     <span>{selectedAppModal.phone || '+251 900 000 000'}</span>
@@ -1559,7 +1559,7 @@ export default function JobsManagement() {
                     ASTU Official
                   </span>
                 ) : (
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 uppercase tracking-wider border border-slate-200">
+                  <span className="rounded-full bg-[var(--bg-page)] px-2.5 py-1 text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider border border-[var(--border-color)]">
                     External Employer
                   </span>
                 )}
@@ -1567,43 +1567,43 @@ export default function JobsManagement() {
             </div>
 
             {/* Position Details & Applied Date */}
-            <div className="grid gap-3 sm:grid-cols-3 rounded-lg border border-slate-100 bg-white p-3 text-xs">
+            <div className="grid gap-3 sm:grid-cols-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] p-3 text-xs">
               <div>
-                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Job Position</span>
-                <span className="font-bold text-slate-900">{selectedAppModal.jobTitle}</span>
+                <span className="text-[var(--text-muted)] font-semibold block uppercase tracking-wider text-[10px]">Job Position</span>
+                <span className="font-bold text-[var(--text-primary)]">{selectedAppModal.jobTitle}</span>
               </div>
               <div>
-                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Employer</span>
-                <span className="font-bold text-slate-800">{selectedAppModal.employer}</span>
+                <span className="text-[var(--text-muted)] font-semibold block uppercase tracking-wider text-[10px]">Employer</span>
+                <span className="font-bold text-[var(--text-primary)]">{selectedAppModal.employer}</span>
               </div>
               <div>
-                <span className="text-slate-400 font-semibold block uppercase tracking-wider text-[10px]">Applied On</span>
-                <span className="font-bold text-slate-800">{formatDate(selectedAppModal.appliedDate)}</span>
+                <span className="text-[var(--text-muted)] font-semibold block uppercase tracking-wider text-[10px]">Applied On</span>
+                <span className="font-bold text-[var(--text-primary)]">{formatDate(selectedAppModal.appliedDate)}</span>
               </div>
             </div>
 
             {/* Academic & Skills Section */}
             <div className="space-y-2">
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500">Academic & Technical Background</h5>
-              <div className="grid gap-3 sm:grid-cols-2 rounded-lg border border-slate-200 p-3.5 bg-white text-xs">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Academic & Technical Background</h5>
+              <div className="grid gap-3 sm:grid-cols-2 rounded-lg border border-[var(--border-color)] p-3.5 bg-[var(--bg-card)] text-xs">
                 <div>
-                  <div className="text-slate-500 font-medium">Department / Major:</div>
-                  <div className="font-bold text-slate-900">{selectedAppModal.department || 'Software Engineering / Computer Science'}</div>
+                  <div className="text-[var(--text-muted)] font-medium">Department / Major:</div>
+                  <div className="font-bold text-[var(--text-primary)]">{selectedAppModal.department || 'Software Engineering / Computer Science'}</div>
                 </div>
                 <div>
-                  <div className="text-slate-500 font-medium">Graduation Year & CGPA:</div>
-                  <div className="font-bold text-slate-900">
+                  <div className="text-[var(--text-muted)] font-medium">Graduation Year & CGPA:</div>
+                  <div className="font-bold text-[var(--text-primary)]">
                     Class of {selectedAppModal.graduationYear || '2024'} • CGPA {selectedAppModal.cgpa || '3.75'}
                     <span className="ml-2 inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
                       ASTU Verified
                     </span>
                   </div>
                 </div>
-                <div className="sm:col-span-2 pt-2 border-t border-slate-100">
-                  <div className="text-slate-500 font-medium mb-1.5">Technical Skills & Competencies:</div>
+                <div className="sm:col-span-2 pt-2 border-t border-[var(--border-color)]">
+                  <div className="text-[var(--text-muted)] font-medium mb-1.5">Technical Skills & Competencies:</div>
                   <div className="flex flex-wrap gap-1.5">
                     {(selectedAppModal.skills && selectedAppModal.skills.length > 0 ? selectedAppModal.skills : ['TypeScript', 'Node.js', 'React', 'Database Systems']).map((skill, i) => (
-                      <span key={i} className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                      <span key={i} className="rounded bg-[var(--bg-page)] px-2 py-0.5 text-[11px] font-semibold text-[var(--text-secondary)]">
                         {skill}
                       </span>
                     ))}
@@ -1614,15 +1614,15 @@ export default function JobsManagement() {
 
             {/* Cover Letter / Statement of Intent */}
             <div className="space-y-2">
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500">Cover Letter / Statement of Purpose</h5>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-800 whitespace-pre-line font-normal shadow-inner">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Cover Letter / Statement of Purpose</h5>
+              <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-xs leading-relaxed text-[var(--text-primary)] whitespace-pre-line font-normal shadow-inner">
                 {selectedAppModal.coverLetter || 'I am writing to express my strong interest in this position. With my solid technical background from ASTU and hands-on project experience, I am ready to contribute effectively.'}
               </div>
             </div>
 
             {/* Resume / Portfolio Attachments */}
             <div className="space-y-2">
-              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500">Resume & Candidate Links</h5>
+              <h5 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Resume & Candidate Links</h5>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -1647,12 +1647,12 @@ export default function JobsManagement() {
                   Open ASTU_AMS Hub Chat
                 </button>
                 {selectedAppModal.linkedIn && (
-                  <a href={getFullUrl(selectedAppModal.linkedIn)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-slate-50">
+                  <a href={getFullUrl(selectedAppModal.linkedIn)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-[var(--bg-page)]">
                     🔗 LinkedIn Profile
                   </a>
                 )}
                 {selectedAppModal.gitHub && (
-                  <a href={getFullUrl(selectedAppModal.gitHub)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  <a href={getFullUrl(selectedAppModal.gitHub)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">
                     💻 GitHub Profile
                   </a>
                 )}
@@ -1660,18 +1660,18 @@ export default function JobsManagement() {
             </div>
 
             {/* Moderation Status Controls inside Modal */}
-            <div className="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
-              <div className="text-xs font-medium text-slate-500">
+            <div className="pt-3 border-t border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs font-medium text-[var(--text-muted)]">
                 {selectedAppModal.isSelfPosted ? (
                   <span className="text-emerald-700 font-semibold">✓ You can update candidate status for this ASTU campus opening below.</span>
                 ) : (
-                  <span className="text-slate-500 italic">This application belongs to an external employer listing. Status is managed directly by the employer.</span>
+                  <span className="text-[var(--text-muted)] italic">This application belongs to an external employer listing. Status is managed directly by the employer.</span>
                 )}
               </div>
 
               {selectedAppModal.isSelfPosted && (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-700">Update Candidate Status:</span>
+                  <span className="text-xs font-bold text-[var(--text-secondary)]">Update Candidate Status:</span>
                   <select
                     value={selectedAppModal.status}
                     onChange={async (e) => {
@@ -1679,7 +1679,7 @@ export default function JobsManagement() {
                       await handleSingleAppStatusChange(selectedAppModal.id, nextSt);
                       setSelectedAppModal({ ...selectedAppModal, status: nextSt });
                     }}
-                    className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#003580]"
+                    className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-bold text-[var(--text-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#003580]"
                   >
                     {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((st) => (
                       <option key={st} value={st}>
@@ -1707,10 +1707,10 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-3">
-        <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h4>
+        {subtitle && <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -1726,7 +1726,7 @@ function Field({
 }) {
   return (
     <label className="space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</span>
+      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</span>
       {children}
     </label>
   );

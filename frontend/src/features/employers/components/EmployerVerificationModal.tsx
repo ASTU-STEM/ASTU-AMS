@@ -93,24 +93,24 @@ export const EmployerVerificationModal: React.FC<EmployerVerificationModalProps>
           {/* Business Credentials */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Registration / TIN Number *</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">Registration / TIN Number *</label>
               <input
                 type="text"
                 value={tinNumber}
                 onChange={e => setTinNumber(e.target.value)}
                 placeholder="e.g. 123456781232"
-                className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 outline-none font-mono font-bold"
+                className="w-full text-xs p-2.5 rounded-xl border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 outline-none font-mono font-bold"
                 required
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 dark:text-slate-300">Authorized Signatory Name *</label>
+              <label className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">Authorized Signatory Name *</label>
               <input
                 type="text"
                 value={signatoryName}
                 onChange={e => setSignatoryName(e.target.value)}
                 placeholder="e.g. Mr. Tolsa Badhasa"
-                className="w-full text-xs p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 outline-none"
+                className="w-full text-xs p-2.5 rounded-xl border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 outline-none"
                 required
               />
             </div>
@@ -119,42 +119,42 @@ export const EmployerVerificationModal: React.FC<EmployerVerificationModalProps>
           {/* Document Upload Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* License Upload */}
-            <div className="space-y-1.5 p-3 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40">
-              <label className="block text-xs font-extrabold text-gray-800 dark:text-slate-200">1. Commercial License / Certificate</label>
+            <div className="space-y-1.5 p-3 rounded-2xl border border-dashed border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800/40">
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-slate-200">1. Commercial License / Certificate</label>
               <input
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg"
                 onChange={e => setBusinessLicenseFile(e.target.files?.[0] || null)}
-                className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#003366] file:text-white cursor-pointer"
+                className="w-full text-xs text-[var(--text-muted)] file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#003366] file:text-white cursor-pointer"
               />
-              <span className="text-[10px] text-gray-400 block">{businessLicenseFile ? `Selected: ${businessLicenseFile.name}` : 'PDF, JPG, or PNG up to 10MB'}</span>
+              <span className="text-[10px] text-[var(--text-muted)] block">{businessLicenseFile ? `Selected: ${businessLicenseFile.name}` : 'PDF, JPG, or PNG up to 10MB'}</span>
             </div>
 
             {/* HR Authorization */}
-            <div className="space-y-1.5 p-3 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40">
-              <label className="block text-xs font-extrabold text-gray-800 dark:text-slate-200">2. HR Authorization Letter / ID</label>
+            <div className="space-y-1.5 p-3 rounded-2xl border border-dashed border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800/40">
+              <label className="block text-xs font-extrabold text-[var(--text-primary)] dark:text-slate-200">2. HR Authorization Letter / ID</label>
               <input
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg"
                 onChange={e => setHrAuthFile(e.target.files?.[0] || null)}
-                className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#003366] file:text-white cursor-pointer"
+                className="w-full text-xs text-[var(--text-muted)] file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#003366] file:text-white cursor-pointer"
               />
-              <span className="text-[10px] text-gray-400 block">{hrAuthFile ? `Selected: ${hrAuthFile.name}` : 'Official company badge or HR letter'}</span>
+              <span className="text-[10px] text-[var(--text-muted)] block">{hrAuthFile ? `Selected: ${hrAuthFile.name}` : 'Official company badge or HR letter'}</span>
             </div>
           </div>
 
           {/* ASTU Non-Disclosure & Data-Sharing Agreement */}
-          <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 space-y-3">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-slate-200 flex items-center gap-1.5">
+          <div className="p-4 rounded-2xl bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 space-y-3">
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-secondary)] dark:text-slate-200 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-rose-500 text-sm">gavel</span>
               ASTU Alumni Data-Sharing Agreement & Non-Disclosure (NDA)
             </h4>
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-[11px] text-[var(--text-muted)] dark:text-slate-400 leading-relaxed">
               By submitting this verification request, <strong>{companyName || 'your organization'}</strong> agrees to use ASTU graduate academic records, verified CGPA scores, and candidate contact details strictly for recruitment and internship onboarding purposes. Unauthorized third-party distribution is prohibited under Federal Ethiopian Data Protection standards.
             </p>
 
-            <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-slate-700">
-              <label className="flex items-start gap-2.5 text-xs text-gray-800 dark:text-slate-200 font-semibold cursor-pointer">
+            <div className="space-y-2 pt-2 border-t border-[var(--border-color)] dark:border-slate-700">
+              <label className="flex items-start gap-2.5 text-xs text-[var(--text-primary)] dark:text-slate-200 font-semibold cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agreePrivacyPolicy}
@@ -165,7 +165,7 @@ export const EmployerVerificationModal: React.FC<EmployerVerificationModalProps>
                 <span>I agree to ASTU Employer Recruitment Terms & Candidate Privacy Regulations.</span>
               </label>
 
-              <label className="flex items-start gap-2.5 text-xs text-gray-800 dark:text-slate-200 font-semibold cursor-pointer">
+              <label className="flex items-start gap-2.5 text-xs text-[var(--text-primary)] dark:text-slate-200 font-semibold cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agreeNda}
@@ -179,11 +179,11 @@ export const EmployerVerificationModal: React.FC<EmployerVerificationModalProps>
           </div>
 
           {/* Buttons */}
-          <div className="pt-3 border-t border-gray-150 flex justify-end gap-3">
+          <div className="pt-3 border-t border-[var(--border-color)] flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700"
+              className="px-4 py-2.5 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             >
               Cancel
             </button>

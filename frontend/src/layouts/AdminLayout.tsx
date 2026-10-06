@@ -31,9 +31,9 @@ class AdminRouteBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="rounded-[10px] border border-[#E24B4A]/20 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <h2 className="text-lg font-semibold text-slate-900">Something went wrong loading this admin page.</h2>
-          <p className="mt-2 text-sm text-slate-600">
+        <div className="rounded-[10px] border border-[#E24B4A]/20 bg-[var(--bg-card)] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Something went wrong loading this admin page.</h2>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
             {this.state.message || 'A render error occurred in the admin workspace.'}
           </p>
         </div>
@@ -375,11 +375,11 @@ export default function AdminLayout() {
                 )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-                  <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5">
+                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-[var(--border-color)] px-3 py-2.5">
                     <div>
-                      <div className="text-sm font-extrabold text-slate-900">Notifications</div>
-                      <div className="text-[11px] font-medium text-slate-500">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
+                      <div className="text-sm font-extrabold text-[var(--text-primary)]">Notifications</div>
+                      <div className="text-[11px] font-medium text-[var(--text-muted)]">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
                     </div>
                     {unreadCount > 0 && (
                       <button
@@ -393,7 +393,7 @@ export default function AdminLayout() {
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-1 p-1">
                     {notificationsLoading && displayNotifications.length === 0 ? (
-                      <div className="px-3 py-6 text-center text-xs font-medium text-slate-500">
+                      <div className="px-3 py-6 text-center text-xs font-medium text-[var(--text-muted)]">
                         Loading notifications…
                       </div>
                     ) : notificationsError && displayNotifications.length === 0 ? (
@@ -408,7 +408,7 @@ export default function AdminLayout() {
                         </button>
                       </div>
                     ) : displayNotifications.length === 0 ? (
-                      <div className="px-3 py-6 text-center text-xs font-medium text-slate-500">
+                      <div className="px-3 py-6 text-center text-xs font-medium text-[var(--text-muted)]">
                         You have no notifications yet.
                       </div>
                     ) : displayNotifications.map((item: any, idx: number) => {
@@ -430,16 +430,16 @@ export default function AdminLayout() {
                               toast.error(err?.message || 'Could not mark notification as read.');
                             });
                           }}
-                          className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                          className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-[var(--bg-page)]'}`}
                         >
                           <span
                             className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
                             style={{ backgroundColor: item.tone || (isUnread ? '#003580' : '#94A3B8') }}
                           />
                           <div className="min-w-0 flex-1">
-                            {item.title && <p className="text-xs font-extrabold text-slate-900">{item.title}</p>}
-                            <p className="text-xs font-medium text-slate-700 leading-snug">{item.message || item.text || item.content}</p>
-                            <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                            {item.title && <p className="text-xs font-extrabold text-[var(--text-primary)]">{item.title}</p>}
+                            <p className="text-xs font-medium text-[var(--text-secondary)] leading-snug">{item.message || item.text || item.content}</p>
+                            <p className="mt-1 text-[10px] font-semibold text-[var(--text-muted)]">
                               {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.time || 'Recently'}
                             </p>
                           </div>
@@ -448,7 +448,7 @@ export default function AdminLayout() {
                       );
                     })}
                   </div>
-                  <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-2 border-t border-[var(--border-color)] px-3 py-2.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -487,14 +487,14 @@ export default function AdminLayout() {
                   <div className="text-sm font-medium text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">{user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}</div>
                 </div>
-                <ChevronDown className="h-4 w-4 text-slate-400" />
+                <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
               </button>
               {menuOpen && menu}
             </div>
           </div>
         </header>
 
-        <main id="main-content" tabIndex={-1}className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1}className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-[var(--bg-page)] p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

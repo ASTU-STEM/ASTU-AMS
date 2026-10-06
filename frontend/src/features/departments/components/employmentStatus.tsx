@@ -29,13 +29,13 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
   },
   UNSPECIFIED: {
     label: 'Status not reported',
-    badge: 'bg-slate-100 text-slate-700 ring-1 ring-slate-300',
+    badge: 'bg-[var(--bg-page)] text-[var(--text-secondary)] ring-1 ring-[var(--border-color)]',
     dot: 'bg-slate-500',
     Icon: UserX,
   },
   UNKNOWN: {
     label: 'Unknown',
-    badge: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
+    badge: 'bg-[var(--bg-page)] text-[var(--text-secondary)] ring-1 ring-[var(--border-color)]',
     dot: 'bg-slate-400',
     Icon: UserX,
   },

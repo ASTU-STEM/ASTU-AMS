@@ -29,7 +29,13 @@ export const alumniSelectClass = alumniInputClass;
 export const alumniCardClass =
   'rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs';
 
-export const alumniPanelClass = `${alumniCardClass} p-5 sm:p-6`;
+export const alumniPanelClass = `${alumniCardClass} p-6 sm:p-7`;
+
+/** Vertical rhythm between major page blocks (hero → section → section). */
+export const alumniPageClass = 'space-y-8 sm:space-y-10 text-[var(--text-primary)]';
+
+/** Standard gap for card grids (tools, jobs, management hub). */
+export const alumniGridGapClass = 'gap-4 sm:gap-5 lg:gap-6';
 
 export const alumniSectionTitleClass =
   'text-lg font-bold tracking-tight text-[var(--text-primary)]';
@@ -85,4 +91,45 @@ export const alumniTabBtn = (active: boolean) =>
       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
   }`;
 
-export const alumniPageClass = 'space-y-6 sm:space-y-8 text-[var(--text-primary)]';
+/** Human-readable titles for the sticky alumni header (matches sidebar labels). */
+export const ALUMNI_TAB_LABELS: Record<string, string> = {
+  dashboard: 'Dashboard',
+  management: 'Management Hub',
+  jobs: 'Jobs Board',
+  career: 'Career Center & Workspace',
+  surveys: 'Surveys',
+  tools: 'Tools',
+  profile: 'My Profile',
+  mentorship: 'Mentorship',
+  directory: 'Directory',
+  forum: 'Community',
+  donations: 'Giving',
+  documents: 'Documents',
+  messages: 'Messages',
+  settings: 'Settings',
+};
+
+export const alumniSidebarSectionLabelClass =
+  'px-3 mb-3 text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest';
+
+export const alumniSidebarNavListClass = 'space-y-1';
+
+export const alumniSidebarNavItem = (active: boolean) =>
+  `nav-btn w-full flex items-center px-2.5 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${
+    active
+      ? 'bg-[#003366]/10 text-[#003366] dark:bg-[#FFCC00]/10 dark:text-[#FFD700] font-bold shadow-2xs ring-1 ring-[#003366]/20 dark:ring-[#FFCC00]/25'
+      : 'text-[var(--text-secondary)] hover:text-[#003366] dark:hover:text-[#FFD700] hover:bg-[var(--bg-page)]'
+  }`;
+
+export const alumniSidebarNavIcon = (active: boolean) =>
+  `relative w-8 h-8 rounded-lg flex items-center justify-center transition-all shrink-0 ${
+    active
+      ? 'bg-[#003366] text-white shadow-xs dark:bg-[#FFCC00] dark:text-[#003366]'
+      : 'bg-[var(--bg-page)] text-[var(--text-muted)] group-hover:text-[#003366] dark:group-hover:text-[#FFD700]'
+  }`;
+
+export const alumniSidebarNavBadgeClass =
+  'flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300';
+
+export const alumniSidebarActiveDotClass =
+  'ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] dark:bg-[#FFCC00] shrink-0';

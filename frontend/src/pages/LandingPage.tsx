@@ -260,8 +260,8 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-on-surface">
-      <header className="sticky top-0 z-50 border-b border-outline-variant bg-white/95 backdrop-blur-md">
+    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)]">
+      <header className="sticky top-0 z-50 border-b border-outline-variant bg-[var(--bg-card)] backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-3 px-4 md:px-8">
           <Link to="/" className="flex min-w-fit items-center gap-2.5">
             <img
@@ -291,7 +291,7 @@ export default function LandingPage() {
             />
 
             {isSearchOpen && filteredSearch.length > 0 ? (
-              <div className="absolute top-12 w-full overflow-hidden rounded-md border border-outline-variant bg-white shadow-lg">
+              <div className="absolute top-12 w-full overflow-hidden rounded-md border border-outline-variant bg-[var(--bg-card)] shadow-lg">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}
@@ -346,7 +346,7 @@ export default function LandingPage() {
         </div>
 
         {isMobileNavOpen ? (
-          <div className="border-t border-outline-variant bg-white px-4 py-4 xl:hidden">
+          <div className="border-t border-outline-variant bg-[var(--bg-card)] px-4 py-4 xl:hidden">
             <div className="space-y-2">
               {navSections.map((item) => (
                 <button
@@ -419,7 +419,7 @@ export default function LandingPage() {
         </section>
 
         <section className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8">
-          <div className="grid overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl md:grid-cols-3">
+          <div className="grid overflow-hidden rounded-xl border border-outline-variant bg-[var(--bg-card)] shadow-xl md:grid-cols-3">
             <article className="flex flex-col items-center gap-3 border-b border-outline-variant p-8 text-center md:border-b-0 md:border-r">
               <div className="rounded-full bg-astu-navy/10 p-3 text-astu-navy">
                 <Users className="h-5 w-5" />
@@ -458,7 +458,7 @@ export default function LandingPage() {
               return (
                 <article
                   key={item.title}
-                  className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+                  className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div className={`mb-4 inline-flex rounded-lg p-3 ${item.tint}`}>
                     <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -529,7 +529,7 @@ export default function LandingPage() {
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-4 sm:col-span-2 lg:col-span-2">
-              <div className="reveal rounded-xl border border-outline-variant bg-white p-4">
+              <div className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-4">
                 <div className="mb-3 flex items-center gap-2 rounded-md bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant">
                   <BookOpen className="h-4 w-4" />
                   Share an update with the ASTU community...
@@ -542,7 +542,7 @@ export default function LandingPage() {
               </div>
 
               {communityPosts.map((post) => (
-                <article key={post.name} className="reveal rounded-xl border border-outline-variant bg-white p-5">
+                <article key={post.name} className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-5">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {post.image && (
@@ -572,7 +572,7 @@ export default function LandingPage() {
             </div>
 
             <aside className="space-y-4 lg:col-span-1">
-              <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
+              <article className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-4">
                 <h4 className="text-sm font-semibold text-astu-navy">Recommended Connections</h4>
                 <div className="mt-3 space-y-3 text-sm">
                   <button className="flex w-full items-center justify-between rounded-md border border-outline-variant px-3 py-2 text-left hover:bg-surface-container-low">
@@ -584,7 +584,7 @@ export default function LandingPage() {
                 </div>
               </article>
 
-              <article className="reveal rounded-xl border border-outline-variant bg-white p-4">
+              <article className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-4">
                 <h4 className="text-sm font-semibold text-astu-navy">ASTU Trending Topics</h4>
                 <ul className="mt-3 space-y-2 text-sm text-on-surface-variant">
                   <li>#EngineeringCareers</li>
@@ -626,7 +626,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <button
-                className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
+                className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-[var(--bg-page)]"
                 onClick={() => navigate("/department/dashboard")}
               >
                 Participate in Impact Study
@@ -666,7 +666,7 @@ export default function LandingPage() {
 
           <div className="grid gap-5 sm:grid-cols-2">
             {events.map((event) => (
-              <article key={event.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-white shadow-sm">
+              <article key={event.title} className="reveal overflow-hidden rounded-xl border border-outline-variant bg-[var(--bg-card)] shadow-sm">
                 <img
                   alt={event.title}
                   className="h-48 w-full object-cover sm:h-52"
@@ -709,7 +709,7 @@ export default function LandingPage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
             {['New Engineering Lab Opened', 'Research Grant Results', 'Career Expo 2026'].map((news, i) => (
-              <article key={i} className="reveal rounded-xl border border-outline-variant bg-white p-5 shadow-sm">
+              <article key={i} className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] p-5 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-wider text-astu-red">Announcement</p>
                 <h4 className="mt-2 font-semibold text-astu-navy">{news}</h4>
                 <p className="mt-2 text-xs text-on-surface-variant">May {15 + i * 5}, 2026</p>
@@ -728,7 +728,7 @@ export default function LandingPage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
             {communityPosts.map((post, i) => (
-              <article key={i} className="reveal rounded-xl border border-outline-variant bg-white overflow-hidden shadow-sm">
+              <article key={i} className="reveal rounded-xl border border-outline-variant bg-[var(--bg-card)] overflow-hidden shadow-sm">
                 {post.image && <img src={post.image} alt={post.name} className="h-48 w-full object-cover" onError={handleImageError} />}
                 <div className="p-4">
                   <h4 className="font-semibold text-astu-navy">{post.name}</h4>
@@ -749,17 +749,17 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
-            <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
+            <div className="text-center p-6 rounded-xl border border-outline-variant bg-[var(--bg-card)]">
               <MapPin className="h-8 w-8 mx-auto text-astu-navy mb-3" />
               <h4 className="font-semibold text-astu-navy">Address</h4>
               <p className="text-xs text-on-surface-variant mt-1">Adama, Oromia, Ethiopia</p>
             </div>
-            <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
+            <div className="text-center p-6 rounded-xl border border-outline-variant bg-[var(--bg-card)]">
               <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">phone</span>
               <h4 className="font-semibold text-astu-navy">Phone</h4>
               <p className="text-xs text-on-surface-variant mt-1">+251-000-0000</p>
             </div>
-            <div className="text-center p-6 rounded-xl border border-outline-variant bg-white">
+            <div className="text-center p-6 rounded-xl border border-outline-variant bg-[var(--bg-card)]">
               <span className="material-symbols-outlined text-astu-navy text-3xl mb-3">mail</span>
               <h4 className="font-semibold text-astu-navy">Email</h4>
               <p className="text-xs text-on-surface-variant mt-1">irccd@astu.edu.et</p>

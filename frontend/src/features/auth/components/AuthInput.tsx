@@ -68,7 +68,7 @@ export default function AuthInput({
             disabled:cursor-not-allowed disabled:opacity-50
             ${hasError
               ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5 dark:bg-red-950/20 dark:border-red-500'
-              : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 bg-white hover:border-outline-variant/80 dark:bg-slate-800/80 dark:border-slate-700 dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
+              : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 bg-[var(--bg-card)] hover:border-outline-variant/80 dark:bg-slate-800/80 dark:border-slate-700 dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
             }
           `}
           aria-invalid={hasError ? true : undefined}

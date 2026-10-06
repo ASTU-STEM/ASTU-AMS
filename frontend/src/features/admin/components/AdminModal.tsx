@@ -122,7 +122,7 @@ export default function AdminModal({
         aria-labelledby={titleId}
         tabIndex={-1}
         className={[
-          'modal-panel my-auto flex max-h-[92vh] w-full flex-col overflow-hidden rounded-[16px] border border-slate-300/80 bg-white dark:border-slate-700 dark:bg-slate-900 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.7)]',
+          'modal-panel my-auto flex max-h-[92vh] w-full flex-col overflow-hidden rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-700 dark:bg-slate-900 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.7)]',
           sizeClasses[size],
         ].join(' ')}
       >
@@ -135,7 +135,7 @@ export default function AdminModal({
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3.5">
               {/* Official ASTU Logo Badge */}
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/30">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-card)] p-1.5 shadow-md border border-white/30">
                 <img
                   src="/images/astu-seal-logo.png"
                   alt="ASTU Logo"
@@ -168,13 +168,13 @@ export default function AdminModal({
         </div>
 
         {/* Modal Content Body */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5 text-sm text-slate-600 dark:text-slate-300 bg-slate-50/30 dark:bg-slate-900/50">
+        <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5 text-sm text-[var(--text-secondary)] dark:text-slate-300 bg-[var(--bg-page)] dark:bg-slate-900/50">
           {children}
         </div>
 
         {/* Modal Footer */}
         {footer && (
-          <div className="shrink-0 border-t border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-3.5 shadow-sm">
+          <div className="shrink-0 border-t border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-900 px-6 py-3.5 shadow-sm">
             {footer}
           </div>
         )}

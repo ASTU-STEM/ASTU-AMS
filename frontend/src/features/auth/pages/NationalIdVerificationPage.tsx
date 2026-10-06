@@ -51,7 +51,7 @@ export default function NationalIdVerificationPage() {
         </div>
 
         {/* Step Indicator */}
-        <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-slate-50 p-3 rounded-lg border border-outline-variant">
+        <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-[var(--bg-page)] p-3 rounded-lg border border-outline-variant">
           <span>Step 2 of 3: Verify identity</span>
           <span className="bg-astu-navy/10 text-astu-navy px-2 py-0.5 rounded-full text-[10px]">National ID</span>
         </div>

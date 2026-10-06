@@ -3,8 +3,7 @@ import { ToolItem, ToolCategory, ToolType, SavedToolResult } from '../types/tool
 import { TOOL_REGISTRY } from '../data/toolRegistry';
 import { TOOL_CATEGORIES } from '../data/toolCategories';
 
-// Categories that actually contain tools. TOOL_CATEGORIES also defines
-// ethiopia_jobs, which has zero tools, so counting the list overstated coverage.
+// Categories that actually contain tools
 const POPULATED_CATEGORY_COUNT = new Set(TOOL_REGISTRY.map((t) => t.category)).size;
 import { toolsService } from '../services/toolsService';
 
@@ -15,8 +14,19 @@ import { ToolFilters } from '../components/ToolFilters';
 import { ToolRunnerModal } from '../components/ToolRunnerModal';
 import { SavedResultsView } from '../components/SavedResultsView';
 
-import { Wrench, History, Compass, LayoutGrid } from 'lucide-react';
+import { History, Compass } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AlumniSectionShell } from '../../alumni/components/AlumniSectionShell';
+import { AlumniSectionBlock } from '../../alumni/components/AlumniSectionBlock';
+import {
+  alumniGhostBtnClass,
+  alumniGridGapClass,
+  alumniPrimaryBtnClass,
+  alumniStatusBadge,
+} from '../../alumni/components/alumniUi';
+import { formatEmploymentStatus } from '../../alumni/utils/statusUi';
+import { ALL_TOOL_TYPES } from '../utils/toolUi';
+import { ToolTypeBadge } from '../components/ToolTypeBadge';
 
 interface AlumniToolsPageProps {
   profile?: any;
@@ -82,6 +92,14 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
     }
   };
 
+  const handleClearRecentTools = () => {
+    try {
+      localStorage.removeItem('astu_alumni_tools_recent');
+    } catch (_) {}
+    setRecentToolIds([]);
+    toast.success('Recent tools cleared');
+  };
+
   // Category counts calculation
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -130,143 +148,176 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
       .filter((t): t is ToolItem => t !== undefined);
   }, [recentToolIds]);
 
+  const toolTypeCounts = useMemo(() => {
+    const counts: Partial<Record<(typeof ALL_TOOL_TYPES)[number], number>> = {};
+    ALL_TOOL_TYPES.forEach((type) => {
+      counts[type] = TOOL_REGISTRY.filter((t) => t.toolType === type).length;
+    });
+    return counts;
+  }, []);
+
+  const employmentLabel = formatEmploymentStatus(profile?.employmentStatus);
+  const departmentLabel = profile?.department?.name || 'ASTU Graduate';
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* ── 1. Hero Product Header Banner (Restored from Screenshot) ────────────── */}
-      <section className="relative overflow-hidden rounded-3xl border border-[var(--border-color)] bg-gradient-to-r from-[#003366] via-[#004d99] to-[#1d9e75] p-6 sm:p-8 text-white shadow-xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FFD700]/15 rounded-full blur-xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[10px] font-extrabold uppercase tracking-widest text-emerald-200 border border-white/20">
-              <Wrench className="h-3.5 w-3.5" />
-              Career toolkit
-            </div>
-
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-              Alumni tools
-            </h1>
-
-            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl">
-              Calculators, CV helpers, and career utilities for ASTU graduates in Ethiopia and abroad.
-            </p>
+    <div className="mx-auto max-w-7xl pb-12">
+      <AlumniSectionShell
+        eyebrow="Career & innovation suite"
+        title="Alumni tools"
+        description="Calculators, CV helpers, financial guides, and career utilities tailored for ASTU graduates in Ethiopia and abroad."
+        metrics={[
+          { value: TOOL_REGISTRY.length, label: 'Tools', accent: 'gold' },
+          { value: POPULATED_CATEGORY_COUNT, label: 'Categories', accent: 'white' },
+          { value: favorites.length, label: 'Favorites', accent: 'white' },
+          { value: savedResults.length, label: 'Saved runs', accent: 'green' },
+        ]}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('catalog')}
+              className={
+                activeTab === 'catalog'
+                  ? 'inline-flex items-center rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#003366] shadow-md'
+                  : alumniGhostBtnClass + ' !text-white/90 hover:!bg-white/10 hover:!text-white border border-white/20 px-4 py-2 text-xs'
+              }
+            >
+              Browse tools
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={
+                activeTab === 'history'
+                  ? 'inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-[#003366] shadow-md'
+                  : alumniGhostBtnClass + ' !text-white/90 hover:!bg-white/10 hover:!text-white border border-white/20 px-4 py-2 text-xs inline-flex items-center gap-1.5'
+              }
+            >
+              <History className="h-3.5 w-3.5" />
+              Saved ({savedResults.length})
+            </button>
           </div>
-
-          {/* Quick Metrics Banner */}
-          <div className="flex flex-row md:flex-col items-center md:items-end gap-3 shrink-0">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15">
-              <span className="material-symbols-outlined text-amber-300 text-2xl">construction</span>
-              <div>
-                <p className="text-sm font-black text-white">{TOOL_REGISTRY.length} tools</p>
-                <p className="text-[10px] text-white/70">{POPULATED_CATEGORY_COUNT} categories</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveTab('catalog')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === 'catalog' ? 'bg-white text-[#003366] shadow-sm' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
-                }`}
-              >
-                Browse tools
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('history')}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === 'history' ? 'bg-white text-[#003366] shadow-sm' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
-                }`}
-              >
-                <History className="h-3.5 w-3.5" />
-                <span>Saved ({savedResults.length})</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─────────────────────────────────────────────────────────────
-          TAB 1: TOOLS CATALOG
-         ───────────────────────────────────────────────────────────── */}
+        }
+      >
       {activeTab === 'catalog' && (
         <>
+          <AlumniSectionBlock
+            title="Your alumni status"
+            description="Recommendations and quick picks adapt to your profile and employment stage."
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={alumniStatusBadge.brand}>
+                  <span className="material-symbols-outlined text-[14px]">school</span>
+                  {departmentLabel}
+                </span>
+                <span className={alumniStatusBadge.info}>
+                  <span className="material-symbols-outlined text-[14px]">work</span>
+                  {employmentLabel}
+                </span>
+                {recentToolIds.length > 0 && (
+                  <span className={alumniStatusBadge.neutral}>
+                    {recentToolIds.length} recent in this browser
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {ALL_TOOL_TYPES.filter((type) => (toolTypeCounts[type] ?? 0) > 0).map((type) => {
+                  const active = selectedType === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setSelectedType(active ? 'all' : type)}
+                      className={`inline-flex items-center gap-1.5 rounded-full transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#003366]/30 ${
+                        active ? 'ring-2 ring-[#003366]/40 dark:ring-[#FFCC00]/40' : ''
+                      }`}
+                      title={`${active ? 'Clear' : 'Filter by'} this type (${toolTypeCounts[type]} tools)`}
+                    >
+                      <ToolTypeBadge toolType={type} compact />
+                      <span className="rounded-full bg-[var(--bg-card)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--text-muted)] border border-[var(--border-color)]">
+                        {toolTypeCounts[type]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </AlumniSectionBlock>
+
           {/* ── 2. Quick Tools Launchpad ─────────────────────────────── */}
           <QuickToolsRow onOpenTool={handleOpenTool} />
 
           {/* ── 3. Recommended for You (Profile-Tailored) ──────────── */}
           <RecommendedToolsRow profile={profile} onOpenTool={handleOpenTool} />
 
-          {/* ── 4. Recently Used Tools (if any) ──────────────────────── */}
           {recentTools.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <History className="h-4 w-4 text-[#003366] dark:text-blue-400" />
-                  Recently Used
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+            <AlumniSectionBlock
+              step={3}
+              title="Recently used"
+              description="Pick up where you left off — your last opened tools in this browser."
+              aside={
+                <button type="button" onClick={handleClearRecentTools} className={alumniGhostBtnClass + ' text-xs'}>
+                  Clear recent
+                </button>
+              }
+            >
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 {recentTools.map((tool) => (
                   <button
                     key={tool.id}
                     type="button"
                     onClick={() => handleOpenTool(tool)}
-                    className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-2xs hover:border-[#003366] transition-all dark:border-slate-800 dark:bg-slate-900"
+                    className="flex shrink-0 items-center gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 text-left shadow-xs transition-all hover:border-[#003366]/30 dark:hover:border-[#FFCC00]/30"
                   >
-                    <span className="material-symbols-outlined text-base text-[#003366] dark:text-blue-400">
+                    <span className="material-symbols-outlined text-xl text-[#003366] dark:text-[#FFD700]">
                       {tool.icon}
                     </span>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
+                    <span className="text-sm font-bold text-[var(--text-primary)] truncate max-w-[200px]">
                       {tool.name}
                     </span>
                   </button>
                 ))}
               </div>
-            </div>
+            </AlumniSectionBlock>
           )}
 
-          {/* ── 5. Search & Category Filters Bar ────────────────────── */}
-          <ToolFilters
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-            selectedType={selectedType}
-            onSelectType={setSelectedType}
-            favoritesCount={favorites.length}
-            categoryCounts={categoryCounts}
-            totalTools={TOOL_REGISTRY.length}
-          />
+          <AlumniSectionBlock
+            step={recentTools.length > 0 ? 4 : 3}
+            title="Find tools"
+            description="Search by keyword, filter by type, or browse categories."
+          >
+            <ToolFilters
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              selectedType={selectedType}
+              onSelectType={setSelectedType}
+              favoritesCount={favorites.length}
+              categoryCounts={categoryCounts}
+              totalTools={TOOL_REGISTRY.length}
+            />
+          </AlumniSectionBlock>
 
-          {/* ── 6. Main Tools Grid Section ──────────────────────────── */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {selectedCategory === 'all'
-                    ? 'All Tools Catalog'
-                    : selectedCategory === 'favorites'
-                    ? 'My Favorite Tools'
-                    : TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || 'Category Tools'}
-                </h2>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                  {filteredTools.length} tools
-                </span>
-              </div>
-
-                <span className="text-xs text-slate-400 hidden sm:inline-block">
-                  Showing {filteredTools.length} of {TOOL_REGISTRY.length} tools across {POPULATED_CATEGORY_COUNT} categories
-                </span>
-            </div>
-
-            {/* Grid of Cards */}
+          <AlumniSectionBlock
+            step={recentTools.length > 0 ? 5 : 4}
+            title={
+              selectedCategory === 'all'
+                ? 'Full catalog'
+                : selectedCategory === 'favorites'
+                  ? 'My favorites'
+                  : TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || 'Category'
+            }
+            description={`Showing ${filteredTools.length} of ${TOOL_REGISTRY.length} tools across ${POPULATED_CATEGORY_COUNT} categories.`}
+            aside={
+              <span className="rounded-full border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-1 text-xs font-bold text-[var(--text-secondary)]">
+                {filteredTools.length} results
+              </span>
+            }
+          >
             {filteredTools.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ${alumniGridGapClass}`}>
                 {filteredTools.map((tool) => (
                   <ToolCard
                     key={tool.id}
@@ -278,20 +329,20 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-dashed border-slate-200 bg-white text-center dark:border-slate-800 dark:bg-slate-900">
-                <Compass className="h-10 w-10 text-slate-300 mb-3" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] p-12 text-center">
+                <Compass className="mb-4 h-10 w-10 text-[var(--text-muted)]" />
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   {searchQuery
                     ? 'No tools matched your search'
                     : selectedCategory !== 'all'
                       ? 'This category has no tools yet'
                       : 'No tools found'}
                 </h3>
-                <p className="mt-1 text-xs text-slate-500 max-w-sm dark:text-slate-400">
+                <p className="mt-2 max-w-sm text-xs leading-relaxed text-[var(--text-secondary)]">
                   {searchQuery
-                    ? `Nothing matched "${searchQuery}". Try a broader term such as "salary", "CV", "GPA" or "Ethiopia".`
+                    ? `Nothing matched "${searchQuery}". Try "salary", "CV", "GPA", or "Ethiopia".`
                     : selectedCategory !== 'all'
-                      ? `"${TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || selectedCategory}" is defined but no tools have been added to it yet.`
+                      ? `"${TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || selectedCategory}" has no tools yet.`
                       : 'No tools match the selected filters.'}
                 </p>
                 <button
@@ -301,26 +352,31 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                     setSelectedCategory('all');
                     setSelectedType('all');
                   }}
-                  className="mt-4 rounded-xl bg-[#003366] px-4 py-2 text-xs font-bold text-white shadow-xs"
+                  className={alumniPrimaryBtnClass + ' mt-6 text-xs'}
                 >
-                  Reset All Filters
+                  Reset all filters
                 </button>
               </div>
             )}
-          </div>
+          </AlumniSectionBlock>
         </>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          TAB 2: SAVED TOOL RESULTS HISTORY
-         ───────────────────────────────────────────────────────────── */}
       {activeTab === 'history' && (
-        <SavedResultsView
-          savedResults={savedResults}
-          onDeleteResult={handleDeleteResult}
-          onClearAll={handleClearAllResults}
-        />
+        <AlumniSectionBlock
+          step={1}
+          title="Saved tool runs"
+          description="Calculators and generators you saved from this browser — copy summaries or clear history anytime."
+        >
+          <SavedResultsView
+            savedResults={savedResults}
+            onDeleteResult={handleDeleteResult}
+            onClearAll={handleClearAllResults}
+            onBrowseTools={() => setActiveTab('catalog')}
+          />
+        </AlumniSectionBlock>
       )}
+      </AlumniSectionShell>
 
       {/* ── INTERACTIVE TOOL RUNNER MODAL ─────────────────────────────── */}
       <ToolRunnerModal

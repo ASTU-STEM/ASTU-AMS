@@ -387,39 +387,39 @@ export default function SurveyManagement() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-5 gap-4">
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{totalSurveys}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Total Surveys</div>
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="text-3xl font-bold text-[var(--text-primary)]">{totalSurveys}</div>
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Total Surveys</div>
         </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{pendingSurveys}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Pending</div>
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="text-3xl font-bold text-[var(--text-primary)]">{pendingSurveys}</div>
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Pending</div>
           <div className="mt-1 text-xs font-semibold text-[#dc2626]">Awaiting launch</div>
         </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{completedSurveys}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Completed</div>
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="text-3xl font-bold text-[var(--text-primary)]">{completedSurveys}</div>
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Completed</div>
           <div className="mt-1 text-xs font-semibold text-[#3b82f6]">All responses in</div>
         </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{totalResponses}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Responses</div>
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="text-3xl font-bold text-[var(--text-primary)]">{totalResponses}</div>
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Responses</div>
           <div className="mt-1 text-xs font-semibold text-[#10b981]">{totalSent} sent total</div>
         </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{totalQuestions}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Questions</div>
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="text-3xl font-bold text-[var(--text-primary)]">{totalQuestions}</div>
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Questions</div>
           <div className="mt-1 text-xs font-semibold text-[#8b5cf6]">Across all surveys</div>
         </div>
       </div>
 
       {/* Tab Bar */}
-      <div className="flex flex-wrap gap-2 rounded-[10px] border border-slate-200 bg-white p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-wrap gap-2 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         {['all', 'create', 'analytics', 'waves'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
-            className={`rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors ${activeTab === tab || (activeTab === 'edit' && tab === 'create') || (activeTab === 'details' && tab === 'all') ? 'bg-[#003580] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            className={`rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors ${activeTab === tab || (activeTab === 'edit' && tab === 'create') || (activeTab === 'details' && tab === 'all') ? 'bg-[#003580] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'}`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)} Surveys
           </button>
@@ -427,20 +427,20 @@ export default function SurveyManagement() {
       </div>
 
       {activeTab === 'all' && (
-        <section className="rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           {loading ? (
-            <div className="p-8 text-center text-slate-500">Loading surveys...</div>
+            <div className="p-8 text-center text-[var(--text-muted)]">Loading surveys...</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full border-separate border-spacing-0 text-sm">
-                <thead className="bg-slate-50">
+                <thead className="bg-[var(--bg-page)]">
                   <tr>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Survey Title</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Type</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Milestone</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Status</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Questions</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Actions</th>
+                    <th className="border-b border-[var(--border-color)] px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Survey Title</th>
+                    <th className="border-b border-[var(--border-color)] px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Type</th>
+                    <th className="border-b border-[var(--border-color)] px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Milestone</th>
+                    <th className="border-b border-[var(--border-color)] px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Status</th>
+                    <th className="border-b border-[var(--border-color)] px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Questions</th>
+                    <th className="border-b border-[var(--border-color)] px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -448,14 +448,14 @@ export default function SurveyManagement() {
                     const isFixed = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(s.type);
                     const qCount = (s.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) || 0) + (s.questions?.length || 0);
                     return (
-                      <tr key={s.id} onClick={() => viewDetails(s)} className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer">
-                        <td className="px-4 py-4 font-semibold text-slate-900">{s.title}</td>
-                        <td className="px-4 py-4 text-slate-600">{s.type}</td>
-                        <td className="px-4 py-4 text-slate-600">{s.milestoneMonths ? `${s.milestoneMonths} Months` : 'Custom'}</td>
+                      <tr key={s.id} onClick={() => viewDetails(s)} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)] cursor-pointer">
+                        <td className="px-4 py-4 font-semibold text-[var(--text-primary)]">{s.title}</td>
+                        <td className="px-4 py-4 text-[var(--text-secondary)]">{s.type}</td>
+                        <td className="px-4 py-4 text-[var(--text-secondary)]">{s.milestoneMonths ? `${s.milestoneMonths} Months` : 'Custom'}</td>
                         <td className="px-4 py-4">
                           <AdminBadge variant={s.isActive ? 'success' : 'neutral'}>{s.isActive ? 'Active' : 'Inactive'}</AdminBadge>
                         </td>
-                        <td className="px-4 py-4 text-slate-600">{qCount}</td>
+                        <td className="px-4 py-4 text-[var(--text-secondary)]">{qCount}</td>
                         <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                           {!isFixed ? (
                             <button
@@ -475,7 +475,7 @@ export default function SurveyManagement() {
                     );
                   })}
                   {surveys.length === 0 && (
-                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">No survey templates found. Create one!</td></tr>
+                    <tr><td colSpan={6} className="p-8 text-center text-[var(--text-muted)]">No survey templates found. Create one!</td></tr>
                   )}
                 </tbody>
               </table>
@@ -487,19 +487,19 @@ export default function SurveyManagement() {
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Analytics Header & Batch Filter */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-[10px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
             <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <GraduationCap className="h-5 w-5 text-[#003580]" /> Graduation Batch Analytics & ABET Reports
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Filter tracer survey response rates and accreditation statistics by graduating class batch.</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">Filter tracer survey response rates and accreditation statistics by graduating class batch.</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-600">Batch Filter:</span>
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">Batch Filter:</span>
               <select
                 value={batchFilter}
                 onChange={(e) => setBatchFilter(e.target.value)}
-                className="rounded-[8px] border border-slate-200 px-3 py-1.5 text-sm font-semibold text-[#003580] bg-slate-50 outline-none focus:border-[#003580] shadow-sm"
+                className="rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-sm font-semibold text-[#003580] bg-[var(--bg-page)] outline-none focus:border-[#003580] shadow-sm"
               >
                 <option value="ALL">🎓 All Graduating Batches</option>
                 <option value="2024">🎓 2024 GC (Class of 2024)</option>
@@ -511,7 +511,7 @@ export default function SurveyManagement() {
           </div>
 
           {analyticsLoading ? (
-            <div className="rounded-[10px] border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-8 text-center text-[var(--text-muted)]">
               <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-[#003580]" />
               Loading analytics and reports...
             </div>
@@ -527,44 +527,44 @@ export default function SurveyManagement() {
 
                 return (
                   <div className="grid grid-cols-4 gap-4">
-                    <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-sm">
+                    <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="text-2xl font-bold text-slate-900">{totalAssigned}</div>
-                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Total Assigned</div>
+                          <div className="text-2xl font-bold text-[var(--text-primary)]">{totalAssigned}</div>
+                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Assigned</div>
                         </div>
                         <div className="rounded-full bg-blue-50 p-2 text-blue-600">
                           <Users className="h-5 w-5" />
                         </div>
                       </div>
                     </div>
-                    <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-sm">
+                    <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="text-2xl font-bold text-slate-900">{totalCompleted}</div>
-                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Completed Responses</div>
+                          <div className="text-2xl font-bold text-[var(--text-primary)]">{totalCompleted}</div>
+                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Completed Responses</div>
                         </div>
                         <div className="rounded-full bg-emerald-50 p-2 text-emerald-600">
                           <CheckCircle className="h-5 w-5" />
                         </div>
                       </div>
                     </div>
-                    <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-sm">
+                    <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="text-2xl font-bold text-slate-900">{avgRate}%</div>
-                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Avg Response Rate</div>
+                          <div className="text-2xl font-bold text-[var(--text-primary)]">{avgRate}%</div>
+                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Avg Response Rate</div>
                         </div>
                         <div className="rounded-full bg-purple-50 p-2 text-purple-600">
                           <TrendingUp className="h-5 w-5" />
                         </div>
                       </div>
                     </div>
-                    <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-sm">
+                    <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="text-2xl font-bold text-slate-900">{totalOverdue}</div>
-                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-400">Overdue / Expired</div>
+                          <div className="text-2xl font-bold text-[var(--text-primary)]">{totalOverdue}</div>
+                          <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Overdue / Expired</div>
                         </div>
                         <div className="rounded-full bg-red-50 p-2 text-red-600">
                           <Clock className="h-5 w-5" />
@@ -578,8 +578,8 @@ export default function SurveyManagement() {
               {/* Recharts section */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Donut chart - status breakdown */}
-                <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Response Status Breakdown</h3>
+                <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)] mb-4">Response Status Breakdown</h3>
                   <div className="h-64 flex items-center justify-center">
                     {(() => {
                       const pending = completionReport.reduce((acc, r) => acc + (r.totalAssigned - r.completed - (r.overdue || 0) - (r.expired || 0)), 0);
@@ -595,7 +595,7 @@ export default function SurveyManagement() {
                       ].filter(d => d.value > 0);
 
                       if (data.length === 0) {
-                        return <div className="text-slate-400 text-sm">No response data available.</div>;
+                        return <div className="text-[var(--text-muted)] text-sm">No response data available.</div>;
                       }
 
                       return (
@@ -624,8 +624,8 @@ export default function SurveyManagement() {
                 </div>
 
                 {/* Bar chart - milestone completion */}
-                <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Milestone Response Rates (%)</h3>
+                <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)] mb-4">Milestone Response Rates (%)</h3>
                   <div className="h-64">
                     {(() => {
                       const data = completionReport.map(r => ({
@@ -636,9 +636,9 @@ export default function SurveyManagement() {
                       return (
                         <ResponsiveContainer width="100%" height="100%">
                           <RechartsBarChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                            <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748B' }} />
-                            <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#64748B' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                            <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} />
+                            <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} />
                             <RechartsTooltip formatter={(value) => [`${value}%`, 'Response Rate']} />
                             <Bar dataKey="rate" fill="#003580" radius={[4, 4, 0, 0]}>
                               {data.map((entry, index) => (
@@ -654,38 +654,38 @@ export default function SurveyManagement() {
               </div>
 
               {/* Template report table */}
-              <section className="rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Survey Template Performance</h3>
+              <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div className="border-b border-[var(--border-color)] bg-[var(--bg-page)] px-6 py-4">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">Survey Template Performance</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full border-separate border-spacing-0 text-sm">
-                    <thead className="bg-slate-50">
+                    <thead className="bg-[var(--bg-page)]">
                       <tr>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Survey Title</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Milestone</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Assigned</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Completed</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Response Rate</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Overdue</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Expired</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Survey Title</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Milestone</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Assigned</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Completed</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Response Rate</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Overdue</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Expired</th>
                       </tr>
                     </thead>
                     <tbody>
                       {completionReport.map((r, idx) => (
-                        <tr key={r.surveyId || idx} className="border-b border-slate-100 hover:bg-slate-50/50">
-                          <td className="px-6 py-4 font-semibold text-slate-900">{r.surveyTitle}</td>
-                          <td className="px-6 py-4 text-slate-600">
-                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        <tr key={r.surveyId || idx} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)]">
+                          <td className="px-6 py-4 font-semibold text-[var(--text-primary)]">{r.surveyTitle}</td>
+                          <td className="px-6 py-4 text-[var(--text-secondary)]">
+                            <span className="rounded-full bg-[var(--bg-page)] px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
                               {r.milestoneMonths ? `${r.milestoneMonths}-Month` : 'Custom'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-slate-900 font-medium">{r.totalAssigned}</td>
-                          <td className="px-6 py-4 text-slate-600">{r.completed}</td>
+                          <td className="px-6 py-4 text-[var(--text-primary)] font-medium">{r.totalAssigned}</td>
+                          <td className="px-6 py-4 text-[var(--text-secondary)]">{r.completed}</td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <span className="text-xs font-bold text-slate-700 w-8">{r.completionRate}%</span>
-                              <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100 shrink-0">
+                              <span className="text-xs font-bold text-[var(--text-secondary)] w-8">{r.completionRate}%</span>
+                              <div className="h-2 w-24 overflow-hidden rounded-full bg-[var(--bg-page)] shrink-0">
                                 <div
                                   className="h-full rounded-full bg-emerald-500"
                                   style={{ width: `${r.completionRate}%` }}
@@ -699,7 +699,7 @@ export default function SurveyManagement() {
                       ))}
                       {completionReport.length === 0 && (
                         <tr>
-                          <td colSpan={7} className="p-8 text-center text-slate-500">No report data found.</td>
+                          <td colSpan={7} className="p-8 text-center text-[var(--text-muted)]">No report data found.</td>
                         </tr>
                       )}
                     </tbody>
@@ -714,17 +714,17 @@ export default function SurveyManagement() {
       {activeTab === 'waves' && (
         <div className="space-y-6">
           {assignmentsLoading ? (
-            <div className="rounded-[10px] border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-8 text-center text-[var(--text-muted)]">
               <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-[#003580]" />
               Loading waves and assignments...
             </div>
           ) : (
             <>
               {/* Dynamic Waves Summary */}
-              <section className="rounded-[10px] border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Active Deployment Waves</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Surveys currently active or scheduled in waves by graduation milestones</p>
+              <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm overflow-hidden">
+                <div className="border-b border-[var(--border-color)] bg-[var(--bg-page)] px-6 py-4">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">Active Deployment Waves</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Surveys currently active or scheduled in waves by graduation milestones</p>
                 </div>
                 <div className="p-6">
                   {(() => {
@@ -755,7 +755,7 @@ export default function SurveyManagement() {
                     const wavesList = Object.values(grouped);
 
                     if (wavesList.length === 0) {
-                      return <div className="text-center text-slate-400 text-sm">No waves deployed yet.</div>;
+                      return <div className="text-center text-[var(--text-muted)] text-sm">No waves deployed yet.</div>;
                     }
 
                     return (
@@ -769,22 +769,22 @@ export default function SurveyManagement() {
                           });
 
                           return (
-                            <div key={wave.surveyId || idx} className="rounded-[12px] border border-slate-100 bg-slate-50/50 p-5 hover:border-[#003580]/20 transition-all">
+                            <div key={wave.surveyId || idx} className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-page)] p-5 hover:border-[#003580]/20 transition-all">
                               <div className="flex justify-between items-start mb-3">
                                 <span className="rounded-full bg-[#eff6ff] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600">
                                   {wave.type.replace('_', '-')}
                                 </span>
-                                <span className="text-xs text-slate-400 font-semibold">{launchDateStr}</span>
+                                <span className="text-xs text-[var(--text-muted)] font-semibold">{launchDateStr}</span>
                               </div>
-                              <h4 className="font-bold text-slate-900 text-sm mb-1 line-clamp-1">{wave.title}</h4>
-                              <p className="text-xs text-slate-500 mb-4">{wave.recipients} Deployed Recipients</p>
+                              <h4 className="font-bold text-[var(--text-primary)] text-sm mb-1 line-clamp-1">{wave.title}</h4>
+                              <p className="text-xs text-[var(--text-muted)] mb-4">{wave.recipients} Deployed Recipients</p>
                               
                               <div>
                                 <div className="flex justify-between items-center text-xs mb-1.5">
-                                  <span className="font-semibold text-slate-600">Completed Rate</span>
+                                  <span className="font-semibold text-[var(--text-secondary)]">Completed Rate</span>
                                   <span className="font-bold text-[#003580]">{rate}%</span>
                                 </div>
-                                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-page)]">
                                   <div
                                     className="h-full rounded-full bg-[#003580]"
                                     style={{ width: `${rate}%` }}
@@ -801,31 +801,31 @@ export default function SurveyManagement() {
               </section>
 
               {/* Filterable assignments table */}
-              <section className="rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
-                <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-4 md:flex-row md:items-center md:justify-between">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Individual Survey Assignments</h3>
+              <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div className="flex flex-col gap-4 border-b border-[var(--border-color)] px-6 py-4 md:flex-row md:items-center md:justify-between">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">Individual Survey Assignments</h3>
                   
                   {/* Search and Filters */}
                   <div className="flex flex-wrap items-center gap-3">
                     {/* Search Input */}
                     <div className="relative w-64">
-                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--text-muted)]" />
                       <input
                         type="text"
                         placeholder="Search Alumni, ID or Survey..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full rounded-[8px] border border-slate-200 pl-9 pr-4 py-2 text-sm outline-none focus:border-[#003580]"
+                        className="w-full rounded-[8px] border border-[var(--border-color)] pl-9 pr-4 py-2 text-sm outline-none focus:border-[#003580]"
                       />
                     </div>
 
                     {/* Batch filter dropdown */}
                     <div className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-slate-400" />
+                      <GraduationCap className="h-4 w-4 text-[var(--text-muted)]" />
                       <select
                         value={batchFilter}
                         onChange={(e) => setBatchFilter(e.target.value)}
-                        className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                        className="rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
                       >
                         <option value="ALL">All Batches</option>
                         <option value="2024">2024 GC</option>
@@ -837,11 +837,11 @@ export default function SurveyManagement() {
 
                     {/* Status filter dropdown */}
                     <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4 text-slate-400" />
+                      <Filter className="h-4 w-4 text-[var(--text-muted)]" />
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                        className="rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
                       >
                         <option value="ALL">All Statuses</option>
                         <option value="PENDING">Pending</option>
@@ -856,14 +856,14 @@ export default function SurveyManagement() {
 
                 <div className="overflow-x-auto">
                   <table className="min-w-full border-separate border-spacing-0 text-sm">
-                    <thead className="bg-slate-50">
+                    <thead className="bg-[var(--bg-page)]">
                       <tr>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Alumni Details</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Survey Deployed</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Status</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Assigned</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Due Date</th>
-                        <th className="border-b border-slate-200 px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Actions</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Alumni Details</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Survey Deployed</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Status</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Assigned</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Due Date</th>
+                        <th className="border-b border-[var(--border-color)] px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -888,7 +888,7 @@ export default function SurveyManagement() {
                         if (filtered.length === 0) {
                           return (
                             <tr>
-                              <td colSpan={6} className="p-8 text-center text-slate-500">
+                              <td colSpan={6} className="p-8 text-center text-[var(--text-muted)]">
                                 No survey assignments match your filters.
                               </td>
                             </tr>
@@ -908,9 +908,9 @@ export default function SurveyManagement() {
                           });
 
                           return (
-                            <tr key={item.id || idx} className="border-b border-slate-100 hover:bg-slate-50/50">
+                            <tr key={item.id || idx} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)]">
                               <td className="px-6 py-4">
-                                <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                                <div className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                                   {item.alumni?.fullName}
                                   {item.alumni?.graduationYear && (
                                     <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200">
@@ -918,12 +918,12 @@ export default function SurveyManagement() {
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-xs text-slate-500">{item.alumni?.email}</div>
-                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.alumni?.studentId}</div>
+                                <div className="text-xs text-[var(--text-muted)]">{item.alumni?.email}</div>
+                                <div className="text-[10px] text-[var(--text-muted)] font-mono mt-0.5">{item.alumni?.studentId}</div>
                               </td>
-                              <td className="px-6 py-4 text-slate-700">
+                              <td className="px-6 py-4 text-[var(--text-secondary)]">
                                 <div className="font-semibold">{item.survey?.title}</div>
-                                <div className="text-xs text-slate-500">{item.alumni?.department?.name || 'Graduate'}</div>
+                                <div className="text-xs text-[var(--text-muted)]">{item.alumni?.department?.name || 'Graduate'}</div>
                               </td>
                               <td className="px-6 py-4">
                                 <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold
@@ -931,22 +931,22 @@ export default function SurveyManagement() {
                                   ${item.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-700' : ''}
                                   ${item.status === 'PENDING' ? 'bg-amber-50 text-amber-700' : ''}
                                   ${item.status === 'OVERDUE' ? 'bg-rose-50 text-rose-700 animate-pulse' : ''}
-                                  ${item.status === 'EXPIRED' ? 'bg-slate-100 text-slate-600' : ''}
+                                  ${item.status === 'EXPIRED' ? 'bg-[var(--bg-page)] text-[var(--text-secondary)]' : ''}
                                 `}>
                                   {item.status}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-slate-600">{assignedDate}</td>
-                              <td className="px-6 py-4 text-slate-600">{dueDate}</td>
+                              <td className="px-6 py-4 text-[var(--text-secondary)]">{assignedDate}</td>
+                              <td className="px-6 py-4 text-[var(--text-secondary)]">{dueDate}</td>
                               <td className="px-6 py-4 text-center">
                                 {item.status !== 'COMPLETED' ? (
                                   <button
                                     onClick={() => {
                                       toast.success(`Reminder email queued for ${item.alumni?.fullName}!`);
                                     }}
-                                    className="inline-flex items-center gap-1.5 rounded-[6px] border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm"
+                                    className="inline-flex items-center gap-1.5 rounded-[6px] border border-[var(--border-color)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] shadow-sm"
                                   >
-                                    <Mail className="h-3 w-3 text-slate-500" /> Remind
+                                    <Mail className="h-3 w-3 text-[var(--text-muted)]" /> Remind
                                   </button>
                                 ) : (
                                   <span className="text-xs font-semibold text-emerald-600 flex items-center justify-center gap-1">
@@ -968,11 +968,11 @@ export default function SurveyManagement() {
       )}
 
       {activeTab === 'details' && selectedSurvey && (
-        <div className="rounded-[10px] border border-slate-200 bg-white shadow-lg overflow-hidden">
+        <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h2 className="text-xl font-bold text-slate-900">Survey Details</h2>
-            <button onClick={() => setActiveTab('all')} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+          <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4">
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Survey Details</h2>
+            <button onClick={() => setActiveTab('all')} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)]">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -986,7 +986,7 @@ export default function SurveyManagement() {
                 <span className="flex items-center gap-1 rounded-full bg-[#eff6ff] px-3 py-1 text-sm font-semibold text-[#3b82f6]">
                   <div className="h-2 w-2 rounded-full bg-[#3b82f6]" /> In Progress
                 </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+                <span className="rounded-full bg-[var(--bg-page)] px-3 py-1 text-sm font-medium text-[var(--text-secondary)]">
                   Created: {new Date(selectedSurvey.createdAt).toISOString().split('T')[0]}
                 </span>
                 {['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(selectedSurvey.type) && (
@@ -998,8 +998,8 @@ export default function SurveyManagement() {
               
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900 mb-2">{selectedSurvey.title}</h1>
-                  <p className="text-slate-600 max-w-3xl">{selectedSurvey.description}</p>
+                  <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">{selectedSurvey.title}</h1>
+                  <p className="text-[var(--text-secondary)] max-w-3xl">{selectedSurvey.description}</p>
                 </div>
                 <div className="flex gap-3">
                   {(() => {
@@ -1018,8 +1018,8 @@ export default function SurveyManagement() {
                         disabled={!canEdit}
                         className={`flex items-center gap-2 rounded-[8px] border px-4 py-2 font-semibold transition-all ${
                           canEdit
-                            ? 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                            : 'border-slate-100 bg-slate-100 text-slate-400 cursor-not-allowed'
+                            ? 'border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'
+                            : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-muted)] cursor-not-allowed'
                         }`}
                         title={!canEdit ? 'Only Administrators can edit fixed milestone survey templates' : 'Edit survey'}
                       >
@@ -1061,30 +1061,30 @@ export default function SurveyManagement() {
               return (
                 <>
                   <div className="grid grid-cols-4 gap-4 mb-8">
-                    <div className="rounded-[10px] bg-slate-50 p-4 text-center">
+                    <div className="rounded-[10px] bg-[var(--bg-page)] p-4 text-center">
                       <div className="text-3xl font-bold text-[#3b82f6]">{responses}</div>
-                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Responses</div>
+                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Responses</div>
                     </div>
-                    <div className="rounded-[10px] bg-slate-50 p-4 text-center">
+                    <div className="rounded-[10px] bg-[var(--bg-page)] p-4 text-center">
                       <div className="text-3xl font-bold text-[#6366f1]">{sent}</div>
-                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Sent</div>
+                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Sent</div>
                     </div>
-                    <div className="rounded-[10px] bg-slate-50 p-4 text-center">
+                    <div className="rounded-[10px] bg-[var(--bg-page)] p-4 text-center">
                       <div className="text-3xl font-bold text-[#8b5cf6]">{totalQuestions}</div>
-                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Questions</div>
+                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Questions</div>
                     </div>
-                    <div className="rounded-[10px] bg-slate-50 p-4 text-center">
+                    <div className="rounded-[10px] bg-[var(--bg-page)] p-4 text-center">
                       <div className="text-3xl font-bold text-[#10b981]">{rate}%</div>
-                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Response Rate</div>
+                      <div className="mt-1 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Response Rate</div>
                     </div>
                   </div>
 
                   <div className="mb-8">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Response Progress</span>
-                      <span className="text-sm font-bold text-slate-700">{rate}%</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Response Progress</span>
+                      <span className="text-sm font-bold text-[var(--text-secondary)]">{rate}%</span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--bg-page)]">
                       <div className="h-full rounded-full bg-[#ef4444] transition-all" style={{ width: `${rate}%` }} />
                     </div>
                   </div>
@@ -1100,13 +1100,13 @@ export default function SurveyManagement() {
 
               return (
                 <div>
-                  <div className="flex border-b border-slate-200 mb-6">
+                  <div className="flex border-b border-[var(--border-color)] mb-6">
                     <button
                       onClick={() => setDetailsSubTab('questions')}
                       className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all ${
                         detailsSubTab === 'questions'
-                          ? 'border-[#003580] text-[#003580] bg-slate-50/50'
-                          : 'border-transparent text-slate-500 hover:text-slate-700'
+                          ? 'border-[#003580] text-[#003580] bg-[var(--bg-page)]'
+                          : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                       }`}
                     >
                       📋 Questions ({allQs.length})
@@ -1115,8 +1115,8 @@ export default function SurveyManagement() {
                       onClick={() => setDetailsSubTab('responses')}
                       className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all ${
                         detailsSubTab === 'responses'
-                          ? 'border-[#003580] text-[#003580] bg-slate-50/50'
-                          : 'border-transparent text-slate-500 hover:text-slate-700'
+                          ? 'border-[#003580] text-[#003580] bg-[var(--bg-page)]'
+                          : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                       }`}
                     >
                       💬 Submitted Alumni Responses
@@ -1129,12 +1129,12 @@ export default function SurveyManagement() {
                   {detailsSubTab === 'questions' && (
                     <div className="space-y-3">
                       {allQs.map((q: any, qIdx: number) => (
-                        <div key={q.id || qIdx} className="flex items-center gap-4 rounded-[10px] border border-slate-100 bg-slate-50/50 p-4 hover:bg-slate-50">
+                        <div key={q.id || qIdx} className="flex items-center gap-4 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 hover:bg-black/5 dark:hover:bg-white/5">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[#fce7f3] text-sm font-bold text-[#db2777]">
                             {qIdx + 1}
                           </div>
                           <div className="flex-1">
-                            <span className="font-medium text-slate-700">{q.questionText}</span>
+                            <span className="font-medium text-[var(--text-secondary)]">{q.questionText}</span>
                           </div>
                           {q.required && (
                             <span className="rounded bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">REQ</span>
@@ -1144,14 +1144,14 @@ export default function SurveyManagement() {
                             ${q.questionType === 'TEXT' || q.questionType === 'TEXTAREA' ? 'bg-[#eff6ff] text-[#3b82f6]' : ''}
                             ${q.questionType === 'RATING' ? 'bg-[#fef9c3] text-[#ca8a04]' : ''}
                             ${q.questionType === 'CHECKBOX' ? 'bg-[#ecfdf5] text-[#059669]' : ''}
-                            ${!['RADIO', 'SELECT', 'TEXT', 'TEXTAREA', 'RATING', 'CHECKBOX'].includes(q.questionType) ? 'bg-slate-100 text-slate-600' : ''}
+                            ${!['RADIO', 'SELECT', 'TEXT', 'TEXTAREA', 'RATING', 'CHECKBOX'].includes(q.questionType) ? 'bg-[var(--bg-page)] text-[var(--text-secondary)]' : ''}
                           `}>
                             {q.questionType ? q.questionType.replace('_', ' ') : 'TEXT'}
                           </span>
                         </div>
                       ))}
                       {allQs.length === 0 && (
-                        <div className="p-8 text-center text-slate-400">No questions found for this survey template.</div>
+                        <div className="p-8 text-center text-[var(--text-muted)]">No questions found for this survey template.</div>
                       )}
                     </div>
                   )}
@@ -1159,20 +1159,20 @@ export default function SurveyManagement() {
                   {detailsSubTab === 'responses' && (
                     <div className="space-y-4">
                       {surveyResponsesLoading ? (
-                        <div className="p-8 text-center text-slate-500">Loading submitted responses...</div>
+                        <div className="p-8 text-center text-[var(--text-muted)]">Loading submitted responses...</div>
                       ) : selectedSurveyResponses.length === 0 ? (
-                        <div className="p-8 text-center text-slate-400 rounded-lg border border-slate-100 bg-slate-50">
+                        <div className="p-8 text-center text-[var(--text-muted)] rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]">
                           No responses submitted for this survey yet.
                         </div>
                       ) : (
-                        <div className="overflow-x-auto rounded-lg border border-slate-200">
+                        <div className="overflow-x-auto rounded-lg border border-[var(--border-color)]">
                           <table className="min-w-full text-sm border-separate border-spacing-0">
-                            <thead className="bg-slate-50">
+                            <thead className="bg-[var(--bg-page)]">
                               <tr>
-                                <th className="border-b border-slate-200 px-4 py-3 text-left font-semibold text-slate-600 text-xs">Alumni Respondent</th>
-                                <th className="border-b border-slate-200 px-4 py-3 text-left font-semibold text-slate-600 text-xs">Department</th>
-                                <th className="border-b border-slate-200 px-4 py-3 text-left font-semibold text-slate-600 text-xs">Submitted Date</th>
-                                <th className="border-b border-slate-200 px-4 py-3 text-center font-semibold text-slate-600 text-xs">Action</th>
+                                <th className="border-b border-[var(--border-color)] px-4 py-3 text-left font-semibold text-[var(--text-secondary)] text-xs">Alumni Respondent</th>
+                                <th className="border-b border-[var(--border-color)] px-4 py-3 text-left font-semibold text-[var(--text-secondary)] text-xs">Department</th>
+                                <th className="border-b border-[var(--border-color)] px-4 py-3 text-left font-semibold text-[var(--text-secondary)] text-xs">Submitted Date</th>
+                                <th className="border-b border-[var(--border-color)] px-4 py-3 text-center font-semibold text-[var(--text-secondary)] text-xs">Action</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1187,9 +1187,9 @@ export default function SurveyManagement() {
                                 const batchLabel = resItem.alumni?.graduationYear ? `${resItem.alumni.graduationYear} GC` : '';
 
                                 return (
-                                  <tr key={resItem.id} className="border-b border-slate-100 hover:bg-slate-50">
+                                  <tr key={resItem.id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-page)]">
                                     <td className="px-4 py-3">
-                                      <div className="font-semibold text-slate-900 flex items-center gap-2">
+                                      <div className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
                                         {alumniName}
                                         {batchLabel && (
                                           <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200">
@@ -1197,11 +1197,11 @@ export default function SurveyManagement() {
                                           </span>
                                         )}
                                       </div>
-                                      <div className="text-xs text-slate-500">{alumniEmail}</div>
-                                      {studentId && <div className="text-[10px] text-slate-400 font-mono">{studentId}</div>}
+                                      <div className="text-xs text-[var(--text-muted)]">{alumniEmail}</div>
+                                      {studentId && <div className="text-[10px] text-[var(--text-muted)] font-mono">{studentId}</div>}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-700">{deptName}</td>
-                                    <td className="px-4 py-3 text-slate-600 text-xs">{submittedDateStr}</td>
+                                    <td className="px-4 py-3 text-[var(--text-secondary)]">{deptName}</td>
+                                    <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">{submittedDateStr}</td>
                                     <td className="px-4 py-3 text-center">
                                       <button
                                         onClick={() => setViewingResponseModal(resItem)}
@@ -1228,34 +1228,34 @@ export default function SurveyManagement() {
 
       {(activeTab === 'create' || activeTab === 'edit') && (
         <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-          <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-max">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Survey Details</h3>
+          <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-max">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Survey Details</h3>
             <div className="space-y-4">
               <label className="block space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Survey Title</span>
-                <input value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580]" placeholder="e.g. ASTU 2024 Tracer Study" />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Survey Title</span>
+                <input value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 outline-none focus:border-[#003580]" placeholder="e.g. ASTU 2024 Tracer Study" />
               </label>
               <label className="block space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Description</span>
-                <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580]" rows={3} placeholder="Survey description..." />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Description</span>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 outline-none focus:border-[#003580]" rows={3} placeholder="Survey description..." />
               </label>
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block space-y-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Survey Type (Trigger)</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Survey Type (Trigger)</span>
                   {!editId ? (
                     <div>
                       <input
                         type="text"
                         disabled
                         value="Custom / Manual Assignment (CUSTOM)"
-                        className="w-full rounded-[8px] border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 cursor-not-allowed"
+                        className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] cursor-not-allowed"
                       />
-                      <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                      <p className="mt-1 text-[11px] text-[var(--text-muted)] font-medium">
                         💡 Fixed milestone templates (6, 12, 18, 24-Month) are pre-configured system defaults. New surveys are created as Custom Surveys.
                       </p>
                     </div>
                   ) : (
-                    <select disabled={['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(type)} value={type} onChange={e => setType(e.target.value as SurveyType)} className="w-full rounded-[8px] border border-slate-200 px-3 py-2 outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:cursor-not-allowed font-medium text-slate-700">
+                    <select disabled={['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(type)} value={type} onChange={e => setType(e.target.value as SurveyType)} className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:cursor-not-allowed font-medium text-[var(--text-secondary)]">
                       <option value="SIX_MONTH">6-Month Post Graduation (Fixed Milestone)</option>
                       <option value="TWELVE_MONTH">12-Month Post Graduation (Fixed Milestone)</option>
                       <option value="EIGHTEEN_MONTH">18-Month Post Graduation (Fixed Milestone)</option>
@@ -1266,17 +1266,17 @@ export default function SurveyManagement() {
                 </label>
 
                 <label className="block space-y-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Target Audience</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Target Audience</span>
                   <select
                     value={targetAudience}
                     onChange={e => setTargetAudience(e.target.value as any)}
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-bold text-slate-800 outline-none focus:border-[#003580]"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm font-bold text-[var(--text-primary)] outline-none focus:border-[#003580]"
                   >
                     <option value="ALUMNI">🎓 Alumni Graduates Only</option>
                     <option value="EMPLOYERS">🏢 Employer Partners Only</option>
                     <option value="BOTH">🌐 Both Alumni &amp; Employer Partners</option>
                   </select>
-                  <p className="mt-1 text-[11px] text-slate-500 font-medium">
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)] font-medium">
                     Select recipients to dispatch multi-channel notifications (In-app, Email &amp; SMS).
                   </p>
                 </label>
@@ -1284,10 +1284,10 @@ export default function SurveyManagement() {
             </div>
           </section>
 
-          <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Survey Builder</h3>
-              <button onClick={handleAddSection} className="inline-flex items-center gap-2 rounded-[8px] bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)]">Survey Builder</h3>
+              <button onClick={handleAddSection} className="inline-flex items-center gap-2 rounded-[8px] bg-[var(--bg-page)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5">
                 <Plus className="h-4 w-4" /> Add Section
               </button>
             </div>
@@ -1303,15 +1303,15 @@ export default function SurveyManagement() {
                       </button>
                     </div>
                     <input value={section.title} onChange={e => { const up = [...sections]; up[sIdx].title = e.target.value; setSections(up); }} className="w-full bg-transparent text-lg font-bold outline-none placeholder:text-slate-400" placeholder="Section Title (e.g. Personal Information)" />
-                    <input value={section.description} onChange={e => { const up = [...sections]; up[sIdx].description = e.target.value; setSections(up); }} className="w-full bg-transparent text-sm text-slate-600 outline-none placeholder:text-slate-400" placeholder="Section Description (Optional)" />
+                    <input value={section.description} onChange={e => { const up = [...sections]; up[sIdx].description = e.target.value; setSections(up); }} className="w-full bg-transparent text-sm text-[var(--text-secondary)] outline-none placeholder:text-slate-400" placeholder="Section Description (Optional)" />
                   </div>
 
                   <div className="space-y-4">
                     {section.questions.map((q, qIdx) => (
-                      <div key={qIdx} className="rounded-[8px] border border-slate-200 bg-white p-4 shadow-sm">
+                      <div key={qIdx} className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="grid gap-4 md:grid-cols-[1fr_200px]">
                           <input value={q.questionText} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].questionText = e.target.value; setSections(up); }} className="w-full font-medium outline-none placeholder:text-slate-400" placeholder={`Question ${qIdx + 1} Text`} />
-                          <select value={q.questionType} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].questionType = e.target.value as QuestionType; setSections(up); }} className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none">
+                          <select value={q.questionType} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].questionType = e.target.value as QuestionType; setSections(up); }} className="rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none">
                             <option value="TEXT">Short Text</option>
                             <option value="TEXTAREA">Paragraph</option>
                             <option value="RADIO">Multiple Choice (Radio)</option>
@@ -1327,25 +1327,25 @@ export default function SurveyManagement() {
                           <div className="mt-4 space-y-2 pl-4">
                             {q.options.map((opt, optIdx) => (
                               <div key={optIdx} className="flex items-center gap-2">
-                                <div className={`h-4 w-4 border border-slate-300 ${q.questionType === 'RADIO' ? 'rounded-full' : 'rounded-sm'}`} />
-                                <input value={opt} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].options[optIdx] = e.target.value; setSections(up); }} className="flex-1 border-b border-transparent text-sm outline-none focus:border-slate-300" placeholder={`Option ${optIdx + 1}`} />
-                                <button onClick={() => { const up = [...sections]; up[sIdx].questions[qIdx].options.splice(optIdx, 1); setSections(up); }} className="text-slate-400 hover:text-red-500"><X className="h-4 w-4" /></button>
+                                <div className={`h-4 w-4 border border-[var(--border-color)] ${q.questionType === 'RADIO' ? 'rounded-full' : 'rounded-sm'}`} />
+                                <input value={opt} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].options[optIdx] = e.target.value; setSections(up); }} className="flex-1 border-b border-transparent text-sm outline-none focus:border-[var(--border-color)]" placeholder={`Option ${optIdx + 1}`} />
+                                <button onClick={() => { const up = [...sections]; up[sIdx].questions[qIdx].options.splice(optIdx, 1); setSections(up); }} className="text-[var(--text-muted)] hover:text-red-500"><X className="h-4 w-4" /></button>
                               </div>
                             ))}
                             <button onClick={() => { const up = [...sections]; up[sIdx].questions[qIdx].options.push(`Option ${q.options.length + 1}`); setSections(up); }} className="text-sm font-semibold text-[#003580] hover:underline">Add Option</button>
                           </div>
                         )}
 
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-sm">
+                        <div className="mt-4 flex items-center justify-between border-t border-[var(--border-color)] pt-3 text-sm">
                           <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={q.required} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].required = e.target.checked; setSections(up); }} className="rounded border-slate-300" />
-                            <span className="font-medium text-slate-600">Required</span>
+                            <input type="checkbox" checked={q.required} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].required = e.target.checked; setSections(up); }} className="rounded border-[var(--border-color)]" />
+                            <span className="font-medium text-[var(--text-secondary)]">Required</span>
                           </label>
                           <button onClick={() => { const up = [...sections]; up[sIdx].questions.splice(qIdx, 1); setSections(up); }} className="text-red-500 hover:underline">Remove Question</button>
                         </div>
                       </div>
                     ))}
-                    <button onClick={() => handleAddQuestion(sIdx)} className="inline-flex w-full items-center justify-center gap-2 rounded-[8px] border border-dashed border-slate-300 py-3 text-sm font-semibold text-slate-500 hover:border-[#003580] hover:text-[#003580]">
+                    <button onClick={() => handleAddQuestion(sIdx)} className="inline-flex w-full items-center justify-center gap-2 rounded-[8px] border border-dashed border-[var(--border-color)] py-3 text-sm font-semibold text-[var(--text-muted)] hover:border-[#003580] hover:text-[#003580]">
                       <Plus className="h-4 w-4" /> Add Question
                     </button>
                   </div>
@@ -1353,15 +1353,15 @@ export default function SurveyManagement() {
               ))}
               
               {sections.length === 0 && (
-                <div className="flex h-32 flex-col items-center justify-center rounded-[10px] border border-dashed border-slate-300 bg-slate-50">
-                  <span className="text-sm font-medium text-slate-500">Start by adding a section</span>
+                <div className="flex h-32 flex-col items-center justify-center rounded-[10px] border border-dashed border-[var(--border-color)] bg-[var(--bg-page)]">
+                  <span className="text-sm font-medium text-[var(--text-muted)]">Start by adding a section</span>
                 </div>
               )}
             </div>
 
-            <div className="mt-8 flex justify-end border-t border-slate-200 pt-4 gap-3">
+            <div className="mt-8 flex justify-end border-t border-[var(--border-color)] pt-4 gap-3">
               {activeTab === 'edit' && (
-                <button type="button" onClick={() => { setActiveTab('details'); resetBuilder(); }} className="rounded-[8px] border border-slate-200 px-6 py-2.5 font-semibold text-slate-600 hover:bg-slate-50">
+                <button type="button" onClick={() => { setActiveTab('details'); resetBuilder(); }} className="rounded-[8px] border border-[var(--border-color)] px-6 py-2.5 font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">
                   Cancel
                 </button>
               )}
@@ -1376,13 +1376,13 @@ export default function SurveyManagement() {
       {/* Schedule Modal */}
       {isScheduleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-[16px] bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="w-full max-w-md rounded-[16px] bg-[var(--bg-card)] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Schedule Survey</h3>
-                <p className="text-sm text-slate-500">Set launch date & time for automatic activation</p>
+                <h3 className="text-xl font-bold text-[var(--text-primary)]">Schedule Survey</h3>
+                <p className="text-sm text-[var(--text-muted)]">Set launch date & time for automatic activation</p>
               </div>
-              <button onClick={() => setIsScheduleModalOpen(false)} className="rounded-full bg-slate-100 p-2 text-slate-500 hover:bg-slate-200">
+              <button onClick={() => setIsScheduleModalOpen(false)} className="rounded-full bg-[var(--bg-page)] p-2 text-[var(--text-muted)] hover:bg-black/5 dark:hover:bg-white/5">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -1394,7 +1394,7 @@ export default function SurveyManagement() {
               
               <div className="space-y-2 mb-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Scheduled Launch Date & Time <span className="text-red-500">*</span></span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Scheduled Launch Date & Time <span className="text-red-500">*</span></span>
                   <button
                     type="button"
                     onClick={() => setScheduledDateTime(getNowDateTimeLocal())}
@@ -1407,9 +1407,9 @@ export default function SurveyManagement() {
                   type="datetime-local"
                   value={scheduledDateTime}
                   onChange={(e) => setScheduledDateTime(e.target.value)}
-                  className="w-full rounded-[8px] border border-slate-200 px-4 py-3 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580] font-medium text-slate-800"
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-4 py-3 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580] font-medium text-[var(--text-primary)]"
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[var(--text-muted)]">
                   Tip: Selecting today and right now will immediately activate and dispatch the survey to alumni.
                 </p>
               </div>
@@ -1419,7 +1419,7 @@ export default function SurveyManagement() {
                   type="button"
                   onClick={() => setIsScheduleModalOpen(false)}
                   disabled={isScheduling}
-                  className="flex-1 rounded-[8px] border border-slate-200 py-3 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex-1 rounded-[8px] border border-[var(--border-color)] py-3 font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -1439,10 +1439,10 @@ export default function SurveyManagement() {
       {/* Full Answers Inspector Modal */}
       {viewingResponseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl rounded-[16px] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50">
+          <div className="w-full max-w-2xl rounded-[16px] bg-[var(--bg-card)] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4 bg-[var(--bg-page)]">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                   🎓 Alumni Survey Response
                   {viewingResponseModal.alumni?.graduationYear && (
                     <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
@@ -1450,11 +1450,11 @@ export default function SurveyManagement() {
                     </span>
                   )}
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--text-muted)]">
                   Submitted by <strong>{viewingResponseModal.alumni?.fullName || 'Graduate'}</strong> ({viewingResponseModal.alumni?.email}) on {new Date(viewingResponseModal.submittedAt || viewingResponseModal.createdAt).toLocaleString()}
                 </p>
               </div>
-              <button onClick={() => setViewingResponseModal(null)} className="rounded-full bg-slate-200 p-1.5 text-slate-600 hover:bg-slate-300">
+              <button onClick={() => setViewingResponseModal(null)} className="rounded-full bg-[var(--bg-page)] p-1.5 text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1465,34 +1465,34 @@ export default function SurveyManagement() {
                 <div><strong>Student ID:</strong> {viewingResponseModal.alumni?.studentId || 'N/A'}</div>
               </div>
 
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4 mb-2">Answers ({viewingResponseModal.answers?.length || 0})</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mt-4 mb-2">Answers ({viewingResponseModal.answers?.length || 0})</h4>
 
               {(viewingResponseModal.answers || []).map((ans: any, aIdx: number) => {
                 const questionText = ans.question?.questionText || `Question ${aIdx + 1}`;
                 const questionType = ans.question?.questionType || 'TEXT';
                 return (
-                  <div key={ans.id || aIdx} className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+                  <div key={ans.id || aIdx} className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm font-semibold text-slate-800">
+                      <span className="text-sm font-semibold text-[var(--text-primary)]">
                         {aIdx + 1}. {questionText}
                       </span>
-                      <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-200 px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase bg-[var(--bg-page)] px-2 py-0.5 rounded">
                         {questionType}
                       </span>
                     </div>
-                    <div className="text-sm font-medium text-[#003580] bg-white p-3 rounded-md border border-slate-100 shadow-sm">
-                      {ans.answerText || <span className="italic text-slate-400">No answer provided</span>}
+                    <div className="text-sm font-medium text-[#003580] bg-white p-3 rounded-md border border-[var(--border-color)] shadow-sm">
+                      {ans.answerText || <span className="italic text-[var(--text-muted)]">No answer provided</span>}
                     </div>
                   </div>
                 );
               })}
 
               {(!viewingResponseModal.answers || viewingResponseModal.answers.length === 0) && (
-                <div className="p-8 text-center text-slate-400">No answer details recorded for this response.</div>
+                <div className="p-8 text-center text-[var(--text-muted)]">No answer details recorded for this response.</div>
               )}
             </div>
 
-            <div className="border-t border-slate-100 px-6 py-4 bg-slate-50 flex justify-end">
+            <div className="border-t border-[var(--border-color)] px-6 py-4 bg-[var(--bg-page)] flex justify-end">
               <button
                 onClick={() => setViewingResponseModal(null)}
                 className="rounded-md bg-[#003580] px-5 py-2 text-sm font-semibold text-white hover:bg-[#002660]"

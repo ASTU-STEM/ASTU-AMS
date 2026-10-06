@@ -296,7 +296,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
             <div className="flex flex-col md:flex-row gap-3">
               {/* Search Bar */}
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--text-muted)]" />
                 <input 
                   type="text" 
                   placeholder="Search alumni by name, role, company, or tech stack..."
@@ -314,11 +314,11 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                     onChange={(e) => setDeptFilter(e.target.value)}
                     className="w-full appearance-none bg-white/10 border border-white/20 rounded-xl py-3 pl-4 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 backdrop-blur-md cursor-pointer text-sm font-medium"
                   >
-                    <option value="All" className="text-slate-900 font-semibold">
+                    <option value="All" className="text-[var(--text-primary)] font-semibold">
                       All Departments ({dbDepartments.length > 0 ? dbDepartments.length : 'All'})
                     </option>
                     {dbDepartments.map((d) => (
-                      <option key={d.id || d.code} value={d.name} className="text-slate-900 font-medium">
+                      <option key={d.id || d.code} value={d.name} className="text-[var(--text-primary)] font-medium">
                         {d.name} {d.code ? `(${d.code})` : ''}
                       </option>
                     ))}
@@ -333,14 +333,14 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                     onChange={(e) => setBatchFilter(e.target.value)}
                     className="w-full appearance-none bg-white/10 border border-white/20 rounded-xl py-3 pl-4 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 backdrop-blur-md cursor-pointer text-sm font-medium"
                   >
-                    <option value="All" className="text-slate-900 font-semibold">All Batches</option>
-                    <option value="2024" className="text-slate-900">Class of 2024</option>
-                    <option value="2023" className="text-slate-900">Class of 2023</option>
-                    <option value="2022" className="text-slate-900">Class of 2022</option>
-                    <option value="2021" className="text-slate-900">Class of 2021</option>
-                    <option value="2020" className="text-slate-900">Class of 2020</option>
-                    <option value="2019" className="text-slate-900">Class of 2019</option>
-                    <option value="2018" className="text-slate-900">Class of 2018</option>
+                    <option value="All" className="text-[var(--text-primary)] font-semibold">All Batches</option>
+                    <option value="2024" className="text-[var(--text-primary)]">Class of 2024</option>
+                    <option value="2023" className="text-[var(--text-primary)]">Class of 2023</option>
+                    <option value="2022" className="text-[var(--text-primary)]">Class of 2022</option>
+                    <option value="2021" className="text-[var(--text-primary)]">Class of 2021</option>
+                    <option value="2020" className="text-[var(--text-primary)]">Class of 2020</option>
+                    <option value="2019" className="text-[var(--text-primary)]">Class of 2019</option>
+                    <option value="2018" className="text-[var(--text-primary)]">Class of 2018</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
                 </div>
@@ -357,7 +357,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                   <SlidersHorizontal className="w-4 h-4" />
                   <span className="whitespace-nowrap">More Filters</span>
                   {activeFilterCount > 0 && (
-                    <span className="flex items-center justify-center bg-white text-blue-900 font-black text-xs w-5 h-5 rounded-full shadow-sm">
+                    <span className="flex items-center justify-center bg-[var(--bg-card)] text-blue-900 font-black text-xs w-5 h-5 rounded-full shadow-sm">
                       {activeFilterCount}
                     </span>
                   )}
@@ -437,13 +437,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
           { label: 'Global Locations', value: stats.globalLocations, icon: MapPin, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
           { label: 'Hiring Partners', value: stats.hiringPartners, icon: Briefcase, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
         ].map((stat, i) => (
-          <div key={i} className="flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
+          <div key={i} className="flex items-center gap-4 bg-[var(--bg-card)] dark:bg-slate-900 border border-[var(--border-color)] dark:border-slate-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
               <stat.icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{stat.label}</p>
+              <p className="text-2xl font-bold text-[var(--text-primary)] dark:text-white">{stat.value}</p>
+              <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -453,7 +453,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
       {loading && (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-3" />
-          <p className="text-sm text-slate-500 font-medium">Querying ASTU alumni database with filters...</p>
+          <p className="text-sm text-[var(--text-muted)] font-medium">Querying ASTU alumni database with filters...</p>
         </div>
       )}
 
@@ -464,7 +464,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
             <div 
               key={alumni.id} 
               onClick={() => setSelectedAlumni(alumni)}
-              className="group relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full cursor-pointer"
+              className="group relative bg-[var(--bg-card)] dark:bg-slate-900 rounded-3xl border border-[var(--border-color)] dark:border-slate-800 p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full cursor-pointer"
             >
               {/* Top accent line */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -474,12 +474,12 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                   <img 
                     src={formatAvatarUrl(alumni.avatar, alumni.name)} 
                     alt={alumni.name} 
-                    className="w-16 h-16 rounded-2xl bg-slate-100 p-1 border border-slate-200 dark:border-slate-700 shadow-sm object-cover" 
+                    className="w-16 h-16 rounded-2xl bg-[var(--bg-page)] p-1 border border-[var(--border-color)] dark:border-slate-700 shadow-sm object-cover" 
                     onError={(e) => {
                       (e.target as HTMLElement).setAttribute('src', `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(alumni.name)}`);
                     }}
                   />
-                  <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-900 rounded-lg p-0.5 shadow-sm border border-slate-200 dark:border-slate-800">
+                  <div className="absolute -bottom-2 -right-2 bg-[var(--bg-card)] dark:bg-slate-900 rounded-lg p-0.5 shadow-sm border border-[var(--border-color)] dark:border-slate-800">
                     <div className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
                       '{alumni.batch ? alumni.batch.slice(-2) : '24'}
                     </div>
@@ -500,7 +500,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
               </div>
 
               <div className="mb-4 flex-grow">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <h3 className="text-xl font-bold text-[var(--text-primary)] dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {alumni.name}
                 </h3>
                 <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-3">
@@ -508,32 +508,32 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 </p>
                 
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                    <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] dark:text-slate-400">
+                    <GraduationCap className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                     <span className="truncate">{alumni.department}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                    <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] dark:text-slate-400">
+                    <MapPin className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
                     <span className="truncate">{alumni.location}</span>
                   </div>
                 </div>
 
-                <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
+                <p className="text-sm text-[var(--text-secondary)] dark:text-slate-300 line-clamp-2">
                   "{alumni.bio}"
                 </p>
               </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="mt-auto pt-4 border-t border-[var(--border-color)] dark:border-slate-800">
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {alumni.skills && alumni.skills.length > 0 ? (
                     <>
                       {alumni.skills.slice(0, 3).map((skill, idx) => (
-                        <span key={idx} className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-medium px-2 py-1 rounded-md">
+                        <span key={idx} className="bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 text-[11px] font-medium px-2 py-1 rounded-md">
                           {skill}
                         </span>
                       ))}
                       {alumni.skills.length > 3 && (
-                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-medium px-2 py-1 rounded-md">
+                        <span className="bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-400 text-[11px] font-medium px-2 py-1 rounded-md">
                           +{alumni.skills.length - 3}
                         </span>
                       )}
@@ -569,7 +569,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                   </button>
                   <button 
                     onClick={(e) => handleOpenMessage(alumni, e)}
-                    className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-sm font-bold py-2.5 rounded-xl transition-colors"
+                    className="flex items-center justify-center gap-2 bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 dark:bg-slate-800 dark:hover:bg-slate-700 text-[var(--text-primary)] dark:text-white text-sm font-bold py-2.5 rounded-xl transition-colors"
                   >
                     <MessageSquare className="w-4 h-4" /> Message
                   </button>
@@ -581,12 +581,12 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
       )}
 
       {!loading && alumniList.length === 0 && (
-        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 mb-4">
+        <div className="text-center py-20 bg-[var(--bg-card)] dark:bg-slate-900 rounded-3xl border border-[var(--border-color)] dark:border-slate-800 p-8 shadow-sm">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-muted)] mb-4">
             <Search className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No matching alumni found</h3>
-          <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-sm leading-relaxed mb-6">
+          <h3 className="text-lg font-bold text-[var(--text-primary)] dark:text-white mb-2">No matching alumni found</h3>
+          <p className="text-[var(--text-muted)] dark:text-slate-400 max-w-md mx-auto text-sm leading-relaxed mb-6">
             We couldn't find any alumni matching your 20+ filter criteria. Try adjusting your filters or click reset to view all graduates.
           </p>
           <button
@@ -601,29 +601,29 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
       {/* ── 20+ ADVANCED FILTERING SYSTEM MODAL ────────────────────────────────────── */}
       {showAdvancedModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
+          <div className="relative w-full max-w-3xl bg-[var(--bg-card)] dark:bg-slate-900 rounded-3xl shadow-2xl border border-[var(--border-color)] dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 p-6 bg-slate-50/50 dark:bg-slate-800/30">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] dark:border-slate-800 p-6 bg-[var(--bg-page)] dark:bg-slate-800/30">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-md">
                   <Filter className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <h3 className="text-xl font-black text-[var(--text-primary)] dark:text-white flex items-center gap-2">
                     Advanced 20+ Alumni Search & Filters
                     <span className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-extrabold px-2.5 py-0.5 rounded-full">
                       DB Powered
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-[var(--text-muted)] dark:text-slate-400 mt-0.5">
                     Filter ASTU graduates by academic record, tech stack, employment tier, and location
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowAdvancedModal(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -633,7 +633,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
             <div className="overflow-y-auto p-6 space-y-6 flex-1 text-sm">
               
               {/* Category 1: Academic & Graduation */}
-              <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+              <div className="space-y-4 border-b border-[var(--border-color)] dark:border-slate-800 pb-5">
                 <h4 className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-2">
                   <GraduationCap className="w-4 h-4" /> 1. Academic & Graduation Filters
                 </h4>
@@ -641,13 +641,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Department (Dynamic DB) */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Department (DB Fetched)
                     </label>
                     <select
                       value={deptFilter}
                       onChange={(e) => setDeptFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">All Departments ({dbDepartments.length})</option>
                       {dbDepartments.map(d => (
@@ -658,13 +658,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
 
                   {/* Batch Year */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Graduation Batch
                     </label>
                     <select
                       value={batchFilter}
                       onChange={(e) => setBatchFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">All Graduation Batches</option>
                       <option value="2024">Class of 2024</option>
@@ -679,13 +679,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
 
                   {/* Minimum CGPA */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Minimum CGPA
                     </label>
                     <select
                       value={minCgpaFilter}
                       onChange={(e) => setMinCgpaFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">Any CGPA</option>
                       <option value="3.8">3.8+ (High Distinction)</option>
@@ -699,13 +699,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Gender */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Gender Filter
                     </label>
                     <select
                       value={genderFilter}
                       onChange={(e) => setGenderFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">All Genders</option>
                       <option value="female">Female Engineers</option>
@@ -722,7 +722,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                         onChange={(e) => setVerifiedFilter(e.target.checked)}
                         className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                      <span className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-200 flex items-center gap-1">
                         <ShieldCheck className="w-4 h-4 text-emerald-500" /> Only Verified Alumni Profiles
                       </span>
                     </label>
@@ -731,7 +731,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
               </div>
 
               {/* Category 2: Professional & Career */}
-              <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+              <div className="space-y-4 border-b border-[var(--border-color)] dark:border-slate-800 pb-5">
                 <h4 className="text-xs font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
                   <Briefcase className="w-4 h-4" /> 2. Employment & Career Filters
                 </h4>
@@ -739,13 +739,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Employment Status */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Employment Status
                     </label>
                     <select
                       value={employmentFilter}
                       onChange={(e) => setEmploymentFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">All Statuses</option>
                       <option value="EMPLOYED">Employed</option>
@@ -757,7 +757,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
 
                   {/* Company Name */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Company / Organization
                     </label>
                     <input
@@ -765,19 +765,19 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                       placeholder="e.g. Safaricom, Google, Ethio Telecom"
                       value={companyFilter}
                       onChange={(e) => setCompanyFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   {/* Industry Sector */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Industry Sector
                     </label>
                     <select
                       value={industryFilter}
                       onChange={(e) => setIndustryFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">All Industries</option>
                       <option value="Telecommunications">Telecommunications</option>
@@ -792,13 +792,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Min Salary Tier */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Salary Tier
                     </label>
                     <select
                       value={salaryMinFilter}
                       onChange={(e) => setSalaryMinFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">Any Salary Tier</option>
                       <option value="10000">&gt; 10,000 ETB / month</option>
@@ -816,7 +816,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                         onChange={(e) => setHasExperienceFilter(e.target.checked)}
                         className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <span className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-200">
                         Must Have Registered Work Experience
                       </span>
                     </label>
@@ -825,13 +825,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
               </div>
 
               {/* Category 3: Mentorship & Network Role */}
-              <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+              <div className="space-y-4 border-b border-[var(--border-color)] dark:border-slate-800 pb-5">
                 <h4 className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
                   <Award className="w-4 h-4" /> 3. Mentorship & Hiring Availability
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <label className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-emerald-500 transition-colors">
+                  <label className="flex items-center gap-3 p-3 bg-[var(--bg-page)] dark:bg-slate-800/60 rounded-xl border border-[var(--border-color)] dark:border-slate-700 cursor-pointer hover:border-emerald-500 transition-colors">
                     <input 
                       type="checkbox" 
                       checked={mentorFilter}
@@ -839,14 +839,14 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                       className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500"
                     />
                     <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                      <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white flex items-center gap-1">
                         <Award className="w-3.5 h-3.5 text-emerald-500" /> Verified Mentors Only
                       </p>
-                      <p className="text-[11px] text-slate-500">Show alumni available for 1-on-1 mentorship sessions</p>
+                      <p className="text-[11px] text-[var(--text-muted)]">Show alumni available for 1-on-1 mentorship sessions</p>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-amber-500 transition-colors">
+                  <label className="flex items-center gap-3 p-3 bg-[var(--bg-page)] dark:bg-slate-800/60 rounded-xl border border-[var(--border-color)] dark:border-slate-700 cursor-pointer hover:border-amber-500 transition-colors">
                     <input 
                       type="checkbox" 
                       checked={hiringFilter}
@@ -854,17 +854,17 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                       className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500"
                     />
                     <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                      <p className="text-xs font-bold text-[var(--text-primary)] dark:text-white flex items-center gap-1">
                         <Briefcase className="w-3.5 h-3.5 text-amber-500" /> Currently Hiring / Recruiter
                       </p>
-                      <p className="text-[11px] text-slate-500">Show alumni actively hiring at their companies</p>
+                      <p className="text-[11px] text-[var(--text-muted)]">Show alumni actively hiring at their companies</p>
                     </div>
                   </label>
                 </div>
               </div>
 
               {/* Category 4: Tech Stack & Skills Tag Selector */}
-              <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+              <div className="space-y-4 border-b border-[var(--border-color)] dark:border-slate-800 pb-5">
                 <h4 className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-2">
                   <Sparkles className="w-4 h-4" /> 4. Tech Stack & Engineering Skills Filter
                 </h4>
@@ -880,7 +880,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
                           isSelected
                             ? 'bg-blue-600 text-white ring-2 ring-blue-400/50 shadow-md'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            : 'bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300  dark:hover:bg-slate-700'
                         }`}
                       >
                         {isSelected && <Check className="w-3 h-3" />}
@@ -892,7 +892,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
               </div>
 
               {/* Category 5: Location & Digital Presence */}
-              <div className="space-y-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+              <div className="space-y-4 border-b border-[var(--border-color)] dark:border-slate-800 pb-5">
                 <h4 className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-2">
                   <MapPin className="w-4 h-4" /> 5. Location & Digital Presence
                 </h4>
@@ -900,13 +900,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Location Filter */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Location / Region
                     </label>
                     <select
                       value={locationFilter}
                       onChange={(e) => setLocationFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-medium focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="All">All Locations</option>
                       <option value="Addis Ababa">Addis Ababa, Ethiopia</option>
@@ -927,7 +927,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                         onChange={(e) => setHasLinkedInFilter(e.target.checked)}
                         className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                      <span className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-200 flex items-center gap-1">
                         <Linkedin className="w-4 h-4 text-blue-500" /> Must Have LinkedIn Profile Linked
                       </span>
                     </label>
@@ -943,13 +943,13 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 mb-1.5">
                       Sort Graduates By
                     </label>
                     <select
                       value={sortByFilter}
                       onChange={(e) => setSortByFilter(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-white font-semibold focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl p-2.5 text-xs text-[var(--text-primary)] dark:text-white font-semibold focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="fullName_asc">Full Name (A &rarr; Z)</option>
                       <option value="fullName_desc">Full Name (Z &rarr; A)</option>
@@ -964,7 +964,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 p-5 bg-slate-50/80 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between border-t border-[var(--border-color)] dark:border-slate-800 p-5 bg-[var(--bg-page)] dark:bg-slate-800/50">
               <button
                 onClick={handleResetFilters}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
@@ -990,7 +990,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
       {/* Alumni Profile Detail Modal */}
       {selectedAlumni && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[85vh] flex flex-col">
+          <div className="relative w-full max-w-2xl bg-[var(--bg-card)] dark:bg-slate-900 rounded-3xl shadow-2xl border border-[var(--border-color)] dark:border-slate-800 overflow-hidden max-h-[85vh] flex flex-col">
             
             {/* Scrollable Container */}
             <div className="overflow-y-auto flex-1">
@@ -1010,7 +1010,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                   <img 
                     src={formatAvatarUrl(selectedAlumni.avatar, selectedAlumni.name)} 
                     alt={selectedAlumni.name} 
-                    className="w-24 h-24 rounded-2xl bg-white p-1 border-4 border-white dark:border-slate-900 shadow-xl object-cover shrink-0"
+                    className="w-24 h-24 rounded-2xl bg-[var(--bg-card)] p-1 border-4 border-white dark:border-slate-900 shadow-xl object-cover shrink-0"
                   />
                   <div className="flex gap-2">
                     <button 
@@ -1031,7 +1031,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                         setSelectedAlumni(null);
                         handleOpenMessage(alum);
                       }}
-                      className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-sm"
+                      className="flex items-center gap-2 bg-[var(--bg-page)] dark:bg-slate-800  dark:hover:bg-slate-700 text-[var(--text-primary)] dark:text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-colors shadow-sm"
                     >
                       <MessageSquare className="w-4 h-4" /> Send Message
                     </button>
@@ -1039,7 +1039,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <h2 className="text-2xl font-extrabold text-[var(--text-primary)] dark:text-white flex items-center gap-2">
                     {selectedAlumni.name}
                     {selectedAlumni.isMentor && (
                       <span className="text-xs bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded-full">
@@ -1053,38 +1053,38 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 </div>
 
                 {/* Details grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[var(--bg-page)] dark:bg-slate-800/50 p-4 rounded-2xl border border-[var(--border-color)] dark:border-slate-800">
                   <div className="flex items-center gap-3 min-w-0">
-                    <GraduationCap className="w-5 h-5 text-slate-400 shrink-0" />
+                    <GraduationCap className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-slate-400 uppercase font-semibold">Department & Batch</p>
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{selectedAlumni.department} ('{selectedAlumni.batch})</p>
+                      <p className="text-xs text-[var(--text-muted)] uppercase font-semibold">Department & Batch</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)] dark:text-slate-200 truncate">{selectedAlumni.department} ('{selectedAlumni.batch})</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 min-w-0">
-                    <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
+                    <MapPin className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-slate-400 uppercase font-semibold">Location</p>
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{selectedAlumni.location}</p>
+                      <p className="text-xs text-[var(--text-muted)] uppercase font-semibold">Location</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)] dark:text-slate-200 truncate">{selectedAlumni.location}</p>
                     </div>
                   </div>
 
                   {selectedAlumni.email && (
                     <div className="flex items-center gap-3 min-w-0">
-                      <Mail className="w-5 h-5 text-slate-400 shrink-0" />
+                      <Mail className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs text-slate-400 uppercase font-semibold">Email</p>
-                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{selectedAlumni.email}</p>
+                        <p className="text-xs text-[var(--text-muted)] uppercase font-semibold">Email</p>
+                        <p className="text-sm font-semibold text-[var(--text-primary)] dark:text-slate-200 truncate">{selectedAlumni.email}</p>
                       </div>
                     </div>
                   )}
 
                   {selectedAlumni.linkedIn && (
                     <div className="flex items-center gap-3 min-w-0">
-                      <Linkedin className="w-5 h-5 text-slate-400 shrink-0" />
+                      <Linkedin className="w-5 h-5 text-[var(--text-muted)] shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs text-slate-400 uppercase font-semibold">LinkedIn</p>
+                        <p className="text-xs text-[var(--text-muted)] uppercase font-semibold">LinkedIn</p>
                         <a href={selectedAlumni.linkedIn} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-500 hover:underline truncate block">
                           {selectedAlumni.linkedIn}
                         </a>
@@ -1095,8 +1095,8 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
 
                 {/* Bio */}
                 <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">About</h4>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">About</h4>
+                  <p className="text-[var(--text-secondary)] dark:text-slate-300 text-sm leading-relaxed bg-[var(--bg-page)] dark:bg-slate-800/30 p-4 rounded-2xl border border-[var(--border-color)] dark:border-slate-800">
                     {selectedAlumni.bio}
                   </p>
                 </div>
@@ -1104,7 +1104,7 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
                 {/* Skills */}
                 {selectedAlumni.skills && selectedAlumni.skills.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Skills & Expertise</h4>
+                    <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Skills & Expertise</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedAlumni.skills.map((skill, idx) => (
                         <span key={idx} className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/40 text-xs font-semibold px-3 py-1.5 rounded-xl">
@@ -1124,31 +1124,31 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
       {/* Send Message Fallback Modal */}
       {messagingAlumni && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="relative w-full max-w-md bg-[var(--bg-card)] dark:bg-slate-900 rounded-3xl shadow-2xl border border-[var(--border-color)] dark:border-slate-800 p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] dark:border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] dark:text-white flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-blue-600" /> Message {messagingAlumni.name}
               </h3>
-              <button onClick={() => setMessagingAlumni(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setMessagingAlumni(null)} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Your Message</label>
+              <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-2">Your Message</label>
               <textarea
                 rows={4}
                 value={messageContent}
                 onChange={(e) => setMessageContent(e.target.value)}
                 placeholder="Type your message here..."
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-2xl p-3 text-sm text-[var(--text-primary)] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setMessagingAlumni(null)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-[var(--text-secondary)] dark:text-slate-400 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800"
               >
                 Cancel
               </button>

@@ -311,7 +311,7 @@ export default function PublicInfoPage() {
   const liveStatEntries = (page.liveStats ?? []).filter((e) => (statValues[e.key] ?? 0) > 0);
 
   return (
-    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-200">
       <Navbar />
       <main>
         <section className="relative overflow-hidden">
@@ -343,7 +343,7 @@ export default function PublicInfoPage() {
               </div>
               <button
                 onClick={() => navigate("/login")}
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-astu-navy shadow-lg hover:bg-slate-100 transition-all hover:scale-105"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-bold text-astu-navy shadow-lg hover:bg-[var(--bg-page)] transition-all hover:scale-105"
               >
                 <GraduationCap className="h-4 w-4" />
                 Portal Access
@@ -361,7 +361,7 @@ export default function PublicInfoPage() {
                 return (
                   <article
                     key={entry.key}
-                    className="group rounded-xl border border-outline-variant dark:border-slate-800 bg-white dark:bg-slate-900 p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all"
+                    className="group rounded-xl border border-outline-variant dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all"
                   >
                     <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 dark:bg-blue-900/30 text-astu-navy dark:text-blue-300 transition-colors group-hover:bg-astu-navy/10">
                       <SectionIcon className="h-5 w-5" />
@@ -386,7 +386,7 @@ export default function PublicInfoPage() {
               return (
                 <article
                   key={section.heading}
-                  className="group rounded-xl border border-outline-variant dark:border-slate-800 bg-white dark:bg-slate-900 p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all"
+                  className="group rounded-xl border border-outline-variant dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all"
                 >
                   <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/5 dark:bg-blue-900/30 text-astu-navy dark:text-blue-300 group-hover:bg-astu-navy/10 transition-colors">
                     <SectionIcon className="h-5 w-5" />

@@ -219,7 +219,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center justify-center space-y-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-astu-navy/20 border-t-astu-navy"></div>
-          <p className="text-sm font-medium text-slate-500">Loading data correction requests...</p>
+          <p className="text-sm font-medium text-[var(--text-muted)]">Loading data correction requests...</p>
         </div>
       </div>
     );
@@ -247,21 +247,21 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
       {/* Filters */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
             type="text"
             placeholder="Search by name, ID, or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm focus:border-astu-navy focus:outline-none focus:ring-1 focus:ring-astu-navy dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+            className="w-full rounded-xl border border-[var(--border-color)] pl-10 pr-4 py-2.5 text-sm focus:border-astu-navy focus:outline-none focus:ring-1 focus:ring-astu-navy dark:bg-slate-800 dark:border-slate-600 dark:text-white"
           />
         </div>
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-500" />
+          <Filter className="h-4 w-4 text-[var(--text-muted)]" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="rounded-xl border border-slate-200 py-2.5 pl-3 pr-8 text-sm focus:border-astu-navy focus:outline-none focus:ring-1 focus:ring-astu-navy dark:bg-slate-800 dark:border-slate-600 dark:text-white"
+            className="rounded-xl border border-[var(--border-color)] py-2.5 pl-3 pr-8 text-sm focus:border-astu-navy focus:outline-none focus:ring-1 focus:ring-astu-navy dark:bg-slate-800 dark:border-slate-600 dark:text-white"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending</option>
@@ -272,10 +272,10 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden md:block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:bg-slate-800 dark:border-slate-700">
+      <div className="hidden md:block overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm dark:bg-slate-800 dark:border-slate-700">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+            <thead className="bg-[var(--bg-page)] text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] dark:bg-slate-700 dark:text-slate-300">
               <tr>
                 <th className="px-6 py-4">Student Info</th>
                 <th className="px-6 py-4">Contact Details</th>
@@ -284,18 +284,18 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-700">
               {paginatedIssues.map((issue) => (
-                <tr key={issue.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
+                <tr key={issue.id} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-700/50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900 dark:text-white">{issue.fullName}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{issue.studentId} • Class of {issue.graduationYear}</div>
+                    <div className="font-semibold text-[var(--text-primary)] dark:text-white">{issue.fullName}</div>
+                    <div className="text-xs text-[var(--text-muted)] dark:text-slate-400">{issue.studentId} • Class of {issue.graduationYear}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-slate-700 dark:text-slate-300">{issue.contactEmail}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{issue.phoneNumber}</div>
+                    <div className="text-[var(--text-secondary)] dark:text-slate-300">{issue.contactEmail}</div>
+                    <div className="text-xs text-[var(--text-muted)] dark:text-slate-400">{issue.phoneNumber}</div>
                   </td>
-                  <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                  <td className="px-6 py-4 text-[var(--text-secondary)] dark:text-slate-400 whitespace-nowrap">
                     {new Date(issue.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -304,7 +304,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => setSelectedIssue(issue)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:text-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy focus:ring-offset-1 transition-all dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] shadow-sm hover:bg-[var(--bg-page)] hover:text-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy focus:ring-offset-1 transition-all dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600"
                     >
                       <FileText className="h-3.5 w-3.5" />
                       Review
@@ -316,11 +316,11 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
               {filteredIssues.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
-                      <SearchX className="h-6 w-6 text-slate-400" />
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-page)] dark:bg-slate-700">
+                      <SearchX className="h-6 w-6 text-[var(--text-muted)]" />
                     </div>
-                    <h3 className="mt-4 text-sm font-semibold text-slate-900 dark:text-white">No requests found</h3>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <h3 className="mt-4 text-sm font-semibold text-[var(--text-primary)] dark:text-white">No requests found</h3>
+                    <p className="mt-1 text-sm text-[var(--text-muted)] dark:text-slate-400">
                       {searchQuery || statusFilter !== 'ALL'
                         ? 'Try adjusting your search or filters'
                         : 'There are no data correction requests to review'}
@@ -333,26 +333,26 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
         </div>
         
         {/* Pagination Bar */}
-        <div className="border-t border-slate-200 px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/50 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
+        <div className="border-t border-[var(--border-color)] px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[var(--bg-page)] dark:bg-slate-800/50 dark:border-slate-700 text-xs text-[var(--text-muted)] dark:text-slate-400">
           <div>
-            Showing <span className="font-semibold text-slate-700 dark:text-slate-200">{filteredIssues.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-semibold text-slate-700 dark:text-slate-200">{Math.min(currentPage * pageSize, filteredIssues.length)}</span> of <span className="font-semibold text-slate-700 dark:text-slate-200">{filteredIssues.length}</span> entries
+            Showing <span className="font-semibold text-[var(--text-secondary)] dark:text-slate-200">{filteredIssues.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to <span className="font-semibold text-[var(--text-secondary)] dark:text-slate-200">{Math.min(currentPage * pageSize, filteredIssues.length)}</span> of <span className="font-semibold text-[var(--text-secondary)] dark:text-slate-200">{filteredIssues.length}</span> entries
           </div>
           {totalPages > 1 && (
             <div className="flex items-center gap-2">
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-all"
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 font-medium text-[var(--text-secondary)] shadow-sm hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-all"
               >
                 <ChevronLeft className="h-3.5 w-3.5" /> Previous
               </button>
-              <span className="px-2 font-semibold text-slate-700 dark:text-slate-200">
+              <span className="px-2 font-semibold text-[var(--text-secondary)] dark:text-slate-200">
                 Page {currentPage} of {totalPages}
               </span>
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-all"
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 font-medium text-[var(--text-secondary)] shadow-sm hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:hover:bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 transition-all"
               >
                 Next <ChevronRight className="h-3.5 w-3.5" />
               </button>
@@ -364,22 +364,22 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
       {/* Mobile Card Layout */}
       <div className="md:hidden space-y-3">
         {filteredIssues.map((issue) => (
-          <div key={issue.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:bg-slate-800 dark:border-slate-700">
+          <div key={issue.id} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm dark:bg-slate-800 dark:border-slate-700">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <div className="font-semibold text-slate-900 dark:text-white">{issue.fullName}</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">{issue.studentId} • Class of {issue.graduationYear}</div>
+                <div className="font-semibold text-[var(--text-primary)] dark:text-white">{issue.fullName}</div>
+                <div className="text-xs text-[var(--text-muted)] dark:text-slate-400">{issue.studentId} • Class of {issue.graduationYear}</div>
               </div>
               {getStatusBadge(issue.status)}
             </div>
             <div className="space-y-1.5 mb-3">
-              <div className="text-xs text-slate-600 dark:text-slate-400">📧 {issue.contactEmail}</div>
-              <div className="text-xs text-slate-600 dark:text-slate-400">📱 {issue.phoneNumber}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">📅 {new Date(issue.createdAt).toLocaleDateString()}</div>
+              <div className="text-xs text-[var(--text-secondary)] dark:text-slate-400">📧 {issue.contactEmail}</div>
+              <div className="text-xs text-[var(--text-secondary)] dark:text-slate-400">📱 {issue.phoneNumber}</div>
+              <div className="text-xs text-[var(--text-muted)] dark:text-slate-400">📅 {new Date(issue.createdAt).toLocaleDateString()}</div>
             </div>
             <button
               onClick={() => setSelectedIssue(issue)}
-              className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:text-astu-navy transition-all dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-white px-3 py-2 text-xs font-medium text-[var(--text-secondary)] shadow-sm hover:bg-[var(--bg-page)] hover:text-astu-navy transition-all dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
             >
               <FileText className="h-3.5 w-3.5" />
               Review Request
@@ -387,12 +387,12 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
           </div>
         ))}
         {filteredIssues.length === 0 && (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center dark:bg-slate-800 dark:border-slate-700">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
-              <SearchX className="h-6 w-6 text-slate-400" />
+          <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-8 text-center dark:bg-slate-800 dark:border-slate-700">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-page)] dark:bg-slate-700">
+              <SearchX className="h-6 w-6 text-[var(--text-muted)]" />
             </div>
-            <h3 className="mt-4 text-sm font-semibold text-slate-900 dark:text-white">No requests found</h3>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <h3 className="mt-4 text-sm font-semibold text-[var(--text-primary)] dark:text-white">No requests found</h3>
+            <p className="mt-1 text-sm text-[var(--text-muted)] dark:text-slate-400">
               {searchQuery || statusFilter !== 'ALL'
                 ? 'Try adjusting your search or filters'
                 : 'There are no data correction requests to review'}
@@ -405,18 +405,18 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
       {selectedIssue && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={() => setSelectedIssue(null)}>
           <div
-            className="relative w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-800"
+            className="relative w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-[var(--bg-card)] shadow-2xl dark:bg-slate-800"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-800 dark:border-slate-700">
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border-color)] px-4 sm:px-6 py-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-800 dark:border-slate-700">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Review Data Correction Request</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Submitted on {new Date(selectedIssue.createdAt).toLocaleString()}</p>
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] dark:text-white">Review Data Correction Request</h3>
+                <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">Submitted on {new Date(selectedIssue.createdAt).toLocaleString()}</p>
               </div>
               <button
                 onClick={() => setSelectedIssue(null)}
-                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors dark:hover:bg-slate-700"
+                className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors dark:hover:bg-slate-700"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -429,7 +429,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                 <div className="space-y-5">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
                         {isEditing ? '✏️ Edit & Correct Graduate Info' : 'Reported Information'}
                       </h4>
                       <button
@@ -442,42 +442,42 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                     </div>
 
                     {isEditing ? (
-                      <div className="space-y-3 rounded-xl bg-slate-50 p-4 border border-slate-200 dark:bg-slate-700/50 dark:border-slate-600 text-xs">
+                      <div className="space-y-3 rounded-xl bg-[var(--bg-page)] p-4 border border-[var(--border-color)] dark:bg-slate-700/50 dark:border-slate-600 text-xs">
                         <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Full Name</label>
+                          <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Full Name</label>
                           <input
                             type="text"
                             value={editForm.fullName}
                             onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                            className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-semibold focus:outline-none focus:border-astu-navy"
+                            className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] font-semibold focus:outline-none focus:border-astu-navy"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Student ID</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Student ID</label>
                             <input
                               type="text"
                               value={editForm.studentId}
                               onChange={(e) => setEditForm({ ...editForm, studentId: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-mono focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] font-mono focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Graduation Year</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Graduation Year</label>
                             <input
                               type="text"
                               value={editForm.graduationYear}
                               onChange={(e) => setEditForm({ ...editForm, graduationYear: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Department / Program</label>
+                          <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Department / Program</label>
                           <select
                             value={editForm.department}
                             onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
-                            className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-semibold focus:outline-none focus:border-astu-navy"
+                            className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] font-semibold focus:outline-none focus:border-astu-navy"
                           >
                             <option value="Computer Science & Engineering">Computer Science & Engineering</option>
                             <option value="Software Engineering">Software Engineering</option>
@@ -491,92 +491,92 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Email</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Email</label>
                             <input
                               type="email"
                               value={editForm.email}
                               onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Phone</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Phone</label>
                             <input
                               type="text"
                               value={editForm.phone}
                               onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Final CGPA</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Final CGPA</label>
                             <input
                               type="text"
                               value={editForm.cgpa}
                               onChange={(e) => setEditForm({ ...editForm, cgpa: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-mono focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] font-mono focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nationality</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Nationality</label>
                             <input
                               type="text"
                               value={editForm.nationality}
                               onChange={(e) => setEditForm({ ...editForm, nationality: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Date of Birth</label>
+                            <label className="block text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1">Date of Birth</label>
                             <input
                               type="date"
                               value={editForm.dateOfBirth}
                               onChange={(e) => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
-                              className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white focus:outline-none focus:border-astu-navy"
+                              className="w-full p-2 border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy"
                             />
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-3 rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-700/50 dark:border-slate-600">
+                      <div className="space-y-3 rounded-xl bg-[var(--bg-page)] p-4 border border-[var(--border-color)] dark:bg-slate-700/50 dark:border-slate-600">
                         <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Full Name</div>
-                          <div className="font-semibold text-slate-900 dark:text-white">{editForm.fullName || selectedIssue.fullName}</div>
+                          <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Full Name</div>
+                          <div className="font-semibold text-[var(--text-primary)] dark:text-white">{editForm.fullName || selectedIssue.fullName}</div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Student ID</div>
-                            <div className="font-medium text-slate-900 dark:text-white">{editForm.studentId || selectedIssue.studentId}</div>
+                            <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Student ID</div>
+                            <div className="font-medium text-[var(--text-primary)] dark:text-white">{editForm.studentId || selectedIssue.studentId}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Graduation Year</div>
-                            <div className="font-medium text-slate-900 dark:text-white">{editForm.graduationYear || selectedIssue.graduationYear}</div>
+                            <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Graduation Year</div>
+                            <div className="font-medium text-[var(--text-primary)] dark:text-white">{editForm.graduationYear || selectedIssue.graduationYear}</div>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Email</div>
-                            <div className="text-sm font-medium text-slate-900 break-all dark:text-white">{editForm.email || selectedIssue.contactEmail}</div>
+                            <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Email</div>
+                            <div className="text-sm font-medium text-[var(--text-primary)] break-all dark:text-white">{editForm.email || selectedIssue.contactEmail}</div>
                           </div>
                           <div>
-                            <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Phone</div>
-                            <div className="text-sm font-medium text-slate-900 dark:text-white">{editForm.phone || selectedIssue.phoneNumber}</div>
+                            <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Phone</div>
+                            <div className="text-sm font-medium text-[var(--text-primary)] dark:text-white">{editForm.phone || selectedIssue.phoneNumber}</div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/60">
+                        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[var(--border-color)]">
                           <div>
-                            <div className="text-[9px] uppercase text-slate-400 font-semibold">CGPA</div>
-                            <div className="text-xs font-bold text-slate-800">{editForm.cgpa}</div>
+                            <div className="text-[9px] uppercase text-[var(--text-muted)] font-semibold">CGPA</div>
+                            <div className="text-xs font-bold text-[var(--text-primary)]">{editForm.cgpa}</div>
                           </div>
                           <div>
-                            <div className="text-[9px] uppercase text-slate-400 font-semibold">Nationality</div>
-                            <div className="text-xs font-bold text-slate-800">{editForm.nationality}</div>
+                            <div className="text-[9px] uppercase text-[var(--text-muted)] font-semibold">Nationality</div>
+                            <div className="text-xs font-bold text-[var(--text-primary)]">{editForm.nationality}</div>
                           </div>
                           <div>
-                            <div className="text-[9px] uppercase text-slate-400 font-semibold">DOB</div>
-                            <div className="text-xs font-bold text-slate-800">{editForm.dateOfBirth || 'N/A'}</div>
+                            <div className="text-[9px] uppercase text-[var(--text-muted)] font-semibold">DOB</div>
+                            <div className="text-xs font-bold text-[var(--text-primary)]">{editForm.dateOfBirth || 'N/A'}</div>
                           </div>
                         </div>
                       </div>
@@ -584,7 +584,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                   </div>
 
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Issue Description</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mb-2">Issue Description</h4>
                     <div className="rounded-xl bg-amber-50 p-4 border border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/30">
                       <p className="text-sm text-amber-900 whitespace-pre-wrap dark:text-amber-200">{selectedIssue.issueDescription}</p>
                     </div>
@@ -594,36 +594,36 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                 {/* Right Column: Document */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Identity Document</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Identity Document</h4>
                     <a
                       href={getDocumentUrl(selectedIssue.identificationUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       download
-                      className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-astu-navy hover:bg-slate-200 transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                      className="inline-flex items-center gap-1 rounded-lg bg-[var(--bg-page)] px-2.5 py-1 text-[10px] font-semibold text-astu-navy  transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                     >
                       <Download className="h-3 w-3" />
                       Download
                     </a>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 dark:bg-slate-700/50 dark:border-slate-600">
+                  <div className="rounded-xl border border-[var(--border-color)] overflow-hidden bg-[var(--bg-page)] dark:bg-slate-700/50 dark:border-slate-600">
                     {isImageFile(selectedIssue.identificationUrl) && !imgError ? (
                       <img
                         src={getDocumentUrl(selectedIssue.identificationUrl)}
                         alt="ID Document"
-                        className="w-full h-auto max-h-72 object-contain bg-white dark:bg-slate-800"
+                        className="w-full h-auto max-h-72 object-contain bg-[var(--bg-card)] dark:bg-slate-800"
                         onError={() => setImgError(true)}
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center py-10 px-4">
-                        <div className="h-16 w-16 rounded-2xl bg-slate-100 dark:bg-slate-600 flex items-center justify-center mb-4">
-                          <FileText className="h-8 w-8 text-slate-400" />
+                        <div className="h-16 w-16 rounded-2xl bg-[var(--bg-page)] dark:bg-slate-600 flex items-center justify-center mb-4">
+                          <FileText className="h-8 w-8 text-[var(--text-muted)]" />
                         </div>
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                        <p className="text-sm font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
                           {imgError ? 'Image could not be loaded' : 'Document uploaded'}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                        <p className="text-xs text-[var(--text-muted)] dark:text-slate-400 mb-4">
                           Click below to download or open the document
                         </p>
                         <div className="flex gap-2">
@@ -639,7 +639,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                             href={getDocumentUrl(selectedIssue.identificationUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
                           >
                             <ExternalLink className="h-3.5 w-3.5" />
                             Open in Browser
@@ -659,16 +659,16 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
             </div>
 
             {/* Modal Footer – fixed at bottom */}
-            <div className="flex-shrink-0 border-t border-slate-200 bg-slate-50/80 px-4 sm:px-6 py-4 dark:bg-slate-800 dark:border-slate-700">
+            <div className="flex-shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-4 sm:px-6 py-4 dark:bg-slate-800 dark:border-slate-700">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-sm flex items-center gap-2">
-                  <span className="text-slate-500 dark:text-slate-400">Status:</span>
+                  <span className="text-[var(--text-muted)] dark:text-slate-400">Status:</span>
                   {getStatusBadge(selectedIssue.status)}
                 </div>
                 <div className="flex flex-wrap gap-2 justify-end">
                   <button
                     onClick={() => setSelectedIssue(null)}
-                    className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors dark:text-slate-300 dark:hover:bg-slate-700"
+                    className="rounded-xl px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors dark:text-slate-300 dark:hover:bg-slate-700"
                   >
                     Close
                   </button>
@@ -677,7 +677,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                       <button
                         disabled={actionLoading}
                         onClick={() => handleResolveIssue(selectedIssue.id, 'REJECTED')}
-                        className="rounded-xl bg-white border border-red-200 px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all disabled:opacity-50 dark:bg-slate-700 dark:border-red-800 dark:text-red-400"
+                        className="rounded-xl bg-[var(--bg-card)] border border-red-200 px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all disabled:opacity-50 dark:bg-slate-700 dark:border-red-800 dark:text-red-400"
                       >
                         Reject
                       </button>

@@ -169,7 +169,7 @@ export default function PartnersPage() {
   const goToRegister = () => navigate('/employers/register');
 
   return (
-    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-200">
       <Navbar />
 
       {/* Hero */}
@@ -239,7 +239,7 @@ export default function PartnersPage() {
             return (
               <div
                 key={capability.title}
-                className="group rounded-xl border border-outline-variant bg-white p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all hover:shadow-lg hover:-translate-y-1"
+                className="group rounded-xl border border-outline-variant bg-[var(--bg-card)] p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all hover:shadow-lg hover:-translate-y-1"
               >
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-astu-navy/10 text-astu-navy transition-colors group-hover:bg-astu-navy group-hover:text-white">
                   <Icon className="h-7 w-7" />
@@ -272,7 +272,7 @@ export default function PartnersPage() {
               return (
                 <li
                   key={step.title}
-                  className="relative rounded-xl border border-outline-variant bg-white p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
+                  className="relative rounded-xl border border-outline-variant bg-[var(--bg-card)] p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
                 >
                   <div className="mb-4 flex items-center gap-3">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-astu-navy text-sm font-bold text-white">
@@ -307,7 +307,7 @@ export default function PartnersPage() {
               return (
                 <li
                   key={requirement.label}
-                  className="flex items-start gap-4 rounded-lg border border-outline-variant bg-white p-4"
+                  className="flex items-start gap-4 rounded-lg border border-outline-variant bg-[var(--bg-card)] p-4"
                 >
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-astu-navy/10 text-astu-navy">
                     <Icon className="h-5 w-5" />
@@ -336,7 +336,7 @@ export default function PartnersPage() {
         and shows an honest empty state until administration adds verified
         partners via Homepage CMS → Partners.
       */}
-      <section className="border-y border-outline-variant bg-white">
+      <section className="border-y border-outline-variant bg-[var(--bg-card)]">
         <div className="mx-auto max-w-[1440px] px-4 py-16 md:px-8">
           <h2 className="text-center text-2xl font-bold text-astu-navy md:text-3xl">
             Registered partner organisations
@@ -363,7 +363,7 @@ export default function PartnersPage() {
             Questions before you register
           </h2>
         </div>
-        <div className="divide-y divide-outline-variant overflow-hidden rounded-xl border border-outline-variant bg-white">
+        <div className="divide-y divide-outline-variant overflow-hidden rounded-xl border border-outline-variant bg-[var(--bg-card)]">
           {faqs.map((faq, idx) => {
             const isOpen = openFaq === idx;
             return (

@@ -83,7 +83,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
             <History className="h-4 w-4 shrink-0 text-astu-navy" />
             Activity Timeline
             {activities.length > 0 && (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+              <span className="rounded-full bg-[var(--bg-page)] px-2 py-0.5 text-[10px] font-bold text-[var(--text-secondary)]">
                 {activities.length}
               </span>
             )}
@@ -143,7 +143,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
           <button
             type="button"
             onClick={handleViewAllClick}
-            className="mt-4 flex w-full items-center justify-center gap-1 rounded-xl border border-slate-200/60 bg-slate-50 py-2.5 text-center text-xs font-bold text-astu-navy transition-all hover:bg-astu-navy/5"
+            className="mt-4 flex w-full items-center justify-center gap-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] py-2.5 text-center text-xs font-bold text-astu-navy transition-all hover:bg-astu-navy/5"
           >
             <span>View All ({activities.length}) Activities</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -153,36 +153,36 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 
       {isModalOpen && (
         <div className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 p-6 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-page)] p-6 dark:border-slate-800 dark:bg-slate-900">
               <div className="flex items-center gap-2.5">
                 <span className="rounded-xl bg-astu-navy/10 p-2 text-astu-navy">
                   <History className="h-5 w-5" />
                 </span>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">System Activity Audit Log</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Complete historical timeline of verifications, document requests & system actions</p>
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)] dark:text-white">System Activity Audit Log</h3>
+                  <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">Complete historical timeline of verifications, document requests & system actions</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                className="rounded-xl p-2 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] dark:hover:bg-slate-800"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="space-y-3 border-b border-slate-100 p-4 dark:border-slate-800">
+            <div className="space-y-3 border-b border-[var(--border-color)] p-4 dark:border-slate-800">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
                 <input
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search activity..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10 dark:border-slate-700 dark:bg-slate-800"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10 dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -194,7 +194,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                     className={`rounded-full px-3 py-1 text-[11px] font-bold capitalize transition-colors ${
                       activeType === type
                         ? 'bg-astu-navy text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
+                        : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 dark:bg-slate-800 dark:text-slate-300'
                     }`}
                   >
                     {type === 'ALL' ? 'All' : type}
@@ -205,7 +205,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
 
             <div className="flex-1 space-y-3 overflow-y-auto p-4">
               {filteredModalActivities.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                <div className="flex flex-col items-center justify-center py-16 text-[var(--text-muted)]">
                   <SearchX className="mb-2 h-10 w-10 text-slate-300" />
                   <p className="text-sm font-medium">No matching activity found</p>
                 </div>
@@ -232,7 +232,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                               <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-astu-red align-middle" />
                             )}
                           </p>
-                          <span className="shrink-0 text-[10px] font-semibold text-slate-500">{activity.timestamp}</span>
+                          <span className="shrink-0 text-[10px] font-semibold text-[var(--text-muted)]">{activity.timestamp}</span>
                         </div>
                         <p className={`mt-0.5 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                           {activity.description}

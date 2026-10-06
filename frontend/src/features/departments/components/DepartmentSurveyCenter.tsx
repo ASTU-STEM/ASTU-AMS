@@ -122,7 +122,7 @@ function dedupeMilestones(surveys: SurveyTemplate[]): SurveyTemplate[] {
 }
 
 const Skeleton = ({ className = '' }: { className?: string }) => (
-  <div className={`animate-pulse rounded-lg bg-slate-200/70 dark:bg-slate-700/50 ${className}`} />
+  <div className={`animate-pulse rounded-lg bg-[var(--bg-page)] dark:bg-slate-700/50 ${className}`} />
 );
 
 export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ darkMode = false, departmentId = null }) => {
@@ -370,7 +370,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
 
   const cardShell = darkMode
     ? 'bg-slate-900 border-slate-800 text-white'
-    : 'bg-white border-slate-200/80 text-slate-900';
+    : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)]';
 
   const renderSurveyCard = (survey: SurveyTemplate, kind: 'milestone' | 'custom') => {
     const qCount = questionCount(survey);
@@ -383,7 +383,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
         className={`flex flex-col rounded-2xl border p-5 transition ${
           darkMode
             ? 'border-slate-800 bg-slate-950/40 hover:border-slate-700'
-            : 'border-slate-200 bg-slate-50/40 hover:border-[#003580]/25 hover:shadow-sm'
+            : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003580]/25 hover:shadow-sm'
         }`}
       >
         <div className="flex items-start justify-between gap-2">
@@ -652,7 +652,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
         </div>
       ) : (
         <div className={`space-y-6 rounded-2xl border p-6 ${cardShell}`}>
-          <div className="flex items-center justify-between gap-3 border-b border-slate-200/70 pb-4 dark:border-slate-800">
+          <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] pb-4 dark:border-slate-800">
             <div>
               <h3 className="flex items-center gap-2 text-lg font-bold">
                 <FilePlus2 className="h-5 w-5 text-[#003580]" />
@@ -715,7 +715,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
             />
           </div>
 
-          <div className="space-y-4 border-t border-slate-200/70 pt-4 dark:border-slate-800">
+          <div className="space-y-4 border-t border-[var(--border-color)] pt-4 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <h4 className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                 Questions ({questions.length})
@@ -815,7 +815,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                               };
                               setQuestions(updated);
                             }}
-                            className="text-slate-400 hover:text-red-500"
+                            className="text-[var(--text-muted)] hover:text-red-500"
                           >
                             ×
                           </button>
@@ -855,7 +855,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-slate-200/70 pt-4 dark:border-slate-800">
+          <div className="flex justify-end gap-3 border-t border-[var(--border-color)] pt-4 dark:border-slate-800">
             <button
               type="button"
               onClick={() => setActiveSubTab('manage')}
@@ -883,7 +883,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
               darkMode ? 'border-slate-800 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-900'
             }`}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
+            <div className="flex items-start justify-between gap-3 border-b border-[var(--border-color)] px-5 py-4 dark:border-slate-800">
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-[#003580]">
                   {MILESTONE_TYPES.has(selectedDetail.type) ? 'Milestone template' : 'Custom survey'}
@@ -893,7 +893,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                   {selectedDetail.description || 'No description'}
                 </p>
               </div>
-              <button type="button" onClick={closeDetail} className="rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
+              <button type="button" onClick={closeDetail} className="rounded-lg p-2 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -945,7 +945,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                           {responses.length || analysis?.totalResponses || 0} of {selectedDetail._count?.assignments || 0} assigned
                         </span>
                       </div>
-                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--bg-page)] dark:bg-slate-800">
                         <div
                           className="h-full rounded-full bg-emerald-500 transition-all"
                           style={{ width: `${completionPct(selectedDetail, responses, analysis)}%` }}
@@ -1085,7 +1085,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                                       <span className={`w-36 shrink-0 truncate text-xs ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                         {label}
                                       </span>
-                                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--bg-page)] dark:bg-slate-800">
                                         <div
                                           className="h-full rounded-full bg-[#003580]"
                                           style={{ width: `${p}%` }}
@@ -1109,7 +1109,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
               )}
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-200/70 px-5 py-4 dark:border-slate-800">
+            <div className="flex justify-end gap-2 border-t border-[var(--border-color)] px-5 py-4 dark:border-slate-800">
               <button
                 type="button"
                 onClick={closeDetail}
@@ -1138,7 +1138,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
               darkMode ? 'border-slate-800 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-900'
             }`}
           >
-            <div className="border-b border-slate-200/70 px-6 py-4 dark:border-slate-800">
+            <div className="border-b border-[var(--border-color)] px-6 py-4 dark:border-slate-800">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-[#003580]">Confirm dispatch</p>
@@ -1150,7 +1150,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
                 <button
                   type="button"
                   onClick={() => setPreview(null)}
-                  className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="rounded-lg p-1.5 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -1206,7 +1206,7 @@ export const DepartmentSurveyCenter: React.FC<DepartmentSurveyCenterProps> = ({ 
               )}
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-200/70 px-6 py-4 dark:border-slate-800">
+            <div className="flex justify-end gap-2 border-t border-[var(--border-color)] px-6 py-4 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setPreview(null)}

@@ -26,7 +26,7 @@ export default function Dropdown({ trigger, children, align = 'left', className 
       <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
       {isOpen && (
         <div
-          className={`absolute z-50 mt-2 min-w-[200px] rounded-xl border border-outline-variant bg-white shadow-lg py-1 ${
+          className={`absolute z-50 mt-2 min-w-[200px] rounded-xl border border-outline-variant bg-[var(--bg-card)] shadow-lg py-1 ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
           onClick={() => setIsOpen(false)}

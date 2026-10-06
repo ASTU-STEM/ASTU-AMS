@@ -380,7 +380,7 @@ export default function ContactRegistrarPage() {
                   ? 'border-emerald-400 bg-emerald-50/50'
                   : fileError
                   ? 'border-red-300 bg-red-50/50'
-                  : 'border-outline-variant bg-slate-50 hover:border-astu-navy/50 hover:bg-slate-100'
+                  : 'border-outline-variant bg-[var(--bg-page)] hover:border-astu-navy/50 hover:bg-black/5 dark:hover:bg-white/5'
               }`}
               onClick={() => fileInputRef.current?.click()}
             >

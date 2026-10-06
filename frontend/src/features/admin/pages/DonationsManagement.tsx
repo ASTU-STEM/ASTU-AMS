@@ -513,11 +513,11 @@ export default function DonationsManagement() {
       {/* Header & Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight flex items-center gap-2">
             <Heart className="h-7 w-7 text-rose-500 fill-rose-500" />
             Donations & Giving Management
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             Manage ASTU fundraising campaigns, create new causes, and monitor Chapa donor records.
           </p>
         </div>
@@ -525,7 +525,7 @@ export default function DonationsManagement() {
         <div className="flex items-center gap-3">
           <button
             onClick={loadData}
-            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm"
+            className="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)] text-[var(--text-secondary)] transition-colors shadow-sm"
             title="Refresh Data"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -543,61 +543,61 @@ export default function DonationsManagement() {
 
       {/* Analytics Metric Cards (100% Dynamic Database Values) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--border-color)] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Total Raised</span>
+            <span className="text-[10px] font-extrabold uppercase text-[var(--text-muted)] tracking-wider">Total Raised</span>
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
               ETB
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">{totalRaised.toLocaleString()} ETB</p>
+          <p className="text-2xl font-black text-[var(--text-primary)] mt-2">{totalRaised.toLocaleString()} ETB</p>
           <p className="text-[10px] text-emerald-600 font-bold mt-1">From verified Chapa payments</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--border-color)] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Target Goal Total</span>
+            <span className="text-[10px] font-extrabold uppercase text-[var(--text-muted)] tracking-wider">Target Goal Total</span>
             <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <Target className="h-5 w-5" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">{totalGoal.toLocaleString()} ETB</p>
-          <p className="text-[10px] text-slate-500 font-medium mt-1">Across all active causes</p>
+          <p className="text-2xl font-black text-[var(--text-primary)] mt-2">{totalGoal.toLocaleString()} ETB</p>
+          <p className="text-[10px] text-[var(--text-muted)] font-medium mt-1">Across all active causes</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--border-color)] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Total Donors</span>
+            <span className="text-[10px] font-extrabold uppercase text-[var(--text-muted)] tracking-wider">Total Donors</span>
             <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
               <Users className="h-5 w-5" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">{totalDonors}</p>
+          <p className="text-2xl font-black text-[var(--text-primary)] mt-2">{totalDonors}</p>
           <p className="text-[10px] text-purple-600 font-bold mt-1">Alumni & Corporate Supporters</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="bg-[var(--bg-card)] p-5 rounded-2xl border border-[var(--border-color)] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Active Campaigns</span>
+            <span className="text-[10px] font-extrabold uppercase text-[var(--text-muted)] tracking-wider">Active Campaigns</span>
             <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
               <Heart className="h-5 w-5" />
             </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 mt-2">{activeCampaignsCount}</p>
+          <p className="text-2xl font-black text-[var(--text-primary)] mt-2">{activeCampaignsCount}</p>
           <p className="text-[10px] text-rose-600 font-bold mt-1">Controlled by Admin</p>
         </div>
       </div>
 
       {/* Tabs & Search */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-3">
+      <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-sm p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[var(--border-color)] pb-3">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab('campaigns')}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
                 activeTab === 'campaigns'
                   ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
               Campaign Causes ({campaigns.length})
@@ -607,7 +607,7 @@ export default function DonationsManagement() {
               className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
                 activeTab === 'donors'
                   ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
               Donor Records ({donors.length})
@@ -615,7 +615,7 @@ export default function DonationsManagement() {
           </div>
 
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
             <input
               type="text"
               value={searchQuery}
@@ -624,7 +624,7 @@ export default function DonationsManagement() {
                 setDonorPage(1);
               }}
               placeholder="Search campaign or donor..."
-              className="w-full text-xs pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-slate-400 transition-colors"
+              className="w-full text-xs pl-9 pr-4 py-2 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] focus:outline-none focus:border-slate-400 transition-colors"
             />
           </div>
         </div>
@@ -637,27 +637,27 @@ export default function DonationsManagement() {
               return (
                 <div
                   key={c.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9px] font-extrabold rounded-md uppercase tracking-wider">
                         {c.category || 'Fund'}
                       </span>
-                      <span className="text-[10px] font-bold text-slate-500">{c.donorCount || 0} donors</span>
+                      <span className="text-[10px] font-bold text-[var(--text-muted)]">{c.donorCount || 0} donors</span>
                     </div>
 
-                    <h3 className="text-sm font-extrabold text-slate-900">{c.title}</h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
+                    <h3 className="text-sm font-extrabold text-[var(--text-primary)]">{c.title}</h3>
+                    <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed line-clamp-2">
                       {c.description || 'Fundraising campaign for ASTU university development.'}
                     </p>
 
                     <div className="mt-4 space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-bold">
                         <span className="text-emerald-700">{c.raised.toLocaleString()} ETB</span>
-                        <span className="text-slate-400">of {c.goal.toLocaleString()} ETB</span>
+                        <span className="text-[var(--text-muted)]">of {c.goal.toLocaleString()} ETB</span>
                       </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-[var(--bg-page)] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 transition-all"
                           style={{ width: `${progressPct}%` }}
@@ -666,10 +666,10 @@ export default function DonationsManagement() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                  <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-color)]">
                     <button
                       onClick={() => handleOpenEdit(c)}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5"
+                      className="flex-1 py-2 rounded-xl text-xs font-bold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <Edit3 className="h-3.5 w-3.5" />
                       Edit Cause
@@ -688,10 +688,10 @@ export default function DonationsManagement() {
             })}
 
             {filteredCampaigns.length === 0 && (
-              <div className="col-span-full py-12 text-center text-slate-500 space-y-2">
-                <AlertCircle className="mx-auto h-8 w-8 text-slate-400" />
+              <div className="col-span-full py-12 text-center text-[var(--text-muted)] space-y-2">
+                <AlertCircle className="mx-auto h-8 w-8 text-[var(--text-muted)]" />
                 <p className="text-xs font-bold">No donation campaigns found</p>
-                <p className="text-[10px] text-slate-400">Click "Create Campaign" to add your first cause</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Click "Create Campaign" to add your first cause</p>
               </div>
             )}
           </div>
@@ -701,11 +701,11 @@ export default function DonationsManagement() {
         {activeTab === 'donors' && (
           <div className="space-y-4">
             {/* Filter, Sort & Export Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--bg-page)] p-3 rounded-xl border border-[var(--border-color)]">
               <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 {/* Cause Filter */}
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                  <Filter className="h-3.5 w-3.5 text-slate-400" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
+                  <Filter className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                   <span>Cause:</span>
                   <select
                     value={donorCauseFilter}
@@ -713,7 +713,7 @@ export default function DonationsManagement() {
                       setDonorCauseFilter(e.target.value);
                       setDonorPage(1);
                     }}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                    className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                   >
                     <option value="ALL">All Causes ({donors.length})</option>
                     {Array.from(new Set(donors.map((d) => d.campaign?.title).filter(Boolean))).map((title) => (
@@ -725,12 +725,12 @@ export default function DonationsManagement() {
                 </div>
 
                 {/* Sort Order */}
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <span>Sort By:</span>
                   <select
                     value={donorSortBy}
                     onChange={(e: any) => setDonorSortBy(e.target.value)}
-                    className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                    className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -781,9 +781,9 @@ export default function DonationsManagement() {
             </div>
 
             {/* Scrollable Donor Table with Sticky Header */}
-            <div className="overflow-x-auto max-h-[480px] overflow-y-auto rounded-xl border border-slate-200 scrollbar-thin">
+            <div className="overflow-x-auto max-h-[480px] overflow-y-auto rounded-xl border border-[var(--border-color)] scrollbar-thin">
               <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-slate-100 z-10 text-slate-600 uppercase font-extrabold tracking-wider border-b border-slate-200 shadow-xs">
+                <thead className="sticky top-0 bg-[var(--bg-page)] z-10 text-[var(--text-secondary)] uppercase font-extrabold tracking-wider border-b border-[var(--border-color)] shadow-xs">
                   <tr>
                     <th className="px-4 py-3">Donor Name</th>
                     <th className="px-4 py-3">Campaign Cause</th>
@@ -794,20 +794,20 @@ export default function DonationsManagement() {
                     <th className="px-4 py-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody className="divide-y divide-[var(--border-color)] bg-[var(--bg-card)]">
                   {paginatedDonors.map((d) => (
                     <tr
                       key={d.id}
                       onClick={() => setSelectedDonor(d)}
                       className="hover:bg-blue-50/60 cursor-pointer transition-colors group"
                     >
-                      <td className="px-4 py-3 font-bold text-slate-900 group-hover:text-[#003580]">
+                      <td className="px-4 py-3 font-bold text-[var(--text-primary)] group-hover:text-[#003580]">
                         {d.alumni?.fullName || 'Anonymous Donor'}
                         {d.alumni?.email && (
-                          <span className="block text-[10px] font-normal text-slate-400">{d.alumni.email}</span>
+                          <span className="block text-[10px] font-normal text-[var(--text-muted)]">{d.alumni.email}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-medium text-slate-700">
+                      <td className="px-4 py-3 font-medium text-[var(--text-secondary)]">
                         {d.campaign?.title || 'ASTU Scholarship Fund 2026'}
                         {d.campaign?.category && (
                           <span className="block text-[9px] font-extrabold text-emerald-600 uppercase">
@@ -816,10 +816,10 @@ export default function DonationsManagement() {
                         )}
                       </td>
                       <td className="px-4 py-3 font-black text-emerald-700">{d.amount.toLocaleString()} ETB</td>
-                      <td className="px-4 py-3 font-mono text-[11px] text-slate-600">
+                      <td className="px-4 py-3 font-mono text-[11px] text-[var(--text-secondary)]">
                         {d.paymentRef || 'ASTU-DON-CHAPA'}
                       </td>
-                      <td className="px-4 py-3 text-slate-500">
+                      <td className="px-4 py-3 text-[var(--text-muted)]">
                         {new Date(d.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -833,7 +833,7 @@ export default function DonationsManagement() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 group-hover:bg-[#003580] group-hover:text-white text-[10px] font-bold text-slate-600 transition-all inline-flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-[var(--bg-page)] group-hover:bg-[#003580] group-hover:text-white text-[10px] font-bold text-[var(--text-secondary)] transition-all inline-flex items-center gap-1">
                           <Eye className="h-3 w-3" />
                           Details
                         </span>
@@ -843,8 +843,8 @@ export default function DonationsManagement() {
 
                   {filteredDonors.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-500 space-y-2">
-                        <AlertCircle className="mx-auto h-8 w-8 text-slate-400" />
+                      <td colSpan={7} className="py-12 text-center text-[var(--text-muted)] space-y-2">
+                        <AlertCircle className="mx-auto h-8 w-8 text-[var(--text-muted)]" />
                         <p className="text-xs font-bold">No donor records match your filter criteria.</p>
                       </td>
                     </tr>
@@ -855,25 +855,25 @@ export default function DonationsManagement() {
 
             {/* Pagination Controls */}
             {filteredDonors.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs font-medium text-slate-600">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs font-medium text-[var(--text-secondary)]">
                 <div className="flex items-center gap-3">
                   <span>
-                    Showing <strong className="text-slate-900">{(currentDonorPage - 1) * donorRowsPerPage + 1}</strong> to{' '}
-                    <strong className="text-slate-900">
+                    Showing <strong className="text-[var(--text-primary)]">{(currentDonorPage - 1) * donorRowsPerPage + 1}</strong> to{' '}
+                    <strong className="text-[var(--text-primary)]">
                       {Math.min(currentDonorPage * donorRowsPerPage, filteredDonors.length)}
                     </strong>{' '}
-                    of <strong className="text-slate-900">{filteredDonors.length}</strong> donor records
+                    of <strong className="text-[var(--text-primary)]">{filteredDonors.length}</strong> donor records
                   </span>
 
-                  <div className="flex items-center gap-1.5 ml-2 border-l border-slate-200 pl-3">
-                    <span className="text-[11px] text-slate-400 font-bold uppercase">Rows per page:</span>
+                  <div className="flex items-center gap-1.5 ml-2 border-l border-[var(--border-color)] pl-3">
+                    <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase">Rows per page:</span>
                     <select
                       value={donorRowsPerPage}
                       onChange={(e) => {
                         setDonorRowsPerPage(Number(e.target.value));
                         setDonorPage(1);
                       }}
-                      className="text-xs px-2 py-1 rounded-lg border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none"
+                      className="text-xs px-2 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] font-bold text-[var(--text-primary)] focus:outline-none"
                     >
                       <option value={5}>5</option>
                       <option value={10}>10</option>
@@ -887,18 +887,18 @@ export default function DonationsManagement() {
                   <button
                     onClick={() => setDonorPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentDonorPage === 1}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-colors"
+                    className="p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:hover:bg-white transition-colors"
                     title="Previous Page"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <span className="px-3 py-1 bg-slate-100 rounded-lg text-slate-800 font-extrabold text-xs">
+                  <span className="px-3 py-1 bg-[var(--bg-page)] rounded-lg text-[var(--text-primary)] font-extrabold text-xs">
                     Page {currentDonorPage} of {totalDonorPages}
                   </span>
                   <button
                     onClick={() => setDonorPage((prev) => Math.min(totalDonorPages, prev + 1))}
                     disabled={currentDonorPage === totalDonorPages}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-colors"
+                    className="p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:hover:bg-white transition-colors"
                     title="Next Page"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -919,9 +919,9 @@ export default function DonationsManagement() {
               if (e.target === e.currentTarget) setSelectedDonor(null);
             }}
           >
-            <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-[var(--border-color)] space-y-6 animate-in zoom-in-95 duration-200">
               {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="h-11 w-11 rounded-2xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold shadow-sm">
                     <Heart className="h-6 w-6 fill-emerald-600" />
@@ -930,14 +930,14 @@ export default function DonationsManagement() {
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 block">
                       Donor Transaction Record
                     </span>
-                    <h3 className="text-lg font-black text-slate-900">
+                    <h3 className="text-lg font-black text-[var(--text-primary)]">
                       {selectedDonor.alumni?.fullName || 'Anonymous Donor'}
                     </h3>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedDonor(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-full transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -964,55 +964,55 @@ export default function DonationsManagement() {
               {/* Grid Metadata Details */}
               <div className="space-y-4 text-xs">
                 {/* Section 1: Payment & Gateway Info */}
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
-                  <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-[10px] text-slate-500 flex items-center gap-1.5">
+                <div className="bg-[var(--bg-page)] p-4 rounded-2xl border border-[var(--border-color)] space-y-2">
+                  <h4 className="font-extrabold text-[var(--text-primary)] uppercase tracking-wider text-[10px] text-[var(--text-muted)] flex items-center gap-1.5">
                     <CreditCard className="h-3.5 w-3.5 text-[#003580]" />
                     Payment Gateway & Verification Metadata
                   </h4>
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Chapa Reference ID</span>
-                      <span className="font-mono font-bold text-slate-800">{selectedDonor.paymentRef || 'ASTU-DON-CHAPA'}</span>
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Chapa Reference ID</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{selectedDonor.paymentRef || 'ASTU-DON-CHAPA'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Payment Date & Time</span>
-                      <span className="font-bold text-slate-800">
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Payment Date & Time</span>
+                      <span className="font-bold text-[var(--text-primary)]">
                         {new Date(selectedDonor.createdAt).toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Payment Channel</span>
-                      <span className="font-bold text-slate-800">Chapa Online Gateway</span>
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Payment Channel</span>
+                      <span className="font-bold text-[var(--text-primary)]">Chapa Online Gateway</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Category</span>
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Category</span>
                       <span className="font-bold text-emerald-700">{selectedDonor.campaign?.category || 'Scholarship'}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Section 2: Donor Profile Info */}
-                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
-                  <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-[10px] text-slate-500 flex items-center gap-1.5">
+                <div className="bg-[var(--bg-page)] p-4 rounded-2xl border border-[var(--border-color)] space-y-2">
+                  <h4 className="font-extrabold text-[var(--text-primary)] uppercase tracking-wider text-[10px] text-[var(--text-muted)] flex items-center gap-1.5">
                     <Users className="h-3.5 w-3.5 text-[#003580]" />
                     Alumni / Supporter Details
                   </h4>
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Full Name</span>
-                      <span className="font-bold text-slate-800">{selectedDonor.alumni?.fullName || 'Anonymous Donor'}</span>
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Full Name</span>
+                      <span className="font-bold text-[var(--text-primary)]">{selectedDonor.alumni?.fullName || 'Anonymous Donor'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Email Address</span>
-                      <span className="font-bold text-slate-800">{selectedDonor.alumni?.email || 'N/A'}</span>
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Email Address</span>
+                      <span className="font-bold text-[var(--text-primary)]">{selectedDonor.alumni?.email || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Phone Number</span>
-                      <span className="font-bold text-slate-800">{selectedDonor.alumni?.phone || 'N/A'}</span>
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Phone Number</span>
+                      <span className="font-bold text-[var(--text-primary)]">{selectedDonor.alumni?.phone || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block text-[11px]">Department / Batch</span>
-                      <span className="font-bold text-slate-800">
+                      <span className="text-[var(--text-muted)] font-medium block text-[11px]">Department / Batch</span>
+                      <span className="font-bold text-[var(--text-primary)]">
                         {selectedDonor.alumni?.department?.name || 'ASTU Alumni'}{' '}
                         {selectedDonor.alumni?.graduationYear ? `(${selectedDonor.alumni.graduationYear})` : ''}
                       </span>
@@ -1028,7 +1028,7 @@ export default function DonationsManagement() {
                   onClick={() => {
                     window.print();
                   }}
-                  className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="flex-1 py-3 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
                 >
                   Print Summary
                 </button>
@@ -1057,9 +1057,9 @@ export default function DonationsManagement() {
               }
             }}
           >
-            <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-[var(--border-color)] space-y-5 animate-in zoom-in-95 duration-200">
               {/* Modal Header */}
-              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center shadow-md">
                     <Heart className="h-5 w-5 fill-white" />
@@ -1068,7 +1068,7 @@ export default function DonationsManagement() {
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 block">
                       ASTU Giving Initiative
                     </span>
-                    <h3 className="text-lg font-black text-slate-900">
+                    <h3 className="text-lg font-black text-[var(--text-primary)]">
                       {editingCampaign ? 'Edit Donation Cause' : 'Create New Donation Campaign'}
                     </h3>
                   </div>
@@ -1078,7 +1078,7 @@ export default function DonationsManagement() {
                     setShowCreateModal(false);
                     resetForm();
                   }}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-full transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1086,7 +1086,7 @@ export default function DonationsManagement() {
 
               <form onSubmit={handleSubmitCampaign} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1.5">
+                  <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                     Campaign Title <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -1094,20 +1094,20 @@ export default function DonationsManagement() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. ASTU AI Research Lab Equipment 2026"
-                    className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-[#003580] focus:outline-none transition-all font-medium text-slate-800"
+                    className="w-full text-xs p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] focus:bg-[var(--bg-card)] focus:border-[#003580] focus:outline-none transition-all font-medium text-[var(--text-primary)]"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                       Category <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-[#003580] focus:outline-none font-bold text-slate-800"
+                      className="w-full text-xs p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] focus:bg-[var(--bg-card)] focus:border-[#003580] focus:outline-none font-bold text-[var(--text-primary)]"
                     >
                       <option value="Scholarship">Scholarship</option>
                       <option value="Research">Research</option>
@@ -1119,7 +1119,7 @@ export default function DonationsManagement() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                       Target Goal (ETB) <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -1128,10 +1128,10 @@ export default function DonationsManagement() {
                         value={goalAmount}
                         onChange={(e) => setGoalAmount(e.target.value)}
                         placeholder="e.g. 5000000"
-                        className="w-full text-xs p-3 pr-12 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-[#003580] focus:outline-none font-extrabold text-emerald-700"
+                        className="w-full text-xs p-3 pr-12 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] focus:bg-[var(--bg-card)] focus:border-[#003580] focus:outline-none font-extrabold text-emerald-700"
                         required
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-[var(--text-muted)]">
                         ETB
                       </span>
                     </div>
@@ -1139,14 +1139,14 @@ export default function DonationsManagement() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1.5">
+                  <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-1.5">
                     Description / Purpose
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Explain why alumni should contribute to this cause and what impact their support will create..."
-                    className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-[#003580] focus:outline-none h-24 resize-none leading-relaxed text-slate-800 font-medium"
+                    className="w-full text-xs p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] focus:bg-[var(--bg-card)] focus:border-[#003580] focus:outline-none h-24 resize-none leading-relaxed text-[var(--text-primary)] font-medium"
                   />
                 </div>
 
@@ -1155,7 +1155,7 @@ export default function DonationsManagement() {
                   <Bell className="h-4 w-4 text-[#003580] shrink-0 mt-0.5" />
                   <div className="space-y-0.5">
                     <span className="font-bold block">Automated Alumni Notification Dispatch</span>
-                    <p className="text-[11px] text-slate-600 leading-snug">
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-snug">
                       Publishing this campaign will automatically send in-app notifications & email alerts to all
                       registered ASTU alumni.
                     </p>
@@ -1171,7 +1171,7 @@ export default function DonationsManagement() {
                       resetForm();
                     }}
                     disabled={isSubmitting}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    className="flex-1 py-3 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>

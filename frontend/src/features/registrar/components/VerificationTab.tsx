@@ -121,19 +121,19 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Total Requests</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Requests</p>
           <p className="text-2xl font-extrabold text-astu-navy mt-1">{stats.total}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterTab('PENDING')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterTab('PENDING')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Pending</p>
           <p className="text-2xl font-extrabold text-amber-600 mt-1">{stats.pending}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterTab('APPROVED')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterTab('APPROVED')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Approved</p>
           <p className="text-2xl font-extrabold text-emerald-600 mt-1">{stats.approved}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterTab('REJECTED')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterTab('REJECTED')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-red-600">Rejected</p>
           <p className="text-2xl font-extrabold text-red-600 mt-1">{stats.rejected}</p>
         </div>
@@ -147,26 +147,26 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 filterTab === tab
                   ? 'bg-astu-navy text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-astu-navy/30 hover:text-astu-navy'
+                  : 'bg-white text-[var(--text-secondary)] border border-[var(--border-color)] hover:border-astu-navy/30 hover:text-astu-navy'
               }`}>
               {tab === 'All' ? 'All' : tab.charAt(0) + tab.slice(1).toLowerCase()} {tab === 'All' ? `(${stats.total})` : tab === 'PENDING' ? `(${stats.pending})` : tab === 'APPROVED' ? `(${stats.approved})` : `(${stats.rejected})`}
             </button>
           ))}
         </div>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-sm">search</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] material-symbols-outlined text-sm">search</span>
           <input type="text" placeholder="Search verifications..." value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20 w-56 md:w-72" />
+            className="pl-8 pr-3 py-2 text-xs border border-[var(--border-color)] rounded-xl bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20 w-56 md:w-72" />
         </div>
       </div>
 
       {/* Main Table */}
-      <div className="bg-white border border-gray-200/60 rounded-3xl shadow-sm overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
+              <tr className="bg-[var(--bg-page)] border-b border-[var(--border-color)] text-[var(--text-muted)] font-bold uppercase tracking-wider">
                 <th className="p-4">Student ID</th>
                 <th className="p-4">Candidate Details</th>
                 <th className="p-4">Department</th>
@@ -176,13 +176,13 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                 <th className="p-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {filteredVerifications.map((req) => (
-                <tr key={req.id} className="hover:bg-gray-50/70 transition-colors">
-                  <td className="p-4 font-mono font-bold text-gray-800">{req.studentId}</td>
+                <tr key={req.id} className="hover:bg-[var(--bg-page)] transition-colors">
+                  <td className="p-4 font-mono font-bold text-[var(--text-primary)]">{req.studentId}</td>
                   <td className="p-4">
-                    <p className="font-bold text-gray-900">{req.fullName}</p>
-                    <p className="text-[10px] text-gray-500">{req.email}</p>
+                    <p className="font-bold text-[var(--text-primary)]">{req.fullName}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">{req.email}</p>
                   </td>
                   <td className="p-4 text-xs font-semibold text-astu-navy">{req.department} • Class of {req.graduationYear}</td>
                   <td className="p-4">
@@ -192,7 +192,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                       {req.type.replace(/_/g, ' ')}
                     </span>
                   </td>
-                  <td className="p-4 text-gray-500 whitespace-nowrap">{new Date(req.requestDate).toLocaleDateString()}</td>
+                  <td className="p-4 text-[var(--text-muted)] whitespace-nowrap">{new Date(req.requestDate).toLocaleDateString()}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${
                       getStatus(req.status) === 'APPROVED' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
@@ -208,7 +208,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                         setImgError(false);
                         setSelectedVerification(req);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-astu-navy focus:ring-offset-1 transition-all"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] shadow-sm hover:bg-[var(--bg-page)] focus:outline-none focus:ring-2 focus:ring-astu-navy focus:ring-offset-1 transition-all"
                     >
                       <FileText className="h-3.5 w-3.5" />
                       Review
@@ -222,14 +222,14 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
         {filteredVerifications.length === 0 && (
           <div className="py-12 text-center">
             <span className="material-symbols-outlined text-4xl text-gray-300">verified_user</span>
-            <p className="mt-2 text-sm text-gray-400">No verification requests match your criteria.</p>
+            <p className="mt-2 text-sm text-[var(--text-muted)]">No verification requests match your criteria.</p>
           </div>
         )}
-        <div className="border-t border-gray-100 px-4 py-3 flex justify-between items-center bg-gray-50/50">
-          <span className="text-[11px] text-gray-500 font-medium">
+        <div className="border-t border-[var(--border-color)] px-4 py-3 flex justify-between items-center bg-[var(--bg-page)]">
+          <span className="text-[11px] text-[var(--text-muted)] font-medium">
             Showing {filteredVerifications.length} of {verifications.length} requests
           </span>
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-[var(--text-muted)]">
             Last updated: {new Date().toLocaleString()}
           </span>
         </div>
@@ -239,18 +239,18 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
       {selectedVerification && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={() => setSelectedVerification(null)}>
           <div
-            className="relative w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="relative w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-[var(--bg-card)] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-4 bg-gradient-to-r from-slate-50 to-white">
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border-color)] px-4 sm:px-6 py-4 bg-gradient-to-r from-slate-50 to-white">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900">Review Verification Request</h3>
-                <p className="text-xs text-slate-500">Submitted on {new Date(selectedVerification.requestDate).toLocaleString()}</p>
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Review Verification Request</h3>
+                <p className="text-xs text-[var(--text-muted)]">Submitted on {new Date(selectedVerification.requestDate).toLocaleString()}</p>
               </div>
               <button
                 onClick={() => setSelectedVerification(null)}
-                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -262,36 +262,36 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                 {/* Left Column: Info */}
                 <div className="space-y-5">
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3">Candidate Details</h4>
-                    <div className="space-y-3 rounded-xl bg-slate-50 p-4 border border-slate-100">
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">Candidate Details</h4>
+                    <div className="space-y-3 rounded-xl bg-[var(--bg-page)] p-4 border border-[var(--border-color)]">
                       <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Full Name</div>
-                        <div className="font-semibold text-slate-900">{selectedVerification.fullName}</div>
+                        <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Full Name</div>
+                        <div className="font-semibold text-[var(--text-primary)]">{selectedVerification.fullName}</div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Student ID</div>
-                          <div className="font-medium text-slate-900">{selectedVerification.studentId}</div>
+                          <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Student ID</div>
+                          <div className="font-medium text-[var(--text-primary)]">{selectedVerification.studentId}</div>
                         </div>
                         <div>
-                          <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Graduation Year</div>
-                          <div className="font-medium text-slate-900">{selectedVerification.graduationYear}</div>
+                          <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Graduation Year</div>
+                          <div className="font-medium text-[var(--text-primary)]">{selectedVerification.graduationYear}</div>
                         </div>
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Department</div>
-                        <div className="font-medium text-slate-900">{selectedVerification.department}</div>
+                        <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Department</div>
+                        <div className="font-medium text-[var(--text-primary)]">{selectedVerification.department}</div>
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Email</div>
-                        <div className="text-sm font-medium text-slate-900 break-all">{selectedVerification.email}</div>
+                        <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Email</div>
+                        <div className="text-sm font-medium text-[var(--text-primary)] break-all">{selectedVerification.email}</div>
                       </div>
                     </div>
                   </div>
 
                   {selectedVerification.notes && (
                     <div>
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Submission Notes</h4>
+                      <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mb-2">Submission Notes</h4>
                       <div className="rounded-xl bg-amber-50 p-4 border border-amber-100">
                         <p className="text-sm text-amber-900 whitespace-pre-wrap">{selectedVerification.notes}</p>
                       </div>
@@ -308,7 +308,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                     return (
                       <>
                         <div className="flex items-center justify-between">
-                          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                          <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
                             Identity Documents {docUrls.length > 1 && `(${docUrls.length} uploaded)`}
                           </h4>
                           {currentUrl && (
@@ -317,7 +317,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                               target="_blank"
                               rel="noopener noreferrer"
                               download
-                              className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-astu-navy hover:bg-slate-200 transition-colors"
+                              className="inline-flex items-center gap-1 rounded-lg bg-[var(--bg-page)] px-2.5 py-1 text-[10px] font-semibold text-astu-navy hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                             >
                               <Download className="h-3 w-3" />
                               Download
@@ -338,7 +338,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shrink-0 ${
                                   activeDocIndex === idx
                                     ? 'bg-astu-navy text-white border-astu-navy shadow-sm'
-                                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-color)] hover:bg-[var(--bg-page)]'
                                 }`}
                               >
                                 Document {idx + 1}
@@ -347,28 +347,28 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                           </div>
                         )}
 
-                        <div className="rounded-xl border border-slate-200 overflow-hidden bg-slate-50 min-h-[250px] flex items-center justify-center">
+                        <div className="rounded-xl border border-[var(--border-color)] overflow-hidden bg-[var(--bg-page)] min-h-[250px] flex items-center justify-center">
                           {!currentUrl ? (
                             <div className="text-center p-4">
                               <FileText className="h-12 w-12 text-slate-300 mx-auto mb-2" />
-                              <p className="text-sm text-slate-500 font-medium">No document provided</p>
+                              <p className="text-sm text-[var(--text-muted)] font-medium">No document provided</p>
                             </div>
                           ) : isImageFile(currentUrl) && !imgError ? (
                             <img
                               src={currentUrl}
                               alt={`Submitted Document ${activeDocIndex + 1}`}
-                              className="w-full h-auto max-h-72 object-contain bg-white"
+                              className="w-full h-auto max-h-72 object-contain bg-[var(--bg-card)]"
                               onError={() => setImgError(true)}
                             />
                           ) : (
                             <div className="flex flex-col items-center justify-center py-10 px-4">
-                              <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                                <FileText className="h-8 w-8 text-slate-400" />
+                              <div className="h-16 w-16 rounded-2xl bg-[var(--bg-page)] flex items-center justify-center mb-4">
+                                <FileText className="h-8 w-8 text-[var(--text-muted)]" />
                               </div>
-                              <p className="text-sm font-semibold text-slate-700 mb-1">
+                              <p className="text-sm font-semibold text-[var(--text-secondary)] mb-1">
                                 {imgError ? 'Image could not be loaded' : `Document ${activeDocIndex + 1} uploaded`}
                               </p>
-                              <p className="text-xs text-slate-500 mb-4">
+                              <p className="text-xs text-[var(--text-muted)] mb-4">
                                 Click below to download or open the document
                               </p>
                               <div className="flex gap-2">
@@ -384,7 +384,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                                   href={currentUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
                                 >
                                   <ExternalLink className="h-3.5 w-3.5" />
                                   Open
@@ -407,10 +407,10 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
             </div>
 
             {/* Modal Footer – fixed at bottom */}
-            <div className="flex-shrink-0 border-t border-slate-200 bg-slate-50/80 px-4 sm:px-6 py-4">
+            <div className="flex-shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-4 sm:px-6 py-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-sm flex items-center gap-2">
-                  <span className="text-slate-500">Status:</span>
+                  <span className="text-[var(--text-muted)]">Status:</span>
                   <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${
                       getStatus(selectedVerification.status) === 'APPROVED' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
                       getStatus(selectedVerification.status) === 'REJECTED' ? 'bg-red-100 text-red-800 border border-red-200' :
@@ -422,7 +422,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                 <div className="flex flex-wrap gap-2 justify-end">
                   <button
                     onClick={() => setSelectedVerification(null)}
-                    className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                    className="rounded-xl px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
                   >
                     Close
                   </button>
@@ -430,7 +430,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
                     <>
                       <button
                         onClick={() => handleAction(selectedVerification.id, 'REJECTED', selectedVerification.fullName)}
-                        className="rounded-xl bg-white border border-red-200 px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
+                        className="rounded-xl bg-[var(--bg-card)] border border-red-200 px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all"
                       >
                         Reject
                       </button>
@@ -453,31 +453,31 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
       {/* Bulk Action Confirmation Modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setConfirmModal(null)}>
-          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full max-w-md rounded-2xl bg-[var(--bg-card)] p-6 shadow-2xl space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3">
               <div className={`p-3 rounded-full ${confirmModal.action === 'APPROVED' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
                 {confirmModal.action === 'APPROVED' ? <CheckCircle className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
               </div>
               <div>
-                <h3 className="text-lg font-extrabold text-slate-900">
+                <h3 className="text-lg font-extrabold text-[var(--text-primary)]">
                   {confirmModal.action === 'APPROVED' ? 'Confirm Bulk Approval' : 'Confirm Bulk Rejection'}
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">Action cannot be undone automatically</p>
+                <p className="text-xs text-[var(--text-muted)] font-medium">Action cannot be undone automatically</p>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
               Are you sure you want to <strong>{confirmModal.action.toLowerCase()} all {confirmModal.pendingList.length} pending verification requests</strong>?
               {confirmModal.action === 'APPROVED'
                 ? ' This will activate all corresponding alumni accounts and send confirmation emails.'
                 : ' This will set their status to rejected and send update notifications.'}
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-color)]">
               <button
                 type="button"
                 onClick={() => setConfirmModal(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+                className="px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-all"
               >
                 Cancel
               </button>

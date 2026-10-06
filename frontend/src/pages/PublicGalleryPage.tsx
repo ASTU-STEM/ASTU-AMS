@@ -152,7 +152,7 @@ export default function PublicGalleryPage() {
   }, [items, selectedAlbum, selectedType, search]);
 
   return (
-    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-sans text-[var(--text-primary)] dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
       {/* Header Banner */}
@@ -175,7 +175,7 @@ export default function PublicGalleryPage() {
       {/* Main Container */}
       <main className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
         {/* Filters & Search */}
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm md:flex-row md:items-center md:justify-between transition-colors">
+        <div className="flex flex-col gap-4 rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-4 shadow-sm md:flex-row md:items-center md:justify-between transition-colors">
           {/* Album Tabs */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {albumsList.map((albumName) => (
@@ -186,7 +186,7 @@ export default function PublicGalleryPage() {
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                   selectedAlbum === albumName
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    : 'bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300  dark:hover:bg-slate-700'
                 }`}
               >
                 {albumName}
@@ -196,13 +196,13 @@ export default function PublicGalleryPage() {
 
           {/* Type Filter & Search */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1 text-xs">
+            <div className="flex items-center rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 p-1 text-xs">
               {(['All', 'Photo', 'Video'] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
                   className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
-                    selectedType === type ? 'bg-[#003580] text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    selectedType === type ? 'bg-[#003580] text-white shadow-sm' : 'text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700'
                   }`}
                 >
                   {type}
@@ -211,12 +211,12 @@ export default function PublicGalleryPage() {
             </div>
 
             <div className="relative w-48 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)]" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search gallery..."
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white py-1.5 pl-9 pr-3 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 transition-colors"
+                className="w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 dark:text-white py-1.5 pl-9 pr-3 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 transition-colors"
               />
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function PublicGalleryPage() {
             <article
               key={item.id}
               onClick={() => setActiveModalItem(item)}
-              className="group cursor-pointer overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group cursor-pointer overflow-hidden rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="relative h-56 w-full overflow-hidden bg-slate-900">
                 <img
@@ -256,7 +256,7 @@ export default function PublicGalleryPage() {
                 <h3 className="text-base font-bold text-[#003580] dark:text-blue-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                   {item.title}
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <div className="mt-2 flex items-center justify-between text-xs text-[var(--text-muted)] dark:text-slate-400">
                   <span>{item.uploadedBy || 'ASTU Directorate'}</span>
                   <span>{item.date || 'Recent'}</span>
                 </div>
@@ -266,10 +266,10 @@ export default function PublicGalleryPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="py-16 text-center bg-[var(--bg-card)] dark:bg-slate-900 rounded-xl border border-[var(--border-color)] dark:border-slate-800">
             <ImageIcon className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
-            <h3 className="mt-3 text-base font-bold text-slate-700 dark:text-slate-200">No media items found</h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Try adjusting your album or filter search term.</p>
+            <h3 className="mt-3 text-base font-bold text-[var(--text-secondary)] dark:text-slate-200">No media items found</h3>
+            <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400">Try adjusting your album or filter search term.</p>
           </div>
         )}
       </main>
@@ -281,7 +281,7 @@ export default function PublicGalleryPage() {
           onClick={() => setActiveModalItem(null)}
         >
           <div
-            className="relative max-w-4xl w-full rounded-2xl bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 p-4 shadow-2xl overflow-hidden"
+            className="relative max-w-4xl w-full rounded-2xl bg-[var(--bg-card)] dark:bg-slate-900 border border-transparent dark:border-slate-800 p-4 shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -302,10 +302,10 @@ export default function PublicGalleryPage() {
                 <span className="rounded-md bg-blue-100 dark:bg-blue-900/40 text-[#003580] dark:text-blue-300 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
                   {activeModalItem.album}
                 </span>
-                <h2 className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100">{activeModalItem.title}</h2>
+                <h2 className="mt-2 text-lg font-bold text-[var(--text-primary)] dark:text-slate-100">{activeModalItem.title}</h2>
               </div>
-              <div className="text-right text-xs text-slate-500 dark:text-slate-400">
-                <p className="font-semibold text-slate-700 dark:text-slate-300">{activeModalItem.uploadedBy || 'ASTU Office'}</p>
+              <div className="text-right text-xs text-[var(--text-muted)] dark:text-slate-400">
+                <p className="font-semibold text-[var(--text-secondary)] dark:text-slate-300">{activeModalItem.uploadedBy || 'ASTU Office'}</p>
                 <p>{activeModalItem.date || 'Recent'}</p>
               </div>
             </div>
@@ -314,7 +314,7 @@ export default function PublicGalleryPage() {
       )}
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
+      <footer className="mt-auto border-t border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 py-6 text-center text-xs text-[var(--text-muted)] dark:text-slate-400 transition-colors">
         © 2026 Adama Science and Technology University (ASTU) — All Rights Reserved.
       </footer>
       <ChatBot />

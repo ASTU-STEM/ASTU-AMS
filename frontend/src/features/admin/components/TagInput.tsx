@@ -57,8 +57,8 @@ export default function TagInput({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="flex flex-wrap items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-2 py-1.5 focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10">
-        <Hash className="ml-1 h-3.5 w-3.5 text-slate-400" />
+      <div className="flex flex-wrap items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10">
+        <Hash className="ml-1 h-3.5 w-3.5 text-[var(--text-muted)]" />
         {value.map((tag) => (
           <span
             key={tag}
@@ -100,8 +100,8 @@ export default function TagInput({
         )}
       </div>
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-44 overflow-y-auto rounded-[8px] border border-slate-200 bg-white py-1 shadow-lg">
-          <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-44 overflow-y-auto rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] py-1 shadow-lg">
+          <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
             Suggestions
           </div>
           {filteredSuggestions.map((suggestion) => (
@@ -110,9 +110,9 @@ export default function TagInput({
               type="button"
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => addTag(suggestion)}
-              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
-              <Hash className="h-3 w-3 text-slate-400" />
+              <Hash className="h-3 w-3 text-[var(--text-muted)]" />
               {suggestion}
             </button>
           ))}

@@ -87,9 +87,9 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
                   darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
                 }`}
               >
-                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{item.label}</p>
+                <p className="text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider">{item.label}</p>
                 <p className="text-3xl font-extrabold text-astu-navy mt-2">{item.value}</p>
-                <p className="text-xs text-gray-500 mt-2">{item.desc}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-2">{item.desc}</p>
                 <span className="text-[10px] font-bold text-astu-green bg-astu-green/10 px-2 py-0.5 rounded mt-3 inline-block">
                   {item.trend}
                 </span>
@@ -120,7 +120,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
                       <span>{item.stage}</span>
                       <span className="font-bold">{item.value}</span>
                     </div>
-                    <div className="w-full bg-gray-150 h-2.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-[var(--bg-page)] h-2.5 rounded-full overflow-hidden">
                       <div
                         className={`${item.color} h-full rounded-full transition-all duration-700`}
                         style={{ width: `${Math.min((item.value / item.max) * 100, 100)}%` }}
@@ -183,7 +183,7 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = ({ darkMode }) => {
                           {item.value}
                         </span>
                       </div>
-                      <p className="text-[10px] text-gray-500 font-medium mt-1">{item.insight}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-medium mt-1">{item.insight}</p>
                     </div>
                   </div>
                 ))}

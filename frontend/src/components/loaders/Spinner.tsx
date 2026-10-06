@@ -49,7 +49,7 @@ export function TableRowSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?:
       {Array.from({ length: rows }).map((_, r) => (
         <div key={r} className="flex gap-4">
           {Array.from({ length: cols }).map((_, c) => (
-            <div key={c} className="h-10 bg-gray-100 rounded flex-1" />
+            <div key={c} className="h-10 bg-[var(--bg-page)] rounded flex-1" />
           ))}
         </div>
       ))}
@@ -59,10 +59,10 @@ export function TableRowSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?:
 
 export function CardSkeleton() {
   return (
-    <div className="animate-pulse rounded-xl border border-outline-variant bg-white p-5">
-      <div className="h-10 w-10 bg-gray-100 rounded-lg mb-4" />
-      <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
-      <div className="h-3 bg-gray-100 rounded w-1/2" />
+    <div className="animate-pulse rounded-xl border border-outline-variant bg-[var(--bg-card)] p-5">
+      <div className="h-10 w-10 bg-[var(--bg-page)] rounded-lg mb-4" />
+      <div className="h-4 bg-[var(--bg-page)] rounded w-3/4 mb-2" />
+      <div className="h-3 bg-[var(--bg-page)] rounded w-1/2" />
     </div>
   );
 }
@@ -71,15 +71,15 @@ export function ProfileSkeleton() {
   return (
     <div className="animate-pulse space-y-6 p-6">
       <div className="flex items-center gap-4">
-        <div className="w-20 h-20 bg-gray-100 rounded-full" />
+        <div className="w-20 h-20 bg-[var(--bg-page)] rounded-full" />
         <div className="space-y-2">
-          <div className="h-5 bg-gray-100 rounded w-48" />
-          <div className="h-4 bg-gray-100 rounded w-32" />
+          <div className="h-5 bg-[var(--bg-page)] rounded w-48" />
+          <div className="h-4 bg-[var(--bg-page)] rounded w-32" />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="h-24 bg-gray-100 rounded-xl" />
+          <div key={i} className="h-24 bg-[var(--bg-page)] rounded-xl" />
         ))}
       </div>
     </div>

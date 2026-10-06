@@ -74,7 +74,7 @@ const badgeToneClass = (tone: 'slate' | 'amber' | 'rose' | undefined, active: bo
   if (active) return 'bg-[#003580] text-white border-transparent';
   if (tone === 'rose') return dark ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-rose-50 text-rose-700 border-rose-100';
   if (tone === 'amber') return dark ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-amber-50 text-amber-800 border-amber-100';
-  return dark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200';
+  return dark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
 };
 const TAB_TITLES: Record<DepartmentTab, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Live graduate outcomes for your department' },
@@ -330,7 +330,7 @@ const DepartmentDashboard = () => {
           className={`fixed left-0 top-0 z-40 flex h-dvh w-72 flex-col overflow-hidden border-r transition-all duration-300 md:translate-x-0 ${
             darkMode
               ? 'border-slate-800 bg-slate-950 text-slate-100'
-              : 'border-slate-200/80 bg-white text-slate-800'
+              : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-primary)]'
           } ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${
             sidebarCollapsed ? 'md:w-20' : 'md:w-72'
           }`}
@@ -395,8 +395,8 @@ const DepartmentDashboard = () => {
                               ? 'bg-[#003580]/25 font-bold text-white ring-1 ring-[#003580]/40'
                               : 'bg-[#003580]/10 font-bold text-[#003580] ring-1 ring-[#003580]/20'
                             : darkMode
-                              ? 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-[#003580]'
+                              ? 'text-[var(--text-muted)] hover:bg-slate-900 hover:text-white'
+                              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[#003580]'
                         }`}
                       >
                         {isActive && (
@@ -407,8 +407,8 @@ const DepartmentDashboard = () => {
                             isActive
                               ? 'bg-[#003580] text-white shadow-sm'
                               : darkMode
-                                ? 'bg-slate-900 text-slate-400 group-hover:text-white'
-                                : 'bg-slate-100 text-slate-600 group-hover:text-[#003580]'
+                                ? 'bg-slate-900 text-[var(--text-muted)] group-hover:text-white'
+                                : 'bg-[var(--bg-page)] text-[var(--text-secondary)] group-hover:text-[#003580]'
                           }`}
                         >
                           <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
@@ -525,7 +525,7 @@ const DepartmentDashboard = () => {
             className={`sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b px-4 shadow-2xs backdrop-blur-md sm:px-6 ${
               darkMode
                 ? 'border-slate-800 bg-slate-950/95'
-                : 'border-slate-200/80 bg-white/95'
+                : 'border-[var(--border-color)] bg-[var(--bg-card)]'
             }`}
           >
             <div className="flex min-w-0 items-center gap-3">
@@ -611,7 +611,7 @@ const DepartmentDashboard = () => {
                     <div className="max-w-[9rem] truncate text-sm font-medium text-[var(--text-primary)]">{userFullName}</div>
                     <div className="max-w-[9rem] truncate text-[11px] text-[var(--text-secondary)]">{departmentLabel}</div>
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-[var(--text-muted)] transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {menuOpen && (
                   <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
@@ -713,7 +713,7 @@ const DepartmentDashboard = () => {
           </header>
 
           <div
-            className={`mx-auto w-full max-w-[1600px] flex-grow bg-slate-50/60 ${
+            className={`mx-auto w-full max-w-[1600px] flex-grow bg-[var(--bg-page)] ${
               activeTab === 'messages' ? 'p-3 md:p-4' : 'space-y-6 p-6 md:p-8'
             }`}
             style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}

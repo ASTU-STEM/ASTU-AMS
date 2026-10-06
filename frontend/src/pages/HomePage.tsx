@@ -102,10 +102,26 @@ const STAT_PRESENTATION: Record<
   string,
   { label: string; Icon: React.ComponentType<{ className?: string }>; accent: string }
 > = {
-  alumni: { label: 'Active Alumni', Icon: Users, accent: 'text-astu-navy bg-astu-navy/10' },
-  employers: { label: 'Verified Employers', Icon: Building2, accent: 'text-astu-green bg-astu-green/10' },
-  jobs: { label: 'Open Roles', Icon: Briefcase, accent: 'text-astu-red bg-astu-red/10' },
-  departments: { label: 'Departments', Icon: Trophy, accent: 'text-astu-navy bg-astu-navy/10' },
+  alumni: {
+    label: 'Active Alumni',
+    Icon: Users,
+    accent: 'text-astu-navy bg-astu-navy/10 dark:text-sky-400 dark:bg-sky-500/15',
+  },
+  employers: {
+    label: 'Verified Employers',
+    Icon: Building2,
+    accent: 'text-astu-green bg-astu-green/10 dark:text-emerald-400 dark:bg-emerald-500/15',
+  },
+  jobs: {
+    label: 'Open Roles',
+    Icon: Briefcase,
+    accent: 'text-astu-red bg-astu-red/10 dark:text-rose-400 dark:bg-rose-500/15',
+  },
+  departments: {
+    label: 'Departments',
+    Icon: Trophy,
+    accent: 'text-amber-600 bg-amber-500/10 dark:text-amber-400 dark:bg-amber-500/15',
+  },
 };
 
 const navSections = [
@@ -133,8 +149,8 @@ const emptyPartners: any[] = [];
 const emptyImpactStats: any[] = [];
 
 const EmptySection = ({ message }: { message: string }) => (
-  <div className="rounded-xl border border-dashed border-outline-variant bg-white/60 px-6 py-10 text-center">
-    <p className="text-sm text-on-surface-variant">{message}</p>
+  <div className="rounded-xl border border-dashed border-outline-variant dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-800/40 px-6 py-10 text-center">
+    <p className="text-sm text-on-surface-variant dark:text-slate-400">{message}</p>
   </div>
 );
 
@@ -755,7 +771,7 @@ location: e.location || 'Location to be confirmed',
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
-    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-200">
       <Navbar />
 
       <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20">
@@ -860,7 +876,7 @@ location: e.location || 'Location to be confirmed',
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-6 bg-[#FFD700]" : "w-2.5 bg-white/40 hover:bg-white/60"
+                className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-6 bg-[#FFD700]" : "w-2.5 bg-white/40 hover:bg-[var(--bg-card)]"
                   }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -881,20 +897,42 @@ location: e.location || 'Location to be confirmed',
         </section>
 
         {visibleStats.length > 0 && (
-          <section id="impact-numbers" className="relative z-20 mx-auto -mt-12 mb-16 max-w-[1440px] px-4 md:-mt-16 md:px-8" style={{ marginTop: "100px" }}>
-            <div className="grid overflow-hidden rounded-xl shadow-[0_8px_32px_rgba(0,51,102,0.12)] md:grid-cols-4 lg:grid-cols-5 glass">
-              {visibleStats.map(({ stat, presentation }, idx) => {
-                const { Icon } = presentation;
-                return (
-                  <article key={stat.key || idx} className="flex flex-col items-center gap-3 border-b border-white/20 p-8 text-center md:border-b-0 md:border-r card-hover">
-                    <div className={`rounded-full p-3 ${presentation.accent}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-astu-navy">{stat.value.toLocaleString()}</h2>
-                    <p className="text-xs uppercase tracking-[0.2em] text-on-surface-variant">{presentation.label}</p>
-                  </article>
-                );
-              })}
+          <section id="impact-numbers" className="relative z-20 mx-auto my-10 md:my-14 max-w-[1440px] px-4 md:px-8">
+            <div className="relative overflow-hidden rounded-2xl bg-[var(--bg-card)] dark:bg-slate-900 border border-[var(--border-color)] dark:border-slate-800 shadow-[0_12px_40px_rgba(0,51,102,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
+              <div
+                className={`grid divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-color)] dark:divide-slate-800 ${
+                  visibleStats.length === 1
+                    ? "grid-cols-1"
+                    : visibleStats.length === 2
+                    ? "grid-cols-1 sm:grid-cols-2"
+                    : visibleStats.length === 3
+                    ? "grid-cols-1 sm:grid-cols-3"
+                    : visibleStats.length === 4
+                    ? "grid-cols-2 lg:grid-cols-4"
+                    : "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+                }`}
+              >
+                {visibleStats.map(({ stat, presentation }, idx) => {
+                  const { Icon } = presentation;
+                  return (
+                    <article
+                      key={stat.key || idx}
+                      className="group flex flex-col items-center gap-3.5 p-8 text-center transition-all duration-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40"
+                    >
+                      <div className={`rounded-2xl p-3.5 ${presentation.accent} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h2 className="text-3xl lg:text-4xl font-extrabold text-astu-navy dark:text-white tracking-tight">
+                        {stat.value.toLocaleString()}
+                      </h2>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--text-muted)] dark:text-slate-400">
+                        {presentation.label}
+                      </p>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </section>
         )}
@@ -902,8 +940,8 @@ location: e.location || 'Location to be confirmed',
         <section id="how-it-works" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-12 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Get Started</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">How ASTU-AMS Works</h3>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">How ASTU-AMS Works</h3>
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               From registration to real impact — here's how our platform empowers alumni,
               employers, and the university community in four simple steps.
             </p>
@@ -920,7 +958,7 @@ location: e.location || 'Location to be confirmed',
                 return (
                   <article
                     key={item.id || item.step || item.title || idx}
-                    className={`reveal reveal-delay-${(idx % 4) + 1} group relative rounded-2xl border border-outline-variant bg-white p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_24px_rgba(0,51,102,0.12)]`}
+                    className={`reveal reveal-delay-${(idx % 4) + 1} group relative rounded-2xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_24px_rgba(0,51,102,0.12)]`}
                   >
                     <div className="mb-5 flex items-center gap-3">
                       <div
@@ -933,17 +971,17 @@ location: e.location || 'Location to be confirmed',
                       </div>
                     </div>
 
-                    <h4 className="mb-2 text-lg font-bold text-astu-navy">
+                    <h4 className="mb-2 text-lg font-bold text-astu-navy dark:text-white">
                       {item.title}
                     </h4>
-                    <p className="text-sm leading-relaxed text-on-surface-variant line-clamp-3">
+                    <p className="text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
                       {descText}
                     </p>
 
                     {item.cta && (
                       <button
                         onClick={() => navigate(item.route || '/login')}
-                        className="mt-3 text-xs font-semibold text-[#003580] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        className="mt-3 text-xs font-semibold text-[#003580] dark:text-amber-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
                       >
                         {item.cta} <ArrowRight className="h-3 w-3" />
                       </button>
@@ -974,10 +1012,10 @@ location: e.location || 'Location to be confirmed',
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">
               {impactSection?.eyebrow || 'Industry-Campus Bridge'}
             </p>
-            <h3 className="mt-2 text-3xl font-bold animate-gradient-text">
+            <h3 className="mt-2 text-3xl font-bold animate-gradient-text dark:text-white">
               {impactSection?.title || welcomeMessage || 'ASTU Alumni Impact'}
             </h3>
-            <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">
+            <p className="mt-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
               {impactSection?.description ||
                 welcomeMessage ||
                 'Graduate outcomes and employer feedback managed through the ASTU content system feed directly into curriculum updates.'}
@@ -985,8 +1023,8 @@ location: e.location || 'Location to be confirmed',
             <div className="mt-6 grid grid-cols-2 gap-4">
               {liveStats.slice(0, 2).map((stat: any) => (
                 <div key={stat.title || stat.label || stat.id}>
-                  <p className="text-3xl font-bold text-astu-navy">{stat.value}{stat.suffix || ''}</p>
-                  <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant">{stat.title || stat.label}</p>
+                  <p className="text-3xl font-bold text-astu-navy dark:text-amber-400">{stat.value}{stat.suffix || ''}</p>
+                  <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant dark:text-slate-400">{stat.title || stat.label}</p>
                 </div>
               ))}
             </div>
@@ -1020,8 +1058,8 @@ location: e.location || 'Location to be confirmed',
         <section id="campus-life" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Explore Life At ASTU</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Campus Life, Facilities, Events, and Galleries</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Campus Life, Facilities, Events, and Galleries</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               Discover events, facilities, campus activities, media galleries, and student services that define life at Adama Science and Technology University.
             </p>
           </div>
@@ -1032,14 +1070,14 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               liveCampusLife.map((card, idx) => (
-              <article key={card.id || card.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={card.id || card.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={card.image || FALLBACK_IMAGE} alt={card.title} className="h-52 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-astu-red">{card.campus}</p>
-                  <h4 className="mt-2 text-lg font-semibold text-astu-navy">{card.title}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{card.description}</p>
+                  <h4 className="mt-2 text-lg font-semibold text-astu-navy dark:text-white">{card.title}</h4>
+                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">{card.description}</p>
                   {card.action && (
-                    <button className="mt-4 rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low btn-magnetic">
+                    <button className="mt-4 rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 btn-magnetic">
                       {card.action}
                     </button>
                   )}
@@ -1054,9 +1092,9 @@ location: e.location || 'Location to be confirmed',
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Campuses</p>
-              <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Explore ASTU Spaces</h3>
+              <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Explore ASTU Spaces</h3>
             </div>
-            <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low">
+            <button className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800">
               View all
             </button>
           </div>
@@ -1067,11 +1105,11 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               liveCampuses.map((campus, idx) => (
-              <article key={campus.id || campus.name || idx} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={campus.id || campus.name || idx} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={campus.image || FALLBACK_IMAGE} alt={campus.name} className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-4">
-                  <h4 className="text-sm font-semibold text-astu-navy">{campus.name}</h4>
-                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant">{campus.description}</p>
+                  <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{campus.name}</h4>
+                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400">{campus.description}</p>
                   <button className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic">Explore</button>
                 </div>
               </article>
@@ -1083,8 +1121,8 @@ location: e.location || 'Location to be confirmed',
         <section id="gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Photo Gallery</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Photo Gallery</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               Campus life, events, and institutional moments from Adama Science and Technology University.
             </p>
           </div>
@@ -1095,10 +1133,10 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               liveGallery.map((item, idx) => (
-              <article key={item.id || item.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={item.id || item.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={item.src || item.image || FALLBACK_IMAGE} alt={item.title} className="h-48 w-full object-cover transition-all duration-700 hover:scale-110 sm:h-56 md:h-64" onError={handleImageError} />
                 <div className="p-3 md:p-4">
-                  <h4 className="text-sm font-semibold text-astu-navy">{item.title}</h4>
+                  <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{item.title}</h4>
                   {item.album && <p className="text-[10px] font-bold text-astu-red uppercase tracking-wider mt-1">{item.album}</p>}
                 </div>
               </article>
@@ -1119,10 +1157,10 @@ location: e.location || 'Location to be confirmed',
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
-              <h3 className="mt-2 text-2xl font-bold text-astu-navy sm:text-3xl">Video Gallery</h3>
-              <p className="mt-2 text-sm text-on-surface-variant">Workshop recordings, graduation moments, and research showcases.</p>
+              <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white sm:text-3xl">Video Gallery</h3>
+              <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400">Workshop recordings, graduation moments, and research showcases.</p>
             </div>
-            <button className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low">
+            <button className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800">
               View Media Library
             </button>
           </div>
@@ -1133,7 +1171,7 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               liveVideos.map((video: any, idx: number) => (
-                <article key={video.id || video.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                <article key={video.id || video.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                   <div className="relative">
                     <img
                       src={video.thumbnail || video.image || video.cover || cmsFeatureImages.primary}
@@ -1154,9 +1192,9 @@ location: e.location || 'Location to be confirmed',
                     </a>
                   </div>
                   <div className="p-4">
-                    <h4 className="text-sm font-semibold text-astu-navy">{video.title}</h4>
+                    <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{video.title}</h4>
                     {video.description && (
-                      <p className="mt-1 line-clamp-2 text-xs text-on-surface-variant">{video.description}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-on-surface-variant dark:text-slate-400">{video.description}</p>
                     )}
                   </div>
                 </article>
@@ -1209,7 +1247,7 @@ location: e.location || 'Location to be confirmed',
                 </div>
               </div>
               <button
-                className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
+                className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-[var(--bg-page)]"
                 onClick={() => navigate("/info/impact-numbers")}
               >
                 View Impact Numbers
@@ -1237,11 +1275,11 @@ location: e.location || 'Location to be confirmed',
           <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Events</p>
-              <h3 className="mt-2 text-2xl font-bold text-astu-navy sm:text-3xl">Upcoming Alumni Events</h3>
-              <p className="mt-2 text-sm text-on-surface-variant">Networking, learning, and professional growth opportunities.</p>
+              <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white sm:text-3xl">Upcoming Alumni Events</h3>
+              <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400">Networking, learning, and professional growth opportunities.</p>
             </div>
             <button
-              className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold hover:bg-surface-container-low"
+              className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800"
               onClick={() => navigate("/login")}
             >
               See All Events
@@ -1250,7 +1288,7 @@ location: e.location || 'Location to be confirmed',
 
           <div className="grid gap-5 sm:grid-cols-2">
             {liveEvents.map((event, idx) => (
-              <article key={event.title + idx} className={`reveal reveal-delay-${(idx % 2) + 1} overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={event.title + idx} className={`reveal reveal-delay-${(idx % 2) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img
                   alt={event.title}
                   className="h-48 w-full object-cover sm:h-52"
@@ -1259,8 +1297,8 @@ location: e.location || 'Location to be confirmed',
                 />
                 <div className="p-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-astu-red">Career Development</p>
-                  <h4 className="mt-2 text-lg font-semibold text-astu-navy">{event.title}</h4>
-                  <div className="mt-3 flex flex-col gap-2 text-xs text-on-surface-variant sm:flex-row sm:flex-wrap sm:gap-4">
+                  <h4 className="mt-2 text-lg font-semibold text-astu-navy dark:text-white">{event.title}</h4>
+                  <div className="mt-3 flex flex-col gap-2 text-xs text-on-surface-variant dark:text-slate-400 sm:flex-row sm:flex-wrap sm:gap-4">
                     <p className="inline-flex items-center gap-1">
                       <CalendarDays className="h-4 w-4" />
                       {event.date}
@@ -1283,7 +1321,7 @@ location: e.location || 'Location to be confirmed',
                         const eventSlug = event.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
                         window.open(`/events/${eventSlug}`, '_blank');
                       }}
-                      className="rounded-md border border-outline-variant px-4 py-2 text-xs font-semibold hover:bg-surface-container-low"
+                      className="rounded-md border border-outline-variant dark:border-slate-600 px-4 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700"
                     >
                       Learn More
                     </button>
@@ -1297,17 +1335,17 @@ location: e.location || 'Location to be confirmed',
         <section id="workshops" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Workshops</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Upcoming Workshops</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Upcoming Workshops</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               Practical training sessions with RSVP, attendance tracking, and certificates of participation.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {liveWorkshops.map((workshop, idx) => (
-              <article key={workshop.title + idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={workshop.title + idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-astu-red">{workshop.focus}</p>
-                <h4 className="mt-2 text-lg font-semibold text-astu-navy">{workshop.title}</h4>
-                <div className="mt-4 space-y-2 text-sm text-on-surface-variant">
+                <h4 className="mt-2 text-lg font-semibold text-astu-navy dark:text-white">{workshop.title}</h4>
+                <div className="mt-4 space-y-2 text-sm text-on-surface-variant dark:text-slate-400">
                   <p className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4" /> {workshop.date}</p>
                   <p>{workshop.seats}</p>
                 </div>
@@ -1326,22 +1364,22 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="news" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-slate-50/30">
+        <section id="news" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 bg-[var(--bg-page)] dark:bg-slate-900/30">
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">News</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Latest News</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Latest News</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               University updates, academic notices, and alumni network news.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {liveNews.map((news, idx) => (
-              <article key={idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <p className="text-xs text-astu-red font-semibold uppercase tracking-wider">Announcement</p>
-                <h4 className="mt-1 text-base font-semibold text-astu-navy">{news.title}</h4>
-                {news.excerpt && <p className="mt-1 text-xs text-slate-600 line-clamp-2">{news.excerpt}</p>}
-                <p className="mt-2 text-xs text-on-surface-variant">{news.date}</p>
-                <button className="mt-3 text-xs font-medium text-astu-navy hover:underline" onClick={() => navigate(`/announcements/${news.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}>
+                <h4 className="mt-1 text-base font-semibold text-astu-navy dark:text-white">{news.title}</h4>
+                {news.excerpt && <p className="mt-1 text-xs text-[var(--text-secondary)] dark:text-slate-400 line-clamp-2">{news.excerpt}</p>}
+                <p className="mt-2 text-xs text-on-surface-variant dark:text-slate-500">{news.date}</p>
+                <button className="mt-3 text-xs font-medium text-astu-navy dark:text-amber-400 hover:underline" onClick={() => navigate(`/announcements/${news.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}>
                   Read More
                 </button>
               </article>
@@ -1351,35 +1389,35 @@ location: e.location || 'Location to be confirmed',
 
         <section id="announcements" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-            <article className="reveal rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]">
+            <article className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40">
               <div className="mb-5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30">
                     <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-7 w-7" />
                   </span>
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Announcements</p>
-                    <h3 className="text-2xl font-bold text-astu-navy md:text-3xl">Official Notices</h3>
+                    <h3 className="text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Official Notices</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => navigate('/announcements')}
-                  className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low transition-colors"
+                  className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors"
                 >
                   View all
                 </button>
               </div>
-              <div className="divide-y divide-outline-variant">
+              <div className="divide-y divide-outline-variant dark:divide-slate-700">
                 {liveAnnouncements.slice(0, 5).map((announcement, idx) => (
                   <button
                     key={announcement.title + idx}
                     onClick={() => navigate(`/announcements/${announcement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
-                    className="flex w-full items-start gap-3 py-4 text-left hover:bg-surface-container-low/60 rounded-lg px-2 transition-all cursor-pointer group"
+                    className="flex w-full items-start gap-3 py-4 text-left hover:bg-surface-container-low/60 dark:hover:bg-slate-700/50 rounded-lg px-2 transition-all cursor-pointer group"
                   >
                     <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-astu-navy group-hover:text-astu-red transition-colors">{announcement.title}</span>
-                      <span className="mt-1 block text-xs text-on-surface-variant">{announcement.type} · {announcement.date}</span>
+                      <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors">{announcement.title}</span>
+                      <span className="mt-1 block text-xs text-on-surface-variant dark:text-slate-400">{announcement.type} · {announcement.date}</span>
                     </span>
                   </button>
                 ))}
@@ -1414,8 +1452,8 @@ location: e.location || 'Location to be confirmed',
         <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Alumni Success Stories</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Alumni Success Stories</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
             </p>
           </div>
@@ -1428,14 +1466,14 @@ location: e.location || 'Location to be confirmed',
               liveStories.slice(0, 3).map((story, idx) => (
                 <article
                   key={story.id || idx}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] flex flex-col justify-between`}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between`}
                 >
                   <div>
                     {story.image ? (
                       <img
                         src={story.image}
                         alt=""
-                        className="h-40 w-full rounded-xl object-cover mb-3 bg-slate-100"
+                        className="h-40 w-full rounded-xl object-cover mb-3 bg-[var(--bg-page)] dark:bg-slate-700"
                         onError={(e) => {
                           const img = e.currentTarget;
                           img.onerror = null;
@@ -1443,14 +1481,14 @@ location: e.location || 'Location to be confirmed',
                         }}
                       />
                     ) : null}
-                    <h4 className="font-semibold text-astu-navy">{story.name}</h4>
-                    <p className="text-xs text-on-surface-variant">
+                    <h4 className="font-semibold text-astu-navy dark:text-white">{story.name}</h4>
+                    <p className="text-xs text-on-surface-variant dark:text-slate-400">
                       {[story.role, story.company].filter(Boolean).join(' · ')}
                     </p>
-                    <p className="mt-2 text-sm text-on-surface-variant line-clamp-3">{story.text}</p>
+                    <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400 line-clamp-3">{story.text}</p>
                   </div>
                   <button
-                    className="mt-4 text-xs font-semibold text-[#003580] hover:underline self-start cursor-pointer inline-flex items-center gap-1"
+                    className="mt-4 text-xs font-semibold text-[#003580] dark:text-amber-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
                     onClick={() =>
                       navigate(
                         `/stories/${story.id || String(story.name || '')
@@ -1466,8 +1504,6 @@ location: e.location || 'Location to be confirmed',
             )}
           </div>
         </section>
-
-
 
         <section id="research" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
@@ -1501,10 +1537,10 @@ location: e.location || 'Location to be confirmed',
               {(researchHighlights?.stats?.length ? researchHighlights.stats : []).map((item: any, idx: number) => {
                 const Icon = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || BookOpen);
                 return (
-                  <article key={item.label || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                    <Icon className="h-6 w-6 text-astu-navy" />
-                    <p className="mt-4 text-2xl font-bold text-astu-navy">{item.value || '—'}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-on-surface-variant">{item.label}</p>
+                  <article key={item.label || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+                    <Icon className="h-6 w-6 text-astu-navy dark:text-amber-400" />
+                    <p className="mt-4 text-2xl font-bold text-astu-navy dark:text-white">{item.value || '—'}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-on-surface-variant dark:text-slate-400">{item.label}</p>
                   </article>
                 );
               })}
@@ -1517,11 +1553,11 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-8">
+        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] dark:from-slate-900/50 to-white dark:to-slate-950 rounded-2xl my-8">
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Partners</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Partner Organisations</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Partner Organisations</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
           <div className="relative">
             {livePartners.length === 0 ? (
@@ -1534,7 +1570,7 @@ location: e.location || 'Location to be confirmed',
                 return (
                   <div
                     key={`${partner.name}-${idx}`}
-                    className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]"
+                    className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40"
                   >
                     {logoUrl ? (
                       <img src={logoUrl} alt={partner.name} className="h-14 w-14 object-contain" onError={handleImageError} />
@@ -1545,7 +1581,7 @@ location: e.location || 'Location to be confirmed',
                         {(partner.name || '??').slice(0, 2).toUpperCase()}
                       </div>
                     )}
-                    <span className="text-xs font-semibold text-astu-navy text-center leading-tight">{partner.name}</span>
+                    <span className="text-xs font-semibold text-astu-navy dark:text-white text-center leading-tight">{partner.name}</span>
                   </div>
                 );
               })}
@@ -1557,8 +1593,8 @@ location: e.location || 'Location to be confirmed',
         <section id="testimonials" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Community Voices</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">What Our Community Says</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">What Our Community Says</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               Reflections from alumni, employers, and partners connected through the ASTU network.
             </p>
           </div>
@@ -1569,10 +1605,10 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               liveTestimonials.map((item: any, idx: number) => (
-              <article key={item.id || item.by || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+              <article key={item.id || item.by || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <Quote className="h-6 w-6 text-astu-red" />
-                <p className="mt-4 text-sm leading-relaxed text-on-surface-variant">{item.quote}</p>
-                <p className="mt-4 text-sm font-semibold text-astu-navy">{item.by}</p>
+                <p className="mt-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-300">{item.quote}</p>
+                <p className="mt-4 text-sm font-semibold text-astu-navy dark:text-white">{item.by}</p>
               </article>
               ))
             )}
@@ -1582,8 +1618,8 @@ location: e.location || 'Location to be confirmed',
         <section id="faq" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">FAQ</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">Frequently Asked Questions</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
+            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Frequently Asked Questions</h3>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
               Common questions about ASTU-AMS, tracer studies, and alumni services.
             </p>
           </div>
@@ -1592,12 +1628,12 @@ location: e.location || 'Location to be confirmed',
               <EmptySection message="Frequently asked questions will appear here once published by the university content team." />
             ) : (
               liveFaq.map((item, idx) => (
-              <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant bg-white overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-astu-navy hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
+              <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-astu-navy dark:text-white hover:bg-[var(--bg-page)] dark:hover:bg-slate-700/50 transition-colors [&::-webkit-details-marker]:hidden">
                   <span>{item.question}</span>
                   <HelpCircle className="h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 group-open:rotate-180" />
                 </summary>
-                <div className="border-t border-outline-variant px-5 py-4 text-sm leading-relaxed text-on-surface-variant">
+                <div className="border-t border-outline-variant dark:border-slate-700 px-5 py-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
                   {item.answer}
                 </div>
               </details>
@@ -1607,16 +1643,16 @@ location: e.location || 'Location to be confirmed',
         </section>
 
         <section id="career-opportunities" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="reveal rounded-xl border border-outline-variant bg-white p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)]">
+          <div className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)] dark:shadow-slate-900/40">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">
                   {careerCta?.eyebrow || 'Career Opportunities'}
                 </p>
-                <h3 className="mt-2 text-2xl font-bold text-astu-navy">
+                <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white">
                   {careerCta?.title || 'Jobs, internships, AI matching, and candidate shortlisting'}
                 </h3>
-                <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
+                <p className="mt-2 max-w-3xl text-sm text-on-surface-variant dark:text-slate-400">
                   {careerCta?.description ||
                     'Employers can post bulk jobs, manage talent pools, shortlist candidates, schedule interviews, and join job fairs.'}
                 </p>
@@ -1634,16 +1670,16 @@ location: e.location || 'Location to be confirmed',
 
         {tracerSpotlight && (
           <section id="tracer-spotlight" className="mx-auto max-w-[1440px] px-4 pb-12 md:px-8">
-            <div className="reveal rounded-xl border border-astu-navy/20 bg-gradient-to-r from-[#003580]/5 to-white p-6 shadow-sm">
+            <div className="reveal rounded-xl border border-astu-navy/20 dark:border-astu-navy/40 bg-gradient-to-r from-[#003580]/5 dark:from-astu-navy/20 to-white dark:to-slate-900 p-6 shadow-sm">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">Tracer Study</p>
-                  <h3 className="mt-2 text-xl font-bold text-astu-navy">{tracerSpotlight.title}</h3>
-                  <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">{tracerSpotlight.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-on-surface-variant">
-                    {tracerSpotlight.targetBatch && <span>Batch: <strong>{tracerSpotlight.targetBatch}</strong></span>}
-                    {tracerSpotlight.responseRate && <span>Response rate: <strong>{tracerSpotlight.responseRate}</strong></span>}
-                    {tracerSpotlight.deadline && <span>Deadline: <strong>{tracerSpotlight.deadline}</strong></span>}
+                  <h3 className="mt-2 text-xl font-bold text-astu-navy dark:text-white">{tracerSpotlight.title}</h3>
+                  <p className="mt-2 max-w-3xl text-sm text-on-surface-variant dark:text-slate-400">{tracerSpotlight.description}</p>
+                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-on-surface-variant dark:text-slate-400">
+                    {tracerSpotlight.targetBatch && <span>Batch: <strong className="dark:text-slate-200">{tracerSpotlight.targetBatch}</strong></span>}
+                    {tracerSpotlight.responseRate && <span>Response rate: <strong className="dark:text-slate-200">{tracerSpotlight.responseRate}</strong></span>}
+                    {tracerSpotlight.deadline && <span>Deadline: <strong className="dark:text-slate-200">{tracerSpotlight.deadline}</strong></span>}
                   </div>
                 </div>
                 <button
@@ -1673,7 +1709,7 @@ location: e.location || 'Location to be confirmed',
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <button
-                className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md hover:scale-105 btn-magnetic"
+                className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-[var(--bg-page)] transition-all shadow-md hover:scale-105 btn-magnetic"
                 onClick={() => navigate(bottomCta?.primaryRoute || '/login')}
               >
                 {bottomCta?.primaryLabel || 'Alumni Portal'}
@@ -1698,7 +1734,7 @@ location: e.location || 'Location to be confirmed',
               <h5 className="text-base font-bold text-white uppercase tracking-wider">
                 {footerConfig.newsletterTitle || 'Stay Connected with ASTU'}
               </h5>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-[var(--text-muted)] mt-1">
                 {footerConfig.newsletterSubtitle || 'Get updates on reunions, career expos, and employment reports.'}
               </p>
             </div>
@@ -1740,7 +1776,7 @@ location: e.location || 'Location to be confirmed',
                   <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Alumni Network</p>
                 </div>
               </div>
-              <p className="text-xs leading-relaxed text-slate-400">
+              <p className="text-xs leading-relaxed text-[var(--text-muted)]">
                 {welcomeMessage ||
                   'Connecting graduates, corporate employers, and department heads in one unified ecosystem.'}
               </p>
@@ -1764,7 +1800,7 @@ location: e.location || 'Location to be confirmed',
                 <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">
                   {section.title}
                 </h6>
-                <ul className="space-y-3 text-xs text-slate-400">
+                <ul className="space-y-3 text-xs text-[var(--text-muted)]">
                   {section.links.map((link) => (
                     <li key={link.id}>
                       {link.href.startsWith('http') || link.href.startsWith('#') ? (
@@ -1796,7 +1832,7 @@ location: e.location || 'Location to be confirmed',
               <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">
                 Official Contact Details
               </h6>
-              <ul className="space-y-3 text-xs text-slate-400">
+              <ul className="space-y-3 text-xs text-[var(--text-muted)]">
                 <li className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-astu-green mt-0.5 shrink-0" />
                   <span>{footerConfig.contactInfo?.address}</span>
@@ -1831,7 +1867,7 @@ location: e.location || 'Location to be confirmed',
                   <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">
                     {section.title}
                   </h6>
-                  <ul className="space-y-3 text-xs text-slate-400">
+                  <ul className="space-y-3 text-xs text-[var(--text-muted)]">
                     {section.links.map((link) => (
                       <li key={link.id}>
                         {link.href.startsWith('http') || link.href.startsWith('#') ? (
@@ -1855,7 +1891,7 @@ location: e.location || 'Location to be confirmed',
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/5 pt-8 text-xs text-slate-500 font-semibold">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/5 pt-8 text-xs text-[var(--text-muted)] font-semibold">
             <div className="flex flex-wrap items-center gap-3">
               <p>{footerConfig.copyright}</p>
               {footerConfig.credit && (
@@ -1879,10 +1915,10 @@ location: e.location || 'Location to be confirmed',
       {/* Notice Detail Modal */}
       {selectedNotice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-outline-variant bg-white p-6 shadow-2xl">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-6 shadow-2xl">
             <button
               onClick={() => setSelectedNotice(null)}
-              className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              className="absolute right-4 top-4 rounded-full p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 hover:text-[var(--text-secondary)] dark:hover:text-slate-200"
             >
               <X className="h-5 w-5" />
             </button>
@@ -1894,19 +1930,19 @@ location: e.location || 'Location to be confirmed',
                 <span className="rounded-md bg-astu-red/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-red">
                   {selectedNotice.type || 'Official Announcement'}
                 </span>
-                <p className="mt-0.5 text-xs text-on-surface-variant">{selectedNotice.date}</p>
+                <p className="mt-0.5 text-xs text-on-surface-variant dark:text-slate-400">{selectedNotice.date}</p>
               </div>
             </div>
-            <h3 className="mt-4 text-xl font-bold text-astu-navy">{selectedNotice.title}</h3>
-            <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-              <p className="text-sm leading-relaxed text-slate-700 whitespace-pre-line">
+            <h3 className="mt-4 text-xl font-bold text-astu-navy dark:text-white">{selectedNotice.title}</h3>
+            <div className="mt-4 rounded-xl border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-900/50 p-4">
+              <p className="text-sm leading-relaxed text-[var(--text-secondary)] dark:text-slate-300 whitespace-pre-line">
                 {selectedNotice.excerpt || selectedNotice.description || selectedNotice.content || "Full official announcement details and documentation from ASTU-AMS Administration."}
               </p>
             </div>
             <div className="mt-6 flex items-center justify-end gap-2">
               <button
                 onClick={() => setSelectedNotice(null)}
-                className="rounded-lg border border-outline-variant bg-white px-4 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low"
+                className="rounded-lg border border-outline-variant dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-600"
               >
                 Close Notice
               </button>
@@ -1927,15 +1963,15 @@ location: e.location || 'Location to be confirmed',
       {/* View All Notices Modal */}
       {showAllNotices && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-outline-variant pb-4">
+          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-outline-variant dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-outline-variant dark:border-slate-700 pb-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 text-astu-navy">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30 text-astu-navy dark:text-amber-400">
                   <Bell className="h-5 w-5" />
                 </span>
                 <div>
-                  <h3 className="text-xl font-bold text-astu-navy">Official Notices & Announcements</h3>
-                  <p className="text-xs text-on-surface-variant">All public university announcements and official directives.</p>
+                  <h3 className="text-xl font-bold text-astu-navy dark:text-white">Official Notices & Announcements</h3>
+                  <p className="text-xs text-on-surface-variant dark:text-slate-400">All public university announcements and official directives.</p>
                 </div>
               </div>
               <button
@@ -1943,24 +1979,24 @@ location: e.location || 'Location to be confirmed',
                   setShowAllNotices(false);
                   setNoticeSearch('');
                 }}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-full p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 hover:text-[var(--text-secondary)] dark:hover:text-slate-200"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mt-4 relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={noticeSearch}
                 onChange={(e) => setNoticeSearch(e.target.value)}
                 placeholder="Search notices by keyword..."
-                className="w-full rounded-lg border border-outline-variant bg-slate-50 py-2.5 pl-9 pr-3 text-sm text-astu-navy outline-none focus:border-astu-navy focus:bg-white"
+                className="w-full rounded-lg border border-outline-variant dark:border-slate-600 bg-[var(--bg-page)] dark:bg-slate-900 py-2.5 pl-9 pr-3 text-sm text-astu-navy dark:text-white outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
-            <div className="mt-4 flex-1 overflow-y-auto divide-y divide-outline-variant pr-1">
+            <div className="mt-4 flex-1 overflow-y-auto divide-y divide-outline-variant dark:divide-slate-700 pr-1">
               {liveAnnouncements
                 .filter(n => !noticeSearch || n.title.toLowerCase().includes(noticeSearch.toLowerCase()) || (n.excerpt && n.excerpt.toLowerCase().includes(noticeSearch.toLowerCase())))
                 .map((announcement, idx) => (
@@ -1970,24 +2006,24 @@ location: e.location || 'Location to be confirmed',
                       setShowAllNotices(false);
                       setSelectedNotice(announcement);
                     }}
-                    className="flex w-full items-start gap-3.5 py-3.5 px-2 text-left hover:bg-surface-container-low/80 rounded-xl transition-all cursor-pointer group"
+                    className="flex w-full items-start gap-3.5 py-3.5 px-2 text-left hover:bg-surface-container-low/80 dark:hover:bg-slate-700/50 rounded-xl transition-all cursor-pointer group"
                   >
                     <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="block text-sm font-semibold text-astu-navy group-hover:text-astu-red transition-colors">{announcement.title}</span>
-                        <span className="shrink-0 text-[10px] font-bold text-slate-400">{announcement.date}</span>
+                        <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors">{announcement.title}</span>
+                        <span className="shrink-0 text-[10px] font-bold text-[var(--text-muted)] dark:text-slate-500">{announcement.date}</span>
                       </div>
-                      <span className="mt-1 block text-xs text-on-surface-variant">{announcement.type}</span>
+                      <span className="mt-1 block text-xs text-on-surface-variant dark:text-slate-400">{announcement.type}</span>
                       {announcement.excerpt && (
-                        <p className="mt-1 text-xs text-slate-600 line-clamp-2">{announcement.excerpt}</p>
+                        <p className="mt-1 text-xs text-[var(--text-secondary)] dark:text-slate-400 line-clamp-2">{announcement.excerpt}</p>
                       )}
                     </div>
                   </button>
                 ))}
             </div>
 
-            <div className="mt-4 border-t border-outline-variant pt-3 flex justify-end">
+            <div className="mt-4 border-t border-outline-variant dark:border-slate-700 pt-3 flex justify-end">
               <button
                 onClick={() => {
                   setShowAllNotices(false);
@@ -2005,66 +2041,66 @@ location: e.location || 'Location to be confirmed',
       {/* RSVP & Full Event Registration Modal */}
       {rsvpModalItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-md animate-fade-in" onClick={() => setRsvpModalItem(null)}>
-          <div className="relative max-w-lg w-full rounded-2xl bg-white p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-lg w-full rounded-2xl bg-[var(--bg-card)] dark:bg-slate-800 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {!confirmedQrPass ? (
               <>
-                <div className="flex items-center justify-between border-b pb-3 border-slate-100">
+                <div className="flex items-center justify-between border-b dark:border-slate-700 pb-3 border-[var(--border-color)]">
                   <div>
                     <span className="rounded-md bg-astu-navy px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">{rsvpModalItem.kind} Registration</span>
-                    <h3 className="mt-1.5 text-lg font-bold text-astu-navy">{rsvpModalItem.title}</h3>
+                    <h3 className="mt-1.5 text-lg font-bold text-astu-navy dark:text-white">{rsvpModalItem.title}</h3>
                   </div>
-                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 hover:text-[var(--text-secondary)] dark:hover:text-slate-200">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 p-3.5 text-xs space-y-1 border border-slate-100">
-                  <p className="text-slate-600"><span className="font-semibold text-slate-900">Scheduled Date:</span> {rsvpModalItem.date}</p>
-                  {rsvpModalItem.location && <p className="text-slate-600"><span className="font-semibold text-slate-900">Venue / Location:</span> {rsvpModalItem.location}</p>}
-                  <p className="text-[10px] text-slate-500 font-medium pt-1">Free Admission • A registration reference is generated after you submit</p>
+                <div className="rounded-xl bg-[var(--bg-page)] dark:bg-slate-900/50 p-3.5 text-xs space-y-1 border border-[var(--border-color)] dark:border-slate-700">
+                  <p className="text-[var(--text-secondary)] dark:text-slate-300"><span className="font-semibold text-[var(--text-primary)] dark:text-white">Scheduled Date:</span> {rsvpModalItem.date}</p>
+                  {rsvpModalItem.location && <p className="text-[var(--text-secondary)] dark:text-slate-300"><span className="font-semibold text-[var(--text-primary)] dark:text-white">Venue / Location:</span> {rsvpModalItem.location}</p>}
+                  <p className="text-[10px] text-[var(--text-muted)] dark:text-slate-400 font-medium pt-1">Free Admission • A registration reference is generated after you submit</p>
                 </div>
 
                 <div className="space-y-3 pt-1">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="text-xs font-semibold text-slate-700">Full Name <span className="text-red-500">*</span></label>
+                      <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Full Name <span className="text-red-500">*</span></label>
                       <input
                         type="text"
                         value={rsvpName}
                         onChange={(e) => setRsvpName(e.target.value)}
                         placeholder="e.g. Dr. Abebe Yosef"
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy"
+                        className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-900 text-[var(--text-primary)] dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-slate-700">Email Address <span className="text-red-500">*</span></label>
+                      <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Email Address <span className="text-red-500">*</span></label>
                       <input
                         type="email"
                         value={rsvpEmail}
                         onChange={(e) => setRsvpEmail(e.target.value)}
                         placeholder="e.g. abebe@astu.edu.et"
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy"
+                        className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-900 text-[var(--text-primary)] dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       />
                     </div>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="text-xs font-semibold text-slate-700">Phone Number</label>
+                      <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Phone Number</label>
                       <input
                         type="tel"
                         value={rsvpPhone}
                         onChange={(e) => setRsvpPhone(e.target.value)}
                         placeholder="e.g. +251 911 234 567"
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy"
+                        className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-900 text-[var(--text-primary)] dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-slate-700">Participant Status</label>
+                      <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Participant Status</label>
                       <select
                         value={rsvpRole}
                         onChange={(e) => setRsvpRole(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy bg-white"
+                        className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-900 text-[var(--text-primary)] dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       >
                         <option value="Alumni">ASTU Alumni</option>
                         <option value="Student">Graduating Senior Student</option>
@@ -2075,30 +2111,30 @@ location: e.location || 'Location to be confirmed',
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700">Department / Organization</label>
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Department / Organization</label>
                     <input
                       type="text"
                       value={rsvpAffiliation}
                       onChange={(e) => setRsvpAffiliation(e.target.value)}
                       placeholder="e.g. School of Electrical Engineering & Computing"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy"
+                      className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-900 text-[var(--text-primary)] dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-slate-700">Special Accommodations / Dietary Notes (Optional)</label>
+                    <label className="text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300">Special Accommodations / Dietary Notes (Optional)</label>
                     <input
                       type="text"
                       value={rsvpNotes}
                       onChange={(e) => setRsvpNotes(e.target.value)}
                       placeholder="e.g. Wheelchair access / Vegetarian meal"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy"
+                      className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-600 bg-[var(--bg-card)] dark:bg-slate-900 text-[var(--text-primary)] dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-color)] dark:border-slate-700">
+                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-[var(--border-color)] dark:border-slate-600 px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700">
                     Cancel
                   </button>
                   <button onClick={confirmRsvpRegistration} className="rounded-lg bg-[#003580] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
@@ -2108,16 +2144,16 @@ location: e.location || 'Location to be confirmed',
               </>
             ) : (
               <div className="text-center space-y-4 py-2">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
                   <CheckCircle2 className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Registration Confirmed!</h3>
-                  <p className="mt-1 text-xs text-slate-500">{rsvpModalItem.title}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Participant: {rsvpName} ({rsvpEmail})</p>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] dark:text-white">Registration Confirmed!</h3>
+                  <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400">{rsvpModalItem.title}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] dark:text-slate-500 mt-0.5">Participant: {rsvpName} ({rsvpEmail})</p>
                 </div>
 
-                <div className="mx-auto w-48 h-48 rounded-xl border-2 border-slate-200 p-3 bg-white flex items-center justify-center shadow-inner">
+                <div className="mx-auto w-48 h-48 rounded-xl border-2 border-[var(--border-color)] dark:border-slate-600 p-3 bg-[var(--bg-card)] dark:bg-slate-100 flex items-center justify-center shadow-inner">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(confirmedQrPass)}`}
                     alt="Entry Ticket Code"
@@ -2125,14 +2161,14 @@ location: e.location || 'Location to be confirmed',
                   />
                 </div>
 
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-[var(--text-muted)] dark:text-slate-400">
                     Keep this reference for your records. Entry check-in is not yet
                     automated — nothing scans this code at the venue yet.
                   </p>
 
                 <button
                   onClick={() => setRsvpModalItem(null)}
-                  className="w-full rounded-xl bg-slate-900 py-2.5 text-xs font-semibold text-white hover:bg-slate-800"
+                  className="w-full rounded-xl bg-slate-900 dark:bg-slate-700 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-600"
                 >
                   Done & Close
                 </button>

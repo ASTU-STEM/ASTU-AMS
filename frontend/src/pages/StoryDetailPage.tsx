@@ -43,14 +43,14 @@ export default function StoryDetailPage() {
 
   if (!story) {
     return (
-      <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
+      <div className="app-shell min-h-screen bg-[var(--bg-page)] font-sans text-[var(--text-primary)] dark:text-slate-100 flex flex-col transition-colors duration-200">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center">
-          <div className="h-16 w-16 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 mb-4">
+          <div className="h-16 w-16 rounded-full bg-[var(--bg-page)] dark:bg-slate-800 flex items-center justify-center text-[var(--text-muted)] dark:text-slate-400 mb-4">
             <GraduationCap className="h-8 w-8" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Success Story Not Found</h2>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-md">
+          <h2 className="text-xl font-bold text-[var(--text-primary)] dark:text-white">Success Story Not Found</h2>
+          <p className="mt-2 text-sm text-[var(--text-muted)] dark:text-slate-400 max-w-md">
             The requested alumni success story may have been updated or moved.
           </p>
           <button
@@ -65,7 +65,7 @@ export default function StoryDetailPage() {
   }
 
   return (
-    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-sans text-[var(--text-primary)] dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
       {/* Header Breadcrumb */}
@@ -98,13 +98,13 @@ export default function StoryDetailPage() {
           <main className="space-y-8">
             {/* Story Card Header */}
             {/* Story Card Header */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm transition-colors">
+            <div className="rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 sm:p-8 shadow-sm transition-colors">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 {story.image ? (
                   <img
                     src={story.image}
                     alt={story.name}
-                    className="h-28 w-28 rounded-2xl object-cover shadow-md shrink-0 border-2 border-slate-100 dark:border-slate-700"
+                    className="h-28 w-28 rounded-2xl object-cover shadow-md shrink-0 border-2 border-[var(--border-color)] dark:border-slate-700"
                   />
                 ) : (
                   <div className="h-28 w-28 rounded-2xl bg-[#003580]/10 dark:bg-blue-900/30 flex items-center justify-center text-[#003580] dark:text-blue-300 font-bold text-2xl shrink-0">
@@ -124,23 +124,23 @@ export default function StoryDetailPage() {
                     )}
                   </div>
 
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{story.name}</h2>
+                  <h2 className="text-2xl font-bold text-[var(--text-primary)] dark:text-white">{story.name}</h2>
                   <p className="text-sm font-semibold text-[#003580] dark:text-blue-400 mt-0.5">{story.role}</p>
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-xs font-medium text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-xs font-medium text-[var(--text-muted)] dark:text-slate-400 border-t border-[var(--border-color)] dark:border-slate-800 pt-3">
                     {story.company && (
                       <span className="flex items-center gap-1.5">
-                        <Building2 className="h-4 w-4 text-slate-400" /> {story.company}
+                        <Building2 className="h-4 w-4 text-[var(--text-muted)]" /> {story.company}
                       </span>
                     )}
                     {story.graduationYear && (
                       <span className="flex items-center gap-1.5">
-                        <GraduationCap className="h-4 w-4 text-slate-400" /> {story.graduationYear}
+                        <GraduationCap className="h-4 w-4 text-[var(--text-muted)]" /> {story.graduationYear}
                       </span>
                     )}
                     {story.publishedAt && (
                       <span className="flex items-center gap-1.5">
-                        <Calendar className="h-4 w-4 text-slate-400" /> Published {story.publishedAt}
+                        <Calendar className="h-4 w-4 text-[var(--text-muted)]" /> Published {story.publishedAt}
                       </span>
                     )}
                   </div>
@@ -148,7 +148,7 @@ export default function StoryDetailPage() {
 
                 <button
                   onClick={handleShare}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200  dark:hover:bg-slate-700 transition-colors"
                   title="Share Story"
                 >
                   <Share2 className="h-4 w-4" /> Share
@@ -159,7 +159,7 @@ export default function StoryDetailPage() {
             {/* Impact Quote Box */}
             <div className="relative rounded-2xl bg-gradient-to-r from-[#003580]/5 to-[#003580]/10 dark:from-blue-950/40 dark:to-blue-900/20 border border-[#003580]/20 dark:border-blue-800/40 p-6 sm:p-8">
               <Quote className="absolute right-6 top-6 h-12 w-12 text-[#003580]/15 dark:text-blue-400/10" />
-              <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 leading-relaxed relative z-10 italic">
+              <p className="text-base sm:text-lg font-semibold text-[var(--text-primary)] dark:text-slate-100 leading-relaxed relative z-10 italic">
                 "{story.text}"
               </p>
               <p className="mt-3 text-xs font-bold uppercase tracking-wider text-[#003580] dark:text-blue-400">
@@ -168,12 +168,12 @@ export default function StoryDetailPage() {
             </div>
 
             {/* Full Story Content */}
-            <article className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm space-y-4 transition-colors">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <article className="rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 sm:p-8 shadow-sm space-y-4 transition-colors">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] dark:text-white flex items-center gap-2">
                 <Award className="h-5 w-5 text-[#003580] dark:text-blue-400" /> Full Story & Career Journey
               </h3>
 
-              <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
+              <div className="text-sm text-[var(--text-secondary)] dark:text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
                 {story.fullStory || story.text}
               </div>
             </article>
@@ -182,29 +182,29 @@ export default function StoryDetailPage() {
           {/* Sidebar */}
           <aside className="space-y-6">
             {/* Graduate Highlights */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
+            <div className="rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 shadow-sm transition-colors">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] dark:text-slate-400 mb-4">
                 Graduate Profile
               </h4>
               <div className="space-y-3.5 text-xs">
-                <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">Institution</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">ASTU</span>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--border-color)] dark:border-slate-800">
+                  <span className="text-[var(--text-muted)] dark:text-slate-400 font-medium">Institution</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-slate-100">ASTU</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">Department</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">{story.department || 'Engineering'}</span>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--border-color)] dark:border-slate-800">
+                  <span className="text-[var(--text-muted)] dark:text-slate-400 font-medium">Department</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-slate-100">{story.department || 'Engineering'}</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">Current Status</span>
+                <div className="flex items-center justify-between py-2 border-b border-[var(--border-color)] dark:border-slate-800">
+                  <span className="text-[var(--text-muted)] dark:text-slate-400 font-medium">Current Status</span>
                   <span className="font-bold text-emerald-700 dark:text-emerald-400">Verified Alumni</span>
                 </div>
               </div>
             </div>
 
             {/* More Alumni Success Stories */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-colors">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
+            <div className="rounded-2xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-6 shadow-sm transition-colors">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] dark:text-slate-400 mb-4">
                 More Success Stories
               </h4>
               <div className="space-y-4">
@@ -212,13 +212,13 @@ export default function StoryDetailPage() {
                   <Link
                     key={rel.id}
                     to={`/stories/${rel.id}`}
-                    className="group block rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-3 transition-all hover:bg-slate-100/80 dark:hover:bg-slate-850"
+                    className="group block rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-page)] dark:bg-slate-800/40 p-3 transition-all  dark:hover:bg-slate-850"
                   >
-                    <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#003580] dark:group-hover:text-blue-400 transition-colors">
+                    <h5 className="text-xs font-bold text-[var(--text-primary)] dark:text-slate-100 group-hover:text-[#003580] dark:group-hover:text-blue-400 transition-colors">
                       {rel.name}
                     </h5>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">{rel.role}</p>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 mt-1">{rel.text}</p>
+                    <p className="text-[11px] text-[var(--text-muted)] dark:text-slate-400 font-medium mt-0.5">{rel.role}</p>
+                    <p className="text-[11px] text-[var(--text-secondary)] dark:text-slate-300 line-clamp-2 mt-1">{rel.text}</p>
                   </Link>
                 ))}
               </div>

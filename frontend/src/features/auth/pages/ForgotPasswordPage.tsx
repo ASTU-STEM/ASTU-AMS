@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
         Enter the email address associated with your ASTU alumni account (or phone number) and we will send you a secure link or verification code to reset your password. The link expires after 15 minutes for your safety.
       </p>
       {/* Recovery Method Toggle Tabs */}
-      <div className="flex bg-slate-100 p-1 rounded-lg mb-6">
+      <div className="flex bg-[var(--bg-page)] p-1 rounded-lg mb-6">
         <button
           type="button"
           onClick={() => setMethod('email')}

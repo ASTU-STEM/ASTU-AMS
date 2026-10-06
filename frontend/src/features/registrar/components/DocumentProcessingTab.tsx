@@ -292,23 +292,23 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
 
       {/* Stats & Document Type Breakdown */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Total Requests</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Requests</p>
           <p className="text-2xl font-extrabold text-astu-navy mt-1">{stats.total}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('PENDING')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('PENDING')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Pending</p>
           <p className="text-2xl font-extrabold text-amber-600 mt-1">{stats.pending}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('IN_PROGRESS')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('IN_PROGRESS')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">In Progress</p>
           <p className="text-2xl font-extrabold text-blue-600 mt-1">{stats.inProgress}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('APPROVED')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('APPROVED')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Approved</p>
           <p className="text-2xl font-extrabold text-emerald-600 mt-1">{stats.approved}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('REJECTED')}>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm cursor-pointer" onClick={() => setFilterStatus('REJECTED')}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-red-600">Rejected</p>
           <p className="text-2xl font-extrabold text-red-600 mt-1">{stats.rejected}</p>
         </div>
@@ -359,26 +359,26 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 filterStatus === tab.key
                   ? 'bg-astu-navy text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-astu-navy/30 hover:text-astu-navy'
+                  : 'bg-white text-[var(--text-secondary)] border border-[var(--border-color)] hover:border-astu-navy/30 hover:text-astu-navy'
               }`}>
               {tab.label} ({tab.count})
             </button>
           ))}
         </div>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-sm">search</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] material-symbols-outlined text-sm">search</span>
           <input type="text" placeholder="Search documents..." value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20 w-56 md:w-72" />
+            className="pl-8 pr-3 py-2 text-xs border border-[var(--border-color)] rounded-xl bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy focus:ring-1 focus:ring-astu-navy/20 w-56 md:w-72" />
         </div>
       </div>
 
       {/* Queue Table */}
-      <div className="bg-white border border-gray-200/60 rounded-3xl shadow-sm overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
+              <tr className="bg-[var(--bg-page)] border-b border-[var(--border-color)] text-[var(--text-muted)] font-bold uppercase tracking-wider">
                 <th className="p-3">Student ID</th>
                 <th className="p-3">Graduate Name</th>
                 <th className="p-3">Document Type</th>
@@ -388,13 +388,13 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {filteredDocs.map((doc) => (
-                <tr key={doc.id} className="hover:bg-gray-50/70 transition-colors">
-                  <td className="p-3 font-mono font-bold text-gray-800">{doc.alumni?.studentId || '—'}</td>
+                <tr key={doc.id} className="hover:bg-[var(--bg-page)] transition-colors">
+                  <td className="p-3 font-mono font-bold text-[var(--text-primary)]">{doc.alumni?.studentId || '—'}</td>
                   <td className="p-3">
-                    <p className="font-bold text-gray-900">{doc.alumni?.fullName || '—'}</p>
-                    <p className="text-[10px] text-gray-500">{doc.alumni?.email || doc.contactEmail || ''}</p>
+                    <p className="font-bold text-[var(--text-primary)]">{doc.alumni?.fullName || '—'}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">{doc.alumni?.email || doc.contactEmail || ''}</p>
                   </td>
                   <td className="p-3">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-astu-navy/5 text-astu-navy font-semibold rounded-lg text-[10px] border border-astu-navy/10">
@@ -407,7 +407,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                       const { paymentInfo, purpose } = parseInstructions(doc.additionalInstructions);
                       return (
                         <div className="space-y-1">
-                          <p className="text-xs font-semibold text-gray-800 truncate" title={purpose}>
+                          <p className="text-xs font-semibold text-[var(--text-primary)] truncate" title={purpose}>
                             {purpose}
                           </p>
                           {paymentInfo && (
@@ -420,7 +420,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                       );
                     })()}
                   </td>
-                  <td className="p-3 text-gray-500 whitespace-nowrap">{new Date(doc.createdAt).toLocaleDateString()}</td>
+                  <td className="p-3 text-[var(--text-muted)] whitespace-nowrap">{new Date(doc.createdAt).toLocaleDateString()}</td>
                   <td className="p-3">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase border ${getStatusBadge(doc.status)}`}>
                       {getStatusLabel(doc.status)}
@@ -429,7 +429,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                   <td className="p-3 text-right">
                     <div className="flex gap-1.5 justify-end flex-wrap">
                       <button onClick={() => setPreviewDoc(doc)}
-                        className="px-2 py-1 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-bold hover:bg-slate-100 transition-all flex items-center gap-1">
+                        className="px-2 py-1 bg-[var(--bg-page)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg text-[10px] font-bold hover:bg-black/5 dark:hover:bg-white/5 transition-all flex items-center gap-1">
                         <Eye className="h-3 w-3" />
                         View
                       </button>
@@ -471,14 +471,14 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
         {filteredDocs.length === 0 && (
           <div className="py-12 text-center">
             <span className="material-symbols-outlined text-4xl text-gray-300">file_copy</span>
-            <p className="mt-2 text-sm text-gray-400">No document requests match your criteria.</p>
+            <p className="mt-2 text-sm text-[var(--text-muted)]">No document requests match your criteria.</p>
           </div>
         )}
-        <div className="border-t border-gray-100 px-4 py-3 flex justify-between items-center bg-gray-50/50">
-          <span className="text-[11px] text-gray-500 font-medium">
+        <div className="border-t border-[var(--border-color)] px-4 py-3 flex justify-between items-center bg-[var(--bg-page)]">
+          <span className="text-[11px] text-[var(--text-muted)] font-medium">
             Showing {filteredDocs.length} of {documents.length} requests
           </span>
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-[var(--text-muted)]">
             Queue updated: {new Date().toLocaleString()}
           </span>
         </div>
@@ -487,48 +487,48 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
       {/* ── Approve Modal (with file upload) ── */}
       {approveModalDoc && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={() => { setApproveModalDoc(null); setSelectedFile(null); }}>
-          <div className="relative w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-[var(--bg-card)] shadow-2xl" onClick={e => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-gradient-to-r from-emerald-50 to-white">
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border-color)] px-5 py-4 bg-gradient-to-r from-emerald-50 to-white">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Approve & Upload Document</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Upload the issued document for {approveModalDoc.alumni?.fullName || 'this alumni'}</p>
+                <h3 className="text-base font-bold text-[var(--text-primary)]">Approve & Upload Document</h3>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Upload the issued document for {approveModalDoc.alumni?.fullName || 'this alumni'}</p>
               </div>
-              <button onClick={() => { setApproveModalDoc(null); setSelectedFile(null); }} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+              <button onClick={() => { setApproveModalDoc(null); setSelectedFile(null); }} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* Request info */}
-              <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 space-y-2">
+              <div className="rounded-xl bg-[var(--bg-page)] p-4 border border-[var(--border-color)] space-y-2">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Student ID</div>
-                    <div className="font-medium text-slate-900">{approveModalDoc.alumni?.studentId}</div>
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Student ID</div>
+                    <div className="font-medium text-[var(--text-primary)]">{approveModalDoc.alumni?.studentId}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Document Type</div>
-                    <div className="font-medium text-slate-900">{getDocTypeLabel(approveModalDoc.documentType)}</div>
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Document Type</div>
+                    <div className="font-medium text-[var(--text-primary)]">{getDocTypeLabel(approveModalDoc.documentType)}</div>
                   </div>
                 </div>
                 {approveModalDoc.additionalInstructions && (
                   <div>
-                    <div className="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Instructions</div>
-                    <div className="text-sm text-slate-700">{approveModalDoc.additionalInstructions}</div>
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold tracking-wider">Instructions</div>
+                    <div className="text-sm text-[var(--text-secondary)]">{approveModalDoc.additionalInstructions}</div>
                   </div>
                 )}
               </div>
 
               {/* File upload area */}
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-2">Upload Issued Document <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-[var(--text-secondary)] block mb-2">Upload Issued Document <span className="text-red-500">*</span></label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                     selectedFile
                       ? 'border-emerald-300 bg-emerald-50/50'
-                      : 'border-slate-300 bg-slate-50 hover:border-astu-navy/40 hover:bg-astu-navy/5'
+                      : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-astu-navy/40 hover:bg-astu-navy/5'
                   }`}
                 >
                   <input
@@ -546,17 +546,17 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                         <FileText className="h-6 w-6 text-emerald-600" />
                       </div>
                       <p className="text-sm font-semibold text-emerald-800">{selectedFile.name}</p>
-                      <p className="text-xs text-slate-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                      <p className="text-xs text-[var(--text-muted)]">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                       <button onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
                         className="text-[10px] text-red-600 font-bold hover:underline">Remove</button>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <div className="h-12 w-12 mx-auto rounded-xl bg-slate-100 flex items-center justify-center">
-                        <Upload className="h-6 w-6 text-slate-400" />
+                      <div className="h-12 w-12 mx-auto rounded-xl bg-[var(--bg-page)] flex items-center justify-center">
+                        <Upload className="h-6 w-6 text-[var(--text-muted)]" />
                       </div>
-                      <p className="text-sm font-semibold text-slate-700">Click to select file</p>
-                      <p className="text-xs text-slate-400">PDF, DOC, DOCX, JPG, PNG — Max 10MB</p>
+                      <p className="text-sm font-semibold text-[var(--text-secondary)]">Click to select file</p>
+                      <p className="text-xs text-[var(--text-muted)]">PDF, DOC, DOCX, JPG, PNG — Max 10MB</p>
                     </div>
                   )}
                 </div>
@@ -569,9 +569,9 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
               </div>
             </div>
             {/* Footer */}
-            <div className="flex-shrink-0 border-t border-slate-200 bg-slate-50/80 px-5 py-4 flex justify-end gap-2">
+            <div className="flex-shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-5 py-4 flex justify-end gap-2">
               <button onClick={() => { setApproveModalDoc(null); setSelectedFile(null); }}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors">
+                className="rounded-xl px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors">
                 Cancel
               </button>
               <button onClick={handleApproveSubmit} disabled={!selectedFile || uploading}
@@ -591,15 +591,15 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
       {/* ── Reject Confirmation Modal ── */}
       {rejectModalDoc && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={() => setRejectModalDoc(null)}>
-          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-gradient-to-r from-red-50 to-white">
-              <h3 className="text-base font-bold text-slate-900">Confirm Rejection</h3>
-              <button onClick={() => setRejectModalDoc(null)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-[var(--bg-card)] shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-5 py-4 bg-gradient-to-r from-red-50 to-white">
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Confirm Rejection</h3>
+              <button onClick={() => setRejectModalDoc(null)} className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="p-5 space-y-4">
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-[var(--text-secondary)]">
                 Are you sure you want to reject the <strong>{getDocTypeLabel(rejectModalDoc.documentType)}</strong> request from <strong>{rejectModalDoc.alumni?.fullName || 'this alumni'}</strong>?
               </p>
               <div className="rounded-xl bg-red-50 p-3 border border-red-100">
@@ -608,9 +608,9 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                 </p>
               </div>
             </div>
-            <div className="border-t border-slate-200 bg-slate-50/80 px-5 py-4 flex justify-end gap-2">
+            <div className="border-t border-[var(--border-color)] bg-[var(--bg-page)] px-5 py-4 flex justify-end gap-2">
               <button onClick={() => setRejectModalDoc(null)}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 transition-colors">
+                className="rounded-xl px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors">
                 Cancel
               </button>
               <button onClick={handleRejectConfirm}
@@ -626,9 +626,9 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
       {/* ── Preview / Detail Modal ── */}
       {previewDoc && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4" onClick={() => setPreviewDoc(null)}>
-          <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden rounded-2xl bg-[var(--bg-card)] shadow-2xl" onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="flex-shrink-0 flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-gradient-to-r from-slate-900 via-[#003366] to-slate-900 text-white">
+            <div className="flex-shrink-0 flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4 bg-gradient-to-r from-slate-900 via-[#003366] to-slate-900 text-white">
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-extrabold tracking-tight">Document Request Details</h3>
@@ -650,45 +650,45 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                 {/* Left Column (5/12): Request Details & Delivery Purpose */}
                 <div className="lg:col-span-5 space-y-4">
                   {/* Requester Identity Card */}
-                  <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200 space-y-3">
+                  <div className="rounded-2xl bg-[var(--bg-page)] p-4 border border-[var(--border-color)] space-y-3">
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-sm shadow-sm">
                         {previewDoc.alumni?.fullName ? previewDoc.alumni.fullName.split(' ').map((n: string) => n[0]).join('') : 'U'}
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-slate-900">{previewDoc.alumni?.fullName || 'Alumni Student'}</h4>
-                        <p className="text-xs text-slate-500 font-mono">{previewDoc.alumni?.studentId || 'N/A'}</p>
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">{previewDoc.alumni?.fullName || 'Alumni Student'}</h4>
+                        <p className="text-xs text-[var(--text-muted)] font-mono">{previewDoc.alumni?.studentId || 'N/A'}</p>
                       </div>
                     </div>
-                    <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
+                    <div className="pt-2 border-t border-[var(--border-color)] grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">Graduation</span>
-                        <span className="font-semibold text-slate-800">{previewDoc.alumni?.graduationYear || 2024}</span>
+                        <span className="text-[10px] uppercase text-[var(--text-muted)] font-bold tracking-wider block">Graduation</span>
+                        <span className="font-semibold text-[var(--text-primary)]">{previewDoc.alumni?.graduationYear || 2024}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">CGPA</span>
+                        <span className="text-[10px] uppercase text-[var(--text-muted)] font-bold tracking-wider block">CGPA</span>
                         <span className="font-semibold text-emerald-700">{previewDoc.alumni?.cgpa ? `${previewDoc.alumni.cgpa} / 4.00` : '3.85 / 4.00'}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Document & Purpose Card */}
-                  <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200 space-y-3">
+                  <div className="rounded-2xl bg-[var(--bg-page)] p-4 border border-[var(--border-color)] space-y-3">
                     <div>
-                      <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider block">Document Type</span>
+                      <span className="text-[10px] uppercase text-[var(--text-muted)] font-bold tracking-wider block">Document Type</span>
                       <span className="text-sm font-bold text-[#003366]">{getDocTypeLabel(previewDoc.documentType)}</span>
                     </div>
 
                     {(() => {
                       const { paymentInfo, purpose } = parseInstructions(previewDoc.additionalInstructions);
                       return (
-                        <div className="space-y-3 pt-2 border-t border-slate-200/60">
+                        <div className="space-y-3 pt-2 border-t border-[var(--border-color)]">
                           <div>
                             <div className="text-[10px] uppercase text-blue-600 font-bold tracking-wider mb-1 flex items-center gap-1">
                               <span className="material-symbols-outlined text-xs">local_shipping</span>
                               Purpose / Delivery Details
                             </div>
-                            <div className="text-xs font-semibold text-slate-800 bg-white p-3 rounded-xl border border-slate-200 leading-relaxed">
+                            <div className="text-xs font-semibold text-[var(--text-primary)] bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] leading-relaxed">
                               {purpose}
                             </div>
                           </div>
@@ -714,7 +714,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                     background: normalizeStatus(previewDoc.status) === 'APPROVED' ? '#f0fdf4' : normalizeStatus(previewDoc.status) === 'REJECTED' ? '#fef2f2' : '#fffbeb',
                     borderColor: normalizeStatus(previewDoc.status) === 'APPROVED' ? '#bbf7d0' : normalizeStatus(previewDoc.status) === 'REJECTED' ? '#fecaca' : '#fde68a'
                   }}>
-                    <span className="text-xs font-bold text-slate-700">Request Status:</span>
+                    <span className="text-xs font-bold text-[var(--text-secondary)]">Request Status:</span>
                     <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase border ${getStatusBadge(previewDoc.status)}`}>
                       {getStatusLabel(previewDoc.status)}
                     </span>
@@ -724,7 +724,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                 {/* Right Column (7/12): Alumni Profile Verification Tabs */}
                 <div className="lg:col-span-7 space-y-4">
                   {/* Profile Section Tabs Header */}
-                  <div className="grid grid-cols-5 border-b border-slate-200 bg-slate-100/70 p-1.5 rounded-xl gap-1">
+                  <div className="grid grid-cols-5 border-b border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 rounded-xl gap-1">
                     {[
                       { id: 'academic', label: 'Academic', icon: 'school' },
                       { id: 'personal', label: 'Personal', icon: 'person' },
@@ -738,8 +738,8 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                         onClick={() => setModalTab(tab.id as any)}
                         className={`flex flex-col sm:flex-row items-center justify-center gap-1 rounded-lg px-1.5 sm:px-2 py-1.5 text-[11px] font-bold transition-all text-center ${
                           modalTab === tab.id
-                            ? 'bg-white text-[#003366] shadow-xs border border-slate-200'
-                            : 'text-slate-500 hover:text-slate-900 hover:bg-black/5'
+                            ? 'bg-white text-[#003366] shadow-xs border border-[var(--border-color)]'
+                            : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5'
                         }`}
                       >
                         <span className="material-symbols-outlined text-sm flex-shrink-0">{tab.icon}</span>
@@ -749,12 +749,12 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                   </div>
 
                   {/* Tab Content Box */}
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 min-h-[300px]">
+                  <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 min-h-[300px]">
                     {/* Tab 1: Academic */}
                     {modalTab === 'academic' && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-base text-[#003366]">school</span>
                             SIS Verified Academic Record
                           </h4>
@@ -763,20 +763,20 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div className="bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Department / Program</span>
-                            <span className="font-bold text-slate-900">{typeof previewDoc.alumni?.department === 'object' ? previewDoc.alumni.department?.name : (previewDoc.alumni?.department || 'Electrical and Computer Engineering')}</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Department / Program</span>
+                            <span className="font-bold text-[var(--text-primary)]">{typeof previewDoc.alumni?.department === 'object' ? previewDoc.alumni.department?.name : (previewDoc.alumni?.department || 'Electrical and Computer Engineering')}</span>
                           </div>
-                          <div className="bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Student ID / Batch</span>
-                            <span className="font-bold font-mono text-slate-900">{previewDoc.alumni?.studentId || 'UGR/37898/17'}</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Student ID / Batch</span>
+                            <span className="font-bold font-mono text-[var(--text-primary)]">{previewDoc.alumni?.studentId || 'UGR/37898/17'}</span>
                           </div>
-                          <div className="bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Graduation Year</span>
-                            <span className="font-bold text-slate-900">{previewDoc.alumni?.graduationYear || 2024}</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Graduation Year</span>
+                            <span className="font-bold text-[var(--text-primary)]">{previewDoc.alumni?.graduationYear || 2024}</span>
                           </div>
-                          <div className="bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Official Cumulative GPA</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Official Cumulative GPA</span>
                             <span className="font-extrabold text-emerald-700">{previewDoc.alumni?.cgpa ? `${previewDoc.alumni.cgpa} / 4.00` : '3.85 / 4.00'}</span>
                           </div>
                         </div>
@@ -786,30 +786,30 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                     {/* Tab 2: Personal */}
                     {modalTab === 'personal' && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-base text-[#003366]">person</span>
                             Personal Information & Bio
                           </h4>
                         </div>
                         <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div className="bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Full Name</span>
-                            <span className="font-bold text-slate-900">{previewDoc.alumni?.fullName || 'Wabi Tena'}</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Full Name</span>
+                            <span className="font-bold text-[var(--text-primary)]">{previewDoc.alumni?.fullName || 'Wabi Tena'}</span>
                           </div>
-                          <div className="bg-white p-3 rounded-xl border border-slate-200">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Phone Number</span>
-                            <span className="font-bold font-mono text-slate-900">{previewDoc.alumni?.phone || '+251917842503'}</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Phone Number</span>
+                            <span className="font-bold font-mono text-[var(--text-primary)]">{previewDoc.alumni?.phone || '+251917842503'}</span>
                           </div>
-                          <div className="bg-white p-3 rounded-xl border border-slate-200 col-span-2">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Email Address</span>
-                            <span className="font-bold text-slate-900">{previewDoc.alumni?.email || previewDoc.contactEmail || 'wabitena@gmail.com'}</span>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] col-span-2">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Email Address</span>
+                            <span className="font-bold text-[var(--text-primary)]">{previewDoc.alumni?.email || previewDoc.contactEmail || 'wabitena@gmail.com'}</span>
                           </div>
                         </div>
                         {previewDoc.alumni?.bio && (
-                          <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Professional Bio</span>
-                            <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{previewDoc.alumni.bio}</p>
+                          <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] text-xs">
+                            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block mb-1">Professional Bio</span>
+                            <p className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">{previewDoc.alumni.bio}</p>
                           </div>
                         )}
                       </div>
@@ -818,8 +818,8 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                     {/* Tab 3: Employment */}
                     {modalTab === 'employment' && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-base text-[#003366]">work</span>
                             Employment & Career History
                           </h4>
@@ -827,10 +827,10 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                         {previewDoc.alumni?.experiences && previewDoc.alumni.experiences.length > 0 ? (
                           <div className="space-y-2">
                             {previewDoc.alumni.experiences.map((exp: any, i: number) => (
-                              <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 text-xs flex items-start justify-between">
+                              <div key={i} className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] text-xs flex items-start justify-between">
                                 <div>
-                                  <p className="font-bold text-slate-900">{exp.position}</p>
-                                  <p className="text-slate-600 font-medium">{exp.companyName} • {exp.industry}</p>
+                                  <p className="font-bold text-[var(--text-primary)]">{exp.position}</p>
+                                  <p className="text-[var(--text-secondary)] font-medium">{exp.companyName} • {exp.industry}</p>
                                 </div>
                                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700">
                                   {exp.isCurrent ? 'Current' : 'Past'}
@@ -839,12 +839,12 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                             ))}
                           </div>
                         ) : (
-                          <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs space-y-2">
+                          <div className="bg-[var(--bg-card)] p-4 rounded-xl border border-[var(--border-color)] text-xs space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-slate-900">Experienced AI Engineer</span>
+                              <span className="font-bold text-[var(--text-primary)]">Experienced AI Engineer</span>
                               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">INSA Corporation</span>
                             </div>
-                            <p className="text-slate-500">Electrical and Computer Engineering • 2024 Graduate</p>
+                            <p className="text-[var(--text-muted)]">Electrical and Computer Engineering • 2024 Graduate</p>
                           </div>
                         )}
                       </div>
@@ -853,8 +853,8 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                     {/* Tab 4: Certifications & Skills */}
                     {modalTab === 'certifications' && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-base text-[#003366]">verified</span>
                             Certifications & Projects
                           </h4>
@@ -862,17 +862,17 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                         {previewDoc.alumni?.certifications && previewDoc.alumni.certifications.length > 0 ? (
                           <div className="space-y-2">
                             {previewDoc.alumni.certifications.map((cert: any, i: number) => (
-                              <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 text-xs">
-                                <p className="font-bold text-slate-900">{cert.name}</p>
-                                <p className="text-slate-500">{cert.issuer}</p>
+                              <div key={i} className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] text-xs">
+                                <p className="font-bold text-[var(--text-primary)]">{cert.name}</p>
+                                <p className="text-[var(--text-muted)]">{cert.issuer}</p>
                               </div>
                             ))}
                           </div>
                         ) : (
                           <div className="space-y-2 text-xs">
-                            <div className="bg-white p-3 rounded-xl border border-slate-200">
-                              <span className="font-bold text-slate-900 block">Verified Software Engineering Certification</span>
-                              <span className="text-slate-500">Adama Science and Technology University</span>
+                            <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)]">
+                              <span className="font-bold text-[var(--text-primary)] block">Verified Software Engineering Certification</span>
+                              <span className="text-[var(--text-muted)]">Adama Science and Technology University</span>
                             </div>
                           </div>
                         )}
@@ -882,8 +882,8 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                     {/* Tab 5: Documents */}
                     {modalTab === 'documents' && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-base text-[#003366]">description</span>
                             Attached Files, Resume & Official Documents
                           </h4>
@@ -891,36 +891,36 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
 
                         {/* Section A: Requester Custom File Attachments */}
                         <div>
-                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Request File Attachments</h5>
+                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">Request File Attachments</h5>
                           {previewDoc.fileUrls && previewDoc.fileUrls.length > 0 ? (
                             <div className="space-y-2">
                               {previewDoc.fileUrls.map((url, idx) => (
                                 <a key={idx} href={getDocumentUrl(url)} target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center gap-2 rounded-xl bg-white p-3 border border-slate-200 hover:bg-slate-50 transition-colors">
+                                  className="flex items-center gap-2 rounded-xl bg-[var(--bg-card)] p-3 border border-[var(--border-color)] hover:bg-[var(--bg-page)] transition-colors">
                                   <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                                  <span className="text-xs font-bold text-slate-800 flex-1 truncate">Requester Attachment {idx + 1}</span>
-                                  <ExternalLink className="h-4 w-4 text-slate-400" />
+                                  <span className="text-xs font-bold text-[var(--text-primary)] flex-1 truncate">Requester Attachment {idx + 1}</span>
+                                  <ExternalLink className="h-4 w-4 text-[var(--text-muted)]" />
                                 </a>
                               ))}
                             </div>
                           ) : (
-                            <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs text-slate-500 flex items-center justify-between">
+                            <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-muted)] flex items-center justify-between">
                               <span>No custom file uploaded with this document request.</span>
-                              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Standard Form</span>
+                              <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--bg-page)] px-2 py-0.5 rounded">Standard Form</span>
                             </div>
                           )}
                         </div>
 
                         {/* Section B: Alumni Profile Resume & Verification Documents */}
-                        <div className="pt-2 border-t border-slate-200">
-                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Alumni Profile Verification Documents</h5>
+                        <div className="pt-2 border-t border-[var(--border-color)]">
+                          <h5 className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">Alumni Profile Verification Documents</h5>
                           <div className="space-y-2 text-xs">
-                            <div className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <div className="bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-color)] flex items-center justify-between">
                               <div className="flex items-center gap-2.5">
                                 <FileText className="h-5 w-5 text-indigo-600 flex-shrink-0" />
                                 <div>
-                                  <p className="font-bold text-slate-900">{previewDoc.alumni?.fullName || 'Alumni'}_Official_Resume.pdf</p>
-                                  <p className="text-[10px] text-slate-400">Verified Alumni Resume & Career Profile</p>
+                                  <p className="font-bold text-[var(--text-primary)]">{previewDoc.alumni?.fullName || 'Alumni'}_Official_Resume.pdf</p>
+                                  <p className="text-[10px] text-[var(--text-muted)]">Verified Alumni Resume & Career Profile</p>
                                 </div>
                               </div>
                               <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-1 rounded-lg">
@@ -931,7 +931,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                         </div>
 
                         {/* Section C: Registrar Issued Official Document */}
-                        <div className="pt-2 border-t border-slate-200">
+                        <div className="pt-2 border-t border-[var(--border-color)]">
                           <h5 className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-2">Registrar Issued Document Status</h5>
                           {previewDoc.issuedDocumentUrl ? (
                             <a href={getDocumentUrl(previewDoc.issuedDocumentUrl)} target="_blank" rel="noopener noreferrer" download
@@ -956,9 +956,9 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="flex-shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4 flex justify-end gap-2">
+            <div className="flex-shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-6 py-4 flex justify-end gap-2">
               <button onClick={() => setPreviewDoc(null)}
-                className="rounded-xl px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
+                className="rounded-xl px-5 py-2.5 text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors">
                 Close
               </button>
               {normalizeStatus(previewDoc.status) !== 'APPROVED' && (
@@ -976,7 +976,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
       {/* Bulk Action Confirmation Modal */}
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 overflow-y-auto">
-          <div className={`w-full ${confirmModal.action === 'APPROVED' ? 'max-w-2xl' : 'max-w-lg'} rounded-3xl bg-white dark:bg-slate-900 p-6 md:p-8 shadow-2xl border border-gray-100 dark:border-slate-800 space-y-5 my-8`}>
+          <div className={`w-full ${confirmModal.action === 'APPROVED' ? 'max-w-2xl' : 'max-w-lg'} rounded-3xl bg-[var(--bg-card)] dark:bg-slate-900 p-6 md:p-8 shadow-2xl border border-[var(--border-color)] dark:border-slate-800 space-y-5 my-8`}>
             <div className="flex items-start gap-4">
               <div className={`p-3.5 rounded-2xl ${confirmModal.action === 'APPROVED' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400'}`}>
                 <span className="material-symbols-outlined text-2xl">
@@ -984,10 +984,10 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                 </span>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                <h3 className="text-lg font-extrabold text-[var(--text-primary)] dark:text-white">
                   {confirmModal.action === 'APPROVED' ? 'Confirm Bulk Approval & File Upload' : 'Confirm Process All Pending'}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-[var(--text-muted)] dark:text-slate-400 mt-1">
                   {confirmModal.action === 'APPROVED'
                     ? `Attach the issued document file for each alumnus request below before completing approval.`
                     : `Are you sure you want to mark all ${confirmModal.pendingList.length} pending document requests as In Progress?`
@@ -1000,9 +1000,9 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
             {confirmModal.action === 'APPROVED' ? (
               <div className="space-y-3">
                 {/* Upload Status Header */}
-                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                <div className="flex items-center justify-between bg-[var(--bg-page)] dark:bg-slate-800/60 p-3 rounded-2xl border border-[var(--border-color)] dark:border-slate-800">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">File Attachments Status:</span>
+                    <span className="text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300">File Attachments Status:</span>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
                       confirmModal.pendingList.every(d => Boolean(d.issuedDocumentUrl || bulkFilesMap[String(d.id)]))
                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
@@ -1012,7 +1012,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                     </span>
                   </div>
                   {/* Progress bar */}
-                  <div className="w-32 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div className="w-32 bg-[var(--bg-page)] dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                     <div
                       className="bg-emerald-500 h-full transition-all duration-300"
                       style={{
@@ -1023,7 +1023,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                 </div>
 
                 {/* Per-Profile Attachment List */}
-                <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-800 max-h-72 overflow-y-auto space-y-3">
+                <div className="bg-[var(--bg-page)] dark:bg-slate-800/40 rounded-2xl p-3 border border-[var(--border-color)] dark:border-slate-800 max-h-72 overflow-y-auto space-y-3">
                   {confirmModal.pendingList.map((doc) => {
                     const localFile = bulkFilesMap[String(doc.id)];
                     const serverUrl = doc.issuedDocumentUrl;
@@ -1037,20 +1037,20 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                         className={`p-3.5 rounded-2xl border transition-all ${
                           hasFile
                             ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/40'
-                            : 'bg-white dark:bg-slate-900 border-amber-200/80 dark:border-amber-900/40 shadow-sm'
+                            : 'bg-[var(--bg-card)] dark:bg-slate-900 border-amber-200/80 dark:border-amber-900/40 shadow-sm'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="font-bold text-slate-900 dark:text-white text-xs truncate">
+                              <p className="font-bold text-[var(--text-primary)] dark:text-white text-xs truncate">
                                 {doc.alumni?.fullName || 'Alumni'}
                               </p>
-                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                              <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300">
                                 {doc.alumni?.studentId || 'N/A'}
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                            <p className="text-[10px] text-[var(--text-muted)] dark:text-slate-400 mt-0.5 flex items-center gap-1">
                               <span className="material-symbols-outlined text-[12px]">{getDocTypeIcon(doc.documentType)}</span>
                               {getDocTypeLabel(doc.documentType)}
                             </p>
@@ -1064,10 +1064,10 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                                 Saving File...
                               </div>
                             ) : hasFile ? (
-                              <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700">
+                              <div className="flex items-center gap-2 bg-[var(--bg-card)] dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-700">
                                 <FileText className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                                 <div className="text-left min-w-0 max-w-[140px]">
-                                  <p className="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate" title={displayName}>{displayName}</p>
+                                  <p className="text-[10px] font-bold text-[var(--text-primary)] dark:text-slate-200 truncate" title={displayName}>{displayName}</p>
                                   <p className="text-[8px] text-emerald-600 font-semibold">
                                     {localFile ? `${(localFile.size / 1024).toFixed(1)} KB` : 'Saved on Server'}
                                   </p>
@@ -1075,7 +1075,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleBulkFileRemove(doc.id)}
-                                  className="text-slate-400 hover:text-red-500 p-0.5 transition-colors"
+                                  className="text-[var(--text-muted)] hover:text-red-500 p-0.5 transition-colors"
                                   title="Remove file"
                                 >
                                   <X className="h-3.5 w-3.5" />
@@ -1130,15 +1130,15 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
               </div>
             ) : (
               /* If IN_PROGRESS: Standard status update preview */
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 max-h-44 overflow-y-auto space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+              <div className="bg-[var(--bg-page)] dark:bg-slate-800/50 rounded-2xl p-3 border border-[var(--border-color)] dark:border-slate-800 max-h-44 overflow-y-auto space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-1">
                   Affected Requests ({confirmModal.pendingList.length})
                 </p>
                 {confirmModal.pendingList.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 text-xs">
+                  <div key={doc.id} className="flex items-center justify-between bg-[var(--bg-card)] dark:bg-slate-900 p-2.5 rounded-xl border border-[var(--border-color)] dark:border-slate-800 text-xs">
                     <div className="min-w-0 pr-2">
-                      <p className="font-bold text-slate-800 dark:text-slate-200 truncate">{doc.alumni?.fullName || 'Alumni'}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">{doc.alumni?.studentId || '—'} • {getDocTypeLabel(doc.documentType)}</p>
+                      <p className="font-bold text-[var(--text-primary)] dark:text-slate-200 truncate">{doc.alumni?.fullName || 'Alumni'}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-mono">{doc.alumni?.studentId || '—'} • {getDocTypeLabel(doc.documentType)}</p>
                     </div>
                     <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border ${getStatusBadge(doc.status)}`}>
                       {getStatusLabel(doc.status)}
@@ -1148,7 +1148,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-[var(--border-color)] dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => {
@@ -1156,7 +1156,7 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                   setBulkFilesMap({});
                 }}
                 disabled={isBulkSubmitting}
-                className="px-5 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all disabled:opacity-50"
+                className="px-5 py-2.5 text-xs font-bold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 rounded-xl transition-all disabled:opacity-50"
               >
                 Cancel
               </button>

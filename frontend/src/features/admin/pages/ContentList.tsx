@@ -287,22 +287,22 @@ export default function ContentList() {
       />
 
       {/* Toolbar */}
-      <div className="cms-fade flex flex-col gap-3 rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="cms-fade flex flex-col gap-3 rounded-[12px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by title, excerpt, or tag..."
-              className="w-full rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-2 pl-8 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10"
+              className="w-full rounded-[8px] border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 py-2 pl-8 pr-3 text-sm text-[var(--text-primary)] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -312,7 +312,7 @@ export default function ContentList() {
             type="button"
             onClick={() => setShowFilters((open) => !open)}
             className={`inline-flex items-center gap-1.5 rounded-[8px] border px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-              showFilters ? 'border-[#003580] bg-[#003580]/5 text-[#003580] dark:border-sky-500 dark:bg-sky-950/30 dark:text-sky-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+              showFilters ? 'border-[#003580] bg-[#003580]/5 text-[#003580] dark:border-sky-500 dark:bg-sky-950/30 dark:text-sky-300' : 'border-[var(--border-color)] dark:border-slate-700 bg-white dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700'
             }`}
           >
             <Filter className="h-3.5 w-3.5" />
@@ -327,7 +327,7 @@ export default function ContentList() {
               setTypeFilter('all');
               setSelectedIds([]);
             }}
-            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 transition-all cursor-pointer"
           >
             <RefreshCcw className="h-3.5 w-3.5" />
             Reset
@@ -335,17 +335,17 @@ export default function ContentList() {
           <button
             type="button"
             onClick={handleExport}
-            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 transition-all cursor-pointer"
             title="Export all visible content as JSON"
           >
             <Download className="h-3.5 w-3.5" />
             Export
           </button>
-          <div className="inline-flex rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-0.5">
+          <div className="inline-flex rounded-md border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 p-0.5">
             <button
               type="button"
               onClick={() => setView('grid')}
-              className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded cursor-pointer ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-[var(--text-muted)] dark:text-slate-400 hover:text-[var(--text-secondary)] dark:hover:text-white'}`}
               title="Grid view"
             >
               <Grid3x3 className="h-4 w-4" />
@@ -353,7 +353,7 @@ export default function ContentList() {
             <button
               type="button"
               onClick={() => setView('list')}
-              className={`inline-flex h-8 w-8 items-center justify-center rounded ${view === 'list' ? 'bg-[#003580] text-white' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded ${view === 'list' ? 'bg-[#003580] text-white' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'}`}
               title="List view"
             >
               <LayoutList className="h-4 w-4" />
@@ -362,7 +362,7 @@ export default function ContentList() {
         </div>
 
         {showFilters && (
-          <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3">
+          <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--border-color)] pt-3">
             {TYPE_FILTERS.map((type) => (
               <button
                 key={type.key}
@@ -371,7 +371,7 @@ export default function ContentList() {
                 className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all ${
                   typeFilter === type.key
                     ? 'border-[#003580] bg-[#003580] text-white'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-[#003580]/40'
+                    : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003580]/40'
                 }`}
               >
                 {type.label}
@@ -380,7 +380,7 @@ export default function ContentList() {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3">
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--border-color)] pt-3">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -389,13 +389,13 @@ export default function ContentList() {
               className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all ${
                 statusTab === tab.key
                   ? 'bg-[#003580] text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
               {tab.label}
               <span
                 className={`rounded px-1.5 py-0.5 text-[10px] ${
-                  statusTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+                  statusTab === tab.key ? 'bg-white/20 text-white' : 'bg-[var(--bg-page)] text-[var(--text-muted)]'
                 }`}
               >
                 {counts[tab.key] ?? 0}
@@ -449,7 +449,7 @@ export default function ContentList() {
             <button
               type="button"
               onClick={() => setSelectedIds([])}
-              className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+              className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--bg-page)]"
               aria-label="Clear selection"
             >
               <X className="h-3.5 w-3.5" />
@@ -495,16 +495,16 @@ export default function ContentList() {
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+          <div className="overflow-x-auto rounded-[10px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-xs">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800">
-                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <thead className="bg-[var(--bg-page)] dark:bg-slate-800/60 border-b border-[var(--border-color)] dark:border-slate-800">
+                <tr className="text-left text-[10px] uppercase tracking-wider text-[var(--text-muted)] dark:text-slate-400">
                   <th className="px-3 py-2.5 font-semibold">
                     <input
                       type="checkbox"
                       checked={selectedIds.length === filtered.length && filtered.length > 0}
                       onChange={selectAllVisible}
-                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
+                      className="h-4 w-4 rounded border-[var(--border-color)] dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
                     />
                   </th>
                   <th className="px-3 py-2.5 font-semibold">Title</th>
@@ -515,43 +515,43 @@ export default function ContentList() {
                   <th className="px-3 py-2.5 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800">
                 {filtered.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={item.id} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40 transition-colors">
                     <td className="px-3 py-2.5">
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(item.id)}
                         onChange={() => toggleSelected(item.id)}
-                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
+                        className="h-4 w-4 rounded border-[var(--border-color)] dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
                       />
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
                         {item.pinned && <Pin className="h-3 w-3 text-amber-500 shrink-0" />}
-                        <span className="font-semibold text-slate-900 dark:text-white line-clamp-1">{item.title}</span>
+                        <span className="font-semibold text-[var(--text-primary)] dark:text-white line-clamp-1">{item.title}</span>
                       </div>
-                      <div className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">{item.excerpt?.slice(0, 90)}</div>
+                      <div className="mt-0.5 text-[11px] text-[var(--text-muted)] dark:text-slate-400 line-clamp-1">{item.excerpt?.slice(0, 90)}</div>
                     </td>
-                    <td className="px-3 py-2.5 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{item.type}</td>
+                    <td className="px-3 py-2.5 text-xs font-semibold uppercase text-[var(--text-muted)] dark:text-slate-400">{item.type}</td>
                     <td className="px-3 py-2.5 text-xs">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                         item.status === 'Published' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' :
-                        item.status === 'Draft' ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' :
+                        item.status === 'Draft' ? 'bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-secondary)] dark:text-slate-300' :
                         item.status === 'Scheduled' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' :
-                        item.status === 'Needs Review' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                        item.status === 'Needs Review' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300' : 'bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-400'
                       }`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{item.author || 'Content Manager'}</td>
-                    <td className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">{item.updatedAt || 'Recently'}</td>
+                    <td className="px-3 py-2.5 text-xs text-[var(--text-muted)] dark:text-slate-400">{item.author || 'Content Manager'}</td>
+                    <td className="px-3 py-2.5 text-xs text-[var(--text-muted)] dark:text-slate-400">{item.updatedAt || 'Recently'}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
                           onClick={() => setPreviewItem(item)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 cursor-pointer"
                           title="Preview"
                         >
                           <Eye className="h-3.5 w-3.5" />
@@ -559,7 +559,7 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => setEditItem(item)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                           title="Edit"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
@@ -567,7 +567,7 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => handleDuplicate(item)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
                           title="Duplicate / Copy"
                         >
                           <Copy className="h-3.5 w-3.5" />
@@ -578,7 +578,7 @@ export default function ContentList() {
                             updateItem(item.id, { pinned: !item.pinned });
                             toast.success(item.pinned ? 'Unpinned' : 'Pinned');
                           }}
-                          className={`inline-flex h-7 w-7 items-center justify-center rounded-md border cursor-pointer ${item.pinned ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40'}`}
+                          className={`inline-flex h-7 w-7 items-center justify-center rounded-md border cursor-pointer ${item.pinned ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300' : 'border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40'}`}
                           title={item.pinned ? 'Unpin' : 'Pin'}
                         >
                           <Pin className="h-3.5 w-3.5" />
@@ -586,7 +586,7 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => openScheduleFor(item.id)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                           title="Schedule"
                         >
                           <Calendar className="h-3.5 w-3.5" />
@@ -608,7 +608,7 @@ export default function ContentList() {
                         <button
                           type="button"
                           onClick={() => setMoreModalItem(item)}
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 cursor-pointer"
                           title="More Options"
                         >
                           <MoreHorizontal className="h-3.5 w-3.5" />
@@ -620,16 +620,16 @@ export default function ContentList() {
               </tbody>
             </table>
             {filtered.length === 0 && (
-              <div className="py-12 text-center text-sm text-slate-500 dark:text-slate-400">No content matches your filters.</div>
+              <div className="py-12 text-center text-sm text-[var(--text-muted)] dark:text-slate-400">No content matches your filters.</div>
             )}
           </div>
         )}
 
         {filtered.length === 0 && view === 'grid' && (
-          <div className="rounded-[10px] border border-dashed border-slate-300 bg-white p-10 text-center">
+          <div className="rounded-[10px] border border-dashed border-[var(--border-color)] bg-[var(--bg-card)] p-10 text-center">
             <Sparkles className="mx-auto h-8 w-8 text-slate-300" />
-            <p className="mt-2 text-sm font-semibold text-slate-700">No content found</p>
-            <p className="mt-1 text-xs text-slate-500">Try adjusting your filters or create new content to get started.</p>
+            <p className="mt-2 text-sm font-semibold text-[var(--text-secondary)]">No content found</p>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">Try adjusting your filters or create new content to get started.</p>
             <button
               type="button"
               onClick={() => setCreateOpen(true)}
@@ -661,14 +661,14 @@ export default function ContentList() {
             <button
               type="button"
               onClick={() => setCreateOpen(false)}
-              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => handleCreateContent('Draft')}
-              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Save Draft
             </button>
@@ -684,11 +684,11 @@ export default function ContentList() {
       >
         <div className="space-y-3">
           <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Content Type</span>
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Content Type</span>
             <select
               value={newType}
               onChange={(e) => setNewType(e.target.value as ContentType)}
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
             >
               <option value="post">Post (Article / News)</option>
               <option value="announcement">Announcement</option>
@@ -699,22 +699,22 @@ export default function ContentList() {
             </select>
           </label>
           <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Title</span>
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Title</span>
             <input
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
               placeholder="e.g. ASTU Hosts International Engineering Summit"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Excerpt / Description</span>
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Excerpt / Description</span>
             <textarea
               value={newExcerpt}
               onChange={(e) => setNewExcerpt(e.target.value)}
               rows={3}
-              className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+              className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
               placeholder="Brief summary or description..."
             />
           </label>
@@ -731,7 +731,7 @@ export default function ContentList() {
             <button
               type="button"
               onClick={() => setPreviewItem(null)}
-              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Close
             </button>
@@ -754,10 +754,10 @@ export default function ContentList() {
         {previewItem && (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+              <span className="rounded-md bg-[var(--bg-page)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                 {previewItem.type}
               </span>
-              <span className="rounded-md border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+              <span className="rounded-md border border-[var(--border-color)] px-2 py-0.5 text-[10px] font-semibold text-[var(--text-secondary)]">
                 {previewItem.status}
               </span>
               {previewItem.tags?.map((tag) => (
@@ -766,26 +766,26 @@ export default function ContentList() {
                 </span>
               ))}
             </div>
-            <p className="text-sm text-slate-700">{previewItem.excerpt}</p>
-            <div className="rounded-[8px] border border-dashed border-slate-300 bg-slate-50/60 p-4 text-center text-xs text-slate-500">
+            <p className="text-sm text-[var(--text-secondary)]">{previewItem.excerpt}</p>
+            <div className="rounded-[8px] border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-center text-xs text-[var(--text-muted)]">
               Live preview renders the content layout on the public site. Headings, images, and links will appear here.
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-[8px] border border-slate-200 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Author</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{previewItem.author}</p>
+              <div className="rounded-[8px] border border-[var(--border-color)] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Author</p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{previewItem.author}</p>
               </div>
-              <div className="rounded-[8px] border border-slate-200 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Views</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{previewItem.views?.toLocaleString() ?? 0}</p>
+              <div className="rounded-[8px] border border-[var(--border-color)] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Views</p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{previewItem.views?.toLocaleString() ?? 0}</p>
               </div>
-              <div className="rounded-[8px] border border-slate-200 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Published</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{previewItem.publishedAt ?? '—'}</p>
+              <div className="rounded-[8px] border border-[var(--border-color)] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Published</p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{previewItem.publishedAt ?? '—'}</p>
               </div>
-              <div className="rounded-[8px] border border-slate-200 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Scheduled</p>
-                <p className="mt-1 text-sm font-medium text-slate-800">{previewItem.scheduledFor ?? '—'}</p>
+              <div className="rounded-[8px] border border-[var(--border-color)] p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Scheduled</p>
+                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{previewItem.scheduledFor ?? '—'}</p>
               </div>
             </div>
           </div>
@@ -803,7 +803,7 @@ export default function ContentList() {
             <button
               type="button"
               onClick={() => setEditItem(null)}
-              className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -820,22 +820,22 @@ export default function ContentList() {
         {editItem && (
           <div className="space-y-3">
             <label className="block">
-              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Title</span>
+              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Title</span>
               <input
                 type="text"
                 value={editItem.title}
                 onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
-                className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
               />
             </label>
 
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Content Type</span>
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Content Type</span>
                 <select
                   value={editItem.type}
                   onChange={(e) => setEditItem({ ...editItem, type: e.target.value as ContentType })}
-                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
                 >
                   <option value="post">Post (Article / News)</option>
                   <option value="announcement">Announcement</option>
@@ -847,11 +847,11 @@ export default function ContentList() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Status</span>
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Status</span>
                 <select
                   value={editItem.status}
                   onChange={(e) => setEditItem({ ...editItem, status: e.target.value as ContentStatus })}
-                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
                 >
                   <option value="Published">Published</option>
                   <option value="Draft">Draft</option>
@@ -869,32 +869,32 @@ export default function ContentList() {
             />
 
             <label className="block">
-              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Excerpt / Content Summary</span>
+              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Excerpt / Content Summary</span>
               <textarea
                 value={editItem.excerpt || ''}
                 onChange={(e) => setEditItem({ ...editItem, excerpt: e.target.value })}
                 rows={3}
-                className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]"
+                className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]"
               />
             </label>
 
             <div className="flex items-center gap-4 pt-2">
-              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!!editItem.pinned}
                   onChange={(e) => setEditItem({ ...editItem, pinned: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                  className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580]"
                 />
                 Pinned Notice
               </label>
 
-              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!!editItem.featured}
                   onChange={(e) => setEditItem({ ...editItem, featured: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                  className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580]"
                 />
                 Featured Card
               </label>
@@ -912,11 +912,11 @@ export default function ContentList() {
       >
         {moreModalItem && (
           <div className="space-y-3 py-1">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="text-xs font-bold text-slate-800 line-clamp-1">{moreModalItem.title}</p>
+            <div className="p-3 bg-[var(--bg-page)] rounded-xl border border-[var(--border-color)]">
+              <p className="text-xs font-bold text-[var(--text-primary)] line-clamp-1">{moreModalItem.title}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] uppercase font-bold text-slate-500">{moreModalItem.type}</span>
-                <span className="text-[10px] text-slate-400">·</span>
+                <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">{moreModalItem.type}</span>
+                <span className="text-[10px] text-[var(--text-muted)]">·</span>
                 <span className="text-[10px] font-semibold text-emerald-600">{moreModalItem.status}</span>
               </div>
             </div>
@@ -928,7 +928,7 @@ export default function ContentList() {
                   handleDuplicate(moreModalItem);
                   setMoreModalItem(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-lg transition-colors"
               >
                 <Copy className="h-4 w-4 text-indigo-600" /> Duplicate as New Draft
               </button>
@@ -942,7 +942,7 @@ export default function ContentList() {
                   toast.success('Public URL copied to clipboard!');
                   setMoreModalItem(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-lg transition-colors"
               >
                 <ExternalLink className="h-4 w-4 text-blue-600" /> Copy Public Portal URL
               </button>
@@ -954,7 +954,7 @@ export default function ContentList() {
                   toast.success(moreModalItem.pinned ? 'Item unpinned' : 'Item pinned to top');
                   setMoreModalItem(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-lg transition-colors"
               >
                 <Pin className="h-4 w-4 text-amber-600" /> {moreModalItem.pinned ? 'Unpin from Top' : 'Pin Notice to Top'}
               </button>
@@ -966,7 +966,7 @@ export default function ContentList() {
                   toast.success(moreModalItem.featured ? 'Removed from featured' : 'Marked as Featured Story');
                   setMoreModalItem(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-lg transition-colors"
               >
                 <Sparkles className="h-4 w-4 text-purple-600" /> {moreModalItem.featured ? 'Remove from Featured' : 'Mark as Featured Card'}
               </button>
@@ -977,13 +977,13 @@ export default function ContentList() {
                   setEditItem(moreModalItem);
                   setMoreModalItem(null);
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-lg transition-colors"
               >
-                <Edit3 className="h-4 w-4 text-slate-600" /> Edit Full Details...
+                <Edit3 className="h-4 w-4 text-[var(--text-secondary)]" /> Edit Full Details...
               </button>
 
-              <div className="pt-2 border-t border-slate-100">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-1">Quick Status Change</p>
+              <div className="pt-2 border-t border-[var(--border-color)]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] px-3 mb-1">Quick Status Change</p>
                 <div className="grid grid-cols-2 gap-1 px-1">
                   {(['Published', 'Draft', 'Needs Review', 'Archived'] as ContentStatus[]).map((st) => (
                     <button
@@ -995,7 +995,7 @@ export default function ContentList() {
                         setMoreModalItem(null);
                       }}
                       className={`text-left px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${
-                        moreModalItem.status === st ? 'bg-[#003580] text-white' : 'hover:bg-slate-100 text-slate-600'
+                        moreModalItem.status === st ? 'bg-[#003580] text-white' : 'hover:bg-[var(--bg-page)] text-[var(--text-secondary)]'
                       }`}
                     >
                       {st}
@@ -1004,7 +1004,7 @@ export default function ContentList() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-[var(--border-color)]">
                 <button
                   type="button"
                   onClick={() => {

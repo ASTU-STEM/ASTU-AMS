@@ -171,7 +171,7 @@ export default function RichTextEditor({
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => exec(cmd.command, cmdValue)}
         className={`inline-flex h-8 min-w-[2rem] items-center justify-center gap-1 rounded-md px-2 text-xs font-semibold transition-all ${
-          active ? 'bg-[#003580]/10 text-[#003580]' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+          active ? 'bg-[#003580]/10 text-[#003580]' : 'text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]'
         }`}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -181,14 +181,14 @@ export default function RichTextEditor({
   };
 
   return (
-    <div className={`overflow-hidden rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] ${className}`}>
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 bg-gradient-to-b from-slate-50/80 to-white px-2 py-1.5">
+    <div className={`overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.04)] ${className}`}>
+      <div className="flex flex-wrap items-center gap-0.5 border-b border-[var(--border-color)] bg-gradient-to-b from-slate-50/80 to-white px-2 py-1.5">
         <div className="relative">
           <button
             type="button"
             onClick={() => setShowHeadingMenu((open) => !open)}
             onMouseDown={(event) => event.preventDefault()}
-            className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+            className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             aria-haspopup="menu"
             aria-expanded={showHeadingMenu}
           >
@@ -197,7 +197,7 @@ export default function RichTextEditor({
             <ChevronDown className="h-3 w-3" />
           </button>
           {showHeadingMenu && (
-            <div className="absolute left-0 top-9 z-10 w-44 overflow-hidden rounded-[8px] border border-slate-200 bg-white py-1 shadow-lg">
+            <div className="absolute left-0 top-9 z-10 w-44 overflow-hidden rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] py-1 shadow-lg">
               {paragraphCommands.map((cmd) => {
                 const Icon = cmd.icon;
                 return (
@@ -209,9 +209,9 @@ export default function RichTextEditor({
                       exec(cmd.command, cmd.value);
                       setShowHeadingMenu(false);
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
                   >
-                    <Icon className="h-4 w-4 text-slate-500" />
+                    <Icon className="h-4 w-4 text-[var(--text-muted)]" />
                     {cmd.label}
                   </button>
                 );
@@ -219,19 +219,19 @@ export default function RichTextEditor({
             </div>
           )}
         </div>
-        <span className="mx-1 h-5 w-px bg-slate-200" />
+        <span className="mx-1 h-5 w-px bg-[var(--bg-page)]" />
         {textCommands.map((cmd) => (
           <ToolbarButton key={cmd.label} cmd={cmd} />
         ))}
-        <span className="mx-1 h-5 w-px bg-slate-200" />
+        <span className="mx-1 h-5 w-px bg-[var(--bg-page)]" />
         {listCommands.map((cmd) => (
           <ToolbarButton key={cmd.label} cmd={cmd} />
         ))}
-        <span className="mx-1 h-5 w-px bg-slate-200" />
+        <span className="mx-1 h-5 w-px bg-[var(--bg-page)]" />
         {alignmentCommands.map((cmd) => (
           <ToolbarButton key={cmd.label} cmd={cmd} />
         ))}
-        <span className="mx-1 h-5 w-px bg-slate-200" />
+        <span className="mx-1 h-5 w-px bg-[var(--bg-page)]" />
         <button
           type="button"
           title="Insert link"
@@ -240,7 +240,7 @@ export default function RichTextEditor({
             setLinkUrl('');
             setShowLinkPrompt(true);
           }}
-          className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]"
         >
           <Link2 className="h-3.5 w-3.5" />
         </button>
@@ -249,7 +249,7 @@ export default function RichTextEditor({
           title="Insert image"
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => exec('insertImage')}
-          className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+          className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]"
         >
           <ImageIcon className="h-3.5 w-3.5" />
         </button>
@@ -259,7 +259,7 @@ export default function RichTextEditor({
             title="Undo"
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => exec('undo')}
-            className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+            className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]"
           >
             <Undo2 className="h-3.5 w-3.5" />
           </button>
@@ -268,7 +268,7 @@ export default function RichTextEditor({
             title="Redo"
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => exec('redo')}
-            className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+            className="inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]"
           >
             <Redo2 className="h-3.5 w-3.5" />
           </button>
@@ -276,14 +276,14 @@ export default function RichTextEditor({
       </div>
 
       {showLinkPrompt && (
-        <div className="flex items-center gap-2 border-b border-slate-200 bg-blue-50/60 px-3 py-2">
+        <div className="flex items-center gap-2 border-b border-[var(--border-color)] bg-blue-50/60 px-3 py-2">
           <Link2 className="h-3.5 w-3.5 text-[#003580]" />
           <input
             type="url"
             value={linkUrl}
             onChange={(event) => setLinkUrl(event.target.value)}
             placeholder="https://example.com"
-            className="flex-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm outline-none focus:border-[#003580]"
+            className="flex-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-sm outline-none focus:border-[#003580]"
             autoFocus
             onKeyDown={(event) => {
               if (event.key === 'Enter') insertLink();
@@ -306,7 +306,7 @@ export default function RichTextEditor({
               setShowLinkPrompt(false);
               setLinkUrl('');
             }}
-            className="rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
           >
             Cancel
           </button>
@@ -322,7 +322,7 @@ export default function RichTextEditor({
         onMouseUp={checkActiveStates}
         onBlur={handleInput}
         data-placeholder={placeholder}
-        className="cms-rich-editor px-4 py-3 text-sm text-slate-800 outline-none"
+        className="cms-rich-editor px-4 py-3 text-sm text-[var(--text-primary)] outline-none"
         style={{ minHeight }}
         dangerouslySetInnerHTML={{ __html: value }}
       />
@@ -346,7 +346,7 @@ export default function RichTextEditor({
       `}</style>
 
       {showWordCount && (
-        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/60 px-3 py-1.5 text-[10px] text-slate-500">
+        <div className="flex items-center justify-between border-t border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-1.5 text-[10px] text-[var(--text-muted)]">
           <span>{stats.words} words · {stats.chars} characters</span>
           <span>~{stats.minutes} min read</span>
         </div>

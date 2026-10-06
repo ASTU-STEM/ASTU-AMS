@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UIState {
   sidebarCollapsed: boolean;
-  darkMode: boolean;
   mobileMenuOpen: boolean;
   notificationPanelOpen: boolean;
   globalLoading: boolean;
@@ -10,12 +9,15 @@ interface UIState {
 
 const initialState: UIState = {
   sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
-  darkMode: localStorage.getItem('theme') === 'dark',
   mobileMenuOpen: false,
   notificationPanelOpen: false,
   globalLoading: false,
 };
 
+// Theming deliberately lives in src/hooks/useTheme.ts, not here. This slice
+// used to carry a second toggleDarkMode/setDarkMode pair that wrote the same
+// localStorage key and the same <html> class. Nothing ever dispatched them, so
+// they were dead code that would silently diverge from the real implementation.
 const uiSlice = createSlice({
   name: 'ui',
   initialState,
@@ -27,21 +29,6 @@ const uiSlice = createSlice({
     setSidebarCollapsed(state, action: PayloadAction<boolean>) {
       state.sidebarCollapsed = action.payload;
       localStorage.setItem('sidebar_collapsed', String(action.payload));
-    },
-    toggleDarkMode(state) {
-      state.darkMode = !state.darkMode;
-      localStorage.setItem('theme', state.darkMode ? 'dark' : 'light');
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(state.darkMode ? 'dark' : 'light');
-    },
-    setDarkMode(state, action: PayloadAction<boolean>) {
-      state.darkMode = action.payload;
-      localStorage.setItem('theme', action.payload ? 'dark' : 'light');
-      // This previously only wrote localStorage, so calling setDarkMode left the
-      // `light`/`dark` class on <html> untouched and the page never changed.
-      document.documentElement.classList.remove('light', 'dark');
-      document.documentElement.classList.add(action.payload ? 'dark' : 'light');
-      document.documentElement.style.colorScheme = action.payload ? 'dark' : 'light';
     },
     setMobileMenuOpen(state, action: PayloadAction<boolean>) {
       state.mobileMenuOpen = action.payload;
@@ -58,8 +45,6 @@ const uiSlice = createSlice({
 export const {
   toggleSidebar,
   setSidebarCollapsed,
-  toggleDarkMode,
-  setDarkMode,
   setMobileMenuOpen,
   setNotificationPanelOpen,
   setGlobalLoading,

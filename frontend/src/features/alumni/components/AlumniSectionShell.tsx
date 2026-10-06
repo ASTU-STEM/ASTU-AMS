@@ -46,8 +46,8 @@ export const AlumniSectionShell: React.FC<AlumniSectionShellProps> = ({
         <div className="pointer-events-none absolute -mr-20 -mt-20 top-0 right-0 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 rounded-full bg-[#FFCC00]/5 blur-2xl" />
 
-        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
             <BrandMark className="h-14 w-14 shrink-0 object-contain scale-110 rounded-xl" tone="dark" />
             <div className="space-y-2 min-w-0">
               {eyebrow && (
@@ -60,12 +60,12 @@ export const AlumniSectionShell: React.FC<AlumniSectionShellProps> = ({
               {description && (
                 <p className="max-w-2xl text-sm sm:text-base leading-relaxed text-white/70">{description}</p>
               )}
-              {actions && <div className="pt-1 flex flex-wrap gap-2">{actions}</div>}
+              {actions && <div className="pt-2 flex flex-wrap gap-3">{actions}</div>}
             </div>
           </div>
 
           {metrics && metrics.length > 0 && (
-            <div className="flex flex-wrap gap-3 self-start md:self-center">
+            <div className="flex flex-wrap gap-4 self-start md:self-center">
               {metrics.map((metric) => (
                 <div
                   key={metric.label}

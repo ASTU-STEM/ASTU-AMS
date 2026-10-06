@@ -32,7 +32,7 @@ export default function FormField({
 
   const inputClasses = `
     w-full rounded-lg border px-4 py-3 text-sm
-    transition-all duration-200 bg-white text-on-surface dark:bg-slate-800/80 dark:text-white
+    transition-all duration-200 bg-[var(--bg-card)] text-on-surface dark:bg-slate-800/80 dark:text-white
     placeholder:text-on-surface-variant/40 dark:placeholder:text-slate-500
     focus:outline-none focus:ring-2
     disabled:cursor-not-allowed disabled:opacity-50

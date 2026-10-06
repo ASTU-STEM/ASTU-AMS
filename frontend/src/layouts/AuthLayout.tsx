@@ -39,9 +39,9 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
   ];
 
   return (
-    <div className="app-shell min-h-screen bg-surface dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] dark:text-slate-100 transition-colors duration-200">
       {/* Top Navigation */}
-      <header className="border-b border-outline-variant bg-white/95 backdrop-blur dark:bg-slate-900/95 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
+      <header className="border-b border-outline-variant bg-[var(--bg-card)] backdrop-blur dark:bg-slate-900/95 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
           <Link to="/" className="flex items-center gap-2">
             <div className="rounded-full bg-astu-navy p-2 text-white shadow-sm">
@@ -53,11 +53,11 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
             <button
               type="button"
               onClick={toggleTheme}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant dark:border-slate-700 bg-surface-container-low dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant dark:border-slate-700 bg-surface-container-low dark:bg-slate-800 text-[var(--text-secondary)] dark:text-amber-400 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 transition-colors"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4 text-slate-700" />}
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4 text-[var(--text-secondary)]" />}
             </button>
             <Link to="/" className="text-sm font-semibold text-on-surface-variant hover:text-astu-navy dark:text-slate-300 dark:hover:text-white transition-colors">
               Back to Home
@@ -118,7 +118,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
         </div>
 
         {/* Right Side - Auth Form */}
-        <div className={`flex w-full items-center justify-center bg-surface dark:bg-slate-950 p-4 ${rightWidth} sm:p-8 lg:p-12 transition-colors duration-200`}>
+        <div className={`flex w-full items-center justify-center bg-[var(--bg-page)] p-4 ${rightWidth} sm:p-8 lg:p-12 transition-colors duration-200`}>
           <div className={`w-full ${maxWidth}`}>
             {/* Logo */}
             {showLogo && (
@@ -141,7 +141,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
             </div>
 
             {/* Auth Card */}
-            <div className="rounded-2xl border border-outline-variant bg-white p-5 sm:p-8 shadow-sm dark:bg-slate-900/90 dark:border-slate-800 dark:shadow-2xl transition-colors duration-200">
+            <div className="rounded-2xl border border-outline-variant bg-[var(--bg-card)] p-5 sm:p-8 shadow-sm dark:bg-slate-900/90 dark:border-slate-800 dark:shadow-2xl transition-colors duration-200">
               {children}
             </div>
           </div>

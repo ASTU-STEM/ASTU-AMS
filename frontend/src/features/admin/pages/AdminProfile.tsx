@@ -270,21 +270,21 @@ export default function AdminProfile() {
         
         {/* Left Column: Avatar & Summary Card */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="admin-card rounded-[12px] border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)] text-center relative overflow-hidden">
+          <div className="admin-card rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)] text-center relative overflow-hidden">
             {/* Design accents */}
             <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-[#003366] via-[#E8A020] to-[#004080]" />
             
             <div className="relative mt-4 mb-4 inline-block">
-              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-[#003366] to-[#004080] flex items-center justify-center text-3xl font-bold text-white mx-auto ring-4 ring-slate-100 shadow-md">
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-[#003366] to-[#004080] flex items-center justify-center text-3xl font-bold text-white mx-auto ring-4 ring-[var(--border-color)] shadow-md">
                 {(personalForm.firstName[0] || 'U')}{(personalForm.lastName[0] || 'M')}
               </div>
               <span className="absolute bottom-0 right-1 bg-emerald-500 border-2 border-white rounded-full h-4.5 w-4.5 animate-pulse" />
             </div>
 
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] dark:text-white">
               {personalForm.firstName} {personalForm.lastName}
             </h3>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mt-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mt-1">
               {roleMeta.roleTitle}
             </p>
             
@@ -297,47 +297,47 @@ export default function AdminProfile() {
               </AdminBadge>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-slate-100 text-left text-sm space-y-3.5 text-slate-600">
+            <div className="mt-6 pt-6 border-t border-[var(--border-color)] text-left text-sm space-y-3.5 text-[var(--text-secondary)]">
               <div className="flex items-center gap-2.5">
-                <Mail className="h-4.5 w-4.5 text-slate-400 shrink-0" />
+                <Mail className="h-4.5 w-4.5 text-[var(--text-muted)] shrink-0" />
                 <span className="truncate">{personalForm.email}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Building2 className="h-4.5 w-4.5 text-slate-400 shrink-0" />
+                <Building2 className="h-4.5 w-4.5 text-[var(--text-muted)] shrink-0" />
                 <span className="truncate">{personalForm.department || roleMeta.department}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <BadgeCheck className="h-4.5 w-4.5 text-slate-400 shrink-0" />
-                <span className="font-mono text-xs font-semibold text-slate-700">{personalForm.employeeId || roleMeta.employeeId}</span>
+                <BadgeCheck className="h-4.5 w-4.5 text-[var(--text-muted)] shrink-0" />
+                <span className="font-mono text-xs font-semibold text-[var(--text-secondary)]">{personalForm.employeeId || roleMeta.employeeId}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Calendar className="h-4.5 w-4.5 text-slate-400 shrink-0" />
+                <Calendar className="h-4.5 w-4.5 text-[var(--text-muted)] shrink-0" />
                 <span>Academic Year 2025/2026</span>
               </div>
             </div>
           </div>
 
           {/* Quick Stats Widget */}
-          <div className="admin-card rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)]">
-            <h4 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 mb-4">Identity & Access Summary</h4>
+          <div className="admin-card rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)]">
+            <h4 className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)] mb-4">Identity & Access Summary</h4>
             <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                <span className="text-slate-500 font-medium">Assigned Role</span>
-                <span className="font-bold text-slate-800">{roleMeta.roleBadge}</span>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-page)]">
+                <span className="text-[var(--text-muted)] font-medium">Assigned Role</span>
+                <span className="font-bold text-[var(--text-primary)]">{roleMeta.roleBadge}</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                <span className="text-slate-500 font-medium">Verified SRS Grants</span>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-page)]">
+                <span className="text-[var(--text-muted)] font-medium">Verified SRS Grants</span>
                 <span className="font-bold text-[#003366]">{roleMeta.permissions.length} Privileges</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                <span className="text-slate-500 font-medium">2FA Protection</span>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-page)]">
+                <span className="text-[var(--text-muted)] font-medium">2FA Protection</span>
                 <span className={`font-bold ${isAdmin2FAEnabled ? 'text-emerald-600' : 'text-amber-600'}`}>
                   {isAdmin2FAEnabled ? 'Active' : 'Unconfigured'}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                <span className="text-slate-500 font-medium">Operational Scope</span>
-                <span className="font-semibold text-slate-700 truncate max-w-[130px]">{roleMeta.scope}</span>
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg-page)]">
+                <span className="text-[var(--text-muted)] font-medium">Operational Scope</span>
+                <span className="font-semibold text-[var(--text-secondary)] truncate max-w-[130px]">{roleMeta.scope}</span>
               </div>
             </div>
           </div>
@@ -345,10 +345,10 @@ export default function AdminProfile() {
 
         {/* Right Column: Tabs Panel */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="admin-card rounded-[12px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)] overflow-hidden">
+          <div className="admin-card rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:bg-[var(--bg-card)] overflow-hidden">
             
             {/* Tab selection header */}
-            <div className="flex border-b border-slate-200 bg-slate-50/50 p-2 gap-1 overflow-x-auto">
+            <div className="flex border-b border-[var(--border-color)] bg-[var(--bg-page)] p-2 gap-1 overflow-x-auto">
               {[
                 { id: 'personal', label: 'Personal Information', icon: User },
                 { id: 'security', label: 'Security & Access', icon: KeyRound },
@@ -363,8 +363,8 @@ export default function AdminProfile() {
                     onClick={() => setActiveTab(tab.id as TabType)}
                     className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
                       active 
-                        ? 'bg-white text-[#003366] shadow-sm border border-slate-200' 
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-black/5'
+                        ? 'bg-white text-[#003366] shadow-sm border border-[var(--border-color)]' 
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5'
                     }`}
                   >
                     <TabIcon className="h-4 w-4" />
@@ -382,74 +382,74 @@ export default function AdminProfile() {
                 <form onSubmit={handleSavePersonal} className="space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">First Name</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">First Name</span>
                       <input 
                         type="text" 
                         value={personalForm.firstName}
                         onChange={(e) => setPersonalForm({...personalForm, firstName: e.target.value})}
-                        className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
                       />
                     </label>
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Last Name</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Last Name</span>
                       <input 
                         type="text" 
                         value={personalForm.lastName}
                         onChange={(e) => setPersonalForm({...personalForm, lastName: e.target.value})}
-                        className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
                       />
                     </label>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Email Address</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Email Address</span>
                       <input 
                         type="email" 
                         value={personalForm.email}
                         onChange={(e) => setPersonalForm({...personalForm, email: e.target.value})}
-                        className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
                       />
                     </label>
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Phone Number</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Phone Number</span>
                       <input 
                         type="text" 
                         value={personalForm.phone}
                         onChange={(e) => setPersonalForm({...personalForm, phone: e.target.value})}
-                        className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25" 
                       />
                     </label>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Department</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Department</span>
                       <input 
                         type="text" 
                         value={personalForm.department}
                         disabled
-                        className="w-full rounded-[8px] border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm outline-none text-slate-500" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-page)] px-3.5 py-2 text-sm outline-none text-[var(--text-muted)]" 
                       />
                     </label>
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Employee ID</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Employee ID</span>
                       <input 
                         type="text" 
                         value={personalForm.employeeId}
                         disabled
-                        className="w-full rounded-[8px] border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm outline-none text-slate-500" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-page)] px-3.5 py-2 text-sm outline-none text-[var(--text-muted)]" 
                       />
                     </label>
                   </div>
 
                   <label className="space-y-2 block">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Professional Bio</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Professional Bio</span>
                     <textarea 
                       rows={4}
                       value={personalForm.bio}
                       onChange={(e) => setPersonalForm({...personalForm, bio: e.target.value})}
-                      className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25 resize-none leading-relaxed" 
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2.5 text-sm outline-none focus:border-[#003366] focus:ring-1 focus:ring-[#003366]/25 resize-none leading-relaxed" 
                     />
                   </label>
 
@@ -476,34 +476,34 @@ export default function AdminProfile() {
                   </div>
 
                   <label className="space-y-2 block">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Current Password</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Current Password</span>
                     <input 
                       type="password" 
                       value={securityForm.currentPassword}
                       onChange={(e) => setSecurityForm({...securityForm, currentPassword: e.target.value})}
-                      className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366]" 
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366]" 
                       placeholder="••••••••••••"
                     />
                   </label>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">New Password</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">New Password</span>
                       <input 
                         type="password" 
                         value={securityForm.newPassword}
                         onChange={(e) => setSecurityForm({...securityForm, newPassword: e.target.value})}
-                        className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366]" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366]" 
                         placeholder="••••••••••••"
                       />
                     </label>
                     <label className="space-y-2">
-                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Confirm Password</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Confirm Password</span>
                       <input 
                         type="password" 
                         value={securityForm.confirmPassword}
                         onChange={(e) => setSecurityForm({...securityForm, confirmPassword: e.target.value})}
-                        className="w-full rounded-[8px] border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#003366]" 
+                        className="w-full rounded-[8px] border border-[var(--border-color)] px-3.5 py-2 text-sm outline-none focus:border-[#003366]" 
                         placeholder="••••••••••••"
                       />
                     </label>
@@ -520,11 +520,11 @@ export default function AdminProfile() {
                   </div>
 
                   {/* Admin 2FA Section */}
-                  <div className="mt-8 pt-6 border-t border-slate-200 space-y-4">
+                  <div className="mt-8 pt-6 border-t border-[var(--border-color)] space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Shield className="h-5 w-5 text-emerald-600" />
-                        <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Two-Factor Authentication (2FA)</h4>
+                        <h4 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wider">Two-Factor Authentication (2FA)</h4>
                       </div>
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                         isAdmin2FAEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
@@ -533,9 +533,9 @@ export default function AdminProfile() {
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                       Enforce secondary email OTP verification codes whenever logging in as an administrator. 
-                      OTP codes are sent to your resolved email: <span className="font-mono font-bold text-slate-700">{getAdmin2FAEmail() || 'Not Configured'}</span>.
+                      OTP codes are sent to your resolved email: <span className="font-mono font-bold text-[var(--text-secondary)]">{getAdmin2FAEmail() || 'Not Configured'}</span>.
                     </p>
 
                     {!adminOtpSent ? (
@@ -550,8 +550,8 @@ export default function AdminProfile() {
                         {isSendingAdminOTP ? 'Sending Code...' : isAdmin2FAEnabled ? 'Disable Admin 2FA' : 'Send 2FA Verification Code'}
                       </button>
                     ) : (
-                      <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                        <label className="block text-xs font-bold text-slate-700">Enter 6-Digit Verification Code</label>
+                      <div className="space-y-3 p-4 bg-[var(--bg-page)] rounded-xl border border-[var(--border-color)]">
+                        <label className="block text-xs font-bold text-[var(--text-secondary)]">Enter 6-Digit Verification Code</label>
                         <input
                           type="text"
                           maxLength={6}
@@ -564,7 +564,7 @@ export default function AdminProfile() {
                           <button
                             type="button"
                             onClick={() => setAdminOtpSent(false)}
-                            className="flex-1 py-2 text-xs font-bold text-slate-600 border rounded-xl"
+                            className="flex-1 py-2 text-xs font-bold text-[var(--text-secondary)] border rounded-xl"
                           >
                             Cancel
                           </button>
@@ -588,22 +588,22 @@ export default function AdminProfile() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                    <span className="text-sm font-semibold text-slate-800">SRS RBAC Tier: {roleMeta.roleTitle}</span>
+                    <span className="text-sm font-semibold text-[var(--text-primary)]">SRS RBAC Tier: {roleMeta.roleTitle}</span>
                   </div>
                   
-                  <p className="text-sm text-slate-500 leading-relaxed">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                     Operational privileges established by the ASTU-AMS Software Requirements Specification (SRS). Below are the verified operational capabilities assigned to your account:
                   </p>
 
                   <div className="grid gap-3 sm:grid-cols-2 mt-4">
                     {roleMeta.permissions.map((perm) => (
-                      <div key={perm.name} className="flex gap-3 border border-slate-100 bg-slate-50/50 rounded-xl p-4 transition-all duration-200 hover:shadow-sm hover:border-slate-200">
+                      <div key={perm.name} className="flex gap-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl p-4 transition-all duration-200 hover:shadow-sm hover:border-[var(--border-color)]">
                         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 border border-emerald-100">
                           <BadgeCheck className="h-4.5 w-4.5" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">{perm.name}</p>
-                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">{perm.desc}</p>
+                          <p className="text-sm font-semibold text-[var(--text-primary)]">{perm.name}</p>
+                          <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{perm.desc}</p>
                         </div>
                       </div>
                     ))}

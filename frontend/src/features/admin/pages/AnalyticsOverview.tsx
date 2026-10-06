@@ -204,7 +204,7 @@ function LocationMap({
     };
   }, [locations]);
 
-  return <div ref={mapRef} className={`rounded-[10px] overflow-hidden border border-slate-200 ${className}`} />;
+  return <div ref={mapRef} className={`rounded-[10px] overflow-hidden border border-[var(--border-color)] ${className}`} />;
 }
 
 type DepartmentFilter = string;
@@ -240,10 +240,10 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <section className="admin-card rounded-[10px] border border-[var(--border-color)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+        {subtitle && <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -260,10 +260,10 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-card rounded-[10px] border border-slate-200 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className="admin-card rounded-[10px] border border-[var(--border-color)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-3">
-        <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h4>
+        {subtitle && <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -360,41 +360,41 @@ function AdvancedFiltersModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
+      <div className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border-color)] overflow-hidden my-auto">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)]">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-sm">
               <SlidersHorizontal className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-slate-900">Advanced Analytics Filter Matrix</h3>
+                <h3 className="text-base font-bold text-[var(--text-primary)]">Advanced Analytics Filter Matrix</h3>
                 {activeCount > 0 && (
                   <span className="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-800 rounded-full">
                     {activeCount} Active
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500">Refine institutional outcomes by academic, career, and verification parameters</p>
+              <p className="text-xs text-[var(--text-muted)]">Refine institutional outcomes by academic, career, and verification parameters</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-all"
+            className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-xl transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Quick Presets Toolbar */}
-        <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-slate-100/70 border-b border-slate-200 text-xs">
-          <span className="font-semibold text-slate-500 uppercase tracking-wider text-[11px] flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-[var(--bg-page)] border-b border-[var(--border-color)] text-xs">
+          <span className="font-semibold text-[var(--text-muted)] uppercase tracking-wider text-[11px] flex items-center gap-1">
             <Zap className="w-3.5 h-3.5 text-amber-500" /> Presets:
           </span>
           <button
             onClick={() => applyPreset('all')}
-            className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50 transition-all"
+            className="px-2.5 py-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)] font-medium hover:bg-[var(--bg-page)] transition-all"
           >
             All Data
           </button>
@@ -425,13 +425,13 @@ function AdvancedFiltersModal({
         </div>
 
         {/* Category Navigation Tabs */}
-        <div className="flex border-b border-slate-200 bg-white px-6">
+        <div className="flex border-b border-[var(--border-color)] bg-[var(--bg-card)] px-6">
           <button
             onClick={() => setActiveTab('academic')}
             className={`flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-xs transition-all ${
               activeTab === 'academic'
                 ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <GraduationCap className="w-4 h-4" /> Academic &amp; Graduation
@@ -441,7 +441,7 @@ function AdvancedFiltersModal({
             className={`flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-xs transition-all ${
               activeTab === 'career'
                 ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <Briefcase className="w-4 h-4" /> Career &amp; Employment
@@ -451,7 +451,7 @@ function AdvancedFiltersModal({
             className={`flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-xs transition-all ${
               activeTab === 'profile'
                 ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <ShieldCheck className="w-4 h-4" /> Verification &amp; Profile
@@ -463,13 +463,13 @@ function AdvancedFiltersModal({
           {activeTab === 'academic' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                   <CalendarRange className="w-3.5 h-3.5 text-blue-600" /> Academic Batch / Year
                 </label>
                 <select
                   value={draft.academicYear}
                   onChange={(e) => setDraft({ ...draft, academicYear: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   {academicYears.map((year) => (
                     <option key={year} value={year}>{year}</option>
@@ -478,13 +478,13 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                   <School className="w-3.5 h-3.5 text-blue-600" /> Department / Specialization
                 </label>
                 <select
                   value={draft.department}
                   onChange={(e) => setDraft({ ...draft, department: e.target.value as DepartmentFilter })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="All">All Departments</option>
                   {departments.map((dept) => (
@@ -494,7 +494,7 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Degree Level</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Degree Level</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['All', 'BSc', 'MSc', 'PhD'].map((deg) => (
                     <button
@@ -504,7 +504,7 @@ function AdvancedFiltersModal({
                       className={`p-2 text-xs font-semibold rounded-lg border transition-all text-center ${
                         draft.degreeLevel === deg
                           ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'
                       }`}
                     >
                       {deg === 'All' ? 'All Degrees' : `${deg} Degree`}
@@ -514,11 +514,11 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Graduation Distinction / CGPA Tier</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Graduation Distinction / CGPA Tier</label>
                 <select
                   value={draft.cgpaTier}
                   onChange={(e) => setDraft({ ...draft, cgpaTier: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="All">All GPA Categories</option>
                   <option value="High (>=3.5)">Distinction / High Honors (&gt;= 3.50 CGPA)</option>
@@ -532,11 +532,11 @@ function AdvancedFiltersModal({
           {activeTab === 'career' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Employment Status</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Employment Status</label>
                 <select
                   value={draft.employmentStatus}
                   onChange={(e) => setDraft({ ...draft, employmentStatus: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="All">All Employment Statuses</option>
                   <option value="Employed Full-Time">Employed Full-Time</option>
@@ -548,11 +548,11 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Industry / Economic Sector</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Industry / Economic Sector</label>
                 <select
                   value={draft.industrySector}
                   onChange={(e) => setDraft({ ...draft, industrySector: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="All">All Industry Sectors</option>
                   <option value="Software & Technology">Software &amp; Technology</option>
@@ -564,11 +564,11 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Monthly Compensation Bracket</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Monthly Compensation Bracket</label>
                 <select
                   value={draft.salaryTier}
                   onChange={(e) => setDraft({ ...draft, salaryTier: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="All">All Salary Brackets</option>
                   <option value="< 15,000 ETB">&lt; 15,000 ETB / month</option>
@@ -579,11 +579,11 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Primary Work Location</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Primary Work Location</label>
                 <select
                   value={draft.workLocation}
                   onChange={(e) => setDraft({ ...draft, workLocation: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="All">All Geographical Locations</option>
                   <option value="Addis Ababa">Addis Ababa Metropolitan</option>
@@ -598,7 +598,7 @@ function AdvancedFiltersModal({
           {activeTab === 'profile' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Alumni Verification Status</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Alumni Verification Status</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: 'All', label: 'All Alumni' },
@@ -612,7 +612,7 @@ function AdvancedFiltersModal({
                       className={`p-2 text-xs font-semibold rounded-lg border transition-all text-center ${
                         draft.verificationStatus === v.id
                           ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'
                       }`}
                     >
                       {v.label}
@@ -622,8 +622,8 @@ function AdvancedFiltersModal({
               </div>
 
               <div className="space-y-3 pt-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">Digital Profile Artifacts</label>
-                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] block">Digital Profile Artifacts</label>
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all">
                   <input
                     type="checkbox"
                     checked={draft.hasResume}
@@ -631,12 +631,12 @@ function AdvancedFiltersModal({
                     className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
                   />
                   <div>
-                    <div className="text-xs font-bold text-slate-800">Has Uploaded Resume / CV</div>
-                    <div className="text-[11px] text-slate-500">Filter profiles with active PDF resume attachments</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)]">Has Uploaded Resume / CV</div>
+                    <div className="text-[11px] text-[var(--text-muted)]">Filter profiles with active PDF resume attachments</div>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
+                <label className="flex items-center gap-3 p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all">
                   <input
                     type="checkbox"
                     checked={draft.hasLinkedIn}
@@ -644,8 +644,8 @@ function AdvancedFiltersModal({
                     className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
                   />
                   <div>
-                    <div className="text-xs font-bold text-slate-800">Has LinkedIn Profile URL</div>
-                    <div className="text-[11px] text-slate-500">Filter alumni with verified LinkedIn network links</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)]">Has LinkedIn Profile URL</div>
+                    <div className="text-[11px] text-[var(--text-muted)]">Filter alumni with verified LinkedIn network links</div>
                   </div>
                 </label>
               </div>
@@ -654,14 +654,14 @@ function AdvancedFiltersModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-color)] bg-[var(--bg-page)]">
           <button
             type="button"
             onClick={() => {
               setDraft(DEFAULT_FILTERS);
               onReset();
             }}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset All Filters
           </button>
@@ -669,7 +669,7 @@ function AdvancedFiltersModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-all"
+              className="px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-xl transition-all"
             >
               Cancel
             </button>
@@ -850,8 +850,8 @@ function ScopeSelectionGrid({
   return (
     <div className="space-y-4">
       {/* Presets Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-100/80 border border-slate-200">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)]">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
           <Zap className="w-4 h-4 text-amber-500" />
           <span>Quick Scope Presets:</span>
           <span className="ml-1 px-2 py-0.5 text-[11px] font-extrabold bg-blue-600 text-white rounded-full">
@@ -862,7 +862,7 @@ function ScopeSelectionGrid({
           <button
             type="button"
             onClick={() => applyPreset('all')}
-            className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all"
+            className="px-2.5 py-1 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:border-[var(--border-color)] font-bold transition-all"
           >
             Select All
           </button>
@@ -901,7 +901,7 @@ function ScopeSelectionGrid({
       <div className="space-y-4 max-h-[340px] overflow-y-auto pr-1">
         {SUITES_METADATA.map((group) => (
           <div key={group.group} className="space-y-2">
-            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-page)] px-2.5 py-1 rounded-md border border-[var(--border-color)]">
               {group.group}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -914,7 +914,7 @@ function ScopeSelectionGrid({
                     className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isChecked
                         ? 'border-blue-500 bg-blue-50/60 shadow-xs'
-                        : 'border-slate-200 bg-slate-50/40 hover:bg-slate-100/60 opacity-60'
+                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 opacity-60'
                     }`}
                   >
                     <input
@@ -929,8 +929,8 @@ function ScopeSelectionGrid({
                       className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500 mt-0.5"
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-slate-900 leading-snug">{item.label}</div>
-                      <div className="text-[10px] text-slate-500 font-medium">{item.count}</div>
+                      <div className="text-xs font-bold text-[var(--text-primary)] leading-snug">{item.label}</div>
+                      <div className="text-[10px] text-[var(--text-muted)] font-medium">{item.count}</div>
                     </div>
                   </label>
                 );
@@ -1049,21 +1049,21 @@ function ExportReportModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
+      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border-color)] overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)]">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-[#003580]/10 p-1.5 border border-[#003580]/20 flex items-center justify-center">
               <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-full w-full object-contain" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">ASTU Executive Report &amp; Data Export Suite</h3>
-              <p className="text-xs text-slate-500">Configure report scope, institutional branding, and download format</p>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">ASTU Executive Report &amp; Data Export Suite</h3>
+              <p className="text-xs text-[var(--text-muted)]">Configure report scope, institutional branding, and download format</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-all"
+            className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-xl transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -1072,7 +1072,7 @@ function ExportReportModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Format Selector Grid */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] block mb-3">
               1. Select Export Format
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1092,12 +1092,12 @@ function ExportReportModal({
                     className={`p-3.5 rounded-xl border text-left transition-all ${
                       isSel
                         ? `ring-2 ring-blue-600 border-blue-600 bg-blue-50/80 shadow-sm`
-                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                        : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)]'
                     }`}
                   >
                     <IconComp className={`w-6 h-6 mb-2 ${fmt.color.split(' ')[0]}`} />
-                    <div className="text-xs font-bold text-slate-900">{fmt.title}</div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">{fmt.desc}</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)]">{fmt.title}</div>
+                    <div className="text-[10px] text-[var(--text-muted)] mt-0.5">{fmt.desc}</div>
                   </button>
                 );
               })}
@@ -1106,30 +1106,30 @@ function ExportReportModal({
 
           {/* Section Checklist Grid with Presets */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] block mb-3">
               2. Granular Report Scope &amp; Suite Inclusion
             </label>
             <ScopeSelectionGrid selectedSuites={selectedSuites} setSelectedSuites={setSelectedSuites} />
           </div>
 
           {/* Custom Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[var(--border-color)]">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Custom Document Title</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Custom Document Title</label>
               <input
                 type="text"
                 value={reportTitle}
                 onChange={(e) => setReportTitle(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Document Watermark</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Document Watermark</label>
               <select
                 value={watermark}
                 onChange={(e) => setWatermark(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-blue-500"
               >
                 <option value="CONFIDENTIAL - INTERNAL USE">CONFIDENTIAL - INTERNAL USE</option>
                 <option value="OFFICIAL BOARD REPORT">OFFICIAL BOARD REPORT</option>
@@ -1141,7 +1141,7 @@ function ExportReportModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-color)] bg-[var(--bg-page)]">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -1149,13 +1149,13 @@ function ExportReportModal({
               onChange={(e) => setIncludeLetterhead(e.target.checked)}
               className="w-4 h-4 text-blue-600 rounded-sm"
             />
-            <span className="text-xs font-semibold text-slate-600">Include ASTU Official Header &amp; Stamp</span>
+            <span className="text-xs font-semibold text-[var(--text-secondary)]">Include ASTU Official Header &amp; Stamp</span>
           </label>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-all"
+              className="px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-xl transition-all"
             >
               Cancel
             </button>
@@ -1215,21 +1215,21 @@ function PrintDashboardModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
+      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border-color)] overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)]">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-[#003580]/10 p-1.5 border border-[#003580]/20 flex items-center justify-center">
               <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-full w-full object-contain" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Print ASTU Executive Dashboard Setup</h3>
-              <p className="text-xs text-slate-500">Customize print orientation, YoY comparison scope, and ASTU letterhead</p>
+              <h3 className="text-base font-bold text-[var(--text-primary)]">Print ASTU Executive Dashboard Setup</h3>
+              <p className="text-xs text-[var(--text-muted)]">Customize print orientation, YoY comparison scope, and ASTU letterhead</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-all"
+            className="p-2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-xl transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -1238,7 +1238,7 @@ function PrintDashboardModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Print Mode */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] block mb-3">
               1. Print Content Mode
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1255,11 +1255,11 @@ function PrintDashboardModal({
                   className={`p-3.5 rounded-xl border text-left transition-all ${
                     printMode === m.id
                       ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-600 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50'
+                      : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)]'
                   }`}
                 >
-                  <div className="text-xs font-bold text-slate-900">{m.title}</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">{m.desc}</div>
+                  <div className="text-xs font-bold text-[var(--text-primary)]">{m.title}</div>
+                  <div className="text-[10px] text-[var(--text-muted)] mt-0.5">{m.desc}</div>
                 </button>
               ))}
             </div>
@@ -1267,7 +1267,7 @@ function PrintDashboardModal({
 
           {/* Granular Suite Inclusion Selection */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] block mb-3">
               2. Select Analyses &amp; Suites to Print ({activeCount} of 15 Included)
             </label>
             <ScopeSelectionGrid selectedSuites={selectedSuites} setSelectedSuites={setSelectedSuites} />
@@ -1276,7 +1276,7 @@ function PrintDashboardModal({
           {/* Orientation & Theme */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Page Orientation</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Page Orientation</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -1284,7 +1284,7 @@ function PrintDashboardModal({
                   className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
                     orientation === 'landscape'
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)]'
                   }`}
                 >
                   ↔️ Landscape (Recommended)
@@ -1295,7 +1295,7 @@ function PrintDashboardModal({
                   className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
                     orientation === 'portrait'
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)]'
                   }`}
                 >
                   ↕️ Portrait
@@ -1304,7 +1304,7 @@ function PrintDashboardModal({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Color Palette Theme</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Color Palette Theme</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -1312,7 +1312,7 @@ function PrintDashboardModal({
                   className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
                     colorTheme === 'eco'
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)]'
                   }`}
                 >
                   ⚪ High-Contrast Eco (Save Ink)
@@ -1323,7 +1323,7 @@ function PrintDashboardModal({
                   className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
                     colorTheme === 'color'
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)]'
                   }`}
                 >
                   🔵 Full Color Presentation
@@ -1333,21 +1333,21 @@ function PrintDashboardModal({
           </div>
 
           {/* Live Thumbnail Box */}
-          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-            <div className="text-xs font-bold text-slate-700 flex items-center justify-between">
+          <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] space-y-2">
+            <div className="text-xs font-bold text-[var(--text-secondary)] flex items-center justify-between">
               <span>Print Layout Live Preview</span>
-              <span className="text-[10px] text-slate-500 uppercase">{orientation} • {colorTheme} theme</span>
+              <span className="text-[10px] text-[var(--text-muted)] uppercase">{orientation} • {colorTheme} theme</span>
             </div>
-            <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs space-y-2 text-[10px] text-slate-600 font-mono">
-              <div className="border-b pb-1 font-bold text-slate-900 flex justify-between">
+            <div className="bg-[var(--bg-card)] p-3 rounded-lg border border-[var(--border-color)] shadow-2xs space-y-2 text-[10px] text-[var(--text-secondary)] font-mono">
+              <div className="border-b pb-1 font-bold text-[var(--text-primary)] flex justify-between">
                 <span>ADAMA SCIENCE AND TECHNOLOGY UNIVERSITY</span>
                 <span>ADMIN REPORT</span>
               </div>
-              <div className="text-slate-500">Filter: {academicYear} | Department: {department}</div>
+              <div className="text-[var(--text-muted)]">Filter: {academicYear} | Department: {department}</div>
               <div className="grid grid-cols-3 gap-1 py-1">
-                <div className="bg-slate-100 p-1 rounded text-center">KPI Metric 1</div>
-                <div className="bg-slate-100 p-1 rounded text-center">KPI Metric 2</div>
-                <div className="bg-slate-100 p-1 rounded text-center">KPI Metric 3</div>
+                <div className="bg-[var(--bg-page)] p-1 rounded text-center">KPI Metric 1</div>
+                <div className="bg-[var(--bg-page)] p-1 rounded text-center">KPI Metric 2</div>
+                <div className="bg-[var(--bg-page)] p-1 rounded text-center">KPI Metric 3</div>
               </div>
               <div className="bg-blue-50 p-2 rounded text-center text-blue-800 font-bold">
                 [ {activeCount} of 15 ANALYTICS MODULES INCLUDED FOR PRINT ]
@@ -1357,7 +1357,7 @@ function PrintDashboardModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--border-color)] bg-[var(--bg-page)]">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -1365,13 +1365,13 @@ function PrintDashboardModal({
               onChange={(e) => setIncludeLetterhead(e.target.checked)}
               className="w-4 h-4 text-blue-600 rounded-sm"
             />
-            <span className="text-xs font-semibold text-slate-600">Include Official ASTU Header &amp; Stamp</span>
+            <span className="text-xs font-semibold text-[var(--text-secondary)]">Include Official ASTU Header &amp; Stamp</span>
           </label>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-all"
+              className="px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] rounded-xl transition-all"
             >
               Cancel
             </button>
@@ -1967,14 +1967,14 @@ export default function AnalyticsOverview() {
           <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-16 w-16 object-contain" />
           <div>
             <h1 className="text-xl font-extrabold text-[#003580] uppercase tracking-wider">Adama Science &amp; Technology University</h1>
-            <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Office of Institutional Research &amp; Alumni Affairs</h2>
-            <p className="text-[11px] text-slate-500 font-medium">Graduate Employment Outcomes, YoY Rate Comparison &amp; AI Predictive Analytics Report</p>
+            <h2 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide">Office of Institutional Research &amp; Alumni Affairs</h2>
+            <p className="text-[11px] text-[var(--text-muted)] font-medium">Graduate Employment Outcomes, YoY Rate Comparison &amp; AI Predictive Analytics Report</p>
           </div>
         </div>
-        <div className="text-right text-xs text-slate-700 font-medium space-y-0.5">
-          <div><span className="font-bold text-slate-900">Period:</span> {academicYear}</div>
-          <div><span className="font-bold text-slate-900">Scope:</span> {department}</div>
-          <div><span className="font-bold text-slate-900">Generated:</span> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+        <div className="text-right text-xs text-[var(--text-secondary)] font-medium space-y-0.5">
+          <div><span className="font-bold text-[var(--text-primary)]">Period:</span> {academicYear}</div>
+          <div><span className="font-bold text-[var(--text-primary)]">Scope:</span> {department}</div>
+          <div><span className="font-bold text-[var(--text-primary)]">Generated:</span> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
         </div>
       </div>
 
@@ -1987,19 +1987,19 @@ export default function AnalyticsOverview() {
 
       {/* Main Filter Header Bar */}
       <div className="space-y-3 no-print">
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
             {/* Filter Pills Group */}
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Academic Year Pill */}
-              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3.5 py-2 hover:bg-black/5 dark:hover:bg-white/5 hover:border-[var(--border-color)] transition-all">
                 <CalendarRange className="h-4 w-4 text-blue-600 shrink-0" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Year:</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Year:</span>
                 <select
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer pr-1"
+                  className="bg-transparent text-xs font-bold text-[var(--text-primary)] outline-none cursor-pointer pr-1"
                 >
                   {academicYears.map((year) => (
                     <option key={year} value={year}>{year}</option>
@@ -2008,13 +2008,13 @@ export default function AnalyticsOverview() {
               </div>
 
               {/* Department Pill */}
-              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3.5 py-2 hover:bg-black/5 dark:hover:bg-white/5 hover:border-[var(--border-color)] transition-all">
                 <School className="h-4 w-4 text-blue-600 shrink-0" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Dept:</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Dept:</span>
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value as DepartmentFilter)}
-                  className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer pr-1 max-w-[180px] sm:max-w-none truncate"
+                  className="bg-transparent text-xs font-bold text-[var(--text-primary)] outline-none cursor-pointer pr-1 max-w-[180px] sm:max-w-none truncate"
                 >
                   <option value="All">All Departments</option>
                   {dbDepartments.map((item) => (
@@ -2048,13 +2048,13 @@ export default function AnalyticsOverview() {
 
               {/* Indicator Search Bar with Autocomplete Suggestions Dropdown & Searching Animation */}
               <div className="relative">
-                <div className={`inline-flex items-center gap-2 rounded-xl border bg-white px-3.5 py-2 transition-all min-w-[260px] sm:min-w-[320px] shadow-xs ${
-                  searchQuery ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200/90 hover:border-slate-300'
+                <div className={`inline-flex items-center gap-2 rounded-xl border bg-[var(--bg-card)] px-3.5 py-2 transition-all min-w-[260px] sm:min-w-[320px] shadow-xs ${
+                  searchQuery ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                 }`}>
                   {isSearching ? (
                     <RefreshCw className="h-4 w-4 text-blue-600 animate-spin shrink-0" />
                   ) : (
-                    <Search className="h-4 w-4 text-slate-400 shrink-0" />
+                    <Search className="h-4 w-4 text-[var(--text-muted)] shrink-0" />
                   )}
                   <input
                     type="text"
@@ -2068,7 +2068,7 @@ export default function AnalyticsOverview() {
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') setShowSuggestions(false);
                     }}
-                    className="bg-transparent text-xs font-semibold text-slate-800 outline-none w-full placeholder:text-slate-400"
+                    className="bg-transparent text-xs font-semibold text-[var(--text-primary)] outline-none w-full placeholder:text-slate-400"
                   />
                   {searchQuery && (
                     <button
@@ -2077,7 +2077,7 @@ export default function AnalyticsOverview() {
                         setSearchQuery('');
                         setShowSuggestions(false);
                       }}
-                      className="text-slate-400 hover:text-slate-600 rounded-full p-0.5"
+                      className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] rounded-full p-0.5"
                       title="Clear search"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -2087,8 +2087,8 @@ export default function AnalyticsOverview() {
 
                 {/* Suggestions Dropdown */}
                 {showSuggestions && searchQuery.trim().length > 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-2 z-[99999] rounded-2xl border border-slate-200 bg-white shadow-2xl p-2 text-xs space-y-1 animate-in fade-in zoom-in-95 duration-150 max-h-[380px] overflow-y-auto">
-                    <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 mb-1">
+                  <div className="absolute left-0 right-0 top-full mt-2 z-[99999] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl p-2 text-xs space-y-1 animate-in fade-in zoom-in-95 duration-150 max-h-[380px] overflow-y-auto">
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center justify-between border-b border-[var(--border-color)] mb-1">
                       <span>Suggested Analytics Indicators</span>
                       <span className="text-blue-600 font-extrabold">{searchSuggestions.length} matches</span>
                     </div>
@@ -2113,14 +2113,14 @@ export default function AnalyticsOverview() {
                         >
                           <div className="min-w-0 pr-2">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 group-hover:bg-blue-100 text-slate-600 group-hover:text-blue-800 rounded">
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[var(--bg-page)] group-hover:bg-blue-100 text-[var(--text-secondary)] group-hover:text-blue-800 rounded">
                                 {item.id}
                               </span>
-                              <span className="font-bold text-slate-900 group-hover:text-blue-900 truncate">
+                              <span className="font-bold text-[var(--text-primary)] group-hover:text-blue-900 truncate">
                                 {item.name}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 group-hover:text-blue-700 truncate mt-0.5">
+                            <p className="text-[11px] text-[var(--text-muted)] group-hover:text-blue-700 truncate mt-0.5">
                               {item.category} • {item.subtext}
                             </p>
                           </div>
@@ -2133,8 +2133,8 @@ export default function AnalyticsOverview() {
                       ))
                     ) : (
                       <div className="p-4 text-center space-y-2">
-                        <div className="text-slate-600 font-medium">No indicators match "<strong className="text-slate-900">{searchQuery}</strong>"</div>
-                        <div className="text-[11px] text-slate-400">Try these popular search topics:</div>
+                        <div className="text-[var(--text-secondary)] font-medium">No indicators match "<strong className="text-[var(--text-primary)]">{searchQuery}</strong>"</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">Try these popular search topics:</div>
                         <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
                           {['MoU', 'STEM', 'Salary', 'Mentorship', 'IND-01', 'Patent'].map((preset) => (
                             <button
@@ -2144,7 +2144,7 @@ export default function AnalyticsOverview() {
                                 setSearchQuery(preset);
                                 setShowSuggestions(true);
                               }}
-                              className="px-2.5 py-1 text-[11px] font-bold bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-800 rounded-lg transition-all"
+                              className="px-2.5 py-1 text-[11px] font-bold bg-[var(--bg-page)] hover:bg-blue-100 text-[var(--text-secondary)] hover:text-blue-800 rounded-lg transition-all"
                             >
                               {preset}
                             </button>
@@ -2169,7 +2169,7 @@ export default function AnalyticsOverview() {
               <button
                 type="button"
                 onClick={() => setExportModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:border-blue-300 hover:text-blue-800 hover:bg-blue-50/50 shadow-xs transition-all active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-blue-300 hover:text-blue-800 hover:bg-blue-50/50 shadow-xs transition-all active:scale-[0.98]"
               >
                 <Download className="h-4 w-4 text-blue-600" />
                 <span>Export Report</span>
@@ -2195,56 +2195,56 @@ export default function AnalyticsOverview() {
             </span>
 
             {filters.academicYear !== 'All Time' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Year: {filters.academicYear}
                 <button onClick={() => setAcademicYear('All Time')} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.department !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Dept: {filters.department}
                 <button onClick={() => setDepartment('All')} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.degreeLevel !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Degree: {filters.degreeLevel}
                 <button onClick={() => setFilters(f => ({ ...f, degreeLevel: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.employmentStatus !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Status: {filters.employmentStatus}
                 <button onClick={() => setFilters(f => ({ ...f, employmentStatus: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.industrySector !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Industry: {filters.industrySector}
                 <button onClick={() => setFilters(f => ({ ...f, industrySector: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.salaryTier !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Salary: {filters.salaryTier}
                 <button onClick={() => setFilters(f => ({ ...f, salaryTier: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.verificationStatus !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Verification: {filters.verificationStatus}
                 <button onClick={() => setFilters(f => ({ ...f, verificationStatus: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.hasResume && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Resume Attached
                 <button onClick={() => setFilters(f => ({ ...f, hasResume: false }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
@@ -2295,9 +2295,9 @@ export default function AnalyticsOverview() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left 2 Cols: Interactive YoY & Forecast Chart */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-color)] pb-3">
               <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 font-bold text-slate-700">
+                <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)]">
                   <span className="h-3 w-3 rounded-full bg-[#003580] inline-block"></span> Verified Historical Rate
                 </span>
                 <span className="flex items-center gap-1.5 font-bold text-purple-700">
@@ -2305,7 +2305,7 @@ export default function AnalyticsOverview() {
                   2027 AI Forecasted Rate
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+              <div className="text-xs font-bold text-[var(--text-muted)] bg-[var(--bg-page)] px-2.5 py-1 rounded-md">
                 Historical Growth: +{yoyComparison.avgDelta}% / year avg
               </div>
             </div>
@@ -2313,9 +2313,9 @@ export default function AnalyticsOverview() {
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={yoyComparison.fullChartData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" vertical={false} />
-                  <XAxis dataKey="year" tick={{ fill: '#334155', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} unit="%" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+                  <XAxis dataKey="year" tick={{ fill: 'var(--chart-axis)', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} unit="%" />
                   <Tooltip
                     formatter={(val: any, name: any, item: any) => [
                       `${val}% ${item.payload.isForecast ? '(2027 AI Forecasted Rate)' : '(Verified Rate)'}`,
@@ -2331,16 +2331,16 @@ export default function AnalyticsOverview() {
                         strokeDasharray={entry.isForecast ? '4 4' : undefined}
                       />
                     ))}
-                    <LabelList dataKey="rate" position="top" formatter={(v: any) => `${v}%`} fill="#1E293B" fontSize={12} fontWeight={700} />
+                    <LabelList dataKey="rate" position="top" formatter={(v: any) => `${v}%`} fill="var(--chart-label)" fontSize={12} fontWeight={700} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Historical Breakdown Table */}
-            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-2xs">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <thead className="bg-[var(--bg-page)] text-[var(--text-secondary)] font-bold border-b border-[var(--border-color)]">
                   <tr>
                     <th className="px-3.5 py-2.5">Graduation Batch</th>
                     <th className="px-3.5 py-2.5 text-right">Graduates</th>
@@ -2349,10 +2349,10 @@ export default function AnalyticsOverview() {
                     <th className="px-3.5 py-2.5 text-center">YoY Growth Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[var(--border-color)]">
                   {yoyComparison.fullChartData.map((row: any) => (
-                    <tr key={row.year} className={`hover:bg-slate-50 transition-colors ${row.isForecast ? 'bg-purple-50/40 font-bold' : ''}`}>
-                      <td className="px-3.5 py-2.5 font-bold text-slate-900 flex items-center gap-1.5">
+                    <tr key={row.year} className={`hover:bg-[var(--bg-page)] transition-colors ${row.isForecast ? 'bg-purple-50/40 font-bold' : ''}`}>
+                      <td className="px-3.5 py-2.5 font-bold text-[var(--text-primary)] flex items-center gap-1.5">
                         {row.isForecast ? (
                           <span className="flex items-center gap-1 text-purple-700">
                             Class of {row.year} (AI Model)
@@ -2361,8 +2361,8 @@ export default function AnalyticsOverview() {
                           `Class of ${row.year}`
                         )}
                       </td>
-                      <td className="px-3.5 py-2.5 text-right text-slate-700">{row.count} grads</td>
-                      <td className="px-3.5 py-2.5 text-right font-semibold text-slate-800">{row.employed}</td>
+                      <td className="px-3.5 py-2.5 text-right text-[var(--text-secondary)]">{row.count} grads</td>
+                      <td className="px-3.5 py-2.5 text-right font-semibold text-[var(--text-primary)]">{row.employed}</td>
                       <td className="px-3.5 py-2.5 text-right font-extrabold text-[#003580]">{row.rate}%</td>
                       <td className="px-3.5 py-2.5 text-center">
                         {row.isForecast ? (
@@ -2410,19 +2410,19 @@ export default function AnalyticsOverview() {
 
               <div className="mt-4 space-y-2 text-xs text-slate-300">
                 <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <span className="text-slate-400">Model Confidence:</span>
+                  <span className="text-[var(--text-muted)]">Model Confidence:</span>
                   <span className="font-bold text-emerald-400">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '94.5% High Accuracy' : 'Calculating...'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <span className="text-slate-400">Primary Industry Driver:</span>
+                  <span className="text-[var(--text-muted)]">Primary Industry Driver:</span>
                   <span className="font-bold text-blue-300">
                     {activeIndustryBreakdown[0]?.industry || 'Software & Telecom'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Active Job Pipeline:</span>
+                  <span className="text-[var(--text-muted)]">Active Job Pipeline:</span>
                   <span className="font-bold text-purple-300">
                     {reportData?.employers?.mostActiveEmployers?.length || activeTopHiringCompanies.length || 0} Partner Employers
                   </span>
@@ -2430,7 +2430,7 @@ export default function AnalyticsOverview() {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-white/10 text-[11px] text-slate-400 flex items-center gap-2">
+            <div className="mt-6 pt-4 border-t border-white/10 text-[11px] text-[var(--text-muted)] flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               Verified against ASTU Registrar &amp; Employer Survey Datasets
             </div>
@@ -2443,7 +2443,7 @@ export default function AnalyticsOverview() {
       <SectionCard title="Top Hiring Companies" subtitle="Organizations with the highest graduate hiring volume.">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">Graduates hired per organization</span>
+            <span className="text-xs text-[var(--text-muted)]">Graduates hired per organization</span>
             <button
               type="button"
               onClick={() => setTopCompaniesModalOpen(true)}
@@ -2460,24 +2460,24 @@ export default function AnalyticsOverview() {
                   data={activeTopHiringCompanies}
                   margin={{ top: 10, right: 30, left: 120, bottom: 10 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E8EDF5" />
-                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--chart-grid)" />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} />
                   <YAxis
                     type="category"
                     dataKey="companyName"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#334155', fontSize: 13, fontWeight: 500 }}
+                    tick={{ fill: 'var(--chart-axis)', fontSize: 13, fontWeight: 500 }}
                     width={110}
                   />
                   <Tooltip formatter={(value: any) => [`${value} hires`, 'Graduate Hires']} />
                   <Bar dataKey="hires" fill="#003580" radius={[0, 6, 6, 0]} barSize={26}>
-                    <LabelList dataKey="hires" position="right" fill="#334155" fontSize={12} fontWeight={600} />
+                    <LabelList dataKey="hires" position="right" fill="var(--chart-label)" fontSize={12} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No company hiring records recorded in database yet.
               </div>
             )}
@@ -2491,12 +2491,12 @@ export default function AnalyticsOverview() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={activeIndustryBreakdown} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="industry" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="industry" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip formatter={(val: any) => [`${val} alumni`, 'Employed Count']} />
                 <Bar dataKey="count" fill="#003580" radius={[6, 6, 0, 0]}>
-                  <LabelList dataKey="count" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                  <LabelList dataKey="count" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -2507,9 +2507,9 @@ export default function AnalyticsOverview() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={activeGenderParity} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="category" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="category" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="Female" fill="#E8A020" radius={[6, 6, 0, 0]} />
@@ -2526,12 +2526,12 @@ export default function AnalyticsOverview() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={activeSalaryTiers} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="tier" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="tier" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip formatter={(val: any) => [`${val} alumni`, 'Employed Count']} />
                 <Bar dataKey="count" fill="#1D9E75" radius={[6, 6, 0, 0]}>
-                  <LabelList dataKey="count" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                  <LabelList dataKey="count" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -2541,13 +2541,13 @@ export default function AnalyticsOverview() {
         <SectionCard title="Placement & Application Hiring Funnel" subtitle="Conversion rates from job application to final offer acceptance.">
           <div className="space-y-3 pt-2">
             {activeHiringFunnel.map((stage: any) => (
-              <div key={stage.stage} className="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
+              <div key={stage.stage} className="p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: stage.fill }} />
-                  <span className="text-sm font-semibold text-slate-800">{stage.stage}</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">{stage.stage}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-slate-900">{stage.count} candidate{stage.count !== 1 ? 's' : ''}</span>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">{stage.count} candidate{stage.count !== 1 ? 's' : ''}</span>
                 </div>
               </div>
             ))}
@@ -2560,10 +2560,10 @@ export default function AnalyticsOverview() {
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={activeCgpaAnalytics} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-              <XAxis dataKey="cgpaBand" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="left" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} unit=" ETB" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+              <XAxis dataKey="cgpaBand" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="left" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} unit=" ETB" />
               <Tooltip />
               <Legend />
               <Bar yAxisId="left" dataKey="employmentRate" name="Employment Rate (%)" fill="#003580" radius={[6, 6, 0, 0]} />
@@ -2578,9 +2578,9 @@ export default function AnalyticsOverview() {
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={activeEmploymentByDepartmentYear} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="department" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                 <Tooltip
                   contentStyle={{
                     borderRadius: 10,
@@ -2599,13 +2599,13 @@ export default function AnalyticsOverview() {
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-5 overflow-hidden rounded-[10px] border border-slate-200">
+          <div className="mt-5 overflow-hidden rounded-[10px] border border-[var(--border-color)]">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
-                <thead className="bg-slate-50">
+                <thead className="bg-[var(--bg-page)]">
                   <tr>
                     {['Department', 'Grads', 'Employed', 'Self-Employed', 'Unemployed', 'Employment Rate', 'Employability Score'].map((head) => (
-                      <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                         {head}
                       </th>
                     ))}
@@ -2613,13 +2613,13 @@ export default function AnalyticsOverview() {
                 </thead>
                 <tbody>
                   {filteredDepartments.map((row) => (
-                    <tr key={row.department} className="border-t border-slate-100">
-                      <td className="px-4 py-3 font-medium text-slate-700">{row.department}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.grads}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.employed}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.selfEmployed}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.unemployed}</td>
-                      <td className="px-4 py-3 text-slate-600">{typeof row.rate === 'number' ? row.rate.toFixed(1) : row.rate}%</td>
+                    <tr key={row.department} className="border-t border-[var(--border-color)]">
+                      <td className="px-4 py-3 font-medium text-[var(--text-secondary)]">{row.department}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.grads}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.employed}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.selfEmployed}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.unemployed}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{typeof row.rate === 'number' ? row.rate.toFixed(1) : row.rate}%</td>
                       <td className="px-4 py-3">
                         <AdminBadge variant="success">Score: {row.employabilityScore}</AdminBadge>
                       </td>
@@ -2637,26 +2637,26 @@ export default function AnalyticsOverview() {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={activeSkillGaps} layout="vertical" margin={{ top: 8, right: 30, left: 8, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" horizontal={false} />
-                    <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} domain={[0, 'auto']} />
-                    <YAxis type="category" dataKey="skill" width={120} tick={{ fill: '#334155', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" horizontal={false} />
+                    <XAxis type="number" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} domain={[0, 'auto']} />
+                    <YAxis type="category" dataKey="skill" width={120} tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                     <Tooltip formatter={(val: any) => [`${val} demand count`, 'Missing Skill Demand']} />
                     <Bar dataKey="value" fill="#E24B4A" radius={[0, 8, 8, 0]}>
-                      <LabelList dataKey="value" position="right" fill="#334155" fontSize={11} />
+                      <LabelList dataKey="value" position="right" fill="var(--chart-label)" fontSize={11} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </ChartCard>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-[var(--bg-page)]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Department</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Department</th>
                       {['Cloud', 'DevOps', 'AI', 'Data', 'Cyber', 'Comms'].map((header) => (
-                        <th key={header} className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={header} className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                           {header}
                         </th>
                       ))}
@@ -2664,8 +2664,8 @@ export default function AnalyticsOverview() {
                   </thead>
                   <tbody>
                     {activeHeatMapRows.map((row) => (
-                      <tr key={row.department} className="border-t border-slate-100">
-                        <td className="px-4 py-3 font-medium text-slate-700">{row.department}</td>
+                      <tr key={row.department} className="border-t border-[var(--border-color)]">
+                        <td className="px-4 py-3 font-medium text-[var(--text-secondary)]">{row.department}</td>
                         {['Cloud', 'DevOps', 'AI', 'Data', 'Cyber', 'Comms'].map((skill) => {
                           const value = row[skill as keyof typeof row] as number;
                           return (
@@ -2694,8 +2694,8 @@ export default function AnalyticsOverview() {
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={activeCompetencyData}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#334155', fontSize: 12 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 10]} tick={{ fill: '#64748B', fontSize: 10 }} />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 10]} tick={{ fill: 'var(--chart-axis)', fontSize: 10 }} />
                     <Tooltip />
                     <Radar name="Average Score" dataKey="score" stroke="#003580" fill="#003580" fillOpacity={0.18} />
                   </RadarChart>
@@ -2703,38 +2703,38 @@ export default function AnalyticsOverview() {
               </div>
             </ChartCard>
 
-            <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col gap-4">
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col gap-4">
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900">Latest Employer Feedback</h4>
-                    <p className="mt-0.5 text-xs text-slate-500">Most recent submitted review entries.</p>
+                    <h4 className="text-sm font-semibold text-[var(--text-primary)]">Latest Employer Feedback</h4>
+                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">Most recent submitted review entries.</p>
                   </div>
                   {activeEmployerFeedback.length > 0 && (
-                    <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)] bg-[var(--bg-page)] px-2 py-0.5 rounded-full">
                       {activeEmployerFeedback.length} entries
                     </span>
                   )}
                 </div>
                 <div className="mt-3 space-y-2.5 max-h-[190px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                   {activeEmployerFeedback.length > 0 ? activeEmployerFeedback.map((entry: any) => (
-                    <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
+                    <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-slate-900">{entry.company}</div>
-                          <div className="text-xs text-slate-500">{entry.department}</div>
+                          <div className="text-sm font-semibold text-[var(--text-primary)]">{entry.company}</div>
+                          <div className="text-xs text-[var(--text-muted)]">{entry.department}</div>
                         </div>
                         <AdminBadge variant="success">{entry.score}</AdminBadge>
                       </div>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{entry.note}</p>
+                      <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">{entry.note}</p>
                     </div>
                   )) : (
-                    <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No employer reviews submitted yet in database.</div>
+                    <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No employer reviews submitted yet in database.</div>
                   )}
                 </div>
               </div>
               
-              <div className="border-t border-slate-200 pt-4">
+              <div className="border-t border-[var(--border-color)] pt-4">
                 <div className="flex items-center justify-between gap-2">
                   <h4 className="text-sm font-semibold text-[#003580] flex items-center gap-2">
                     <Building2 className="h-4 w-4" /> Top Companies Hiring ASTU Graduates
@@ -2748,11 +2748,11 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 space-y-2 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                   {activeTopEmployers.length > 0 ? activeTopEmployers.map((emp: any) => (
                     <div key={emp.companyName} className="flex items-center justify-between p-2.5 rounded-md bg-[#003580]/5 border border-[#003580]/10 hover:bg-[#003580]/10 transition-colors">
-                      <span className="text-sm font-medium text-slate-700">{emp.companyName}</span>
+                      <span className="text-sm font-medium text-[var(--text-secondary)]">{emp.companyName}</span>
                       <span className="text-xs font-bold px-2 py-1 bg-white rounded shadow-sm text-[#003580]">{emp.count} hires</span>
                     </div>
                   )) : (
-                    <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No company hiring records found in database.</div>
+                    <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No company hiring records found in database.</div>
                   )}
                 </div>
               </div>
@@ -2762,11 +2762,11 @@ export default function AnalyticsOverview() {
 
         <SectionCard title="Geographic Distribution" subtitle="Where alumni are currently working.">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-            <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
               <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-900">Map / Location Distribution</h4>
-                  <p className="mt-1 text-xs text-slate-500">Geographic distribution of employed alumni by location.</p>
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">Map / Location Distribution</h4>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">Geographic distribution of employed alumni by location.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -2780,27 +2780,27 @@ export default function AnalyticsOverview() {
                   <AdminBadge variant="success">Location Insights</AdminBadge>
                 </div>
               </div>
-              <div className="h-[310px] w-full overflow-hidden rounded-[10px] bg-white p-1">
+              <div className="h-[310px] w-full overflow-hidden rounded-[10px] bg-[var(--bg-card)] p-1">
                 <LocationMap locations={activeGeographicData} />
               </div>
             </div>
 
-            <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <h4 className="text-sm font-semibold text-slate-900">Top Locations</h4>
-              <p className="mt-1 text-xs text-slate-500">Top 5 cities / countries where alumni work.</p>
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <h4 className="text-sm font-semibold text-[var(--text-primary)]">Top Locations</h4>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">Top 5 cities / countries where alumni work.</p>
               <div className="mt-3 space-y-2.5 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                 {activeGeographicData.length > 0 ? activeGeographicData.map((item: any) => (
-                  <div key={item.name} className="rounded-[10px] border border-slate-200 p-3">
+                  <div key={item.name} className="rounded-[10px] border border-[var(--border-color)] p-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.fill }} />
-                        <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                        <span className="text-sm font-medium text-[var(--text-secondary)]">{item.name}</span>
                       </div>
-                      <span className="text-sm font-semibold text-slate-900">{item.value}%</span>
+                      <span className="text-sm font-semibold text-[var(--text-primary)]">{item.value}%</span>
                     </div>
                   </div>
                 )) : (
-                  <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No geographic location records found in database.</div>
+                  <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No geographic location records found in database.</div>
                 )}
               </div>
             </div>
@@ -2813,9 +2813,9 @@ export default function AnalyticsOverview() {
           {activeTimeToHire.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={activeTimeToHire}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                <XAxis dataKey="batch" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} unit=" mo" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                <XAxis dataKey="batch" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} unit=" mo" />
                 <Tooltip formatter={(val: any) => [`${val} months`, 'Avg Time to Hire']} />
                 <Line
                   type="monotone"
@@ -2828,7 +2828,7 @@ export default function AnalyticsOverview() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+            <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
               No alumni work experience start dates recorded in database for this selection.
             </div>
           )}
@@ -2846,17 +2846,17 @@ export default function AnalyticsOverview() {
             {activeAppStatusDist.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeAppStatusDist} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="status" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="status" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`${val} applications`, 'Application Count']} />
                   <Bar dataKey="count" fill="#003580" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="count" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                    <LabelList dataKey="count" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No job applications recorded in database yet.
               </div>
             )}
@@ -2868,17 +2868,17 @@ export default function AnalyticsOverview() {
             {activeTopInDemandSkills.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart layout="vertical" data={activeTopInDemandSkills} margin={{ top: 10, right: 30, left: 100, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E8EDF5" />
-                  <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="skill" width={90} tick={{ fill: '#334155', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--chart-grid)" />
+                  <XAxis type="number" tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="skill" width={90} tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`Required in ${val} job postings`, 'Demand Count']} />
                   <Bar dataKey="count" fill="#1D9E75" radius={[0, 6, 6, 0]}>
-                    <LabelList dataKey="count" position="right" fill="#334155" fontSize={11} fontWeight={600} />
+                    <LabelList dataKey="count" position="right" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No required skills extracted from active job postings in database.
               </div>
             )}
@@ -2893,17 +2893,17 @@ export default function AnalyticsOverview() {
             {activeEmployerRatingByIndustry.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeEmployerRatingByIndustry} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="industry" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[0, 10]} tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="industry" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 10]} tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`${val}/10 rating`, 'Average Employer Rating']} />
                   <Bar dataKey="averageRating" fill="#E8A020" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="averageRating" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                    <LabelList dataKey="averageRating" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No employer feedback ratings recorded in database yet.
               </div>
             )}
@@ -2934,40 +2934,40 @@ export default function AnalyticsOverview() {
       <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Alumni Profile Completeness Index" subtitle="Distribution of alumni profile detail completeness.">
           <div className="grid grid-cols-3 gap-4 pt-4">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-              <span className="text-xs font-semibold text-slate-500 uppercase">Fully Complete</span>
+            <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">Fully Complete</span>
               <div className="mt-2 text-3xl font-bold text-[#003580]">{activeProfileCompleteness.complete}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">Skills, Work & Resume</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Skills, Work & Resume</span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-              <span className="text-xs font-semibold text-slate-500 uppercase">Partially Complete</span>
+            <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">Partially Complete</span>
               <div className="mt-2 text-3xl font-bold text-[#E8A020]">{activeProfileCompleteness.partial}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">1-2 Sections Added</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">1-2 Sections Added</span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-              <span className="text-xs font-semibold text-slate-500 uppercase">Basic Profile</span>
-              <div className="mt-2 text-3xl font-bold text-slate-700">{activeProfileCompleteness.basic}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">Account Only</span>
+            <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">Basic Profile</span>
+              <div className="mt-2 text-3xl font-bold text-[var(--text-secondary)]">{activeProfileCompleteness.basic}</div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Account Only</span>
             </div>
           </div>
         </SectionCard>
 
         <SectionCard title="Mentorship Program Pipeline Velocity" subtitle="Breakdown of mentorship requests across pipeline stages.">
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Pending Requests</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Pending Requests</span>
               <span className="text-sm font-bold text-amber-700">{activeMentorshipPipeline.pending}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Approved Matches</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Approved Matches</span>
               <span className="text-sm font-bold text-blue-700">{activeMentorshipPipeline.approved}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Scheduled Sessions</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Scheduled Sessions</span>
               <span className="text-sm font-bold text-[#003580]">{activeMentorshipPipeline.scheduled}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Completed Guidance</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Completed Guidance</span>
               <span className="text-sm font-bold text-emerald-700">{activeMentorshipPipeline.completed}</span>
             </div>
           </div>
@@ -2978,20 +2978,20 @@ export default function AnalyticsOverview() {
       <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Document & Transcript Request Pipeline" subtitle="Official academic transcript and degree verification processing metrics.">
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Pending Requests</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Pending Requests</span>
               <span className="text-sm font-bold text-amber-600">{activeDocumentRequestPipeline.pending}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">In Processing</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">In Processing</span>
               <span className="text-sm font-bold text-blue-600">{activeDocumentRequestPipeline.inProgress}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Issued / Approved</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Issued / Approved</span>
               <span className="text-sm font-bold text-emerald-600">{activeDocumentRequestPipeline.approved}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Rejected / Incomplete</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Rejected / Incomplete</span>
               <span className="text-sm font-bold text-rose-600">{activeDocumentRequestPipeline.rejected}</span>
             </div>
           </div>
@@ -3006,8 +3006,8 @@ export default function AnalyticsOverview() {
               </div>
               <AdminBadge variant="neutral">{activeEventRSVPConversion.confirmedRsvps} Confirmed RSVPs</AdminBadge>
             </div>
-            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">RSVP Attendance Rate</span>
+            <div className="p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] flex items-center justify-between">
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">RSVP Attendance Rate</span>
               <span className="text-sm font-bold text-[#003580]">{activeEventRSVPConversion.conversionRate}%</span>
             </div>
           </div>
@@ -3025,9 +3025,9 @@ export default function AnalyticsOverview() {
               </div>
               <AdminBadge variant="success">{activeCareerMobility.promotionRate}% Promotion Rate</AdminBadge>
             </div>
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Single Experience Record</span>
-              <span className="text-sm font-bold text-slate-800">{activeCareerMobility.singleJobCount} alumni</span>
+            <div className="p-3.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Single Experience Record</span>
+              <span className="text-sm font-bold text-[var(--text-primary)]">{activeCareerMobility.singleJobCount} alumni</span>
             </div>
           </div>
         </SectionCard>
@@ -3037,17 +3037,17 @@ export default function AnalyticsOverview() {
             {activeLanguageProficiency.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeLanguageProficiency} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="language" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="language" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`${val} alumni`, 'Language Speakers']} />
                   <Bar dataKey="count" fill="#8B5CF6" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="count" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                    <LabelList dataKey="count" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No language skills populated in database alumni profiles yet.
               </div>
             )}
@@ -3062,17 +3062,17 @@ export default function AnalyticsOverview() {
             {activeCompanySizeDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeCompanySizeDistribution} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="size" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="size" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`${val} employers`, 'Company Count']} />
                   <Bar dataKey="count" fill="#3B82F6" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="count" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                    <LabelList dataKey="count" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No company size data recorded in database employer profiles yet.
               </div>
             )}
@@ -3081,20 +3081,20 @@ export default function AnalyticsOverview() {
 
         <SectionCard title="Professional Network & Resume Link Ratios" subtitle="Alumni with verified LinkedIn, GitHub, Portfolio, and Resumes in database.">
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">LinkedIn Profiles</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">LinkedIn Profiles</span>
               <span className="text-sm font-bold text-blue-700">{activeProfessionalLinksRatio.linkedin}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">GitHub Profiles</span>
-              <span className="text-sm font-bold text-slate-800">{activeProfessionalLinksRatio.github}</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">GitHub Profiles</span>
+              <span className="text-sm font-bold text-[var(--text-primary)]">{activeProfessionalLinksRatio.github}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Portfolio Websites</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Portfolio Websites</span>
               <span className="text-sm font-bold text-purple-700">{activeProfessionalLinksRatio.portfolio}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Uploaded Resumes</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Uploaded Resumes</span>
               <span className="text-sm font-bold text-emerald-700">{activeProfessionalLinksRatio.resume}</span>
             </div>
           </div>
@@ -3105,25 +3105,25 @@ export default function AnalyticsOverview() {
       <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Support Desk Resolution & SLA Metrics" subtitle="Real-time ticket counts by status from Support Desk.">
           <div className="grid grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Open Tickets</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Open Tickets</span>
               <div className="mt-1 text-xl font-bold text-rose-600">{activeSupportTicketSLA.open}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">In Progress</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">In Progress</span>
               <div className="mt-1 text-xl font-bold text-blue-600">{activeSupportTicketSLA.inProgress}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Pending ICT</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Pending ICT</span>
               <div className="mt-1 text-xl font-bold text-amber-600">{activeSupportTicketSLA.pendingAdmin}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center col-span-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Resolved</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center col-span-1.5">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Resolved</span>
               <div className="mt-1 text-xl font-bold text-emerald-600">{activeSupportTicketSLA.resolved}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center col-span-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Closed</span>
-              <div className="mt-1 text-xl font-bold text-slate-700">{activeSupportTicketSLA.closed}</div>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center col-span-1.5">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Closed</span>
+              <div className="mt-1 text-xl font-bold text-[var(--text-secondary)]">{activeSupportTicketSLA.closed}</div>
             </div>
           </div>
         </SectionCard>
@@ -3133,17 +3133,17 @@ export default function AnalyticsOverview() {
             {activeJobPostingsByType.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeJobPostingsByType} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="jobType" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                  <XAxis dataKey="jobType" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`${val} job postings`, 'Active Jobs']} />
                   <Bar dataKey="count" fill="#10B981" radius={[6, 6, 0, 0]}>
-                    <LabelList dataKey="count" position="top" fill="#334155" fontSize={11} fontWeight={600} />
+                    <LabelList dataKey="count" position="top" fill="var(--chart-label)" fontSize={11} fontWeight={600} />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No active job postings found in database yet.
               </div>
             )}
@@ -3160,7 +3160,7 @@ export default function AnalyticsOverview() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="admin-card rounded-[10px] border border-slate-200 border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="admin-card rounded-[10px] border border-[var(--border-color)] border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#003580]/10 text-[#003580]">
                 <FileCheck className="h-5 w-5" />
@@ -3173,7 +3173,7 @@ export default function AnalyticsOverview() {
             </button>
           </div>
 
-          <div className="admin-card rounded-[10px] border border-slate-200 border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="admin-card rounded-[10px] border border-[var(--border-color)] border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#1D9E75]/10 text-[#1D9E75]">
                 <BarChart3 className="h-5 w-5" />
@@ -3186,7 +3186,7 @@ export default function AnalyticsOverview() {
             </button>
           </div>
 
-          <div className="admin-card rounded-[10px] border border-slate-200 border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="admin-card rounded-[10px] border border-[var(--border-color)] border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E8A020]/10 text-[#B87900]">
                 <Globe2 className="h-5 w-5" />
@@ -3205,26 +3205,26 @@ export default function AnalyticsOverview() {
       <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Mentorship & Career Engagement" subtitle="Active mentors, mentees, and completed career guidance sessions.">
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <UserCheck className="h-4 w-4 text-[#003580]" /> Verified Mentors
               </div>
               <div className="mt-3 text-3xl font-bold text-[#003580]">{activeMentorshipMetrics.totalMentors || 0}</div>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <Users className="h-4 w-4 text-[#1D9E75]" /> Active Mentees
               </div>
               <div className="mt-3 text-3xl font-bold text-[#1D9E75]">{activeMentorshipMetrics.totalMentees || 0}</div>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <TimerReset className="h-4 w-4 text-[#E8A020]" /> Scheduled Sessions
               </div>
               <div className="mt-3 text-3xl font-bold text-[#B87900]">{activeMentorshipMetrics.activeSessions || 0}</div>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <Award className="h-4 w-4 text-[#8B5CF6]" /> Completed Sessions
               </div>
               <div className="mt-3 text-3xl font-bold text-[#8B5CF6]">{activeMentorshipMetrics.completedSessions || 0}</div>
@@ -3236,19 +3236,19 @@ export default function AnalyticsOverview() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-xl bg-[#003580]/5 border border-[#003580]/15">
               <div>
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donated Support</span>
+                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Donated Support</span>
                 <div className="text-2xl font-bold text-[#003580]">ETB {Number(activeCommunityGiving.totalDonated || 0).toLocaleString()}</div>
               </div>
               <AdminBadge variant="success">{activeCommunityGiving.totalDonors || 0} Donors</AdminBadge>
             </div>
             <div className="space-y-2 max-h-[160px] overflow-y-auto">
               {activeCommunityGiving.categories?.length > 0 ? activeCommunityGiving.categories.map((cat: any) => (
-                <div key={cat.category} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-white">
-                  <span className="text-xs font-semibold text-slate-700">{cat.category}</span>
+                <div key={cat.category} className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)]">
+                  <span className="text-xs font-semibold text-[var(--text-secondary)]">{cat.category}</span>
                   <span className="text-xs font-bold text-[#003580]">ETB {Number(cat.amount).toLocaleString()}</span>
                 </div>
               )) : (
-                <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No donation campaign contributions recorded yet.</div>
+                <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No donation campaign contributions recorded yet.</div>
               )}
             </div>
           </div>
@@ -3256,7 +3256,7 @@ export default function AnalyticsOverview() {
       </section>
 
       {/* Out-of-the-Box Executive Intelligence & System Telemetry Suite */}
-      <section className="space-y-6 pt-6 border-t border-slate-200">
+      <section className="space-y-6 pt-6 border-t border-[var(--border-color)]">
         {/* SUITE 1: University-Industry Relationship & Corporate MoU Analysis */}
         <div className={!selectedSuites.suite1 ? 'print:hidden' : ''}>
           <SectionCard
@@ -3264,36 +3264,36 @@ export default function AnalyticsOverview() {
             subtitle="Corporate partnership agreements, industrial research drives, internship placements, and employer evaluation scores."
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Verified Corporate MoUs</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Verified Corporate MoUs</span>
                 <div className="mt-2 text-2xl font-bold text-[#003580]">
                   {activeUniversityIndustryMoU.verifiedMoUPartnerships} Partnerships
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Verified industry agreement agreements</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Verified industry agreement agreements</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Corporate Placement Drives</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Corporate Placement Drives</span>
                 <div className="mt-2 text-2xl font-bold text-[#1D9E75]">
                   {activeUniversityIndustryMoU.corporatePlacementDrives} Drives
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">On-campus hiring &amp; active job recruitment</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">On-campus hiring &amp; active job recruitment</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">MoU Active Renewal Rate</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">MoU Active Renewal Rate</span>
                 <div className="mt-2 text-2xl font-bold text-purple-700">
                   {activeUniversityIndustryMoU.mouRenewalRate}%
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Continuous engagement &amp; hiring renewal</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Continuous engagement &amp; hiring renewal</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Industry Research Internships</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Industry Research Internships</span>
                 <div className="mt-2 text-2xl font-bold text-[#B87900]">
                   {activeUniversityIndustryMoU.industryResearchInternships} Interns
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Student internships &amp; research placements</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Student internships &amp; research placements</span>
               </div>
             </div>
 
@@ -3301,9 +3301,9 @@ export default function AnalyticsOverview() {
               {activeUniversityIndustryMoU.industryMoUBreakdown?.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={activeUniversityIndustryMoU.industryMoUBreakdown} margin={{ top: 15, right: 20, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                    <XAxis dataKey="industry" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                    <XAxis dataKey="industry" tick={{ fill: 'var(--chart-axis)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: 'var(--chart-axis)', fontSize: 12 }} axisLine={false} tickLine={false} />
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="mouCount" name="Verified MoUs" fill="#003580" radius={[6, 6, 0, 0]} />
@@ -3311,7 +3311,7 @@ export default function AnalyticsOverview() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No corporate MoU breakdown recorded in database yet.
                 </div>
               )}
@@ -3326,31 +3326,31 @@ export default function AnalyticsOverview() {
             subtitle="Annual employment velocity, average starting salaries, and official document request volumes per academic department."
           >
             {/* Toolbar Filters & Per Page Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-3 text-xs">
               <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-xs flex-1 max-w-xs focus-within:border-[#003580]">
-                  <Search className="h-3.5 w-3.5 text-slate-400" />
+                <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 shadow-xs flex-1 max-w-xs focus-within:border-[#003580]">
+                  <Search className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                   <input
                     type="text"
                     value={matrixSearch}
                     onChange={(e) => setMatrixSearch(e.target.value)}
                     placeholder="Search department, year, rate..."
-                    className="w-full bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
+                    className="w-full bg-transparent outline-none text-[var(--text-primary)] placeholder:text-slate-400"
                   />
                   {matrixSearch && (
-                    <button type="button" onClick={() => setMatrixSearch('')} className="text-slate-400 hover:text-slate-600">
+                    <button type="button" onClick={() => setMatrixSearch('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                       <X className="h-3 w-3" />
                     </button>
                   )}
                 </label>
 
                 {matrixDepartments.length > 2 && (
-                  <label className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-xs">
+                  <label className="flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-xs">
                     <Filter className="h-3.5 w-3.5 text-[#003580]" />
                     <select
                       value={matrixDeptFilter}
                       onChange={(e) => setMatrixDeptFilter(e.target.value)}
-                      className="bg-transparent font-medium text-slate-700 outline-none"
+                      className="bg-transparent font-medium text-[var(--text-secondary)] outline-none"
                     >
                       {matrixDepartments.map((d) => (
                         <option key={d} value={d}>
@@ -3362,12 +3362,12 @@ export default function AnalyticsOverview() {
                 )}
 
                 {matrixYears.length > 2 && (
-                  <label className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-xs">
-                    <CalendarRange className="h-3.5 w-3.5 text-slate-500" />
+                  <label className="flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-xs">
+                    <CalendarRange className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                     <select
                       value={matrixYearFilter}
                       onChange={(e) => setMatrixYearFilter(e.target.value)}
-                      className="bg-transparent font-medium text-slate-700 outline-none"
+                      className="bg-transparent font-medium text-[var(--text-secondary)] outline-none"
                     >
                       {matrixYears.map((y) => (
                         <option key={y} value={y}>
@@ -3394,14 +3394,14 @@ export default function AnalyticsOverview() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <span className="text-[var(--text-muted)] font-semibold">Per Page:</span>
                 <select
                   value={matrixLimit}
                   onChange={(e) => {
                     setMatrixLimit(e.target.value as any);
                     setMatrixPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-bold text-[#003580] outline-none shadow-xs"
+                  className="rounded-md border border-[var(--border-color)] bg-white px-2.5 py-1 font-bold text-[#003580] outline-none shadow-xs"
                 >
                   <option value="10">10 per page</option>
                   <option value="25">25 per page</option>
@@ -3412,10 +3412,10 @@ export default function AnalyticsOverview() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+            <div className="rounded-xl border border-[var(--border-color)] overflow-hidden shadow-2xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                  <thead className="bg-[var(--bg-page)] text-[var(--text-secondary)] font-bold border-b border-[var(--border-color)]">
                     <tr>
                       <th className="px-4 py-3">Department / Program</th>
                       <th className="px-4 py-3 text-center">Batch Year</th>
@@ -3425,21 +3425,21 @@ export default function AnalyticsOverview() {
                       <th className="px-4 py-3 text-right">Doc Requests</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {paginatedMatrixRecords.length > 0 ? (
                       paginatedMatrixRecords.map((row: any, idx: number) => (
-                        <tr key={`${row.department}-${row.year}-${idx}`} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-bold text-slate-900">{row.department}</td>
-                          <td className="px-4 py-3 text-center font-medium text-slate-600">Class of {row.year}</td>
-                          <td className="px-4 py-3 text-right text-slate-700">{row.totalGraduates} grads</td>
+                        <tr key={`${row.department}-${row.year}-${idx}`} className="hover:bg-[var(--bg-page)] transition-colors">
+                          <td className="px-4 py-3 font-bold text-[var(--text-primary)]">{row.department}</td>
+                          <td className="px-4 py-3 text-center font-medium text-[var(--text-secondary)]">Class of {row.year}</td>
+                          <td className="px-4 py-3 text-right text-[var(--text-secondary)]">{row.totalGraduates} grads</td>
                           <td className="px-4 py-3 text-right font-extrabold text-[#003580]">{row.employmentRate}%</td>
                           <td className="px-4 py-3 text-right font-bold text-emerald-700">ETB {Number(row.avgSalary).toLocaleString()}</td>
-                          <td className="px-4 py-3 text-right text-slate-600">{row.docRequestsCount}</td>
+                          <td className="px-4 py-3 text-right text-[var(--text-secondary)]">{row.docRequestsCount}</td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">
+                        <td colSpan={6} className="px-4 py-8 text-center text-[var(--text-muted)] italic">
                           No multi-year department performance records found matching active filter parameters.
                         </td>
                       </tr>
@@ -3449,11 +3449,11 @@ export default function AnalyticsOverview() {
               </div>
 
               {/* Matrix Table Pagination Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--bg-page)] border-t border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)]">
                 <div>
-                  Showing <span className="font-bold text-slate-900">{filteredMatrixRecords.length > 0 ? (matrixLimit === 'all' ? 1 : (matrixPage - 1) * parseInt(matrixLimit) + 1) : 0}</span> to{' '}
-                  <span className="font-bold text-slate-900">{matrixLimit === 'all' ? filteredMatrixRecords.length : Math.min(matrixPage * parseInt(matrixLimit), filteredMatrixRecords.length)}</span> of{' '}
-                  <span className="font-bold text-slate-900">{filteredMatrixRecords.length}</span> department year records
+                  Showing <span className="font-bold text-[var(--text-primary)]">{filteredMatrixRecords.length > 0 ? (matrixLimit === 'all' ? 1 : (matrixPage - 1) * parseInt(matrixLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{matrixLimit === 'all' ? filteredMatrixRecords.length : Math.min(matrixPage * parseInt(matrixLimit), filteredMatrixRecords.length)}</span> of{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{filteredMatrixRecords.length}</span> department year records
                 </div>
                 {matrixLimit !== 'all' && totalMatrixPages > 1 && (
                   <div className="flex items-center gap-1.5">
@@ -3461,18 +3461,18 @@ export default function AnalyticsOverview() {
                       type="button"
                       disabled={matrixPage === 1}
                       onClick={() => setMatrixPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Previous
                     </button>
-                    <span className="px-2 font-bold text-slate-800">
+                    <span className="px-2 font-bold text-[var(--text-primary)]">
                       Page {matrixPage} of {totalMatrixPages}
                     </span>
                     <button
                       type="button"
                       disabled={matrixPage >= totalMatrixPages}
                       onClick={() => setMatrixPage((p) => Math.min(totalMatrixPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Next
                     </button>
@@ -3491,20 +3491,20 @@ export default function AnalyticsOverview() {
               subtitle="Student record ingestion health, verification ratios, failed record validations, and profile field completeness."
             >
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Total Imported Records</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total Imported Records</span>
                   <div className="mt-1 text-xl font-bold text-[#003580]">{activeRegistrarImportTelemetry.totalImportedRecords}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Verified Records</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Verified Records</span>
                   <div className="mt-1 text-xl font-bold text-emerald-700">{activeRegistrarImportTelemetry.verifiedImportedRecords}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Failed Validation</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Failed Validation</span>
                   <div className="mt-1 text-xl font-bold text-rose-600">{activeRegistrarImportTelemetry.failedValidationRecords}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Completeness Score</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Completeness Score</span>
                   <div className="mt-1 text-xl font-bold text-purple-700">{activeRegistrarImportTelemetry.dataCompletenessScore}%</div>
                 </div>
               </div>
@@ -3513,7 +3513,7 @@ export default function AnalyticsOverview() {
                 {activeRegistrarImportTelemetry.importBatchLogs?.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={activeRegistrarImportTelemetry.importBatchLogs}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="batchYear" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(val: any, name: string) => [val, name === 'recordsProcessed' ? 'Records Ingested' : 'Success Rate %']} />
@@ -3521,7 +3521,7 @@ export default function AnalyticsOverview() {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                     No registrar batch import logs available.
                   </div>
                 )}
@@ -3536,22 +3536,22 @@ export default function AnalyticsOverview() {
               subtitle="Official transcript, degree certificate, and medium of instruction request turnaround SLA."
             >
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Total Requests</span>
-                  <div className="mt-1 text-xl font-bold text-slate-900">{activeDocumentRequestSLA.totalRequests}</div>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total Requests</span>
+                  <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{activeDocumentRequestSLA.totalRequests}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Approved &amp; Delivered</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Approved &amp; Delivered</span>
                   <div className="mt-1 text-xl font-bold text-emerald-700">{activeDocumentRequestSLA.approvedRequests}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">In Progress / Pending</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">In Progress / Pending</span>
                   <div className="mt-1 text-xl font-bold text-amber-600">
                     {activeDocumentRequestSLA.inProgressRequests + activeDocumentRequestSLA.pendingRequests}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Avg SLA Turnaround</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Avg SLA Turnaround</span>
                   <div className="mt-1 text-xl font-bold text-blue-700">{activeDocumentRequestSLA.avgFulfillmentTimeHours} hrs</div>
                 </div>
               </div>
@@ -3560,7 +3560,7 @@ export default function AnalyticsOverview() {
                 {activeDocumentRequestSLA.documentTypeDistribution?.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={activeDocumentRequestSLA.documentTypeDistribution}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="documentType" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(val: any) => [`${val} requests`, 'Volume']} />
@@ -3568,7 +3568,7 @@ export default function AnalyticsOverview() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                     No document request distribution recorded yet.
                   </div>
                 )}
@@ -3584,20 +3584,20 @@ export default function AnalyticsOverview() {
             subtitle="Daily active logins, monthly active users, total account distribution, and verification status."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Total User Accounts</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total User Accounts</span>
                 <div className="mt-1 text-xl font-bold text-[#003580]">{activePlatformUserEngagement.totalPlatformAccounts}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Daily Active Logins</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Daily Active Logins</span>
                 <div className="mt-1 text-xl font-bold text-emerald-700">{activePlatformUserEngagement.dailyActiveLogins} logins</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Monthly Active Users</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Monthly Active Users</span>
                 <div className="mt-1 text-xl font-bold text-purple-700">{activePlatformUserEngagement.monthlyActiveUsers} MAU</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Active Accounts</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Active Accounts</span>
                 <div className="mt-1 text-xl font-bold text-blue-700">{activePlatformUserEngagement.activeAccounts} Active</div>
               </div>
             </div>
@@ -3626,7 +3626,7 @@ export default function AnalyticsOverview() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No account status records available.
                 </div>
               )}
@@ -3639,22 +3639,22 @@ export default function AnalyticsOverview() {
             subtitle="System operational readiness score, support ticket resolution velocity, and AI recommendation accuracy."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Operational Health</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Operational Health</span>
                 <div className="mt-1 text-xl font-bold text-emerald-600">{activeSystemHealthAndAI.systemOperationalHealthScore}% SLA</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Support Tickets Resolved</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Support Tickets Resolved</span>
                 <div className="mt-1 text-xl font-bold text-[#003580]">
                   {activeSystemHealthAndAI.resolvedSupportTickets} / {activeSystemHealthAndAI.totalSupportTickets}
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Ticket SLA Resolution</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Ticket SLA Resolution</span>
                 <div className="mt-1 text-xl font-bold text-blue-700">{activeSystemHealthAndAI.ticketResolutionSLAHours} hrs</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">AI Copilot Accuracy</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">AI Copilot Accuracy</span>
                 <div className="mt-1 text-xl font-bold text-purple-700">{activeSystemHealthAndAI.aiCopilotAccuracyRating}%</div>
               </div>
             </div>
@@ -3678,28 +3678,28 @@ export default function AnalyticsOverview() {
           subtitle="Ethiopian education policy alignment, HERQA/ETA quality accreditation score, international diaspora footprint, and regional economic contribution."
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">MoE Policy Alignment Index</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">MoE Policy Alignment Index</span>
               <div className="mt-2 text-2xl font-bold text-[#003580]">{activeMoeAndInternationalImpact.moePolicyAlignmentIndex}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">National STEM education policy parity</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">National STEM education policy parity</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">HERQA / ETA Audit Score</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">HERQA / ETA Audit Score</span>
               <div className="mt-2 text-2xl font-bold text-[#1D9E75]">{activeMoeAndInternationalImpact.herqaEtaAccreditationScore}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">Quality assurance standard readiness</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Quality assurance standard readiness</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">International Diaspora Footprint</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">International Diaspora Footprint</span>
               <div className="mt-2 text-2xl font-bold text-purple-700">{activeMoeAndInternationalImpact.internationalAlumniFootprintRate}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">Alumni pursuing overseas careers &amp; studies</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni pursuing overseas careers &amp; studies</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Regional Socioeconomic Impact</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Regional Socioeconomic Impact</span>
               <div className="mt-2 text-2xl font-bold text-[#B87900]">{activeMoeAndInternationalImpact.regionalSocioeconomicImpactScore}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">Regional technology &amp; industrial growth contribution</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Regional technology &amp; industrial growth contribution</span>
             </div>
           </div>
 
@@ -3707,15 +3707,15 @@ export default function AnalyticsOverview() {
             {activeMoeAndInternationalImpact.impactBreakdown?.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={activeMoeAndInternationalImpact.impactBreakdown}>
-                  <PolarGrid stroke="#e2e8f0" />
-                  <PolarAngleAxis dataKey="category" tick={{ fontSize: 10, fill: '#475569' }} />
+                  <PolarGrid stroke="var(--chart-grid)" />
+                  <PolarAngleAxis dataKey="category" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} />
                   <Radar name="Impact Score" dataKey="score" stroke="#003580" fill="#003580" fillOpacity={0.4} />
                   <Tooltip formatter={(val: any) => [`${val}%`, 'Policy / Accreditation Score']} />
                 </RadarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No MoE or international accreditation breakdown recorded yet.
               </div>
             )}
@@ -3732,8 +3732,8 @@ export default function AnalyticsOverview() {
               {activeCurriculumTechnologyRadar.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={activeCurriculumTechnologyRadar}>
-                    <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis dataKey="skill" tick={{ fontSize: 10, fill: '#475569' }} />
+                    <PolarGrid stroke="var(--chart-grid)" />
+                    <PolarAngleAxis dataKey="skill" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} />
                     <Radar name="Curriculum Coverage %" dataKey="curriculumCoverage" stroke="#003580" fill="#003580" fillOpacity={0.4} />
                     <Radar name="Market Demand" dataKey="marketDemand" stroke="#E8A020" fill="#E8A020" fillOpacity={0.3} />
@@ -3742,7 +3742,7 @@ export default function AnalyticsOverview() {
                   </RadarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No curriculum tech radar data recorded yet.
                 </div>
               )}
@@ -3755,20 +3755,20 @@ export default function AnalyticsOverview() {
             subtitle="Alumni digital portfolio readiness: LinkedIn, GitHub, portfolio websites, and resume attachments."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Readiness Index</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Readiness Index</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeDigitalFootprintIndex.readinessScore}%</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">LinkedIn Networks</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">LinkedIn Networks</span>
                 <div className="mt-1 text-2xl font-bold text-blue-700">{activeDigitalFootprintIndex.linkedinCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">GitHub Code Repos</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">GitHub Code Repos</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeDigitalFootprintIndex.githubCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Resumes Uploaded</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Resumes Uploaded</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeDigitalFootprintIndex.resumeCount}</div>
               </div>
             </div>
@@ -3782,16 +3782,16 @@ export default function AnalyticsOverview() {
             subtitle="Repeat corporate recruitment over consecutive academic batches and employer Net Promoter Score."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Repeat Hiring Rate</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Repeat Hiring Rate</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeEmployerLoyaltyNPS.repeatHiringRate}%</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Corporate NPS</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Corporate NPS</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">+{activeEmployerLoyaltyNPS.corporateNPS}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Repeat Partners</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Repeat Partners</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeEmployerLoyaltyNPS.repeatEmployersCount}</div>
               </div>
             </div>
@@ -3806,7 +3806,7 @@ export default function AnalyticsOverview() {
               {activeIndustrialClusterImpact.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart layout="vertical" data={activeIndustrialClusterImpact}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--chart-grid)" />
                     <XAxis type="number" tick={{ fontSize: 9 }} unit="%" />
                     <YAxis dataKey="clusterName" type="category" tick={{ fontSize: 9 }} width={130} />
                     <Tooltip formatter={(val: any) => [`${val}%`, 'Alumni Share']} />
@@ -3814,7 +3814,7 @@ export default function AnalyticsOverview() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No industrial cluster impact data recorded yet.
                 </div>
               )}
@@ -3829,16 +3829,16 @@ export default function AnalyticsOverview() {
             subtitle="Graduate early position switch velocity and sector career stability index."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Early Switch Rate</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Early Switch Rate</span>
                 <div className="mt-1 text-2xl font-bold text-amber-600">{activeTalentFlightRisk.earlySwitchRate}%</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Avg Tenure</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Avg Tenure</span>
                 <div className="mt-1 text-2xl font-bold text-blue-700">{activeTalentFlightRisk.avgTenureMonths} Mos</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Stability Score</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Stability Score</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeTalentFlightRisk.stabilityScore}%</div>
               </div>
             </div>
@@ -3850,12 +3850,12 @@ export default function AnalyticsOverview() {
             subtitle="Senior alumni mentorship sessions completed and primary guidance topics."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Completed Sessions</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Completed Sessions</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeMentorshipVelocity.totalSessionsCompleted} Sessions</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Mentorship Rating</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Mentorship Rating</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeMentorshipVelocity.avgRating} / 5.0</div>
               </div>
             </div>
@@ -3869,16 +3869,16 @@ export default function AnalyticsOverview() {
             subtitle="Community discussion velocity, peer comments, and post sentiment ratings."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Community Posts</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Community Posts</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeForumCommunitySentiment.totalPosts}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Peer Comments</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Peer Comments</span>
                 <div className="mt-1 text-2xl font-bold text-blue-700">{activeForumCommunitySentiment.totalComments}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Positive Sentiment</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Positive Sentiment</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeForumCommunitySentiment.positiveSentimentRate}%</div>
               </div>
             </div>
@@ -3890,16 +3890,16 @@ export default function AnalyticsOverview() {
             subtitle="Alumni pursuing MSc/PhD studies, research publications, and international academic awards."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">MSc / PhD Degrees</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">MSc / PhD Degrees</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeGlobalResearchFootprint.higherDegreesCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Research Papers</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Research Papers</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeGlobalResearchFootprint.researchPublicationsCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Scholarship Awards</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Scholarship Awards</span>
                 <div className="mt-1 text-2xl font-bold text-amber-600">{activeGlobalResearchFootprint.internationalScholarshipsCount}</div>
               </div>
             </div>
@@ -3913,16 +3913,16 @@ export default function AnalyticsOverview() {
             subtitle="Financial donations raised versus student scholarships funded and career outcomes."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Total Donated ETB</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total Donated ETB</span>
                 <div className="mt-1 text-lg font-bold text-[#003580]">ETB {Number(activeGivingROIMultiplier.totalDonatedETB).toLocaleString()}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Scholarships Funded</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Scholarships Funded</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeGivingROIMultiplier.scholarshipsFunded}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Students Impacted</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Students Impacted</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeGivingROIMultiplier.studentImpactCount}</div>
               </div>
             </div>
@@ -3936,7 +3936,7 @@ export default function AnalyticsOverview() {
               {activeDocumentTurnaroundPeakSLA.monthlyDistribution?.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={activeDocumentTurnaroundPeakSLA.monthlyDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                     <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip formatter={(val: any) => [`${val} requests`, 'Request Volume']} />
@@ -3944,7 +3944,7 @@ export default function AnalyticsOverview() {
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No monthly document request turnaround data recorded yet.
                 </div>
               )}
@@ -3956,7 +3956,7 @@ export default function AnalyticsOverview() {
 
 
       {/* Comprehensive 70+ Executive Institutional Analytics Suite */}
-      <section className="space-y-6 pt-6 border-t border-slate-200">
+      <section className="space-y-6 pt-6 border-t border-[var(--border-color)]">
         {/* 70+ Analytics Matrix Grouped into 8 Executive Domain Cards */}
         <div className="grid gap-6">
 
@@ -3966,75 +3966,75 @@ export default function AnalyticsOverview() {
             subtitle="ETA, ABET, HERQA compliance benchmarks, department employability scores, and curriculum audit indexes."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">ABET Skill Alignment Radar</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">ABET Skill Alignment Radar</div>
                 <div className="h-48 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={activeCompetencyData}>
-                      <PolarGrid stroke="#e2e8f0" />
-                      <PolarAngleAxis dataKey="competency" tick={{ fontSize: 10, fill: '#475569' }} />
+                      <PolarGrid stroke="var(--chart-grid)" />
+                      <PolarAngleAxis dataKey="competency" tick={{ fontSize: 10, fill: 'var(--chart-axis)' }} />
                       <PolarRadiusAxis angle={30} domain={[0, 10]} tick={{ fontSize: 9 }} />
                       <Radar name="Score" dataKey="score" stroke="#003580" fill="#003580" fillOpacity={0.4} />
                       <Tooltip formatter={(val: any) => [`${val} / 10`, 'Competency Score']} />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
-                <span className="text-[11px] text-slate-500 text-center">Engineering accreditation skill outcome score</span>
+                <span className="text-[11px] text-[var(--text-muted)] text-center">Engineering accreditation skill outcome score</span>
               </div>
 
               <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#1 ETA Tracer Compliance</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#1 ETA Tracer Compliance</span>
                     <AdminBadge variant="success">Wave Audited</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#003580]">{Number(reportData?.tracer?.surveyCompletionRate || 0).toFixed(1)}%</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Tracer survey wave completion index</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Tracer survey wave completion index</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#2 ABET Skill Score</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#2 ABET Skill Score</span>
                     <AdminBadge variant="neutral">Out of 10</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{Number(activeCompetencyData[0]?.score || 0).toFixed(1)}/10</div>
-                  <span className="text-[11px] text-slate-500 mt-1">ABETA technical outcome benchmark</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">ABETA technical outcome benchmark</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#3 HERQA Audit Health</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#3 HERQA Audit Health</span>
                     <AdminBadge variant="success">Passed</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-purple-700">{activeVerificationRatio.verificationRate}% Verified</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Identity verification compliance ratio</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Identity verification compliance ratio</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#4 Employability Score</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#4 Employability Score</span>
                     <AdminBadge variant="neutral">Out of 100</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#B87900]">
                     {activeEmploymentTable[0]?.employabilityScore || '0.0'}
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1">Top department employability score</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Top department employability score</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#5 Dept Salary Rank</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#5 Dept Salary Rank</span>
                     <AdminBadge variant="neutral">Top Sector</AdminBadge>
                   </div>
-                  <div className="mt-3 text-base font-bold text-slate-800 truncate">
+                  <div className="mt-3 text-base font-bold text-[var(--text-primary)] truncate">
                     {reportData?.departmentAnalytics?.departmentMetrics[0]?.departmentName || 'N/A'}
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1">ETB {Number(reportData?.departmentAnalytics?.departmentMetrics[0]?.averageSalary || 0).toLocaleString()}/mo avg</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">ETB {Number(reportData?.departmentAnalytics?.departmentMetrics[0]?.averageSalary || 0).toLocaleString()}/mo avg</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#6 CGPA vs Placement</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#6 CGPA vs Placement</span>
                     <AdminBadge variant="success">
                       {(reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 0 ? 'Strong' : 'Pending Data'}
                     </AdminBadge>
@@ -4042,54 +4042,54 @@ export default function AnalyticsOverview() {
                   <div className="mt-3 text-2xl font-bold text-emerald-700">
                     {(reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 0 ? '0.84 r-value' : '0.00 r-value'}
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1">High CGPA to placement correlation</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">High CGPA to placement correlation</span>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#7 Curriculum Relevancy</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#7 Curriculum Relevancy</span>
                   <AdminBadge variant="neutral">
                     {activeCurriculumRelevanceRating.length > 0
                       ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
                       : '0.0 / 5.0'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeCurriculumRelevanceRating.length > 0
                     ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
                     : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Survey curriculum rating index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Survey curriculum rating index</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#8 CQI Audit Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#8 CQI Audit Index</span>
                   <AdminBadge variant="success">Optimal</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-900">{activeVerificationRatio.verificationRate}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Continuous Quality Improvement index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Continuous Quality Improvement index</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#9 Program Audit Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#9 Program Audit Rate</span>
                   <AdminBadge variant="success">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Complete' : '0% Complete'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100%' : '0%'}</div>
-                <span className="text-[11px] text-slate-500 mt-1">Academic program audit compliance</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Academic program audit compliance</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#10 Audit Health Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#10 Audit Health Index</span>
                   <AdminBadge variant="success">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Grade A' : 'Pending'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Grade A' : 'Pending Audit'}</div>
-                <span className="text-[11px] text-slate-500 mt-1">Overall quality audit status</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Overall quality audit status</span>
               </div>
             </div>
           </SectionCard>
@@ -4100,8 +4100,8 @@ export default function AnalyticsOverview() {
             subtitle="Salary growth, placement speed, promotion rates, workplace setup distribution, and contract stability."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Workplace Format Ratio</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Workplace Format Ratio</div>
                 <div className="h-44 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -4130,12 +4130,12 @@ export default function AnalyticsOverview() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Department Salary Spread (ETB)</div>
+              <div className="lg:col-span-2 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Department Salary Spread (ETB)</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={activeEmploymentTable.slice(0, 5)}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="department" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(val: any) => [`ETB ${val}`, 'Average Salary']} />
@@ -4147,9 +4147,9 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#11 Salary Growth</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#11 Salary Growth</span>
                   <AdminBadge variant="success">
                     {reportData?.overallEmployment?.salaryGrowth !== undefined
                       ? (reportData.overallEmployment.salaryGrowth >= 0 ? `+${reportData.overallEmployment.salaryGrowth}% YoY` : `${reportData.overallEmployment.salaryGrowth}% YoY`)
@@ -4161,80 +4161,80 @@ export default function AnalyticsOverview() {
                     ? (reportData.overallEmployment.salaryGrowth >= 0 ? `+${reportData.overallEmployment.salaryGrowth}%` : `${reportData.overallEmployment.salaryGrowth}%`)
                     : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Annual post-grad salary growth velocity</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Annual post-grad salary growth velocity</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#12 Time-to-Hire Speed</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#12 Time-to-Hire Speed</span>
                   <AdminBadge variant="neutral">Speed Index</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">
                   {Number(reportData?.overallEmployment?.averageTimeToHireMonths || 0).toFixed(1)} Mos
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average months to first position</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average months to first position</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#13 Career Promotion</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#13 Career Promotion</span>
                   <AdminBadge variant="success">Career Growth</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">{activeCareerMobility.promotionRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni with 1+ sequential promotions</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni with 1+ sequential promotions</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#14 Startup Founders</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#14 Startup Founders</span>
                   <AdminBadge variant="neutral">Ventures</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">{reportData?.overallEmployment?.selfEmploymentRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni founding new business enterprises</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni founding new business enterprises</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#15 Underemployment</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#15 Underemployment</span>
                   <AdminBadge variant="success">
                     {reportData?.overallEmployment?.employmentRate !== undefined ? `${reportData.overallEmployment.employmentRate}% Matched` : '0.0% Matched'}
                   </AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">{reportData?.overallEmployment?.unemploymentRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Skill mismatch underemployment rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Skill mismatch underemployment rate</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#16 Contract Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#16 Contract Ratio</span>
                   <AdminBadge variant="neutral">Full-Time Lead</AdminBadge>
                 </div>
-                <div className="mt-3 text-lg font-bold text-slate-800">
+                <div className="mt-3 text-lg font-bold text-[var(--text-primary)]">
                   FT: {activeJobPostingsByType[0]?.count || 0} | Con: {activeJobPostingsByType[1]?.count || 0}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Full-time vs contract vs internship ratio</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Full-time vs contract vs internship ratio</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#17 Placement Speed Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#17 Placement Speed Ratio</span>
                   <AdminBadge variant="success">&lt;3 Mos ({reportData?.overallEmployment?.employmentRate || 0}%)</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-800">{reportData?.overallEmployment?.employmentRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Placements secured within 90 days</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Placements secured within 90 days</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#18 Job Mobility Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#18 Job Mobility Index</span>
                   <AdminBadge variant="neutral">
                     {activeCareerMobility.promotionRate ? `${Math.min(99, Math.round(100 - activeCareerMobility.promotionRate / 2))}% Retention` : '0% Retention'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeCareerMobility.promotionRate ? `${Math.min(99, Math.round(100 - activeCareerMobility.promotionRate / 2))}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Sector domain retention index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Sector domain retention index</span>
               </div>
             </div>
           </SectionCard>
@@ -4245,12 +4245,12 @@ export default function AnalyticsOverview() {
             subtitle="Top hiring partners, corporate posting volume, recruitment funnel conversion, and skill gap audits."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Recruitment Funnel Conversion</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Recruitment Funnel Conversion</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart layout="vertical" data={activeHiringFunnel}>
-                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--chart-grid)" />
                       <XAxis type="number" tick={{ fontSize: 9 }} />
                       <YAxis dataKey="stage" type="category" tick={{ fontSize: 9 }} width={75} />
                       <Tooltip />
@@ -4260,12 +4260,12 @@ export default function AnalyticsOverview() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Top Requested Technical Skills Gap</div>
+              <div className="lg:col-span-2 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Top Requested Technical Skills Gap</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={activeSkillGaps.slice(0, 6)}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="skill" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(val: any) => [val, 'Demand Count']} />
@@ -4277,29 +4277,29 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#21 Top Employer Partner</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#21 Top Employer Partner</span>
                   <AdminBadge variant="success">Leading Partner</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-[#003580] truncate">
                   {activeTopHiringCompanies[0]?.companyName || 'N/A'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeTopHiringCompanies[0]?.hires || 0} graduate placements</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeTopHiringCompanies[0]?.hires || 0} graduate placements</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#22 Corporate Job Postings</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#22 Corporate Job Postings</span>
                   <AdminBadge variant="neutral">Active Listings</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{activeJobPostingsByType.reduce((a: number, b: any) => a + (b.count || 0), 0)} Postings</div>
-                <span className="text-[11px] text-slate-500 mt-1">Active postings in job network</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Active postings in job network</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#23 Employer Rating</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#23 Employer Rating</span>
                   <AdminBadge variant="neutral">
                     {activeEmployerRatingByIndustry[0]?.averageRating ? `${activeEmployerRatingByIndustry[0].averageRating} / 5.0` : '0.0 / 5.0'}
                   </AdminBadge>
@@ -4307,23 +4307,23 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-purple-700">
                   {activeEmployerRatingByIndustry[0]?.averageRating ? `${activeEmployerRatingByIndustry[0].averageRating} / 5.0` : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average hiring partner evaluation score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average hiring partner evaluation score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#24 Funnel Offer Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#24 Funnel Offer Rate</span>
                   <AdminBadge variant="success">Conversion</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {activeHiringFunnel[0]?.count > 0 ? `${Math.round(((activeHiringFunnel[3]?.count || 0) / activeHiringFunnel[0].count) * 100)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Application to hire conversion rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Application to hire conversion rate</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#25 Employer Satisfaction</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#25 Employer Satisfaction</span>
                   <AdminBadge variant="success">
                     {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${Math.round(activeUniversityIndustryMoU.corporateFeedbackScore * 10)}% High` : '0% High'}
                   </AdminBadge>
@@ -4331,23 +4331,23 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${Math.round(activeUniversityIndustryMoU.corporateFeedbackScore * 10)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Corporate partner satisfaction score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Corporate partner satisfaction score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#26 Company Size Matrix</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#26 Company Size Matrix</span>
                   <AdminBadge variant="neutral">Enterprise Lead</AdminBadge>
                 </div>
-                <div className="mt-3 text-lg font-bold text-slate-800">
+                <div className="mt-3 text-lg font-bold text-[var(--text-primary)]">
                   {activeCompanySizeDistribution[0]?.size || 'None'}: {activeCompanySizeDistribution[0]?.count || 0}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Enterprise vs mid-market employer share</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Enterprise vs mid-market employer share</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#27 Sector Satisfaction</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#27 Sector Satisfaction</span>
                   <AdminBadge variant="success">
                     {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${(activeUniversityIndustryMoU.corporateFeedbackScore / 2).toFixed(1)} Tech` : '0.0 Tech'}
                   </AdminBadge>
@@ -4355,20 +4355,20 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-blue-800">
                   {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${(activeUniversityIndustryMoU.corporateFeedbackScore / 2).toFixed(1)} / 5.0` : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Tech sector satisfaction benchmark</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Tech sector satisfaction benchmark</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#28 Internship Conversion</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#28 Internship Conversion</span>
                   <AdminBadge variant="success">
                     {activeHiringFunnel[0]?.count > 0 ? `${Math.round(((activeHiringFunnel[3]?.count || 0) / activeHiringFunnel[0].count) * 100)}% Hired` : '0% Hired'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeHiringFunnel[0]?.count > 0 ? `${Math.round(((activeHiringFunnel[3]?.count || 0) / activeHiringFunnel[0].count) * 100)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Internship to full-time position conversion</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Internship to full-time position conversion</span>
               </div>
             </div>
           </SectionCard>
@@ -4379,12 +4379,12 @@ export default function AnalyticsOverview() {
             subtitle="Geographic employment hubs, brain drain metrics, gender parity, and survey participation velocity."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Regional Placement Share (%)</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Regional Placement Share (%)</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={activeGeographicData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(val: any) => [`${val}%`, 'Alumni Share']} />
@@ -4396,29 +4396,29 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#31 Primary Hub</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#31 Primary Hub</span>
                   <AdminBadge variant="success">Capital Hub</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#003580]">{activeGeographicData[0]?.name || 'N/A'}</div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeGeographicData[0]?.value || 0}% of placed alumni</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeGeographicData[0]?.value || 0}% of placed alumni</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#32 Domestic Retention</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#32 Domestic Retention</span>
                   <AdminBadge variant="neutral">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Retained' : 'No Data'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100.0%' : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni working domestically</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni working domestically</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#33 Gender Parity</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#33 Gender Parity</span>
                   <AdminBadge variant="success">
                     Index {reportData?.overallEmployment?.genderParity?.female?.rate && reportData?.overallEmployment?.genderParity?.male?.rate
                       ? (reportData.overallEmployment.genderParity.female.rate / Math.max(1, reportData.overallEmployment.genderParity.male.rate)).toFixed(2)
@@ -4430,23 +4430,23 @@ export default function AnalyticsOverview() {
                     ? `${(reportData.overallEmployment.genderParity.female.rate / Math.max(1, reportData.overallEmployment.genderParity.male.rate)).toFixed(2)} Parity`
                     : '0.00 Parity'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Employment rate female-to-male parity</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Employment rate female-to-male parity</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#34 Response Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#34 Response Rate</span>
                   <AdminBadge variant="neutral">Participation</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {Number(reportData?.tracer?.surveyCompletionRate || 0).toFixed(1)}%
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Institutional survey completion rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Institutional survey completion rate</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#35 Career Satisfaction</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#35 Career Satisfaction</span>
                   <AdminBadge variant="success">
                     {activeCurriculumRelevanceRating.length > 0
                       ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
@@ -4458,25 +4458,25 @@ export default function AnalyticsOverview() {
                     ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
                     : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni career path fulfillment index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni career path fulfillment index</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#36 Industrial Zones</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#36 Industrial Zones</span>
                   <AdminBadge variant="neutral">
                     {activeGeographicData[0]?.value ? `${activeGeographicData[0].value}% Placed` : '0% Placed'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeGeographicData[0]?.value ? `${activeGeographicData[0].value}%` : '0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Industrial park deployment concentration</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Industrial park deployment concentration</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#37 Survey Speed</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#37 Survey Speed</span>
                   <AdminBadge variant="success">
                     {Number(reportData?.tracer?.surveyCompletionRate || 0) > 0 ? '1.8 Days Avg' : '0.0 Days'}
                   </AdminBadge>
@@ -4484,20 +4484,20 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-blue-800">
                   {Number(reportData?.tracer?.surveyCompletionRate || 0) > 0 ? '1.8 Days' : '0.0 Days'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average time to complete survey</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average time to complete survey</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#38 Remote Earning</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#38 Remote Earning</span>
                   <AdminBadge variant="neutral">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '10.0% Remote' : '0.0% Remote'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '10.0%' : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni earning foreign currency remotely</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni earning foreign currency remotely</span>
               </div>
             </div>
           </SectionCard>
@@ -4508,23 +4508,23 @@ export default function AnalyticsOverview() {
             subtitle="Alumni network engagement, mentorship program pipeline, donor contributions, and student aid impact."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mentorship Program Pipeline Progress</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Mentorship Program Pipeline Progress</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Active Mentors</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Active Mentors</div>
                     <div className="text-xl font-bold text-[#003580]">{activeMentorshipPipeline.accepted}</div>
                   </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Pending Requests</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Pending Requests</div>
                     <div className="text-xl font-bold text-amber-600">{activeMentorshipPipeline.pending}</div>
                   </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Completed Sessions</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Completed Sessions</div>
                     <div className="text-xl font-bold text-emerald-600">{activeMentorshipPipeline.completed}</div>
                   </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Mentor-Mentee Ratio</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Mentor-Mentee Ratio</div>
                     <div className="text-xl font-bold text-purple-700">
                       1 : {activeMentorshipPipeline.accepted > 0 ? Math.max(1, Math.round(activeMentorshipPipeline.completed / activeMentorshipPipeline.accepted)) : 0}
                     </div>
@@ -4534,9 +4534,9 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#41 Network Score</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#41 Network Score</span>
                   <AdminBadge variant="success">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${Math.min(100, Math.round((activeMentorshipPipeline.accepted * 10) + (reportData?.overallEmployment?.employmentRate || 0)))} / 100` : '0.0 / 100'}
                   </AdminBadge>
@@ -4544,82 +4544,82 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-[#003580]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${Math.min(100, Math.round((activeMentorshipPipeline.accepted * 10) + (reportData?.overallEmployment?.employmentRate || 0)))} / 100` : '0.0 / 100'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni network engagement score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni network engagement score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#42 Active Mentors</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#42 Active Mentors</span>
                   <AdminBadge variant="neutral">Verified</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{activeMentorshipPipeline.accepted} Mentors</div>
-                <span className="text-[11px] text-slate-500 mt-1">Active verified alumni mentors</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Active verified alumni mentors</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#43 Donated Support</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#43 Donated Support</span>
                   <AdminBadge variant="success">ETB Total</AdminBadge>
                 </div>
                 <div className="mt-3 text-xl font-bold text-purple-700">
                   ETB {Number(activeCommunityGiving.totalDonated || 0).toLocaleString()}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeCommunityGiving.totalDonors || 0} active alumni donors</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeCommunityGiving.totalDonors || 0} active alumni donors</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#44 Speaker Network</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#44 Speaker Network</span>
                   <AdminBadge variant="neutral">Volunteers</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">{activeMentorshipPipeline.accepted || 0} Speakers</div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni guest speakers & lecturers</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni guest speakers & lecturers</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#45 Financial Aid</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#45 Financial Aid</span>
                   <AdminBadge variant="success">{activeCommunityGiving.totalDonors || 0} Aided</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">{activeCommunityGiving.totalDonors || 0} Aid Grants</div>
-                <span className="text-[11px] text-slate-500 mt-1">Students supported by alumni giving</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Students supported by alumni giving</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#46 Mentorship Rating</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#46 Mentorship Rating</span>
                   <AdminBadge variant="success">
                     {activeMentorshipPipeline.completed > 0 ? '5.0 / 5.0' : '0.0 / 5.0'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeMentorshipPipeline.completed > 0 ? '5.0 / 5.0' : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Mentorship session satisfaction score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Mentorship session satisfaction score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#47 Guidance Topic</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#47 Guidance Topic</span>
                   <AdminBadge variant="neutral">Top Department</AdminBadge>
                 </div>
                 <div className="mt-3 text-base font-bold text-blue-800 truncate">
                   {reportData?.departmentAnalytics?.departmentMetrics[0]?.departmentName || 'N/A'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Top requested career topic</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Top requested career topic</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#48 Giving Engagement</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#48 Giving Engagement</span>
                   <AdminBadge variant="neutral">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${((activeCommunityGiving.totalDonors / Math.max(1, reportData.overallEmployment.totalAlumni)) * 100).toFixed(1)}% Rate` : '0.0% Rate'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${((activeCommunityGiving.totalDonors / Math.max(1, reportData.overallEmployment.totalAlumni)) * 100).toFixed(1)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni campaign participation rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni campaign participation rate</span>
               </div>
             </div>
           </SectionCard>
@@ -4630,8 +4630,8 @@ export default function AnalyticsOverview() {
             subtitle="Account verification status, profile completeness index, professional network links, and resume uploads."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Professional Linkage Share</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Professional Linkage Share</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -4663,89 +4663,89 @@ export default function AnalyticsOverview() {
               </div>
 
               <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2">
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#51 Verification Rate</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#51 Verification Rate</span>
                     <AdminBadge variant="success">Verified</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#003580]">{activeVerificationRatio.verificationRate}%</div>
-                  <span className="text-[11px] text-slate-500 mt-1">{activeVerificationRatio.verified} verified alumni accounts</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeVerificationRatio.verified} verified alumni accounts</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#52 Completeness Index</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#52 Completeness Index</span>
                     <AdminBadge variant="neutral">Profiles</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{activeProfileCompleteness.complete} Full</div>
-                  <span className="text-[11px] text-slate-500 mt-1">{activeProfileCompleteness.partial} partial profiles</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeProfileCompleteness.partial} partial profiles</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#53 LinkedIn Ratio</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#53 LinkedIn Ratio</span>
                     <AdminBadge variant="success">Connected</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-purple-700">{activeProfessionalLinksRatio.linkedin || 0} Accounts</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Alumni with verified LinkedIn links</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni with verified LinkedIn links</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#54 Resume Uploads</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#54 Resume Uploads</span>
                     <AdminBadge variant="neutral">CV On File</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#B87900]">{activeProfessionalLinksRatio.resume || 0} Resumes</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Alumni with active CV uploaded</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni with active CV uploaded</span>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#55 Language Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#55 Language Index</span>
                   <AdminBadge variant="neutral">Multilingual</AdminBadge>
                 </div>
-                <div className="mt-3 text-lg font-bold text-slate-800">
+                <div className="mt-3 text-lg font-bold text-[var(--text-primary)]">
                   {activeLanguageProficiency[0]?.language || 'N/A'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Primary spoken language distribution</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Primary spoken language distribution</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#56 Certification Badges</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#56 Certification Badges</span>
                   <AdminBadge variant="success">Verified</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {activeProfessionalLinksRatio.resume ? activeProfessionalLinksRatio.resume * 10 : 0} Badges
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Earned professional skill badges</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Earned professional skill badges</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#57 Audit Velocity</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#57 Audit Velocity</span>
                   <AdminBadge variant="success">{activeVerificationRatio.verified > 0 ? '<24 Hours' : '0 Hours'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-800">
                   {activeVerificationRatio.verified > 0 ? '<24 Hours' : '0 Hours'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average alumni verification speed</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average alumni verification speed</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#58 Profile Refresh Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#58 Profile Refresh Rate</span>
                   <AdminBadge variant="neutral">
                     {activeProfileCompleteness.complete > 0 ? `${activeVerificationRatio.verificationRate}% Active` : '0.0% Active'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeProfileCompleteness.complete > 0 ? `${activeVerificationRatio.verificationRate}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Annual profile refresh rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Annual profile refresh rate</span>
               </div>
             </div>
           </SectionCard>
@@ -4756,8 +4756,8 @@ export default function AnalyticsOverview() {
             subtitle="Support ticket resolution, document processing speed, event conversion, and registrar sync."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Service Operations SLA Resolution Speed</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Service Operations SLA Resolution Speed</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={[
@@ -4767,7 +4767,7 @@ export default function AnalyticsOverview() {
                       { service: 'Event RSVPs', score: activeEventRSVPConversion.conversionRate || 0 },
                       { service: 'Registrar Sync', score: (reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 100 : 0 },
                     ]}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="service" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} domain={[0, 100]} />
                       <Tooltip formatter={(val: any) => [`${val}%`, 'SLA Rate']} />
@@ -4779,92 +4779,92 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#61 Support Desk SLA</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#61 Support Desk SLA</span>
                   <AdminBadge variant="success">Resolved</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#003580]">{activeSupportTicketSLA.resolved || 0} Resolved</div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeSupportTicketSLA.open || 0} open tickets</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeSupportTicketSLA.open || 0} open tickets</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#62 Document SLA</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#62 Document SLA</span>
                   <AdminBadge variant="neutral">Requests</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-[#1D9E75]">
                   App: {activeDocumentRequestPipeline.approved} | Pend: {activeDocumentRequestPipeline.pending}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Official document request processing</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Official document request processing</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#63 RSVP Conversion</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#63 RSVP Conversion</span>
                   <AdminBadge variant="success">Attendance</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">{activeEventRSVPConversion.conversionRate}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeEventRSVPConversion.confirmedRsvps} confirmed RSVPs</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeEventRSVPConversion.confirmedRsvps} confirmed RSVPs</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#64 Registrar Sync</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#64 Registrar Sync</span>
                   <AdminBadge variant="success">Live Sync</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Synced' : '0% Synced'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Registrar student register synchronization</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Registrar student register synchronization</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#65 Audit Integrity</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#65 Audit Integrity</span>
                   <AdminBadge variant="neutral">Logs</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Active Audit' : 'No Audit'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Security & admin action logging</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Security & admin action logging</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#66 Record Registry</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#66 Record Registry</span>
                   <AdminBadge variant="success">Healthy</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-900">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Uptime' : '0% Uptime'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">System record register connectivity</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">System record register connectivity</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#67 Document Speed</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#67 Document Speed</span>
                   <AdminBadge variant="success">
                     {activeDocumentRequestPipeline.approved > 0 ? '1.2 Days' : '0.0 Days'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeDocumentRequestPipeline.approved > 0 ? '1.2 Days' : '0.0 Days'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average document processing speed</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average document processing speed</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#68 First-Contact SLA</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#68 First-Contact SLA</span>
                   <AdminBadge variant="success">
                     {activeSupportTicketSLA.resolved > 0 ? `${Math.round((activeSupportTicketSLA.resolved / Math.max(1, activeSupportTicketSLA.open + activeSupportTicketSLA.resolved)) * 100)}% Solved` : '0.0% Solved'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeSupportTicketSLA.resolved > 0 ? `${Math.round((activeSupportTicketSLA.resolved / Math.max(1, activeSupportTicketSLA.open + activeSupportTicketSLA.resolved)) * 100)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">First-contact ticket resolution rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">First-contact ticket resolution rate</span>
               </div>
             </div>
           </SectionCard>
@@ -4875,8 +4875,8 @@ export default function AnalyticsOverview() {
             subtitle="Graduate distinction tiers, STEM ratio, postgraduate studies, research output, and institutional Net Promoter Score."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Graduation Academic Distinction Tier Breakdown</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Graduation Academic Distinction Tier Breakdown</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={[
@@ -4885,7 +4885,7 @@ export default function AnalyticsOverview() {
                       { tier: 'Distinction (3.25-3.49)', share: (reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 2 ? (reportData?.overallEmployment?.cgpaAnalytics[2]?.count || 0) : 0 },
                       { tier: 'Satisfactory (2.00-3.24)', share: (reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 3 ? (reportData?.overallEmployment?.cgpaAnalytics[3]?.count || 0) : 0 },
                     ]}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
                       <XAxis dataKey="tier" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(val: any) => [`${val}`, 'Graduate Count']} />
@@ -4897,9 +4897,9 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#71 Distinction Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#71 Distinction Ratio</span>
                   <AdminBadge variant="success">
                     {(reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 0
                       ? `${reportData?.overallEmployment?.cgpaAnalytics[0]?.employmentRate || 0}% First Class`
@@ -4911,12 +4911,12 @@ export default function AnalyticsOverview() {
                     ? `${reportData?.overallEmployment?.cgpaAnalytics[0]?.employmentRate || 0}%`
                     : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Graduates achieving distinction honors</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Graduates achieving distinction honors</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#72 STEM Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#72 STEM Ratio</span>
                   <AdminBadge variant="neutral">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Engineering' : '0% Engineering'}
                   </AdminBadge>
@@ -4924,45 +4924,45 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100.0%' : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Engineering and technology degree share</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Engineering and technology degree share</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#73 Postgraduate Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#73 Postgraduate Rate</span>
                   <AdminBadge variant="neutral">MSc / PhD</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${(reportData?.overallEmployment?.selfEmploymentRate || 0)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni pursuing advanced degrees</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni pursuing advanced degrees</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#74 Research Papers</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#74 Research Papers</span>
                   <AdminBadge variant="success">{activeCommunityGiving.totalDonors ? activeCommunityGiving.totalDonors * 2 : 0} Papers</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {activeCommunityGiving.totalDonors ? activeCommunityGiving.totalDonors * 2 : 0} Papers
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni academic research publications</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni academic research publications</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#75 Advisory Board</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#75 Advisory Board</span>
                   <AdminBadge variant="neutral">{activeMentorshipPipeline.accepted || 0} Members</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {activeMentorshipPipeline.accepted || 0} Members
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni on curriculum advisory boards</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni on curriculum advisory boards</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#76 Institutional NPS</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#76 Institutional NPS</span>
                   <AdminBadge variant="success">
                     {activeCurriculumRelevanceRating.length > 0 ? '+64 NPS' : '+0 NPS'}
                   </AdminBadge>
@@ -4970,33 +4970,33 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-blue-900">
                   {activeCurriculumRelevanceRating.length > 0 ? '+64' : '+0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni institutional recommendation score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni institutional recommendation score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#77 Alumni Recruiters</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#77 Alumni Recruiters</span>
                   <AdminBadge variant="neutral">
                     {activeTopHiringCompanies.reduce((a: number, b: any) => a + (b.hires || 0), 0)} Recruiters
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {activeTopHiringCompanies.reduce((a: number, b: any) => a + (b.hires || 0), 0)} Recruiters
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni representing employer partners</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni representing employer partners</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#78 Success Score</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#78 Success Score</span>
                   <AdminBadge variant="success">
                     {reportData?.overallEmployment?.employmentRate !== undefined ? `${reportData.overallEmployment.employmentRate} / 100` : '0.0 / 100'}
                   </AdminBadge>
                 </div>
-                <div className="mt-3 text-2xl font-bold text-slate-800">
+                <div className="mt-3 text-2xl font-bold text-[var(--text-primary)]">
                   {reportData?.overallEmployment?.employmentRate !== undefined ? `${reportData.overallEmployment.employmentRate} / 100` : '0.0 / 100'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Overall composite institutional success score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Overall composite institutional success score</span>
               </div>
             </div>
           </SectionCard>
@@ -5014,7 +5014,7 @@ export default function AnalyticsOverview() {
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="px-3 py-1 bg-white border border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
+                      className="px-3 py-1 bg-[var(--bg-card)] border border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
                     >
                       Clear Search
                     </button>
@@ -5046,11 +5046,11 @@ export default function AnalyticsOverview() {
                     >
                     {/* Domain 1: Multi-Axis Radar Chart */}
                     {idx === 0 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 1 Benchmark Radar</h4>
-                            <p className="text-[11px] text-slate-500">Multi-axis strategic policy &amp; leadership alignment scoring across indicators</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 1 Benchmark Radar</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Multi-axis strategic policy &amp; leadership alignment scoring across indicators</p>
                           </div>
                           <AdminBadge variant="success">Policy Radar</AdminBadge>
                         </div>
@@ -5062,9 +5062,9 @@ export default function AnalyticsOverview() {
                               value: parseMetric(ind.value || ind.metricValue),
                               benchmark: 80,
                             }))}>
-                              <PolarGrid stroke="#e2e8f0" />
-                              <PolarAngleAxis dataKey="subject" tick={{ fill: '#475569', fontSize: 11, fontWeight: 600 }} />
-                              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#cbd5e1" />
+                              <PolarGrid stroke="var(--chart-grid)" />
+                              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--chart-axis)', fontSize: 11, fontWeight: 600 }} />
+                              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" />
                               <Radar name="ASTU Institutional Score" dataKey="value" stroke="#003580" fill="#003580" fillOpacity={0.4} />
                               <Radar name="National Benchmark" dataKey="benchmark" stroke="#1D9E75" fill="#1D9E75" fillOpacity={0.15} />
                               <Tooltip formatter={(val: any) => [`${val}%`, 'Institutional Score']} />
@@ -5077,11 +5077,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 2: Workforce Velocity Bar Chart */}
                     {idx === 1 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 2 Workforce Velocity Bar Chart</h4>
-                            <p className="text-[11px] text-slate-500">Career progression, tech placement, and promotion rates across indicators</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 2 Workforce Velocity Bar Chart</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Career progression, tech placement, and promotion rates across indicators</p>
                           </div>
                           <AdminBadge variant="neutral">Workforce Metrics</AdminBadge>
                         </div>
@@ -5092,9 +5092,9 @@ export default function AnalyticsOverview() {
                               title: ind.name || ind.title,
                               metric: parseMetric(ind.value || ind.metricValue),
                             }))}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                              <XAxis dataKey="code" tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }} />
-                              <YAxis domain={[0, 100]} tick={{ fill: '#475569', fontSize: 10 }} unit="%" />
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
+                              <XAxis dataKey="code" tick={{ fill: 'var(--chart-axis)', fontSize: 10, fontWeight: 600 }} />
+                              <YAxis domain={[0, 100]} tick={{ fill: 'var(--chart-axis)', fontSize: 10 }} unit="%" />
                               <Tooltip formatter={(val: any, name: any, props: any) => [`${val}%`, props.payload.title]} />
                               <Bar dataKey="metric" name="Workforce Velocity Score" radius={[6, 6, 0, 0]}>
                                 {(domain.indicators || []).map((entry: any, index: number) => (
@@ -5109,11 +5109,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 3: Smooth Area Chart */}
                     {idx === 2 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 3 Academic Quality Area Curve</h4>
-                            <p className="text-[11px] text-slate-500">Skill-gap closure, research citations, and honors placement distribution</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 3 Academic Quality Area Curve</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Skill-gap closure, research citations, and honors placement distribution</p>
                           </div>
                           <AdminBadge variant="success">Academic Quality</AdminBadge>
                         </div>
@@ -5130,9 +5130,9 @@ export default function AnalyticsOverview() {
                                   <stop offset="95%" stopColor="#1D9E75" stopOpacity={0.05}/>
                                 </linearGradient>
                               </defs>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                              <XAxis dataKey="code" tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }} />
-                              <YAxis domain={[0, 100]} tick={{ fill: '#475569', fontSize: 10 }} unit="%" />
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
+                              <XAxis dataKey="code" tick={{ fill: 'var(--chart-axis)', fontSize: 10, fontWeight: 600 }} />
+                              <YAxis domain={[0, 100]} tick={{ fill: 'var(--chart-axis)', fontSize: 10 }} unit="%" />
                               <Tooltip formatter={(val: any, name: any, props: any) => [`${val}%`, props.payload.title]} />
                               <Area type="monotone" dataKey="score" name="Academic Quality Index" stroke="#1D9E75" strokeWidth={2.5} fillOpacity={1} fill="url(#domain3Grad)" />
                             </AreaChart>
@@ -5143,11 +5143,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 4: MoU Grouped Bar Chart */}
                     {idx === 3 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 4 MoU &amp; Corporate Intelligence Chart</h4>
-                            <p className="text-[11px] text-slate-500">University-industry partnerships, placement success, and employer loyalty</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 4 MoU &amp; Corporate Intelligence Chart</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">University-industry partnerships, placement success, and employer loyalty</p>
                           </div>
                           <AdminBadge variant="neutral">Corporate MoUs</AdminBadge>
                         </div>
@@ -5159,9 +5159,9 @@ export default function AnalyticsOverview() {
                               score: parseMetric(ind.value || ind.metricValue),
                               target: 90,
                             }))}>
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                              <XAxis dataKey="code" tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }} />
-                              <YAxis domain={[0, 100]} tick={{ fill: '#475569', fontSize: 10 }} unit="%" />
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
+                              <XAxis dataKey="code" tick={{ fill: 'var(--chart-axis)', fontSize: 10, fontWeight: 600 }} />
+                              <YAxis domain={[0, 100]} tick={{ fill: 'var(--chart-axis)', fontSize: 10 }} unit="%" />
                               <Tooltip formatter={(val: any, name: any, props: any) => [`${val}%`, props.payload.title]} />
                               <Bar dataKey="score" name="Current MoU Score" fill="#3B82F6" radius={[4, 4, 0, 0]} />
                               <Bar dataKey="target" name="Institutional Target" fill="#CBD5E1" radius={[4, 4, 0, 0]} />
@@ -5174,11 +5174,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 5: Pie/Donut Chart & Visual Bars */}
                     {idx === 4 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 5 Digital Ecosystem &amp; Sentiment Breakdown</h4>
-                            <p className="text-[11px] text-slate-500">Alumni platform activation, mentorship completion, and giving growth velocity</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 5 Digital Ecosystem &amp; Sentiment Breakdown</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Alumni platform activation, mentorship completion, and giving growth velocity</p>
                           </div>
                           <AdminBadge variant="success">Community Ecosystem</AdminBadge>
                         </div>
@@ -5218,11 +5218,11 @@ export default function AnalyticsOverview() {
                               const valStr = ind.value || ind.metricValue;
                               return (
                                 <div key={codeStr} className="space-y-1">
-                                  <div className="flex justify-between text-xs font-semibold text-slate-700">
+                                  <div className="flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
                                     <span className="truncate max-w-[200px]" title={nameStr}>{codeStr}: {nameStr}</span>
-                                    <span className="font-bold text-slate-900">{valStr}</span>
+                                    <span className="font-bold text-[var(--text-primary)]">{valStr}</span>
                                   </div>
-                                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                  <div className="w-full bg-[var(--bg-page)] rounded-full h-2 overflow-hidden">
                                     <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
                                   </div>
                                 </div>
@@ -5245,24 +5245,24 @@ export default function AnalyticsOverview() {
                         const valColor =
                           statusVal === 'optimal' || statusVal === 'excellent' ? 'text-emerald-700' :
                           statusVal === 'good' ? 'text-blue-900' :
-                          statusVal === 'warning' ? 'text-amber-600' : 'text-slate-800';
+                          statusVal === 'warning' ? 'text-amber-600' : 'text-[var(--text-primary)]';
 
                         const codeStr = ind.id || ind.code;
                         const nameStr = ind.name || ind.title;
                         const valStr = ind.value || ind.metricValue;
 
                         return (
-                          <div id={`ind-${codeStr}`} key={codeStr} className="p-4 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-white hover:border-blue-300 transition-all flex flex-col justify-between shadow-xs scroll-mt-24">
+                          <div id={`ind-${codeStr}`} key={codeStr} className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-[var(--bg-card)] hover:border-blue-300 transition-all flex flex-col justify-between shadow-xs scroll-mt-24">
                             <div>
                               <div className="flex items-center justify-between gap-1 mb-2">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{codeStr}</span>
+                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{codeStr}</span>
                                 <AdminBadge variant={statusVariant}>{ind.badge}</AdminBadge>
                               </div>
-                              <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight" title={nameStr}>{nameStr}</h4>
+                              <h4 className="text-xs font-bold text-[var(--text-primary)] line-clamp-2 leading-tight" title={nameStr}>{nameStr}</h4>
                             </div>
                             <div className="mt-3">
                               <div className={`text-xl font-extrabold ${valColor}`}>{valStr}</div>
-                              <p className="text-[11px] text-slate-500 mt-1 leading-snug">{ind.subtext}</p>
+                              <p className="text-[11px] text-[var(--text-muted)] mt-1 leading-snug">{ind.subtext}</p>
                             </div>
                           </div>
                         );
@@ -5275,12 +5275,12 @@ export default function AnalyticsOverview() {
             </div>
           ) : (
             searchQuery.trim().length > 0 && (
-              <div className="mt-10 p-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 text-center space-y-3 animate-in fade-in duration-200">
-                <div className="inline-flex p-3.5 rounded-full bg-slate-200/80 text-slate-500">
+              <div className="mt-10 p-8 rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] text-center space-y-3 animate-in fade-in duration-200">
+                <div className="inline-flex p-3.5 rounded-full bg-[var(--bg-page)] text-[var(--text-muted)]">
                   <Search className="h-6 w-6" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">No Analytics Indicators Found for "{searchQuery}"</h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <h3 className="text-base font-bold text-[var(--text-primary)]">No Analytics Indicators Found for "{searchQuery}"</h3>
+                <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
                   No institutional metric or out-of-the-box indicator matches your search query. Try clicking one of the popular search topics below:
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
@@ -5292,7 +5292,7 @@ export default function AnalyticsOverview() {
                         setSearchQuery(preset);
                         setShowSuggestions(true);
                       }}
-                      className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 hover:text-blue-800 rounded-xl shadow-2xs transition-all"
+                      className="px-3 py-1.5 text-xs font-bold bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-400 hover:bg-blue-50 text-[var(--text-secondary)] hover:text-blue-800 rounded-xl shadow-2xs transition-all"
                     >
                       {preset}
                     </button>
@@ -5319,16 +5319,16 @@ export default function AnalyticsOverview() {
       {/* Top Hiring Companies Modal */}
       {topCompaniesModalOpen && createPortal(
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="relative w-full max-w-4xl rounded-xl bg-white shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-4xl rounded-xl bg-[var(--bg-card)] shadow-2xl border border-[var(--border-color)] flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/90 shrink-0">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4 bg-[var(--bg-page)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <Building2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">All Top Hiring Companies</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">All Top Hiring Companies</h3>
+                  <p className="text-xs text-[var(--text-muted)]">
                     Comprehensive list of partner organizations employing ASTU graduates
                   </p>
                 </div>
@@ -5336,7 +5336,7 @@ export default function AnalyticsOverview() {
               <button
                 type="button"
                 onClick={() => setTopCompaniesModalOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -5345,19 +5345,19 @@ export default function AnalyticsOverview() {
 
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto space-y-4">
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <table className="w-full text-left text-xs text-slate-700">
-                  <thead className="bg-slate-100 text-slate-600 font-medium">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-sm">
+                <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+                  <thead className="bg-[var(--bg-page)] text-[var(--text-secondary)] font-medium">
                     <tr>
                       <th className="px-4 py-3">Company / Organization</th>
                       <th className="px-4 py-3 text-right">Graduate Hires</th>
                       <th className="px-4 py-3">Hiring Volume Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody className="divide-y divide-[var(--border-color)]">
                     {activeTopHiringCompanies.map((c: any) => (
-                      <tr key={c.companyName} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
+                      <tr key={c.companyName} className="hover:bg-[var(--bg-page)] transition-colors">
+                        <td className="px-4 py-3 font-semibold text-[var(--text-primary)] flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-[#003580]" />
                           {c.companyName}
                         </td>
@@ -5375,11 +5375,11 @@ export default function AnalyticsOverview() {
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-slate-200 px-6 py-3 bg-slate-50/90 flex justify-end shrink-0">
+            <div className="border-t border-[var(--border-color)] px-6 py-3 bg-[var(--bg-page)] flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setTopCompaniesModalOpen(false)}
-                className="px-5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
+                className="px-5 py-2 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-page)] transition-colors shadow-sm"
               >
                 Close View
               </button>
@@ -5392,16 +5392,16 @@ export default function AnalyticsOverview() {
       {/* Geographic Distribution Large Detail Modal */}
       {geoModalOpen && createPortal(
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="relative w-full max-w-6xl rounded-xl bg-white shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-6xl rounded-xl bg-[var(--bg-card)] shadow-2xl border border-[var(--border-color)] flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/90 shrink-0">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4 bg-[var(--bg-page)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <Globe2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Detailed Geographic Distribution</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">Detailed Geographic Distribution</h3>
+                  <p className="text-xs text-[var(--text-muted)]">
                     Interactive OpenStreetMap & Satellite Location Breakdown of Employed Alumni
                   </p>
                 </div>
@@ -5409,7 +5409,7 @@ export default function AnalyticsOverview() {
               <button
                 type="button"
                 onClick={() => setGeoModalOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] transition-colors"
                 title="Close detail view"
               >
                 <X className="h-5 w-5" />
@@ -5420,40 +5420,40 @@ export default function AnalyticsOverview() {
             <div className="p-6 overflow-y-auto space-y-6">
               {/* Stat Summary Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tracked Cities</div>
-                  <div className="mt-1 text-2xl font-bold text-slate-900">{activeGeographicData.length}</div>
+                <div className="p-4 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Tracked Cities</div>
+                  <div className="mt-1 text-2xl font-bold text-[var(--text-primary)]">{activeGeographicData.length}</div>
                 </div>
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Primary Alumni Hub</div>
+                <div className="p-4 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Primary Alumni Hub</div>
                   <div className="mt-1 text-2xl font-bold text-[#003580]">
                     {activeGeographicData[0]?.name || 'N/A'} ({activeGeographicData[0]?.value || 0}%)
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Geographic Scope</div>
+                <div className="p-4 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Geographic Scope</div>
                   <div className="mt-1 text-2xl font-bold text-emerald-700">National & Regional</div>
                 </div>
               </div>
 
               {/* Large Map Container */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-sm">
                 <div className="mb-2 flex items-center justify-between px-1">
-                  <span className="text-xs font-semibold text-slate-700">Interactive Map View (Street & Satellite)</span>
-                  <span className="text-[11px] text-slate-500">Hover top-right map layer icon to switch to Satellite View</span>
+                  <span className="text-xs font-semibold text-[var(--text-secondary)]">Interactive Map View (Street & Satellite)</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">Hover top-right map layer icon to switch to Satellite View</span>
                 </div>
                 <LocationMap locations={activeGeographicData} className="h-[460px] w-full min-h-[400px]" />
               </div>
 
               {/* Location Breakdown Table */}
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-900">Location Distribution Breakdown</h4>
-                  <span className="text-xs text-slate-500">Sorted by highest alumni ratio</span>
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-sm">
+                <div className="border-b border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">Location Distribution Breakdown</h4>
+                  <span className="text-xs text-[var(--text-muted)]">Sorted by highest alumni ratio</span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
-                    <thead className="bg-slate-100 text-slate-600 font-medium">
+                  <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+                    <thead className="bg-[var(--bg-page)] text-[var(--text-secondary)] font-medium">
                       <tr>
                         <th className="px-4 py-3">Location / City</th>
                         <th className="px-4 py-3 text-right">Alumni Share (%)</th>
@@ -5461,17 +5461,17 @@ export default function AnalyticsOverview() {
                         <th className="px-4 py-3">Visual Proportion</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200">
+                    <tbody className="divide-y divide-[var(--border-color)]">
                       {activeGeographicData.map((item: any) => (
-                        <tr key={item.name} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
+                        <tr key={item.name} className="hover:bg-[var(--bg-page)] transition-colors">
+                          <td className="px-4 py-3 font-semibold text-[var(--text-primary)] flex items-center gap-2">
                             <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
                             {item.name}
                           </td>
                           <td className="px-4 py-3 text-right font-bold text-[#003580]">{item.value}%</td>
-                          <td className="px-4 py-3 text-right font-medium text-slate-600">{item.count || 1} alumni</td>
+                          <td className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">{item.count || 1} alumni</td>
                           <td className="px-4 py-3 w-1/3">
-                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div className="w-full bg-[var(--bg-page)] rounded-full h-2 overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all duration-300"
                                 style={{ width: `${Math.min(100, item.value)}%`, backgroundColor: item.fill }}
@@ -5487,11 +5487,11 @@ export default function AnalyticsOverview() {
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-slate-200 px-6 py-3 bg-slate-50/90 flex justify-end shrink-0">
+            <div className="border-t border-[var(--border-color)] px-6 py-3 bg-[var(--bg-page)] flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setGeoModalOpen(false)}
-                className="px-5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
+                className="px-5 py-2 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-page)] transition-colors shadow-sm"
               >
                 Close View
               </button>

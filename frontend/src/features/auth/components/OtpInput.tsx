@@ -104,7 +104,7 @@ export default function OtpInput({
             autoComplete={index === 0 ? 'one-time-code' : 'off'}
             className={`
               w-12 h-14 sm:w-14 sm:h-16 text-center text-xl font-bold rounded-lg border
-              transition-all duration-200 focus:outline-none focus:ring-2 bg-white text-on-surface
+              transition-all duration-200 focus:outline-none focus:ring-2 bg-[var(--bg-card)] text-on-surface
               disabled:opacity-50 disabled:cursor-not-allowed
               ${hasError
                 ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5'

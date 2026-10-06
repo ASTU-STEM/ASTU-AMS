@@ -62,7 +62,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
         darkMode ? 'bg-slate-900 border border-slate-700 text-white' : 'bg-white text-gray-900'
       }`}>
         {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-150/50">
+        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-[var(--border-color)]">
           <div className="flex items-center gap-3 sm:gap-4">
             <img
               src={candidate.alumnusAvatar ? getFullUrl(candidate.alumnusAvatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.alumnusName)}&background=003366&color=ffffff&bold=true`}
@@ -96,7 +96,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                     </a>
                   )}
                   {candidate.socialLinks.github && (
-                    <a href={getFullUrl(candidate.socialLinks.github)} target="_blank" rel="noreferrer" className="text-gray-700 dark:text-slate-300 font-bold hover:underline flex items-center gap-0.5">
+                    <a href={getFullUrl(candidate.socialLinks.github)} target="_blank" rel="noreferrer" className="text-[var(--text-secondary)] dark:text-slate-300 font-bold hover:underline flex items-center gap-0.5">
                       💻 GitHub
                     </a>
                   )}
@@ -109,8 +109,8 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
               )}
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-            <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button onClick={onClose} className="p-2 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 rounded-xl transition-colors">
+            <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
         
@@ -126,38 +126,38 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                 <span>👤</span> Personal Information
               </h4>
               <div className={`p-4 rounded-xl border space-y-2.5 text-xs ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-100'}`}>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Email Address</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.alumnusEmail}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Email Address</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.alumnusEmail}</span>
                 </div>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Phone Number</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.phone || 'N/A'}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Phone Number</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.phone || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Student ID / Batch</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.studentId || 'N/A'}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Student ID / Batch</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.studentId || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Nationality</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.nationality || 'Ethiopian'}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Nationality</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.nationality || 'Ethiopian'}</span>
                 </div>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Gender</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.gender || 'N/A'}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Gender</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.gender || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Languages</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.languages?.join(', ') || 'English, Amharic'}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Languages</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.languages?.join(', ') || 'English, Amharic'}</span>
                 </div>
-                <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                  <span className="text-gray-500 font-medium">Current Address</span>
-                  <span className="font-bold text-gray-900 dark:text-white">{candidate.currentAddress && candidate.currentAddress !== 'N/A' ? candidate.currentAddress : 'Adama, Oromia, Ethiopia'}</span>
+                <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                  <span className="text-[var(--text-muted)] font-medium">Current Address</span>
+                  <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.currentAddress && candidate.currentAddress !== 'N/A' ? candidate.currentAddress : 'Adama, Oromia, Ethiopia'}</span>
                 </div>
                 {candidate.volunteerWork && candidate.volunteerWork !== 'N/A' && (
                   <div className="pt-1">
-                    <span className="text-gray-500 font-medium block mb-1">Volunteer & Community Work</span>
-                    <p className="text-gray-700 dark:text-slate-300 italic bg-white dark:bg-slate-900 p-2 rounded-lg border border-gray-200/60">{candidate.volunteerWork}</p>
+                    <span className="text-[var(--text-muted)] font-medium block mb-1">Volunteer & Community Work</span>
+                    <p className="text-[var(--text-secondary)] dark:text-slate-300 italic bg-[var(--bg-card)] dark:bg-slate-900 p-2 rounded-lg border border-[var(--border-color)]">{candidate.volunteerWork}</p>
                   </div>
                 )}
               </div>
@@ -170,23 +170,23 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                   <span>🎓</span> Academic Record
                 </h4>
                 <div className={`p-4 rounded-xl border space-y-2.5 text-xs ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-100'}`}>
-                  <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                    <span className="text-gray-500 font-medium">Department</span>
-                    <span className="font-bold text-gray-900 dark:text-white">{candidate.department}</span>
+                  <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                    <span className="text-[var(--text-muted)] font-medium">Department</span>
+                    <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.department}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-200/40 pb-1.5">
-                    <span className="text-gray-500 font-medium">Graduation Year</span>
-                    <span className="font-bold text-gray-900 dark:text-white">{candidate.graduationYear}</span>
+                  <div className="flex justify-between border-b border-[var(--border-color)] pb-1.5">
+                    <span className="text-[var(--text-muted)] font-medium">Graduation Year</span>
+                    <span className="font-bold text-[var(--text-primary)] dark:text-white">{candidate.graduationYear}</span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-gray-200/40 pb-1.5">
-                    <span className="text-gray-500 font-medium">Authenticated CGPA</span>
+                  <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-1.5">
+                    <span className="text-[var(--text-muted)] font-medium">Authenticated CGPA</span>
                     <span className={`font-extrabold ${candidate.cgpa.includes('Hidden') ? 'text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-[11px] border border-amber-200' : 'text-sm text-[#1a5c3a]'}`}>
                       {candidate.cgpa.includes('Hidden') ? '🔒 Hidden (Privacy Setting)' : candidate.cgpa}
                     </span>
                   </div>
                   {candidate.honors && candidate.honors !== 'N/A' && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500 font-medium">Honors & Distinction</span>
+                      <span className="text-[var(--text-muted)] font-medium">Honors & Distinction</span>
                       <span className="font-bold text-amber-600">{candidate.honors}</span>
                     </div>
                   )}
@@ -199,29 +199,29 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                   <span>🌐</span> Social & Professional Profiles
                 </h4>
                 <div className={`p-4 rounded-xl border space-y-2 text-xs ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-100'}`}>
-                  <div className="flex justify-between items-center border-b border-gray-200/40 pb-1.5">
-                    <span className="text-gray-500 font-medium">LinkedIn</span>
+                  <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-1.5">
+                    <span className="text-[var(--text-muted)] font-medium">LinkedIn</span>
                     {candidate.socialLinks?.linkedin ? (
                       <a href={getFullUrl(candidate.socialLinks.linkedin)} target="_blank" rel="noreferrer" className="text-blue-600 font-bold hover:underline truncate max-w-[200px]">
                         {candidate.socialLinks.linkedin}
                       </a>
-                    ) : <span className="text-gray-400 italic">Not connected</span>}
+                    ) : <span className="text-[var(--text-muted)] italic">Not connected</span>}
                   </div>
-                  <div className="flex justify-between items-center border-b border-gray-200/40 pb-1.5">
-                    <span className="text-gray-500 font-medium">GitHub</span>
+                  <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-1.5">
+                    <span className="text-[var(--text-muted)] font-medium">GitHub</span>
                     {candidate.socialLinks?.github ? (
-                      <a href={getFullUrl(candidate.socialLinks.github)} target="_blank" rel="noreferrer" className="text-gray-800 dark:text-slate-200 font-bold hover:underline truncate max-w-[200px]">
+                      <a href={getFullUrl(candidate.socialLinks.github)} target="_blank" rel="noreferrer" className="text-[var(--text-primary)] dark:text-slate-200 font-bold hover:underline truncate max-w-[200px]">
                         {candidate.socialLinks.github}
                       </a>
-                    ) : <span className="text-gray-400 italic">Not connected</span>}
+                    ) : <span className="text-[var(--text-muted)] italic">Not connected</span>}
                   </div>
-                  <div className="flex justify-between items-center border-b border-gray-200/40 pb-1.5">
-                    <span className="text-gray-500 font-medium">Portfolio Website</span>
+                  <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-1.5">
+                    <span className="text-[var(--text-muted)] font-medium">Portfolio Website</span>
                     {candidate.socialLinks?.website ? (
                       <a href={getFullUrl(candidate.socialLinks.website)} target="_blank" rel="noreferrer" className="text-emerald-600 font-bold hover:underline truncate max-w-[200px]">
                         {candidate.socialLinks.website}
                       </a>
-                    ) : <span className="text-gray-400 italic">Not connected</span>}
+                    ) : <span className="text-[var(--text-muted)] italic">Not connected</span>}
                   </div>
                 </div>
               </div>
@@ -231,7 +231,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                   <span>📝</span> Professional Bio
                 </h4>
                 <div className={`p-3 rounded-xl border text-xs leading-relaxed ${darkMode ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-gray-50 border-gray-100 text-gray-700'}`}>
-                  {candidate.bio && candidate.bio !== 'N/A' ? candidate.bio : <span className="italic text-gray-400">No professional bio provided.</span>}
+                  {candidate.bio && candidate.bio !== 'N/A' ? candidate.bio : <span className="italic text-[var(--text-muted)]">No professional bio provided.</span>}
                 </div>
               </div>
             </div>
@@ -248,18 +248,18 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                 {candidate.experiences.map((exp, i) => (
                   <div key={i} className={`p-3.5 rounded-xl border space-y-1.5 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200/80 shadow-xs'}`}>
                     <div className="flex items-center justify-between">
-                      <h5 className="font-bold text-xs text-gray-900 dark:text-white">{exp.title}</h5>
+                      <h5 className="font-bold text-xs text-[var(--text-primary)] dark:text-white">{exp.title}</h5>
                       {exp.current && <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded">Present</span>}
                     </div>
                     <p className="text-[11px] font-semibold text-[#003366]">{exp.company} {exp.location ? `• ${exp.location}` : ''}</p>
-                    <p className="text-[10px] text-gray-400 font-medium">{exp.startDate} - {exp.current ? 'Present' : (exp.endDate || 'N/A')}</p>
-                    {exp.description && <p className="text-[11px] text-gray-600 dark:text-slate-300 mt-1 leading-relaxed">{exp.description}</p>}
+                    <p className="text-[10px] text-[var(--text-muted)] font-medium">{exp.startDate} - {exp.current ? 'Present' : (exp.endDate || 'N/A')}</p>
+                    {exp.description && <p className="text-[11px] text-[var(--text-secondary)] dark:text-slate-300 mt-1 leading-relaxed">{exp.description}</p>}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-3.5 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200/60 text-xs text-gray-600 dark:text-slate-300">
-                <span className="font-bold text-gray-900 dark:text-white">Current Placement:</span> Expranced AI Engineer @ INSA Corporation
+              <div className="p-3.5 bg-[var(--bg-page)] dark:bg-slate-800 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] dark:text-slate-300">
+                <span className="font-bold text-[var(--text-primary)] dark:text-white">Current Placement:</span> Expranced AI Engineer @ INSA Corporation
               </div>
             )}
           </div>
@@ -274,14 +274,14 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                 {candidate.projects.map((proj, i) => (
                   <div key={i} className={`p-3 rounded-xl border space-y-1.5 ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-100'}`}>
                     <div className="flex items-center justify-between">
-                      <h5 className="font-bold text-xs text-gray-900 dark:text-white">{proj.title}</h5>
+                      <h5 className="font-bold text-xs text-[var(--text-primary)] dark:text-white">{proj.title}</h5>
                       {proj.link && (
                         <a href={getFullUrl(proj.link)} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-blue-600 hover:underline">
                           View Project &rarr;
                         </a>
                       )}
                     </div>
-                    {proj.description && <p className="text-[11px] text-gray-600 dark:text-slate-300">{proj.description}</p>}
+                    {proj.description && <p className="text-[11px] text-[var(--text-secondary)] dark:text-slate-300">{proj.description}</p>}
                     {proj.technologies && proj.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {proj.technologies.map((tech, tIdx) => (
@@ -293,7 +293,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-xl border text-xs text-gray-400 italic">No projects listed.</div>
+              <div className="p-3 bg-[var(--bg-page)] dark:bg-slate-800 rounded-xl border text-xs text-[var(--text-muted)] italic">No projects listed.</div>
             )}
           </div>
 
@@ -310,7 +310,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                   <span key={skill} className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
                     darkMode ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-white text-[#003366] border-blue-200 shadow-2xs'
                   }`}>{skill}</span>
-                )) : <span className="text-xs text-gray-400 italic">No skills listed.</span>}
+                )) : <span className="text-xs text-[var(--text-muted)] italic">No skills listed.</span>}
               </div>
             </div>
 
@@ -322,10 +322,10 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
               {((candidate.certifications && candidate.certifications.length > 0) || (candidate.achievements && candidate.achievements.length > 0)) ? (
                 <div className="space-y-2">
                   {candidate.certifications?.map((cert, cIdx) => (
-                    <div key={cIdx} className="p-2 bg-gray-50 dark:bg-slate-800 rounded-lg border text-xs flex justify-between items-center">
+                    <div key={cIdx} className="p-2 bg-[var(--bg-page)] dark:bg-slate-800 rounded-lg border text-xs flex justify-between items-center">
                       <div>
-                        <span className="font-bold text-gray-900 dark:text-white block">{cert.title}</span>
-                        <span className="text-[10px] text-gray-500">{cert.issuer} {cert.issueDate ? `• ${cert.issueDate}` : ''}</span>
+                        <span className="font-bold text-[var(--text-primary)] dark:text-white block">{cert.title}</span>
+                        <span className="text-[10px] text-[var(--text-muted)]">{cert.issuer} {cert.issueDate ? `• ${cert.issueDate}` : ''}</span>
                       </div>
                       {cert.credentialUrl && (
                         <button
@@ -346,7 +346,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                   ))}
                 </div>
               ) : (
-                <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-xl border text-xs text-gray-400 italic">No certifications or achievements listed.</div>
+                <div className="p-3 bg-[var(--bg-page)] dark:bg-slate-800 rounded-xl border text-xs text-[var(--text-muted)] italic">No certifications or achievements listed.</div>
               )}
             </div>
 
@@ -370,10 +370,10 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-bold">{candidate.cvFileName || `${candidate.alumnusName.replace(/\s+/g, '_')}_Resume.pdf`}</p>
-                    <p className="text-xs text-gray-500">Official Curriculum Vitae</p>
+                    <p className="text-xs text-[var(--text-muted)]">Official Curriculum Vitae</p>
                   </div>
                 </div>
-                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                <svg className="w-5 h-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
               </button>
             </div>
 
@@ -384,7 +384,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
               <div className={`p-4 rounded-xl border h-28 overflow-y-auto text-xs leading-relaxed ${
                 darkMode ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-gray-50 border-gray-100 text-gray-700'
               }`}>
-                {candidate.coverLetter ? candidate.coverLetter : <span className="italic text-gray-400">No cover letter provided.</span>}
+                {candidate.coverLetter ? candidate.coverLetter : <span className="italic text-[var(--text-muted)]">No cover letter provided.</span>}
               </div>
             </div>
           </div>
@@ -398,7 +398,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
           <div className="flex items-center gap-3">
             {showStatusControls && (
               <>
-                <span className="text-xs sm:text-sm font-medium text-gray-500">Current Status:</span>
+                <span className="text-xs sm:text-sm font-medium text-[var(--text-muted)]">Current Status:</span>
                 <span className={`px-3 py-1 border rounded-full text-xs font-bold ${getStatusBadge(candidate.status)}`}>
                   {candidate.status}
                 </span>
@@ -456,8 +456,8 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
       {/* Certificate Image Preview Modal */}
       {previewImage && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md lg:pl-64" onClick={() => setPreviewImage(null)}>
-          <div className="relative max-w-3xl max-h-[90vh] bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-2xl flex flex-col items-center gap-3 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="w-full flex justify-between items-center pb-3 border-b border-gray-200 dark:border-slate-700">
+          <div className="relative max-w-3xl max-h-[90vh] bg-[var(--bg-card)] dark:bg-slate-900 p-5 rounded-2xl shadow-2xl flex flex-col items-center gap-3 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full flex justify-between items-center pb-3 border-b border-[var(--border-color)] dark:border-slate-700">
               <div className="flex items-center gap-2">
                 <span className="text-lg">📜</span>
                 <h4 className="text-sm font-extrabold text-[#003366] dark:text-blue-400">Verified Certificate Document</h4>
@@ -473,7 +473,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
                 </a>
                 <button
                   onClick={() => setPreviewImage(null)}
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-gray-500 font-bold text-sm"
+                  className="p-1.5 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 rounded-lg text-[var(--text-muted)] font-bold text-sm"
                 >
                   ✕
                 </button>
@@ -484,7 +484,7 @@ export const CandidateProfileModal: React.FC<CandidateProfileModalProps> = ({
               <img
                 src={previewImage}
                 alt="Certificate Preview"
-                className="max-h-[70vh] max-w-full object-contain rounded-lg shadow-md border border-gray-200 dark:border-slate-800"
+                className="max-h-[70vh] max-w-full object-contain rounded-lg shadow-md border border-[var(--border-color)] dark:border-slate-800"
                 onError={(e) => {
                   toast.error('Failed to load certificate image.');
                   e.currentTarget.style.display = 'none';

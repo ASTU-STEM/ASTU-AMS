@@ -150,7 +150,7 @@ export default function EmployersPage() {
       </Formik>
 
       <div className="mt-6 pt-6 border-t border-outline-variant">
-        <div className="flex items-center gap-3 rounded-lg border border-outline-variant bg-white p-4">
+        <div className="flex items-center gap-3 rounded-lg border border-outline-variant bg-[var(--bg-card)] p-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/10">
             <Building2 className="h-5 w-5 text-astu-navy" />
           </div>

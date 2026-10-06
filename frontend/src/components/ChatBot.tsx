@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, ChevronDown, ChevronUp, MessageCircle, Send, Trash2, X } from "lucide-react";
+import { useTheme } from "../hooks/useTheme";
 
 type MessageSender = "user" | "bot";
 
@@ -118,7 +119,7 @@ function nowTime() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-function TypingDots() {
+function TypingDots({ isDark = false }: { isDark?: boolean }) {
   return (
     <div style={{ display: "flex", gap: 4, alignItems: "center", padding: "4px 2px" }}>
       {[0, 1, 2].map((i) => (
@@ -126,10 +127,12 @@ function TypingDots() {
           key={i}
           style={{
             width: 8, height: 8, borderRadius: "50%",
-            background: [COLORS.navy, COLORS.green, COLORS.gold][i],
+            background: isDark
+              ? ["#60a5fa", "#4ade80", "#fbbf24"][i]
+              : [COLORS.navy, COLORS.green, COLORS.gold][i],
             display: "inline-block",
             animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-            boxShadow: `0 0 6px ${[COLORS.navy, COLORS.green, COLORS.gold][i]}60`,
+            boxShadow: `0 0 6px ${isDark ? ["#60a5fa", "#4ade80", "#fbbf24"][i] : [COLORS.navy, COLORS.green, COLORS.gold][i]}60`,
           }}
         />
       ))}
@@ -137,7 +140,7 @@ function TypingDots() {
   );
 }
 
-function renderStructuredContent(rawText: string, isUser: boolean) {
+function renderStructuredContent(rawText: string, isUser: boolean, isDark = false) {
   const cleanedText = rawText
     .replace(/\*\*/g, "")
     .replace(/\*/g, "")
@@ -168,7 +171,7 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
                 fontSize: 13.5,
                 marginTop: idx === 0 ? 0 : 4,
                 marginBottom: 2,
-                color: isUser ? "#fff" : COLORS.navy,
+                color: isUser ? "#fff" : (isDark ? "#93c5fd" : COLORS.navy),
                 lineHeight: 1.4,
               }}
             >
@@ -195,8 +198,10 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
                   minWidth: 18,
                   height: 18,
                   borderRadius: "50%",
-                  background: isUser ? "rgba(255,255,255,0.2)" : "rgba(0,48,135,0.12)",
-                  color: isUser ? "#fff" : COLORS.navy,
+                  background: isUser
+                    ? "rgba(255,255,255,0.2)"
+                    : (isDark ? "rgba(96,165,250,0.2)" : "rgba(0,48,135,0.12)"),
+                  color: isUser ? "#fff" : (isDark ? "#93c5fd" : COLORS.navy),
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -206,7 +211,7 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
               >
                 {numMatch[1]}
               </span>
-              <span style={{ fontSize: 13, lineHeight: 1.55 }}>
+              <span style={{ fontSize: 13, lineHeight: 1.55, color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e") }}>
                 {numMatch[2]}
               </span>
             </div>
@@ -226,7 +231,7 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
             >
               <span
                 style={{
-                  color: isUser ? "#fff" : COLORS.green,
+                  color: isUser ? "#fff" : (isDark ? "#4ade80" : COLORS.green),
                   fontWeight: 700,
                   fontSize: 13,
                   flexShrink: 0,
@@ -234,7 +239,7 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
               >
                 {bulletMatch[1] === "✓" ? "✓" : "•"}
               </span>
-              <span style={{ fontSize: 13, lineHeight: 1.55 }}>
+              <span style={{ fontSize: 13, lineHeight: 1.55, color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e") }}>
                 {bulletMatch[2]}
               </span>
             </div>
@@ -242,7 +247,7 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
         }
 
         return (
-          <div key={idx} style={{ fontSize: 13, lineHeight: 1.55 }}>
+          <div key={idx} style={{ fontSize: 13, lineHeight: 1.55, color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e") }}>
             {trimmed}
           </div>
         );
@@ -251,7 +256,7 @@ function renderStructuredContent(rawText: string, isUser: boolean) {
   );
 }
 
-function MessageBubble({ msg }: { msg: ChatMessage }) {
+function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boolean }) {
   const isUser = msg.sender === "user";
   return (
     <div style={{
@@ -275,29 +280,29 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
         maxWidth: "78%",
         background: isUser
           ? `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`
-          : "#fff",
-        color: isUser ? "#fff" : "#1a1a2e",
+          : (isDark ? "#1e293b" : "#fff"),
+        color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e"),
         borderRadius: 16,
         borderBottomLeftRadius: isUser ? 16 : 4,
         borderBottomRightRadius: isUser ? 4 : 16,
         padding: "12px 16px",
-        border: isUser ? "none" : "1px solid #e2e8f4",
+        border: isUser ? "none" : (isDark ? "1px solid #334155" : "1px solid #e2e8f4"),
         boxShadow: isUser
           ? `0 4px 12px ${COLORS.navy}30`
-          : "0 2px 8px rgba(0,0,0,0.06)",
+          : (isDark ? "0 4px 14px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.06)"),
       }}>
-        {renderStructuredContent(msg.text, isUser)}
+        {renderStructuredContent(msg.text, isUser, isDark)}
         <p style={{
           fontSize: 10.5, marginTop: 6, marginBottom: 0,
-          color: isUser ? "rgba(255,255,255,0.55)" : "#9aa3b8",
+          color: isUser ? "rgba(255,255,255,0.55)" : (isDark ? "#94a3b8" : "#9aa3b8"),
           textAlign: isUser ? "right" : "left",
         }}>
           {msg.timestamp}
           {msg.isAI && (
             <span style={{
-              marginLeft: 6, opacity: 0.7,
-              background: isUser ? "rgba(255,255,255,0.15)" : COLORS.gold + "20",
-              color: isUser ? "#fff" : COLORS.gold,
+              marginLeft: 6, opacity: isDark ? 0.9 : 0.7,
+              background: isUser ? "rgba(255,255,255,0.15)" : (isDark ? "rgba(200,150,42,0.25)" : COLORS.gold + "20"),
+              color: isUser ? "#fff" : (isDark ? "#fbbf24" : COLORS.gold),
               padding: "1px 6px", borderRadius: 8, fontSize: 9, fontWeight: 600,
             }}>AI</span>
           )}
@@ -308,6 +313,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
 }
 
 export default function ASTUCareerCopilot() {
+  const { darkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -511,9 +517,11 @@ export default function ASTUCareerCopilot() {
             height: isMinimized ? 68 : 560,
             maxHeight: "calc(100vh - 130px)",
             borderRadius: 24,
-            background: "#fff",
-            border: "1px solid rgba(200,150,42,0.15)",
-            boxShadow: `0 12px 60px ${COLORS.navy}25, 0 4px 16px rgba(0,0,0,0.08)`,
+            background: darkMode ? "#0f172a" : "#fff",
+            border: darkMode ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(200,150,42,0.15)",
+            boxShadow: darkMode
+              ? "0 16px 60px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)"
+              : `0 12px 60px ${COLORS.navy}25, 0 4px 16px rgba(0,0,0,0.08)`,
             display: "flex", flexDirection: "column",
             overflow: "hidden",
             animation: "popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)",
@@ -594,9 +602,11 @@ export default function ASTUCareerCopilot() {
               <div style={{
                 flex: 1, overflowY:"auto", padding:"16px",
                 display:"flex", flexDirection:"column", gap:12,
-                background: "linear-gradient(180deg, #f0f4fe 0%, #f4f7fc 50%, #f8faff 100%)",
+                background: darkMode
+                  ? "linear-gradient(180deg, #0b0f19 0%, #0f172a 100%)"
+                  : "linear-gradient(180deg, #f0f4fe 0%, #f4f7fc 50%, #f8faff 100%)",
               }} className="chatbot-messages">
-                {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
+                {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} isDark={darkMode} />)}
 
                 {isTyping && (
                   <div style={{
@@ -611,11 +621,13 @@ export default function ASTUCareerCopilot() {
                       boxShadow: `0 2px 8px ${COLORS.navy}40`,
                     }}><Bot size={16} strokeWidth={2.25} /></div>
                     <div style={{
-                      background:"#fff", borderRadius:16, borderBottomLeftRadius:4,
-                      padding:"10px 16px", border:"1px solid #e2e8f4",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                      background: darkMode ? "#1e293b" : "#fff",
+                      borderRadius:16, borderBottomLeftRadius:4,
+                      padding:"10px 16px",
+                      border: darkMode ? "1px solid #334155" : "1px solid #e2e8f4",
+                      boxShadow: darkMode ? "0 4px 16px rgba(0,0,0,0.4)" : "0 2px 8px rgba(0,0,0,0.04)",
                     }}>
-                      <TypingDots />
+                      <TypingDots isDark={darkMode} />
                     </div>
                   </div>
                 )}
@@ -624,8 +636,9 @@ export default function ASTUCareerCopilot() {
 
               {/* Input bar */}
               <div style={{
-                padding:"12px 14px", background:"#fff",
-                borderTop:"1px solid #edf0f8",
+                padding:"12px 14px",
+                background: darkMode ? "#0f172a" : "#fff",
+                borderTop: darkMode ? "1px solid #1e293b" : "1px solid #edf0f8",
                 display:"flex", gap:8, alignItems:"center", flexShrink:0,
               }}>
                 <input
@@ -638,8 +651,10 @@ export default function ASTUCareerCopilot() {
                   className="chat-input"
                   style={{
                     flex:1, fontSize:13.5, padding:"10px 14px",
-                    borderRadius:12, border:"1.5px solid #dde3f0",
-                    background:"#f4f7fc", color:"#1a1a2e",
+                    borderRadius:12,
+                    border: darkMode ? "1.5px solid #334155" : "1.5px solid #dde3f0",
+                    background: darkMode ? "#1e293b" : "#f4f7fc",
+                    color: darkMode ? "#f8fafc" : "#1a1a2e",
                     transition:"border-color 0.2s, box-shadow 0.2s",
                   }}
                 />
@@ -664,12 +679,17 @@ export default function ASTUCareerCopilot() {
               {/* Powered by footer */}
               <div style={{
                 textAlign:"center", padding:"6px 14px 10px",
-                background: `linear-gradient(180deg, #fff, #f8faff)`,
-                borderTop:"1px solid #f0f3fa", flexShrink:0,
+                background: darkMode
+                  ? "linear-gradient(180deg, #0f172a, #0b0f19)"
+                  : "linear-gradient(180deg, #fff, #f8faff)",
+                borderTop: darkMode ? "1px solid #1e293b" : "1px solid #f0f3fa",
+                flexShrink:0,
               }}>
                 <span style={{
-                  fontSize:11, color:"#9aa3b8", fontWeight:500,
-                  background: `linear-gradient(90deg, ${COLORS.navy}, ${COLORS.green})`,
+                  fontSize:11, fontWeight:500,
+                  background: darkMode
+                    ? `linear-gradient(90deg, #60a5fa, #4ade80)`
+                    : `linear-gradient(90deg, ${COLORS.navy}, ${COLORS.green})`,
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}>

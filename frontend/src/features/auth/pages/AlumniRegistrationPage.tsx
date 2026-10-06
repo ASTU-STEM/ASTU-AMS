@@ -183,7 +183,7 @@ export default function AlumniRegistrationPage() {
   };
 
   const getPasswordStrength = (pwd: string) => {
-    if (!pwd) return { score: 0, label: 'Weak', color: 'bg-slate-200' };
+    if (!pwd) return { score: 0, label: 'Weak', color: 'bg-[var(--bg-page)]' };
     let score = 0;
     if (pwd.length >= 8) score++;
     if (/[A-Z]/.test(pwd)) score++;
@@ -235,7 +235,7 @@ export default function AlumniRegistrationPage() {
           return (
             <Form className="space-y-6">
               {/* Step indicator */}
-              <div className="flex justify-between items-center text-xs text-on-surface-variant dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-outline-variant dark:border-slate-700">
+              <div className="flex justify-between items-center text-xs text-on-surface-variant dark:text-slate-300 font-medium bg-[var(--bg-page)] dark:bg-slate-800/60 p-3 rounded-lg border border-outline-variant dark:border-slate-700">
                 <span>Step 1 of 3: Enter profile details</span>
                 <span className="bg-astu-navy/10 text-astu-navy dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-semibold">Registration</span>
               </div>
@@ -290,7 +290,7 @@ export default function AlumniRegistrationPage() {
 
                   {/* Toggle Checkbox: I don't have ASTU email */}
                   <div>
-                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-outline-variant dark:border-slate-700">
+                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-[var(--bg-page)] dark:bg-slate-800/60 border border-outline-variant dark:border-slate-700">
                       <input
                         id="hasNoAstuEmail"
                         name="hasNoAstuEmail"
@@ -426,12 +426,12 @@ export default function AlumniRegistrationPage() {
 
                   {/* Password strength checker box */}
                   {values.password && (
-                    <div className="space-y-2 p-3 bg-slate-50 rounded-lg border border-outline-variant">
+                    <div className="space-y-2 p-3 bg-[var(--bg-page)] rounded-lg border border-outline-variant">
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-on-surface-variant font-medium">Strength:</span>
                         <span className="font-bold text-on-surface">{strength.label}</span>
                       </div>
-                      <div className="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className="w-full h-1 bg-[var(--bg-page)] dark:bg-slate-700 rounded-full overflow-hidden">
                         <div 
                           className={`h-full ${strength.color} transition-all duration-300`} 
                           style={{ width: `${(strength.score / 5) * 100}%` }}

@@ -68,11 +68,11 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white text-slate-800 border-r border-slate-200/80 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 ${collapsed ? 'w-[76px]' : 'w-72'
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-[var(--bg-card)] text-[var(--text-primary)] border-r border-[var(--border-color)] dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:translate-x-0 ${collapsed ? 'w-[76px]' : 'w-72'
           } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo Header */}
-        <div className="relative px-5 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="relative px-5 pt-6 pb-4 border-b border-[var(--border-color)] dark:border-slate-800">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0 flex items-center justify-center h-10 w-10 ">
@@ -85,9 +85,9 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
               {!collapsed && (
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">ASTU CMS</span>
+                    <span className="text-base font-bold text-[var(--text-primary)] dark:text-white tracking-tight">ASTU CMS</span>
                   </div>
-                  <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500 truncate">Content Engine</p>
+                  <p className="text-[11px] font-medium text-[var(--text-muted)] dark:text-slate-500 truncate">Content Engine</p>
                 </div>
               )}
             </div>
@@ -119,7 +119,7 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
               <div key={section.key} className="space-y-1">
                 {!collapsed && (
                   <div className="px-3 py-1 flex items-center justify-between">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] dark:text-slate-500">
                       {section.label}
                     </p>
                   </div>
@@ -140,10 +140,10 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
                         className={`group relative flex items-center rounded-xl text-sm font-medium transition-all duration-150 ${collapsed ? 'justify-center py-2.5 px-0 mx-auto w-11' : 'gap-3 py-2.5 px-3'
                           } ${isActive
                             ? 'bg-sky-50/90 dark:bg-sky-950/50 text-[#003366] dark:text-sky-300 font-semibold border-r-2 border-[#003366] dark:border-[#FFCC00]'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-[var(--text-secondary)] dark:text-slate-400 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/80 hover:text-[var(--text-primary)] dark:hover:text-white'
                           }`}
                       >
-                        <span className={`shrink-0 flex items-center justify-center transition-colors ${isActive ? 'text-[#003366] dark:text-[#FFCC00]' : 'text-slate-400 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200'
+                        <span className={`shrink-0 flex items-center justify-center transition-colors ${isActive ? 'text-[#003366] dark:text-[#FFCC00]' : 'text-[var(--text-muted)] dark:text-slate-400 group-hover:text-[var(--text-secondary)] dark:group-hover:text-slate-200'
                           }`}>
                           <Icon className="h-4.5 w-4.5" />
                         </span>
@@ -178,22 +178,22 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
         </nav>
 
         {/* Footer / User Profile Area */}
-        <div className="border-t border-slate-100 dark:border-slate-800 p-3.5 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="border-t border-[var(--border-color)] dark:border-slate-800 p-3.5 bg-[var(--bg-page)] dark:bg-slate-900/50">
           {!collapsed ? (
-            <div className="flex items-center justify-between rounded-xl bg-white dark:bg-slate-800/80 p-2.5 border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
+            <div className="flex items-center justify-between rounded-xl bg-[var(--bg-card)] dark:bg-slate-800/80 p-2.5 border border-[var(--border-color)] dark:border-slate-700/80 shadow-xs">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003366] dark:bg-[#004080] text-xs font-bold text-white shrink-0">
                   CM
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-200">Content Manager</p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">CMS Admin</p>
+                  <p className="truncate text-xs font-semibold text-[var(--text-primary)] dark:text-slate-200">Content Manager</p>
+                  <p className="text-[10px] text-[var(--text-muted)] dark:text-slate-500 truncate">CMS Admin</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={onLogout}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition-colors cursor-pointer"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
@@ -207,7 +207,7 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
               <button
                 type="button"
                 onClick={onLogout}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition-colors cursor-pointer"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
@@ -218,7 +218,7 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="mt-2 flex w-full items-center justify-center rounded-lg py-1.5 text-xs text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors gap-1.5 cursor-pointer"
+            className="mt-2 flex w-full items-center justify-center rounded-lg py-1.5 text-xs text-[var(--text-muted)] dark:text-slate-400 hover:text-[var(--text-secondary)] dark:hover:text-slate-200 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-colors gap-1.5 cursor-pointer"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <><PanelLeftClose className="h-4 w-4" /><span className="text-[11px] font-medium">Collapse</span></>}

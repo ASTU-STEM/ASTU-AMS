@@ -43,7 +43,7 @@ export default function NotificationPanel({
         {notifications.length > 0 ? (
           notifications.map((n) => (
             <div key={n.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
-              <span className={`mt-1 h-2.5 w-2.5 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+              <span className={`mt-1 h-2.5 w-2.5 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-[var(--bg-page)]'}`} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-[var(--text-primary)]">{n.text}</p>
                 <p className="text-xs text-[var(--text-secondary)]">{n.time}</p>

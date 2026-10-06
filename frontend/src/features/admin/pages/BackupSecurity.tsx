@@ -58,14 +58,14 @@ function backupStatusClass(status: BackupStatus) {
     case 'In Progress':
       return 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   }
 }
 
 function apiStatusClass(status: ApiKeyRecord['status']) {
   return status === 'Active'
     ? 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15'
-    : 'bg-slate-100 text-slate-600 border-slate-200';
+    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
 }
 
 function SectionCard({
@@ -78,10 +78,10 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+        {subtitle && <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -90,11 +90,11 @@ function SectionCard({
 
 function miniStat({ label, value, icon: Icon }: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-2 text-2xl font-semibold text-slate-900">{value}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{label}</p>
+          <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{value}</p>
         </div>
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#003580]/10 text-[#003580]">
           <Icon className="h-4 w-4" />
@@ -122,30 +122,30 @@ function PaginationFooter({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-2 text-xs text-slate-600">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-2 text-xs text-[var(--text-secondary)]">
       <div>
-        Showing <span className="font-semibold text-slate-800">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-800">{endItem}</span> of{' '}
-        <span className="font-semibold text-slate-800">{totalItems}</span> entries
+        Showing <span className="font-semibold text-[var(--text-primary)]">{startItem}</span> to{' '}
+        <span className="font-semibold text-[var(--text-primary)]">{endItem}</span> of{' '}
+        <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> entries
       </div>
       <div className="flex items-center gap-1.5">
         <button
           type="button"
           disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
-          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--bg-page)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Prev
         </button>
-        <span className="px-2 font-medium text-slate-500">
+        <span className="px-2 font-medium text-[var(--text-muted)]">
           Page {currentPage} of {totalPages}
         </span>
         <button
           type="button"
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
-          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--bg-page)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Next
           <ChevronRight className="h-3.5 w-3.5" />
@@ -395,8 +395,8 @@ export default function BackupSecurity() {
             <div className="rounded-[10px] border border-[#1D9E75]/15 bg-[#1D9E75]/5 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Last backup</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">{backupSummary}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Last backup</p>
+                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{backupSummary}</p>
                 </div>
                 <AdminBadge variant="success">Healthy</AdminBadge>
               </div>
@@ -404,11 +404,11 @@ export default function BackupSecurity() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Schedule</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Schedule</span>
                 <select
                   value={schedule}
                   onChange={(event) => handleScheduleChange(event.target.value as BackupFrequency)}
-                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                 >
                   {['Daily', 'Weekly', 'Monthly'].map((item) => (
                     <option key={item} value={item}>
@@ -419,23 +419,23 @@ export default function BackupSecurity() {
               </label>
 
               <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Time</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Time</span>
                 <input
                   type="time"
                   value={time}
                   onChange={(event) => handleTimeChange(event.target.value)}
-                  className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                  className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                 />
               </label>
             </div>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)]">
               <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="sticky top-0 bg-slate-50 shadow-sm">
+                  <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm">
                     <tr>
                       {['Date', 'Size', 'Status', 'Download', 'Restore'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                           {head}
                         </th>
                       ))}
@@ -444,15 +444,15 @@ export default function BackupSecurity() {
                   <tbody>
                     {paginatedBackups.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-500">
+                        <td colSpan={5} className="px-4 py-8 text-center text-xs text-[var(--text-muted)]">
                           No database backups recorded.
                         </td>
                       </tr>
                     ) : (
                       paginatedBackups.map((backup) => (
-                        <tr key={backup.file} className="border-t border-slate-100 hover:bg-slate-50/70">
-                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{backup.date}</td>
-                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{backup.size}</td>
+                        <tr key={backup.file} className="border-t border-[var(--border-color)] hover:bg-[var(--bg-page)]">
+                          <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">{backup.date}</td>
+                          <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">{backup.size}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <AdminBadge variant="success" className={backupStatusClass(backup.status)}>
                               {backup.status}
@@ -462,7 +462,7 @@ export default function BackupSecurity() {
                             <button
                               type="button"
                               onClick={() => handleDownloadBackup(backup.file)}
-                              className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                              className="inline-flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
                             >
                               <Download className="h-3.5 w-3.5" />
                               Download
@@ -493,7 +493,7 @@ export default function BackupSecurity() {
               />
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-color)] pt-4">
               <button
                 type="button"
                 onClick={() => setConfirmOpen(true)}
@@ -502,7 +502,7 @@ export default function BackupSecurity() {
                 <RefreshCcw className="h-4 w-4" />
                 Run Backup Now
               </button>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-[var(--text-muted)]">
                 Next backup: {schedule} at {time}
               </div>
             </div>
@@ -513,7 +513,7 @@ export default function BackupSecurity() {
           <div className="space-y-5">
             <div>
               <div className="flex items-center justify-between gap-3">
-                <h4 className="text-sm font-semibold text-slate-900">Active Sessions</h4>
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">Active Sessions</h4>
                 <button
                   type="button"
                   onClick={() => setRevokeAllOpen(true)}
@@ -522,13 +522,13 @@ export default function BackupSecurity() {
                   Revoke All Sessions
                 </button>
               </div>
-              <div className="mt-3 overflow-hidden rounded-[10px] border border-slate-200">
+              <div className="mt-3 overflow-hidden rounded-[10px] border border-[var(--border-color)]">
                 <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="sticky top-0 bg-slate-50 shadow-sm">
+                    <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm">
                       <tr>
                         {['User', 'IP', 'Device', 'Location', 'Login Time', ''].map((head) => (
-                          <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                             {head}
                           </th>
                         ))}
@@ -537,22 +537,22 @@ export default function BackupSecurity() {
                     <tbody>
                       {paginatedSessions.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-xs text-slate-500">
+                          <td colSpan={6} className="px-4 py-8 text-center text-xs text-[var(--text-muted)]">
                             No active sessions found.
                           </td>
                         </tr>
                       ) : (
                         paginatedSessions.map((session) => (
-                          <tr key={`${session.user}-${session.ip}`} className="border-t border-slate-100 hover:bg-slate-50/70">
-                            <td className="px-3 py-3 text-slate-700 whitespace-nowrap max-w-[180px] truncate" title={session.user}>
+                          <tr key={`${session.user}-${session.ip}`} className="border-t border-[var(--border-color)] hover:bg-[var(--bg-page)]">
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap max-w-[180px] truncate" title={session.user}>
                               {session.user}
                             </td>
-                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{session.ip}</td>
-                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap max-w-[150px] truncate" title={session.device}>
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{session.ip}</td>
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap max-w-[150px] truncate" title={session.device}>
                               {session.device}
                             </td>
-                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{session.location}</td>
-                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{session.loginTime}</td>
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{session.location}</td>
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{session.loginTime}</td>
                             <td className="px-3 py-3 whitespace-nowrap text-right">
                               <button
                                 type="button"
@@ -580,7 +580,7 @@ export default function BackupSecurity() {
 
             <div>
               <div className="flex items-center justify-between gap-3">
-                <h4 className="text-sm font-semibold text-slate-900">API Keys</h4>
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">API Keys</h4>
                 <button
                   type="button"
                   onClick={() => setGenerateKeyOpen(true)}
@@ -590,13 +590,13 @@ export default function BackupSecurity() {
                   Generate New API Key
                 </button>
               </div>
-              <div className="mt-3 overflow-hidden rounded-[10px] border border-slate-200">
+              <div className="mt-3 overflow-hidden rounded-[10px] border border-[var(--border-color)]">
                 <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="sticky top-0 bg-slate-50 shadow-sm">
+                    <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm">
                       <tr>
                         {['Key Name', 'Created', 'Last Used', 'Status', ''].map((head) => (
-                          <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                             {head}
                           </th>
                         ))}
@@ -605,16 +605,16 @@ export default function BackupSecurity() {
                     <tbody>
                       {paginatedApiKeys.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-500">
+                          <td colSpan={5} className="px-4 py-8 text-center text-xs text-[var(--text-muted)]">
                             No API keys generated.
                           </td>
                         </tr>
                       ) : (
                         paginatedApiKeys.map((key) => (
-                          <tr key={key.name} className="border-t border-slate-100 hover:bg-slate-50/70">
-                            <td className="px-3 py-3 text-slate-700 whitespace-nowrap">{key.name}</td>
-                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{key.created}</td>
-                            <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{key.lastUsed}</td>
+                          <tr key={key.name} className="border-t border-[var(--border-color)] hover:bg-[var(--bg-page)]">
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{key.name}</td>
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{key.created}</td>
+                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{key.lastUsed}</td>
                             <td className="px-3 py-3 whitespace-nowrap">
                               <AdminBadge variant="success" className={apiStatusClass(key.status)}>
                                 {key.status}
@@ -646,27 +646,27 @@ export default function BackupSecurity() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <h4 className="text-sm font-semibold text-slate-900">Rate Limiting</h4>
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">Rate Limiting</h4>
                   <AdminBadge variant="neutral">API Protection</AdminBadge>
                 </div>
                 <div className="mt-3">
                   <label className="space-y-2">
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Max requests per minute</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Max requests per minute</span>
                     <input
                       type="number"
                       value={rateLimit}
                       onChange={(event) => handleRateLimitChange(Number(event.target.value))}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                     />
                   </label>
                 </div>
               </div>
 
-              <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
                 <div className="flex items-center justify-between gap-3">
-                  <h4 className="text-sm font-semibold text-slate-900">IP Whitelist</h4>
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">IP Whitelist</h4>
                   <AdminBadge variant="neutral">{whitelist.length} allowed</AdminBadge>
                 </div>
                 <div className="mt-3 flex gap-2">
@@ -674,7 +674,7 @@ export default function BackupSecurity() {
                     value={ipInput}
                     onChange={(event) => setIpInput(event.target.value)}
                     placeholder="Add IP address"
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
                   />
                   <button
                     type="button"
@@ -686,14 +686,14 @@ export default function BackupSecurity() {
                 </div>
                 <div className="mt-3 max-h-[140px] overflow-y-auto flex flex-wrap gap-2 pr-1">
                   {whitelist.length === 0 ? (
-                    <p className="text-xs text-slate-400 py-1">No IP addresses whitelisted.</p>
+                    <p className="text-xs text-[var(--text-muted)] py-1">No IP addresses whitelisted.</p>
                   ) : (
                     whitelist.map((ip) => (
                       <button
                         key={ip}
                         type="button"
                         onClick={() => removeWhitelistIp(ip)}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
                       >
                         {ip}
                         <X className="h-3.5 w-3.5" />
@@ -716,7 +716,7 @@ export default function BackupSecurity() {
             <button
               type="button"
               onClick={() => setConfirmOpen(false)}
-              className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -730,7 +730,7 @@ export default function BackupSecurity() {
           </div>
         }
       >
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-[var(--text-secondary)]">
           This will trigger a manual database backup immediately. The latest backup summary is {lastBackupTime.size} from {lastBackupTime.date}.
         </p>
       </AdminModal>
@@ -744,7 +744,7 @@ export default function BackupSecurity() {
             <button
               type="button"
               onClick={() => setRevokeAllOpen(false)}
-              className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -758,7 +758,7 @@ export default function BackupSecurity() {
           </div>
         }
       >
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-[var(--text-secondary)]">
           This will invalidate all active sessions across the system. Users will be required to sign in again.
         </p>
       </AdminModal>
@@ -772,7 +772,7 @@ export default function BackupSecurity() {
             <button
               type="button"
               onClick={() => setGenerateKeyOpen(false)}
-              className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
             >
               Cancel
             </button>
@@ -787,11 +787,11 @@ export default function BackupSecurity() {
         }
       >
         <label className="space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Key Name</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Key Name</span>
           <input
             value={newKeyName}
             onChange={(event) => setNewKeyName(event.target.value)}
-            className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
+            className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 outline-none focus:border-[#003580]"
           />
         </label>
       </AdminModal>

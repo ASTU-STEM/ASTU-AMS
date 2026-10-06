@@ -59,7 +59,7 @@ export default function ResetPasswordPage() {
   };
 
   const getPasswordStrength = (pwd: string) => {
-    if (!pwd) return { score: 0, label: 'Weak', color: 'bg-slate-200' };
+    if (!pwd) return { score: 0, label: 'Weak', color: 'bg-[var(--bg-page)]' };
     let score = 0;
     if (pwd.length >= 8) score++;
     if (/[A-Z]/.test(pwd)) score++;
@@ -158,7 +158,7 @@ export default function ResetPasswordPage() {
                     <span className="text-on-surface-variant">Password Strength:</span>
                     <span className="font-bold text-on-surface">{strength.label}</span>
                   </div>
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-[var(--bg-page)] rounded-full overflow-hidden">
                     <div 
                       className={`h-full ${strength.color} transition-all duration-300`} 
                       style={{ width: `${(strength.score / 5) * 100}%` }}

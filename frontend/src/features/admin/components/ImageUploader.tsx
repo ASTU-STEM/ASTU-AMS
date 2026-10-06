@@ -58,20 +58,20 @@ export default function ImageUploader({
 
   return (
     <div className={`space-y-1.5 ${className}`}>
-      {label && <label className="block text-xs font-semibold text-slate-700">{label}</label>}
+      {label && <label className="block text-xs font-semibold text-[var(--text-secondary)]">{label}</label>}
 
       {value ? (
-        <div className="relative group rounded-xl border border-slate-200 bg-slate-50 p-2 overflow-hidden flex items-center gap-3">
+        <div className="relative group rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-2 overflow-hidden flex items-center gap-3">
           <img
             src={mediaUrl(value)}
             alt="Uploaded preview"
-            className="h-16 w-24 rounded-lg object-cover border border-slate-200 shrink-0 bg-white"
+            className="h-16 w-24 rounded-lg object-cover border border-[var(--border-color)] shrink-0 bg-[var(--bg-card)]"
             onError={(e) => {
               (e.target as HTMLImageElement).style.visibility = 'hidden';
             }}
           />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-800 truncate flex items-center gap-1">
+            <p className="text-xs font-semibold text-[var(--text-primary)] truncate flex items-center gap-1">
               {uploading ? (
                 <Loader2 className="h-3.5 w-3.5 text-[#003580] shrink-0 animate-spin" />
               ) : (
@@ -79,7 +79,7 @@ export default function ImageUploader({
               )}
               {uploading ? 'Uploading to server…' : 'Image Selected'}
             </p>
-            <p className="text-[10px] text-slate-400 truncate mt-0.5">
+            <p className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
               {value.startsWith('data:') ? 'Local Image File (Base64)' : mediaUrl(value)}
             </p>
             <button
@@ -94,7 +94,7 @@ export default function ImageUploader({
           <button
             type="button"
             onClick={() => onChange('')}
-            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+            className="p-1.5 text-[var(--text-muted)] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
             title="Remove Image"
           >
             <X className="h-4 w-4" />
@@ -112,16 +112,16 @@ export default function ImageUploader({
           className={`cursor-pointer rounded-xl border-2 border-dashed p-4 text-center transition-all ${
             dragActive
               ? 'border-[#003580] bg-[#003580]/5'
-              : 'border-slate-300 bg-slate-50/60 hover:border-[#003580]/50 hover:bg-slate-50'
+              : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003580]/50 hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-xs border border-slate-200 text-[#003580] mb-2">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-xs border border-[var(--border-color)] text-[#003580] mb-2">
             <Upload className="h-5 w-5" />
           </div>
-          <p className="text-xs font-semibold text-slate-800">
-            Click to upload image <span className="font-normal text-slate-500">or drag and drop</span>
+          <p className="text-xs font-semibold text-[var(--text-primary)]">
+            Click to upload image <span className="font-normal text-[var(--text-muted)]">or drag and drop</span>
           </p>
-          <p className="text-[10px] text-slate-400 mt-1">Supports PNG, JPG, GIF or WebP (max 5MB)</p>
+          <p className="text-[10px] text-[var(--text-muted)] mt-1">Supports PNG, JPG, GIF or WebP (max 5MB)</p>
         </div>
       )}
 

@@ -33,7 +33,7 @@ export function BarChartComponent({ data, xKey, bars, height = 300, className = 
     <div className={className}>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e8edf5" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
           <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <Tooltip
@@ -53,7 +53,7 @@ export function LineChartComponent({ data, xKey, lines, height = 300, className 
     <div className={className}>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e8edf5" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
           <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <Tooltip
@@ -110,7 +110,7 @@ export function AreaChartComponent({ data, xKey, lines, height = 300, className 
     <div className={className}>
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e8edf5" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
           <XAxis dataKey={xKey} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
           <Tooltip

@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
-import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  Database,
-  Flame,
-  Plus,
-  RefreshCw,
-  ShieldAlert,
-  Sliders,
-  Zap,
-} from 'lucide-react';
+import { AlertCircle, CheckCircle2, Flame, Server, Siren } from 'lucide-react';
 import toast from 'react-hot-toast';
+import IctPageHeader from '../components/IctPageHeader';
+import IctMetricCard from '../components/IctMetricCard';
+import IctSection from '../components/IctSection';
+import IctStatusBadge from '../components/IctStatusBadge';
+import IctTabs, { IctTabItem } from '../components/IctTabs';
+import IctEmptyState from '../components/IctEmptyState';
+import IctKeyValueGrid from '../components/IctKeyValue';
+import { ictBtnDanger } from '../components/ictUi';
+
+type IncidentTab = 'incidents' | 'dr-simulation';
+
+const LIFECYCLE = ['Detected', 'Investigating', 'Identified', 'Mitigating', 'Resolved', 'Postmortem'] as const;
 
 export default function IctIncidentsPage() {
-  const [activeTab, setActiveTab] = useState<'incidents' | 'dr-simulation'>('incidents');
+  const [activeTab, setActiveTab] = useState<IncidentTab>('incidents');
   const [drSimulating, setDrSimulating] = useState(false);
 
-  const [incidents, setIncidents] = useState([
+  const [incidents] = useState([
     {
       id: 'INC-2026-0042',
       title: 'Registrar SIS Integration API Response Degradation',
@@ -71,155 +71,202 @@ export default function IctIncidentsPage() {
     }, 2500);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
-            Incident Management &amp; Disaster Recovery Center
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Enterprise incident lifecycle tracking (`INC-2026-XXXX`), postmortem audit, and DR simulation routines.
-          </p>
-        </div>
+  const activeIncidents = incidents.filter((i) => i.status !== 'Resolved' && i.status !== 'Closed');
+  const resolvedIncidents = incidents.length - activeIncidents.length;
+  const affectedUsers = incidents.reduce((sum, i) => sum + i.affectedUsers, 0);
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('incidents')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'incidents'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-white text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
-            }`}
-          >
-            Incidents
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('dr-simulation')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'dr-simulation'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-white text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
-            }`}
-          >
-            Disaster Recovery (DR)
-          </button>
-        </div>
-      </div>
+  const tabs: IctTabItem<IncidentTab>[] = [
+    { key: 'incidents', label: 'Incidents', count: activeIncidents.length, dot: activeIncidents.length > 0 ? 'danger' : 'ok' },
+    { key: 'dr-simulation', label: 'Disaster Recovery' },
+  ];
+
+  return (
+    <div className="space-y-4 lg:space-y-5">
+      <IctPageHeader
+        icon={AlertCircle}
+        title="Incidents & Disaster Recovery"
+        description="Incident lifecycle tracking, recovery status and disaster recovery readiness."
+        meta={
+          activeIncidents.length > 0 ? (
+            <IctStatusBadge status="critical" label={`${activeIncidents.length} ACTIVE`} />
+          ) : (
+            <IctStatusBadge status="operational" label="NO ACTIVE INCIDENTS" />
+          )
+        }
+        actions={
+          <IctTabs<IncidentTab> items={tabs} value={activeTab} onChange={setActiveTab} ariaLabel="Incident views" />
+        }
+      />
 
       {activeTab === 'incidents' ? (
-        <div className="space-y-4">
-          {incidents.map((inc) => (
-            <div
-              key={inc.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">{inc.id}</span>
-                    <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
-                      Severity: {inc.severity}
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-                      {inc.status}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{inc.title}</h3>
-                </div>
+        <>
+          {/* Incident overview */}
+          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+            <IctMetricCard
+              label="Active incidents"
+              value={activeIncidents.length}
+              icon={Siren}
+              tone={activeIncidents.length > 0 ? 'danger' : 'success'}
+              hint="Investigating or mitigating"
+            />
+            <IctMetricCard label="Recovered" value={resolvedIncidents} icon={CheckCircle2} tone="success" />
+            <IctMetricCard label="Affected users" value={affectedUsers.toLocaleString()} icon={AlertCircle} tone="warning" hint="Across all tracked incidents" />
+            <IctMetricCard label="Tracked incidents" value={incidents.length} icon={Server} tone="info" hint="Current reporting window" />
+          </div>
 
-                <div className="text-right text-xs text-slate-500">
-                  <div>Started: <strong>{inc.started}</strong></div>
-                  <div>Affected Users: <strong>{inc.affectedUsers.toLocaleString()}</strong></div>
-                </div>
-              </div>
+          {incidents.length === 0 ? (
+            <IctSection icon={AlertCircle} title="Incident Register" description="Active and recovered incidents">
+              <IctEmptyState
+                icon={CheckCircle2}
+                tone="success"
+                title="No active incidents"
+                description="No service interruption is currently being tracked. New incidents appear here with their full lifecycle timeline."
+              />
+            </IctSection>
+          ) : (
+            <div className="space-y-3">
+              {incidents.map((inc) => {
+                const statusIndex = Math.max(
+                  0,
+                  LIFECYCLE.findIndex((s) => s.toLowerCase() === inc.status.toLowerCase())
+                );
+                const currentStep = statusIndex <= 0 ? 1 : statusIndex;
+                const isCritical = inc.severity.toLowerCase() === 'critical';
 
-              {/* Lifecycle Progress Bar */}
-              <div className="mb-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Lifecycle Progress</p>
-                <div className="grid grid-cols-6 gap-1 text-center text-[10px] font-bold">
-                  {['Detected', 'Investigating', 'Identified', 'Mitigating', 'Resolved', 'Postmortem'].map((step, idx) => {
-                    const isCurrent = step.toLowerCase() === inc.status.toLowerCase();
-                    const isPassed = idx < 2;
-                    return (
-                      <div
-                        key={step}
-                        className={`py-1.5 rounded-lg border ${
-                          isCurrent
-                            ? 'bg-amber-500 text-slate-950 border-amber-600 font-extrabold'
-                            : isPassed
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'
-                            : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700'
-                        }`}
-                      >
-                        {step}
+                return (
+                  <IctSection
+                    key={inc.id}
+                    icon={AlertCircle}
+                    title={inc.title}
+                    description={`Started ${inc.started} · ${inc.affectedUsers.toLocaleString()} affected users`}
+                    className={isCritical ? 'border-[var(--ict-crit-line)]' : ''}
+                    actions={
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="ict-mono ict-num font-extrabold text-[var(--ict-accent-text)]">{inc.id}</span>
+                        <IctStatusBadge status={inc.severity} label={`SEVERITY: ${inc.severity.toUpperCase()}`} size="xs" />
+                        <IctStatusBadge status={inc.status} size="xs" />
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Timeline</p>
-                <div className="space-y-2 text-xs">
-                  {inc.timeline.map((event, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="font-mono text-slate-400 font-bold">{event.time}</span>
-                      <span className="text-slate-700 dark:text-slate-300">{event.text}</span>
+                    }
+                    bodyClassName="space-y-3.5"
+                  >
+                    {/* Affected scope */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="ict-label">Affected services</span>
+                      {inc.affectedServices.map((svc) => (
+                        <span
+                          key={svc}
+                          className="rounded-[4px] border border-[var(--border-color)] bg-[var(--ict-surface-inset)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--text-secondary)]  "
+                        >
+                          {svc}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+
+                    {/* Lifecycle */}
+                    <div>
+                      <p className="ict-label mb-1.5">Lifecycle progress</p>
+                      <ol className="grid grid-cols-3 gap-1 sm:grid-cols-6">
+                        {LIFECYCLE.map((step, idx) => {
+                          const isCurrent = idx === currentStep;
+                          const isPassed = idx < currentStep;
+                          return (
+                            <li
+                              key={step}
+                              aria-current={isCurrent ? 'step' : undefined}
+                              className={`rounded-[4px] border px-1.5 py-1.5 text-center text-[9.5px] font-extrabold uppercase tracking-[0.04em] ${
+                                isCurrent
+                                  ? 'border-[var(--ict-warn)] bg-[var(--ict-warn-bg)] text-[var(--ict-warn)]'
+                                  : isPassed
+                                    ? 'border-[var(--ict-ok-line)] bg-[var(--ict-ok-bg)] text-[var(--ict-ok)]'
+                                    : 'border-[var(--border-color)] bg-[var(--ict-surface-inset)] text-[var(--text-muted)]'
+                              }`}
+                            >
+                              {step}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </div>
+
+                    {/* Timeline */}
+                    <div className="ict-inset p-3">
+                      <p className="ict-label mb-2">Incident timeline</p>
+                      <ol className="space-y-2">
+                        {inc.timeline.map((event, i) => (
+                          <li key={`${event.time}-${i}`} className="flex items-start gap-2.5">
+                            <span className="ict-mono ict-num shrink-0 font-extrabold text-[var(--ict-accent-text)]">
+                              {event.time}
+                            </span>
+                            <span className="relative flex flex-col">
+                              <span
+                                className="absolute -left-[1.05rem] top-1 h-1.5 w-1.5 rounded-full bg-[var(--ict-accent)] ring-2 ring-[var(--ict-surface)]"
+                                aria-hidden
+                              />
+                              <span className="text-[11px] leading-relaxed text-[var(--text-secondary)] ">
+                                {event.text}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </IctSection>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       ) : (
-        /* DR Simulation View */
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-6 dark:border-blue-900/40 dark:bg-blue-950/20">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-600 text-white uppercase tracking-widest">
-                  ENVIRONMENT SAFETY GAURD ACTIVE
-                </span>
-                <h2 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">
-                  Disaster Recovery (DR) Simulation Center
-                </h2>
-                <p className="mt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-                  Simulate PostgreSQL database primary node failures, network partitioning, or regional outages without destroying production data.
-                </p>
+        <div className="space-y-4">
+          <IctSection
+            icon={Flame}
+            title="Disaster Recovery Simulation Center"
+            description="Exercise failover of the primary database node without destroying production data"
+            actions={
+              <div className="flex flex-wrap items-center gap-2">
+                <IctStatusBadge status="info" label="SAFETY GUARD ACTIVE" size="xs" />
+                <button type="button" disabled={drSimulating} onClick={handleRunDRSimulation} className={ictBtnDanger}>
+                  <Flame className="h-3.5 w-3.5" aria-hidden />
+                  {drSimulating ? 'Simulating…' : 'Run DR Outage Simulation'}
+                </button>
               </div>
-
-              <button
-                type="button"
-                disabled={drSimulating}
-                onClick={handleRunDRSimulation}
-                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-3 text-xs font-bold text-white shadow-md hover:bg-rose-700 cursor-pointer disabled:opacity-50"
-              >
-                <Flame className="w-4 h-4 animate-pulse" />
-                Run DR Outage Simulation
-              </button>
+            }
+            bodyClassName="space-y-3.5"
+          >
+            <div className="grid gap-2.5 md:grid-cols-3">
+              <IctMetricCard
+                label="Primary system node"
+                value="ONLINE"
+                icon={Server}
+                tone="success"
+                hint="ASTU Core Neon Postgres primary"
+                status={<IctStatusBadge status="operational" size="xs" />}
+              />
+              <IctMetricCard
+                label="Failover replica"
+                value="READY"
+                icon={Server}
+                tone="info"
+                hint="Replication lag under 1.2s"
+                status={<IctStatusBadge status="active" label="READY" size="xs" />}
+              />
+              <IctMetricCard label="Recovery targets" value="RTO <15s" icon={Server} tone="default" hint="RPO 0s · zero data loss target" />
             </div>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              { title: 'PRIMARY SYSTEM NODE', status: 'ONLINE', detail: 'ASTU Core Neon Postgres Primary', color: 'text-emerald-600' },
-              { title: 'FAILOVER REPLICA', status: 'READY', detail: 'Replication lag < 1.2s', color: 'text-blue-600' },
-              { title: 'ESTIMATED RTO / RPO', status: 'RTO: <15s | RPO: 0s', detail: 'Zero data loss target verified', color: 'text-violet-600' },
-            ].map((card) => (
-              <div key={card.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{card.title}</span>
-                <p className={`mt-2 text-lg font-extrabold ${card.color}`}>{card.status}</p>
-                <p className="mt-1 text-xs text-slate-500 font-medium">{card.detail}</p>
-              </div>
-            ))}
-          </div>
+            <IctKeyValueGrid
+              columns={3}
+              items={[
+                { label: 'Recovery time objective', value: 'Under 15 seconds', mono: true },
+                { label: 'Recovery point objective', value: '0 seconds', mono: true },
+                { label: 'Failover node', value: 'Secondary Postgres replica', mono: true },
+              ]}
+            />
+
+            <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
+              The simulation runs entirely in the browser and reports a simulated failover result. It does not touch the
+              production database.
+            </p>
+          </IctSection>
         </div>
       )}
     </div>

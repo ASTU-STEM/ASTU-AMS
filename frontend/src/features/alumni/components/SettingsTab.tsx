@@ -301,7 +301,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       style={{ backgroundColor: enabled ? color : 'var(--border-color)' }}
     >
       <span
-        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--bg-card)] shadow-lg ring-0 transition-all duration-300 ease-in-out ${enabled ? 'translate-x-5' : 'translate-x-0'
           }`}
       />
     </button>
@@ -494,7 +494,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               </div>
 
               {/* Data Retention Info */}
-              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50 flex items-start gap-3">
+              <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-500/25 bg-blue-50/50 dark:bg-blue-500/10 flex items-start gap-3">
                 <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -564,7 +564,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                         </div>
                       </div>
                       <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded-md uppercase tracking-wider ${
-                        donationEnabled ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-gray-100 text-gray-600 border border-gray-200'
+                        donationEnabled ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border border-[var(--border-color)]'
                       }`}>
                         {donationEnabled ? 'Active' : 'Paused'}
                       </span>
@@ -603,15 +603,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     onClick={() => handleThemeChange('light')}
                     className={`p-4 rounded-xl border-2 text-center cursor-pointer transition-all duration-200 ${
                       theme === 'light'
-                        ? 'border-[#003366] bg-[#003366]/5 shadow-sm'
-                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30'
+                        ? 'border-[#003366] dark:border-[#FFCC00] bg-[#003366]/5 dark:bg-[#FFCC00]/10 shadow-sm'
+                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30 dark:hover:border-[#FFCC00]/30'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 mx-auto mb-2 flex items-center justify-center shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] mx-auto mb-2 flex items-center justify-center shadow-sm">
                       <span className="material-symbols-outlined text-sm text-amber-500">light_mode</span>
                     </div>
                     <p className="text-xs font-bold text-[var(--text-primary)]">Light Mode</p>
-                    <p className={`text-[9px] font-extrabold mt-0.5 ${theme === 'light' ? 'text-[#003366]' : 'text-[var(--text-secondary)]'}`}>
+                    <p className={`text-[9px] font-extrabold mt-0.5 ${theme === 'light' ? 'text-[#003366] dark:text-[#FFD700]' : 'text-[var(--text-secondary)]'}`}>
                       {theme === 'light' ? '✓ Active' : 'Available'}
                     </p>
                   </div>
@@ -620,15 +620,15 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     onClick={() => handleThemeChange('dark')}
                     className={`p-4 rounded-xl border-2 text-center cursor-pointer transition-all duration-200 ${
                       theme === 'dark'
-                        ? 'border-[#003366] bg-[#003366]/10 shadow-sm'
-                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30'
+                        ? 'border-[#003366] dark:border-[#FFCC00] bg-[#003366]/10 dark:bg-[#FFCC00]/10 shadow-sm'
+                        : 'border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/30 dark:hover:border-[#FFCC00]/30'
                     }`}
                   >
                     <div className="w-8 h-8 rounded-lg bg-gray-900 border border-gray-700 mx-auto mb-2 flex items-center justify-center shadow-sm">
                       <span className="material-symbols-outlined text-sm text-indigo-400">dark_mode</span>
                     </div>
                     <p className="text-xs font-bold text-[var(--text-primary)]">Dark Mode</p>
-                    <p className={`text-[9px] font-extrabold mt-0.5 ${theme === 'dark' ? 'text-[#003366]' : 'text-[var(--text-secondary)]'}`}>
+                    <p className={`text-[9px] font-extrabold mt-0.5 ${theme === 'dark' ? 'text-[#003366] dark:text-[#FFD700]' : 'text-[var(--text-secondary)]'}`}>
                       {theme === 'dark' ? '✓ Active' : 'Available'}
                     </p>
                   </div>
@@ -777,7 +777,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <button 
                       type="button"
                       onClick={handleDeleteAccountModalOpen}
-                      className="px-4 py-2 rounded-xl border border-red-300 bg-white text-red-600 text-xs font-bold hover:bg-red-50 transition-all duration-200 shadow-sm hover:shadow"
+                      className="px-4 py-2 rounded-xl border border-red-300 bg-[var(--bg-card)] text-red-600 text-xs font-bold hover:bg-red-50 transition-all duration-200 shadow-sm hover:shadow"
                     >
                       Delete Account
                     </button>
@@ -813,14 +813,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
 
             <div className="space-y-4">
               {/* Setup Method Selector Tabs */}
-              <div className="flex rounded-xl bg-gray-100 p-1 border border-gray-200">
+              <div className="flex rounded-xl bg-[var(--bg-page)] p-1 border border-[var(--border-color)]">
                 <button
                   type="button"
                   onClick={() => setSetup2FAMode('app')}
                   className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 ${
                     setup2FAMode === 'app'
-                      ? 'bg-white text-[#003366] shadow-sm'
-                      : 'text-gray-500 hover:text-gray-800'
+                      ? 'bg-[var(--bg-card)] text-[#003366] shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   📱 Authenticator App
@@ -830,8 +830,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                   onClick={() => setSetup2FAMode('email')}
                   className={`flex-1 py-2 rounded-lg text-xs font-extrabold transition-all duration-200 ${
                     setup2FAMode === 'email'
-                      ? 'bg-white text-[#003366] shadow-sm'
-                      : 'text-gray-500 hover:text-gray-800'
+                      ? 'bg-[var(--bg-card)] text-[#003366] shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   ✉️ Email Verification
@@ -839,9 +839,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               </div>
 
               {setup2FAMode === 'app' ? (
-                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center space-y-2">
-                  <p className="text-[11px] font-bold text-gray-700">Scan QR Code or enter setup key in Authenticator app:</p>
-                  <div className="w-36 h-36 bg-white border border-gray-300 rounded-xl mx-auto flex items-center justify-center shadow-sm overflow-hidden p-1.5">
+                <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center space-y-2">
+                  <p className="text-[11px] font-bold text-[var(--text-secondary)]">Scan QR Code or enter setup key in Authenticator app:</p>
+                  <div className="w-36 h-36 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl mx-auto flex items-center justify-center shadow-sm overflow-hidden p-1.5">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
                         `otpauth://totp/ASTU AMS:${user?.email || (preferences as any)?.email || 'alumni@astu.edu.et'}?secret=ASTU2FASECRET367&issuer=ASTU AMS`
@@ -850,19 +850,19 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <p className="text-[11px] font-mono font-bold bg-gray-200 px-3 py-1.5 rounded-lg text-gray-800 tracking-wider">ASTU2FASECRET367</p>
-                  <p className="text-[9px] text-gray-500">Account: <span className="font-semibold text-gray-700">{user?.email || 'alumni@astu.edu.et'}</span></p>
+                  <p className="text-[11px] font-mono font-bold border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 rounded-lg text-[var(--text-primary)] tracking-wider">ASTU2FASECRET367</p>
+                  <p className="text-[9px] text-[var(--text-muted)]">Account: <span className="font-semibold text-[var(--text-secondary)]">{user?.email || 'alumni@astu.edu.et'}</span></p>
                 </div>
               ) : (
-                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center space-y-3">
-                  <p className="text-xs text-gray-600">
+                <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center space-y-3">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Receive 6-digit security verification codes sent directly to your registered email: <span className="font-bold text-[#003366]">{user?.email || 'alumni@astu.edu.et'}</span>
                   </p>
                   <button
                     type="button"
                     disabled={sendingSetupOtp}
                     onClick={handleSendSetupEmailOtp}
-                    className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold transition-all shadow-sm disabled:opacity-60"
+                    className="px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--text-primary)] text-xs font-bold transition-all shadow-sm disabled:opacity-60"
                   >
                     {sendingSetupOtp ? '⏳ Sending Code...' : '📩 Send Test Code to Email'}
                   </button>
@@ -929,7 +929,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               {(securityStatus?.loginHistory || []).map((log: any, idx: number) => (
                 <div key={idx} className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-gray-500">laptop_mac</span>
+                    <span className="material-symbols-outlined text-[var(--text-muted)]">laptop_mac</span>
                     <div>
                       <p className="font-bold text-[var(--text-primary)]">{log.details || log.action || 'Successful Authentication'}</p>
                       <p className="text-[10px] text-[var(--text-secondary)]">IP: {log.ipAddress || '197.156.104.1'} • Addis Ababa, ET</p>

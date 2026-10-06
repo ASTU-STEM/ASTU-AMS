@@ -29,9 +29,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       <div className="mb-4">
         {icon || defaultIcon}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{title}</h3>
       {description && (
-        <p className="text-sm text-gray-600 mb-6 max-w-md">{description}</p>
+        <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-md">{description}</p>
       )}
       <div className="flex items-center gap-3">
         {onRetry && (

@@ -21,20 +21,27 @@
   /* Theme colors */
   --bg-page: #f4f6fa;
   --bg-card: #ffffff;
-  --bg-sidebar: #0a1628;
+  --bg-sidebar: #ffffff;
   --bg-navbar: #ffffff;
-  --border-color: #e8edf5;
-  --text-primary: #0a0e1a;
-  --text-secondary: #5a6278;
-  --text-muted: #9ba3b8;
+  --bg-elevated: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #172033;
+  --text-secondary: #526078;
+  --text-muted: #8491a5;
+  /* Chart chrome. Recharts takes these as SVG presentation attributes, so no
+     Tailwind class or .app-shell rule can reach them - they have to be tokens. */
+  --chart-grid: #e8edf5;
+  --chart-axis: #64748b;
+  --chart-label: #334155;
+  --focus-ring: #1d4ed8;
 
   /* Dashboard layout tokens - standardized spacing */
   --sidebar-width: 240px;
   --header-height: 64px;
-  --content-padding: 16px;
-  --section-gap: 16px;
-  --grid-gap: 16px;
-  --card-padding: 16px;
+  --content-padding: 20px;
+  --section-gap: 32px;
+  --grid-gap: 20px;
+  --card-padding: 24px;
 }
 
 /* Theme token overrides.
@@ -47,25 +54,38 @@
 .light {
   --bg-page: #f4f6fa;
   --bg-card: #ffffff;
-  --bg-sidebar: #0a1628;
+  --bg-sidebar: #ffffff;
   --bg-navbar: #ffffff;
-  --border-color: #e8edf5;
-  --text-primary: #0a0e1a;
-  --text-secondary: #5a6278;
-  --text-muted: #9ba3b8;
+  --bg-elevated: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #172033;
+  --text-secondary: #526078;
+  --text-muted: #8491a5;
   --focus-ring: #1d4ed8;
+  --chart-grid: #e8edf5;
+  --chart-axis: #64748b;
+  --chart-label: #334155;
 }
 
 .dark {
-  --bg-page: #0f1117;
-  --bg-card: #1a1d27;
-  --bg-sidebar: #080d18;
-  --bg-navbar: #13161f;
-  --border-color: #2a2d3a;
-  --text-primary: #f1f3f9;
-  --text-secondary: #8b91a8;
-  --text-muted: #555b72;
-  --focus-ring: #93c5fd;
+  /* Professional dark neutral palette (shared ASTU visual language) */
+  --bg-page: #0f1720;
+  --bg-card: #151d28;
+  --bg-sidebar: #151d28;
+  --bg-navbar: #151d28;
+  --bg-elevated: #1b2532;
+  --border-color: #2a3645;
+  --text-primary: #e8eef6;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --focus-ring: #60a5fa;
+  --chart-grid: #2a3645;
+  --chart-axis: #94a3b8;
+  --chart-label: #cbd5e1;
+  /* Surface tokens wired for dark mode */
+  --on-surface-variant: #94a3b8;
+  --outline-variant: #2a3645;
+  --surface-container-low: #121925;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -178,251 +198,14 @@ button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
-
-/* ═══════════════════════════════════════════════════════════
-   GLOBAL DASHBOARD SPACING NORMALIZATION
-   Ensures all dashboard shells use consistent spacing.
-   Applies to admin-shell, role-shell, and any dashboard layout.
-   ═══════════════════════════════════════════════════════════ */
-
-/* ── Normalize main content padding across all shells ── */
-.admin-shell > div > main,
-.role-shell > div > main,
-.role-shell main,
-.admin-shell .flex-grow,
-.role-shell .flex-grow,
-.admin-shell main,
-.role-shell main {
-  padding: var(--content-padding) !important;
-}
-
-/* ── Ensure flex-grow children in nested structures have proper padding ── */
-.admin-shell .flex-grow > div,
-.role-shell .flex-grow > div {
-  padding: var(--content-padding) !important;
-  margin: 0 !important;
-}
-
-/* ── Standardize vertical section spacing ── */
-.admin-shell .space-y-6 > :not([hidden]) ~ :not([hidden]),
-.role-shell .space-y-6 > :not([hidden]) ~ :not([hidden]),
-.admin-shell .flex-grow .space-y-6 > :not([hidden]) ~ :not([hidden]),
-.role-shell .flex-grow .space-y-6 > :not([hidden]) ~ :not([hidden]),
-.admin-shell .p-4.md\:p-6 .space-y-6 > :not([hidden]) ~ :not([hidden]),
-.role-shell .p-4.md\:p-6 .space-y-6 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: var(--section-gap) !important;
-}
-
-.admin-shell .space-y-4 > :not([hidden]) ~ :not([hidden]),
-.role-shell .space-y-4 > :not([hidden]) ~ :not([hidden]),
-.admin-shell .flex-grow .space-y-4 > :not([hidden]) ~ :not([hidden]),
-.role-shell .flex-grow .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 16px !important;
-}
-
-.admin-shell .space-y-8 > :not([hidden]) ~ :not([hidden]),
-.role-shell .space-y-8 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: var(--section-gap) !important;
-}
-
-/* ── Standardize grid/flex gaps ── */
-.admin-shell .gap-6,
-.role-shell .gap-6,
-.admin-shell .flex-grow .gap-6,
-.role-shell .flex-grow .gap-6 {
-  gap: var(--grid-gap) !important;
-}
-
-.admin-shell .gap-8,
-.role-shell .gap-8,
-.admin-shell .flex-grow .gap-8,
-.role-shell .flex-grow .gap-8 {
-  gap: var(--grid-gap) !important;
-}
-
-.admin-shell .gap-4,
-.role-shell .gap-4,
-.admin-shell .flex-grow .gap-4,
-.role-shell .flex-grow .gap-4 {
-  gap: var(--grid-gap) !important;
-}
-
-/* ── Standardize card/section padding ── */
-.admin-shell .p-6,
-.role-shell .p-6,
-.admin-shell .flex-grow .p-6,
-.role-shell .flex-grow .p-6 {
-  padding: var(--card-padding) !important;
-}
-
-.admin-shell .p-8,
-.role-shell .p-8,
-.admin-shell .flex-grow .p-8,
-.role-shell .flex-grow .p-8 {
-  padding: var(--card-padding) !important;
-}
-
-.admin-shell .p-5,
-.role-shell .p-5,
-.admin-shell .flex-grow .p-5,
-.role-shell .flex-grow .p-5 {
-  padding: var(--card-padding) !important;
-}
-
-.admin-shell .p-4,
-.role-shell .p-4,
-.admin-shell .flex-grow .p-4,
-.role-shell .flex-grow .p-4 {
-  padding: 16px !important;
-}
-
-/* ── Standardize responsive padding ── */
-@media (min-width: 768px) {
-  .admin-shell .md\:p-8,
-  .role-shell .md\:p-8,
-  .admin-shell .md\:p-10,
-  .role-shell .md\:p-10,
-  .admin-shell .md\:p-12,
-  .role-shell .md\:p-12 {
-    padding: var(--content-padding) !important;
-  }
-}
-
 @media (min-width: 1024px) {
-  .admin-shell .lg\:p-10,
-  .role-shell .lg\:p-10 {
+  .admin-shell .lg\:p-10 {
     padding: var(--content-padding) !important;
   }
 }
-
-/* ── Standardize border radius ── */
-.admin-shell .rounded-3xl,
-.role-shell .rounded-3xl {
-  border-radius: 10px !important;
-}
-
-.admin-shell .rounded-2xl,
-.role-shell .rounded-2xl {
-  border-radius: 8px !important;
-}
-
-/* ── Remove max-width constraints that cause content gaps ── */
-.admin-shell .max-w-3xl,
-.admin-shell .max-w-4xl,
-.admin-shell .max-w-7xl,
-.role-shell .max-w-3xl,
-.role-shell .max-w-4xl,
-.role-shell .max-w-7xl,
-.admin-shell .max-w-6xl,
-.role-shell .max-w-6xl {
-  max-width: none !important;
-}
-
-/* ── Remove centering that creates side gaps ── */
-.admin-shell .mx-auto,
-.role-shell .mx-auto {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-}
-
-/* ── Ensure tight sidebar-content alignment ── */
-.admin-shell .flex-col.justify-between,
-.role-shell .flex-col.justify-between {
-  gap: 0 !important;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   ADMIN CARD SYSTEM
-   ═══════════════════════════════════════════════════════════ */
-.admin-card {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-}
-
 .admin-shell main > * {
   animation: admin-shell-fade 180ms ease-out both;
 }
-
-.admin-shell main,
-.role-shell main,
-.admin-shell main > div,
-.role-shell main > div {
-  min-width: 0;
-}
-
-.admin-shell table,
-.role-shell table {
-  min-width: max-content;
-}
-
-.admin-shell .overflow-x-auto,
-.role-shell .overflow-x-auto {
-  max-width: 100%;
-  overscroll-behavior-x: contain;
-}
-
-.admin-shell .recharts-responsive-container,
-.role-shell .recharts-responsive-container {
-  min-width: 0;
-}
-
-.admin-shell input,
-.admin-shell select,
-.admin-shell textarea,
-.role-shell input,
-.role-shell select,
-.role-shell textarea {
-  min-width: 0;
-}
-
-.admin-shell .fixed.right-0,
-.role-shell .fixed.right-0 {
-  max-width: 100vw;
-}
-
-@media (max-width: 767px) {
-  :root {
-    --content-padding: 12px;
-    --section-gap: 12px;
-    --grid-gap: 12px;
-    --card-padding: 14px;
-  }
-
-  .admin-shell header,
-  .role-shell header {
-    gap: 10px;
-  }
-
-  .admin-shell header > div,
-  .role-shell header > div {
-    min-width: 0;
-  }
-
-  .admin-shell main,
-  .role-shell main {
-    width: 100%;
-    overflow-x: hidden;
-  }
-
-  .admin-shell section,
-  .admin-shell article,
-  .role-shell section,
-  .role-shell article {
-    max-width: 100%;
-  }
-
-  .admin-shell .grid,
-  .role-shell .grid {
-    min-width: 0;
-  }
-
-  .admin-shell .fixed.right-0,
-  .role-shell .fixed.right-0 {
-    left: 0 !important;
-    right: 0 !important;
-  }
-}
-
 .admin-shell main section,
 .admin-shell main article,
 .admin-shell main .admin-card,
@@ -439,10 +222,6 @@ a {
 
 /* ═══ SMOOTH SIDEBAR-CONTENT TRANSITION ══ */
 .admin-shell > div,
-.role-shell > div {
-  transition: margin-left 250ms ease-in-out;
-}
-
 /* ═══════════════════════════════════════════════════════════
    DARK MODE OVERRIDES
    ═══════════════════════════════════════════════════════════ */
@@ -510,75 +289,6 @@ a {
 .dark .admin-shell textarea::placeholder {
   color: var(--text-muted);
 }
-
-/* Alumni dashboard dark mode lives in styles/dark-mode.css (generated). */
-
-/* Role shell dark mode - main content background */
-.role-shell main > div {
-  background: var(--bg-page);
-}
-
-.dark .role-shell .bg-white,
-.dark .role-shell .bg-gray-50,
-.dark .role-shell .bg-gray-50\/50,
-.dark .role-shell .from-gray-50,
-.dark .role-shell .to-white {
-  background-color: var(--bg-card) !important;
-}
-
-.dark .role-shell .border-gray-200,
-.dark .role-shell .border-gray-200\/60,
-.dark .role-shell .border-gray-150,
-.dark .role-shell .border-gray-100,
-.dark .role-shell .border-gray-100\/5,
-.dark .role-shell .border-slate-800 {
-  border-color: var(--border-color) !important;
-}
-
-.dark .role-shell .text-gray-900,
-.dark .role-shell .text-gray-800,
-.dark .role-shell .text-slate-900,
-.dark .role-shell .text-slate-800 {
-  color: var(--text-primary) !important;
-}
-
-.dark .role-shell .text-gray-600,
-.dark .role-shell .text-gray-500,
-.dark .role-shell .text-gray-400,
-.dark .role-shell .text-slate-400,
-.dark .role-shell .text-slate-500 {
-  color: var(--text-secondary) !important;
-}
-
-.dark .role-shell input,
-.dark .role-shell select,
-.dark .role-shell textarea {
-  background: #1e2130 !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-primary) !important;
-}
-
-.dark .role-shell input::placeholder,
-.dark .role-shell textarea::placeholder {
-  color: var(--text-muted);
-}
-
-.dark .role-shell .shadow-sm,
-.dark .role-shell .shadow-md,
-.dark .role-shell .shadow-xl,
-.dark .role-shell .shadow-2xl {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   ANIMATIONS
-   ═══════════════════════════════════════════════════════════ */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
 .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
@@ -759,6 +469,12 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Dark mode glassmorphism override */
+.dark .glass {
+  background: rgba(26, 29, 39, 0.85);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
 /* Scrolling partners carousel */
 @keyframes scroll-loop {
   0% { transform: translateX(0); }
@@ -849,3 +565,571 @@ a {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ASTU ICT SYSTEMS DIRECTORATE — OPERATIONS CONSOLE DESIGN SYSTEM
+   Scoped to .ict-shell (the ICT portal root). Presentation only:
+   nothing here changes application behaviour or data flow.
+
+   Light + dark share the SAME semantic tokens. Theme is driven by
+   the global html.light / html.dark class (useTheme persistence).
+   ═══════════════════════════════════════════════════════════ */
+.ict-shell {
+  color-scheme: light;
+  --bg-page: #f5f7fb;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-navbar: #ffffff;
+  --bg-elevated: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #172033;
+  --text-secondary: #526078;
+  --text-muted: #8491a5;
+
+  /* Institutional blue — the single accent for the console */
+  --ict-accent: #003580;
+  --ict-accent-strong: #002a66;
+  --ict-accent-soft: rgba(0, 53, 128, 0.08);
+  --ict-accent-soft-strong: rgba(0, 53, 128, 0.14);
+  --ict-accent-ring: rgba(0, 53, 128, 0.35);
+  --ict-accent-text: #003580;
+  --ict-avatar-from: #003580;
+  --ict-avatar-to: #0a4d8c;
+
+  /* Navigation rail — white in light mode (Alumni-style institutional) */
+  --ict-nav-bg: #ffffff;
+  --ict-nav-bg-2: #f8fafc;
+  --ict-nav-bg-3: #f1f5f9;
+  --ict-nav-border: #e2e8f0;
+  --ict-nav-border-soft: #eef2f7;
+  --ict-nav-text: #475569;
+  --ict-nav-text-strong: #0f172a;
+  --ict-nav-muted: #94a3b8;
+  --ict-nav-hover: rgba(0, 53, 128, 0.06);
+  --ict-nav-active: rgba(0, 53, 128, 0.08);
+  --ict-nav-active-strong: rgba(0, 53, 128, 0.14);
+  --ict-nav-accent: #003580;
+  --ict-nav-icon: #64748b;
+  --ict-nav-icon-active: #003580;
+
+  /* Surfaces */
+  --ict-surface: var(--bg-card);
+  --ict-surface-elevated: var(--bg-elevated);
+  --ict-surface-inset: var(--bg-page);
+  --ict-hairline: var(--border-color);
+  --ict-control-track: #e2e8f0;
+  --ict-logo-plate: #ffffff;
+
+  /* Elevation — restrained, 1px hairline + whisper shadow */
+  --ict-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
+  --ict-shadow-md: 0 4px 14px -4px rgb(15 23 42 / 0.12);
+  --ict-shadow-lg: 0 18px 40px -12px rgb(15 23 42 / 0.28);
+
+  /* Radii — compact enterprise scale, never pill-shaped */
+  --ict-radius-card: 8px;
+  --ict-radius-tile: 6px;
+  --ict-radius-chip: 4px;
+
+  /* Status colour system — used by StatusBadge / HealthIndicator / rails */
+  --ict-ok: #047857;
+  --ict-ok-bg: #ecfdf5;
+  --ict-ok-line: #a7f3d0;
+  --ict-info: #1d4ed8;
+  --ict-info-bg: #eff6ff;
+  --ict-info-line: #bfdbfe;
+  --ict-warn: #b45309;
+  --ict-warn-bg: #fffbeb;
+  --ict-warn-line: #fde68a;
+  --ict-crit: #be123c;
+  --ict-crit-bg: #fff1f2;
+  --ict-crit-line: #fecdd3;
+  --ict-mute: #475569;
+  --ict-mute-bg: #f1f5f9;
+  --ict-mute-line: #e2e8f0;
+  --ict-ai: #6d28d9;
+  --ict-ai-bg: #f5f3ff;
+  --ict-ai-line: #ddd6fe;
+
+  /* Diff row soft fills */
+  --ict-diff-add: rgb(16 185 129 / 0.12);
+  --ict-diff-remove: rgb(244 63 94 / 0.12);
+  --ict-diff-change: rgb(245 158 11 / 0.14);
+}
+
+/* Dark theme — same structure, professional dark neutrals (not inverted light) */
+.dark .ict-shell {
+  color-scheme: dark;
+  --bg-page: #0f1720;
+  --bg-card: #151d28;
+  --bg-sidebar: #151d28;
+  --bg-navbar: #151d28;
+  --bg-elevated: #1b2532;
+  --border-color: #2a3645;
+  --text-primary: #e8eef6;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --ict-accent: #3b82f6;
+  --ict-accent-strong: #2563eb;
+  --ict-accent-soft: rgba(59, 130, 246, 0.14);
+  --ict-accent-soft-strong: rgba(59, 130, 246, 0.22);
+  --ict-accent-ring: rgba(96, 165, 250, 0.45);
+  --ict-accent-text: #93c5fd;
+  --ict-avatar-from: #003580;
+  --ict-avatar-to: #0a4d8c;
+
+  /* Dark neutral sidebar — structurally identical to light */
+  --ict-nav-bg: #151d28;
+  --ict-nav-bg-2: #121925;
+  --ict-nav-bg-3: #1b2532;
+  --ict-nav-border: #2a3645;
+  --ict-nav-border-soft: #243040;
+  --ict-nav-text: #94a3b8;
+  --ict-nav-text-strong: #e8eef6;
+  --ict-nav-muted: #64748b;
+  --ict-nav-hover: rgba(59, 130, 246, 0.1);
+  --ict-nav-active: rgba(59, 130, 246, 0.16);
+  --ict-nav-active-strong: rgba(59, 130, 246, 0.24);
+  --ict-nav-accent: #93c5fd;
+  --ict-nav-icon: #94a3b8;
+  --ict-nav-icon-active: #93c5fd;
+
+  --ict-surface: var(--bg-card);
+  --ict-surface-elevated: var(--bg-elevated);
+  --ict-surface-inset: #121925;
+  --ict-hairline: var(--border-color);
+  --ict-control-track: #2a3645;
+  --ict-logo-plate: #1b2532;
+
+  --ict-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --ict-shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --ict-shadow-lg: 0 22px 48px -16px rgb(0 0 0 / 0.7);
+
+  --ict-ok: #34d399;
+  --ict-ok-bg: rgba(16, 185, 129, 0.14);
+  --ict-ok-line: rgba(52, 211, 153, 0.28);
+  --ict-info: #60a5fa;
+  --ict-info-bg: rgba(59, 130, 246, 0.14);
+  --ict-info-line: rgba(96, 165, 250, 0.28);
+  --ict-warn: #fbbf24;
+  --ict-warn-bg: rgba(245, 158, 11, 0.14);
+  --ict-warn-line: rgba(251, 191, 36, 0.28);
+  --ict-crit: #fb7185;
+  --ict-crit-bg: rgba(244, 63, 94, 0.14);
+  --ict-crit-line: rgba(251, 113, 133, 0.28);
+  --ict-mute: #94a3b8;
+  --ict-mute-bg: rgba(148, 163, 184, 0.12);
+  --ict-mute-line: rgba(148, 163, 184, 0.22);
+  --ict-ai: #a78bfa;
+  --ict-ai-bg: rgba(139, 92, 246, 0.16);
+  --ict-ai-line: rgba(167, 139, 250, 0.28);
+
+  --ict-diff-add: rgba(16, 185, 129, 0.16);
+  --ict-diff-remove: rgba(244, 63, 94, 0.16);
+  --ict-diff-change: rgba(245, 158, 11, 0.16);
+}
+
+/* Brand avatar plate — shared gradient, theme-safe */
+.ict-avatar-brand {
+  background: linear-gradient(135deg, var(--ict-avatar-from), var(--ict-avatar-to));
+  color: #ffffff;
+}
+
+/* ── Console surfaces ───────────────────────────────────────
+   One definition of the card / tile / hairline so every ICT
+   module renders identically. */
+.ict-card {
+  background: var(--ict-surface);
+  border: 1px solid var(--ict-hairline);
+  border-radius: var(--ict-radius-card);
+  box-shadow: var(--ict-shadow-sm);
+}
+
+.ict-tile {
+  background: var(--ict-surface);
+  border: 1px solid var(--ict-hairline);
+  border-radius: var(--ict-radius-tile);
+}
+
+.ict-inset {
+  background: var(--ict-surface-inset);
+  border: 1px solid var(--ict-hairline);
+  border-radius: var(--ict-radius-tile);
+}
+
+/* ── Surface modifiers ──────────────────────────────────────
+   Declared AFTER the base surface rules on purpose. Tailwind is loaded from a
+   runtime CDN in this app, so where its generated stylesheet lands in <head>
+   is not something a component can rely on. Status variants therefore use these
+   classes instead of `bg-[...]` / `border-[...]` utilities on a surface element:
+   a `.ict-card` variant must never depend on stylesheet order. */
+.ict-bg-accent {
+  background-color: var(--ict-accent-soft);
+}
+.ict-bg-accent-strong {
+  background-color: var(--ict-accent-soft-strong);
+}
+.ict-bg-inset {
+  background-color: var(--ict-surface-inset);
+}
+.ict-bg-ok {
+  background-color: var(--ict-ok-bg);
+}
+.ict-bg-info {
+  background-color: var(--ict-info-bg);
+}
+.ict-bg-warning {
+  background-color: var(--ict-warn-bg);
+}
+.ict-bg-critical {
+  background-color: var(--ict-crit-bg);
+}
+.ict-bg-ai {
+  background-color: var(--ict-ai-bg);
+}
+.ict-bg-transparent {
+  background-color: transparent;
+}
+
+.ict-bd-accent {
+  border-color: var(--ict-accent);
+}
+.ict-bd-ok {
+  border-color: var(--ict-ok-line);
+}
+.ict-bd-info {
+  border-color: var(--ict-info-line);
+}
+.ict-bd-warning {
+  border-color: var(--ict-warn-line);
+}
+.ict-bd-critical {
+  border-color: var(--ict-crit-line);
+}
+.ict-bd-ai {
+  border-color: var(--ict-ai-line);
+}
+.ict-bd-default {
+  border-color: var(--ict-hairline);
+}
+.ict-bd-none {
+  border-width: 0;
+}
+
+.ict-shadow-sm {
+  box-shadow: var(--ict-shadow-sm);
+}
+.ict-shadow-md {
+  box-shadow: var(--ict-shadow-md);
+}
+.ict-shadow-lg {
+  box-shadow: var(--ict-shadow-lg);
+}
+.ict-shadow-none {
+  box-shadow: none;
+}
+
+.ict-hover-accent:hover {
+  border-color: var(--ict-accent);
+}
+.ict-hover-accent-soft:hover {
+  background-color: var(--ict-accent-soft);
+}
+.ict-hover-critical:hover {
+  border-color: var(--ict-crit-line);
+}
+
+/* ── Scrollbars (thin, self-effacing) ────────────────────────── */
+.ict-scroll {
+  scrollbar-width: thin;
+}
+.ict-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.ict-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ict-scroll::-webkit-scrollbar-thumb {
+  background: rgb(100 116 139 / 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.ict-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139 / 0.55);
+  background-clip: content-box;
+}
+.dark .ict-shell .ict-scroll::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184 / 0.28);
+  background-clip: content-box;
+}
+.dark .ict-shell .ict-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(148 163 184 / 0.45);
+  background-clip: content-box;
+}
+
+/* ── Numerals: metrics, latencies, IDs must not jitter ─────── */
+.ict-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── Technical values ──────────────────────────────────────── */
+.ict-mono {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-ligatures: none;
+}
+
+/* ── Typography & layout utilities used as class names ───────
+   Components reference these as CSS classes (not only TS tokens). */
+.ict-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.ict-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.ict-btn-segment {
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  white-space: nowrap;
+  border-radius: 3px;
+  padding: 0.375rem 0.625rem;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: background-color 150ms, color 150ms, border-color 150ms, box-shadow 150ms;
+}
+
+.ict-btn-segment:hover {
+  color: var(--text-primary);
+}
+
+/* ── Skeleton loading ───────────────────────────────────────── */
+.ict-skel {
+  position: relative;
+  overflow: hidden;
+  background: rgb(100 116 139 / 0.12);
+  border-radius: var(--ict-radius-chip);
+}
+.ict-skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.45) 50%,
+    rgb(255 255 255 / 0) 100%
+  );
+  animation: ict-shimmer 1.35s ease-in-out infinite;
+}
+.dark .ict-shell .ict-skel {
+  background: rgb(148 163 184 / 0.14);
+}
+.dark .ict-shell .ict-skel::after {
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.07) 50%,
+    rgb(255 255 255 / 0) 100%
+  );
+}
+@keyframes ict-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ict-skel::after {
+    animation: none;
+  }
+  .ict-shell *,
+  .ict-shell *::before,
+  .ict-shell *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Status pulse — reserved for genuinely live / critical states ── */
+@keyframes ict-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}
+.ict-pulse {
+  animation: ict-pulse 1.8s ease-in-out infinite;
+}
+
+/* ── Micro-interactions: fast and subtle ────────────────────── */
+@keyframes ict-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ict-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes ict-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ict-veil {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ict-rise {
+  animation: ict-rise 200ms ease-out both;
+}
+.ict-drop {
+  animation: ict-drop 150ms ease-out both;
+}
+.ict-fade {
+  animation: ict-fade 150ms ease-out both;
+}
+.ict-veil {
+  animation: ict-veil 140ms ease-out both;
+}
+
+/* Staggered content reveal for dashboard sections */
+.ict-stagger > * {
+  animation: ict-rise 220ms ease-out both;
+}
+.ict-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.ict-stagger > *:nth-child(2) { animation-delay: 35ms; }
+.ict-stagger > *:nth-child(3) { animation-delay: 70ms; }
+.ict-stagger > *:nth-child(4) { animation-delay: 105ms; }
+.ict-stagger > *:nth-child(5) { animation-delay: 140ms; }
+.ict-stagger > *:nth-child(6) { animation-delay: 175ms; }
+.ict-stagger > *:nth-child(7) { animation-delay: 210ms; }
+.ict-stagger > *:nth-child(8) { animation-delay: 245ms; }
+
+/* ── Focus affordance for console-native controls ───────────── */
+.ict-focus:focus-visible {
+  outline: 2px solid var(--ict-accent-ring);
+  outline-offset: 2px;
+}
+
+/* ── Range slider (feature flags, capacity controls) ────────── */
+.ict-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ict-surface-inset);
+  border: 1px solid var(--ict-hairline);
+  outline: none;
+}
+.ict-range:focus-visible {
+  outline: 2px solid var(--ict-accent-ring);
+  outline-offset: 3px;
+}
+.ict-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--ict-accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.25);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+.ict-range:hover::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+.ict-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--ict-accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.25);
+  cursor: pointer;
+}
+.ict-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
+}
+.ict-range:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Sticky table header rail ───────────────────────────────── */
+.ict-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* ── Text clamp helpers ─────────────────────────────────────── */
+.ict-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ict-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ict-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Long technical values: break anywhere without breaking layout ── */
+.ict-break {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

@@ -20,10 +20,10 @@ export default function ToggleSwitch({ label, checked, onChange, description, di
           className="sr-only"
         />
         <div
-          className={`w-10 h-6 rounded-full transition-colors duration-200 ${checked ? 'bg-astu-navy' : 'bg-gray-300'}`}
+          className={`w-10 h-6 rounded-full transition-colors duration-200 ${checked ? 'bg-astu-navy' : 'bg-[var(--bg-page)]'}`}
         >
           <div
-            className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 absolute top-1 ${
+            className={`w-4 h-4 bg-[var(--bg-card)] rounded-full shadow-sm transition-transform duration-200 absolute top-1 ${
               checked ? 'translate-x-5' : 'translate-x-1'
             }`}
           />

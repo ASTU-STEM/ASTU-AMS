@@ -484,19 +484,19 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
       {/* Chapa Payment Gateway Checkout Modal */}
       {showChapaModal && chapaPayPayload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 space-y-5 animate-in zoom-in-95 duration-200">
+          <div className="bg-[var(--bg-card)] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 space-y-5 animate-in zoom-in-95 duration-200">
             {/* Chapa Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-extrabold flex items-center justify-center text-sm shadow-sm">
                   CH
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-1.5">
+                  <h3 className="text-sm font-extrabold text-[var(--text-primary)] flex items-center gap-1.5">
                     Chapa Checkout Gateway
                     <span className="px-1.5 py-0.5 text-[9px] bg-emerald-100 text-emerald-800 rounded font-mono">TEST DEMO</span>
                   </h3>
-                  <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                  <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-1">
                     <Lock className="h-3 w-3 text-emerald-600" />
                     256-bit Encrypted Payment
                   </p>
@@ -505,7 +505,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
               <button
                 type="button"
                 onClick={() => { setShowChapaModal(false); setChapaPayPayload(null); }}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -514,22 +514,22 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             {/* Order Summary Box */}
             <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-600">Merchant</span>
+                <span className="text-xs font-bold text-[var(--text-secondary)]">Merchant</span>
                 <span className="text-xs font-extrabold text-emerald-900">ASTU Registrar Office</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-gray-600">Document Type</span>
-                <span className="text-xs font-extrabold text-gray-900">{docType}</span>
+                <span className="text-xs font-bold text-[var(--text-secondary)]">Document Type</span>
+                <span className="text-xs font-extrabold text-[var(--text-primary)]">{docType}</span>
               </div>
               <div className="flex items-center justify-between border-t border-emerald-200/60 pt-2">
-                <span className="text-xs font-extrabold text-gray-900">Total Payable</span>
+                <span className="text-xs font-extrabold text-[var(--text-primary)]">Total Payable</span>
                 <span className="text-xl font-black text-emerald-700">{selectedDocObj.price} ETB</span>
               </div>
             </div>
 
             {/* Payment Options Selection */}
             <div className="space-y-2">
-              <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">Select Payment Method</p>
+              <p className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-widest">Select Payment Method</p>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
@@ -537,7 +537,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                   className={`p-2.5 rounded-xl border text-center transition-all ${
                     selectedMethod === 'telebirr'
                       ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-extrabold ring-1 ring-emerald-500'
-                      : 'border-gray-200 bg-gray-50 text-gray-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)]'
                   }`}
                 >
                   <p className="text-xs font-extrabold">Telebirr</p>
@@ -550,7 +550,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                   className={`p-2.5 rounded-xl border text-center transition-all ${
                     selectedMethod === 'cbe'
                       ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-extrabold ring-1 ring-emerald-500'
-                      : 'border-gray-200 bg-gray-50 text-gray-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)]'
                   }`}
                 >
                   <p className="text-xs font-extrabold">CBE Birr</p>
@@ -563,7 +563,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                   className={`p-2.5 rounded-xl border text-center transition-all ${
                     selectedMethod === 'card'
                       ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-extrabold ring-1 ring-emerald-500'
-                      : 'border-gray-200 bg-gray-50 text-gray-600'
+                      : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)]'
                   }`}
                 >
                   <p className="text-xs font-extrabold">Chapa Card</p>
@@ -573,8 +573,8 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             </div>
 
             {/* Test Credentials Box */}
-            <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-600 space-y-1">
-              <p className="font-bold text-gray-800 flex items-center justify-between">
+            <div className="p-3 bg-[var(--bg-page)] rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] space-y-1">
+              <p className="font-bold text-[var(--text-primary)] flex items-center justify-between">
                 <span>Chapa Test Environment</span>
                 <span className="text-[10px] text-emerald-600 font-mono">configured via env</span>
               </p>
@@ -584,7 +584,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-2 pt-2 border-t border-gray-100">
+            <div className="space-y-2 pt-2 border-t border-[var(--border-color)]">
               <button
                 type="button"
                 onClick={handleConfirmChapaPayment}
@@ -624,7 +624,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
 
       {/* Full Screen Chapa Checkout Page View */}
       {showFullChapaPage && chapaPayPayload && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-100 flex flex-col font-sans">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--bg-page)] flex flex-col font-sans">
           {/* Top Browser Bar */}
           <div className="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs border-b border-slate-800 shadow-md">
             <div className="flex items-center gap-3">
@@ -648,7 +648,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
 
           {/* Main Checkout Box */}
           <div className="flex-1 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden grid grid-cols-1 md:grid-cols-5">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-2xl w-full shadow-2xl border border-[var(--border-color)] overflow-hidden grid grid-cols-1 md:grid-cols-5">
               
               {/* Left Column: Order Summary */}
               <div className="md:col-span-2 bg-slate-900 text-white p-6 space-y-6 flex flex-col justify-between">
@@ -659,39 +659,39 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                     </div>
                     <div>
                       <h4 className="font-extrabold text-sm text-white">Chapa Pay</h4>
-                      <p className="text-[10px] text-slate-400">Secure Payment Checkout</p>
+                      <p className="text-[10px] text-[var(--text-muted)]">Secure Payment Checkout</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Merchant</p>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Merchant</p>
                       <p className="text-sm font-extrabold text-emerald-400">ASTU Registrar Office</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Item / Document</p>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Item / Document</p>
                       <p className="text-sm font-bold text-white">{docType}</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Transaction Ref</p>
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Transaction Ref</p>
                       <p className="text-[11px] font-mono font-bold text-slate-300">{chapaPayPayload.tx_ref}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-800 pt-4">
-                  <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Amount Due</p>
+                  <p className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wider">Amount Due</p>
                   <p className="text-3xl font-black text-emerald-400">{selectedDocObj.price} ETB</p>
                 </div>
               </div>
 
               {/* Right Column: Interactive Payment Options */}
-              <div className="md:col-span-3 p-6 space-y-5 flex flex-col justify-between bg-white">
+              <div className="md:col-span-3 p-6 space-y-5 flex flex-col justify-between bg-[var(--bg-card)]">
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">Complete Demo Payment</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Select a payment option below to finalize transaction</p>
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)]">Complete Demo Payment</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">Select a payment option below to finalize transaction</p>
 
                   <div className="mt-4 space-y-3">
                     <div
@@ -699,7 +699,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                       className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                         selectedMethod === 'telebirr'
                           ? 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -707,8 +707,8 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                           tb
                         </div>
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Telebirr Mobile Money</p>
-                          <p className="text-[10px] text-slate-500">Test PIN: 1234</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Telebirr Mobile Money</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Test PIN: 1234</p>
                         </div>
                       </div>
                       {selectedMethod === 'telebirr' && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -719,7 +719,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                       className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                         selectedMethod === 'cbe'
                           ? 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -727,8 +727,8 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                           CBE
                         </div>
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">CBE Birr Account</p>
-                          <p className="text-[10px] text-slate-500">Direct Bank Transfer</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">CBE Birr Account</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Direct Bank Transfer</p>
                         </div>
                       </div>
                       {selectedMethod === 'cbe' && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -739,7 +739,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                       className={`p-3.5 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between ${
                         selectedMethod === 'card'
                           ? 'border-emerald-600 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                          : 'border-slate-200 hover:border-slate-300'
+                          : 'border-[var(--border-color)] hover:border-[var(--border-color)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -747,8 +747,8 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                           CARD
                         </div>
                         <div>
-                          <p className="text-xs font-extrabold text-slate-900">Visa / Mastercard</p>
-                          <p className="text-[10px] text-slate-500">4000 0000 0000 0002</p>
+                          <p className="text-xs font-extrabold text-[var(--text-primary)]">Visa / Mastercard</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">4000 0000 0000 0002</p>
                         </div>
                       </div>
                       {selectedMethod === 'card' && <CheckCircle2 className="h-5 w-5 text-emerald-600" />}
@@ -756,7 +756,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-4 border-t border-slate-100">
+                <div className="space-y-2 pt-4 border-t border-[var(--border-color)]">
                   <button
                     type="button"
                     onClick={handleConfirmChapaPayment}
@@ -784,7 +784,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowFullChapaPage(false)}
-                    className="w-full py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                    className="w-full py-2 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                   >
                     Cancel & Return to Portal
                   </button>

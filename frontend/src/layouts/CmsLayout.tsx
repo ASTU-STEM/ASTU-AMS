@@ -28,9 +28,9 @@ class CmsRouteBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="rounded-xl border border-rose-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Something went wrong loading this CMS page.</h2>
-          <p className="mt-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-rose-200 bg-[var(--bg-card)] p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Something went wrong loading this CMS page.</h2>
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
             {this.state.message || 'A render error occurred in the content manager.'}
           </p>
         </div>
@@ -215,7 +215,7 @@ export default function CmsLayout() {
 
   return (
     <>
-    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
+    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}
@@ -232,22 +232,22 @@ export default function CmsLayout() {
 
       <div className={`min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-72'}`}>
         {/* Clean White Top Header */}
-        <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
+        <header className="sticky top-0 z-20 bg-[var(--bg-card)] dark:bg-slate-900/95 backdrop-blur-md border-b border-[var(--border-color)] dark:border-slate-800">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6">
             {/* Left: mobile hamburger + page title */}
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(true)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden cursor-pointer"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden cursor-pointer"
                 aria-label="Open navigation"
               >
                 <Menu className="h-5 w-5" />
               </button>
 
               <div className="flex items-center gap-3">
-                <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">{meta.title}</h1>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800 rounded-full px-2.5 py-0.5">
+                <h1 className="text-lg font-bold tracking-tight text-[var(--text-primary)] dark:text-white">{meta.title}</h1>
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)] dark:text-slate-400 bg-[var(--bg-page)] dark:bg-slate-800 rounded-full px-2.5 py-0.5">
                   <Clock className="h-3 w-3" />
                   {headerTime.date} · {headerTime.time}
                 </span>
@@ -258,24 +258,24 @@ export default function CmsLayout() {
             <div className="relative hidden md:block" ref={searchRef}>
               <button
                 onClick={() => setSearchOpen(true)}
-                className="flex h-9 w-[340px] items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-800/80 px-3.5 text-xs text-slate-400 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all focus:outline-none cursor-pointer"
+                className="flex h-9 w-[340px] items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800/80 px-3.5 text-xs text-[var(--text-muted)] dark:text-slate-400 hover:border-[var(--border-color)] dark:hover:border-slate-600 hover:bg-[var(--bg-card)] dark:hover:bg-slate-800 transition-all focus:outline-none cursor-pointer"
               >
-                <Search className="h-3.5 w-3.5 text-slate-400" />
+                <Search className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                 <span>Search pages, media, announcements...</span>
-                <span className="ml-auto flex items-center gap-0.5 rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-300 shadow-xs">
+                <span className="ml-auto flex items-center gap-0.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-700 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)] dark:text-slate-300 shadow-xs">
                   <Command className="h-3 w-3" />K
                 </span>
               </button>
               {searchOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[420px] overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-xl dark:shadow-black/50">
-                  <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
-                    <Search className="h-4 w-4 text-slate-400" />
+                <div className="absolute right-0 top-11 z-50 w-[420px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-slate-900 shadow-xl dark:shadow-black/50">
+                  <div className="flex items-center gap-2.5 border-b border-[var(--border-color)] dark:border-slate-800 px-4 py-3">
+                    <Search className="h-4 w-4 text-[var(--text-muted)]" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search pages, posts, media..."
-                      className="w-full bg-transparent text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
+                      className="w-full bg-transparent text-sm text-[var(--text-primary)] dark:text-white outline-none placeholder:text-slate-400"
                       autoFocus
                     />
                   </div>
@@ -288,9 +288,9 @@ export default function CmsLayout() {
                           setSearchOpen(false);
                           setSearchQuery('');
                         }}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] dark:text-slate-300 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 transition-all cursor-pointer"
                       >
-                        <Sparkles className="h-3.5 w-3.5 text-slate-400" />
+                        <Sparkles className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                         {s.label}
                       </button>
                     ))}
@@ -364,7 +364,7 @@ export default function CmsLayout() {
                               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } }}
                               className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--bg-page)] transition-all cursor-pointer"
                             >
-                              <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${unread ? 'bg-[#003366] dark:bg-[#3b82f6]' : 'bg-gray-300 dark:bg-slate-600'}`} />
+                              <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${unread ? 'bg-[#003366] dark:bg-[#3b82f6]' : 'bg-[var(--bg-page)] dark:bg-slate-600'}`} />
                               <div className="min-w-0">
                                 {item.title && <p className="text-sm font-semibold text-[var(--text-primary)]">{item.title}</p>}
                                 <p className="text-sm text-[var(--text-primary)]">{item.content || item.message}</p>
@@ -389,7 +389,7 @@ export default function CmsLayout() {
               {/* User menu */}
               <div className="relative" data-cms-menu>
                 <button type="button" onClick={() => setMenuOpen(v => !v)}
-                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:shadow transition-all">
+                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-sm hover:border-[var(--border-color)] dark:hover:border-slate-600 hover:shadow transition-all">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-xs font-bold text-[#0B1A2E] shadow-sm">
                     {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'CM'}
                   </div>
@@ -412,7 +412,7 @@ export default function CmsLayout() {
         </header>
 
         {/* Main Content */}
-        <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-[var(--bg-page)] transition-colors text-[var(--text-primary)] dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
           <style>{`@keyframes cms-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <CmsRouteBoundary key={location.pathname}>
             <Outlet />

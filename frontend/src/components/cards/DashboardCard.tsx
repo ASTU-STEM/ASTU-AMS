@@ -20,7 +20,7 @@ export default function DashboardCard({
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl border border-outline-variant bg-white shadow-sm 
+      className={`rounded-xl border border-outline-variant bg-[var(--bg-card)] shadow-sm 
         ${onClick ? 'cursor-pointer hover:shadow-md transition-all' : ''} ${className}`}
     >
       {(title || headerRight) && (

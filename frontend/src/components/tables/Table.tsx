@@ -32,7 +32,7 @@ export default function Table<T extends Record<string, unknown>>({
         <div className="p-8 text-center text-on-surface-variant">
           <div className="animate-pulse space-y-4">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-10 bg-gray-100 rounded" />
+              <div key={i} className="h-10 bg-[var(--bg-page)] rounded" />
             ))}
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function Table<T extends Record<string, unknown>>({
             {data.map((item, idx) => (
               <tr
                 key={idx}
-                className={`bg-white transition-colors ${onRowClick ? 'cursor-pointer hover:bg-surface-container-low' : ''}`}
+                className={`bg-[var(--bg-card)] transition-colors ${onRowClick ? 'cursor-pointer hover:bg-surface-container-low' : ''}`}
                 onClick={() => onRowClick?.(item)}
               >
                 {columns.map(col => (

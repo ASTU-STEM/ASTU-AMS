@@ -153,9 +153,9 @@ function ImageThumbnail({ src, alt, className }: { src?: string; alt: string; cl
 
   if (!src || error) {
     return (
-      <div className={`flex flex-col items-center justify-center bg-slate-100 p-2 text-slate-400 ${className}`}>
+      <div className={`flex flex-col items-center justify-center bg-[var(--bg-page)] p-2 text-[var(--text-muted)] ${className}`}>
         <ImageIcon className="h-8 w-8 text-slate-300" />
-        <span className="mt-1 text-[10px] font-bold tracking-wider text-slate-500">{ext} IMAGE</span>
+        <span className="mt-1 text-[10px] font-bold tracking-wider text-[var(--text-muted)]">{ext} IMAGE</span>
       </div>
     );
   }
@@ -635,53 +635,53 @@ export default function MediaLibrary() {
         ].map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-sm flex items-center gap-3 dark:border-slate-800 dark:bg-slate-900">
+            <div key={stat.label} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm flex items-center gap-3 dark:border-slate-800 dark:bg-slate-900">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
                 <Icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{stat.label}</p>
-                <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{stat.value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] dark:text-slate-400">{stat.label}</p>
+                <p className="text-xl font-semibold tracking-tight text-[var(--text-primary)] dark:text-white">{stat.value}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="flex flex-col gap-3 rounded-[12px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-col gap-3 rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search files, descriptions, and tags..."
-              className="w-full rounded-[8px] border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] py-2 pl-8 pr-3 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
             {search && (
-              <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200">
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
-          <div className="inline-flex rounded-md border border-slate-200 bg-white p-0.5 dark:border-slate-700 dark:bg-slate-800">
-            <button type="button" onClick={() => setView('grid')} className={`inline-flex h-8 w-8 items-center justify-center rounded transition-colors ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'}`} title="Grid view">
+          <div className="inline-flex rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] p-0.5 dark:border-slate-700 dark:bg-slate-800">
+            <button type="button" onClick={() => setView('grid')} className={`inline-flex h-8 w-8 items-center justify-center rounded transition-colors ${view === 'grid' ? 'bg-[#003580] text-white' : 'text-[var(--text-muted)] dark:text-slate-400 hover:text-[var(--text-primary)] dark:hover:text-white'}`} title="Grid view">
               <Grid3x3 className="h-4 w-4" />
             </button>
-            <button type="button" onClick={() => setView('list')} className={`inline-flex h-8 w-8 items-center justify-center rounded transition-colors ${view === 'list' ? 'bg-[#003580] text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'}`} title="List view">
+            <button type="button" onClick={() => setView('list')} className={`inline-flex h-8 w-8 items-center justify-center rounded transition-colors ${view === 'list' ? 'bg-[#003580] text-white' : 'text-[var(--text-muted)] dark:text-slate-400 hover:text-[var(--text-primary)] dark:hover:text-white'}`} title="List view">
               <List className="h-4 w-4" />
             </button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--border-color)] pt-3 dark:border-slate-800">
           {FOLDERS.map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFolder(f)}
               className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all ${
-                folder === f ? 'border-[#003580] bg-[#003580] text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-[#003580]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-500'
+                folder === f ? 'border-[#003580] bg-[#003580] text-white' : 'border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[#003580]/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-sky-500'
               }`}
             >
               {f === 'All' ? <Filter className="h-3 w-3" /> : <Folder className="h-3 w-3" />}
@@ -696,7 +696,7 @@ export default function MediaLibrary() {
               type="button"
               onClick={() => setTypeFilter(t)}
               className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all ${
-                typeFilter === t ? 'bg-slate-700 text-white dark:bg-sky-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                typeFilter === t ? 'bg-slate-700 text-white dark:bg-sky-600' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]  dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
               }`}
             >
               {t === 'all' ? 'All Types' : t}
@@ -715,7 +715,7 @@ export default function MediaLibrary() {
             <button type="button" onClick={deleteSelected} className="inline-flex items-center gap-1 rounded-md bg-rose-500 px-2.5 py-1 text-xs font-semibold text-white">
               <Trash2 className="h-3 w-3" /> Delete
             </button>
-            <button type="button" onClick={() => setSelectedIds([])} className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+            <button type="button" onClick={() => setSelectedIds([])} className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:text-slate-400 dark:hover:bg-slate-800">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -730,21 +730,21 @@ export default function MediaLibrary() {
             return (
               <div
                 key={m.id}
-                className={`group relative flex flex-col overflow-hidden rounded-[10px] border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 ${
-                  selected ? 'border-[#003580] ring-2 ring-[#003580]/30 dark:border-sky-500' : 'border-slate-200'
+                className={`group relative flex flex-col overflow-hidden rounded-[10px] border bg-[var(--bg-card)] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 ${
+                  selected ? 'border-[#003580] ring-2 ring-[#003580]/30 dark:border-sky-500' : 'border-[var(--border-color)]'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => openLightbox(m)}
-                  className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800"
+                  className="relative aspect-video w-full overflow-hidden bg-[var(--bg-page)] dark:bg-slate-800"
                 >
                   {m.type === 'image' ? (
                     <ImageThumbnail src={m.url} alt={m.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100 dark:bg-slate-800">
-                      <Icon className="h-10 w-10 text-slate-400" />
-                      <span className="mt-1 text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">{m.name.split('.').pop()}</span>
+                    <div className="flex h-full w-full flex-col items-center justify-center bg-[var(--bg-page)] dark:bg-slate-800">
+                      <Icon className="h-10 w-10 text-[var(--text-muted)]" />
+                      <span className="mt-1 text-[9px] font-bold text-[var(--text-muted)] dark:text-slate-400 uppercase">{m.name.split('.').pop()}</span>
                     </div>
                   )}
                   <span className={`absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${typeColor[m.type]}`}>
@@ -752,18 +752,18 @@ export default function MediaLibrary() {
                   </span>
                 </button>
                 <div className="p-2">
-                  <p className="truncate text-[11px] font-semibold text-slate-800 dark:text-white" title={m.name}>{m.name}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">{formatBytes(m.size)} · {m.folder}</p>
+                  <p className="truncate text-[11px] font-semibold text-[var(--text-primary)] dark:text-white" title={m.name}>{m.name}</p>
+                  <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">{formatBytes(m.size)} · {m.folder}</p>
                   {m.description && (
-                    <p className="mt-1 line-clamp-1 text-[10px] text-slate-500 dark:text-slate-400 italic">{m.description}</p>
+                    <p className="mt-1 line-clamp-1 text-[10px] text-[var(--text-muted)] dark:text-slate-400 italic">{m.description}</p>
                   )}
                 </div>
-                <div className="flex items-center justify-between border-t border-slate-100 px-2 py-1.5 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/60" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between border-t border-[var(--border-color)] px-2 py-1.5 bg-[var(--bg-page)] dark:border-slate-800 dark:bg-slate-800/60" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => openLightbox(m)}
-                      className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)] dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
                       title="View & Edit Info"
                     >
                       <Info className="h-3 w-3" />
@@ -771,7 +771,7 @@ export default function MediaLibrary() {
                     <button
                       type="button"
                       onClick={() => copyMediaUrl(m)}
-                      className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)] dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
                       title="Copy URL"
                     >
                       <Link2 className="h-3 w-3" />
@@ -779,7 +779,7 @@ export default function MediaLibrary() {
                     <button
                       type="button"
                       onClick={() => downloadMediaAsset(m)}
-                      className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)] dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
                       title="Download Asset"
                     >
                       <Download className="h-3 w-3" />
@@ -805,13 +805,13 @@ export default function MediaLibrary() {
             );
           })}
           {filtered.length === 0 && (
-            <div className="col-span-full rounded-[12px] border-2 border-dashed border-slate-300 bg-white p-12 text-center space-y-3 dark:border-slate-800 dark:bg-slate-900">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400">
+            <div className="col-span-full rounded-[12px] border-2 border-dashed border-[var(--border-color)] bg-[var(--bg-card)] p-12 text-center space-y-3 dark:border-slate-800 dark:bg-slate-900">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-muted)]">
                 <Upload className="h-7 w-7 text-[#003580] dark:text-sky-400" />
               </div>
               <div>
-                <p className="text-base font-bold text-slate-800 dark:text-white">No media files found</p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                <p className="text-base font-bold text-[var(--text-primary)] dark:text-white">No media files found</p>
+                <p className="mt-1 text-xs text-[var(--text-muted)] dark:text-slate-400 max-w-sm mx-auto">
                   Click below to upload images, documents, videos, or audio directly with category and details.
                 </p>
               </div>
@@ -826,10 +826,10 @@ export default function MediaLibrary() {
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-[10px] border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-x-auto rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-slate-900">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/80">
-              <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <thead className="bg-[var(--bg-page)] dark:bg-slate-800/80">
+              <tr className="text-left text-[10px] uppercase tracking-wider text-[var(--text-muted)] dark:text-slate-400">
                 <th className="px-3 py-2 font-semibold">Name & Details</th>
                 <th className="px-3 py-2 font-semibold">Type</th>
                 <th className="px-3 py-2 font-semibold">Folder</th>
@@ -838,39 +838,39 @@ export default function MediaLibrary() {
                 <th className="px-3 py-2 text-right font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800">
               {filtered.map((m) => {
                 const Icon = typeIcon[m.type];
                 return (
-                  <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={m.id} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
                         {m.type === 'image' ? (
-                          <ImageThumbnail src={m.url} alt={m.name} className="h-9 w-12 rounded object-cover border border-slate-200 dark:border-slate-700" />
+                          <ImageThumbnail src={m.url} alt={m.name} className="h-9 w-12 rounded object-cover border border-[var(--border-color)] dark:border-slate-700" />
                         ) : (
-                          <div className="flex h-9 w-12 items-center justify-center rounded bg-slate-100 dark:bg-slate-800">
-                            <Icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                          <div className="flex h-9 w-12 items-center justify-center rounded bg-[var(--bg-page)] dark:bg-slate-800">
+                            <Icon className="h-4 w-4 text-[var(--text-muted)] dark:text-slate-400" />
                           </div>
                         )}
                         <div>
-                          <span className="font-medium text-slate-800 dark:text-white">{m.name}</span>
-                          {m.description && <p className="text-[10px] text-slate-400 truncate max-w-xs">{m.description}</p>}
+                          <span className="font-medium text-[var(--text-primary)] dark:text-white">{m.name}</span>
+                          {m.description && <p className="text-[10px] text-[var(--text-muted)] truncate max-w-xs">{m.description}</p>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-xs uppercase text-slate-500 dark:text-slate-400">{m.type}</td>
-                    <td className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">{m.folder}</td>
-                    <td className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">{formatBytes(m.size)}</td>
-                    <td className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">{m.uploadedAt}</td>
+                    <td className="px-3 py-2 text-xs uppercase text-[var(--text-muted)] dark:text-slate-400">{m.type}</td>
+                    <td className="px-3 py-2 text-xs text-[var(--text-muted)] dark:text-slate-400">{m.folder}</td>
+                    <td className="px-3 py-2 text-xs text-[var(--text-muted)] dark:text-slate-400">{formatBytes(m.size)}</td>
+                    <td className="px-3 py-2 text-xs text-[var(--text-muted)] dark:text-slate-400">{m.uploadedAt}</td>
                     <td className="px-3 py-2">
                       <div className="flex items-center justify-end gap-1">
-                        <button type="button" onClick={() => openLightbox(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" title="Preview & Edit">
+                        <button type="button" onClick={() => openLightbox(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" title="Preview & Edit">
                           <FileText className="h-3.5 w-3.5" />
                         </button>
-                        <button type="button" onClick={() => copyMediaUrl(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" title="Copy URL">
+                        <button type="button" onClick={() => copyMediaUrl(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" title="Copy URL">
                           <Link2 className="h-3.5 w-3.5" />
                         </button>
-                        <button type="button" onClick={() => downloadMediaAsset(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-sky-400" title="Download">
+                        <button type="button" onClick={() => downloadMediaAsset(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-muted)] hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-sky-400" title="Download">
                           <Download className="h-3.5 w-3.5" />
                         </button>
                         <button type="button" onClick={() => handleDeleteSingle(m)} className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/60" title="Delete">
@@ -883,7 +883,7 @@ export default function MediaLibrary() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-sm text-slate-500 dark:text-slate-400">No media files match your filters.</td>
+                  <td colSpan={6} className="py-12 text-center text-sm text-[var(--text-muted)] dark:text-slate-400">No media files match your filters.</td>
                 </tr>
               )}
             </tbody>
@@ -901,7 +901,7 @@ export default function MediaLibrary() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {pendingUploads.length > 1 && (
-                <span className="text-xs text-slate-500 dark:text-slate-400">
+                <span className="text-xs text-[var(--text-muted)] dark:text-slate-400">
                   Configuring file {activeUploadIndex + 1} of {pendingUploads.length}
                 </span>
               )}
@@ -910,7 +910,7 @@ export default function MediaLibrary() {
               <button
                 type="button"
                 onClick={() => setUploadModalOpen(false)}
-                className="rounded-[8px] border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>
@@ -930,7 +930,7 @@ export default function MediaLibrary() {
           <div className="space-y-4">
             {/* Multiple files selector tab if multiple files selected */}
             {pendingUploads.length > 1 && (
-              <div className="flex flex-wrap gap-1 border-b border-slate-100 pb-2 dark:border-slate-800">
+              <div className="flex flex-wrap gap-1 border-b border-[var(--border-color)] pb-2 dark:border-slate-800">
                 {pendingUploads.map((p, idx) => (
                   <button
                     key={p.id}
@@ -939,7 +939,7 @@ export default function MediaLibrary() {
                     className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
                       activeUploadIndex === idx
                         ? 'bg-[#003580] text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                        : 'bg-[var(--bg-page)] text-[var(--text-secondary)]  dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                     }`}
                   >
                     File {idx + 1}: {p.name.length > 15 ? p.name.substring(0, 12) + '...' : p.name}
@@ -950,7 +950,7 @@ export default function MediaLibrary() {
 
             <div className="grid gap-4 md:grid-cols-12">
               {/* Media Preview Thumbnail */}
-              <div className="md:col-span-5 flex flex-col items-center justify-center rounded-[10px] border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+              <div className="md:col-span-5 flex flex-col items-center justify-center rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-3 dark:border-slate-700 dark:bg-slate-800">
                 {currentPending.type === 'image' ? (
                   <ImageThumbnail
                     src={currentPending.dataUrl}
@@ -959,12 +959,12 @@ export default function MediaLibrary() {
                   />
                 ) : (
                   <div className="flex h-36 w-full flex-col items-center justify-center">
-                    {React.createElement(typeIcon[currentPending.type], { className: 'h-16 w-16 text-slate-400' })}
-                    <span className="mt-2 text-xs font-semibold text-slate-600 uppercase dark:text-slate-300">{currentPending.type}</span>
+                    {React.createElement(typeIcon[currentPending.type], { className: 'h-16 w-16 text-[var(--text-muted)]' })}
+                    <span className="mt-2 text-xs font-semibold text-[var(--text-secondary)] uppercase dark:text-slate-300">{currentPending.type}</span>
                   </div>
                 )}
-                <div className="mt-2 w-full text-center text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                  <p className="font-semibold text-slate-700 dark:text-slate-300">{formatBytes(currentPending.size)}</p>
+                <div className="mt-2 w-full text-center text-[11px] text-[var(--text-muted)] dark:text-slate-400 space-y-0.5">
+                  <p className="font-semibold text-[var(--text-secondary)] dark:text-slate-300">{formatBytes(currentPending.size)}</p>
                   {currentPending.width && currentPending.height && (
                     <p>{currentPending.width} × {currentPending.height} px</p>
                   )}
@@ -974,26 +974,26 @@ export default function MediaLibrary() {
               {/* Form Metadata Fields */}
               <div className="md:col-span-7 space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
                     Display Name / Title <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={currentPending.name}
                     onChange={(e) => updatePendingItem(activeUploadIndex, { name: e.target.value })}
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     placeholder="Enter file display name..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
                     Category / Folder <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={currentPending.folder}
                     onChange={(e) => updatePendingItem(activeUploadIndex, { folder: e.target.value })}
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 bg-[var(--bg-card)] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {FOLDERS.filter((f) => f !== 'All').map((f) => (
                       <option key={f} value={f}>{f}</option>
@@ -1002,42 +1002,42 @@ export default function MediaLibrary() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
                     Description
                   </label>
                   <textarea
                     rows={2}
                     value={currentPending.description}
                     onChange={(e) => updatePendingItem(activeUploadIndex, { description: e.target.value })}
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     placeholder="Add a detailed description for this media asset..."
                   />
                 </div>
 
                 {currentPending.type === 'image' && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                    <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
                       Alt Text (Accessibility)
                     </label>
                     <input
                       type="text"
                       value={currentPending.altText}
                       onChange={(e) => updatePendingItem(activeUploadIndex, { altText: e.target.value })}
-                      className="w-full rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       placeholder="Image description for screen readers"
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">
                     Tags (Comma separated)
                   </label>
                   <input
                     type="text"
                     value={currentPending.tagsInput}
                     onChange={(e) => updatePendingItem(activeUploadIndex, { tagsInput: e.target.value })}
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-1.5 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     placeholder="e.g. event, alumni, campus, photo"
                   />
                 </div>
@@ -1050,23 +1050,23 @@ export default function MediaLibrary() {
       {/* Lightbox / Details Modal */}
       {lightboxItem && (
         <div onClick={() => setLightboxItem(null)} className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm">
-          <div onClick={(e) => e.stopPropagation()} className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[12px] border border-white/10 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div onClick={(e) => e.stopPropagation()} className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[12px] border border-white/10 bg-[var(--bg-card)] shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             <button type="button" onClick={() => setLightboxItem(null)} className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/70 text-white hover:bg-slate-900">
               <X className="h-4 w-4" />
             </button>
             <div className="flex max-h-[85vh] flex-col md:flex-row overflow-y-auto">
-              <div className="flex flex-1 items-center justify-center bg-slate-100 p-6 min-h-[260px] dark:bg-slate-800">
+              <div className="flex flex-1 items-center justify-center bg-[var(--bg-page)] p-6 min-h-[260px] dark:bg-slate-800">
                 {lightboxItem.type === 'image' ? (
                   <ImageThumbnail src={lightboxItem.url} alt={lightboxItem.name} className="max-h-[70vh] w-auto rounded shadow-md" />
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8">
                     {React.createElement(typeIcon[lightboxItem.type], { className: 'h-24 w-24 text-slate-300 dark:text-slate-600' })}
-                    <span className="mt-2 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase">{lightboxItem.type}</span>
+                    <span className="mt-2 text-sm font-bold text-[var(--text-muted)] dark:text-slate-400 uppercase">{lightboxItem.type}</span>
                   </div>
                 )}
               </div>
 
-              <div className="w-full space-y-4 border-t border-slate-200 p-5 md:w-96 md:border-l md:border-t-0 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <div className="w-full space-y-4 border-t border-[var(--border-color)] p-5 md:w-96 md:border-l md:border-t-0 bg-[var(--bg-card)] dark:border-slate-800 dark:bg-slate-900">
                 <div className="flex items-center justify-between">
                   <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColor[lightboxItem.type]}`}>
                     {lightboxItem.type}
@@ -1074,7 +1074,7 @@ export default function MediaLibrary() {
                   <button
                     type="button"
                     onClick={() => setIsEditingLightbox(!isEditingLightbox)}
-                    className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    className="inline-flex items-center gap-1 rounded-md border border-[var(--border-color)] px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                   >
                     <Edit3 className="h-3 w-3" />
                     {isEditingLightbox ? 'View Details' : 'Edit Details'}
@@ -1084,28 +1084,28 @@ export default function MediaLibrary() {
                 {!isEditingLightbox ? (
                   <>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">{lightboxItem.name}</h3>
+                      <h3 className="text-base font-semibold text-[var(--text-primary)] dark:text-white">{lightboxItem.name}</h3>
                       {lightboxItem.description && (
-                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{lightboxItem.description}</p>
+                        <p className="mt-1 text-xs text-[var(--text-secondary)] dark:text-slate-300">{lightboxItem.description}</p>
                       )}
                       {lightboxItem.altText && (
-                        <p className="mt-1 text-[11px] text-slate-400 italic">Alt: {lightboxItem.altText}</p>
+                        <p className="mt-1 text-[11px] text-[var(--text-muted)] italic">Alt: {lightboxItem.altText}</p>
                       )}
                     </div>
 
-                    <dl className="space-y-2 text-xs text-slate-600 border-t border-b border-slate-100 py-3 dark:border-slate-800 dark:text-slate-300">
-                      <div className="flex justify-between"><dt className="text-slate-400">Category/Folder</dt><dd className="font-semibold text-slate-800 dark:text-white">{lightboxItem.folder}</dd></div>
-                      <div className="flex justify-between"><dt className="text-slate-400">Size</dt><dd className="font-medium">{formatBytes(lightboxItem.size)}</dd></div>
+                    <dl className="space-y-2 text-xs text-[var(--text-secondary)] border-t border-b border-[var(--border-color)] py-3 dark:border-slate-800 dark:text-slate-300">
+                      <div className="flex justify-between"><dt className="text-[var(--text-muted)]">Category/Folder</dt><dd className="font-semibold text-[var(--text-primary)] dark:text-white">{lightboxItem.folder}</dd></div>
+                      <div className="flex justify-between"><dt className="text-[var(--text-muted)]">Size</dt><dd className="font-medium">{formatBytes(lightboxItem.size)}</dd></div>
                       {lightboxItem.width && lightboxItem.height && (
-                        <div className="flex justify-between"><dt className="text-slate-400">Dimensions</dt><dd className="font-medium">{lightboxItem.width} × {lightboxItem.height} px</dd></div>
+                        <div className="flex justify-between"><dt className="text-[var(--text-muted)]">Dimensions</dt><dd className="font-medium">{lightboxItem.width} × {lightboxItem.height} px</dd></div>
                       )}
-                      <div className="flex justify-between"><dt className="text-slate-400">Uploaded</dt><dd className="font-medium">{lightboxItem.uploadedAt}</dd></div>
-                      <div className="flex justify-between"><dt className="text-slate-400">By</dt><dd className="font-medium">{lightboxItem.uploadedBy}</dd></div>
+                      <div className="flex justify-between"><dt className="text-[var(--text-muted)]">Uploaded</dt><dd className="font-medium">{lightboxItem.uploadedAt}</dd></div>
+                      <div className="flex justify-between"><dt className="text-[var(--text-muted)]">By</dt><dd className="font-medium">{lightboxItem.uploadedBy}</dd></div>
                     </dl>
 
                     <div className="flex flex-wrap gap-1.5">
                       {lightboxItem.tags.map((tag) => (
-                        <span key={tag} className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">#{tag}</span>
+                        <span key={tag} className="rounded-md bg-[var(--bg-page)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)] dark:bg-slate-800 dark:text-slate-300">#{tag}</span>
                       ))}
                     </div>
 
@@ -1113,7 +1113,7 @@ export default function MediaLibrary() {
                       <button type="button" onClick={() => copyMediaUrl(lightboxItem)} className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#003580] px-3 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer">
                         <Link2 className="h-3.5 w-3.5" /> Copy File URL
                       </button>
-                      <button type="button" onClick={() => downloadMediaAsset(lightboxItem)} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+                      <button type="button" onClick={() => downloadMediaAsset(lightboxItem)} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
                         <Download className="h-3.5 w-3.5" /> Download
                       </button>
                       <button type="button" onClick={() => handleDeleteSingle(lightboxItem)} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/60 cursor-pointer">
@@ -1124,21 +1124,21 @@ export default function MediaLibrary() {
                 ) : (
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Name</label>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Name</label>
                       <input
                         type="text"
                         value={editForm.name}
                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="w-full rounded-[6px] border border-[var(--border-color)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Folder</label>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Folder</label>
                       <select
                         value={editForm.folder}
                         onChange={(e) => setEditForm({ ...editForm, folder: e.target.value })}
-                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="w-full rounded-[6px] border border-[var(--border-color)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] bg-[var(--bg-card)] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       >
                         {FOLDERS.filter((f) => f !== 'All').map((f) => (
                           <option key={f} value={f}>{f}</option>
@@ -1147,34 +1147,34 @@ export default function MediaLibrary() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Description</label>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Description</label>
                       <textarea
                         rows={2}
                         value={editForm.description}
                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="w-full rounded-[6px] border border-[var(--border-color)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       />
                     </div>
 
                     {lightboxItem.type === 'image' && (
                       <div>
-                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Alt Text</label>
+                        <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Alt Text</label>
                         <input
                           type="text"
                           value={editForm.altText}
                           onChange={(e) => setEditForm({ ...editForm, altText: e.target.value })}
-                          className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                          className="w-full rounded-[6px] border border-[var(--border-color)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                         />
                       </div>
                     )}
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Tags (Comma separated)</label>
+                      <label className="block text-xs font-semibold text-[var(--text-secondary)] dark:text-slate-200 mb-1">Tags (Comma separated)</label>
                       <input
                         type="text"
                         value={editForm.tagsInput}
                         onChange={(e) => setEditForm({ ...editForm, tagsInput: e.target.value })}
-                        className="w-full rounded-[6px] border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="w-full rounded-[6px] border border-[var(--border-color)] px-2.5 py-1.5 text-xs outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       />
                     </div>
 
@@ -1189,7 +1189,7 @@ export default function MediaLibrary() {
                       <button
                         type="button"
                         onClick={() => setIsEditingLightbox(false)}
-                        className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
+                        className="rounded-md border border-[var(--border-color)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
                       >
                         Cancel
                       </button>

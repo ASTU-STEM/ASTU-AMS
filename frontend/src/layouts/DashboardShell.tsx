@@ -311,7 +311,7 @@ export function DashboardShell({
                           className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
                         >
                           <span
-                            className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'
+                            className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-[var(--bg-page)]'
                               }`}
                           />
                           <div className="min-w-0 flex-1">
@@ -370,7 +370,7 @@ export function DashboardShell({
                   <div className="text-sm font-medium text-[var(--text-primary)]">{userName}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">{userRole}</div>
                 </div>
-                <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
               </button>
 
               {menuOpen && (

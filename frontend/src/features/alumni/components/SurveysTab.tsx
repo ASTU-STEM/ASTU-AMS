@@ -256,7 +256,7 @@ export const SurveysTab = () => {
           {assignments.length === 0 ? (
             <div className={alumniPanelClass}>
               <EmptyState
-                icon={<ClipboardList className="h-10 w-10 text-slate-400 dark:text-slate-500" />}
+                icon={<ClipboardList className="h-10 w-10 text-[var(--text-muted)] dark:text-slate-500" />}
                 title="No tracer surveys yet"
                 description="New surveys appear here when the university assigns them."
               />

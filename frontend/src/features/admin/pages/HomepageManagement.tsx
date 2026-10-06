@@ -212,15 +212,15 @@ function InlineEditor<T extends { id: string; active: boolean }>({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{items.filter(i => i.active).length} active of {items.length} total</span>
+        <span className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400 uppercase tracking-wider">{items.filter(i => i.active).length} active of {items.length} total</span>
         <button onClick={onAdd} className="inline-flex items-center gap-1 rounded-md bg-[#003580]/10 dark:bg-sky-500/20 px-2.5 py-1.5 text-[10px] font-semibold text-[#003580] dark:text-sky-400 hover:bg-[#003580]/20 transition-all cursor-pointer"><Plus className="h-3 w-3" /> Add</button>
       </div>
       {items.map((item, idx) => (
-        <div key={item.id} className="group flex items-start gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 hover:border-[#003580]/20 dark:hover:border-sky-500/30 transition-all">
+        <div key={item.id} className="group flex items-start gap-2 rounded-lg border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-800/80 p-3 hover:border-[#003580]/20 dark:hover:border-sky-500/30 transition-all">
           <div className="min-w-0 flex-1">{renderItem(item, idx)}</div>
           <div className="flex shrink-0 items-center gap-1">
             <button onClick={() => setItems(prev => prev.map(i => i.id === item.id ? { ...i, active: !i.active } : i))}
-              className={`rounded p-1 transition-all ${item.active ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700'}`} title={item.active ? 'Deactivate' : 'Activate'}>
+              className={`rounded p-1 transition-all ${item.active ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-slate-300 dark:text-slate-600 hover:bg-[var(--bg-page)] dark:hover:bg-slate-700'}`} title={item.active ? 'Deactivate' : 'Activate'}>
               <CheckCircle2 className="h-3.5 w-3.5" />
             </button>
             <button onClick={() => { setItems(prev => prev.filter(i => i.id !== item.id)); toast.success('Item removed'); }}
@@ -434,101 +434,101 @@ export default function HomepageManagement() {
           <SectionPanel title="Proposal-Specific Features" subtitle="Content modules derived from the ASTU-AMS project proposal (Tracer Study, Employer Feedback, Mentorship, Newsletter)." icon={Zap}>
             <div className="space-y-6">
               {/* Tracer Study Spotlight */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <div className="rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-sky-400"><FileText className="h-5 w-5" /></span>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">Tracer Study Spotlight</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">CTA banner for the tracer survey campaign on the homepage.</p>
+                      <h3 className="text-base font-semibold text-[var(--text-primary)] dark:text-white">Tracer Study Spotlight</h3>
+                      <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">CTA banner for the tracer survey campaign on the homepage.</p>
                     </div>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input type="checkbox" checked={tracerSpotlight.enabled} onChange={e => setTracerSpotlight(p => ({ ...p, enabled: e.target.checked }))} className="peer sr-only" />
-                    <span className="h-5 w-9 rounded-full bg-slate-200 dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
+                    <span className="h-5 w-9 rounded-full bg-[var(--bg-page)] dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
                   </label>
                 </div>
                 {tracerSpotlight.enabled && (
-                  <div className="mt-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+                  <div className="mt-4 space-y-3 border-t border-[var(--border-color)] dark:border-slate-800 pt-4">
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Title</label><input value={tracerSpotlight.title} onChange={e => setTracerSpotlight(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Target Batch</label><input value={tracerSpotlight.targetBatch} onChange={e => setTracerSpotlight(p => ({ ...p, targetBatch: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Title</label><input value={tracerSpotlight.title} onChange={e => setTracerSpotlight(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Target Batch</label><input value={tracerSpotlight.targetBatch} onChange={e => setTracerSpotlight(p => ({ ...p, targetBatch: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
-                    <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Description</label><textarea value={tracerSpotlight.description} onChange={e => setTracerSpotlight(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500 resize-none" /></div>
+                    <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Description</label><textarea value={tracerSpotlight.description} onChange={e => setTracerSpotlight(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500 resize-none" /></div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Response Rate</label><input value={tracerSpotlight.responseRate} onChange={e => setTracerSpotlight(p => ({ ...p, responseRate: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Deadline</label><input value={tracerSpotlight.deadline} onChange={e => setTracerSpotlight(p => ({ ...p, deadline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Response Rate</label><input value={tracerSpotlight.responseRate} onChange={e => setTracerSpotlight(p => ({ ...p, responseRate: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Deadline</label><input value={tracerSpotlight.deadline} onChange={e => setTracerSpotlight(p => ({ ...p, deadline: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Employer Feedback Portal */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <div className="rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"><Handshake className="h-5 w-5" /></span>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">Employer Feedback Portal</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Employer competency ratings and skill-gap analytics module.</p>
+                      <h3 className="text-base font-semibold text-[var(--text-primary)] dark:text-white">Employer Feedback Portal</h3>
+                      <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">Employer competency ratings and skill-gap analytics module.</p>
                     </div>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input type="checkbox" checked={employerFeedback.enabled} onChange={e => setEmployerFeedback(p => ({ ...p, enabled: e.target.checked }))} className="peer sr-only" />
-                    <span className="h-5 w-9 rounded-full bg-slate-200 dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
+                    <span className="h-5 w-9 rounded-full bg-[var(--bg-page)] dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
                   </label>
                 </div>
                 {employerFeedback.enabled && (
-                  <div className="mt-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
-                    <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Title</label><input value={employerFeedback.title} onChange={e => setEmployerFeedback(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
-                    <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Description</label><textarea value={employerFeedback.description} onChange={e => setEmployerFeedback(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500 resize-none" /></div>
+                  <div className="mt-4 space-y-3 border-t border-[var(--border-color)] dark:border-slate-800 pt-4">
+                    <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Title</label><input value={employerFeedback.title} onChange={e => setEmployerFeedback(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                    <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Description</label><textarea value={employerFeedback.description} onChange={e => setEmployerFeedback(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500 resize-none" /></div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Submissions</label><input type="number" value={employerFeedback.submissions} onChange={e => setEmployerFeedback(p => ({ ...p, submissions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Participating Companies</label><input type="number" value={employerFeedback.companies} onChange={e => setEmployerFeedback(p => ({ ...p, companies: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Total Submissions</label><input type="number" value={employerFeedback.submissions} onChange={e => setEmployerFeedback(p => ({ ...p, submissions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Participating Companies</label><input type="number" value={employerFeedback.companies} onChange={e => setEmployerFeedback(p => ({ ...p, companies: +e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Mentorship Program Stats */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <div className="rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-emerald-950/60 text-green-700 dark:text-emerald-400"><GraduationCap className="h-5 w-5" /></span>
                     <div>
-                      <h3 className="text-base font-semibold text-slate-900 dark:text-white">Mentorship Program Stats</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Live counters for the alumni mentorship initiative.</p>
+                      <h3 className="text-base font-semibold text-[var(--text-primary)] dark:text-white">Mentorship Program Stats</h3>
+                      <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">Live counters for the alumni mentorship initiative.</p>
                     </div>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input type="checkbox" checked={mentorshipStats.enabled} onChange={e => setMentorshipStats(p => ({ ...p, enabled: e.target.checked }))} className="peer sr-only" />
-                    <span className="h-5 w-9 rounded-full bg-slate-200 dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
+                    <span className="h-5 w-9 rounded-full bg-[var(--bg-page)] dark:bg-slate-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#003580] dark:peer-checked:bg-sky-600 peer-checked:after:translate-x-full" />
                   </label>
                 </div>
                 {mentorshipStats.enabled && (
-                  <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-4">
+                  <div className="mt-4 border-t border-[var(--border-color)] dark:border-slate-800 pt-4">
                     <div className="grid grid-cols-3 gap-3">
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mentors</label><input type="number" value={mentorshipStats.mentors} onChange={e => setMentorshipStats(p => ({ ...p, mentors: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Mentees</label><input type="number" value={mentorshipStats.mentees} onChange={e => setMentorshipStats(p => ({ ...p, mentees: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
-                      <div><label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Sessions</label><input type="number" value={mentorshipStats.sessions} onChange={e => setMentorshipStats(p => ({ ...p, sessions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Mentors</label><input type="number" value={mentorshipStats.mentors} onChange={e => setMentorshipStats(p => ({ ...p, mentors: +e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Mentees</label><input type="number" value={mentorshipStats.mentees} onChange={e => setMentorshipStats(p => ({ ...p, mentees: +e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
+                      <div><label className="text-xs font-semibold text-[var(--text-muted)] dark:text-slate-400">Sessions</label><input type="number" value={mentorshipStats.sessions} onChange={e => setMentorshipStats(p => ({ ...p, sessions: +e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-card)] dark:bg-slate-800 text-[var(--text-primary)] dark:text-white px-3 py-2 text-sm outline-none focus:border-[#003580] dark:focus:border-sky-500" /></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Newsletter Subscribers */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+              <div className="rounded-xl border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-5">
                 <div className="flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400"><Mail className="h-5 w-5" /></span>
                   <div>
-                    <h3 className="text-base font-semibold text-slate-900 dark:text-white">Newsletter Subscribers</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{newsletterEmails.length} subscribed emails (tracked from homepage footer form).</p>
+                    <h3 className="text-base font-semibold text-[var(--text-primary)] dark:text-white">Newsletter Subscribers</h3>
+                    <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">{newsletterEmails.length} subscribed emails (tracked from homepage footer form).</p>
                   </div>
                 </div>
                 <div className="mt-4 space-y-2 max-h-40 overflow-y-auto">
                   {newsletterEmails.map((email, idx) => (
-                    <div key={idx} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm">
-                      <span className="text-slate-700 dark:text-slate-200">{email}</span>
+                    <div key={idx} className="flex items-center justify-between rounded-lg bg-[var(--bg-page)] dark:bg-slate-800 px-3 py-2 text-sm">
+                      <span className="text-[var(--text-secondary)] dark:text-slate-200">{email}</span>
                       <button onClick={() => { setNewsletterEmails(prev => prev.filter((_, i) => i !== idx)); toast.success('Email removed'); }}
                         className="text-rose-400 hover:text-rose-600"><X className="h-3.5 w-3.5" /></button>
                     </div>
@@ -551,7 +551,7 @@ export default function HomepageManagement() {
                     { label: 'Footer Settings', path: '/cms/footer' },
                   ].map(link => (
                     <a key={link.label} href={link.path}
-                      className="flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-all">
+                      className="flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-[var(--bg-card)] dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-all">
                       <ArrowRight className="h-3 w-3" /> {link.label}
                     </a>
                   ))}
@@ -563,7 +563,7 @@ export default function HomepageManagement() {
       }
 
       default:
-        return <div className="text-sm text-slate-500 p-8 text-center">Select a section to manage.</div>;
+        return <div className="text-sm text-[var(--text-muted)] p-8 text-center">Select a section to manage.</div>;
     }
   };
 
@@ -597,16 +597,16 @@ export default function HomepageManagement() {
         {[
           { label: 'Total Items', value: totalSections, icon: Globe, tone: 'text-[#003580] dark:text-sky-400', bg: 'bg-[#003580]/10 dark:bg-sky-950/40' },
           { label: 'Active', value: totalActive, icon: CheckCircle2, tone: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
-          { label: 'Content Tabs', value: tabConfig.length, icon: FileText, tone: 'text-slate-600 dark:text-slate-300', bg: 'bg-slate-100 dark:bg-slate-800' },
+          { label: 'Content Tabs', value: tabConfig.length, icon: FileText, tone: 'text-[var(--text-secondary)] dark:text-slate-300', bg: 'bg-[var(--bg-page)] dark:bg-slate-800' },
           { label: 'Sections Managed', value: Object.keys({ heroSlides, impactStats, portals, campusLife, campuses, gallery, videos, events, workshops, newsItems, announcements, stories, partners, testimonials, faq }).length, icon: BarChart3, tone: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40' },
         ].map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="fade-up rounded-[10px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm flex items-center gap-3" style={{ animationDelay: `${idx * 0.05}s` }}>
+            <div key={stat.label} className="fade-up rounded-[10px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-4 shadow-sm flex items-center gap-3" style={{ animationDelay: `${idx * 0.05}s` }}>
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.bg} ${stat.tone}`}><Icon className="h-5 w-5" /></div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{stat.label}</p>
-                <p className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{stat.value}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] dark:text-slate-400">{stat.label}</p>
+                <p className="text-xl font-semibold tracking-tight text-[var(--text-primary)] dark:text-white">{stat.value}</p>
               </div>
             </div>
           );
@@ -614,11 +614,11 @@ export default function HomepageManagement() {
       </div>
 
       {/* Welcome Message */}
-      <div className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+      <div className="rounded-[12px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-5 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <MessageSquareText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Homepage Welcome Message</h2>
+            <MessageSquareText className="h-4 w-4 text-[var(--text-muted)] dark:text-slate-400" />
+            <h2 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white">Homepage Welcome Message</h2>
           </div>
           <button onClick={saveWelcome}
             className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-xs font-semibold transition-all shadow-sm cursor-pointer ${welcomeSaved ? 'bg-emerald-500 text-white' : 'bg-[#1D9E75] text-white hover:brightness-110'}`}>
@@ -626,18 +626,18 @@ export default function HomepageManagement() {
           </button>
         </div>
         <textarea value={welcomeMessage} onChange={(e) => setWelcomeMessage(e.target.value)}
-          className="mt-3 min-h-20 w-full rounded-[8px] border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3 text-sm text-slate-700 dark:text-slate-200 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10 resize-none" />
+          className="mt-3 min-h-20 w-full rounded-[8px] border border-[var(--border-color)] dark:border-slate-700 bg-[var(--bg-page)] dark:bg-slate-800 p-3 text-sm text-[var(--text-secondary)] dark:text-slate-200 outline-none focus:border-[#003580] dark:focus:border-sky-500 focus:ring-2 focus:ring-[#003580]/10 resize-none" />
       </div>
 
       {/* Tab Navigation */}
-      <div className="overflow-x-auto hide-scrollbar rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <div className="overflow-x-auto hide-scrollbar rounded-[12px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 shadow-sm">
         <nav className="flex gap-1 p-1.5 min-w-max">
           {tabConfig.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive ? 'tab-active bg-[#003580]/5 dark:bg-sky-500/15 text-[#003580] dark:text-sky-400' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'}`}>
+                className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive ? 'tab-active bg-[#003580]/5 dark:bg-sky-500/15 text-[#003580] dark:text-sky-400' : 'text-[var(--text-muted)] dark:text-slate-400 hover:bg-[var(--bg-page)] dark:hover:bg-slate-800 hover:text-[var(--text-secondary)] dark:hover:text-slate-200'}`}>
                 <Icon className="h-3.5 w-3.5" /> {tab.label}
               </button>
             );
@@ -656,14 +656,14 @@ export default function HomepageManagement() {
 /* ─── Section Panel Wrapper ─── */
 function SectionPanel({ title, subtitle, icon: Icon, children }: { title: string; subtitle: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
-    <section className="rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+    <section className="rounded-[12px] border border-[var(--border-color)] dark:border-slate-800 bg-[var(--bg-card)] dark:bg-slate-900 p-5 shadow-sm">
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#003580]/10 dark:bg-sky-500/10 text-[#003580] dark:text-sky-400">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h2>
-          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
+          <h2 className="text-base font-semibold text-[var(--text-primary)] dark:text-white">{title}</h2>
+          <p className="mt-0.5 text-sm text-[var(--text-muted)] dark:text-slate-400">{subtitle}</p>
         </div>
       </div>
       <div className="mt-5">{children}</div>
@@ -695,25 +695,25 @@ function HeroSection({ heroSlides, setHeroSlides }: { heroSlides: HeroSlide[]; s
       <InlineEditor items={heroSlides} setItems={setHeroSlides} title="Slides" onAdd={openAdd}
         renderItem={(slide) => (
           <div className="flex items-center gap-3">
-            <div className="h-12 w-20 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={slide.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div className="h-12 w-20 shrink-0 rounded-md bg-[var(--bg-page)] overflow-hidden"><img src={slide.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">{slide.title}</p>
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">{slide.tagline}</p>
-              <p className="text-xs text-slate-400 truncate">{slide.description.slice(0, 80)}...</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{slide.title}</p>
+              <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider mt-0.5">{slide.tagline}</p>
+              <p className="text-xs text-[var(--text-muted)] truncate">{slide.description.slice(0, 80)}...</p>
             </div>
-            <button onClick={() => openEdit(slide)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580] transition-all"><Edit3 className="h-3.5 w-3.5" /></button>
+            <button onClick={() => openEdit(slide)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580] transition-all"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Slide' : 'New Slide'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
           <ImageUploader label="Upload Slide Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
-          <div><label className="text-xs font-semibold text-slate-500">Tagline</label><input value={form.tagline} onChange={e => setForm(p => ({ ...p, tagline: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Quality Assurance & Accreditation" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Slide title" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Tagline</label><input value={form.tagline} onChange={e => setForm(p => ({ ...p, tagline: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Quality Assurance & Accreditation" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Slide title" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -742,10 +742,10 @@ function StatsSection({ impactStats, setImpactStats }: { impactStats: ImpactStat
             <div className="flex items-center gap-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
               <div>
-                <p className="text-sm font-semibold text-slate-900">{stat.value}{stat.suffix} <span className="text-xs font-normal text-slate-500">{stat.label}</span></p>
-                <p className="text-xs text-slate-400">{stat.detail}</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{stat.value}{stat.suffix} <span className="text-xs font-normal text-[var(--text-muted)]">{stat.label}</span></p>
+                <p className="text-xs text-[var(--text-muted)]">{stat.detail}</p>
               </div>
-              <button onClick={() => openEdit(stat)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+              <button onClick={() => openEdit(stat)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
             </div>
           );
         }}
@@ -753,15 +753,15 @@ function StatsSection({ impactStats, setImpactStats }: { impactStats: ImpactStat
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Stat' : 'New Stat'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Value</label><input value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. 1,238" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Suffix</label><input value={form.suffix} onChange={e => setForm(p => ({ ...p, suffix: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="+" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Value</label><input value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. 1,238" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Suffix</label><input value={form.suffix} onChange={e => setForm(p => ({ ...p, suffix: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="+" /></div>
           </div>
-          <div><label className="text-xs font-semibold text-slate-500">Label</label><input value={form.label} onChange={e => setForm(p => ({ ...p, label: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Registered Alumni Members" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Detail</label><input value={form.detail} onChange={e => setForm(p => ({ ...p, detail: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Label</label><input value={form.label} onChange={e => setForm(p => ({ ...p, label: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Registered Alumni Members" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Detail</label><input value={form.detail} onChange={e => setForm(p => ({ ...p, detail: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -800,10 +800,10 @@ function PortalsSection({ portals, setPortals }: { portals: StakeholderPortal[];
             <div className="flex items-center gap-3">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]"><Icon className="h-4 w-4" /></span>
               <div>
-                <p className="text-sm font-semibold text-slate-900">{portal.title}</p>
-                <p className="text-xs text-slate-400">{portal.cta || 'Portal'} · {(portal.points || []).length} features</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{portal.title}</p>
+                <p className="text-xs text-[var(--text-muted)]">{portal.cta || 'Portal'} · {(portal.points || []).length} features</p>
               </div>
-              <button onClick={() => openEdit(portal)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+              <button onClick={() => openEdit(portal)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
             </div>
           );
         }}
@@ -811,17 +811,17 @@ function PortalsSection({ portals, setPortals }: { portals: StakeholderPortal[];
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Portal' : 'New Portal'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Icon</label><select value={form.icon} onChange={e => setForm(p => ({ ...p, icon: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]">{iconOptions.map(io => <option key={io}>{io}</option>)}</select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">CTA Button</label><input value={form.cta} onChange={e => setForm(p => ({ ...p, cta: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Route</label><input value={form.route} onChange={e => setForm(p => ({ ...p, route: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">CTA Button</label><input value={form.cta} onChange={e => setForm(p => ({ ...p, cta: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Route</label><input value={form.route} onChange={e => setForm(p => ({ ...p, route: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           </div>
-          <div><label className="text-xs font-semibold text-slate-500">Feature Points (one per line)</label><textarea value={(form.points || []).join('\n')} onChange={e => setForm(p => ({ ...p, points: e.target.value.split('\n') }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Feature Points (one per line)</label><textarea value={(form.points || []).join('\n')} onChange={e => setForm(p => ({ ...p, points: e.target.value.split('\n') }))} rows={4} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -845,24 +845,24 @@ function CampusLifeSection({ campusLife, setCampusLife }: { campusLife: CampusLi
       <InlineEditor items={campusLife} setItems={setCampusLife} title="Cards" onAdd={openAdd}
         renderItem={(card) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={card.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-            <div><p className="text-sm font-semibold text-slate-900">{card.title}</p><p className="text-xs text-slate-400">{card.campus}</p></div>
-            <button onClick={() => openEdit(card)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div className="h-10 w-14 shrink-0 rounded-md bg-[var(--bg-page)] overflow-hidden"><img src={card.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{card.title}</p><p className="text-xs text-[var(--text-muted)]">{card.campus}</p></div>
+            <button onClick={() => openEdit(card)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Card' : 'New Card'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Campus Label</label><input value={form.campus} onChange={e => setForm(p => ({ ...p, campus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Campus Label</label><input value={form.campus} onChange={e => setForm(p => ({ ...p, campus: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           </div>
-          <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
           <ImageUploader label="Upload Card Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
-          <div><label className="text-xs font-semibold text-slate-500">Action Text</label><input value={form.action} onChange={e => setForm(p => ({ ...p, action: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Action Text</label><input value={form.action} onChange={e => setForm(p => ({ ...p, action: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -886,20 +886,20 @@ function CampusesSection({ campuses, setCampuses }: { campuses: Campus[]; setCam
       <InlineEditor items={campuses} setItems={setCampuses} title="Campuses" onAdd={openAdd}
         renderItem={(campus) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={campus.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-            <div><p className="text-sm font-semibold text-slate-900">{campus.name}</p><p className="text-xs text-slate-400 truncate max-w-[200px]">{campus.description}</p></div>
-            <button onClick={() => openEdit(campus)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div className="h-10 w-14 shrink-0 rounded-md bg-[var(--bg-page)] overflow-hidden"><img src={campus.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{campus.name}</p><p className="text-xs text-[var(--text-muted)] truncate max-w-[200px]">{campus.description}</p></div>
+            <button onClick={() => openEdit(campus)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Campus' : 'New Campus'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Description</label><textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
           <ImageUploader label="Upload Campus Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -923,19 +923,19 @@ function GallerySection({ gallery, setGallery }: { gallery: GalleryImage[]; setG
       <InlineEditor items={gallery} setItems={setGallery} title="Images" onAdd={openAdd}
         renderItem={(img) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={img.src} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-            <div><p className="text-sm font-semibold text-slate-900">{img.title}</p></div>
-            <button onClick={() => openEdit(img)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div className="h-10 w-14 shrink-0 rounded-md bg-[var(--bg-page)] overflow-hidden"><img src={img.src} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{img.title}</p></div>
+            <button onClick={() => openEdit(img)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Image' : 'Add Image'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           <ImageUploader label="Upload Photo" value={form.src} onChange={url => setForm(p => ({ ...p, src: url }))} />
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
         </div>
       </AdminModal>
@@ -959,19 +959,19 @@ function VideoSection({ videos, setVideos }: { videos: VideoItem[]; setVideos: R
       <InlineEditor items={videos} setItems={setVideos} title="Videos" onAdd={openAdd}
         renderItem={(video) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={video.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-            <div><p className="text-sm font-semibold text-slate-900">{video.title}</p></div>
-            <button onClick={() => openEdit(video)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div className="h-10 w-14 shrink-0 rounded-md bg-[var(--bg-page)] overflow-hidden"><img src={video.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{video.title}</p></div>
+            <button onClick={() => openEdit(video)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Video' : 'Add Video'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           <ImageUploader label="Upload Thumbnail Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
         </div>
       </AdminModal>
@@ -995,23 +995,23 @@ function EventsSection({ events, setEvents }: { events: EventItem[]; setEvents: 
       <InlineEditor items={events} setItems={setEvents} title="Events" onAdd={openAdd}
         renderItem={(ev) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-14 shrink-0 rounded-md bg-slate-100 overflow-hidden"><img src={ev.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
-            <div><p className="text-sm font-semibold text-slate-900">{ev.title}</p><p className="text-xs text-slate-400">{ev.date} · {ev.location}</p></div>
-            <button onClick={() => openEdit(ev)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div className="h-10 w-14 shrink-0 rounded-md bg-[var(--bg-page)] overflow-hidden"><img src={ev.image} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /></div>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{ev.title}</p><p className="text-xs text-[var(--text-muted)]">{ev.date} · {ev.location}</p></div>
+            <button onClick={() => openEdit(ev)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Event' : 'New Event'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="April 25-26, 2026" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Location</label><input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="April 25-26, 2026" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Location</label><input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           </div>
           <ImageUploader label="Upload Event Banner Image" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -1035,22 +1035,22 @@ function WorkshopsSection({ workshops, setWorkshops }: { workshops: WorkshopItem
       <InlineEditor items={workshops} setItems={setWorkshops} title="Workshops" onAdd={openAdd}
         renderItem={(ws) => (
           <div className="flex items-center gap-3">
-            <div><p className="text-sm font-semibold text-slate-900">{ws.title}</p><p className="text-xs text-slate-400">{ws.date} · {ws.seats} · {ws.focus}</p></div>
-            <button onClick={() => openEdit(ws)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{ws.title}</p><p className="text-xs text-[var(--text-muted)]">{ws.date} · {ws.seats} · {ws.focus}</p></div>
+            <button onClick={() => openEdit(ws)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Workshop' : 'New Workshop'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Seats</label><input value={form.seats} onChange={e => setForm(p => ({ ...p, seats: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="120 seats" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Seats</label><input value={form.seats} onChange={e => setForm(p => ({ ...p, seats: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="120 seats" /></div>
           </div>
-          <div><label className="text-xs font-semibold text-slate-500">Focus Area</label><input value={form.focus} onChange={e => setForm(p => ({ ...p, focus: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Research & Innovation" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Focus Area</label><input value={form.focus} onChange={e => setForm(p => ({ ...p, focus: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Research & Innovation" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -1074,18 +1074,18 @@ function NewsSection({ newsItems, setNewsItems }: { newsItems: NewsItem[]; setNe
       <InlineEditor items={newsItems} setItems={setNewsItems} title="News" onAdd={openAdd}
         renderItem={(nw) => (
           <div className="flex items-center gap-3">
-            <div><p className="text-sm font-semibold text-slate-900">{nw.title}</p><p className="text-xs text-slate-400">{nw.date}</p></div>
-            <button onClick={() => openEdit(nw)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{nw.title}</p><p className="text-xs text-[var(--text-muted)]">{nw.date}</p></div>
+            <button onClick={() => openEdit(nw)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit News' : 'New News'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -1110,23 +1110,23 @@ function AnnouncementsSection({ announcements, setAnnouncements }: { announcemen
         renderItem={(ann) => (
           <div className="flex items-center gap-3">
             <Bell className="h-4 w-4 text-astu-red shrink-0" />
-            <div><p className="text-sm font-semibold text-slate-900">{ann.title}</p><p className="text-xs text-slate-400">{ann.type} · {ann.date}</p></div>
-            <button onClick={() => openEdit(ann)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{ann.title}</p><p className="text-xs text-[var(--text-muted)]">{ann.type} · {ann.date}</p></div>
+            <button onClick={() => openEdit(ann)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Announcement' : 'New Announcement'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Title</label><input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Type</label><select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]">
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Date</label><input value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Type</label><select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]">
               {['Alumni Announcement', 'Employer Announcement', 'Alumni Achievement', 'Campus Notice', 'Academic Calendar'].map(t => <option key={t}>{t}</option>)}
             </select></div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -1169,7 +1169,7 @@ function StoriesSection({ stories, setStories }: { stories: SuccessStory[]; setS
       <InlineEditor items={stories} setItems={setStories} title="Stories" onAdd={openAdd}
         renderItem={(story) => (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 overflow-hidden">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-[var(--bg-page)] overflow-hidden">
               {story.image ? (
                 <img
                   src={story.image}
@@ -1180,28 +1180,28 @@ function StoriesSection({ stories, setStories }: { stories: SuccessStory[]; setS
               ) : null}
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">{story.name}</p>
-              <p className="text-xs text-slate-400">
+              <p className="text-sm font-semibold text-[var(--text-primary)]">{story.name}</p>
+              <p className="text-xs text-[var(--text-muted)]">
                 {story.role}{story.company ? ` · ${story.company}` : ''}
               </p>
             </div>
-            <button onClick={() => openEdit(story)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <button onClick={() => openEdit(story)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Story' : 'New Story'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-semibold text-slate-500">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-            <div><label className="text-xs font-semibold text-slate-500">Role</label><input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+            <div><label className="text-xs font-semibold text-[var(--text-muted)]">Role</label><input value={form.role} onChange={e => setForm(p => ({ ...p, role: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
           </div>
-          <div><label className="text-xs font-semibold text-slate-500">Company</label><input value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Safaricom Ethiopia" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Short excerpt (homepage card)</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Full story (detail page)</label><textarea value={form.fullStory} onChange={e => setForm(p => ({ ...p, fullStory: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Company</label><input value={form.company} onChange={e => setForm(p => ({ ...p, company: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Safaricom Ethiopia" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Short excerpt (homepage card)</label><textarea value={form.text} onChange={e => setForm(p => ({ ...p, text: e.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Full story (detail page)</label><textarea value={form.fullStory} onChange={e => setForm(p => ({ ...p, fullStory: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
           <ImageUploader label="Upload Photo / Headshot" value={form.image} onChange={url => setForm(p => ({ ...p, image: url }))} />
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -1226,22 +1226,22 @@ function PartnersSection({ partners, setPartners }: { partners: Partner[]; setPa
         renderItem={(partner) => (
           <div className="flex items-center gap-3">
             {partner.logo ? (
-              <img src={partner.logo} alt="" className="h-8 w-8 rounded-lg object-contain bg-slate-50" />
+              <img src={partner.logo} alt="" className="h-8 w-8 rounded-lg object-contain bg-[var(--bg-page)]" />
             ) : (
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-navy text-white text-xs font-bold">{partner.name.slice(0, 2).toUpperCase()}</span>
             )}
-            <p className="text-sm font-semibold text-slate-900">{partner.name}</p>
-            <button onClick={() => openEdit(partner)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">{partner.name}</p>
+            <button onClick={() => openEdit(partner)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Partner' : 'Add Partner'} onClose={modal.close} size="md">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Company Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Ethio Telecom" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Company Name</label><input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="e.g. Ethio Telecom" /></div>
           <ImageUploader label="Partner Logo" value={form.logo} onChange={url => setForm(p => ({ ...p, logo: url }))} />
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Add'}</button>
         </div>
       </AdminModal>
@@ -1266,18 +1266,18 @@ function TestimonialsSection({ testimonials, setTestimonials }: { testimonials: 
         renderItem={(tt) => (
           <div className="flex items-center gap-3">
             <Quote className="h-5 w-5 text-astu-red shrink-0" />
-            <div><p className="text-sm font-semibold text-slate-900">&ldquo;{tt.quote.length > 60 ? tt.quote.slice(0, 60) + '...' : tt.quote}&rdquo;</p><p className="text-xs text-slate-400">&mdash; {tt.by}</p></div>
-            <button onClick={() => openEdit(tt)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">&ldquo;{tt.quote.length > 60 ? tt.quote.slice(0, 60) + '...' : tt.quote}&rdquo;</p><p className="text-xs text-[var(--text-muted)]">&mdash; {tt.by}</p></div>
+            <button onClick={() => openEdit(tt)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit Testimonial' : 'New Testimonial'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Quote</label><textarea value={form.quote} onChange={e => setForm(p => ({ ...p, quote: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Author</label><input value={form.by} onChange={e => setForm(p => ({ ...p, by: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Department Head" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Quote</label><textarea value={form.quote} onChange={e => setForm(p => ({ ...p, quote: e.target.value }))} rows={3} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Author</label><input value={form.by} onChange={e => setForm(p => ({ ...p, by: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" placeholder="Department Head" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>
@@ -1302,18 +1302,18 @@ function FaqSection({ faq, setFaq }: { faq: FaqItem[]; setFaq: React.Dispatch<Re
         renderItem={(fq) => (
           <div className="flex items-center gap-3">
             <HelpCircle className="h-4 w-4 text-astu-red shrink-0" />
-            <div><p className="text-sm font-semibold text-slate-900">{fq.question}</p><p className="text-xs text-slate-400 line-clamp-1">{fq.answer}</p></div>
-            <button onClick={() => openEdit(fq)} className="ml-auto rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
+            <div><p className="text-sm font-semibold text-[var(--text-primary)]">{fq.question}</p><p className="text-xs text-[var(--text-muted)] line-clamp-1">{fq.answer}</p></div>
+            <button onClick={() => openEdit(fq)} className="ml-auto rounded p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[#003580]"><Edit3 className="h-3.5 w-3.5" /></button>
           </div>
         )}
       />
       <AdminModal open={modal.open} title={modal.editing ? 'Edit FAQ' : 'New FAQ'} onClose={modal.close} size="lg">
         <div className="space-y-4 p-1">
-          <div><label className="text-xs font-semibold text-slate-500">Question</label><input value={form.question} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
-          <div><label className="text-xs font-semibold text-slate-500">Answer</label><textarea value={form.answer} onChange={e => setForm(p => ({ ...p, answer: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Question</label><input value={form.question} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580]" /></div>
+          <div><label className="text-xs font-semibold text-[var(--text-muted)]">Answer</label><textarea value={form.answer} onChange={e => setForm(p => ({ ...p, answer: e.target.value }))} rows={4} className="mt-1 w-full rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm outline-none focus:border-[#003580] resize-none" /></div>
         </div>
-        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 mt-4">
-          <button onClick={modal.close} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+        <div className="flex justify-end gap-2 pt-4 border-t border-[var(--border-color)] mt-4">
+          <button onClick={modal.close} className="rounded-lg border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]">Cancel</button>
           <button onClick={save} className="rounded-lg bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110">{modal.editing ? 'Update' : 'Create'}</button>
         </div>
       </AdminModal>

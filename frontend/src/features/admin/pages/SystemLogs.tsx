@@ -51,9 +51,9 @@ function actionBadge(action: ActionType) {
     case 'System':
       return 'bg-violet-100 text-violet-700 border-violet-200';
     case 'API':
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   }
 }
 
@@ -68,23 +68,23 @@ function severityClass(severity: Exclude<Severity, 'All'>) {
     case 'Success':
       return 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   }
 }
 
 function summaryCard({ label, value, icon: Icon, hint }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string }) {
   return (
-    <div className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className="admin-card rounded-[10px] border border-[var(--border-color)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-900">{value}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{label}</p>
+          <p className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{value}</p>
         </div>
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#003580]/10 text-[#003580]">
           <Icon className="h-5 w-5" />
         </div>
       </div>
-      <p className="mt-4 text-xs text-slate-500">{hint}</p>
+      <p className="mt-4 text-xs text-[var(--text-muted)]">{hint}</p>
     </div>
   );
 }
@@ -107,30 +107,30 @@ function PaginationFooter({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-600">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 text-xs text-[var(--text-secondary)]">
       <div>
-        Showing <span className="font-semibold text-slate-800">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-800">{endItem}</span> of{' '}
-        <span className="font-semibold text-slate-800">{totalItems}</span> log entries
+        Showing <span className="font-semibold text-[var(--text-primary)]">{startItem}</span> to{' '}
+        <span className="font-semibold text-[var(--text-primary)]">{endItem}</span> of{' '}
+        <span className="font-semibold text-[var(--text-primary)]">{totalItems}</span> log entries
       </div>
       <div className="flex items-center gap-1.5">
         <button
           type="button"
           disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
-          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--bg-page)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Prev
         </button>
-        <span className="px-2 font-medium text-slate-500">
+        <span className="px-2 font-medium text-[var(--text-muted)]">
           Page {currentPage} of {totalPages}
         </span>
         <button
           type="button"
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
-          className="inline-flex items-center gap-1 rounded-[6px] border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-1 rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-secondary)] shadow-sm transition hover:bg-[var(--bg-page)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           Next
           <ChevronRight className="h-3.5 w-3.5" />
@@ -299,10 +299,10 @@ export default function SystemLogs() {
         ))}
       </section>
 
-      <section className="admin-card rounded-[10px] border border-slate-200 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="admin-card rounded-[10px] border border-[var(--border-color)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="grid gap-3 xl:grid-cols-12">
-          <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <Filter className="h-4 w-4 text-slate-400" />
+          <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm xl:col-span-3">
+            <Filter className="h-4 w-4 text-[var(--text-muted)]" />
             <select value={actionType} onChange={(event) => setActionType(event.target.value as ActionType)} className="w-full bg-transparent outline-none">
               {['All', 'Login', 'Data Import', 'User Action', 'Error', 'System', 'API'].map((item) => (
                 <option key={item} value={item}>
@@ -312,8 +312,8 @@ export default function SystemLogs() {
             </select>
           </label>
 
-          <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <Search className="h-4 w-4 text-slate-400" />
+          <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm xl:col-span-3">
+            <Search className="h-4 w-4 text-[var(--text-muted)]" />
             <input
               value={userSearch}
               onChange={(event) => setUserSearch(event.target.value)}
@@ -322,8 +322,8 @@ export default function SystemLogs() {
             />
           </label>
 
-          <div className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <CalendarDays className="h-4 w-4 text-slate-400" />
+          <div className="flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm xl:col-span-3">
+            <CalendarDays className="h-4 w-4 text-[var(--text-muted)]" />
             <input
               type="date"
               value={dateFrom}
@@ -332,8 +332,8 @@ export default function SystemLogs() {
             />
           </div>
 
-          <div className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <CalendarDays className="h-4 w-4 text-slate-400" />
+          <div className="flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm xl:col-span-3">
+            <CalendarDays className="h-4 w-4 text-[var(--text-muted)]" />
             <input
               type="date"
               value={dateTo}
@@ -342,8 +342,8 @@ export default function SystemLogs() {
             />
           </div>
 
-          <label className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm xl:col-span-3">
-            <Shield className="h-4 w-4 text-slate-400" />
+          <label className="flex items-center gap-2 rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-sm xl:col-span-3">
+            <Shield className="h-4 w-4 text-[var(--text-muted)]" />
             <select value={severity} onChange={(event) => setSeverity(event.target.value as Severity)} className="w-full bg-transparent outline-none">
               {['All', 'Info', 'Warning', 'Error', 'Success'].map((item) => (
                 <option key={item} value={item}>
@@ -355,13 +355,13 @@ export default function SystemLogs() {
         </div>
       </section>
 
-      <section className="admin-card overflow-hidden rounded-[10px] border border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="admin-card overflow-hidden rounded-[10px] border border-[var(--border-color)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="max-h-[520px] overflow-x-auto overflow-y-auto">
           <table className="min-w-full text-sm">
-            <thead className="sticky top-0 bg-slate-50 shadow-sm z-10">
+            <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm z-10">
               <tr>
                 {['Timestamp', 'User', 'Action', 'Details', 'IP Address', 'Severity'].map((head) => (
-                  <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                     {head}
                   </th>
                 ))}
@@ -370,13 +370,13 @@ export default function SystemLogs() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-[var(--text-muted)]">
                     Loading logs...
                   </td>
                 </tr>
               ) : paginatedLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-sm text-[var(--text-muted)]">
                     No logs found matching your filters.
                   </td>
                 </tr>
@@ -384,15 +384,15 @@ export default function SystemLogs() {
                 paginatedLogs.map((log) => (
                   <tr
                     key={log.id}
-                    className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/70"
+                    className="cursor-pointer border-t border-[var(--border-color)] hover:bg-[var(--bg-page)]"
                     onClick={() => setSelectedLog(log)}
                   >
-                    <td className="px-4 py-4 text-slate-600 whitespace-nowrap" title={format(new Date(log.timestamp), 'PPpp')}>
+                    <td className="px-4 py-4 text-[var(--text-secondary)] whitespace-nowrap" title={format(new Date(log.timestamp), 'PPpp')}>
                       {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
                     </td>
                     <td className="px-4 py-4">
                       <div className="space-y-1">
-                        <div className="font-semibold text-slate-900">{log.userEmail}</div>
+                        <div className="font-semibold text-[var(--text-primary)]">{log.userEmail}</div>
                         <AdminBadge variant="neutral">{log.role}</AdminBadge>
                       </div>
                     </td>
@@ -401,8 +401,8 @@ export default function SystemLogs() {
                         {log.action}
                       </AdminBadge>
                     </td>
-                    <td className="px-4 py-4 text-slate-600">{log.details}</td>
-                    <td className="px-4 py-4 text-slate-600 whitespace-nowrap">{log.ipAddress}</td>
+                    <td className="px-4 py-4 text-[var(--text-secondary)]">{log.details}</td>
+                    <td className="px-4 py-4 text-[var(--text-secondary)] whitespace-nowrap">{log.ipAddress}</td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <AdminBadge variant="default" className={severityClass(log.severity)}>
                         {log.severity}
@@ -450,12 +450,12 @@ export default function SystemLogs() {
               <Detail label="Severity" value={selectedLog.severity} />
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Details</p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">{selectedLog.details}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Details</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{selectedLog.details}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Payload</p>
-              <pre className="mt-2 overflow-x-auto rounded-[10px] border border-slate-200 bg-slate-50 p-4 text-xs text-slate-700">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Payload</p>
+              <pre className="mt-2 overflow-x-auto rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-xs text-[var(--text-secondary)]">
                 {selectedLog.payload}
               </pre>
             </div>
@@ -468,9 +468,9 @@ export default function SystemLogs() {
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-medium text-slate-800">{value}</p>
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</p>
+      <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

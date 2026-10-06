@@ -110,7 +110,7 @@ const renderFormattedMarkdown = (text: string) => {
 
     // Horizontal dividers
     if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
-      return <hr key={lineIdx} className="my-2 border-slate-200 dark:border-slate-700/60" />;
+      return <hr key={lineIdx} className="my-2 border-[var(--border-color)] dark:border-slate-700/60" />;
     }
 
     // Code blocks
@@ -118,7 +118,7 @@ const renderFormattedMarkdown = (text: string) => {
       const language = trimmed.slice(3);
       return (
         <div key={lineIdx} className="my-1.5 rounded-lg bg-slate-900 p-2 text-[10px] font-mono text-emerald-400">
-          <span className="text-slate-500 font-bold uppercase block mb-1">{language || 'code'}</span>
+          <span className="text-[var(--text-muted)] font-bold uppercase block mb-1">{language || 'code'}</span>
         </div>
       );
     }
@@ -144,7 +144,7 @@ const renderFormattedMarkdown = (text: string) => {
         if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
           const content = part.slice(2, -2);
           return (
-            <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
+            <strong key={pIdx} className="font-bold text-[var(--text-primary)] dark:text-white">
               {content}
             </strong>
           );
@@ -153,7 +153,7 @@ const renderFormattedMarkdown = (text: string) => {
         if (sanitized.startsWith('**')) {
           sanitized = sanitized.slice(2);
           return (
-            <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
+            <strong key={pIdx} className="font-bold text-[var(--text-primary)] dark:text-white">
               {sanitized}
             </strong>
           );
@@ -900,7 +900,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
 
       {/* Slide-out Panel Wrapper */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 flex h-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-all duration-300 dark:border-slate-800 dark:bg-[#13161f] ${
+        className={`fixed inset-y-0 right-0 z-50 flex h-full flex-col border-l border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl transition-all duration-300 dark:border-slate-800 dark:bg-[#13161f] ${
           isFullScreen ? 'w-full md:w-[90vw]' : 'w-full md:w-[500px] lg:w-[540px]'
         }`}
         style={{
@@ -916,12 +916,12 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
         />
 
         {/* Header section */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800 shrink-0">
+        <div className="flex items-center justify-between border-b border-[var(--border-color)] px-4 py-3 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => setIsHistorySidebarOpen(!isHistorySidebarOpen)}
-              className={`rounded-lg p-1.5 transition-all text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-200 ${
+              className={`rounded-lg p-1.5 transition-all text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] dark:hover:bg-slate-800/60 dark:hover:text-slate-200 ${
                 isHistorySidebarOpen ? 'bg-[#003366]/5 text-[#003366] dark:bg-[#E8A020]/10 dark:text-[#E8A020]' : ''
               }`}
               title="Toggle Discussion Threads List"
@@ -940,7 +940,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                   AGENT SWARM
                 </span>
               </div>
-              <div className="flex items-center gap-1 mt-0.5 text-[8px] text-slate-400 font-bold uppercase tracking-wider">
+              <div className="flex items-center gap-1 mt-0.5 text-[8px] text-[var(--text-muted)] font-bold uppercase tracking-wider">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Scope: ASTU DB Active (78 Swarm Agents)</span>
               </div>
@@ -962,7 +962,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
             <button
               type="button"
               onClick={() => setIsSoundOn(!isSoundOn)}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+              className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
               title={isSoundOn ? 'Mute assistance' : 'Unmute assistance'}
             >
               {isSoundOn ? <Volume2 className="h-4 w-4 text-[#008C44]" /> : <VolumeX className="h-4 w-4" />}
@@ -970,7 +970,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
             <button
               type="button"
               onClick={() => setIsFullScreen(!isFullScreen)}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+              className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
               title={isFullScreen ? 'Exit full screen' : 'Expand full screen'}
             >
               {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -978,7 +978,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
+              className="rounded-lg p-1.5 text-[var(--text-muted)] hover:bg-[var(--bg-page)] hover:text-[var(--text-secondary)] dark:hover:bg-slate-800/60 dark:hover:text-slate-200"
               title="Close panel"
             >
               <X className="h-4 w-4" />
@@ -987,7 +987,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
         </div>
 
         {/* Tab Header Toolbar */}
-        <div className="flex border-b border-slate-100 px-3 bg-slate-50 dark:bg-[#161a25] dark:border-slate-800 shrink-0 items-center justify-between">
+        <div className="flex border-b border-[var(--border-color)] px-3 bg-[var(--bg-page)] dark:bg-[#161a25] dark:border-slate-800 shrink-0 items-center justify-between">
           <div className="flex">
             <button
               type="button"
@@ -995,7 +995,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
               className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
                 activeTab === 'chat'
                   ? 'border-[#003366] text-[#003366] dark:border-[#E8A020] dark:text-[#E8A020]'
-                  : 'border-transparent text-slate-400 hover:text-slate-600'
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               }`}
             >
               Assistant Chat
@@ -1009,14 +1009,14 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
               className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all ${
                 activeTab === 'settings'
                   ? 'border-[#003366] text-[#003366] dark:border-[#E8A020] dark:text-[#E8A020]'
-                  : 'border-transparent text-slate-400 hover:text-slate-600'
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               }`}
             >
               ASTU AI Settings
             </button>
           </div>
           
-          <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400">
+          <div className="flex items-center gap-1.5 text-[9px] font-bold text-[var(--text-muted)]">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
             <span>PostgreSQL Prisma Engine</span>
           </div>
@@ -1027,7 +1027,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
           {/* Discussion History Sidebar Panel */}
           {isHistorySidebarOpen && (
             <div
-              className={`absolute md:relative inset-y-0 left-0 z-10 flex flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-[#1a1d27] transition-all duration-300 ${
+              className={`absolute md:relative inset-y-0 left-0 z-10 flex flex-col border-r border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-[#1a1d27] transition-all duration-300 ${
                 isFullScreen ? 'w-64' : 'w-56 md:w-60'
               }`}
             >
@@ -1036,7 +1036,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 <button
                   type="button"
                   onClick={handleNewChat}
-                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-xs font-bold text-slate-600 hover:border-[#003366] hover:text-[#003366] dark:border-slate-700 dark:text-slate-400 dark:hover:border-[#E8A020] dark:hover:text-[#E8A020] transition-all"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[var(--border-color)] py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-[#003366] hover:text-[#003366] dark:border-slate-700 dark:text-slate-400 dark:hover:border-[#E8A020] dark:hover:text-[#E8A020] transition-all"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>+ New Discussion</span>
@@ -1061,7 +1061,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       className={`group relative flex items-center justify-between rounded-lg p-2.5 text-xs font-medium cursor-pointer transition-all select-none ${
                         isActive
                           ? 'bg-[#003366]/5 text-[#003366] dark:bg-[#E8A020]/10 dark:text-[#E8A020] border-l-2 border-[#003366] dark:border-[#E8A020]'
-                          : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/40 dark:text-slate-400'
+                          : 'text-[var(--text-muted)] hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40 dark:text-slate-400'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -1077,7 +1077,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                               if (e.key === 'Escape') setEditingSessionId(null);
                             }}
                             autoFocus
-                            className="w-full bg-white border border-slate-200 outline-none text-[11px] rounded px-1 dark:bg-slate-800 dark:border-slate-700"
+                            className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] outline-none text-[11px] rounded px-1 dark:bg-slate-800 dark:border-slate-700"
                             onClick={(e) => e.stopPropagation()}
                           />
                         ) : (
@@ -1087,7 +1087,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
 
                       {/* Options (Rename & Delete) */}
                       {!isEditing && (
-                        <div className="absolute right-1.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/90 dark:bg-[#1a1d27]/90 px-1 rounded">
+                        <div className="absolute right-1.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-[var(--bg-page)] dark:bg-[#1a1d27]/90 px-1 rounded">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -1116,7 +1116,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
               </div>
 
               {/* Sidebar footer utility */}
-              <div className="border-t border-slate-200 p-2.5 dark:border-slate-800 text-center shrink-0">
+              <div className="border-t border-[var(--border-color)] p-2.5 dark:border-slate-800 text-center shrink-0">
                 <button
                   type="button"
                   onClick={handleClearHistory}
@@ -1131,7 +1131,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
 
           {/* Main Chat Content Pane */}
           {activeTab === 'chat' ? (
-            <div className="flex-1 flex flex-col min-w-0 bg-slate-50/50 dark:bg-[#0c0e14]">
+            <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)] dark:bg-[#0c0e14]">
               {/* Message History list */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {activeMessages.map((msg) => {
@@ -1153,7 +1153,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                           className={`rounded-2xl px-4 py-3 text-xs leading-relaxed ${
                             isUser
                               ? 'bg-[#003366] text-white shadow-sm rounded-tr-none'
-                              : 'bg-white text-slate-800 border border-slate-100 shadow-sm rounded-tl-none dark:bg-[#1a1d27] dark:border-slate-800 dark:text-slate-100'
+                              : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm rounded-tl-none dark:bg-[#1a1d27] dark:border-slate-800 dark:text-slate-100'
                           }`}
                         >
                           {isUser ? (
@@ -1173,9 +1173,9 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                           </div>
 
                           {!isUser && (
-                            <div className="mt-2 flex items-center justify-between border-t border-slate-100/60 pt-1.5 dark:border-slate-700/60">
+                            <div className="mt-2 flex items-center justify-between border-t border-[var(--border-color)] pt-1.5 dark:border-slate-700/60">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-[9px] text-slate-400">Rate answer:</span>
+                                <span className="text-[9px] text-[var(--text-muted)]">Rate answer:</span>
                                 <button
                                   type="button"
                                   onClick={() => toast.success('Feedback recorded: Helpful! Thank you.')}
@@ -1221,7 +1221,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       <Bot className="h-4 w-4 animate-pulse" />
                     </div>
                     <div className="space-y-1.5 max-w-[78%]">
-                      <div className="rounded-2xl rounded-tl-none border border-slate-100 bg-white px-4 py-3 shadow-sm dark:bg-[#1a1d27] dark:border-slate-800">
+                      <div className="rounded-2xl rounded-tl-none border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-3 shadow-sm dark:bg-[#1a1d27] dark:border-slate-800">
                         <div className="flex items-center gap-1">
                           <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
                           <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:0.2s]" />
@@ -1229,12 +1229,12 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-[9px] dark:border-slate-800 dark:bg-slate-900/40">
-                        <div className="flex items-center gap-1.5 font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-2.5 text-[9px] dark:border-slate-800 dark:bg-slate-900/40">
+                        <div className="flex items-center gap-1.5 font-extrabold text-[var(--text-muted)] dark:text-slate-500 uppercase tracking-wider mb-1">
                           <Sparkles className="h-3 w-3 animate-spin text-[#E8A020] shrink-0" />
                           <span>ASTU AI Swarm Reasoning</span>
                         </div>
-                        <div className="space-y-1 text-slate-500 dark:text-slate-400 font-medium">
+                        <div className="space-y-1 text-[var(--text-muted)] dark:text-slate-400 font-medium">
                           <div className="flex items-center gap-1.5">
                             <span className="h-1 w-1 rounded-full bg-emerald-500" />
                             <span>Connecting to PostgreSQL Database &amp; Universal Multi-Table Tool...</span>
@@ -1261,8 +1261,8 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
               </div>
 
               {/* Preset Query Suggestion Chips */}
-              <div className="border-t border-slate-100 bg-white px-4 py-2.5 dark:bg-[#13161f] dark:border-slate-800 shrink-0">
-                <span className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">PRESET QUERIES</span>
+              <div className="border-t border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2.5 dark:bg-[#13161f] dark:border-slate-800 shrink-0">
+                <span className="text-[9px] font-extrabold uppercase tracking-widest text-[var(--text-muted)]">PRESET QUERIES</span>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {[
                     { text: '🤖 Create new custom AI agent for tuition fee tracking and financial audit', label: '🤖 Build Custom Agent' },
@@ -1279,7 +1279,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       type="button"
                       onClick={() => handleQuickAction(chip.text)}
                       disabled={isTyping}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-600 hover:border-[#003366] hover:bg-[#003366]/5 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-[#E8A020] dark:hover:bg-[#E8A020]/5 disabled:opacity-50"
+                      className="rounded-full border border-[var(--border-color)] bg-[var(--bg-page)] px-2.5 py-1 text-[10px] font-semibold text-[var(--text-secondary)] hover:border-[#003366] hover:bg-[#003366]/5 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300 dark:hover:border-[#E8A020] dark:hover:bg-[#E8A020]/5 disabled:opacity-50"
                     >
                       {chip.label}
                     </button>
@@ -1289,14 +1289,14 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
 
               {/* File Attachment Upload Preview */}
               {attachedFile && (
-                <div className="border-t border-slate-100 bg-emerald-50/40 px-4 py-2 flex items-center justify-between dark:bg-[#0c0e14] dark:border-slate-800">
+                <div className="border-t border-[var(--border-color)] bg-emerald-50/40 px-4 py-2 flex items-center justify-between dark:bg-[#0c0e14] dark:border-slate-800">
                   <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
                     <Check className="h-4 w-4 shrink-0" />
                     <span className="text-[11px] font-bold truncate max-w-[280px]">
                       Attached: {attachedFile.name} ({attachedFile.size})
                     </span>
                   </div>
-                  <button type="button" onClick={() => setAttachedFile(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <button type="button" onClick={() => setAttachedFile(null)} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-slate-200">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -1304,19 +1304,19 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
 
               {/* Upload Progression Bar */}
               {isUploading && (
-                <div className="border-t border-slate-100 bg-slate-50 px-4 py-2 space-y-1 dark:bg-[#0c0e14] dark:border-slate-800">
-                  <div className="flex justify-between text-[10px] font-bold text-slate-500">
+                <div className="border-t border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-2 space-y-1 dark:bg-[#0c0e14] dark:border-slate-800">
+                  <div className="flex justify-between text-[10px] font-bold text-[var(--text-muted)]">
                     <span>Uploading file for AI RAG analysis...</span>
                     <span>{uploadProgress}%</span>
                   </div>
-                  <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-[var(--bg-page)] rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                   </div>
                 </div>
               )}
 
               {/* Chat Input area */}
-              <div className="border-t border-slate-100 bg-white p-3 dark:bg-[#13161f] dark:border-slate-800 shrink-0">
+              <div className="border-t border-[var(--border-color)] bg-[var(--bg-card)] p-3 dark:bg-[#13161f] dark:border-slate-800 shrink-0">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -1334,7 +1334,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800/80 dark:text-slate-400 dark:hover:bg-slate-700"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-page)] text-[var(--text-muted)]  dark:bg-slate-800/80 dark:text-slate-400 dark:hover:bg-slate-700"
                     title="Upload dataset (CSV, XLSX, PDF)"
                   >
                     <Paperclip className="h-4.5 w-4.5" />
@@ -1352,7 +1352,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                     }}
                     disabled={isTyping}
                     placeholder="Ask about tracer stats or surveys..."
-                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-[#003366] focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-[#1a1d27] dark:text-slate-100 dark:focus:border-[#E8A020]"
+                    className="flex-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder-slate-400 focus:border-[#003366] focus:bg-[var(--bg-card)] focus:outline-none dark:border-slate-800 dark:bg-[#1a1d27] dark:text-slate-100 dark:focus:border-[#E8A020]"
                   />
 
                   <button
@@ -1366,9 +1366,9 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 </div>
 
                 {/* Footer Utilities */}
-                <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] text-slate-400 dark:border-slate-800/60">
+                <div className="mt-2.5 flex items-center justify-between border-t border-[var(--border-color)] pt-2 text-[10px] text-[var(--text-muted)] dark:border-slate-800/60">
                   <div className="flex gap-2">
-                    <button type="button" onClick={handleExportTranscript} className="flex items-center gap-1 hover:text-slate-600 dark:hover:text-slate-200">
+                    <button type="button" onClick={handleExportTranscript} className="flex items-center gap-1 hover:text-[var(--text-secondary)] dark:hover:text-slate-200">
                       <Download className="h-3 w-3" />
                       <span>Export Transcript</span>
                     </button>
@@ -1383,18 +1383,18 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
             </div>
           ) : (
             /* ASTU AI Settings Panel Content - Fully Functional & Integrated */
-            <div className="flex-1 overflow-y-auto bg-slate-50/30 p-5 space-y-6 dark:bg-[#0c0e14]">
-              <div className="space-y-1 border-b border-slate-200 pb-3 dark:border-slate-800">
+            <div className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-5 space-y-6 dark:bg-[#0c0e14]">
+              <div className="space-y-1 border-b border-[var(--border-color)] pb-3 dark:border-slate-800">
                 <h3 className="text-xs font-extrabold text-[#003366] dark:text-[#E8A020] uppercase tracking-wider flex items-center gap-1.5">
                   <Sliders className="h-4 w-4" />
                   <span>ASTU AI System Configuration</span>
                 </h3>
-                <p className="text-[10px] text-slate-400 font-medium">Configure parameters for Tracer AI agents, Prisma DB tools, and voice settings.</p>
+                <p className="text-[10px] text-[var(--text-muted)] font-medium">Configure parameters for Tracer AI agents, Prisma DB tools, and voice settings.</p>
               </div>
 
-              <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-[#1a1d27] shadow-sm">
+              <div className="space-y-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 dark:border-slate-800 dark:bg-[#1a1d27] shadow-sm">
                 {/* Voice Preference Option (Girl Voice default vs Boy Voice) */}
-                <div className="space-y-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="space-y-2 pb-3 border-b border-[var(--border-color)] dark:border-slate-800">
                   <label className="text-[11px] font-extrabold text-[#003366] dark:text-[#E8A020] flex items-center gap-1.5">
                     <Volume2 className="h-4 w-4 text-[#008C44]" />
                     <span>AI Voice Selection (Voice Mode &amp; Speech)</span>
@@ -1407,7 +1407,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                         draftSettings.voiceGender === 'female'
                           ? 'border-[#008C44] bg-emerald-50/50 text-[#008C44] dark:bg-emerald-950/40 dark:border-emerald-700 font-bold'
-                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1426,7 +1426,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                       className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                         draftSettings.voiceGender === 'male'
                           ? 'border-[#003366] bg-blue-50/50 text-[#003366] dark:bg-blue-950/40 dark:border-blue-700 font-bold'
-                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
+                          : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -1444,7 +1444,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 {/* Agent Temperature */}
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-[11px] font-bold">
-                    <span className="text-slate-700 dark:text-slate-200">Agent Creativity (Temperature)</span>
+                    <span className="text-[var(--text-secondary)] dark:text-slate-200">Agent Creativity (Temperature)</span>
                     <span className="text-[#003366] dark:text-[#E8A020] font-mono">
                       {draftSettings.temperature} ({draftSettings.temperature <= 0.2 ? 'Strict Metrics' : draftSettings.temperature <= 0.6 ? 'Balanced Analysis' : 'Creative Synthesis'})
                     </span>
@@ -1456,29 +1456,29 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                     step="0.1"
                     value={draftSettings.temperature}
                     onChange={(e) => setDraftSettings({ ...draftSettings, temperature: parseFloat(e.target.value) })}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-[#003366] dark:accent-[#E8A020]"
+                    className="w-full h-1.5 bg-[var(--bg-page)] rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-[#003366] dark:accent-[#E8A020]"
                   />
-                  <p className="text-[9px] text-slate-400 leading-normal">Lower values restrict replies strictly to confirmed database/tracer figures.</p>
+                  <p className="text-[9px] text-[var(--text-muted)] leading-normal">Lower values restrict replies strictly to confirmed database/tracer figures.</p>
                 </div>
 
                 {/* Default System Instruction */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-200">Default System Instruction</label>
+                  <label className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-200">Default System Instruction</label>
                   <textarea
                     value={draftSettings.systemInstruction}
                     onChange={(e) => setDraftSettings({ ...draftSettings, systemInstruction: e.target.value })}
                     rows={3}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-[10px] leading-relaxed outline-none focus:border-[#003366] dark:border-slate-800 dark:bg-slate-800/40 focus:bg-white dark:text-slate-100 dark:focus:border-[#E8A020]"
+                    className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2.5 text-[10px] leading-relaxed outline-none focus:border-[#003366] dark:border-slate-800 dark:bg-slate-800/40 focus:bg-[var(--bg-card)] dark:text-slate-100 dark:focus:border-[#E8A020]"
                   />
                 </div>
 
                 {/* Max Response Tokens */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-slate-200">Max Response Tokens</label>
+                  <label className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-200">Max Response Tokens</label>
                   <select
                     value={draftSettings.maxTokens}
                     onChange={(e) => setDraftSettings({ ...draftSettings, maxTokens: parseInt(e.target.value, 10) })}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-[10px] font-bold outline-none dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-100"
+                    className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-[10px] font-bold outline-none dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-100"
                   >
                     <option value={512}>512 Tokens (Concise Telemetry)</option>
                     <option value={1024}>1024 Tokens (Standard Analysis)</option>
@@ -1488,19 +1488,19 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 </div>
 
                 {/* Enforce Scope Lock */}
-                <div className="flex items-start gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-start gap-3 pt-2 border-t border-[var(--border-color)] dark:border-slate-800">
                   <input
                     type="checkbox"
                     id="scope-lock"
                     checked={draftSettings.enforceScopeLock}
                     onChange={(e) => setDraftSettings({ ...draftSettings, enforceScopeLock: e.target.checked })}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#003366] focus:ring-[#003366] dark:border-slate-700"
+                    className="mt-0.5 h-4 w-4 rounded border-[var(--border-color)] text-[#003366] focus:ring-[#003366] dark:border-slate-700"
                   />
                   <div className="space-y-0.5">
-                    <label htmlFor="scope-lock" className="text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
+                    <label htmlFor="scope-lock" className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-200 cursor-pointer">
                       Enforce Scope Lock
                     </label>
-                    <p className="text-[9px] text-slate-400 leading-normal">Restrict model scope to ASTU academic records, surveys, and registrar metrics only.</p>
+                    <p className="text-[9px] text-[var(--text-muted)] leading-normal">Restrict model scope to ASTU academic records, surveys, and registrar metrics only.</p>
                   </div>
                 </div>
 
@@ -1511,14 +1511,14 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                     id="web-search"
                     checked={draftSettings.enableWebSearch}
                     onChange={(e) => setDraftSettings({ ...draftSettings, enableWebSearch: e.target.checked })}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#003366] focus:ring-[#003366] dark:border-slate-700"
+                    className="mt-0.5 h-4 w-4 rounded border-[var(--border-color)] text-[#003366] focus:ring-[#003366] dark:border-slate-700"
                   />
                   <div className="space-y-0.5">
-                    <label htmlFor="web-search" className="text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer flex items-center gap-1">
+                    <label htmlFor="web-search" className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-200 cursor-pointer flex items-center gap-1">
                       <Globe className="h-3 w-3 text-blue-500" />
                       <span>Enable RAG Web &amp; Market Intelligence Search</span>
                     </label>
-                    <p className="text-[9px] text-slate-400 leading-normal">Allows agents to cross-reference global university benchmarks (MIT, ETH Zurich) and tech employer trends.</p>
+                    <p className="text-[9px] text-[var(--text-muted)] leading-normal">Allows agents to cross-reference global university benchmarks (MIT, ETH Zurich) and tech employer trends.</p>
                   </div>
                 </div>
 
@@ -1529,14 +1529,14 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                     id="swarm-toggle"
                     checked={draftSettings.enableMultiAgentSwarm}
                     onChange={(e) => setDraftSettings({ ...draftSettings, enableMultiAgentSwarm: e.target.checked })}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#003366] focus:ring-[#003366] dark:border-slate-700"
+                    className="mt-0.5 h-4 w-4 rounded border-[var(--border-color)] text-[#003366] focus:ring-[#003366] dark:border-slate-700"
                   />
                   <div className="space-y-0.5">
-                    <label htmlFor="swarm-toggle" className="text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer flex items-center gap-1">
+                    <label htmlFor="swarm-toggle" className="text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-200 cursor-pointer flex items-center gap-1">
                       <Zap className="h-3 w-3 text-amber-500" />
                       <span>Enable 78 Parallel Agent Swarm Execution</span>
                     </label>
-                    <p className="text-[9px] text-slate-400 leading-normal">Runs 78 specialized agents simultaneously via Promise.all() for sub-30ms execution speeds.</p>
+                    <p className="text-[9px] text-[var(--text-muted)] leading-normal">Runs 78 specialized agents simultaneously via Promise.all() for sub-30ms execution speeds.</p>
                   </div>
                 </div>
               </div>
@@ -1556,7 +1556,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                     setDraftSettings(aiSettings);
                     setActiveTab('chat');
                   }}
-                  className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-[#1a1d27] dark:text-slate-300 dark:hover:bg-slate-800/60 transition-all"
+                  className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-5 py-2.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] dark:border-slate-800 dark:bg-[#1a1d27] dark:text-slate-300 dark:hover:bg-slate-800/60 transition-all"
                 >
                   Cancel
                 </button>
@@ -1596,7 +1596,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                     className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
                       aiSettings.language === langItem.code
                         ? 'bg-[#E8A020] text-slate-950 shadow-md font-extrabold scale-105'
-                        : 'text-slate-400 hover:text-white'
+                        : 'text-[var(--text-muted)] hover:text-white'
                     }`}
                   >
                     {langItem.label}
@@ -1615,7 +1615,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all ${
                     aiSettings.voiceGender === 'female'
                       ? 'bg-[#008C44] text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
                   <span>Girl 👧</span>
@@ -1629,7 +1629,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all ${
                     aiSettings.voiceGender === 'male'
                       ? 'bg-[#003366] text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      : 'text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
                   <span>Boy 👦</span>
@@ -1643,7 +1643,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
                 window.speechSynthesis?.cancel();
                 setIsVoiceModeOpen(false);
               }}
-              className="rounded-full bg-slate-800/80 p-2 text-slate-400 hover:bg-slate-700 hover:text-white transition-all"
+              className="rounded-full bg-slate-800/80 p-2 text-[var(--text-muted)] hover:bg-slate-700 hover:text-white transition-all"
             >
               <X className="h-5 w-5" />
             </button>
@@ -1664,7 +1664,7 @@ export default function AdminAiAssistant({ isOpen, onClose }: AdminAiAssistantPr
               </span>
 
               {voiceTranscriptText && (
-                <p className="text-xs text-slate-400 italic bg-slate-900/60 p-3 rounded-xl border border-slate-800/80">
+                <p className="text-xs text-[var(--text-muted)] italic bg-slate-900/60 p-3 rounded-xl border border-slate-800/80">
                   "{voiceTranscriptText}"
                 </p>
               )}

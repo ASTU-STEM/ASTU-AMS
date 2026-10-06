@@ -38,28 +38,28 @@ export default function CmsSettings() {
 
       <div className="grid gap-4 xl:grid-cols-2">
         {/* General */}
-        <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-2 mb-4">
             <Globe className="h-5 w-5 text-[#003580] dark:text-sky-400" />
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">General Settings</h3>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white">General Settings</h3>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Site Name</label>
-              <input value={siteName} onChange={e => setSiteName(e.target.value)} className="mt-1 w-full rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+              <label className="text-xs font-medium text-[var(--text-muted)] dark:text-slate-400">Site Name</label>
+              <input value={siteName} onChange={e => setSiteName(e.target.value)} className="mt-1 w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 text-sm outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Tagline</label>
-              <input value={tagline} onChange={e => setTagline(e.target.value)} className="mt-1 w-full rounded-[8px] border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+              <label className="text-xs font-medium text-[var(--text-muted)] dark:text-slate-400">Tagline</label>
+              <input value={tagline} onChange={e => setTagline(e.target.value)} className="mt-1 w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2.5 text-sm outline-none focus:border-[#003580] dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
             </div>
           </div>
         </div>
 
         {/* Features */}
-        <div className="rounded-[12px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-2 mb-4">
             <Settings2 className="h-5 w-5 text-[#1D9E75] dark:text-emerald-400" />
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Feature Toggles</h3>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] dark:text-white">Feature Toggles</h3>
           </div>
           <div className="space-y-4">
             {[
@@ -67,8 +67,8 @@ export default function CmsSettings() {
               { label: 'Community Comments', value: commentsEnabled, set: setCommentsEnabled },
               { label: 'Auto-Publish Scheduled Content', value: autoPublish, set: setAutoPublish },
             ].map(item => (
-              <div key={item.label} className="flex items-center justify-between rounded-[10px] border border-slate-100 bg-slate-50/50 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/60">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.label}</span>
+              <div key={item.label} className="flex items-center justify-between rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 dark:border-slate-800 dark:bg-slate-800/60">
+                <span className="text-sm font-medium text-[var(--text-secondary)] dark:text-slate-200">{item.label}</span>
                 <button onClick={() => item.set(!item.value)} className="transition-all cursor-pointer">
                   {item.value ? <ToggleRight className="h-6 w-6 text-[#1D9E75] dark:text-emerald-400" /> : <ToggleLeft className="h-6 w-6 text-slate-300 dark:text-slate-600" />}
                 </button>

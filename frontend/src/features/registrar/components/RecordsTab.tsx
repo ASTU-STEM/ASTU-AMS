@@ -492,40 +492,40 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
       {/* Stats Dashboard */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Total Records</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Records</p>
           <p className="text-2xl font-extrabold text-astu-navy mt-1">{stats.total}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Verified</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Verified</p>
           <p className="text-2xl font-extrabold text-emerald-600 mt-1">{stats.verified}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Unverified</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Unverified</p>
           <p className="text-2xl font-extrabold text-amber-600 mt-1">{stats.unverified}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Active</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Active</p>
           <p className="text-2xl font-extrabold text-blue-600 mt-1">{stats.active}</p>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Archived</p>
-          <p className="text-2xl font-extrabold text-gray-600 mt-1">{stats.archived}</p>
+        <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-4 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Archived</p>
+          <p className="text-2xl font-extrabold text-[var(--text-secondary)] mt-1">{stats.archived}</p>
         </div>
       </div>
 
       {/* Department Breakdown */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-sm font-bold text-gray-800">Department Breakdown</h4>
-          <span className="text-[10px] text-gray-400 font-medium">{stats.deptBreakdown.length} departments</span>
+          <h4 className="text-sm font-bold text-[var(--text-primary)]">Department Breakdown</h4>
+          <span className="text-[10px] text-[var(--text-muted)] font-medium">{stats.deptBreakdown.length} departments</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {stats.deptBreakdown.map(dept => (
-            <div key={dept.name} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+            <div key={dept.name} className="bg-[var(--bg-page)] rounded-xl p-3 border border-[var(--border-color)]">
               <p className="text-xs font-bold text-astu-navy">{dept.name}</p>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-lg font-extrabold text-gray-800">{dept.count}</span>
+                <span className="text-lg font-extrabold text-[var(--text-primary)]">{dept.count}</span>
                 <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Avg CGPA: {dept.avgCgpa}</span>
               </div>
             </div>
@@ -539,16 +539,16 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/75 backdrop-blur-md z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden"
           onWheel={(e) => e.stopPropagation()}
         >
-          <form onSubmit={handleAddSubmit} className="bg-white rounded-3xl w-full max-w-4xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] border border-slate-300/80 p-6 md:p-8 space-y-6 relative my-auto max-h-[92vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
-              <h4 className="font-extrabold text-lg flex items-center gap-2 text-slate-800">
+          <form onSubmit={handleAddSubmit} className="bg-[var(--bg-card)] rounded-3xl w-full max-w-4xl shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] border border-[var(--border-color)] p-6 md:p-8 space-y-6 relative my-auto max-h-[92vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-[var(--border-color)]">
+              <h4 className="font-extrabold text-lg flex items-center gap-2 text-[var(--text-primary)]">
                 <span className="material-symbols-outlined text-[#003580]">person_add</span>
                 Add SIS Graduate Profile
               </h4>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] p-1 rounded-lg hover:bg-[var(--bg-page)] transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -562,14 +562,14 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                     <span className="material-symbols-outlined text-sm">key</span>
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wide">ACCOUNT SECURITY & CREDENTIALS</h4>
-                    <p className="text-[11px] text-slate-500">Configure password policy and account status</p>
+                    <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wide">ACCOUNT SECURITY & CREDENTIALS</h4>
+                    <p className="text-[11px] text-[var(--text-muted)]">Configure password policy and account status</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, password: generateRandomPassword() }))}
-                  className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all flex items-center gap-1 shadow-xs cursor-pointer"
                 >
                   <span className="text-amber-500 font-bold">✨</span> Generate Password
                 </button>
@@ -577,29 +577,29 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600 uppercase">INITIAL PASSWORD</label>
+                  <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase">INITIAL PASSWORD</label>
                   <div className="relative flex items-center">
-                    <span className="material-symbols-outlined absolute left-2.5 text-slate-400 text-sm">lock</span>
+                    <span className="material-symbols-outlined absolute left-2.5 text-[var(--text-muted)] text-sm">lock</span>
                     <input
                       type="text"
                       value={formData.password}
                       disabled={formData.autoGeneratePassword}
                       onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      className="w-full text-xs pl-8 pr-8 py-2.5 border border-slate-200 bg-white rounded-xl font-mono text-slate-800 focus:outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:text-slate-600"
+                      className="w-full text-xs pl-8 pr-8 py-2.5 border border-[var(--border-color)] bg-[var(--bg-card)] rounded-xl font-mono text-[var(--text-primary)] focus:outline-none focus:border-[#003580] disabled:bg-slate-100 disabled:text-slate-600"
                       placeholder="Initial Password"
                     />
                     {formData.password && (
                       <button
                         type="button"
                         onClick={() => { navigator.clipboard.writeText(formData.password); toast.success('Password copied!'); }}
-                        className="absolute right-2.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                        className="absolute right-2.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] cursor-pointer"
                         title="Copy password"
                       >
                         <span className="material-symbols-outlined text-sm">content_copy</span>
                       </button>
                     )}
                   </div>
-                  <label className="inline-flex items-center gap-1.5 text-[11px] text-slate-600 mt-1 cursor-pointer font-medium">
+                  <label className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] mt-1 cursor-pointer font-medium">
                     <input
                       type="checkbox"
                       checked={formData.autoGeneratePassword}
@@ -608,14 +608,14 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                         autoGeneratePassword: e.target.checked,
                         password: e.target.checked ? generateRandomPassword() : prev.password
                       }))}
-                      className="rounded border-slate-300 text-[#003580] focus:ring-[#003580] cursor-pointer"
+                      className="rounded border-[var(--border-color)] text-[#003580] focus:ring-[#003580] cursor-pointer"
                     />
                     Auto-generate password & send welcome notification
                   </label>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600 uppercase">INITIAL ACCOUNT STATUS</label>
+                  <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase">INITIAL ACCOUNT STATUS</label>
                   <select
                     value={formData.status}
                     onChange={e => setFormData(prev => {
@@ -626,7 +626,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                         isVerified: st === 'Active' ? true : prev.isVerified
                       };
                     })}
-                    className="w-full text-xs p-2.5 border border-slate-200 bg-white rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                    className="w-full text-xs p-2.5 border border-[var(--border-color)] bg-[var(--bg-card)] rounded-xl font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                   >
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
@@ -636,11 +636,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-600 uppercase">INITIAL PROFILE VERIFICATION</label>
+                  <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase">INITIAL PROFILE VERIFICATION</label>
                   <select
                     value={formData.isVerified ? 'Verified' : 'Unverified'}
                     onChange={e => setFormData(prev => ({ ...prev, isVerified: e.target.value === 'Verified' }))}
-                    className="w-full text-xs p-2.5 border border-slate-200 bg-white rounded-xl font-semibold text-slate-800 focus:outline-none focus:border-[#003580]"
+                    className="w-full text-xs p-2.5 border border-[var(--border-color)] bg-[var(--bg-card)] rounded-xl font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[#003580]"
                   >
                     <option value="Verified">Verified (Record Confirmed)</option>
                     <option value="Unverified">Unverified (Pending Review)</option>
@@ -651,50 +651,50 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">STUDENT ID *</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">STUDENT ID *</label>
                 <input type="text" value={formData.studentId} onChange={e => setFormData(prev => ({ ...prev, studentId: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
                   placeholder="e.g. UG/12839/14" required />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">FULL NAME *</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">FULL NAME *</label>
                 <input type="text" value={formData.fullName} onChange={e => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
                   placeholder="e.g. Abebe Bikila" required />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">EMAIL ADDRESS *</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">EMAIL ADDRESS *</label>
                 <input type="email" value={formData.email} onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
                   placeholder="e.g. abebe.b@gmail.com" required />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">PHONE NUMBER</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">PHONE NUMBER</label>
                 <input type="text" value={formData.phone || ''} onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
                   placeholder="e.g. +251 911223344" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">NATIONALITY</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">NATIONALITY</label>
                 <input type="text" value={formData.nationality || ''} onChange={e => setFormData(prev => ({ ...prev, nationality: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
                   placeholder="e.g. Ethiopian" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">DATE OF BIRTH</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">DATE OF BIRTH</label>
                 <input type="date" value={formData.dateOfBirth || ''} onChange={e => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20" />
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">DEPARTMENT *</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">DEPARTMENT *</label>
                 <select value={formData.department} onChange={e => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none font-semibold text-gray-700">
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none font-semibold text-[var(--text-secondary)]">
                   <option value="Computer Science and Engineering">Computer Science and Engineering</option>
                   <option value="Electrical and Computer Engineering">Electrical and Computer Engineering</option>
                   <option value="Civil Engineering">Civil Engineering</option>
@@ -703,9 +703,9 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">GRADUATION YEAR *</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">GRADUATION YEAR *</label>
                 <select value={formData.graduationYear} onChange={e => setFormData(prev => ({ ...prev, graduationYear: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none font-semibold text-gray-700">
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none font-semibold text-[var(--text-secondary)]">
                   <option value="2024">Class of 2024</option>
                   <option value="2023">Class of 2023</option>
                   <option value="2022">Class of 2022</option>
@@ -714,9 +714,9 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">FINAL CGPA *</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">FINAL CGPA *</label>
                 <input type="text" value={formData.cgpa} onChange={e => setFormData(prev => ({ ...prev, cgpa: e.target.value }))}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl focus:outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20"
                   placeholder="e.g. 3.82" required />
               </div>
             </div>
@@ -735,46 +735,46 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen bg-slate-950/75 backdrop-blur-md z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 overflow-hidden"
           onWheel={(e) => e.stopPropagation()}
         >
-          <form onSubmit={handleEditSubmit} className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl p-6 space-y-6">
+          <form onSubmit={handleEditSubmit} className="bg-[var(--bg-card)] rounded-3xl w-full max-w-2xl shadow-2xl p-6 space-y-6">
             <div className="flex justify-between items-start pb-2 border-b">
               <div>
                 <h3 className="text-lg font-bold">Edit SIS Record</h3>
-                <p className="text-xs text-gray-500">Edit values for {editingGrad.fullName}</p>
+                <p className="text-xs text-[var(--text-muted)]">Edit values for {editingGrad.fullName}</p>
               </div>
-              <button type="button" onClick={() => setEditingGrad(null)} className="text-gray-400 hover:text-gray-600">
+              <button type="button" onClick={() => setEditingGrad(null)} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Full Name</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Full Name</label>
                 <input type="text" value={editingGrad.fullName} onChange={e => setEditingGrad({ ...editingGrad, fullName: e.target.value })}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl" required />
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl" required />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Email Address</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Email Address</label>
                 <input type="email" value={editingGrad.email} onChange={e => setEditingGrad({ ...editingGrad, email: e.target.value })}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl" required />
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl" required />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">CGPA</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">CGPA</label>
                 <input type="text" value={editingGrad.cgpa} onChange={e => setEditingGrad({ ...editingGrad, cgpa: e.target.value })}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl" required />
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl" required />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Verification Status</label>
+                <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Verification Status</label>
                 <select value={editingGrad.identityVerified ? 'true' : 'false'}
                   onChange={e => setEditingGrad({ ...editingGrad, identityVerified: e.target.value === 'true' })}
-                  className="w-full text-xs p-3 border border-gray-250 bg-gray-50 rounded-xl font-semibold">
+                  className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl font-semibold">
                   <option value="true">Identity Verified</option>
                   <option value="false">Unverified Identity</option>
                 </select>
               </div>
             </div>
             <div className="flex gap-4">
-              <button type="button" onClick={() => setEditingGrad(null)} className="flex-1 py-3 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all">Cancel</button>
+              <button type="button" onClick={() => setEditingGrad(null)} className="flex-1 py-3 border border-[var(--border-color)] rounded-xl text-xs font-bold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all">Cancel</button>
               <button type="submit" className="flex-1 py-3 bg-astu-navy text-white rounded-xl text-xs font-bold shadow-md hover:bg-astu-navy/90 transition-all">Save Profile Changes</button>
             </div>
           </form>
@@ -783,17 +783,17 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       )}
 
       {/* Advanced Modern & Sleek Filter Control Bar */}
-      <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3">
+      <div className="bg-[var(--bg-card)] backdrop-blur-md border border-[var(--border-color)] rounded-2xl p-4 shadow-sm space-y-3">
         <div className="flex flex-col xl:flex-row gap-3 items-stretch xl:items-center justify-between">
 
           {/* Modern Search Box */}
           <div className="relative min-w-[280px] flex-grow xl:flex-grow-0">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-sm">search</span>
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] material-symbols-outlined text-sm">search</span>
             <input type="text" placeholder="Search by name, student ID, email..." value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="pl-9 pr-8 py-2.5 text-xs font-medium border border-slate-200 rounded-xl bg-slate-50/60 focus:bg-white focus:outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10 w-full transition-all text-slate-800 placeholder-slate-400 shadow-2xs" />
+              className="pl-9 pr-8 py-2.5 text-xs font-medium border border-[var(--border-color)] rounded-xl bg-[var(--bg-page)] focus:bg-[var(--bg-card)] focus:outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10 w-full transition-all text-[var(--text-primary)] placeholder-slate-400 shadow-2xs" />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors">
                 <span className="material-symbols-outlined text-xs">cancel</span>
               </button>
             )}
@@ -804,62 +804,62 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
             {/* Batch Filter */}
             <div className="relative inline-flex items-center">
-              <span className="absolute left-3 text-slate-400 material-symbols-outlined text-sm pointer-events-none">school</span>
+              <span className="absolute left-3 text-[var(--text-muted)] material-symbols-outlined text-sm pointer-events-none">school</span>
               <select value={batchFilter} onChange={e => setBatchFilter(e.target.value)}
-                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
+                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)] rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
                 {graduationBatches.map(b => (
                   <option key={b} value={b}>{b === 'All' ? 'All Batches' : `Class of ${b}`}</option>
                 ))}
               </select>
-              <span className="absolute right-2 text-slate-400 material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
+              <span className="absolute right-2 text-[var(--text-muted)] material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
             </div>
 
             {/* Department Filter */}
             <div className="relative inline-flex items-center">
-              <span className="absolute left-3 text-slate-400 material-symbols-outlined text-sm pointer-events-none">domain</span>
+              <span className="absolute left-3 text-[var(--text-muted)] material-symbols-outlined text-sm pointer-events-none">domain</span>
               <select value={departmentFilter} onChange={e => setDepartmentFilter(e.target.value)}
-                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs max-w-[170px] truncate">
+                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)] rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs max-w-[170px] truncate">
                 {departments.map(d => <option key={d} value={d}>{d === 'All' ? 'All Departments' : d}</option>)}
               </select>
-              <span className="absolute right-2 text-slate-400 material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
+              <span className="absolute right-2 text-[var(--text-muted)] material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
             </div>
 
             {/* Verification Status Filter */}
             <div className="relative inline-flex items-center">
-              <span className="absolute left-3 text-slate-400 material-symbols-outlined text-sm pointer-events-none">verified</span>
+              <span className="absolute left-3 text-[var(--text-muted)] material-symbols-outlined text-sm pointer-events-none">verified</span>
               <select value={verificationFilter} onChange={e => setVerificationFilter(e.target.value)}
-                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
+                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)] rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
                 <option value="All">All Identities</option>
                 <option value="Verified">Verified Only</option>
                 <option value="Unverified">Unverified Only</option>
               </select>
-              <span className="absolute right-2 text-slate-400 material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
+              <span className="absolute right-2 text-[var(--text-muted)] material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
             </div>
 
             {/* CGPA Range Filter */}
             <div className="relative inline-flex items-center">
-              <span className="absolute left-3 text-slate-400 material-symbols-outlined text-sm pointer-events-none">grade</span>
+              <span className="absolute left-3 text-[var(--text-muted)] material-symbols-outlined text-sm pointer-events-none">grade</span>
               <select value={cgpaRangeFilter} onChange={e => setCgpaRangeFilter(e.target.value)}
-                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
+                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)] rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
                 <option value="All">All CGPA</option>
                 <option value="3.5+">3.50+ Distinction</option>
                 <option value="3.0-3.49">3.00 – 3.49</option>
                 <option value="<3.0">&lt; 3.00 Standard</option>
               </select>
-              <span className="absolute right-2 text-slate-400 material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
+              <span className="absolute right-2 text-[var(--text-muted)] material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
             </div>
 
             {/* Account Status Filter */}
             <div className="relative inline-flex items-center">
-              <span className="absolute left-3 text-slate-400 material-symbols-outlined text-sm pointer-events-none">account_circle</span>
+              <span className="absolute left-3 text-[var(--text-muted)] material-symbols-outlined text-sm pointer-events-none">account_circle</span>
               <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
+                className="pl-8 pr-7 py-2.5 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] hover:bg-black/5 dark:hover:bg-white/5 border border-[var(--border-color)] rounded-xl appearance-none cursor-pointer focus:outline-none focus:border-astu-navy transition-all shadow-2xs">
                 <option value="All">All Statuses</option>
                 <option value="Active">Active Accounts</option>
                 <option value="Inactive">Inactive</option>
                 <option value="Archived">Archived</option>
               </select>
-              <span className="absolute right-2 text-slate-400 material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
+              <span className="absolute right-2 text-[var(--text-muted)] material-symbols-outlined text-xs pointer-events-none">keyboard_arrow_down</span>
             </div>
 
             {/* Clear Filters Reset Button */}
@@ -879,17 +879,17 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       </div>
 
       {/* Database Table with Dynamic Pagination */}
-      <div className="bg-white border border-gray-200/60 rounded-3xl shadow-sm overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider">
+              <tr className="bg-[var(--bg-page)] border-b border-[var(--border-color)] text-[var(--text-muted)] font-bold uppercase tracking-wider">
                 <th className="p-3 w-8">
                   <input type="checkbox" onChange={e => {
                     if (e.target.checked) setSelectedRecords(paginatedGraduates.map(g => g.id));
                     else setSelectedRecords([]);
                   }} checked={selectedRecords.length > 0 && selectedRecords.length === paginatedGraduates.length}
-                    className="rounded border-gray-300 cursor-pointer" />
+                    className="rounded border-[var(--border-color)] cursor-pointer" />
                 </th>
                 <th className="p-3">Student ID</th>
                 <th className="p-3">Full Name</th>
@@ -901,20 +901,20 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {paginatedGraduates.map((grad) => (
-                <tr key={grad.id} className={`hover:bg-gray-50/70 transition-colors ${selectedRecords.includes(grad.id) ? 'bg-blue-50/50' : ''}`}>
+                <tr key={grad.id} className={`hover:bg-[var(--bg-page)] transition-colors ${selectedRecords.includes(grad.id) ? 'bg-blue-50/50' : ''}`}>
                   <td className="p-3">
                     <input type="checkbox" checked={selectedRecords.includes(grad.id)} onChange={() => toggleSelect(grad.id)}
-                      className="rounded border-gray-300 cursor-pointer" />
+                      className="rounded border-[var(--border-color)] cursor-pointer" />
                   </td>
-                  <td className="p-3 font-mono font-bold text-gray-800">{grad.studentId}</td>
+                  <td className="p-3 font-mono font-bold text-[var(--text-primary)]">{grad.studentId}</td>
                   <td className="p-3">
-                    <p className="font-bold text-gray-900">{grad.fullName}</p>
-                    <p className="text-[10px] text-gray-500">{grad.email}</p>
+                    <p className="font-bold text-[var(--text-primary)]">{grad.fullName}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">{grad.email}</p>
                   </td>
                   <td className="p-3 text-xs font-semibold text-astu-navy">{grad.department}</td>
-                  <td className="p-3 font-semibold text-gray-700">{grad.graduationYear}</td>
+                  <td className="p-3 font-semibold text-[var(--text-secondary)]">{grad.graduationYear}</td>
                   <td className="p-3 font-bold text-emerald-600">{grad.cgpa}</td>
                   <td className="p-3">
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${grad.identityVerified ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
@@ -923,7 +923,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${grad.status === 'Active' || (grad.status as string) === 'ACTIVE' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-gray-100 text-gray-800 border border-gray-200'
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${grad.status === 'Active' || (grad.status as string) === 'ACTIVE' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-[var(--bg-page)] text-[var(--text-primary)] border border-[var(--border-color)]'
                       }`}>
                       {grad.status}
                     </span>
@@ -959,7 +959,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
         {filteredGraduates.length === 0 && (
           <div className="py-12 text-center">
             <span className="material-symbols-outlined text-4xl text-gray-300">search_off</span>
-            <p className="mt-2 text-sm text-gray-500 font-semibold">No records match your selected filters.</p>
+            <p className="mt-2 text-sm text-[var(--text-muted)] font-semibold">No records match your selected filters.</p>
             <button onClick={resetAllFilters} className="mt-3 px-4 py-1.5 bg-astu-navy text-white rounded-xl text-xs font-bold shadow-xs hover:bg-astu-navy/90 transition-all">
               Reset Filters
             </button>
@@ -967,20 +967,20 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
         )}
 
         {/* Dynamic Pagination Footer */}
-        <div className="border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 gap-2">
-          <span className="text-[11px] text-gray-500 font-medium">
+        <div className="border-t border-[var(--border-color)] px-4 py-3 flex flex-col sm:flex-row justify-between items-center bg-[var(--bg-page)] gap-2">
+          <span className="text-[11px] text-[var(--text-muted)] font-medium">
             Showing {filteredGraduates.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} – {Math.min(currentPage * pageSize, filteredGraduates.length)} of {filteredGraduates.length} filtered ({graduates.length} total)
           </span>
           <div className="flex items-center gap-2">
             <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              className="px-2.5 py-1 border border-gray-200 rounded-lg text-xs font-bold bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-all">
+              className="px-2.5 py-1 border border-[var(--border-color)] rounded-lg text-xs font-bold bg-[var(--bg-card)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-page)] transition-all">
               Previous
             </button>
-            <span className="text-xs font-bold text-gray-700 px-2">
+            <span className="text-xs font-bold text-[var(--text-secondary)] px-2">
               Page {currentPage} of {totalPages}
             </span>
             <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              className="px-2.5 py-1 border border-gray-200 rounded-lg text-xs font-bold bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-all">
+              className="px-2.5 py-1 border border-[var(--border-color)] rounded-lg text-xs font-bold bg-[var(--bg-card)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--bg-page)] transition-all">
               Next
             </button>
           </div>
@@ -993,22 +993,22 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center p-3 sm:p-5 md:p-6 bg-slate-950/75 backdrop-blur-md overflow-hidden"
           onWheel={(e) => e.stopPropagation()}
         >
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 p-6 md:p-8 relative">
+          <div className="bg-[var(--bg-card)] dark:bg-slate-900 border border-[var(--border-color)] dark:border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-6 p-6 md:p-8 relative">
             
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                   <span className="material-symbols-outlined text-2xl">file_download</span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">Export SIS Graduates Roster</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Configure 10+ multi-dimensional filtering criteria and select export columns</p>
+                  <h3 className="text-lg font-extrabold text-[var(--text-primary)] dark:text-white">Export SIS Graduates Roster</h3>
+                  <p className="text-xs text-[var(--text-muted)] dark:text-slate-400">Configure 10+ multi-dimensional filtering criteria and select export columns</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsExportModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[var(--bg-page)] dark:bg-slate-800 text-[var(--text-muted)] hover:text-[var(--text-primary)] dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-sm">close</span>
               </button>
@@ -1033,7 +1033,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
             {/* 10+ Multi-Dimensional Filtering Criteria Section */}
             <div className="space-y-4">
-              <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <h4 className="text-xs font-extrabold text-[var(--text-secondary)] dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-sm text-astu-navy">filter_alt</span>
                 10+ Filtering Criteria Configuration
               </h4>
@@ -1041,23 +1041,23 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* 1. Search Query */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">1. Keyword / Search Query</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">1. Keyword / Search Query</label>
                   <input
                     type="text"
                     placeholder="Search by Name, Student ID, or Email..."
                     value={exportFilters.search}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   />
                 </div>
 
                 {/* 2. Graduation Batch Year */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">2. Graduation Batch Year</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">2. Graduation Batch Year</label>
                   <select
                     value={exportFilters.batchYear}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, batchYear: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     {graduationBatches.map(b => (
                       <option key={b} value={b}>{b === 'All' ? 'All Batches (2000 - 2036)' : `Class of ${b}`}</option>
@@ -1067,11 +1067,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 3. Department */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">3. Academic Department</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">3. Academic Department</label>
                   <select
                     value={exportFilters.department}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, department: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     {departments.map(d => (
                       <option key={d} value={d}>{d}</option>
@@ -1081,11 +1081,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 4. Verification Status */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">4. Identity Verification</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">4. Identity Verification</label>
                   <select
                     value={exportFilters.verification}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, verification: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     <option value="All">All Identities (Verified & Unverified)</option>
                     <option value="Verified">Verified Identities Only</option>
@@ -1095,11 +1095,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 5. Account Status */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">5. Account Status</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">5. Account Status</label>
                   <select
                     value={exportFilters.status}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     <option value="All">All Statuses (Active, Inactive, Archived)</option>
                     <option value="Active">Active Accounts</option>
@@ -1110,11 +1110,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 6. CGPA Tier */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">6. CGPA Threshold</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">6. CGPA Threshold</label>
                   <select
                     value={exportFilters.cgpaTier}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, cgpaTier: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     <option value="All">All CGPA Scores</option>
                     <option value="3.5+">First Class / Distinction (3.50 – 4.00)</option>
@@ -1125,11 +1125,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 7. Gender */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">7. Gender Filter</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">7. Gender Filter</label>
                   <select
                     value={exportFilters.gender}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, gender: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     <option value="All">All Genders</option>
                     <option value="Male">Male</option>
@@ -1140,11 +1140,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 8. Employment Status */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">8. Employment Status</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">8. Employment Status</label>
                   <select
                     value={exportFilters.employmentStatus}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, employmentStatus: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     <option value="All">All Employment Statuses</option>
                     <option value="Employed">Employed</option>
@@ -1156,11 +1156,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 9. Source / Origin */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">9. Data Source / Origin</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">9. Data Source / Origin</label>
                   <select
                     value={exportFilters.source}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, source: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy"
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy"
                   >
                     <option value="All">All Sources (API Sync, File Upload, Manual)</option>
                     <option value="SIS_API">SIS API Server Sync</option>
@@ -1171,11 +1171,11 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
 
                 {/* 10. Date Range / Timeframe */}
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">10. Record Timeframe</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] dark:text-slate-400 mb-1">10. Record Timeframe</label>
                   <select
                     value={exportFilters.dateRange}
                     onChange={(e) => setExportFilters(prev => ({ ...prev, dateRange: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-astu-navy">
+                    className="w-full px-3 py-2 bg-[var(--bg-page)] dark:bg-slate-800 border border-[var(--border-color)] dark:border-slate-700 rounded-xl text-xs font-semibold text-[var(--text-primary)] dark:text-slate-100 focus:outline-none focus:border-astu-navy">
                     <option value="All">All Time Records</option>
                     <option value="30d">Last 30 Days</option>
                     <option value="90d">Last 90 Days</option>
@@ -1186,14 +1186,14 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
             </div>
 
             {/* Column Selector Checkboxes & Reordering Section */}
-            <div className="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+            <div className="space-y-3 border-t border-[var(--border-color)] dark:border-slate-800 pt-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h4 className="text-xs font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-extrabold text-[var(--text-secondary)] dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-sm text-emerald-600">view_column</span>
                     Select & Reorder Export Columns (Sequence #1 – #{columnSequence.length})
                   </h4>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Use the ◀ / ▶ arrows on any column card to dynamically adjust its output position in the CSV header</p>
+                  <p className="text-[10px] text-[var(--text-muted)] dark:text-slate-500 mt-0.5">Use the ◀ / ▶ arrows on any column card to dynamically adjust its output position in the CSV header</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1206,7 +1206,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                   <span className="text-slate-300 dark:text-slate-700">|</span>
                   <button
                     onClick={() => toggleAllExportColumns(false)}
-                    className="text-[10px] font-bold text-slate-500 hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-[var(--text-muted)] hover:underline cursor-pointer"
                   >
                     Deselect All
                   </button>
@@ -1222,7 +1222,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 bg-[var(--bg-page)] dark:bg-slate-800/50 rounded-2xl border border-[var(--border-color)] dark:border-slate-800">
                 {columnSequence.map((col, idx) => {
                   const isChecked = (exportColumns as any)[col.key];
                   return (
@@ -1230,16 +1230,16 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                       key={col.key}
                       className={`flex items-center justify-between gap-1 p-2 rounded-xl border transition-all ${
                         isChecked
-                          ? 'bg-white dark:bg-slate-800 border-emerald-300/80 dark:border-emerald-700/80 shadow-2xs'
-                          : 'bg-slate-100/70 dark:bg-slate-900/40 border-slate-200/50 dark:border-slate-800 opacity-60'
+                          ? 'bg-[var(--bg-card)] dark:bg-slate-800 border-emerald-300/80 dark:border-emerald-700/80 shadow-2xs'
+                          : 'bg-[var(--bg-page)] dark:bg-slate-900/40 border-[var(--border-color)] dark:border-slate-800 opacity-60'
                       }`}
                     >
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none truncate">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-[var(--text-primary)] dark:text-slate-200 cursor-pointer select-none truncate">
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={(e) => setExportColumns(prev => ({ ...prev, [col.key]: e.target.checked }))}
-                          className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0"
+                          className="w-4 h-4 text-emerald-600 rounded border-[var(--border-color)] focus:ring-emerald-500 cursor-pointer shrink-0"
                         />
                         <span className="flex items-center gap-1.5 truncate">
                           <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800/80 rounded-md shrink-0">
@@ -1254,7 +1254,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                           type="button"
                           disabled={idx === 0}
                           onClick={() => moveColumnSequence(idx, 'up')}
-                          className="w-5 h-5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
+                          className="w-5 h-5 rounded hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 text-[var(--text-muted)] hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
                           title="Move Earlier / Up in CSV sequence"
                         >
                           <span className="material-symbols-outlined text-xs">arrow_back</span>
@@ -1263,7 +1263,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
                           type="button"
                           disabled={idx === columnSequence.length - 1}
                           onClick={() => moveColumnSequence(idx, 'down')}
-                          className="w-5 h-5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
+                          className="w-5 h-5 rounded hover:bg-[var(--bg-page)] dark:hover:bg-slate-700 text-[var(--text-muted)] hover:text-emerald-700 dark:hover:text-emerald-300 disabled:opacity-20 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer transition-colors"
                           title="Move Later / Down in CSV sequence"
                         >
                           <span className="material-symbols-outlined text-xs">arrow_forward</span>
@@ -1276,10 +1276,10 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
             </div>
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
+            <div className="flex items-center justify-between border-t border-[var(--border-color)] dark:border-slate-800 pt-4">
               <button
                 onClick={() => setIsExportModalOpen(false)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-5 py-2.5 bg-[var(--bg-page)]  dark:bg-slate-800 dark:hover:bg-slate-700 text-[var(--text-secondary)] dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 Cancel
               </button>

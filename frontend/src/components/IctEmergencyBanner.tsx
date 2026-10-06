@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, ShieldAlert, X } from 'lucide-react';
+import { ShieldAlert, X } from 'lucide-react';
 
 interface IctEmergencyBannerProps {
   message: string;
@@ -7,38 +7,63 @@ interface IctEmergencyBannerProps {
   onDismiss?: () => void;
 }
 
+const TONE: Record<string, { bar: string; surface: string; accent: string }> = {
+  emergency: {
+    bar: 'bg-[var(--ict-crit)]',
+    surface: 'bg-[var(--ict-crit-bg)]',
+    accent: 'text-[var(--ict-crit)]',
+  },
+  maintenance: {
+    bar: 'bg-[var(--ict-warn)]',
+    surface: 'bg-[var(--ict-warn-bg)]',
+    accent: 'text-[var(--ict-warn)]',
+  },
+  info: {
+    bar: 'bg-[var(--ict-info)]',
+    surface: 'bg-[var(--ict-info-bg)]',
+    accent: 'text-[var(--ict-info)]',
+  },
+};
+
+const LABEL: Record<string, string> = {
+  emergency: 'Emergency',
+  maintenance: 'Maintenance',
+  info: 'Notice',
+};
+
+/**
+ * Institutional-wide announcement rail. Reads as a status bar, not a marketing
+ * banner — flat surface, colour-coded left edge, dismiss affordance.
+ */
 export default function IctEmergencyBanner({
   message,
   type = 'emergency',
   onDismiss,
 }: IctEmergencyBannerProps) {
   if (!message) return null;
-
-  const style =
-    type === 'emergency'
-      ? 'bg-rose-600 text-white border-rose-700'
-      : type === 'maintenance'
-      ? 'bg-amber-500 text-slate-950 border-amber-600'
-      : 'bg-blue-600 text-white border-blue-700';
+  const tone = TONE[type] || TONE.emergency;
 
   return (
-    <div className={`relative border-b px-4 py-2.5 text-xs font-bold shadow-md ${style}`}>
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <ShieldAlert className="h-4 w-4 shrink-0 animate-pulse" />
-          <span className="truncate">{message}</span>
-        </div>
-        {onDismiss && (
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="rounded p-0.5 hover:bg-black/10 cursor-pointer"
-            aria-label="Dismiss banner"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
+    <div className={`relative flex items-center gap-2.5 border-b border-[var(--border-color)] px-3 py-2 sm:px-4 ${tone.surface}`}>
+      <span className={`absolute inset-y-0 left-0 w-[3px] ${tone.bar}`} aria-hidden />
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <ShieldAlert className={`h-3.5 w-3.5 shrink-0 ict-pulse ${tone.accent}`} aria-hidden />
+        <span className={`text-[10px] font-extrabold uppercase tracking-[0.1em] ${tone.accent}`}>{LABEL[type] || 'Notice'}</span>
+        <span className="h-3 w-px shrink-0 bg-current opacity-20" aria-hidden />
+        <p className={`ict-clamp-1 min-w-0 text-[11px] font-bold ${tone.accent}`} title={message}>
+          {message}
+        </p>
       </div>
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          className={`shrink-0 rounded p-1 transition-colors hover:bg-[var(--bg-card)]/40 ${tone.accent} ict-focus`}
+          aria-label="Dismiss notification"
+        >
+          <X className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      )}
     </div>
   );
 }

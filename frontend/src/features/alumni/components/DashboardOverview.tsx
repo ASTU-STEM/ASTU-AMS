@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { alumniService } from '../services/alumni.service';
+import { alumniPageClass } from './alumniUi';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -14,6 +15,7 @@ interface DashboardOverviewProps {
     value: string;
     color: string;
     icon: string;
+    iconBg?: string;
     bgGradient: string;
     trend: string;
     trendIcon: string;
@@ -123,7 +125,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className={alumniPageClass}>
       {/* Welcome Banner with animated gradient */}
       <style>{`
         @keyframes dash-gradient {
@@ -165,7 +167,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {completion < 100 && (
             <button 
               onClick={() => onTabChange('profile')}
-              className="flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-xs font-bold text-astu-navy shadow-sm transition-all hover:bg-white/90"
+              className="flex items-center gap-2 rounded-md bg-[var(--bg-card)] px-4 py-2.5 text-xs font-bold text-astu-navy dark:text-[#FFD700] shadow-sm transition-all hover:bg-[var(--bg-page)]"
             >
               <span className="material-symbols-outlined">check</span>
               Complete Profile
@@ -193,13 +195,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </section>
 
-      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.2fr_0.8fr]">
           <div>
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Alumni Success Command Center</h3>
-                <p className="mt-1 text-xs text-gray-500">A single view for profile strength, hiring movement, tracer compliance, and document readiness.</p>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Alumni Success Command Center</h3>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">A single view for profile strength, hiring movement, tracer compliance, and document readiness.</p>
               </div>
               <button
                 onClick={() => onTabChange('profile')}
@@ -211,13 +213,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               {profileReadiness.map((item) => (
-                <div key={item.label} className="rounded-[10px] border border-gray-200 bg-gray-50 p-4">
+                <div key={item.label} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
                   <div className="flex items-center justify-between">
                     <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
-                    <span className="text-xs font-extrabold text-gray-900">{item.value}</span>
+                    <span className="text-xs font-extrabold text-[var(--text-primary)]">{item.value}</span>
                   </div>
-                  <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{item.label}</p>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--bg-page)]">
                     <div className="h-full rounded-full bg-astu-green transition-all duration-500" style={{ width: `${item.width}%` }}></div>
                   </div>
                 </div>
@@ -227,16 +229,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="rounded-[10px] border border-astu-green/20 bg-astu-green/10 p-4">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-astu-green">verified</span>
-              <h4 className="text-sm font-bold text-gray-900">Next best action</h4>
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">Next best action</h4>
             </div>
-            <p className="mt-2 text-sm leading-relaxed text-gray-600">
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
               {pendingSurveyCount > 0
                 ? `Complete ${pendingSurveyCount} pending tracer survey${pendingSurveyCount > 1 ? 's' : ''} so departments can count your employment outcomes in accreditation reports.`
                 : 'Tracer responses are clear. Keep your role, skills, and resume fresh so employers see the newest version of your profile.'}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <button onClick={() => onTabChange('surveys')} className="rounded-md bg-astu-green px-3 py-2 text-xs font-bold text-white">Open surveys</button>
-              <button onClick={() => onTabChange('jobs')} className="rounded-md border border-astu-navy/20 bg-white px-3 py-2 text-xs font-bold text-astu-navy">View jobs</button>
+              <button onClick={() => onTabChange('jobs')} className="rounded-md border border-astu-navy/20 dark:border-[#FFCC00]/25 bg-[var(--bg-card)] px-3 py-2 text-xs font-bold text-astu-navy dark:text-[#FFD700]">View jobs</button>
             </div>
           </div>
         </div>
@@ -246,9 +248,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         
         {/* Left: Employment Status Tracking */}
-        <div className="lg:col-span-1 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
+        <div className="lg:col-span-1 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
               <span className="material-symbols-outlined text-astu-navy font-bold">work</span>
               Current Placement
             </h3>
@@ -262,17 +264,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           {!isEditingStatus ? (
-            <div className="space-y-3 rounded-[10px] border border-gray-200 bg-gray-50 p-4">
+            <div className="space-y-3 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
               <div>
-                <p className="text-xs uppercase font-extrabold text-gray-400">Position</p>
-                <p className="text-md font-bold text-gray-900 mt-0.5">{profile.currentRole || 'Not Employed'}</p>
+                <p className="text-xs uppercase font-extrabold text-[var(--text-muted)]">Position</p>
+                <p className="text-md font-bold text-[var(--text-primary)] mt-0.5">{profile.currentRole || 'Not Employed'}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-extrabold text-gray-400">Company</p>
-                <p className="text-md font-bold text-gray-900 mt-0.5">{profile.company || 'ASTU Alumnus'}</p>
+                <p className="text-xs uppercase font-extrabold text-[var(--text-muted)]">Company</p>
+                <p className="text-md font-bold text-[var(--text-primary)] mt-0.5">{profile.company || 'ASTU Alumnus'}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-extrabold text-gray-400">Salary Bracket</p>
+                <p className="text-xs uppercase font-extrabold text-[var(--text-muted)]">Salary Bracket</p>
                 <p className="text-xs font-bold text-astu-green bg-astu-green/10 px-2 py-1 rounded mt-1 inline-block">
                   {profile.salaryRange || 'Seeking Opportunities'}
                 </p>
@@ -281,31 +283,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ) : (
             <form onSubmit={handleStatusSubmit} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase">Role / Title</label>
+                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Role / Title</label>
                 <input
                   type="text"
                   value={tempRole}
                   onChange={(e) => setTempRole(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
+                  className="w-full text-xs p-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase">Company Name</label>
+                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Company Name</label>
                 <input
                   type="text"
                   value={tempCompany}
                   onChange={(e) => setTempCompany(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
+                  className="w-full text-xs p-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
                   required
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase">Monthly Salary Range</label>
+                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Monthly Salary Range</label>
                 <select
                   value={tempSalary}
                   onChange={(e) => setTempSalary(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
+                  className="w-full text-xs p-2.5 bg-[var(--bg-page)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-astu-navy/20 focus:outline-none"
                 >
                   <option value="Under 15,000 ETB">Under 15,000 ETB</option>
                   <option value="15,000 - 30,000 ETB">15,000 - 30,000 ETB</option>
@@ -325,34 +327,34 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
 
         {/* Right: Active Tracer Survey Status Indicators (6, 12, 24 Months) */}
-        <div className="lg:col-span-2 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-2 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col justify-between space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span className="material-symbols-outlined text-astu-red font-bold">assignment_turned_in</span>
                 Tracer Survey Timelines (6, 12, 24 Months)
               </h3>
-              <p className="text-xs text-gray-500 mt-0.5">Quick status overview of tracer studies assigned to your account.</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">Quick status overview of tracer studies assigned to your account.</p>
             </div>
 
             {/* Filter Pills & View All */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-[11px] font-bold">
+              <div className="flex items-center bg-[var(--bg-page)] p-0.5 rounded-lg border border-[var(--border-color)] text-[11px] font-bold">
                 <button
                   onClick={() => setTimelineFilter('ALL')}
-                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'ALL' ? 'bg-white text-astu-navy shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'ALL' ? 'bg-[var(--bg-card)] text-astu-navy shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
                 >
                   All ({surveys.length})
                 </button>
                 <button
                   onClick={() => setTimelineFilter('PENDING')}
-                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'PENDING' ? 'bg-white text-astu-red shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'PENDING' ? 'bg-[var(--bg-card)] text-astu-red shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
                 >
                   Pending ({surveys.filter(s => s.status !== 'COMPLETED').length})
                 </button>
                 <button
                   onClick={() => setTimelineFilter('COMPLETED')}
-                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'COMPLETED' ? 'bg-white text-astu-green shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'COMPLETED' ? 'bg-[var(--bg-card)] text-astu-green shadow-xs' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
                 >
                   Done ({surveys.filter(s => s.status === 'COMPLETED').length})
                 </button>
@@ -440,7 +442,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             key={stat.id}
             onMouseEnter={() => setHoveredCard(stat.id)}
             onMouseLeave={() => setHoveredCard(null)}
-            className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-md ${hoveredCard === stat.id ? 'translate-y-[-4px]' : ''}`}
+            className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-md ${hoveredCard === stat.id ? 'translate-y-[-4px]' : ''}`}
             onClick={() => {
               if (stat.label.includes('Profile')) onTabChange('profile');
               if (stat.label.includes('Job')) onTabChange('jobs');
@@ -449,19 +451,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             }}
           >
             {/* Background gradient */}
-            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${stat.bgGradient}`}></div>
+            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 dark:group-hover:opacity-40 transition-opacity duration-300 bg-gradient-to-br ${stat.bgGradient} dark:from-slate-800/80 dark:to-slate-900/40`}></div>
 
             <div className="relative z-10">
               <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}/20 to-${stat.color}/10`}>
-                  <span className={`material-symbols-outlined text-2xl text-${stat.color}`}>{stat.icon}</span>
+                <div className={`p-3 rounded-xl ${stat.iconBg || 'bg-[var(--bg-page)]'}`}>
+                  <span className={`material-symbols-outlined text-2xl ${stat.color}`}>{stat.icon}</span>
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 font-medium mb-2">{stat.label}</p>
-              <p className={`text-4xl font-bold text-${stat.color} mb-3`}>{stat.value}</p>
+              <p className="text-sm text-[var(--text-secondary)] font-medium mb-2">{stat.label}</p>
+              <p className={`text-4xl font-bold ${stat.color} mb-3`}>{stat.value}</p>
 
-              <div className="flex items-center gap-1 text-astu-green text-sm font-medium">
+              <div className={`flex items-center gap-1 ${stat.trendColor} text-sm font-medium`}>
                 <span className="material-symbols-outlined text-lg">{stat.trendIcon}</span>
                 {stat.trend}
               </div>
@@ -471,11 +473,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Main Grid: Job Matches (left) and Career Progression Timeline (right) */}
-      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">World-Class Alumni Features</h3>
-            <p className="mt-1 text-xs text-gray-500">Everything from the brief, wired into the current dashboard modules.</p>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">World-Class Alumni Features</h3>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">Everything from the brief, wired into the current dashboard modules.</p>
           </div>
           <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
             Profile + tracer + career ready
@@ -486,11 +488,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <button
               key={card.title}
               onClick={() => onTabChange(card.tab)}
-              className="group rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+              className="group rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-[var(--bg-card)] hover:shadow-sm"
             >
               <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
-              <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
-              <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+              <h4 className="mt-3 text-sm font-bold text-[var(--text-primary)]">{card.title}</h4>
+              <p className="mt-1 text-xs leading-relaxed text-[var(--text-muted)]">{card.desc}</p>
             </button>
           ))}
         </div>
@@ -500,11 +502,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         
         {/* Left Column: Recent Job Matches */}
         <div className="lg:col-span-2 space-y-6">
-          <section className="h-full rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <section className="h-full rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">Recent Job Matches</h3>
-                <p className="text-sm text-gray-600">Opportunities tailored to your profile</p>
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Recent Job Matches</h3>
+                <p className="text-sm text-[var(--text-secondary)]">Opportunities tailored to your profile</p>
               </div>
               <button 
                 onClick={() => onTabChange('jobs')}
@@ -518,19 +520,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {recentJobs.slice(0, 3).map((job) => (
                 <div
                   key={job.id}
-                  className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-gray-50 p-4 transition-all duration-300 hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+                  className="group cursor-pointer rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-all duration-300 hover:border-astu-navy/30 hover:bg-[var(--bg-card)] hover:shadow-sm"
                   onClick={() => onViewJob(job)}
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{job.title}</h4>
+                        <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-astu-navy transition-colors">{job.title}</h4>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${job.applied ? 'bg-blue-100 text-blue-800' : 'bg-astu-green/15 text-astu-green'}`}>
                           {job.applied ? 'Applied' : `${job.match} Match`}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 font-medium mb-2">{job.company}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <p className="text-sm text-[var(--text-secondary)] font-medium mb-2">{job.company}</p>
+                      <div className="flex flex-wrap gap-4 text-sm text-[var(--text-secondary)]">
                         <span className="flex items-center gap-1">
                           <span className="material-symbols-outlined text-base">location_on</span>
                           {job.location}
@@ -568,8 +570,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {/* Right Column: Career Progression Timeline */}
         <div className="lg:col-span-1">
-          <section className="h-full rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <section className="h-full rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
+            <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
               <span className="material-symbols-outlined text-astu-green font-bold">timeline</span>
               Career Timeline
             </h3>
@@ -582,14 +584,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <span className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow flex items-center justify-center ${
                     milestone.type === 'academic' ? 'bg-astu-navy' : 'bg-astu-green'
                   }`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--bg-card)]"></span>
                   </span>
                   
                   <div className="space-y-1">
-                    <span className="text-[10px] font-extrabold uppercase text-gray-400">{milestone.year}</span>
-                    <h4 className="text-sm font-bold text-gray-900 leading-snug">{milestone.title}</h4>
+                    <span className="text-[10px] font-extrabold uppercase text-[var(--text-muted)]">{milestone.year}</span>
+                    <h4 className="text-sm font-bold text-[var(--text-primary)] leading-snug">{milestone.title}</h4>
                     <p className="text-xs font-bold text-astu-navy">{milestone.company}</p>
-                    <p className="text-[11px] text-gray-500 leading-normal">{milestone.description}</p>
+                    <p className="text-[11px] text-[var(--text-muted)] leading-normal">{milestone.description}</p>
                   </div>
                 </div>
               ))}
@@ -647,8 +649,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       />
 
       {/* Quick Actions */}
-      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        <h3 className="mb-4 text-sm font-semibold text-gray-900">Recommended Next Steps</h3>
+      <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <h3 className="mb-4 text-sm font-semibold text-[var(--text-primary)]">Recommended Next Steps</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
             { icon: 'edit', title: 'Update Skills', desc: 'Add new technical and soft skills' },
@@ -657,25 +659,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           ].map((action, idx) => (
             <div
               key={idx}
-              className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-gray-50 p-4 text-center transition-all duration-300 hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+              className="group cursor-pointer rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-center transition-all duration-300 hover:border-astu-navy/30 hover:bg-[var(--bg-card)] hover:shadow-sm"
               onClick={() => onTabChange('profile')}
             >
               <div className="mx-auto w-14 h-14 rounded-2xl bg-astu-navy/10 flex items-center justify-center mb-4 group-hover:bg-astu-navy/20 transition-colors">
                 <span className="material-symbols-outlined text-2xl text-astu-navy">{action.icon}</span>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">{action.title}</h4>
-              <p className="text-sm text-gray-600">{action.desc}</p>
+              <h4 className="font-semibold text-[var(--text-primary)] mb-2">{action.title}</h4>
+              <p className="text-sm text-[var(--text-secondary)]">{action.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Community Feed Section */}
-      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">Alumni Community Feed</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Latest updates from your network</p>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Alumni Community Feed</h3>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Latest updates from your network</p>
           </div>
           <button onClick={() => onTabChange('messages')} className="text-xs font-bold text-astu-navy hover:underline">View All</button>
         </div>
@@ -689,7 +691,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               .trim();
 
             return (
-              <div key={post.id} className="flex gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-astu-navy/20 transition-all">
+              <div key={post.id} className="flex gap-3 p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:bg-[var(--bg-card)] hover:border-astu-navy/20 transition-all">
                 <img
                 src={post.authorAvatar && !post.authorAvatar.includes('undefined') && !post.authorAvatar.includes('null') ? post.authorAvatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author || 'ASTU Graduate')}&background=003366&color=ffffff&bold=true`}
                 onError={(e) => {
@@ -700,25 +702,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-900">{post.author || 'ASTU Graduate'}</span>
-                    <span className="text-[9px] text-gray-400">{post.timestamp || (post as any).time || 'Recently'}</span>
+                    <span className="text-xs font-bold text-[var(--text-primary)]">{post.author || 'ASTU Graduate'}</span>
+                    <span className="text-[9px] text-[var(--text-muted)]">{post.timestamp || (post as any).time || 'Recently'}</span>
                   </div>
-                  <p className="text-[11px] text-gray-600 mt-1 leading-relaxed line-clamp-2">{cleanText || 'Shared a community update.'}</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1 leading-relaxed line-clamp-2">{cleanText || 'Shared a community update.'}</p>
                   
                   {imgMatch && imgMatch[1] && (
-                    <div className="mt-2 overflow-hidden rounded-lg border border-gray-200/80 max-h-28 bg-slate-900/5">
+                    <div className="mt-2 overflow-hidden rounded-lg border border-[var(--border-color)] max-h-28 bg-slate-900/5">
                       <img src={imgMatch[1]} alt="Attached Media" className="w-full h-28 object-cover rounded-lg" />
                     </div>
                   )}
 
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                    <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] font-medium">
                       <svg className="w-3 h-3" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
                       {post.likes || 0}
                     </span>
-                    <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                    <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)] font-medium">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
@@ -738,32 +740,32 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </section>
 
       {/* Donation Campaigns */}
-      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">Alumni Giving Campaigns</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Support ASTU development initiatives</p>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Alumni Giving Campaigns</h3>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Support ASTU development initiatives</p>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {donationCampaigns.slice(0, 3).map((campaign) => {
             const progress = Math.round((campaign.raised / campaign.goal) * 100);
             return (
-              <div key={campaign.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all">
+              <div key={campaign.id} className="rounded-xl border border-[var(--border-color)] p-4 hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[9px] font-bold rounded-full uppercase">
                     {campaign.category}
                   </span>
-                  <span className="text-[10px] text-gray-400">{campaign.donorCount} donors</span>
+                  <span className="text-[10px] text-[var(--text-muted)]">{campaign.donorCount} donors</span>
                 </div>
-                <h4 className="text-sm font-bold text-gray-900 mb-1">{campaign.title}</h4>
-                <p className="text-[11px] text-gray-500 leading-relaxed mb-3 line-clamp-2">{campaign.description}</p>
+                <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1">{campaign.title}</h4>
+                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed mb-3 line-clamp-2">{campaign.description}</p>
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-bold text-astu-navy">{campaign.raised.toLocaleString()} ETB</span>
-                    <span className="text-gray-400">of {campaign.goal.toLocaleString()} ETB</span>
+                    <span className="text-[var(--text-muted)]">of {campaign.goal.toLocaleString()} ETB</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-[var(--bg-page)] rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-gradient-to-r from-astu-navy to-astu-green transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>
                   </div>
                 </div>

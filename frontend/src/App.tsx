@@ -166,16 +166,26 @@ function App() {
   return (
     <Provider store={store}>
       <Toaster
-        position="top-center"
-        containerStyle={{ top: 72, zIndex: 999999 }}
+        position="top-right"
+        containerStyle={{ top: 72, right: 16, zIndex: 999999 }}
         toastOptions={{
           duration: 2800,
           style: {
             zIndex: 999999,
-            borderRadius: 10,
+            borderRadius: 8,
             fontSize: 13,
             fontWeight: 600,
-            boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)",
+            background: '#ffffff',
+            color: '#0a0e1a',
+            border: '1px solid #e8edf5',
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.10)',
+            padding: '10px 14px',
+          },
+          success: {
+            iconTheme: { primary: '#047857', secondary: '#ecfdf5' },
+          },
+          error: {
+            iconTheme: { primary: '#be123c', secondary: '#fff1f2' },
           },
         }}
       />

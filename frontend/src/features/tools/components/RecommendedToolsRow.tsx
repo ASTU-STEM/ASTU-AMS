@@ -1,7 +1,11 @@
 import React from 'react';
 import { ToolItem } from '../types/tools.types';
 import { TOOL_REGISTRY } from '../data/toolRegistry';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { AlumniSectionBlock } from '../../alumni/components/AlumniSectionBlock';
+import { alumniGridGapClass, alumniStatusBadge } from '../../alumni/components/alumniUi';
+import { formatEmploymentStatus } from '../../alumni/utils/statusUi';
+import { ToolTypeBadge } from './ToolTypeBadge';
 
 interface RecommendedToolsRowProps {
   profile: any;
@@ -12,10 +16,6 @@ export const RecommendedToolsRow: React.FC<RecommendedToolsRowProps> = ({ profil
   const isEmployed = profile?.employmentStatus === 'EMPLOYED' || profile?.employmentStatus === 'SELF_EMPLOYED';
   const userName = profile?.fullName ? profile.fullName.split(' ')[0] : 'Alumni';
 
-  // Ten of these ids never existed in TOOL_REGISTRY, so this list resolved to
-  // 2 tools when employed and 3 when not, rendered into a 4-column grid under a
-  // heading that claims the list was "Shortlisted by employment status". It is a
-  // hand-picked shortlist, so it now says so.
   const recommendedIds = isEmployed
     ? [
         'personal-development-plan',
@@ -36,66 +36,61 @@ export const RecommendedToolsRow: React.FC<RecommendedToolsRowProps> = ({ profil
         'thesis-topic-generator',
       ];
 
-  const resolveTool = (id: string): ToolItem | undefined => {
-    const found = TOOL_REGISTRY.find((t) => t.id === id);
-    if (!found && import.meta.env.DEV) {
-      console.warn(`[tools] RecommendedToolsRow references unknown tool id: "${id}"`);
-    }
-    return found;
-  };
+  const recommendedTools = recommendedIds
+    .map((id) => TOOL_REGISTRY.find((t) => t.id === id))
+    .filter((t): t is ToolItem => t !== undefined);
 
-  const recommendedTools = recommendedIds.map(resolveTool).filter((t): t is ToolItem => t !== undefined);
+  const gridColsClass =
+    recommendedTools.length % 3 === 0
+      ? 'sm:grid-cols-2 lg:grid-cols-3'
+      : 'sm:grid-cols-2 lg:grid-cols-4';
 
   return (
-    <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/70 via-blue-50/50 to-white p-4 dark:border-indigo-900/40 dark:from-slate-900 dark:to-slate-800">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold shadow-xs">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Recommended for {userName}
-            </h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              {profile?.department?.name || 'ASTU Graduate'} · {isEmployed ? 'Career growth picks' : 'Job-ready picks'}
-            </p>
-          </div>
+    <AlumniSectionBlock
+      step={2}
+      title={`Recommended for ${userName}`}
+      description={`${profile?.department?.name || 'ASTU Graduate'} · ${
+        isEmployed ? 'Career growth and acceleration picks from your profile.' : 'Job-readiness and placement picks from your profile.'
+      }`}
+      aside={
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className={alumniStatusBadge.info}>{formatEmploymentStatus(profile?.employmentStatus)}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
+            <CheckCircle2 className="h-3 w-3" />
+            {recommendedTools.length} curated
+          </span>
         </div>
-
-        <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 self-start sm:self-auto">
-          Matched to your status
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      }
+    >
+      <div className={`grid grid-cols-1 ${gridColsClass} ${alumniGridGapClass}`}>
         {recommendedTools.map((tool) => (
-          <div
+          <button
             key={tool.id}
+            type="button"
             onClick={() => onOpenTool(tool)}
-            className="group cursor-pointer rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs transition-all hover:border-indigo-400 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            className="group flex min-h-[160px] flex-col justify-between rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-5 sm:p-6 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/35 hover:shadow-md dark:hover:border-indigo-400/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/25"
           >
-            <div className="flex items-start gap-2.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                <span className="material-symbols-outlined text-xl">{tool.icon}</span>
+            <div>
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 transition-transform group-hover:scale-105">
+                  <span className="material-symbols-outlined text-[24px]">{tool.icon}</span>
+                </div>
+                <ToolTypeBadge toolType={tool.toolType} compact />
               </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors dark:text-white line-clamp-2">
-                  {tool.name}
-                </h4>
-                <p className="text-[11px] text-slate-500 line-clamp-3 mt-0.5 dark:text-slate-400 leading-relaxed">
-                  {tool.description}
-                </p>
-              </div>
+              <h4 className="text-sm font-bold text-[var(--text-primary)] line-clamp-2 leading-snug group-hover:text-indigo-700 dark:group-hover:text-indigo-300">
+                {tool.name}
+              </h4>
+              <p className="mt-2.5 text-xs leading-relaxed text-[var(--text-secondary)] line-clamp-3">
+                {tool.description}
+              </p>
             </div>
-
-            <div className="mt-2.5 flex items-center justify-between text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <span>Open</span>
-              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+            <div className="mt-5 flex items-center justify-between border-t border-[var(--border-color)] pt-4 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+              <span>Launch tool</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </div>
-          </div>
+          </button>
         ))}
       </div>
-    </div>
+    </AlumniSectionBlock>
   );
 };

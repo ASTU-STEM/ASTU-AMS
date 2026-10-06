@@ -246,7 +246,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
             </div>
             <div>
               <div className="text-[12px] font-extrabold text-[#003366] dark:text-blue-300">{name}</div>
-              <div className="text-[9px] text-slate-400 font-mono">ID: {ag.id || 'agent-dyn'}</div>
+              <div className="text-[9px] text-[var(--text-muted)] font-mono">ID: {ag.id || 'agent-dyn'}</div>
             </div>
           </div>
           <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
@@ -254,18 +254,18 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
           </span>
         </div>
 
-        <p className="text-[10.5px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{description}</p>
+        <p className="text-[10.5px] text-[var(--text-secondary)] dark:text-slate-300 font-medium leading-relaxed">{description}</p>
 
         <div className="flex flex-wrap gap-1.5 pt-1">
           {capabilities.map((cap, i) => (
-            <span key={i} className="rounded-md bg-white/90 px-2 py-0.5 text-[9px] font-bold text-blue-800 dark:bg-slate-900 dark:text-blue-300 border border-blue-100 dark:border-blue-900">
+            <span key={i} className="rounded-md bg-[var(--bg-card)] px-2 py-0.5 text-[9px] font-bold text-blue-800 dark:bg-slate-900 dark:text-blue-300 border border-blue-100 dark:border-blue-900">
               ⚡ {cap}
             </span>
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-blue-200/60 pt-2 text-[9.5px] text-slate-500 dark:border-blue-900/40">
-          <span>Author: <strong className="text-slate-800 dark:text-slate-200">{createdBy}</strong> ({createdAt})</span>
+        <div className="flex items-center justify-between border-t border-blue-200/60 pt-2 text-[9.5px] text-[var(--text-muted)] dark:border-blue-900/40">
+          <span>Author: <strong className="text-[var(--text-primary)] dark:text-slate-200">{createdBy}</strong> ({createdAt})</span>
           <span className="font-bold text-emerald-700 dark:text-emerald-400">Execution Count: {executionCount} Runs</span>
         </div>
       </div>
@@ -310,14 +310,14 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
 
   // Helper Tab Switcher Bar
   const renderTabSwitcher = () => (
-    <div className="flex items-center gap-1 border-b border-slate-200/80 pb-2 mb-3 dark:border-slate-800 text-[10px] font-bold">
+    <div className="flex items-center gap-1 border-b border-[var(--border-color)] pb-2 mb-3 dark:border-slate-800 text-[10px] font-bold">
       <button
         type="button"
         onClick={() => setActiveTab('graphics')}
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
           activeTab === 'graphics'
             ? 'bg-[#003366] text-white shadow-xs dark:bg-[#E8A020] dark:text-slate-900 font-extrabold'
-            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+            : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 dark:bg-slate-800 dark:text-slate-400'
         }`}
       >
         <BarChart3 className="h-3 w-3" />
@@ -330,7 +330,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
           activeTab === 'radar'
             ? 'bg-[#003366] text-white shadow-xs dark:bg-[#E8A020] dark:text-slate-900 font-extrabold'
-            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+            : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 dark:bg-slate-800 dark:text-slate-400'
         }`}
       >
         <Compass className="h-3 w-3" />
@@ -343,7 +343,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
           activeTab === 'canvas'
             ? 'bg-[#003366] text-white shadow-xs dark:bg-[#E8A020] dark:text-slate-900 font-extrabold'
-            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+            : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 dark:bg-slate-800 dark:text-slate-400'
         }`}
       >
         <Activity className="h-3 w-3" />
@@ -356,7 +356,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
           activeTab === 'table'
             ? 'bg-[#003366] text-white shadow-xs dark:bg-[#E8A020] dark:text-slate-900 font-extrabold'
-            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+            : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 dark:bg-slate-800 dark:text-slate-400'
         }`}
       >
         <TableIcon className="h-3 w-3" />
@@ -376,7 +376,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
     const executedAt = info.executedAt || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
-      <div className="mt-2.5 rounded-xl border border-emerald-200 bg-white p-3.5 shadow-md dark:border-emerald-900/60 dark:bg-[#1a1d27] transition-all">
+      <div className="mt-2.5 rounded-xl border border-emerald-200 bg-[var(--bg-card)] p-3.5 shadow-md dark:border-emerald-900/60 dark:bg-[#1a1d27] transition-all">
         {renderTabSwitcher()}
 
         {activeTab === 'graphics' && (
@@ -399,8 +399,8 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
             <div className="h-[140px] w-full pt-1">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[{ name: 'SMTP Delivered', count: 45, fill: '#008C44' }, { name: 'In-App Bell', count: 45, fill: '#3b82f6' }, { name: 'Failed', count: 0, fill: '#ef4444' }]}>
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} />
-                  <YAxis stroke="#94a3b8" fontSize={10} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={10} />
+                  <YAxis stroke="var(--chart-axis)" fontSize={10} />
                   <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px' }} />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -410,7 +410,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
             <div className="grid grid-cols-2 gap-2 text-[10px]">
               <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
                 <div className="font-bold text-emerald-900 dark:text-emerald-300">{targetLabel}</div>
-                <div className="text-[9px] text-slate-500 font-mono truncate">{targetEmail}</div>
+                <div className="text-[9px] text-[var(--text-muted)] font-mono truncate">{targetEmail}</div>
               </div>
               <div className="rounded-lg bg-blue-50 p-2 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
                 <div className="font-bold text-blue-900 dark:text-blue-300">{subject}</div>
@@ -424,9 +424,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarSkillData}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={9} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={8} />
+                <PolarGrid stroke="var(--chart-grid)" />
+                <PolarAngleAxis dataKey="subject" stroke="var(--chart-axis)" fontSize={9} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" fontSize={8} />
                 <Radar name="ASTU Graduates" dataKey="ASTU_Graduates" stroke="#008C44" fill="#008C44" fillOpacity={0.5} />
                 <Radar name="Industry Demand" dataKey="Industry" stroke="#E8A020" fill="#E8A020" fillOpacity={0.3} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
@@ -439,13 +439,13 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
 
         {activeTab === 'table' && (
           <div className="space-y-2 text-[10.5px]">
-            <div className="rounded-lg bg-white p-2.5 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <div className="text-[10px] font-extrabold text-slate-500 uppercase">Target Recipients</div>
-              <div className="font-bold text-slate-800 dark:text-slate-200">{targetLabel} ({targetEmail})</div>
+            <div className="rounded-lg bg-[var(--bg-card)] p-2.5 dark:bg-slate-900 border border-[var(--border-color)] dark:border-slate-800">
+              <div className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase">Target Recipients</div>
+              <div className="font-bold text-[var(--text-primary)] dark:text-slate-200">{targetLabel} ({targetEmail})</div>
             </div>
-            <div className="rounded-lg bg-white p-2.5 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <div className="text-[10px] font-extrabold text-slate-500 uppercase">Broadcast Subject</div>
-              <div className="font-bold text-slate-800 dark:text-slate-200">{subject}</div>
+            <div className="rounded-lg bg-[var(--bg-card)] p-2.5 dark:bg-slate-900 border border-[var(--border-color)] dark:border-slate-800">
+              <div className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase">Broadcast Subject</div>
+              <div className="font-bold text-[var(--text-primary)] dark:text-slate-200">{subject}</div>
             </div>
           </div>
         )}
@@ -469,7 +469,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
     ];
 
     return (
-      <div className="mt-2.5 rounded-xl border border-emerald-300/80 bg-white p-3.5 shadow-md dark:border-emerald-800/60 dark:bg-[#1a1d27] transition-all">
+      <div className="mt-2.5 rounded-xl border border-emerald-300/80 bg-[var(--bg-card)] p-3.5 shadow-md dark:border-emerald-800/60 dark:bg-[#1a1d27] transition-all">
         {renderTabSwitcher()}
 
         {activeTab === 'graphics' && (
@@ -484,10 +484,10 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
             </div>
 
             {/* Total & SLA KPI Bar */}
-            <div className="flex flex-wrap items-center justify-between rounded-lg border border-slate-200/80 bg-slate-50 px-3.5 py-2 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-[11px]">
-              <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center justify-between rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3.5 py-2 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-[11px]">
+              <div className="flex items-center gap-1.5 font-bold text-[var(--text-muted)] dark:text-slate-400">
                 <span>Total Requests:</span>
-                <span className="font-extrabold text-slate-900 dark:text-white text-xs">{totalRequests}</span>
+                <span className="font-extrabold text-[var(--text-primary)] dark:text-white text-xs">{totalRequests}</span>
               </div>
               <div className="flex items-center gap-1.5 font-bold text-[#D97706] dark:text-amber-400">
                 <span>Pending SLA:</span>
@@ -509,8 +509,8 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
                       <stop offset="95%" stopColor="#008C44" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="year" stroke="#94a3b8" fontSize={9} />
-                  <YAxis stroke="#94a3b8" fontSize={9} />
+                  <XAxis dataKey="year" stroke="var(--chart-axis)" fontSize={9} />
+                  <YAxis stroke="var(--chart-axis)" fontSize={9} />
                   <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px' }} />
                   <Area type="monotone" dataKey="confidence" stroke="#008C44" fillOpacity={1} fill="url(#colorSla)" name="SLA Compliance %" />
                 </AreaChart>
@@ -523,9 +523,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarSkillData}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={9} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={8} />
+                <PolarGrid stroke="var(--chart-grid)" />
+                <PolarAngleAxis dataKey="subject" stroke="var(--chart-axis)" fontSize={9} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" fontSize={8} />
                 <Radar name="ASTU Graduates" dataKey="ASTU_Graduates" stroke="#008C44" fill="#008C44" fillOpacity={0.5} />
                 <Radar name="Industry Demand" dataKey="Industry" stroke="#E8A020" fill="#E8A020" fillOpacity={0.3} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
@@ -537,9 +537,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         {activeTab === 'canvas' && <AiCanvasAnalytics title="Registrar Document SLA Telemetry Canvas" />}
 
         {activeTab === 'table' && (
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#13161f]">
+          <div className="overflow-x-auto rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-[#13161f]">
             <table className="w-full text-left text-[10px]">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-[var(--bg-page)] dark:bg-slate-800/60 text-[var(--text-muted)] font-extrabold uppercase border-b border-[var(--border-color)] dark:border-slate-800">
                 <tr>
                   <th className="px-2.5 py-1.5">Req ID</th>
                   <th className="px-2.5 py-1.5">Student / Alumni</th>
@@ -548,13 +548,13 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
                   <th className="px-2.5 py-1.5 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+              <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800/60 font-medium">
                 {sampleRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                    <td className="px-2.5 py-1.5 font-mono text-[9.5px] font-bold text-slate-600 dark:text-slate-300">{req.id}</td>
-                    <td className="px-2.5 py-1.5 font-bold text-slate-900 dark:text-slate-100">{req.student}</td>
-                    <td className="px-2.5 py-1.5 text-slate-600 dark:text-slate-400">{req.doc}</td>
-                    <td className="px-2.5 py-1.5 text-slate-500 dark:text-slate-400">{req.sla}</td>
+                  <tr key={req.id} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40">
+                    <td className="px-2.5 py-1.5 font-mono text-[9.5px] font-bold text-[var(--text-secondary)] dark:text-slate-300">{req.id}</td>
+                    <td className="px-2.5 py-1.5 font-bold text-[var(--text-primary)] dark:text-slate-100">{req.student}</td>
+                    <td className="px-2.5 py-1.5 text-[var(--text-secondary)] dark:text-slate-400">{req.doc}</td>
+                    <td className="px-2.5 py-1.5 text-[var(--text-muted)] dark:text-slate-400">{req.sla}</td>
                     <td className="px-2.5 py-1.5 text-right">
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold ${
@@ -599,12 +599,12 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
     ];
 
     return (
-      <div className="mt-2.5 rounded-xl border border-slate-200 bg-white p-3.5 shadow-md dark:border-slate-800 dark:bg-[#1a1d27] transition-all">
+      <div className="mt-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-md dark:border-slate-800 dark:bg-[#1a1d27] transition-all">
         {renderTabSwitcher()}
 
         {activeTab === 'graphics' && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 border-b border-slate-100 pb-2 dark:border-slate-800">
+            <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-2 dark:border-slate-800">
               <Users className="h-4 w-4 text-[#003366] dark:text-[#E8A020]" />
               <span className="text-[12px] font-extrabold text-[#003366] dark:text-[#E8A020]">
                 ASTU Account Distribution &amp; Status Pie Graphics
@@ -632,9 +632,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarSkillData}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={9} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={8} />
+                <PolarGrid stroke="var(--chart-grid)" />
+                <PolarAngleAxis dataKey="subject" stroke="var(--chart-axis)" fontSize={9} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" fontSize={8} />
                 <Radar name="ASTU Graduates" dataKey="ASTU_Graduates" stroke="#008C44" fill="#008C44" fillOpacity={0.5} />
                 <Radar name="Industry Demand" dataKey="Industry" stroke="#E8A020" fill="#E8A020" fillOpacity={0.3} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
@@ -646,9 +646,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         {activeTab === 'canvas' && <AiCanvasAnalytics title="Account Telemetry & Security Matrix Canvas" />}
 
         {activeTab === 'table' && (
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#13161f]">
+          <div className="overflow-x-auto rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-[#13161f]">
             <table className="w-full text-left text-[10px]">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-[var(--bg-page)] dark:bg-slate-800/60 text-[var(--text-muted)] font-extrabold uppercase border-b border-[var(--border-color)] dark:border-slate-800">
                 <tr>
                   <th className="px-2.5 py-1.5">Audit ID</th>
                   <th className="px-2.5 py-1.5">Action Executed</th>
@@ -656,13 +656,13 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
                   <th className="px-2.5 py-1.5 text-right">Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+              <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800/60 font-medium">
                 {auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                    <td className="px-2.5 py-1.5 font-mono text-[9.5px] font-bold text-slate-500">{log.id}</td>
-                    <td className="px-2.5 py-1.5 font-bold text-slate-800 dark:text-slate-200">{log.action}</td>
-                    <td className="px-2.5 py-1.5 text-slate-600 dark:text-slate-400">{log.user}</td>
-                    <td className="px-2.5 py-1.5 text-right text-slate-400">{log.time}</td>
+                  <tr key={log.id} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40">
+                    <td className="px-2.5 py-1.5 font-mono text-[9.5px] font-bold text-[var(--text-muted)]">{log.id}</td>
+                    <td className="px-2.5 py-1.5 font-bold text-[var(--text-primary)] dark:text-slate-200">{log.action}</td>
+                    <td className="px-2.5 py-1.5 text-[var(--text-secondary)] dark:text-slate-400">{log.user}</td>
+                    <td className="px-2.5 py-1.5 text-right text-[var(--text-muted)]">{log.time}</td>
                   </tr>
                 ))}
               </tbody>
@@ -676,7 +676,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
   // 4. MOE_MINISTRY_DATABASE & Strategic Indicators
   if (effectiveWidget === 'MOE_MINISTRY_DATABASE' || effectiveWidget === 'MOE_COMPLIANCE') {
     return (
-      <div className="mt-2.5 rounded-xl border border-amber-200 bg-white p-3.5 shadow-md dark:border-amber-900/60 dark:bg-[#1a1d27] transition-all">
+      <div className="mt-2.5 rounded-xl border border-amber-200 bg-[var(--bg-card)] p-3.5 shadow-md dark:border-amber-900/60 dark:bg-[#1a1d27] transition-all">
         {renderTabSwitcher()}
 
         {activeTab === 'graphics' && (
@@ -691,8 +691,8 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
             <div className="h-[160px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[{ name: 'IND-01 Plan', MoE: 10, ASTU: 9.95 }, { name: 'IND-02 HERQA', MoE: 65, ASTU: 69 }, { name: 'IND-03 STEM %', MoE: 50, ASTU: 60 }, { name: 'IND-08 Trust', MoE: 7.0, ASTU: 6.9 }]}>
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} />
-                  <YAxis stroke="#94a3b8" fontSize={9} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={9} />
+                  <YAxis stroke="var(--chart-axis)" fontSize={9} />
                   <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px' }} />
                   <Bar dataKey="MoE" fill="#94a3b8" name="MoE Benchmark" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="ASTU" fill="#008C44" name="ASTU Actual" radius={[4, 4, 0, 0]} />
@@ -707,9 +707,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarSkillData}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={9} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={8} />
+                <PolarGrid stroke="var(--chart-grid)" />
+                <PolarAngleAxis dataKey="subject" stroke="var(--chart-axis)" fontSize={9} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" fontSize={8} />
                 <Radar name="ASTU Performance" dataKey="ASTU_Graduates" stroke="#008C44" fill="#008C44" fillOpacity={0.6} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
               </RadarChart>
@@ -720,9 +720,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         {activeTab === 'canvas' && <AiCanvasAnalytics title="MoE Strategic Compliance Swarm Canvas" />}
 
         {activeTab === 'table' && (
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#13161f]">
+          <div className="overflow-x-auto rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-[#13161f]">
             <table className="w-full text-left text-[10px]">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-[var(--bg-page)] dark:bg-slate-800/60 text-[var(--text-muted)] font-extrabold uppercase border-b border-[var(--border-color)] dark:border-slate-800">
                 <tr>
                   <th className="px-2.5 py-1.5">Code</th>
                   <th className="px-2.5 py-1.5">Indicator Name</th>
@@ -730,17 +730,17 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
                   <th className="px-2.5 py-1.5 text-right">ASTU Value</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+              <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800/60 font-medium">
                 {[
                   { code: 'IND-01', name: 'Plan Alignment', target: '10.0%', actual: '9.95%' },
                   { code: 'IND-02', name: 'HERQA Impact Score', target: '65.0', actual: '69.0' },
                   { code: 'IND-03', name: 'Female STEM Placement', target: '50.0%', actual: '60.0%' },
                   { code: 'IND-08', name: 'Brand Trust', target: '7.0/10', actual: '6.9/10' },
                 ].map((row) => (
-                  <tr key={row.code} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                  <tr key={row.code} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40">
                     <td className="px-2.5 py-1.5 font-mono text-[9.5px] font-bold text-amber-600">{row.code}</td>
-                    <td className="px-2.5 py-1.5 font-bold text-slate-800 dark:text-slate-200">{row.name}</td>
-                    <td className="px-2.5 py-1.5 text-slate-500">{row.target}</td>
+                    <td className="px-2.5 py-1.5 font-bold text-[var(--text-primary)] dark:text-slate-200">{row.name}</td>
+                    <td className="px-2.5 py-1.5 text-[var(--text-muted)]">{row.target}</td>
                     <td className="px-2.5 py-1.5 text-right font-bold text-emerald-600">{row.actual}</td>
                   </tr>
                 ))}
@@ -755,7 +755,7 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
   // 5. JOBS_DATABASE & Industry Hiring Graphics
   if (effectiveWidget === 'JOBS_DATABASE' || effectiveWidget === 'APPLICATIONS_DATABASE') {
     return (
-      <div className="mt-2.5 rounded-xl border border-blue-200 bg-white p-3.5 shadow-md dark:border-blue-900/60 dark:bg-[#1a1d27] transition-all">
+      <div className="mt-2.5 rounded-xl border border-blue-200 bg-[var(--bg-card)] p-3.5 shadow-md dark:border-blue-900/60 dark:bg-[#1a1d27] transition-all">
         {renderTabSwitcher()}
 
         {activeTab === 'graphics' && (
@@ -770,8 +770,8 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
             <div className="h-[160px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={employerBarData}>
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} />
-                  <YAxis stroke="#94a3b8" fontSize={9} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={9} />
+                  <YAxis stroke="var(--chart-axis)" fontSize={9} />
                   <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px' }} />
                   <Bar dataKey="salary" fill="#3b82f6" name="Avg Starting Salary (ETB)" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -784,9 +784,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarSkillData}>
-                <PolarGrid stroke="#334155" />
-                <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={9} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={8} />
+                <PolarGrid stroke="var(--chart-grid)" />
+                <PolarAngleAxis dataKey="subject" stroke="var(--chart-axis)" fontSize={9} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" fontSize={8} />
                 <Radar name="ASTU Graduates" dataKey="ASTU_Graduates" stroke="#008C44" fill="#008C44" fillOpacity={0.5} />
                 <Radar name="Industry Demand" dataKey="Industry" stroke="#E8A020" fill="#E8A020" fillOpacity={0.3} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />
@@ -798,20 +798,20 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         {activeTab === 'canvas' && <AiCanvasAnalytics title="Industry Employer Job Swarm Canvas" />}
 
         {activeTab === 'table' && (
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#13161f]">
+          <div className="overflow-x-auto rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-[#13161f]">
             <table className="w-full text-left text-[10px]">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-[var(--bg-page)] dark:bg-slate-800/60 text-[var(--text-muted)] font-extrabold uppercase border-b border-[var(--border-color)] dark:border-slate-800">
                 <tr>
                   <th className="px-2.5 py-1.5">Employer</th>
                   <th className="px-2.5 py-1.5">Placement Count</th>
                   <th className="px-2.5 py-1.5 text-right">Starting Salary</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+              <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800/60 font-medium">
                 {employerBarData.map((emp) => (
-                  <tr key={emp.name} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                    <td className="px-2.5 py-1.5 font-bold text-slate-900 dark:text-slate-100">{emp.name}</td>
-                    <td className="px-2.5 py-1.5 text-slate-600 dark:text-slate-400">{emp.hires} Alumni</td>
+                  <tr key={emp.name} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40">
+                    <td className="px-2.5 py-1.5 font-bold text-[var(--text-primary)] dark:text-slate-100">{emp.name}</td>
+                    <td className="px-2.5 py-1.5 text-[var(--text-secondary)] dark:text-slate-400">{emp.hires} Alumni</td>
                     <td className="px-2.5 py-1.5 text-right font-bold text-emerald-600">ETB {emp.salary.toLocaleString()}/mo</td>
                   </tr>
                 ))}
@@ -825,12 +825,12 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
 
   // 6. Default / Tracer Survey Visual Graphics
   return (
-    <div className="mt-2.5 rounded-xl border border-slate-200 bg-white p-3.5 shadow-md dark:border-slate-800 dark:bg-[#1a1d27] transition-all">
+    <div className="mt-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-md dark:border-slate-800 dark:bg-[#1a1d27] transition-all">
       {renderTabSwitcher()}
 
       {activeTab === 'graphics' && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2 dark:border-slate-800">
             <div className="flex items-center gap-1.5">
               <BarChart3 className="h-4 w-4 text-[#E8A020]" />
               <span className="text-[11px] font-extrabold text-[#003366] dark:text-[#E8A020]">
@@ -848,8 +848,8 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
                     <stop offset="95%" stopColor="#E8A020" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="year" stroke="#94a3b8" fontSize={9} />
-                <YAxis stroke="#94a3b8" fontSize={9} />
+                <XAxis dataKey="year" stroke="var(--chart-axis)" fontSize={9} />
+                <YAxis stroke="var(--chart-axis)" fontSize={9} />
                 <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '10px' }} />
                 <Area type="monotone" dataKey="rate" stroke="#E8A020" fillOpacity={1} fill="url(#colorTrend)" name="Employment Rate %" />
               </AreaChart>
@@ -862,9 +862,9 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radarSkillData}>
-              <PolarGrid stroke="#334155" />
-              <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={9} />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={8} />
+              <PolarGrid stroke="var(--chart-grid)" />
+              <PolarAngleAxis dataKey="subject" stroke="var(--chart-axis)" fontSize={9} />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--chart-axis)" fontSize={8} />
               <Radar name="ASTU Graduates" dataKey="ASTU_Graduates" stroke="#008C44" fill="#008C44" fillOpacity={0.5} />
               <Radar name="Industry Demand" dataKey="Industry" stroke="#E8A020" fill="#E8A020" fillOpacity={0.3} />
               <Legend wrapperStyle={{ fontSize: '10px' }} />
@@ -876,26 +876,26 @@ export const AiWidgetRenderer: React.FC<AiWidgetRendererProps> = ({
       {activeTab === 'canvas' && <AiCanvasAnalytics title="ASTU Swarm Neural Telemetry Canvas" />}
 
       {activeTab === 'table' && (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-[#13161f]">
+        <div className="overflow-x-auto rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] dark:border-slate-800 dark:bg-[#13161f]">
           <table className="w-full text-left text-[10px]">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-[var(--bg-page)] dark:bg-slate-800/60 text-[var(--text-muted)] font-extrabold uppercase border-b border-[var(--border-color)] dark:border-slate-800">
               <tr>
                 <th className="px-2.5 py-1.5">Department</th>
                 <th className="px-2.5 py-1.5">Employment %</th>
                 <th className="px-2.5 py-1.5 text-right">Avg Salary</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-[var(--border-color)] dark:divide-slate-800/60 font-medium">
               {[
                 { dept: 'Computer Science (CSE)', pct: '87.2%', sal: 'ETB 23,400/mo' },
                 { dept: 'Electrical Engineering (ECE)', pct: '79.5%', sal: 'ETB 22,000/mo' },
                 { dept: 'Mechanical Engineering (ME)', pct: '72.1%', sal: 'ETB 18,000/mo' },
                 { dept: 'Civil Engineering (CE)', pct: '64.8%', sal: 'ETB 19,500/mo' },
               ].map((row) => (
-                <tr key={row.dept} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                  <td className="px-2.5 py-1.5 font-bold text-slate-900 dark:text-slate-100">{row.dept}</td>
+                <tr key={row.dept} className="hover:bg-[var(--bg-page)] dark:hover:bg-slate-800/40">
+                  <td className="px-2.5 py-1.5 font-bold text-[var(--text-primary)] dark:text-slate-100">{row.dept}</td>
                   <td className="px-2.5 py-1.5 text-emerald-600 font-bold">{row.pct}</td>
-                  <td className="px-2.5 py-1.5 text-right font-bold text-slate-800 dark:text-slate-200">{row.sal}</td>
+                  <td className="px-2.5 py-1.5 text-right font-bold text-[var(--text-primary)] dark:text-slate-200">{row.sal}</td>
                 </tr>
               ))}
             </tbody>

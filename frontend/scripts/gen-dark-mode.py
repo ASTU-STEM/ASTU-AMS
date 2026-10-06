@@ -28,9 +28,9 @@ FAMILIES = set(
 )
 
 # Light shades that need to become dark surfaces, and their overlay alpha.
-LIGHT_BG = {'50': '0.03', '100': '0.05', '200': '0.08', '300': '0.12'}
+LIGHT_BG = {'50': '0.03', '100': '0.05', '150': '0.06', '200': '0.08', '250': '0.10', '300': '0.12'}
 # Light shades that need to become the dark border token.
-LIGHT_BORDER = {'100', '200', '300'}
+LIGHT_BORDER = {'100', '150', '200', '250', '300'}
 # Shade -> theme text token.
 TEXT_MAP = {
     '900': 'primary', '800': 'primary',
@@ -39,9 +39,15 @@ TEXT_MAP = {
 }
 
 # White surfaces are the single most common light background in the app.
-WHITE_SURFACES = {'bg-white', 'focus:bg-white', 'hover:bg-white', 'sm:bg-white', 'md:bg-white', 'lg:bg-white'}
+#
+# Low-alpha white is *not* a light surface: bg-white/5 ... bg-white/40 are
+# translucent "glass" chips layered on the navy sidebar / hero gradients and look
+# correct in both themes. Remapping them would flatten the navy chrome. Only
+# opaque-or-near-opaque white (and white at >= NAVY_OVERLAY_MAX) is remapped.
+NAVY_OVERLAY_MAX = 45
+WHITE_ALPHA = {'50', '55', '60', '65', '70', '75', '80', '85', '90', '95'}
 
-SOURCES = ('src/layouts', 'src/features')
+SOURCES = ('src/layouts', 'src/features', 'src/components', 'src/pages')
 OUT = pathlib.Path('src/styles/dark-mode.css')
 SHELL = 'app-shell'
 
@@ -52,14 +58,24 @@ ARBITRARY = {
     'bg-[#003366]/10': 'rgba(255,255,255,0.09)',
 }
 
+VARIANTS = r'(?:hover:|focus:|active:|group-hover:|sm:|md:|lg:|xl:)?'
+# Utilities whose colour is a light surface. `ring-` is included because
+# Tailwind 3 emits ring colours as --tw-ring-color, which ring-1/ring-2 then
+# consume, so overriding the variable repaints the ring without touching width.
+PROPS = r'(bg|text|border|from|to|via|divide|ring)'
+
 PAT = re.compile(
     r'(?:^|[\s"\'`])'
-    r'((?:hover:|focus:|active:|group-hover:|sm:|md:|lg:|xl:)?'
-    r'(?:bg|text|border|from|to|via)-([a-z]+)-(\d{2,3}))'
-    r'(/[0-9]+)?(?![/\w-])'
+    r'(' + VARIANTS + PROPS + r'-([a-z]+)-(\d{2,3}))'
+    r'(?:/([0-9]{1,3}))?(?![/\w-])'
+)
+PAT_WHITE = re.compile(
+    r'(?:^|[\s"\'`])(' + VARIANTS + r'bg-white)(?:/([0-9]{1,3}))?(?![/\w-])'
 )
 
-esc = lambda s: s.replace(':', r'\:')
+# Tailwind selector escaping: ':' and '/' are both meaningful in a class
+# selector and must be backslash-escaped or the rule never matches the DOM.
+esc = lambda s: re.sub(r'([:/])', r'\\\1', s)
 
 
 def selector(cls: str, prop: str) -> str:
@@ -67,31 +83,43 @@ def selector(cls: str, prop: str) -> str:
     guard = f'[class*="dark:{prop}-"]'
     base = f'.dark .{SHELL} '
     if pfx in ('hover', 'group-hover'):
-        return f'{base}.{esc(cls)}:not({guard}):hover'
-    if pfx == 'focus':
-        return f'{base}.{esc(cls)}:not({guard}):focus'
-    if pfx == 'active':
-        return f'{base}.{esc(cls)}:not({guard}):active'
-    return f'{base}.{cls}:not({guard})'
+        sel = f'{base}.{esc(cls)}:not({guard}):hover'
+    elif pfx == 'focus':
+        sel = f'{base}.{esc(cls)}:not({guard}):focus'
+    elif pfx == 'active':
+        sel = f'{base}.{esc(cls)}:not({guard}):active'
+    else:
+        sel = f'{base}.{esc(cls)}:not({guard})'
+    # divide-* paints the border on the *child* elements, exactly as Tailwind
+    # itself does, so the override has to target the sibling combinator too.
+    if cls.split(':')[-1].startswith('divide-'):
+        sel += ' > :not([hidden]) ~ :not([hidden])'
+    return sel
 
 
-def collect() -> set:
-    classes = set()
+def collect():
+    """Return (prop, class, opacity) triples found in the scanned sources."""
+    found = set()
     for root in SOURCES:
         base = pathlib.Path(root)
         if not base.exists():
             continue
         for f in base.rglob('*.tsx'):
             text = f.read_text()
-            for cls, _fam, _shade, _op in PAT.findall(text):
-                classes.add(cls)
-            for cls in WHITE_SURFACES:
-                if re.search(r'(?:^|[\s"`])' + re.escape(cls) + r'(?=[\s"`])', text):
-                    classes.add(cls)
-    return classes
+            for cls, prop, _fam, _shade, op in PAT.findall(text):
+                # Re-attach the opacity modifier: the emitted selector has to
+                # match the literal DOM class (bg-slate-50/60), not the bare
+                # utility (bg-slate-50), or the rule silently never applies.
+                found.add((prop, f'{cls}/{op}' if op else cls, op))
+            for cls, op in PAT_WHITE.findall(text):
+                # Skip the intentional translucent overlays on navy chrome.
+                if op and int(op) < NAVY_OVERLAY_MAX:
+                    continue
+                found.add(('bg', f'{cls}/{op}' if op else cls, op))
+    return found
 
 
-def emit(rows, decl) -> str:
+def emit(rows, decl):
     groups = collections.OrderedDict()
     for val, s in rows:
         groups.setdefault(val, []).append(s)
@@ -102,24 +130,28 @@ def emit(rows, decl) -> str:
 
 
 def main():
-    bg, tx, bd, gf, gv, gt = [], [], [], [], [], []
-    for cls in collect():
-        if cls in WHITE_SURFACES:
+    bg, tx, bd, gf, gv, gt, dv, rv = [], [], [], [], [], [], [], []
+    for prop, cls, op in collect():
+        # Parse the palette tail without the /opacity modifier; the modifier
+        # stays in `cls` so the emitted selector matches the DOM class.
+        bare = cls.split(':')[-1].split('/')[0]
+        if bare == 'bg-white':
             bg.append(("var(--bg-card)", selector(cls, 'bg')))
             continue
-        m = re.match(
-            r'^(?:hover:|focus:|active:|group-hover:|sm:|md:|lg:|xl:)?'
-            r'(bg|text|border|from|to|via)-([a-z]+)-(\d{2,3})$', cls
-        )
+        m = re.match(r'^(?:bg|text|border|from|to|via|divide|ring)-([a-z]+)-(\d{2,3})$', bare)
         if not m:
             continue
-        prop, fam, shade = m.groups()
+        fam, shade = m.groups()
         if fam not in FAMILIES:
             continue
         if prop == 'bg' and shade in LIGHT_BG:
             bg.append((f"rgba(255,255,255,{LIGHT_BG[shade]})", selector(cls, 'bg')))
         elif prop == 'border' and shade in LIGHT_BORDER:
             bd.append(("var(--border-color)", selector(cls, 'border')))
+        elif prop == 'divide' and shade in LIGHT_BORDER:
+            dv.append(("var(--border-color)", selector(cls, 'divide')))
+        elif prop == 'ring' and shade in LIGHT_BORDER:
+            rv.append((f"var(--border-color)", selector(cls, 'ring')))
         elif prop == 'text' and shade in TEXT_MAP:
             tx.append((f"var(--text-{TEXT_MAP[shade]})", selector(cls, 'text')))
         elif prop in ('from', 'to', 'via') and shade in {'50', '100'}:
@@ -140,6 +172,12 @@ def main():
     parts.append(emit(tx, lambda v: f"color: {v} !important;"))
     parts.append("\n/* -- Borders -- */")
     parts.append(emit(bd, lambda v: f"border-color: {v} !important;"))
+    if dv:
+        parts.append("\n/* -- Dividers (divide-* paints borders on children) -- */")
+        parts.append(emit(dv, lambda v: f"border-color: {v} !important;"))
+    if rv:
+        parts.append("\n/* -- Rings (Tailwind 3 stores ring colour in --tw-ring-color) -- */")
+        parts.append(emit(rv, lambda v: f"--tw-ring-color: {v} !important;"))
     if gf or gv or gt:
         parts.append("\n/* -- Gradient stops -- */")
     if gf:
@@ -151,7 +189,7 @@ def main():
 
     parts.append(TMPL)
     OUT.write_text("\n".join(parts))
-    total = len(set(s for _, s in bg + tx + bd))
+    total = len(set(s for _, s in bg + tx + bd + dv + rv))
     print(f"wrote {OUT} - {total} selectors")
 
 
