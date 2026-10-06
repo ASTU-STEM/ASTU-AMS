@@ -85,89 +85,117 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
         </div>
       )}
 
-      <ResponsiveContainer width="100%" height={height}>
-        {type === 'area' ? (
-          <AreaChart data={data}>
-            <defs>
+      <div style={{ width: '100%', height, minHeight: height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          {type === 'area' ? (
+            <AreaChart data={data}>
+              <defs>
+                {series.map((s, i) => (
+                  <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={resolveColor(s, i)} stopOpacity={0.35} />
+                    <stop offset="95%" stopColor={resolveColor(s, i)} stopOpacity={0} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey={xKey} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Tooltip {...CustomTooltipStyle} />
+              {series.length > 1 && (
+                <Legend
+                  wrapperStyle={{ fontSize: 11 }}
+                  formatter={(value) => <span className={darkMode ? 'text-slate-200' : 'text-slate-700'}>{value}</span>}
+                />
+              )}
               {series.map((s, i) => (
-                <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={resolveColor(s, i)} stopOpacity={0.35} />
-                  <stop offset="95%" stopColor={resolveColor(s, i)} stopOpacity={0} />
-                </linearGradient>
+                <Area
+                  key={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.label}
+                  stroke={resolveColor(s, i)}
+                  fill={`url(#grad-${s.key})`}
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 5 }}
+                />
               ))}
-            </defs>
-            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey={xKey} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip {...CustomTooltipStyle} />
-            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
-            {series.map((s, i) => (
-              <Area
-                key={s.key}
-                type="monotone"
-                dataKey={s.key}
-                name={s.label}
-                stroke={resolveColor(s, i)}
-                fill={`url(#grad-${s.key})`}
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ r: 5 }}
-              />
-            ))}
-          </AreaChart>
-        ) : type === 'bar' ? (
-          <BarChart data={data} barSize={20}>
-            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey={xKey} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip {...CustomTooltipStyle} />
-            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
-            {series.map((s, i) => (
-              <Bar key={s.key} dataKey={s.key} name={s.label} fill={resolveColor(s, i)} radius={[6, 6, 0, 0]} />
-            ))}
-          </BarChart>
-        ) : type === 'line' ? (
-          <LineChart data={data}>
-            <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey={xKey} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-            <Tooltip {...CustomTooltipStyle} />
-            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
-            {series.map((s, i) => (
-              <Line
-                key={s.key}
-                type="monotone"
-                dataKey={s.key}
-                name={s.label}
-                stroke={resolveColor(s, i)}
-                strokeWidth={2.5}
-                dot={{ r: 3.5, fill: resolveColor(s, i) }}
-                activeDot={{ r: 6 }}
-              />
-            ))}
-          </LineChart>
-        ) : (
-          // PIE
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={height * 0.22}
-              outerRadius={height * 0.36}
-              paddingAngle={3}
-              dataKey={series[0]?.key ?? 'value'}
-              nameKey={xKey}
-            >
-              {data.map((_, i) => (
-                <Cell key={`cell-${i}`} fill={seriesColors[i % seriesColors.length]} />
+            </AreaChart>
+          ) : type === 'bar' ? (
+            <BarChart data={data} barSize={20}>
+              <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey={xKey} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Tooltip {...CustomTooltipStyle} />
+              {series.length > 1 && (
+                <Legend
+                  wrapperStyle={{ fontSize: 11 }}
+                  formatter={(value) => <span className={darkMode ? 'text-slate-200' : 'text-slate-700'}>{value}</span>}
+                />
+              )}
+              {series.map((s, i) => (
+                <Bar key={s.key} dataKey={s.key} name={s.label} fill={resolveColor(s, i)} radius={[6, 6, 0, 0]} />
               ))}
-            </Pie>
-            <Tooltip {...CustomTooltipStyle} />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-          </PieChart>
-        )}
-      </ResponsiveContainer>
+            </BarChart>
+          ) : type === 'line' ? (
+            <LineChart data={data}>
+              <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey={xKey} tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} domain={[0, 100]} />
+              <Tooltip {...CustomTooltipStyle} />
+              {series.length > 1 && (
+                <Legend
+                  wrapperStyle={{ fontSize: 11 }}
+                  formatter={(value) => <span className={darkMode ? 'text-slate-200' : 'text-slate-700'}>{value}</span>}
+                />
+              )}
+              {series.map((s, i) => (
+                <Line
+                  key={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.label}
+                  stroke={resolveColor(s, i)}
+                  strokeWidth={2.5}
+                  dot={{ r: 4, fill: resolveColor(s, i) }}
+                  activeDot={{ r: 6 }}
+                  isAnimationActive={false}
+                />
+              ))}
+            </LineChart>
+          ) : (
+            // PIE
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="45%"
+                innerRadius={Math.round(height * 0.18)}
+                outerRadius={Math.round(height * 0.32)}
+                paddingAngle={4}
+                dataKey={series[0]?.key ?? 'count'}
+                nameKey={xKey}
+                isAnimationActive={false}
+              >
+                {data.map((_, i) => (
+                  <Cell key={`cell-${i}`} fill={seriesColors[i % seriesColors.length]} stroke={darkMode ? '#0F172A' : '#FFFFFF'} strokeWidth={2} />
+                ))}
+              </Pie>
+              <Tooltip {...CustomTooltipStyle} />
+              <Legend
+                verticalAlign="bottom"
+                align="center"
+                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                formatter={(value) => (
+                  <span className={`text-xs font-semibold ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                    {value}
+                  </span>
+                )}
+              />
+            </PieChart>
+          )}
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

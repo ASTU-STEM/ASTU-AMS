@@ -42,6 +42,7 @@ export interface EmploymentOutcomeData {
   count: number;
   percentage: number;
   color: string;
+  trend?: number;
 }
 
 export interface CareerAlignmentData {

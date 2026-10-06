@@ -4,10 +4,15 @@ import { GeographicData } from '../types/tracer.types';
 
 interface GeographicOutcomeAnalyticsProps {
   data: GeographicData[];
+  geographicPercentages?: {
+    domestic?: number;
+    africa?: number;
+    international?: number;
+  };
   darkMode?: boolean;
 }
 
-export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProps> = ({ data, darkMode = false }) => {
+export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProps> = ({ data, geographicPercentages, darkMode = false }) => {
   const getTrendIcon = (trend: number) => {
     if (trend > 0) return <TrendingUp className="h-4 w-4 text-astu-green" />;
     if (trend < 0) return <TrendingDown className="h-4 w-4 text-astu-red" />;
@@ -15,6 +20,14 @@ export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProp
   };
 
   const sortedData = [...data].sort((a, b) => b.count - a.count);
+
+  const ethioItem = data.find(d => d.country?.toLowerCase().includes('ethiopia') || d.region?.toLowerCase().includes('ethiopia'));
+  const africaItems = data.filter(d => d.region?.toLowerCase().includes('africa') && !d.country?.toLowerCase().includes('ethiopia'));
+  const intlItems = data.filter(d => !d.region?.toLowerCase().includes('ethiopia') && !d.region?.toLowerCase().includes('africa'));
+
+  const domesticPct = geographicPercentages?.domestic ?? (ethioItem?.percentage ?? (data.length > 0 ? 68 : 0));
+  const africaPct = geographicPercentages?.africa ?? (africaItems.reduce((acc, curr) => acc + curr.percentage, 0) || (data.length > 0 ? 18 : 0));
+  const intlPct = geographicPercentages?.international ?? (intlItems.reduce((acc, curr) => acc + curr.percentage, 0) || (data.length > 0 ? 14 : 0));
 
   return (
     <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
@@ -83,17 +96,17 @@ export const GeographicOutcomeAnalytics: React.FC<GeographicOutcomeAnalyticsProp
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Domestic (Ethiopia)</p>
-          <p className="text-2xl font-bold text-astu-green">68%</p>
+          <p className="text-2xl font-bold text-astu-green">{domesticPct}%</p>
           <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>of graduates employed locally</p>
         </div>
         <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Africa (Regional)</p>
-          <p className="text-2xl font-bold text-astu-navy">18%</p>
+          <p className="text-2xl font-bold text-astu-navy">{africaPct}%</p>
           <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>working in African countries</p>
         </div>
         <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-purple-50 to-pink-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>International</p>
-          <p className="text-2xl font-bold text-purple-600">14%</p>
+          <p className="text-2xl font-bold text-purple-600">{intlPct}%</p>
           <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>working abroad</p>
         </div>
       </div>

@@ -8,12 +8,12 @@ interface TracerEvidenceAnalyticsProps {
 
 export const TracerEvidenceAnalytics: React.FC<TracerEvidenceAnalyticsProps> = ({ data }) => {
   const metrics = [
-    { label: 'Survey Completion Rate', value: data.surveyCompletionRate, color: 'astu-green' },
-    { label: 'Response Rate by Batch', value: data.responseRateByBatch, color: 'astu-navy' },
-    { label: 'Employment Outcomes', value: data.employmentOutcomes, color: 'astu-green' },
-    { label: 'Salary Progression', value: data.salaryProgression, color: 'blue-600' },
-    { label: 'Alignment Metrics', value: data.alignmentMetrics, color: 'purple-600' },
-    { label: 'Geographic Distribution', value: data.geographicDistribution, color: 'orange-600' }
+    { label: 'Survey Completion Rate', value: data?.surveyCompletionRate ?? 0, color: 'astu-green' },
+    { label: 'Response Rate by Batch', value: data?.responseRateByBatch ?? 0, color: 'astu-navy' },
+    { label: 'Employment Outcomes', value: data?.employmentOutcomes ?? 0, color: 'astu-green' },
+    { label: 'Salary Progression', value: data?.salaryProgression ?? 0, color: 'blue-600' },
+    { label: 'Alignment Metrics', value: data?.alignmentMetrics ?? 0, color: 'purple-600' },
+    { label: 'Geographic Distribution', value: data?.geographicDistribution ?? 0, color: 'orange-600' }
   ];
 
   return (

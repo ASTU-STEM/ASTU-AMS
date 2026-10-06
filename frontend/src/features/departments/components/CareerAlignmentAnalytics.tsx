@@ -4,15 +4,26 @@ import { CareerAlignmentData } from '../types/tracer.types';
 
 interface CareerAlignmentAnalyticsProps {
   data: CareerAlignmentData[];
+  benchmarks?: {
+    industryBenchmark?: number;
+    departmentAverage?: number;
+    topPerformerScore?: number;
+    topPerformerDept?: string;
+  };
   darkMode?: boolean;
 }
 
-export const CareerAlignmentAnalytics: React.FC<CareerAlignmentAnalyticsProps> = ({ data, darkMode = false }) => {
+export const CareerAlignmentAnalytics: React.FC<CareerAlignmentAnalyticsProps> = ({ data, benchmarks, darkMode = false }) => {
   const getTrendIcon = (trend: number) => {
     if (trend > 0) return <TrendingUp className="h-4 w-4 text-astu-green" />;
     if (trend < 0) return <TrendingDown className="h-4 w-4 text-astu-red" />;
     return <Target className="h-4 w-4 text-gray-400" />;
   };
+
+  const indBench = benchmarks?.industryBenchmark ?? 78;
+  const deptAvg = benchmarks?.departmentAverage ?? (data.length > 0 ? Math.round(data.reduce((acc, curr) => acc + curr.score, 0) / data.length) : 0);
+  const topScore = benchmarks?.topPerformerScore ?? 92;
+  const topDept = benchmarks?.topPerformerDept || 'Software Engineering';
 
   return (
     <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
@@ -63,18 +74,18 @@ export const CareerAlignmentAnalytics: React.FC<CareerAlignmentAnalyticsProps> =
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-emerald-50 to-green-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Industry Benchmark</p>
-          <p className="text-2xl font-bold text-astu-green">78%</p>
+          <p className="text-2xl font-bold text-astu-green">{indBench}%</p>
           <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Average alignment score</p>
         </div>
         <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Department Average</p>
-          <p className="text-2xl font-bold text-astu-navy">82%</p>
-          <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Above industry benchmark</p>
+          <p className="text-2xl font-bold text-astu-navy">{deptAvg}%</p>
+          <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{deptAvg >= indBench ? 'Above industry benchmark' : 'Below industry benchmark'}</p>
         </div>
         <div className={`p-4 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-purple-50 to-pink-50 border-gray-200/60'}`}>
           <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Top Performer</p>
-          <p className="text-2xl font-bold text-purple-600">92%</p>
-          <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Software Engineering</p>
+          <p className="text-2xl font-bold text-purple-600">{topScore}%</p>
+          <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{topDept}</p>
         </div>
       </div>
     </div>

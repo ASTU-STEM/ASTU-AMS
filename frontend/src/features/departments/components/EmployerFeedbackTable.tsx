@@ -4,19 +4,30 @@ import { EmployerFeedbackRecord } from '../types/employerFeedback.types';
 
 interface EmployerFeedbackTableProps {
   records: EmployerFeedbackRecord[];
+  lockedDepartment?: string;
+  onOpenExport?: () => void;
+  darkMode?: boolean;
 }
 
-export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({ records }) => {
+export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({
+  records,
+  lockedDepartment = 'Software Engineering',
+  onOpenExport,
+  darkMode = false
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState<keyof EmployerFeedbackRecord>('employer');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
-    department: '',
+    department: lockedDepartment,
     industry: '',
   });
 
   const itemsPerPage = 10;
+
+  // Extract unique industries dynamically from records
+  const uniqueIndustries = Array.from(new Set(records.map(r => r.industry).filter(Boolean)));
 
   // Filter and search
   const filteredRecords = records.filter(record => {
@@ -25,7 +36,7 @@ export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({ re
       record.industry.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.department.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesDepartment = !filters.department || record.department === filters.department;
+    const matchesDepartment = !filters.department || record.department.toLowerCase() === filters.department.toLowerCase();
     const matchesIndustry = !filters.industry || record.industry === filters.industry;
 
     return matchesSearch && matchesDepartment && matchesIndustry;
@@ -90,13 +101,11 @@ export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({ re
             
             <select
               value={filters.department}
-              onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 focus:bg-white transition-all"
+              disabled={true}
+              title={`Locked to target department: ${lockedDepartment}`}
+              className="px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-sm font-semibold text-astu-navy cursor-not-allowed"
             >
-              <option value="">All Departments</option>
-              <option value="Software Engineering">Software Engineering</option>
-              <option value="Mechanical Engineering">Mechanical Engineering</option>
-              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value={lockedDepartment}>{lockedDepartment}</option>
             </select>
             
             <select
@@ -105,19 +114,20 @@ export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({ re
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-astu-navy/50 focus:bg-white transition-all"
             >
               <option value="">All Industries</option>
-              <option value="Technology">Technology</option>
-              <option value="Telecommunications">Telecommunications</option>
-              <option value="Aviation">Aviation</option>
-              <option value="Finance">Finance</option>
+              {uniqueIndustries.map(ind => (
+                <option key={ind} value={ind}>{ind}</option>
+              ))}
             </select>
             
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-astu-navy hover:bg-blue-900 text-white rounded-xl transition-all duration-300 font-medium text-sm"
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </button>
+            {onOpenExport && (
+              <button
+                onClick={onOpenExport}
+                className="flex items-center gap-2 px-4 py-2 bg-astu-navy hover:bg-blue-900 text-white rounded-xl transition-all duration-300 font-medium text-sm"
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -152,36 +162,44 @@ export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({ re
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {paginatedRecords.map((record) => (
-              <tr key={record.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{record.employer}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{record.industry}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{record.department}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-medium text-gray-900">{record.rating}</span>
-                  </div>
+            {paginatedRecords.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-6 py-12 text-center text-gray-500 font-medium bg-gray-50/50">
+                  No employer feedback records found in the database for this department.
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{record.graduatesHired}</td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full ${
-                          record.satisfaction >= 8 ? 'bg-astu-green' :
-                          record.satisfaction >= 6 ? 'bg-yellow-500' :
-                          'bg-astu-red'
-                        }`}
-                        style={{ width: `${record.satisfaction * 10}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">{record.satisfaction}/10</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{record.lastActivity}</td>
               </tr>
-            ))}
+            ) : (
+              paginatedRecords.map((record) => (
+                <tr key={record.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{record.employer}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{record.industry}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{record.department}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      <span className="text-sm font-medium text-gray-900">{record.rating}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{record.graduatesHired}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 bg-gray-200 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full ${
+                            record.satisfaction >= 8 ? 'bg-astu-green' :
+                            record.satisfaction >= 6 ? 'bg-yellow-500' :
+                            'bg-astu-red'
+                          }`}
+                          style={{ width: `${record.satisfaction * 10}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">{record.satisfaction}/10</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{record.lastActivity}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -189,7 +207,7 @@ export const EmployerFeedbackTable: React.FC<EmployerFeedbackTableProps> = ({ re
       {/* Pagination */}
       <div className="px-6 py-4 border-t border-gray-200/60 flex items-center justify-between">
         <div className="text-sm text-gray-600">
-          Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedRecords.length)} of {sortedRecords.length} records
+          Showing {sortedRecords.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, sortedRecords.length)} of {sortedRecords.length} records
         </div>
         <div className="flex items-center gap-2">
           <button

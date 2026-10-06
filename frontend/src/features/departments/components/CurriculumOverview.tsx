@@ -8,9 +8,15 @@ interface CurriculumOverviewProps {
 }
 
 export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, darkMode = false }) => {
-  const alignedPercentage = ((data.alignedCourses / data.totalCourses) * 100).toFixed(0);
-  const partiallyAlignedPercentage = ((data.partiallyAlignedCourses / data.totalCourses) * 100).toFixed(0);
-  const misalignedPercentage = ((data.misalignedCourses / data.totalCourses) * 100).toFixed(0);
+  const totalCourses = data?.totalCourses || 0;
+  const alignedCourses = data?.alignedCourses || 0;
+  const partiallyAlignedCourses = data?.partiallyAlignedCourses || 0;
+  const misalignedCourses = data?.misalignedCourses || 0;
+  const coursesRequiringUpdate = data?.coursesRequiringUpdate || 0;
+
+  const alignedPercentage = totalCourses > 0 ? ((alignedCourses / totalCourses) * 100).toFixed(0) : '0';
+  const partiallyAlignedPercentage = totalCourses > 0 ? ((partiallyAlignedCourses / totalCourses) * 100).toFixed(0) : '0';
+  const misalignedPercentage = totalCourses > 0 ? ((misalignedCourses / totalCourses) * 100).toFixed(0) : '0';
 
   return (
     <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
@@ -27,7 +33,7 @@ export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, da
             </div>
             <p className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Aligned Courses</p>
           </div>
-          <p className="text-3xl font-bold text-astu-green mb-1">{data.alignedCourses}</p>
+          <p className="text-3xl font-bold text-astu-green mb-1">{alignedCourses}</p>
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{alignedPercentage}% of total</p>
         </div>
 
@@ -38,7 +44,7 @@ export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, da
             </div>
             <p className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Partially Aligned</p>
           </div>
-          <p className="text-3xl font-bold text-yellow-600 mb-1">{data.partiallyAlignedCourses}</p>
+          <p className="text-3xl font-bold text-yellow-600 mb-1">{partiallyAlignedCourses}</p>
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{partiallyAlignedPercentage}% of total</p>
         </div>
 
@@ -49,7 +55,7 @@ export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, da
             </div>
             <p className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Misaligned</p>
           </div>
-          <p className="text-3xl font-bold text-astu-red mb-1">{data.misalignedCourses}</p>
+          <p className="text-3xl font-bold text-astu-red mb-1">{misalignedCourses}</p>
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{misalignedPercentage}% of total</p>
         </div>
 
@@ -60,7 +66,7 @@ export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, da
             </div>
             <p className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Require Update</p>
           </div>
-          <p className="text-3xl font-bold text-purple-600 mb-1">{data.coursesRequiringUpdate}</p>
+          <p className="text-3xl font-bold text-purple-600 mb-1">{coursesRequiringUpdate}</p>
           <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Priority courses</p>
         </div>
       </div>
@@ -69,7 +75,7 @@ export const CurriculumOverview: React.FC<CurriculumOverviewProps> = ({ data, da
       <div className={`p-5 border rounded-xl ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200/60'}`}>
         <div className="flex justify-between items-center mb-3">
           <p className={`text-sm font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Courses Analyzed</p>
-          <p className="text-2xl font-bold text-astu-navy">{data.totalCourses}</p>
+          <p className="text-2xl font-bold text-astu-navy">{totalCourses}</p>
         </div>
         <div className={`w-full h-3 rounded-full overflow-hidden flex ${darkMode ? 'bg-slate-600' : 'bg-gray-200'}`}>
           <div className="bg-astu-green h-full" style={{ width: `${alignedPercentage}%` }}></div>

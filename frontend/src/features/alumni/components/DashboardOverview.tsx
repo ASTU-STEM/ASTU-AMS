@@ -44,6 +44,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [tempRole, setTempRole] = useState(profile.currentRole);
   const [tempCompany, setTempCompany] = useState(profile.company);
   const [tempSalary, setTempSalary] = useState(profile.salaryRange || '30,001 - 60,000 ETB');
+  const [timelineFilter, setTimelineFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED'>('ALL');
 
   const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
   const [donationCampaigns, setDonationCampaigns] = useState<DonationCampaign[]>([]);
@@ -324,43 +325,110 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
 
         {/* Right: Active Tracer Survey Status Indicators (6, 12, 24 Months) */}
-        <div className="lg:col-span-2 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-4">
-          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <span className="material-symbols-outlined text-astu-red font-bold">assignment_turned_in</span>
-            Tracer Survey Timelines (6, 12, 24 Months)
-          </h3>
-          
-          <div className="grid grid-cols-1 gap-4 pt-2 md:grid-cols-3">
-            {surveys.map((survey) => (
-              <div 
-                key={survey.id}
-                onClick={() => onTabChange('surveys')}
-                className={`cursor-pointer rounded-[10px] border p-4 transition-all hover:shadow-sm ${
-                  survey.status === 'COMPLETED' 
-                    ? 'bg-green-50/30 border-green-150' 
-                    : 'bg-red-50/30 border-red-150 hover:border-red-300'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400">
-                    {survey.type}
-                  </span>
-                  <span className={`w-2 h-2 rounded-full ${
-                    survey.status === 'COMPLETED' ? 'bg-astu-green' : 'bg-astu-red animate-pulse'
-                  }`}></span>
-                </div>
-                <h4 className="text-xs font-bold text-gray-900 line-clamp-1">{survey.title.split(' ')[1] || 'Tracer study'}</h4>
-                <p className="text-[10px] text-gray-600 mt-1">
-                  Status: <span className={`font-bold ${survey.status === 'COMPLETED' ? 'text-astu-green' : 'text-astu-red'}`}>
-                    {survey.status === 'COMPLETED' ? 'Submitted' : 'Pending Action'}
-                  </span>
-                </p>
-                {survey.status === 'PENDING' && (
-                  <span className="text-[9px] text-astu-red font-bold hover:underline block mt-2">Start survey now &rarr;</span>
-                )}
+        <div className="lg:col-span-2 rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col justify-between space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-astu-red font-bold">assignment_turned_in</span>
+                Tracer Survey Timelines (6, 12, 24 Months)
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">Quick status overview of tracer studies assigned to your account.</p>
+            </div>
+
+            {/* Filter Pills & View All */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200 text-[11px] font-bold">
+                <button
+                  onClick={() => setTimelineFilter('ALL')}
+                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'ALL' ? 'bg-white text-astu-navy shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                >
+                  All ({surveys.length})
+                </button>
+                <button
+                  onClick={() => setTimelineFilter('PENDING')}
+                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'PENDING' ? 'bg-white text-astu-red shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                >
+                  Pending ({surveys.filter(s => s.status !== 'COMPLETED').length})
+                </button>
+                <button
+                  onClick={() => setTimelineFilter('COMPLETED')}
+                  className={`px-2.5 py-0.5 rounded-md transition-all cursor-pointer ${timelineFilter === 'COMPLETED' ? 'bg-white text-astu-green shadow-xs' : 'text-gray-500 hover:text-gray-900'}`}
+                >
+                  Done ({surveys.filter(s => s.status === 'COMPLETED').length})
+                </button>
               </div>
-            ))}
+
+              <button
+                onClick={() => onTabChange('surveys')}
+                className="text-xs font-bold text-astu-navy hover:underline flex items-center gap-0.5 cursor-pointer shrink-0"
+              >
+                View All &rarr;
+              </button>
+            </div>
           </div>
+
+          {/* Scrollable Grid Container for Many Surveys */}
+          {(() => {
+            const filteredTimelineSurveys = surveys.filter((s) => {
+              if (timelineFilter === 'PENDING') return s.status !== 'COMPLETED';
+              if (timelineFilter === 'COMPLETED') return s.status === 'COMPLETED';
+              return true;
+            });
+
+            if (filteredTimelineSurveys.length === 0) {
+              return (
+                <div className="p-8 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed">
+                  No matching tracer survey timelines found.
+                </div>
+              );
+            }
+
+            return (
+              <div className="max-h-[290px] overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {filteredTimelineSurveys.map((survey) => {
+                    const isCompleted = survey.status === 'COMPLETED';
+                    return (
+                      <div
+                        key={survey.id}
+                        onClick={() => onTabChange('surveys')}
+                        className={`cursor-pointer rounded-[10px] border p-3.5 transition-all hover:shadow-sm flex flex-col justify-between ${
+                          isCompleted
+                            ? 'bg-green-50/30 border-green-150'
+                            : 'bg-red-50/30 border-red-150 hover:border-red-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-gray-400">
+                              {survey.type || 'CUSTOM'}
+                            </span>
+                            <span className={`w-2 h-2 rounded-full ${
+                              isCompleted ? 'bg-astu-green' : 'bg-astu-red animate-pulse'
+                            }`}></span>
+                          </div>
+                          <h4 className="text-xs font-bold text-gray-900 line-clamp-1" title={survey.title}>
+                            {survey.title}
+                          </h4>
+                        </div>
+
+                        <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
+                          <p className="text-[10px] text-gray-600">
+                            Status: <span className={`font-bold ${isCompleted ? 'text-astu-green' : 'text-astu-red'}`}>
+                              {isCompleted ? 'Submitted' : 'Pending Action'}
+                            </span>
+                          </p>
+                          {!isCompleted && (
+                            <span className="text-[9px] text-astu-red font-bold hover:underline">Start &rarr;</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
       </div>

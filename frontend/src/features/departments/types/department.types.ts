@@ -127,4 +127,5 @@ export interface ExportReport {
   format: string;
   icon: string;
   color: string;
+  reportType?: string;
 }
