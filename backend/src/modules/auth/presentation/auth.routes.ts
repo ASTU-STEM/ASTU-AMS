@@ -26,10 +26,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+import { authRateLimiter, passwordResetRateLimiter } from '../../../core/middleware/rateLimiter.middleware';
+
 // Public Routes
-router.post('/login', asyncHandler(AuthController.login));
-router.post('/send-2fa-otp', asyncHandler(AuthController.send2FAOTP));
-router.post('/verify-2fa-code', asyncHandler(AuthController.verify2FACode));
+router.post('/login', authRateLimiter, asyncHandler(AuthController.login));
+router.post('/send-2fa-otp', authRateLimiter, asyncHandler(AuthController.send2FAOTP));
+router.post('/verify-2fa-code', authRateLimiter, asyncHandler(AuthController.verify2FACode));
 router.post('/activate-alumni', asyncHandler(AuthController.activateAlumni));
 router.post('/refresh', asyncHandler(AuthController.refresh));
 
@@ -57,12 +59,12 @@ router.get('/didit-status/:sessionId', asyncHandler(AuthController.getDiditStatu
 router.post('/didit-verify', asyncHandler(AuthController.verifyDiditSession));
 
 // Employer Specific Flows
-router.post('/employer/login', asyncHandler(AuthController.employerLogin));
+router.post('/employer/login', authRateLimiter, asyncHandler(AuthController.employerLogin));
 router.post('/employer/register', asyncHandler(AuthController.registerEmployer));
 
 // Forgot / Reset Password
-router.post('/forgot-password', asyncHandler(AuthController.forgotPassword));
-router.post('/reset-password', asyncHandler(AuthController.resetPassword));
+router.post('/forgot-password', passwordResetRateLimiter, asyncHandler(AuthController.forgotPassword));
+router.post('/reset-password', passwordResetRateLimiter, asyncHandler(AuthController.resetPassword));
 
 // Protected Routes
 router.post('/logout', authenticateJWT, asyncHandler(AuthController.logout));

@@ -1,6 +1,6 @@
 import { IUserRepository } from '../ports/IUserRepository';
 import { IAuditLogRepository } from '../ports/IAuditLogRepository';
-import { InvalidCredentialsError, AccountPendingApprovalError } from '../../domain/errors/AuthErrors';
+import { InvalidCredentialsError, AccountPendingApprovalError, AccountSuspendedError } from '../../domain/errors/AuthErrors';
 import bcrypt from 'bcryptjs';
 import { generateAccessToken, generateRefreshToken } from '../../../../core/utils/jwt.utils';
 import { verifyTOTP, verifyEmail2FAOTP, storeEmail2FAOTP } from '../../../../core/utils/totp.utils';
@@ -41,10 +41,13 @@ export class LoginUser {
     }
 
     if (!user.isActive) {
-      if (user.role === Role.ALUMNI || user.role === Role.EMPLOYER) {
-        throw new AccountPendingApprovalError();
+      const alumniProf = await prisma.alumniProfile.findUnique({ where: { userId: user.id } }).catch(() => null);
+      const isExplicitlySuspended = alumniProf?.status === 'SUSPENDED' || (user.adminNotes && (user.adminNotes.includes('SUSPENDED') || user.adminNotes.includes('BANNED')));
+
+      if (isExplicitlySuspended) {
+        throw new AccountSuspendedError('Your ASTU account has been suspended by an administrator. Access is restricted.');
       }
-      throw new AccountPendingApprovalError();
+      throw new AccountPendingApprovalError('Your account is pending verification or admin approval.');
     }
 
     // Password verification

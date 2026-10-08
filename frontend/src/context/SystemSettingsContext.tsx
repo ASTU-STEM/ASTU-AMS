@@ -38,6 +38,15 @@ export interface SystemSettingsState {
     accentColor: string;
     logoUrl: string;
   };
+  emergencyBroadcast?: {
+    message: string;
+    active: boolean;
+    publishedAt?: string;
+  } | null;
+  maintenanceMode?: {
+    enabled: boolean;
+    enabledAt?: string;
+  } | null;
 }
 
 export const DEFAULT_FRONTEND_SETTINGS: SystemSettingsState = {
@@ -78,11 +87,15 @@ export const DEFAULT_FRONTEND_SETTINGS: SystemSettingsState = {
     accentColor: '#E8A020',
     logoUrl: '/images/astu-seal-logo.png',
   },
+  emergencyBroadcast: null,
+  maintenanceMode: null,
 };
 
 interface SystemSettingsContextType {
   settings: SystemSettingsState;
   loading: boolean;
+  emergencyBroadcast: { message: string; active: boolean; publishedAt?: string } | null;
+  maintenanceMode: { enabled: boolean; enabledAt?: string } | null;
   refreshSettings: () => Promise<void>;
   updateSettingsState: (newSettings: Partial<SystemSettingsState>) => void;
 }
@@ -90,6 +103,8 @@ interface SystemSettingsContextType {
 const SystemSettingsContext = createContext<SystemSettingsContextType>({
   settings: DEFAULT_FRONTEND_SETTINGS,
   loading: false,
+  emergencyBroadcast: null,
+  maintenanceMode: null,
   refreshSettings: async () => {},
   updateSettingsState: () => {},
 });
@@ -97,6 +112,8 @@ const SystemSettingsContext = createContext<SystemSettingsContextType>({
 export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<SystemSettingsState>(DEFAULT_FRONTEND_SETTINGS);
   const [loading, setLoading] = useState(true);
+  const [emergencyBroadcast, setEmergencyBroadcast] = useState<{ message: string; active: boolean; publishedAt?: string } | null>(null);
+  const [maintenanceMode, setMaintenanceMode] = useState<{ enabled: boolean; enabledAt?: string } | null>(null);
 
   const fetchSettings = async () => {
     try {
@@ -114,7 +131,21 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
               ...prev.appearance,
               ...(result.data.appearance || {}),
             },
+            emergencyBroadcast: result.data.emergencyBroadcast || null,
+            maintenanceMode: result.data.maintenanceMode || null,
           }));
+
+          if (result.data.emergencyBroadcast) {
+            setEmergencyBroadcast(result.data.emergencyBroadcast);
+          } else {
+            setEmergencyBroadcast(null);
+          }
+
+          if (result.data.maintenanceMode) {
+            setMaintenanceMode(result.data.maintenanceMode);
+          } else {
+            setMaintenanceMode(null);
+          }
         }
       }
     } catch (err) {
@@ -126,6 +157,8 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
 
   useEffect(() => {
     fetchSettings();
+    const interval = setInterval(fetchSettings, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -154,6 +187,8 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
       if (newSettings.email) merged.email = { ...prev.email, ...newSettings.email };
       if (newSettings.integrations) merged.integrations = { ...prev.integrations, ...newSettings.integrations };
       if (newSettings.appearance) merged.appearance = { ...prev.appearance, ...newSettings.appearance };
+      if (newSettings.emergencyBroadcast !== undefined) merged.emergencyBroadcast = newSettings.emergencyBroadcast;
+      if (newSettings.maintenanceMode !== undefined) merged.maintenanceMode = newSettings.maintenanceMode;
       return merged;
     });
   };
@@ -163,6 +198,8 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
       value={{
         settings,
         loading,
+        emergencyBroadcast,
+        maintenanceMode,
         refreshSettings: fetchSettings,
         updateSettingsState,
       }}

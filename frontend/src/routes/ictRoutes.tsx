@@ -13,6 +13,7 @@ import IctFeatureFlagsPage from '../features/ict/pages/IctFeatureFlagsPage';
 import IctPoliciesSessionsPage from '../features/ict/pages/IctPoliciesSessionsPage';
 import IctArchitecturePage from '../features/ict/pages/IctArchitecturePage';
 import IctSupportTicketsPage from '../features/ict/pages/IctSupportTicketsPage';
+import UserManagement from '../features/admin/pages/UserManagement';
 
 export default function IctRoutes() {
   return (
@@ -21,6 +22,7 @@ export default function IctRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<IctCommandCenterPage />} />
         <Route path="support-tickets" element={<IctSupportTicketsPage />} />
+        <Route path="users" element={<UserManagement />} />
         <Route path="logs" element={<IctUniversalLogsPage />} />
         <Route path="api-gateway" element={<IctApiGatewayPage />} />
         <Route path="observability" element={<IctObservabilityPage />} />

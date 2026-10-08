@@ -5,6 +5,8 @@ import prisma, { initPrisma } from '../../src/core/config/db';
 import { Role } from '@prisma/client';
 import { OpenRouterService } from '../../src/modules/ai/infrastructure/services/OpenRouterService';
 
+import { invalidateUserBanCache } from '../../src/core/middleware/auth.middleware';
+
 jest.mock('../../src/modules/ai/infrastructure/services/OpenRouterService');
 jest.setTimeout(60000);
 
@@ -14,6 +16,19 @@ describe('Admin Chatbot E2E Workflows', () => {
   beforeAll(async () => {
     await initPrisma();
     
+    await prisma.user.upsert({
+      where: { id: 'admin-uuid' },
+      update: {},
+      create: {
+        id: 'admin-uuid',
+        email: 'admin@astu.edu.et',
+        password: 'securePassword123',
+        role: Role.ADMIN,
+        isActive: true,
+      },
+    });
+    invalidateUserBanCache('admin-uuid');
+
     adminToken = generateAccessToken({
       userId: 'admin-uuid',
       email: 'admin@astu.edu.et',

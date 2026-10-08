@@ -288,6 +288,13 @@ export const registrarService = {
 
   async logExport(logData: { reportName: string; format: string; recordCount?: number; fileSize?: string }): Promise<any> {
     try {
+      post('/admin/audit-log', {
+        action: `EXPORT_${logData.format.toUpperCase()}_REPORT`,
+        details: `Registrar exported "${logData.reportName}" (${logData.recordCount || 0} records, ${logData.fileSize || '1.0 MB'}) in ${logData.format} format`,
+        userEmail: 'registrar@astust.edu.et',
+        userRole: 'REGISTRAR',
+        afterState: { reportName: logData.reportName, format: logData.format, recordCount: logData.recordCount, fileSize: logData.fileSize }
+      }).catch(() => {});
       const response = await post<{ data: any }>('/registrar/export-logs', logData);
       return response.data;
     } catch (error) {

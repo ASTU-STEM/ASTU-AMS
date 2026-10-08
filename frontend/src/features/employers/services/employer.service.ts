@@ -323,6 +323,13 @@ export const employerService = {
     };
     try {
       const response = await apiClient.post('/employer/jobs', payload);
+      apiClient.post('/admin/audit-log', {
+        action: 'CREATE_JOB_POSTING',
+        details: `Employer published job posting: "${job.title}" (${job.type}) in ${job.location}`,
+        userEmail: 'careers@ethiotelecom.et',
+        userRole: 'EMPLOYER',
+        afterState: { title: job.title, type: job.type, location: job.location }
+      }).catch(() => {});
       return mapBackendJobToFrontend(response.data.data);
     } catch (err: any) {
       console.error("createJob failed:", err.response?.data || err.message);
@@ -371,6 +378,13 @@ export const employerService = {
       await apiClient.patch(`/employer/applications/${applicationId}/status`, {
         status: mapFrontendStatusToBackend(status),
       });
+      apiClient.post('/admin/audit-log', {
+        action: 'UPDATE_CANDIDATE_APPLICATION_STATUS',
+        details: `Employer changed candidate application #${applicationId} status to ${status.toUpperCase()}`,
+        userEmail: 'careers@ethiotelecom.et',
+        userRole: 'EMPLOYER',
+        afterState: { applicationId, status }
+      }).catch(() => {});
     } catch (err: any) {
       console.error("updateApplicationStatus failed:", err.response?.data || err.message);
       throw err;
@@ -594,6 +608,13 @@ export const employerService = {
     comments: string;
   }): Promise<any> {
     const response = await apiClient.post('/employer/feedback/by-name', feedback);
+    apiClient.post('/admin/audit-log', {
+      action: 'SUBMIT_GRADUATE_EMPLOYER_FEEDBACK',
+      details: `Employer submitted academic performance audit feedback for ASTU graduate ${feedback.alumnusName} (${feedback.department})`,
+      userEmail: 'careers@ethiotelecom.et',
+      userRole: 'EMPLOYER',
+      afterState: feedback
+    }).catch(() => {});
     return response.data.data;
   },
 

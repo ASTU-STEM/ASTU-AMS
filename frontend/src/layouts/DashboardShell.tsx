@@ -3,6 +3,8 @@ import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Su
 import { AppSidebar, SidebarNavItem } from './AppSidebar';
 import HelpCenter from './HelpCenter';
 import toast from 'react-hot-toast';
+import { useSystemSettings } from '../context/SystemSettingsContext';
+import IctEmergencyBanner from '../components/IctEmergencyBanner';
 
 export interface DashboardShellProps {
   children: React.ReactNode;
@@ -46,7 +48,8 @@ export function DashboardShell({
    onSearch,
    headerChildren,
  }: DashboardShellProps) {
-   const [darkMode, setDarkMode] = useState(
+  const { emergencyBroadcast } = useSystemSettings();
+  const [darkMode, setDarkMode] = useState(
      () => localStorage.getItem('theme') === 'dark'
    );
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -131,6 +134,11 @@ export function DashboardShell({
 
       {/* Main Workspace */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Emergency Broadcast Banner */}
+        {emergencyBroadcast?.active && emergencyBroadcast?.message && (
+          <IctEmergencyBanner message={emergencyBroadcast.message} type="emergency" />
+        )}
+
         {/* Header */}
         <header
           className="flex h-16 flex-shrink-0 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"

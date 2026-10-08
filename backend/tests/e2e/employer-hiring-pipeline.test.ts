@@ -3,6 +3,7 @@ import app from '../../src/app';
 import { generateAccessToken } from '../../src/core/utils/jwt.utils';
 import prisma, { initPrisma } from '../../src/core/config/db';
 import { Role } from '@prisma/client';
+import { invalidateUserBanCache } from '../../src/core/middleware/auth.middleware';
 
 jest.setTimeout(60000);
 
@@ -61,6 +62,8 @@ describe('Employer Recruitment Pipeline E2E Workflows', () => {
         isActive: true,
       },
     });
+    invalidateUserBanCache('e2e-employer-user');
+    invalidateUserBanCache('e2e-alumni-user');
 
     const alumniProfile = await prisma.alumniProfile.upsert({
       where: { studentId: 'ASTU/MEG/999' },

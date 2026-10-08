@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, FileText, Search } from 'lucide-react';
 import type { AdminDataTableProps } from '../types/admin.types';
 
 function asComparable(value: unknown) {
@@ -139,6 +139,84 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
     URL.revokeObjectURL(url);
   };
 
+  const exportPdf = () => {
+    const headers = columns.map((c) => c.header);
+    const tableHeaderHtml = headers.map(h => `
+      <th style="padding: 8px 10px; font-size: 11px; font-weight: 800; color: #002866; background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left;">
+        ${h}
+      </th>
+    `).join('');
+
+    const tableBodyHtml = sorted.map((row, idx) => {
+      const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+      const cellHtml = columns.map(col => {
+        const accessor = col.accessor;
+        let val: unknown;
+        if (typeof accessor === 'function') {
+          val = accessor(row);
+        } else if (accessor) {
+          val = row[accessor];
+        } else {
+          val = row[col.key as keyof T];
+        }
+        return `
+          <td style="padding: 7px 10px; font-size: 11px; color: #334155; border-bottom: 1px solid #e2e8f0; vertical-align: middle;">
+            ${String(val ?? '')}
+          </td>
+        `;
+      }).join('');
+      return `<tr style="background-color: ${rowBg}; page-break-inside: avoid;">${cellHtml}</tr>`;
+    }).join('');
+
+    const printableHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>ASTU Data Export Report</title>
+        <style>
+          @page { size: A4 landscape; margin: 15mm; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; margin: 0; padding: 20px; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #002866; padding-bottom: 10px; margin-bottom: 15px; }
+          .title { font-size: 16px; font-weight: 800; color: #002866; }
+          .meta { font-size: 10px; color: #64748b; text-align: right; }
+          table { width: 100%; border-collapse: collapse; }
+          @media print { .no-print { display: none !important; } }
+        </style>
+      </head>
+      <body>
+        <div class="no-print" style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #002866; color: white; padding: 8px 14px; border-radius: 6px; font-family: sans-serif;">
+          <span>📄 Data Table PDF Export (${sorted.length} records)</span>
+          <div>
+            <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 4px; font-weight: bold; cursor: pointer;">Print / Save as PDF</button>
+            <button onclick="window.close()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 10px; border-radius: 4px; margin-left: 6px; cursor: pointer;">Close</button>
+          </div>
+        </div>
+        <div class="header">
+          <div>
+            <div class="title">ADAMA SCIENCE AND TECHNOLOGY UNIVERSITY</div>
+            <div style="font-size: 12px; font-weight: 600; color: #003580;">Data Roster Export</div>
+          </div>
+          <div class="meta">
+            <div><strong>Generated:</strong> ${new Date().toLocaleString()}</div>
+            <div><strong>Total Records:</strong> ${sorted.length}</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr>${tableHeaderHtml}</tr></thead>
+          <tbody>${tableBodyHtml}</tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const printWin = window.open('', '_blank', 'width=1000,height=800');
+    if (printWin) {
+      printWin.document.open();
+      printWin.document.write(printableHtml);
+      printWin.document.close();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="admin-card overflow-hidden rounded-[10px] border shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -170,14 +248,25 @@ export default function AdminDataTable<T extends Record<string, unknown>>({
             className="w-full bg-transparent outline-none text-sm placeholder:text-slate-400"
           />
         </label>
-        <button
-          type="button"
-          onClick={exportCsv}
-          className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-[#003580] transition-all"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={exportPdf}
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-rose-200 bg-rose-50/50 hover:bg-rose-100/70 px-3 py-1.5 text-xs font-semibold text-rose-800 transition-all cursor-pointer"
+            title="Export data table to printable PDF report"
+          >
+            <FileText className="h-3.5 w-3.5 text-rose-600" />
+            Export PDF
+          </button>
+          <button
+            type="button"
+            onClick={exportCsv}
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-[#003580] transition-all cursor-pointer"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">

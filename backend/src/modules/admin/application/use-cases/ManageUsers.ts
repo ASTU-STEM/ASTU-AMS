@@ -1,6 +1,7 @@
 import prisma from '../../../../core/config/db';
 import { Role, AlumniStatus } from '@prisma/client';
 import { EmailService } from '../../../../core/services/EmailService';
+import { invalidateUserBanCache } from '../../../../core/middleware/auth.middleware';
 import bcrypt from 'bcryptjs';
 
 const emailService = new EmailService();
@@ -630,6 +631,8 @@ export class ManageUsers {
 
     if (!user) throw new Error('User not found');
 
+    invalidateUserBanCache(id);
+
     if (action === 'activate' || action === 'verify') {
       await prisma.user.update({
         where: { id },
@@ -667,7 +670,7 @@ export class ManageUsers {
     } else if (action === 'suspend') {
       await prisma.user.update({
         where: { id },
-        data: { isActive: false }
+        data: { isActive: false, adminNotes: 'SUSPENDED: Account suspended by administrator' }
       });
 
       if (user.role === Role.ALUMNI && user.alumniProfile) {

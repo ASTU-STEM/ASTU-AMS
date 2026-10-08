@@ -25,6 +25,21 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
+    if (error.response?.status === 403) {
+      const errCode = error.response?.data?.error?.code;
+      const errMsg = error.response?.data?.error?.message || error.response?.data?.message;
+
+      if (errCode === 'USER_ACCOUNT_SUSPENDED') {
+        localStorage.removeItem(config.auth.storageKey);
+        localStorage.removeItem(config.auth.refreshStorageKey);
+        localStorage.removeItem(config.auth.userStorageKey);
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          alert(`ACCOUNT ACCESS DENIED:\n${errMsg || 'Your account has been suspended by an administrator.'}`);
+          window.location.href = '/login';
+        }
+      }
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -89,6 +104,23 @@ export async function download(url: string, filename: string): Promise<void> {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(link.href);
+}
+
+export interface AuditLogPayload {
+  action: string;
+  details: string;
+  userEmail?: string;
+  userRole?: string;
+  beforeState?: any;
+  afterState?: any;
+}
+
+export async function recordAuditLog(payload: AuditLogPayload): Promise<void> {
+  try {
+    await api.post('/admin/audit-log', payload);
+  } catch (e) {
+    console.warn('Audit log recording warning:', e);
+  }
 }
 
 export default api;

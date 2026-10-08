@@ -4,6 +4,8 @@ import { generateAccessToken } from '../../src/core/utils/jwt.utils';
 import prisma, { initPrisma } from '../../src/core/config/db';
 import { Role } from '@prisma/client';
 
+import { invalidateUserBanCache } from '../../src/core/middleware/auth.middleware';
+
 jest.setTimeout(60000);
 
 describe('Analysis Engine E2E Workflows', () => {
@@ -11,6 +13,19 @@ describe('Analysis Engine E2E Workflows', () => {
 
   beforeAll(async () => {
     await initPrisma();
+
+    await prisma.user.upsert({
+      where: { id: 'analytics-admin-user' },
+      update: {},
+      create: {
+        id: 'analytics-admin-user',
+        email: 'admin.analytics@astu.edu.et',
+        password: 'securePassword123',
+        role: Role.ADMIN,
+        isActive: true,
+      },
+    });
+    invalidateUserBanCache('analytics-admin-user');
 
     adminToken = generateAccessToken({
       userId: 'analytics-admin-user',

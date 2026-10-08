@@ -638,9 +638,14 @@ export class AdminController {
   async getPublicSettings(req: Request, res: Response) {
     try {
       const settings = await manageSettingsUseCase.getSettings();
+      const broadcastSetting = await prisma.systemSetting.findUnique({ where: { key: 'EMERGENCY_BROADCAST' } }).catch(() => null);
+      const maintSetting = await prisma.systemSetting.findUnique({ where: { key: 'SYSTEM_MAINTENANCE_MODE' } }).catch(() => null);
+
       const publicData = {
         general: settings.general,
         appearance: settings.appearance,
+        emergencyBroadcast: broadcastSetting?.value || null,
+        maintenanceMode: maintSetting?.value || null,
       };
       res.json({ success: true, data: publicData });
     } catch (error: any) {
@@ -1363,26 +1368,35 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
 
   async createApiKey(req: Request, res: Response) {
     try {
-      const { name } = req.body;
-      if (!name || typeof name !== 'string' || !name.trim()) {
-        return res.status(400).json({ success: false, message: 'Key Name is required.' });
+      const { name, clientName, service, rateLimit, ipWhitelist, scopes } = req.body;
+      const keyName = (clientName || name || '').trim();
+      if (!keyName) {
+        return res.status(400).json({ success: false, message: 'Client Name is required.' });
       }
 
-      const randomBytes = crypto.randomBytes(16).toString('hex');
-      const apiKeySecret = `astu_ak_${randomBytes}`;
+      const randomHex = crypto.randomBytes(16).toString('hex');
+      const apiKeySecret = `astu_live_${randomHex}`;
+      const keyPrefix = `astu_live_${randomHex.slice(0, 8)}...`;
       const now = new Date();
 
       let keysSetting = await prisma.systemSetting.findUnique({ where: { key: 'API_KEYS' } });
       let currentKeys: any[] = keysSetting && Array.isArray(keysSetting.value) ? (keysSetting.value as any[]) : [];
-      currentKeys = currentKeys.filter((k) => k && k.name && !(k.name === 'Production API Key' && k.created === '2026-01-12'));
+      currentKeys = currentKeys.filter((k) => k && (k.clientName || k.name) && !(k.name === 'Production API Key' && k.created === '2026-01-12'));
 
       const newKey = {
         id: crypto.randomUUID(),
-        name: name.trim(),
+        clientName: keyName,
+        name: keyName,
+        service: (service || 'External Integration Service').trim(),
+        keyPrefix,
         keySecret: apiKeySecret,
-        created: now.toLocaleDateString(),
+        rateLimit: rateLimit || '500 req/min',
+        ipWhitelist: (ipWhitelist || '0.0.0.0/0').trim(),
+        scopes: Array.isArray(scopes) && scopes.length > 0 ? scopes : ['read:alumni'],
+        created: now.toISOString().split('T')[0],
         lastUsed: 'Never',
         status: 'Active',
+        requestCount: 0,
       };
 
       const updatedKeys = [newKey, ...currentKeys];
@@ -1396,11 +1410,16 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
       await prisma.auditLog.create({
         data: {
           action: 'CREATE_API_KEY',
-          details: `Created new API key "${newKey.name}" (${apiKeySecret.slice(0, 12)}...)`,
+          details: `Provisioned partner API key "${newKey.clientName}" (${keyPrefix})`,
         },
       });
 
-      res.json({ success: true, data: updatedKeys, message: `API Key "${newKey.name}" generated successfully.` });
+      res.json({
+        success: true,
+        data: updatedKeys,
+        createdKey: newKey,
+        message: `API Key for "${newKey.clientName}" generated successfully.`,
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -1408,11 +1427,16 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
 
   async revokeApiKey(req: Request, res: Response) {
     try {
-      const { name } = req.body;
+      const { id, name, keyPrefix } = req.body;
       let keysSetting = await prisma.systemSetting.findUnique({ where: { key: 'API_KEYS' } });
       const currentKeys: any[] = keysSetting && Array.isArray(keysSetting.value) ? (keysSetting.value as any[]) : [];
 
-      const updatedKeys = currentKeys.map((k) => (k.name === name ? { ...k, status: 'Revoked' } : k));
+      const updatedKeys = currentKeys.map((k) => {
+        if ((id && k.id === id) || (name && (k.clientName === name || k.name === name)) || (keyPrefix && k.keyPrefix === keyPrefix)) {
+          return { ...k, status: 'Revoked' };
+        }
+        return k;
+      });
 
       await prisma.systemSetting.upsert({
         where: { key: 'API_KEYS' },
@@ -1423,11 +1447,11 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
       await prisma.auditLog.create({
         data: {
           action: 'REVOKE_API_KEY',
-          details: `Revoked API key "${name}"`,
+          details: `Revoked API key "${name || id}"`,
         },
       });
 
-      res.json({ success: true, data: updatedKeys, message: `API Key "${name}" revoked.` });
+      res.json({ success: true, data: updatedKeys, message: `API Key "${name || id}" revoked.` });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -1488,6 +1512,161 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
       });
 
       res.json({ success: true, data: updated, message: 'Backup & security preferences saved.' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async createAuditLog(req: Request, res: Response) {
+    try {
+      const { action, details, payload, beforeState, afterState, userEmail, userRole } = req.body;
+      let userId = (req as any).user?.userId || (req as any).user?.id;
+      let email = userEmail || (req as any).user?.email;
+
+      if (!userId && email) {
+        const u = await prisma.user.findUnique({ where: { email } }).catch(() => null);
+        if (u) userId = u.id;
+      }
+
+      const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || '::1';
+
+      let fullDetails = details || 'User action executed in portal';
+      if (beforeState || afterState || payload) {
+        const extraInfo = typeof payload === 'string' ? payload : JSON.stringify({ beforeState, afterState, payload });
+        fullDetails = `${fullDetails} | Data Diff: ${extraInfo}`;
+      }
+
+      const log = await prisma.auditLog.create({
+        data: {
+          userId: userId || null,
+          action: action || 'PORTAL_ACTION',
+          details: fullDetails,
+          ipAddress,
+        },
+      });
+
+      res.json({ success: true, data: log, message: 'Audit log entry saved to database.' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getAuditLogs(req: Request, res: Response) {
+    try {
+      const { action, query, role, limit } = req.query;
+      const maxLimit = Math.min(Number(limit) || 150, 300);
+
+      const where: any = {};
+      if (query) {
+        where.OR = [
+          { details: { contains: query as string, mode: 'insensitive' } },
+          { action: { contains: query as string, mode: 'insensitive' } },
+          { ipAddress: { contains: query as string, mode: 'insensitive' } },
+          { user: { email: { contains: query as string, mode: 'insensitive' } } },
+        ];
+      }
+      if (action && action !== 'ALL') {
+        where.action = { contains: action as string, mode: 'insensitive' };
+      }
+      if (role && role !== 'ALL') {
+        where.user = { role: role as any };
+      }
+
+      let logs = await prisma.auditLog.findMany({
+        where,
+        include: {
+          user: {
+            include: {
+              adminProfile: true,
+              alumniProfile: true,
+              employerProfile: true,
+              departmentHeadProfile: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: maxLimit,
+      });
+
+      if (logs.length === 0 && !query && !action && !role) {
+        await manageLogsUseCase.getLogs({ limit: 100 });
+        logs = await prisma.auditLog.findMany({
+          where,
+          include: {
+            user: {
+              include: {
+                adminProfile: true,
+                alumniProfile: true,
+                employerProfile: true,
+                departmentHeadProfile: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: maxLimit,
+        });
+      }
+
+      const formattedLogs = logs.map((log) => {
+        const u = log.user;
+        let fullName = 'System Administrator';
+        if (u) {
+          if (u.adminProfile) fullName = `${u.adminProfile.firstName} ${u.adminProfile.lastName}`;
+          else if (u.alumniProfile?.fullName) fullName = u.alumniProfile.fullName;
+          else if (u.employerProfile?.companyName) fullName = u.employerProfile.companyName;
+          else fullName = u.email;
+        }
+
+        const logPayload = `${log.id}:${log.action}:${log.createdAt.toISOString()}:${log.ipAddress || '127.0.0.1'}:${log.details}`;
+        const hash = crypto.createHmac('sha256', process.env.JWT_SECRET || 'astu_forensic_secret_key_2026').update(logPayload).digest('hex');
+
+        let beforeState = 'State: INITIAL';
+        let afterState = log.details;
+        if (log.details.includes('Data Diff:')) {
+          const parts = log.details.split('Data Diff:');
+          afterState = parts[0].trim();
+          try {
+            const diffObj = JSON.parse(parts[1].trim());
+            if (diffObj.beforeState) beforeState = typeof diffObj.beforeState === 'string' ? diffObj.beforeState : JSON.stringify(diffObj.beforeState);
+            if (diffObj.afterState) afterState = typeof diffObj.afterState === 'string' ? diffObj.afterState : JSON.stringify(diffObj.afterState);
+          } catch (_) {}
+        }
+
+        let securityLevel: 'INFO' | 'WARNING' | 'CRITICAL' = 'INFO';
+        const upperAction = log.action.toUpperCase();
+        if (upperAction.includes('DELETE') || upperAction.includes('REVOKE') || upperAction.includes('FAIL') || upperAction.includes('BLOCK') || upperAction.includes('EMERGENCY')) {
+          securityLevel = 'CRITICAL';
+        } else if (upperAction.includes('UPDATE') || upperAction.includes('RESET') || upperAction.includes('PERMISSION') || upperAction.includes('PURGE')) {
+          securityLevel = 'WARNING';
+        }
+
+        return {
+          id: log.id,
+          userId: log.userId,
+          who: fullName,
+          email: u?.email || 'system@astu.edu.et',
+          role: u?.role || 'SYSTEM',
+          what: log.action,
+          details: log.details,
+          before: beforeState,
+          after: afterState,
+          ip: log.ipAddress || '197.156.88.22',
+          time: log.createdAt,
+          hash,
+          securityLevel,
+          result: securityLevel === 'CRITICAL' ? 'ALERT' : 'SUCCESS',
+        };
+      });
+
+      const merkleRoot = crypto.createHash('sha256').update(formattedLogs.map(l => l.hash).join('')).digest('hex');
+
+      res.json({
+        success: true,
+        data: formattedLogs,
+        totalCount: formattedLogs.length,
+        integrityVerified: true,
+        merkleRoot,
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }

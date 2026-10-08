@@ -15,6 +15,7 @@ import authService from "../features/auth/services/auth.service";
 import AnnouncementPanel from "./AnnouncementPanel";
 import astuLogo from "../assets/logos/astu-icon.jpeg";
 import { useSystemSettings } from "../context/SystemSettingsContext";
+import IctEmergencyBanner from "./IctEmergencyBanner";
 
 interface MegaMenuItem {
   label: string;
@@ -95,7 +96,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const searchWrapRef = useRef<HTMLDivElement>(null);
-  const { settings } = useSystemSettings();
+  const { settings, emergencyBroadcast } = useSystemSettings();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -196,6 +197,9 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      {emergencyBroadcast?.active && emergencyBroadcast?.message && (
+        <IctEmergencyBanner message={emergencyBroadcast.message} type="emergency" />
+      )}
       <div className="hidden bg-astu-navy text-white md:block">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
           <div className="flex items-center gap-4 text-xs text-white/80">

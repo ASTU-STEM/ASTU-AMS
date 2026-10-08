@@ -1,13 +1,18 @@
 import { Router } from 'express';
 import { AdminController } from '../controllers/AdminController';
 import { TechnicalOpsController } from '../controllers/TechnicalOpsController';
-import { authenticateJWT } from '../../../../core/middleware/auth.middleware';
+import { authenticateJWT, optionalAuthenticateJWT } from '../../../../core/middleware/auth.middleware';
 import { requireRoles, requirePermission } from '../../../../core/middleware/role.middleware';
 import { Role } from '@prisma/client';
 
 const router = Router();
 const adminController = new AdminController();
 const techOpsController = new TechnicalOpsController();
+
+// Open/optional auth endpoint for recording audit logs across all 6 portals
+router.post('/audit-log', optionalAuthenticateJWT, adminController.createAuditLog);
+router.get('/audit-logs', optionalAuthenticateJWT, adminController.getAuditLogs);
+router.get('/settings/public', optionalAuthenticateJWT, adminController.getPublicSettings);
 
 // SUPER_ADMIN and ADMIN roles can access these admin routes
 router.use(authenticateJWT, requireRoles([Role.SUPER_ADMIN, Role.ADMIN, 'SUPER_ADMIN', 'ADMIN']));
@@ -37,9 +42,22 @@ router.get('/technical-ops/telemetry/live', techOpsController.getLiveTelemetry);
 router.get('/technical-ops/security-governance', techOpsController.getSecurityGovernance);
 router.put('/technical-ops/security-governance', techOpsController.updateSecurityGovernance);
 router.get('/technical-ops/security', techOpsController.getSecurityStatus);
+router.post('/technical-ops/security/owasp-scan', techOpsController.runOwaspScan);
+router.post('/technical-ops/security/break-glass', techOpsController.elevateBreakGlass);
+router.post('/technical-ops/security/block-ip', techOpsController.blockIp);
+router.post('/technical-ops/security/unblock-ip', techOpsController.unblockIp);
 router.get('/technical-ops/load-balancer', techOpsController.getLoadBalancer);
 router.get('/technical-ops/api-gateway', techOpsController.getApiGateway);
 router.get('/technical-ops/db-diagnostics', techOpsController.getDatabaseDiagnostics);
+router.get('/technical-ops/incidents', techOpsController.getIncidents);
+router.get('/technical-ops/feature-flags', techOpsController.getFeatureFlags);
+router.post('/technical-ops/feature-flags', techOpsController.createFeatureFlag);
+router.put('/technical-ops/feature-flags', techOpsController.updateFeatureFlag);
+router.get('/technical-ops/release-info', techOpsController.getReleaseInfo);
+router.post('/technical-ops/release-info/rollback', techOpsController.rollbackRelease);
+router.get('/technical-ops/sessions', techOpsController.getActiveSessions);
+router.post('/technical-ops/sessions/revoke', techOpsController.revokeSession);
+router.post('/technical-ops/broadcast/clear', techOpsController.clearBroadcast);
 router.post('/technical-ops/action', techOpsController.executeAction);
 
 // Department Routes

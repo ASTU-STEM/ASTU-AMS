@@ -26,24 +26,35 @@ import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
-import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
-import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
-import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
-import DepartmentDashboard from "./features/departments/pages/DepartmentDashboard";
-import NotFoundPage from "./pages/NotFoundPage";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminRoutes from "./routes/adminRoutes";
-import IctRoutes from "./routes/ictRoutes";
-import CmsRoutes from "./routes/cmsRoutes";
 import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
-
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Lazy-load portal route bundles for code splitting
+const AlumniDashboard = React.lazy(() => import("./features/alumni/pages/AlumniDashboard"));
+const EmployerDashboard = React.lazy(() => import("./features/employers/pages/EmployerDashboard"));
+const RegistrarDashboard = React.lazy(() => import("./features/registrar/pages/RegistrarDashboard"));
+const DepartmentDashboard = React.lazy(() => import("./features/departments/pages/DepartmentDashboard"));
+const AdminRoutes = React.lazy(() => import("./routes/adminRoutes"));
+const IctRoutes = React.lazy(() => import("./routes/ictRoutes"));
+const CmsRoutes = React.lazy(() => import("./routes/cmsRoutes"));
+
+const PageLoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-sm font-medium text-slate-400">Loading ASTU-AMS Module...</p>
+    </div>
+  </div>
+);
 
 function AppContent() {
   return (
     <Router>
-      <Routes>
+      <React.Suspense fallback={<PageLoadingSpinner />}>
+        <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/partners" element={<PartnersPage />} />
@@ -147,6 +158,7 @@ function AppContent() {
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </React.Suspense>
     </Router>
   );
 }
