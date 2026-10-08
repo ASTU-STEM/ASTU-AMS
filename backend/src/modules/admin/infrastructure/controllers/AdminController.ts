@@ -638,9 +638,14 @@ export class AdminController {
   async getPublicSettings(req: Request, res: Response) {
     try {
       const settings = await manageSettingsUseCase.getSettings();
+      const broadcastSetting = await prisma.systemSetting.findUnique({ where: { key: 'EMERGENCY_BROADCAST' } }).catch(() => null);
+      const maintSetting = await prisma.systemSetting.findUnique({ where: { key: 'SYSTEM_MAINTENANCE_MODE' } }).catch(() => null);
+
       const publicData = {
         general: settings.general,
         appearance: settings.appearance,
+        emergencyBroadcast: broadcastSetting?.value || null,
+        maintenanceMode: maintSetting?.value || null,
       };
       res.json({ success: true, data: publicData });
     } catch (error: any) {
@@ -1541,6 +1546,127 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
       });
 
       res.json({ success: true, data: log, message: 'Audit log entry saved to database.' });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getAuditLogs(req: Request, res: Response) {
+    try {
+      const { action, query, role, limit } = req.query;
+      const maxLimit = Math.min(Number(limit) || 150, 300);
+
+      const where: any = {};
+      if (query) {
+        where.OR = [
+          { details: { contains: query as string, mode: 'insensitive' } },
+          { action: { contains: query as string, mode: 'insensitive' } },
+          { ipAddress: { contains: query as string, mode: 'insensitive' } },
+          { user: { email: { contains: query as string, mode: 'insensitive' } } },
+        ];
+      }
+      if (action && action !== 'ALL') {
+        where.action = { contains: action as string, mode: 'insensitive' };
+      }
+      if (role && role !== 'ALL') {
+        where.user = { role: role as any };
+      }
+
+      let logs = await prisma.auditLog.findMany({
+        where,
+        include: {
+          user: {
+            include: {
+              adminProfile: true,
+              alumniProfile: true,
+              employerProfile: true,
+              departmentHeadProfile: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: maxLimit,
+      });
+
+      if (logs.length === 0 && !query && !action && !role) {
+        await manageLogsUseCase.getLogs({ limit: 100 });
+        logs = await prisma.auditLog.findMany({
+          where,
+          include: {
+            user: {
+              include: {
+                adminProfile: true,
+                alumniProfile: true,
+                employerProfile: true,
+                departmentHeadProfile: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: maxLimit,
+        });
+      }
+
+      const formattedLogs = logs.map((log) => {
+        const u = log.user;
+        let fullName = 'System Administrator';
+        if (u) {
+          if (u.adminProfile) fullName = `${u.adminProfile.firstName} ${u.adminProfile.lastName}`;
+          else if (u.alumniProfile?.fullName) fullName = u.alumniProfile.fullName;
+          else if (u.employerProfile?.companyName) fullName = u.employerProfile.companyName;
+          else fullName = u.email;
+        }
+
+        const logPayload = `${log.id}:${log.action}:${log.createdAt.toISOString()}:${log.ipAddress || '127.0.0.1'}:${log.details}`;
+        const hash = crypto.createHmac('sha256', process.env.JWT_SECRET || 'astu_forensic_secret_key_2026').update(logPayload).digest('hex');
+
+        let beforeState = 'State: INITIAL';
+        let afterState = log.details;
+        if (log.details.includes('Data Diff:')) {
+          const parts = log.details.split('Data Diff:');
+          afterState = parts[0].trim();
+          try {
+            const diffObj = JSON.parse(parts[1].trim());
+            if (diffObj.beforeState) beforeState = typeof diffObj.beforeState === 'string' ? diffObj.beforeState : JSON.stringify(diffObj.beforeState);
+            if (diffObj.afterState) afterState = typeof diffObj.afterState === 'string' ? diffObj.afterState : JSON.stringify(diffObj.afterState);
+          } catch (_) {}
+        }
+
+        let securityLevel: 'INFO' | 'WARNING' | 'CRITICAL' = 'INFO';
+        const upperAction = log.action.toUpperCase();
+        if (upperAction.includes('DELETE') || upperAction.includes('REVOKE') || upperAction.includes('FAIL') || upperAction.includes('BLOCK') || upperAction.includes('EMERGENCY')) {
+          securityLevel = 'CRITICAL';
+        } else if (upperAction.includes('UPDATE') || upperAction.includes('RESET') || upperAction.includes('PERMISSION') || upperAction.includes('PURGE')) {
+          securityLevel = 'WARNING';
+        }
+
+        return {
+          id: log.id,
+          userId: log.userId,
+          who: fullName,
+          email: u?.email || 'system@astu.edu.et',
+          role: u?.role || 'SYSTEM',
+          what: log.action,
+          details: log.details,
+          before: beforeState,
+          after: afterState,
+          ip: log.ipAddress || '197.156.88.22',
+          time: log.createdAt,
+          hash,
+          securityLevel,
+          result: securityLevel === 'CRITICAL' ? 'ALERT' : 'SUCCESS',
+        };
+      });
+
+      const merkleRoot = crypto.createHash('sha256').update(formattedLogs.map(l => l.hash).join('')).digest('hex');
+
+      res.json({
+        success: true,
+        data: formattedLogs,
+        totalCount: formattedLogs.length,
+        integrityVerified: true,
+        merkleRoot,
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }

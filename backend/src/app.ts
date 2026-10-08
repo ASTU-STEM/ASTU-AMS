@@ -38,6 +38,12 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+import { requestCorrelationMiddleware } from './core/middleware/requestCorrelation.middleware';
+app.use(requestCorrelationMiddleware);
+
+import { ipBlockGuardMiddleware } from './core/security/ipBlockGuard.service';
+app.use(ipBlockGuardMiddleware);
+
 import { owaspSecurityInspectorMiddleware } from './core/security/owaspSecurityEngine';
 app.use(owaspSecurityInspectorMiddleware);
 
@@ -122,14 +128,19 @@ app.use('/api/content', contentRouter);
 app.use('/api/mentorship', mentorshipRouter);
 app.use('/api/jobs', jobboardRouter);
 app.use('/api/support', supportRouter);
+import reportRouter from './modules/admin/presentation/report.routes';
+app.use('/api/admin/reports', reportRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/tools', toolsRouter);
 
-// 7. Base API Health Check
-app.get('/health', (req, res) => {
-  return sendSuccess(res, 'API is healthy', { timestamp: new Date().toISOString() });
-});
+import externalApiRouter from './modules/external/presentation/externalApi.routes';
+app.use('/api/v1/external', externalApiRouter);
+app.use('/api/external', externalApiRouter);
+
+import healthRouter from './core/routes/health.routes';
+app.use('/health', healthRouter);
+app.use('/api/health', healthRouter);
 
 // 8. 404 Fallback Route
 app.use((req, res) => {

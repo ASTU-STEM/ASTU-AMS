@@ -792,7 +792,7 @@ export default function IctApiGatewayPage() {
                         type="button"
                         onClick={() =>
                           copyToClipboard(
-                            `curl -X GET "https://api.astu.edu.et/v1/external/sis/graduates" \\\n  -H "Authorization: Bearer ${createdResult.keySecret}" \\\n  -H "Content-Type: application/json"`,
+                            `curl -X GET "http://localhost:5000/api/v1/external/alumni?department=Computer%20Science" \\\n  -H "X-API-KEY: ${createdResult.keySecret}" \\\n  -H "Content-Type: application/json"`,
                             'snippet'
                           )
                         }
@@ -804,8 +804,8 @@ export default function IctApiGatewayPage() {
                     </div>
 
                     <pre className="p-3 rounded-xl bg-slate-900 text-slate-300 border border-slate-800 font-mono text-[11px] overflow-x-auto whitespace-pre">
-{`curl -X GET "https://api.astu.edu.et/v1/external/sis/graduates" \\
-  -H "Authorization: Bearer ${createdResult.keySecret}" \\
+{`curl -X GET "http://localhost:5000/api/v1/external/alumni?department=Computer%20Science" \\
+  -H "X-API-KEY: ${createdResult.keySecret}" \\
   -H "Content-Type: application/json"`}
                     </pre>
                   </div>

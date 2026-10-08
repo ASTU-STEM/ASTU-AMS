@@ -28,6 +28,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const router = Router();
 
+import { bulkImportRateLimiter } from '../../../core/middleware/rateLimiter.middleware';
+
 // Public verification route for registration
 router.get('/verify/:studentId', asyncHandler(RegistrarController.verifyStudentId));
 
@@ -35,7 +37,7 @@ router.get('/verify/:studentId', asyncHandler(RegistrarController.verifyStudentI
 router.use(authenticateJWT);
 router.use(requireRoles([Role.ADMIN, Role.REGISTRAR]));
 
-router.post('/import', upload.single('file'), asyncHandler(RegistrarController.importFile));
+router.post('/import', bulkImportRateLimiter, upload.single('file'), asyncHandler(RegistrarController.importFile));
 router.get('/logs', asyncHandler(RegistrarController.getLogs));
 router.get('/sis-status', asyncHandler(RegistrarController.getSisStatus));
 router.post('/fetch-graduates/:year', asyncHandler(RegistrarController.fetchGraduatesByYear));

@@ -11,6 +11,8 @@ const techOpsController = new TechnicalOpsController();
 
 // Open/optional auth endpoint for recording audit logs across all 6 portals
 router.post('/audit-log', optionalAuthenticateJWT, adminController.createAuditLog);
+router.get('/audit-logs', optionalAuthenticateJWT, adminController.getAuditLogs);
+router.get('/settings/public', optionalAuthenticateJWT, adminController.getPublicSettings);
 
 // SUPER_ADMIN and ADMIN roles can access these admin routes
 router.use(authenticateJWT, requireRoles([Role.SUPER_ADMIN, Role.ADMIN, 'SUPER_ADMIN', 'ADMIN']));
@@ -49,7 +51,13 @@ router.get('/technical-ops/api-gateway', techOpsController.getApiGateway);
 router.get('/technical-ops/db-diagnostics', techOpsController.getDatabaseDiagnostics);
 router.get('/technical-ops/incidents', techOpsController.getIncidents);
 router.get('/technical-ops/feature-flags', techOpsController.getFeatureFlags);
+router.post('/technical-ops/feature-flags', techOpsController.createFeatureFlag);
 router.put('/technical-ops/feature-flags', techOpsController.updateFeatureFlag);
+router.get('/technical-ops/release-info', techOpsController.getReleaseInfo);
+router.post('/technical-ops/release-info/rollback', techOpsController.rollbackRelease);
+router.get('/technical-ops/sessions', techOpsController.getActiveSessions);
+router.post('/technical-ops/sessions/revoke', techOpsController.revokeSession);
+router.post('/technical-ops/broadcast/clear', techOpsController.clearBroadcast);
 router.post('/technical-ops/action', techOpsController.executeAction);
 
 // Department Routes

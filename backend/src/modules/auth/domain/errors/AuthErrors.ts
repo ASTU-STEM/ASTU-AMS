@@ -14,9 +14,16 @@ export class InvalidCredentialsError extends AuthError {
 }
 
 export class AccountPendingApprovalError extends AuthError {
-  constructor() {
-    super('Your account is pending admin approval', 403);
+  constructor(message = 'Your account is pending admin approval') {
+    super(message, 403);
     Object.setPrototypeOf(this, AccountPendingApprovalError.prototype);
+  }
+}
+
+export class AccountSuspendedError extends AuthError {
+  constructor(message = 'Your ASTU account has been suspended or banned by an administrator') {
+    super(message, 403);
+    Object.setPrototypeOf(this, AccountSuspendedError.prototype);
   }
 }
 

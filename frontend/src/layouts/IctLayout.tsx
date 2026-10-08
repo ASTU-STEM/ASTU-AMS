@@ -9,6 +9,8 @@ import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import IctCommandPalette from '../components/IctCommandPalette';
 import IctEmergencyBanner from '../components/IctEmergencyBanner';
+import IctCalendarModal from '../components/IctCalendarModal';
+import { useSystemSettings } from '../context/SystemSettingsContext';
 
 class IctRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -45,6 +47,7 @@ class IctRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; subtitle: string }> = {
   '/ict/dashboard': { title: 'ICT Command Center', subtitle: '360° System Health Matrix & Live Operations' },
+  '/ict/users': { title: 'User Directory & Access Control', subtitle: 'Full CRUD user management, role privileges, status updates & account governance' },
   '/ict/support-tickets': { title: 'Escalated Technical Support Desk', subtitle: 'Review & resolve support tickets transferred by Super Admin' },
   '/ict/logs': { title: 'Universal System Logs & Data Diffs', subtitle: 'Cross-portal log stream, logins, background tasks & mutation diffs' },
   '/ict/api-gateway': { title: 'External API Gateway & Health Hub', subtitle: 'API key provisioning, scope credentials, rate limits & health checking' },
@@ -61,6 +64,7 @@ const routeMeta: Record<string, { title: string; subtitle: string }> = {
 export default function IctLayout() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
   const [calendarMode, setCalendarMode] = useState<'GC' | 'EC'>('GC');
+  const [calendarModalOpen, setCalendarModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -70,6 +74,7 @@ export default function IctLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { emergencyBroadcast } = useSystemSettings();
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed((prev) => {
@@ -148,6 +153,11 @@ export default function IctLayout() {
             sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
           }`}
         >
+          {/* Emergency Broadcast Banner */}
+          {emergencyBroadcast?.active && emergencyBroadcast?.message && (
+            <IctEmergencyBanner message={emergencyBroadcast.message} type="emergency" />
+          )}
+
           {/* Top Header Bar */}
           <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 backdrop-blur-xs px-4 shadow-xs sm:px-6 dark:border-slate-800 dark:bg-slate-900/95">
             <div className="flex min-w-0 items-center gap-3">
@@ -191,16 +201,12 @@ export default function IctLayout() {
                 </kbd>
               </button>
 
-              {/* Ethiopian Calendar Toggle */}
+              {/* Ethiopian / Gregorian Academic Calendar Toggle */}
               <button
                 type="button"
-                onClick={() => {
-                  const next = calendarMode === 'GC' ? 'EC' : 'GC';
-                  setCalendarMode(next);
-                  toast.success(`Calendar mode set to ${next === 'EC' ? 'Ethiopian (2018 E.C.)' : 'Gregorian (2026 G.C.)'}`);
-                }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 cursor-pointer"
-                title="Toggle Ethiopian / Gregorian Calendar"
+                onClick={() => setCalendarModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 cursor-pointer transition-all shadow-2xs"
+                title="Click to view ASTU Dual Calendar & Academic Timeline Matrix"
               >
                 <span>🇪🇹 {calendarMode === 'EC' ? '2018 E.C.' : '2026 G.C.'}</span>
               </button>
@@ -242,6 +248,14 @@ export default function IctLayout() {
                       <div className="text-[10px] text-slate-500 mt-0.5">{user?.email || 'admin@astu.edu.et'}</div>
                     </div>
                     <div className="py-1">
+                      <NavLink
+                        to="/ict/users"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                      >
+                        <User className="h-4 w-4 text-blue-500" />
+                        User Directory &amp; Access
+                      </NavLink>
                       <NavLink
                         to="/ict/policies"
                         onClick={() => setMenuOpen(false)}
@@ -293,6 +307,13 @@ export default function IctLayout() {
       <IctCommandPalette
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
+      />
+
+      <IctCalendarModal
+        isOpen={calendarModalOpen}
+        onClose={() => setCalendarModalOpen(false)}
+        calendarMode={calendarMode}
+        onCalendarModeChange={(mode) => setCalendarMode(mode)}
       />
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />

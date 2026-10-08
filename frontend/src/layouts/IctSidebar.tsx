@@ -20,6 +20,7 @@ import {
   Sliders,
   Sparkles,
   Terminal,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemSettings } from '../context/SystemSettingsContext';
@@ -45,6 +46,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Command Center', path: '/ict/dashboard', icon: Terminal, exact: true, section: 'ops', tooltip: '360° System Health Matrix' },
+  { label: 'User Directory & CRUD', path: '/ict/users', icon: Users, section: 'ops', tooltip: 'Full CRUD User Management & Account Governance' },
   { label: 'Escalated Support Desk', path: '/ict/support-tickets', icon: LifeBuoy, section: 'ops', tooltip: 'Review & Resolve Support Tickets Transferred by Super Admin' },
   { label: 'Universal Logs & Diffs', path: '/ict/logs', icon: ScrollText, section: 'ops', tooltip: 'Cross-Portal Logs & State Mutation Diffs' },
   { label: 'External API Gateway', path: '/ict/api-gateway', icon: Globe, section: 'ops', tooltip: 'API Provisioning, Rate Limits & Health' },

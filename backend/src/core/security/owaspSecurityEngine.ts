@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/db';
 import { Logger, serverLogBuffer } from '../utils/logger.utils';
+import { ipBlockGuard } from './ipBlockGuard.service';
 
 export interface OwaspVectorResult {
   code: string;
@@ -21,10 +22,24 @@ export interface OwaspAuditSummary {
 }
 
 // ----------------------------------------------------------------------
-// 1. WAF Payload & Injection Inspection Middleware (A03, A05, A07, A10)
+// 1. Comprehensive SQL Injection & Command Injection Regex Guard (OWASP A03)
 // ----------------------------------------------------------------------
-const SQLI_COMMAND_REGEX = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|EXEC|UNION|CREATE|TRUNCATE)\b\s+[\s\S]*?\b(FROM|INTO|TABLE|DATABASE|WHERE|SET|ALL)\b)|(\bOR\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+)|(--|;|\/\*|\*\/)/i;
-const XSS_REGEX = /<script\b[^>]*>[\s\S]*?<\/script>|javascript:|onerror\s*=|onload\s*=/i;
+const SQLI_REGEX = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|EXEC|EXECUTE|UNION|CREATE|TRUNCATE|GRANT|REVOKE|SHUTDOWN|PG_SLEEP|BENCHMARK|SLEEP)\b[\s\S]*?\b(FROM|INTO|TABLE|DATABASE|WHERE|SET|ALL|HAVING|INFORMATION_SCHEMA|SYSOBJECTS)\b)|(\bOR\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+)|(\bAND\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+)|(--|;|\/\*|\*\/|@@version|char\(|concat\()/i;
+
+// ----------------------------------------------------------------------
+// 2. Command Injection & Path Traversal Regex Guard (OWASP A03 / A05)
+// ----------------------------------------------------------------------
+const COMMAND_PATH_TRAVERSAL_REGEX = /(\|\||&&|`|\$\(|\b(system|exec|passthru|shell_exec|eval|cmd\.exe|\/bin\/sh|\/bin\/bash)\b)|(\.\.[\/\\]|\/etc\/passwd|c:\\windows)/i;
+
+// ----------------------------------------------------------------------
+// 3. Cross-Site Scripting (XSS) Regex Guard (OWASP A03 / A07)
+// ----------------------------------------------------------------------
+const XSS_REGEX = /<script\b[^>]*>[\s\S]*?<\/script>|javascript:|onerror\s*=|onload\s*=|onclick\s*=|document\.cookie|document\.location|window\.location|<iframe\b|<object\b|<embed\b/i;
+
+// ----------------------------------------------------------------------
+// 4. Abusive Bot & Vulnerability Scanner User-Agent Blacklist
+// ----------------------------------------------------------------------
+const BOT_SCANNER_UA_REGEX = /\b(sqlmap|nikto|nmap|masscan|gobuster|dirbuster|w3af|acunetix|nessus|openvas|hydra|zgrab)\b/i;
 
 export const owaspSecurityInspectorMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -32,16 +47,29 @@ export const owaspSecurityInspectorMiddleware = (req: Request, res: Response, ne
     const bodyStr = req.body ? JSON.stringify(req.body) : '';
     const queryStr = req.query ? JSON.stringify(req.query) : '';
     const combinedInput = `${rawUrl} ${queryStr} ${bodyStr}`;
+    const userAgent = (req.headers['user-agent'] as string) || '';
+    const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
 
-    // Inspect for SQL Injection & Command Injection (A03: Injection)
-    if (SQLI_COMMAND_REGEX.test(combinedInput)) {
-      const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
-      Logger.warn(`[OWASP WAF] SQLi/Command Injection payload blocked from IP ${clientIp} on route ${rawUrl}`);
+    // 1. Inspect for Abusive Scanners & Malicious Bots
+    if (BOT_SCANNER_UA_REGEX.test(userAgent)) {
+      const cleanIp = clientIp.split(',')[0].replace(/^::ffff:/, '').trim();
+      ipBlockGuard.addBlockedIp(cleanIp, `Auto-blocked by WAF: Vulnerability scanner signature detected (${userAgent})`).catch(() => {});
+
+      Logger.warn(`[OWASP WAF] Malicious vulnerability scanner blocked: ${userAgent} from IP ${cleanIp}`);
+      return res.status(403).json({
+        success: false,
+        error: { code: 'BOT_SCANNER_BLOCKED', message: 'Access denied: Vulnerability scanner signature detected.' }
+      });
+    }
+
+    // 2. Inspect for SQL Injection (A03: Injection)
+    if (SQLI_REGEX.test(combinedInput)) {
+      Logger.warn(`[OWASP WAF] SQL Injection payload blocked from IP ${clientIp} on route ${rawUrl}`);
       
       serverLogBuffer.addLog({
         type: 'SERVER_WARN',
         level: 'WARN',
-        message: `[OWASP WAF A03] Blocked suspicious SQLi/Command Injection attempt from IP ${clientIp} on ${rawUrl}`,
+        message: `[OWASP WAF A03] Blocked SQLi payload attempt from IP ${clientIp} on ${rawUrl}`,
         source: 'BACKEND',
         ipAddress: clientIp,
         path: rawUrl,
@@ -50,17 +78,34 @@ export const owaspSecurityInspectorMiddleware = (req: Request, res: Response, ne
 
       return res.status(403).json({
         success: false,
-        message: 'Security Violation: Malicious injection payload blocked by ASTU WAF Inspector (OWASP A03 Mitigation).',
+        error: {
+          code: 'OWASP_SECURITY_BLOCK',
+          message: 'Security Violation: SQL Injection payload blocked by ASTU WAF Inspector (OWASP A03 Mitigation).'
+        }
       });
     }
 
-    // Inspect for XSS Script injection (A03 / A07)
+    // 3. Inspect for Command Injection & Path Traversal (A03 / A05)
+    if (COMMAND_PATH_TRAVERSAL_REGEX.test(combinedInput)) {
+      Logger.warn(`[OWASP WAF] Command Injection / Path Traversal blocked from IP ${clientIp} on route ${rawUrl}`);
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'OWASP_SECURITY_BLOCK',
+          message: 'Security Violation: Command Execution / Path Traversal payload blocked by ASTU WAF Inspector.'
+        }
+      });
+    }
+
+    // 4. Inspect for XSS Script Injection (A03 / A07)
     if (XSS_REGEX.test(combinedInput)) {
-      const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
       Logger.warn(`[OWASP WAF] XSS script injection blocked from IP ${clientIp} on route ${rawUrl}`);
       return res.status(403).json({
         success: false,
-        message: 'Security Violation: Cross-Site Scripting (XSS) payload blocked by ASTU WAF Inspector.',
+        error: {
+          code: 'OWASP_SECURITY_BLOCK',
+          message: 'Security Violation: Cross-Site Scripting (XSS) payload blocked by ASTU WAF Inspector.'
+        }
       });
     }
 
@@ -71,7 +116,7 @@ export const owaspSecurityInspectorMiddleware = (req: Request, res: Response, ne
 };
 
 // ----------------------------------------------------------------------
-// 2. SSRF Outbound Egress URL Validator (A10: SSRF)
+// 5. SSRF Outbound Egress URL Validator (A10: SSRF)
 // ----------------------------------------------------------------------
 const PRIVATE_SUBNET_REGEX = /(^127\.)|(^10\.)|(^172\.(1[6-9]|2[0-9]|3[0-1])\.)|(^192\.168\.)|(^169\.254\.)|(localhost)/i;
 
@@ -79,20 +124,23 @@ export function validateOutboundEgressUrl(targetUrl: string): boolean {
   try {
     const parsed = new URL(targetUrl);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return false;
+      throw new Error('SSRF Block: Protocol must be HTTP or HTTPS.');
     }
     if (PRIVATE_SUBNET_REGEX.test(parsed.hostname)) {
       Logger.warn(`[OWASP SSRF Guard] Blocked outbound request to private network host: ${parsed.hostname}`);
-      return false;
+      throw new Error(`SSRF Block: Access to private IP address '${parsed.hostname}' is prohibited.`);
     }
     return true;
-  } catch {
-    return false;
+  } catch (err: any) {
+    if (err.message && err.message.startsWith('SSRF Block')) {
+      throw err;
+    }
+    throw new Error(`SSRF Block: Invalid egress target URL '${targetUrl}'.`);
   }
 }
 
 // ----------------------------------------------------------------------
-// 3. System-Wide OWASP Top 10 (A01–A10) Audit Engine
+// 6. System-Wide OWASP Top 10 (A01–A10) Audit Engine
 // ----------------------------------------------------------------------
 export async function executeOwaspSystemAudit(): Promise<OwaspAuditSummary> {
   const auditCount = await prisma.auditLog.count().catch(() => 0);
@@ -117,7 +165,7 @@ export async function executeOwaspSystemAudit(): Promise<OwaspAuditSummary> {
       activeControls: [
         'Role-Based Access Control (RBAC) middleware',
         'ProtectedRoute client route guards',
-        'Tenant boundary check middleware',
+        'IDOR Ownership Guard (enforceResourceOwnership)',
         'Object-level permission checks',
       ],
       auditedAt: nowStr,
@@ -143,7 +191,7 @@ export async function executeOwaspSystemAudit(): Promise<OwaspAuditSummary> {
       activeControls: [
         'Prisma ORM parameterized queries',
         'Zod payload schema validation',
-        'Express ASTU WAF SQLi & Command Injection inspector middleware',
+        'Express WAF SQLi, Command Injection & XSS inspector middleware',
       ],
       auditedAt: nowStr,
     },
@@ -155,7 +203,7 @@ export async function executeOwaspSystemAudit(): Promise<OwaspAuditSummary> {
       activeControls: [
         'Defense-in-depth architecture',
         'Break Glass emergency access elevation timers',
-        'Dangerous action typed confirmation modals',
+        'Dangerous action typed confirmation protection',
       ],
       auditedAt: nowStr,
     },
@@ -191,7 +239,7 @@ export async function executeOwaspSystemAudit(): Promise<OwaspAuditSummary> {
       status: 'PROTECTED',
       activeControls: [
         'Mandatory MFA OTP challenge for administrative roles',
-        'Brute force IP lockouts (5 failed attempts)',
+        'Brute force IP lockouts & auth rate limiting',
         'Short-lived JWT tokens with active rotation',
       ],
       auditedAt: nowStr,
@@ -216,7 +264,7 @@ export async function executeOwaspSystemAudit(): Promise<OwaspAuditSummary> {
       activeControls: [
         'Centralized PostgreSQL audit log stream',
         'Real-time WAF alert dispatch & terminal streamer',
-        'Immutable before/after data mutation diff logging',
+        'Automated AlertEngine threshold monitors',
       ],
       auditedAt: nowStr,
     },

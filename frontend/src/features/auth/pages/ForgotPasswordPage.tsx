@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 import toast from 'react-hot-toast';
-import { Mail, Phone, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Mail, Phone, ArrowLeft, ShieldCheck, RefreshCw, KeyRound, CheckCircle2 } from 'lucide-react';
 import AuthLayout from '../../../layouts/AuthLayout';
 import FormField from '../components/FormField';
 import PrimaryButton from '../components/PrimaryButton';
@@ -30,6 +30,24 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [targetVal, setTargetVal] = useState('');
+  
+  // Resend code state & countdown timer
+  const [resendTimer, setResendTimer] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+
+  // OTP & Reset Password Form State
+  const [otpCode, setOtpCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+
+  // Resend countdown effect
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const interval = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [resendTimer]);
 
   const handleSubmit = async (values: { email?: string; phone?: string }) => {
     setIsLoading(true);
@@ -40,7 +58,8 @@ export default function ForgotPasswordPage() {
       const response = await authService.requestPasswordReset(inputVal, method);
       if (response.ok) {
         setIsSuccess(true);
-        toast.success(response.data.message);
+        setResendTimer(45);
+        toast.success(response.data.message || `Recovery code sent to ${inputVal}`);
       } else {
         toast.error(response.message || 'Request failed. Please try again.');
       }
@@ -51,41 +70,172 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  const handleResendCode = async () => {
+    if (!targetVal || resendTimer > 0) return;
+    setIsResending(true);
+    try {
+      const response = await authService.requestPasswordReset(targetVal, method);
+      if (response.ok) {
+        setResendTimer(45);
+        toast.success(`A new verification code has been dispatched to ${targetVal}`);
+      } else {
+        toast.error(response.message || 'Failed to resend code. Please try again.');
+      }
+    } catch (err) {
+      toast.error('Error resending verification code.');
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleResetWithOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpCode.trim()) {
+      toast.error('Please enter the 6-digit verification code.');
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const response = await authService.resetPassword(otpCode.trim(), newPassword);
+      if (response.ok) {
+        toast.success('Password reset successfully! Please sign in with your new password.', { duration: 5000 });
+        navigate('/login');
+      } else {
+        toast.error(response.message || 'Invalid or expired code. Please try resending the code.');
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Password reset failed. Check your code and try again.');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   if (isSuccess) {
     return (
       <AuthLayout
-        title="Recovery Info Sent"
-        subtitle="Check your inbox or messages to reset your password"
+        title="Reset Your Password"
+        subtitle="Enter the 6-digit verification code sent to your account"
         showLogo={true}
       >
-        <div className="flex justify-center mb-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 p-1">
-            <ShieldCheck className="h-8 w-8 text-emerald-600 animate-pulse" />
+        <div className="flex justify-center mb-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 p-1">
+            <ShieldCheck className="h-7 w-7 text-emerald-600 animate-pulse" />
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="rounded-lg bg-emerald-50/50 p-4 border border-emerald-150 text-xs text-emerald-800">
-            <p className="font-bold mb-1">Reset Instructions Dispatched</p>
-            <p>
-              We have sent a verification code / password reset link to <span className="font-semibold text-astu-navy">{targetVal}</span>.
+        <div className="space-y-5">
+          <div className="rounded-xl bg-emerald-50/70 p-3.5 border border-emerald-200 text-xs text-emerald-900">
+            <p className="font-bold mb-1 flex items-center gap-1.5 text-emerald-800">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Reset Instructions Dispatched
             </p>
-            <p className="mt-1">
-              Please follow the instructions in the message to set up your new password. The link will expire in <span className="font-medium">15 minutes</span>.
+            <p className="leading-relaxed">
+              We have sent a verification code to <span className="font-bold text-astu-navy underline">{targetVal}</span>.
+            </p>
+            <p className="mt-1 text-[11px] text-emerald-700">
+              Code expires in <span className="font-semibold">15 minutes</span>.
             </p>
           </div>
 
-          <PrimaryButton onClick={() => navigate('/login')} variant="outline">
-            Go to Login
-          </PrimaryButton>
+          {/* OTP Code & New Password Verification Form */}
+          <form onSubmit={handleResetWithOtp} className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div>
+              <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block mb-1">
+                6-Digit Verification Code
+              </label>
+              <input
+                type="text"
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                placeholder="e.g. 849204"
+                className="w-full text-center text-xl font-mono tracking-[0.3em] p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-astu-navy text-slate-900 font-bold bg-white"
+                required
+                autoFocus
+              />
+            </div>
 
-          <div className="text-center pt-2">
+            <div>
+              <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block mb-1">
+                New Password
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimum 6 characters"
+                className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-astu-navy text-slate-900 font-medium bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider block mb-1">
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-astu-navy text-slate-900 font-medium bg-white"
+                required
+              />
+            </div>
+
+            <PrimaryButton type="submit" loading={isResetting}>
+              Set New Password & Sign In
+            </PrimaryButton>
+          </form>
+
+          {/* Resend Code Section with Countdown Timer */}
+          <div className="p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-center space-y-2">
+            <p className="text-xs text-slate-600 font-medium">
+              Didn't receive the email or SMS code?
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                disabled={resendTimer > 0 || isResending}
+                onClick={handleResendCode}
+                className="w-full py-2.5 px-4 rounded-lg bg-white hover:bg-slate-50 text-astu-navy text-xs font-bold transition-all border border-slate-300 disabled:opacity-60 flex items-center justify-center gap-2 shadow-sm"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isResending ? 'animate-spin' : ''}`} />
+                <span>
+                  {isResending
+                    ? 'Sending Code...'
+                    : resendTimer > 0
+                    ? `Resend Code in ${resendTimer}s`
+                    : 'Send Code Again'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="text-center pt-1 flex flex-col gap-2">
             <button
               type="button"
-              onClick={() => setIsSuccess(false)}
-              className="text-xs text-on-surface-variant hover:text-astu-navy font-semibold hover:underline"
+              onClick={() => { setIsSuccess(false); setOtpCode(''); }}
+              className="text-xs text-slate-500 hover:text-astu-navy font-semibold hover:underline"
             >
-              Didn't receive the code? Request again
+              Use a different email address or phone number
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="text-xs text-astu-navy font-bold inline-flex items-center justify-center gap-1 hover:underline"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Login
             </button>
           </div>
         </div>
@@ -197,3 +347,4 @@ export default function ForgotPasswordPage() {
     </AuthLayout>
   );
 }
+

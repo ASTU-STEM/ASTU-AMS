@@ -43,6 +43,7 @@ import {
   Award,
   Save,
   ShieldCheck,
+  FileText,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
@@ -1560,6 +1561,335 @@ export default function UserManagement() {
     toast.success(`Copied ${allMatchedRows.length} roster summary lines to clipboard!`);
   };
 
+  const executeExportPDF = async () => {
+    const { default: toast } = await import('react-hot-toast');
+    toast.loading('Generating Official ASTU PDF Directory Document...', { id: 'admin-export-toast' });
+
+    const allMatchedRows = exportMatchedUsers;
+    if (allMatchedRows.length === 0) {
+      toast.error('No system users match your selected export criteria.', { id: 'admin-export-toast' });
+      return;
+    }
+
+    const activeCols = columnSequence.filter(col => exportColumns[col.key]);
+    if (activeCols.length === 0) {
+      toast.error('Please select at least one column to export.', { id: 'admin-export-toast' });
+      return;
+    }
+
+    const totalCount = allMatchedRows.length;
+    const activeCount = allMatchedRows.filter(u => u.status === 'Active').length;
+    const pendingCount = allMatchedRows.filter(u => u.status === 'Pending Verification' || (u.status as string) === 'Pending').length;
+    const suspendedCount = allMatchedRows.filter(u => u.status === 'Suspended').length;
+    const activePct = totalCount > 0 ? ((activeCount / totalCount) * 100).toFixed(1) : '0';
+
+    const timestamp = new Date().toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'medium' });
+    const serialNo = `ASTU-DIR-${Date.now().toString(36).toUpperCase()}-${new Date().getFullYear()}`;
+
+    const tableHeaderHtml = activeCols.map(col => `
+      <th style="padding: 10px 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #002866; background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left;">
+        ${col.label}
+      </th>
+    `).join('');
+
+    const tableBodyHtml = allMatchedRows.map((user, index) => {
+      const rowBg = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+      const cellHtml = activeCols.map(col => {
+        const val = getDerivedColumnValue(user, col.key);
+        let formattedVal = val;
+        if (col.key === 'status') {
+          const statusBg = val === 'Active' ? '#dcfce7' : val === 'Suspended' ? '#fee2e2' : '#fef3c7';
+          const statusFg = val === 'Active' ? '#15803d' : val === 'Suspended' ? '#b91c1c' : '#b45309';
+          formattedVal = `<span style="display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 700; border-radius: 9999px; background-color: ${statusBg}; color: ${statusFg};">${val}</span>`;
+        }
+        return `
+          <td style="padding: 9px 12px; font-size: 11px; color: #1e293b; font-weight: 500; border-bottom: 1px solid #e2e8f0; vertical-align: middle;">
+            ${formattedVal}
+          </td>
+        `;
+      }).join('');
+
+      return `<tr style="background-color: ${rowBg}; page-break-inside: avoid;">${cellHtml}</tr>`;
+    }).join('');
+
+    const portalTitle = activePortalTab === 'ALL' ? 'ASTU Enterprise Multi-Portal Directory' : `${activePortalTab} Portal Directory`;
+
+    const printableHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>ASTU System Directory Report - ${serialNo}</title>
+        <style>
+          @page {
+            size: A4 landscape;
+            margin: 15mm;
+          }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #0f172a;
+            margin: 0;
+            padding: 0;
+            background: #fff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px double #002866;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+          }
+          .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+          }
+          .seal-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #002866, #004b99);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+            border: 2px solid #d97706;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+          }
+          .title-area h1 {
+            font-size: 18px;
+            font-weight: 900;
+            color: #002866;
+            margin: 0;
+            letter-spacing: -0.3px;
+          }
+          .title-area h2 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #003580;
+            margin: 2px 0 0 0;
+          }
+          .title-area p {
+            font-size: 10px;
+            color: #64748b;
+            margin: 2px 0 0 0;
+          }
+          .meta-stamp {
+            text-align: right;
+            font-size: 10px;
+            color: #475569;
+          }
+          .stamp-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+            padding: 3px 8px;
+            font-weight: 800;
+            font-size: 9px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+          }
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+          }
+          .metric-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 12px;
+          }
+          .metric-card .lbl {
+            font-size: 9px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          .metric-card .val {
+            font-size: 18px;
+            font-weight: 900;
+            color: #002866;
+            margin-top: 2px;
+          }
+          .metric-card .sub {
+            font-size: 9px;
+            font-weight: 600;
+            color: #10b981;
+            margin-top: 2px;
+          }
+          .filters-banner {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 10px;
+            color: #1e3a8a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+          }
+          thead {
+            display: table-header-group;
+          }
+          tr {
+            page-break-inside: avoid;
+          }
+          .footer-sign {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            page-break-inside: avoid;
+          }
+          .sign-box {
+            width: 42%;
+          }
+          .sign-line {
+            border-bottom: 1px dashed #64748b;
+            margin-top: 35px;
+            margin-bottom: 4px;
+          }
+          .sign-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #334155;
+          }
+          .sign-sub {
+            font-size: 9px;
+            color: #64748b;
+          }
+          @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print" style="background: #002866; color: #fff; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; font-family: sans-serif;">
+          <div style="font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+            <span>📄 Official ASTU Directory PDF Export Preview</span>
+            <span style="font-size: 11px; font-weight: 500; opacity: 0.8;">(${totalCount} Records Filtered)</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="window.print()" style="background: #10b981; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+              🖨️ Print / Save as PDF
+            </button>
+            <button onclick="window.close()" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 12px;">
+              Close Window
+            </button>
+          </div>
+        </div>
+
+        <div style="padding: 20px;">
+          <!-- Header -->
+          <div class="header-container">
+            <div class="logo-section">
+              <div class="seal-badge">ASTU</div>
+              <div class="title-area">
+                <h1>ADAMA SCIENCE AND TECHNOLOGY UNIVERSITY</h1>
+                <h2>${portalTitle.toUpperCase()}</h2>
+                <p>Office of the Registrar & ICT Systems Directorate · Access Management & Directory Governance</p>
+              </div>
+            </div>
+            <div class="meta-stamp">
+              <div class="stamp-badge">OFFICIAL AUDIT REPORT</div>
+              <div><strong>Document Serial:</strong> ${serialNo}</div>
+              <div><strong>Generated:</strong> ${timestamp}</div>
+              <div><strong>Scope:</strong> ${activePortalTab === 'ALL' ? 'System-Wide (5 Portals)' : activePortalTab + ' Portal'}</div>
+            </div>
+          </div>
+
+          <!-- Summary Metrics Cards -->
+          <div class="summary-grid">
+            <div class="metric-card">
+              <div class="lbl">Matched Roster Records</div>
+              <div class="val">${totalCount}</div>
+              <div class="sub">100% of Filter Scope</div>
+            </div>
+            <div class="metric-card">
+              <div class="lbl">Active Account Rate</div>
+              <div class="val">${activeCount}</div>
+              <div class="sub" style="color: #10b981;">${activePct}% Active System Accounts</div>
+            </div>
+            <div class="metric-card">
+              <div class="lbl">Pending Verification</div>
+              <div class="val">${pendingCount}</div>
+              <div class="sub" style="color: #f59e0b;">Awaiting Admin Review</div>
+            </div>
+            <div class="metric-card">
+              <div class="lbl">Suspended Accounts</div>
+              <div class="val">${suspendedCount}</div>
+              <div class="sub" style="color: #ef4444;">Restricted Access</div>
+            </div>
+          </div>
+
+          <!-- Filter Configuration Banner -->
+          <div class="filters-banner">
+            <div>
+              <strong>Active Directory Filter Parameters:</strong> 
+              Search: "${exportFilters.search || 'None'}" | Role: ${exportFilters.role} | Status: ${exportFilters.status} | Department: ${exportFilters.department} | Batch: ${exportFilters.batchYear}
+            </div>
+            <div><strong>Columns Rendered:</strong> ${activeCols.length} Columns</div>
+          </div>
+
+          <!-- Roster Table -->
+          <table>
+            <thead>
+              <tr>
+                ${tableHeaderHtml}
+              </tr>
+            </thead>
+            <tbody>
+              ${tableBodyHtml}
+            </tbody>
+          </table>
+
+          <!-- Footer Signatures -->
+          <div class="footer-sign">
+            <div class="sign-box">
+              <div class="sign-line"></div>
+              <div class="sign-label">Prepared By: ICT System Administrator</div>
+              <div class="sign-sub">ASTU Enterprise Systems Directorate & Security SOC</div>
+            </div>
+            <div class="sign-box" style="text-align: right;">
+              <div class="sign-line"></div>
+              <div class="sign-label">Approved By: Director, Registrar & Academic Records</div>
+              <div class="sign-sub">Adama Science and Technology University · Main Campus</div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWin = window.open('', '_blank', 'width=1100,height=850');
+    if (printWin) {
+      printWin.document.open();
+      printWin.document.write(printableHtml);
+      printWin.document.close();
+      toast.success(`Generated Official ASTU PDF Report for ${totalCount} users! Click 'Print / Save as PDF' in preview window.`, { id: 'admin-export-toast' });
+      setIsExportModalOpen(false);
+    } else {
+      toast.error('Browser pop-up was blocked. Please allow pop-ups for PDF preview.', { id: 'admin-export-toast' });
+    }
+  };
+
   const openAddModal = () => {
     setEditingUserId(null);
     setForm(createDefaultForm());
@@ -1855,7 +2185,7 @@ export default function UserManagement() {
               className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-white/40 px-4 py-2.5 text-sm font-semibold backdrop-blur-md shadow-xs transition-all cursor-pointer"
             >
               <Download className="h-4 w-4 text-white" />
-              <span>Export CSV</span>
+              <span>Export CSV / PDF</span>
             </button>
           </>
         }
@@ -4922,7 +5252,7 @@ export default function UserManagement() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-lg font-extrabold tracking-tight">ASTU Enterprise Multi-Portal Directory Exporter</h3>
                     <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">5 PORTALS CONNECTED</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-400/20 text-blue-200 border border-blue-300/30 px-2 py-0.5 rounded-full">CSV / JSON / COPY</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-400/20 text-blue-200 border border-blue-300/30 px-2 py-0.5 rounded-full">CSV / JSON / PDF / COPY</span>
                   </div>
                   <p className="text-xs text-blue-100/80 mt-0.5">Executive reporting & cross-portal directory data extraction center</p>
                 </div>
@@ -5379,7 +5709,7 @@ export default function UserManagement() {
                 Cancel
               </button>
 
-              <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-end">
+              <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-end">
                 <button
                   type="button"
                   onClick={executeCopySummary}
@@ -5404,16 +5734,27 @@ export default function UserManagement() {
 
                 <button
                   type="button"
+                  onClick={executeExportPDF}
+                  disabled={isExportLoading || exportMatchedUsers.length === 0}
+                  className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  title="Generate printable PDF directory report with seal & metrics"
+                >
+                  <FileText className="h-3.5 w-3.5 text-rose-600" />
+                  <span>Export PDF Report</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={executeExportCSV}
                   disabled={isExportLoading || exportMatchedUsers.length === 0}
-                  className="px-6 py-2.5 bg-gradient-to-r from-[#002866] via-[#003580] to-emerald-700 hover:from-[#001e4d] hover:to-emerald-800 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer w-full sm:w-auto justify-center"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#002866] via-[#003580] to-emerald-700 hover:from-[#001e4d] hover:to-emerald-800 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer w-full sm:w-auto justify-center"
                 >
                   {isExportLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Download className="h-4 w-4" />
                   )}
-                  <span>{isExportLoading ? 'Fetching Data...' : `Generate & Download CSV (${exportMatchedUsers.length})`}</span>
+                  <span>{isExportLoading ? 'Fetching Data...' : `Generate CSV (${exportMatchedUsers.length})`}</span>
                 </button>
               </div>
             </div>

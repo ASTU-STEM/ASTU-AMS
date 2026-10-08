@@ -149,7 +149,8 @@ export class TechnicalOpsController {
 
   async getFeatureFlags(req: Request, res: Response) {
     try {
-      const data = await manageTechnicalOpsUseCase.getFeatureFlags();
+      const env = (req.query.env as string) || 'Production';
+      const data = await manageTechnicalOpsUseCase.getFeatureFlags(env);
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -158,8 +159,67 @@ export class TechnicalOpsController {
 
   async updateFeatureFlag(req: Request, res: Response) {
     try {
-      const { flagId, enabled, env } = req.body;
-      const data = await manageTechnicalOpsUseCase.updateFeatureFlag(flagId, enabled, env);
+      const { flagId, enabled, rolloutPct, env } = req.body;
+      const data = await manageTechnicalOpsUseCase.updateFeatureFlag(flagId, enabled, rolloutPct, env || 'Production');
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async createFeatureFlag(req: Request, res: Response) {
+    try {
+      const { name, target, description, enabled, rolloutPct, env } = req.body;
+      const data = await manageTechnicalOpsUseCase.createFeatureFlag({ name, target, description, enabled, rolloutPct }, env || 'Production');
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getReleaseInfo(req: Request, res: Response) {
+    try {
+      const data = await manageTechnicalOpsUseCase.getReleaseInfo();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async rollbackRelease(req: Request, res: Response) {
+    try {
+      const data = await manageTechnicalOpsUseCase.rollbackRelease();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async getActiveSessions(req: Request, res: Response) {
+    try {
+      const data = await manageTechnicalOpsUseCase.getActiveAdminSessions();
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async revokeSession(req: Request, res: Response) {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ success: false, message: 'User ID is required' });
+      }
+      const data = await manageTechnicalOpsUseCase.revokeAdminSession(userId);
+      res.json({ success: true, data });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async clearBroadcast(req: Request, res: Response) {
+    try {
+      const data = await manageTechnicalOpsUseCase.clearEmergencyBroadcast();
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
