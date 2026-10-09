@@ -18,12 +18,20 @@ import {
   ShieldCheck,
   Trash2,
   X,
+  Users,
+  Filter,
+  GraduationCap,
+  Briefcase,
+  Building2,
+  Shield,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
 import ImageUploader from '../components/ImageUploader';
 import contentService from '../services/content.service';
+import homepageCmsService from '../services/homepageCms.service';
+import communityMembersService, { CommunityMember } from '../services/communityMembers.service';
 
 const GOVERNANCE_ANNOUNCEMENTS_KEY = 'astu_ams_governance_announcements';
 const GOVERNANCE_COMMUNITY_KEY = 'astu_ams_governance_community';
@@ -113,6 +121,7 @@ function mapCmsToAnnouncement(item: any): Announcement {
 
 export default function ContentGovernance() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'announcements' | 'community' | 'community-feed' | 'community-members'>('announcements');
 
   const loadAnnouncements = useCallback((): Announcement[] => {
     const cmsItems = contentService.getItems();
@@ -127,8 +136,33 @@ export default function ContentGovernance() {
   }, []);
 
   const [announcements, setAnnouncements] = useState<Announcement[]>(loadAnnouncements);
+  const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(() => 
+    communityMembersService.getMembers()
+  );
+  const [memberSearch, setMemberSearch] = useState('');
+  const [memberCategoryFilter, setMemberCategoryFilter] = useState<'all' | 'executive' | 'academia' | 'engineering' | 'policy'>('all');
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showEditMemberModal, setShowEditMemberModal] = useState(false);
+  const [showViewMemberModal, setShowViewMemberModal] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
+  const [memberFormData, setMemberFormData] = useState<Partial<CommunityMember>>({});
 
   const [community, setCommunity] = useState<CommunityPost[]>(() => {
+    // First try to load from homepageCmsService
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.communityPosts?.length) {
+      return cmsConfig.communityPosts.map((p: any) => ({
+        id: p.id,
+        title: p.message || p.text || 'Community Post',
+        author: p.name || 'Community Member',
+        reports: 0,
+        action: 'Approve',
+        approved: p.active !== false,
+        pinned: false,
+        date: 'Recently',
+      }));
+    }
+    // Fallback to localStorage
     try {
       const stored = localStorage.getItem(GOVERNANCE_COMMUNITY_KEY);
       if (stored) {
@@ -144,7 +178,6 @@ export default function ContentGovernance() {
   const [body, setBody] = useState('');
   const [image, setImage] = useState('');
   const [search, setSearch] = useState('');
-  const [selectedTab, setSelectedTab] = useState<'announcements' | 'community'>('announcements');
   const [showEditor, setShowEditor] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -161,6 +194,15 @@ export default function ContentGovernance() {
     return () => window.removeEventListener('astu-cms-content-changed', handleSync);
   }, [loadAnnouncements]);
 
+  // Sync community members
+  useEffect(() => {
+    const handleMemberSync = () => {
+      setCommunityMembers(communityMembersService.getMembers());
+    };
+    window.addEventListener('astu-cms-community-members-changed', handleMemberSync);
+    return () => window.removeEventListener('astu-cms-community-members-changed', handleMemberSync);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(GOVERNANCE_ANNOUNCEMENTS_KEY, JSON.stringify(announcements));
   }, [announcements]);
@@ -168,6 +210,24 @@ export default function ContentGovernance() {
   useEffect(() => {
     localStorage.setItem(GOVERNANCE_COMMUNITY_KEY, JSON.stringify(community));
     window.dispatchEvent(new Event('astu-cms-community-changed'));
+
+    // Sync to homepageCmsService for homepage display
+    const cmsConfig = homepageCmsService.getSettings();
+    const communityPostsForHomepage = community
+      .filter(p => p.approved)
+      .map(p => ({
+        name: p.author,
+        role: 'Alumni',
+        company: 'ASTU Alumni',
+        message: p.title,
+        image: '',
+        active: true,
+      }));
+
+    homepageCmsService.saveSettings({
+      ...cmsConfig,
+      communityPosts: communityPostsForHomepage,
+    });
   }, [community]);
 
   const filteredAnnouncements = useMemo(() => {
@@ -370,15 +430,15 @@ export default function ContentGovernance() {
             <button
               key={tab.key}
               type="button"
-              onClick={() => setSelectedTab(tab.key)}
+              onClick={() => setActiveTab(tab.key)}
               className={`inline-flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                selectedTab === tab.key ? 'bg-[#003580] text-white shadow-sm dark:bg-sky-600' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+                activeTab === tab.key ? 'bg-[#003580] text-white shadow-sm dark:bg-sky-600' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
               }`}
             >
               {tab.key === 'announcements' ? <Megaphone className="h-3.5 w-3.5" /> : <MessageSquareWarning className="h-3.5 w-3.5" />}
               {tab.label}
               <span className={`ml-1 px-1.5 py-0.5 rounded text-[10px] ${
-                selectedTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                activeTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
               }`}>{tab.count}</span>
             </button>
           ))}
@@ -389,7 +449,7 @@ export default function ContentGovernance() {
         </div>
       </div>
 
-      {selectedTab === 'announcements' && (
+      {activeTab === 'announcements' && (
         <section className="grid gap-4 xl:grid-cols-[420px_1fr]">
           {/* Editor Panel */}
           {(showEditor || editingId) && (
@@ -501,7 +561,7 @@ export default function ContentGovernance() {
         </section>
       )}
 
-      {selectedTab === 'community' && (
+      {activeTab === 'community' && (
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredCommunity.map((row, idx) => (
             <div key={row.id} className="fade-up rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"

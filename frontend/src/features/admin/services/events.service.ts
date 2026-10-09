@@ -43,7 +43,7 @@ export const eventsService = {
       }
       return [];
     } catch (error) {
-      console.warn('Failed to fetch events from API, falling back to local list:', error);
+      console.warn('Failed to fetch events from API:', error);
       return [];
     }
   },
