@@ -15,6 +15,7 @@ import {
   uploadMediaController,
   getMediaAssetsController,
   deleteMediaAssetController,
+  getPublicMetricsController,
 } from './content.controller';
 
 const router = Router();
@@ -51,6 +52,7 @@ const upload = multer({
 });
 
 // ─── Public Endpoints (Accessible by Landing Page & Directory) ───
+router.get('/public-metrics', optionalAuthenticateJWT, getPublicMetricsController);
 router.get('/homepage/config', optionalAuthenticateJWT, getHomepageConfigController);
 router.get('/media', optionalAuthenticateJWT, getMediaAssetsController);
 router.get('/', optionalAuthenticateJWT, getContentController);
