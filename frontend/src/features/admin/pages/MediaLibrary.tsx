@@ -185,7 +185,7 @@ interface PendingUpload {
   height?: number;
 }
 
-export default function MediaLibrary() {
+export default function MediaLibrary({ hideHeader = false }: { hideHeader?: boolean } = {}) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [media, setMedia] = useState<MediaItem[]>(() => {
     try {
@@ -590,24 +590,26 @@ export default function MediaLibrary() {
         className="hidden"
       />
 
-      <AdminPageHeader
-        title="Media Library"
-        subtitle="Centralized hub for images, videos, documents, and audio uploaded to the database with category, description, and accessibility metadata."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Media' }]}
-        actions={
-          <div className="flex items-center gap-2">
-            <AdminBadge variant="info">{counts.total} uploaded files · {formatBytes(counts.totalSize)}</AdminBadge>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md transition-all cursor-pointer"
-            >
-              <Upload className="h-4 w-4" />
-              Upload Media
-            </button>
-          </div>
-        }
-      />
+      {!hideHeader && (
+        <AdminPageHeader
+          title="Media Library"
+          subtitle="Centralized hub for images, videos, documents, and audio uploaded to the database with category, description, and accessibility metadata."
+          breadcrumbs={[{ label: 'CMS' }, { label: 'Media' }]}
+          actions={
+            <div className="flex items-center gap-2">
+              <AdminBadge variant="info">{counts.total} uploaded files · {formatBytes(counts.totalSize)}</AdminBadge>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] px-4 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md transition-all cursor-pointer"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Media
+              </button>
+            </div>
+          }
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {[
