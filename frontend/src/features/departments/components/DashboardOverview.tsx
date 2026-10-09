@@ -5,6 +5,7 @@ import {
   ArrowUp, ArrowDown, Minus, FileText, MessageSquare, AlertCircle
 } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import {
   DashboardOverviewFilters,
   KPICard,
@@ -224,6 +225,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode =
 
   return (
     <div className="space-y-6">
+      {/* Official Alumni Officer Broadcast Hero Banner */}
+      <DashboardBroadcastHero actorRole="DEPARTMENT_HEAD" className="mb-2" />
+
       {/* Department Command Center Banner */}
       <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#003580] via-[#004b99] to-[#0066cc] p-6 text-white shadow-md">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

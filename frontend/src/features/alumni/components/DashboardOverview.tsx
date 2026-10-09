@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { alumniService } from '../services/alumni.service';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -135,6 +136,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           background-size: 200% 200%;
         }
       `}</style>
+
+      {/* Official Alumni Officer Broadcast Hero Banner */}
+      <DashboardBroadcastHero actorRole="ALUMNI" className="mb-2" />
+
       <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1d9e75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6 dash-glow">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-5 left-[10%] w-2 h-2 rounded-full bg-white/20 animate-float" />
