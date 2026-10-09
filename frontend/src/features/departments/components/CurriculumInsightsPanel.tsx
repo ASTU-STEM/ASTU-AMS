@@ -7,6 +7,8 @@ interface CurriculumInsightsPanelProps {
 }
 
 export const CurriculumInsightsPanel: React.FC<CurriculumInsightsPanelProps> = ({ insights }) => {
+  const safeInsights = Array.isArray(insights) ? insights : [];
+
   const getIcon = (type: CurriculumInsight['type']) => {
     switch (type) {
       case 'success':
@@ -54,7 +56,7 @@ export const CurriculumInsightsPanel: React.FC<CurriculumInsightsPanelProps> = (
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {insights.map((insight) => (
+        {safeInsights.map((insight) => (
           <div
             key={insight.id}
             className={`p-5 bg-gradient-to-br ${getBgColor(insight.type)} border rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer`}

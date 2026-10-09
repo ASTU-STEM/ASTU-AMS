@@ -4,15 +4,26 @@ import { SatisfactionMetric } from '../types/tracer.types';
 
 interface GraduateSatisfactionAnalyticsProps {
   data: SatisfactionMetric[];
+  overallSatisfaction?: {
+    score?: string;
+    trend?: string;
+  };
   darkMode?: boolean;
 }
 
-export const GraduateSatisfactionAnalytics: React.FC<GraduateSatisfactionAnalyticsProps> = ({ data, darkMode = false }) => {
+export const GraduateSatisfactionAnalytics: React.FC<GraduateSatisfactionAnalyticsProps> = ({ data, overallSatisfaction, darkMode = false }) => {
   const getTrendIcon = (trend: number) => {
     if (trend > 0) return <TrendingUp className="h-4 w-4 text-astu-green" />;
     if (trend < 0) return <TrendingDown className="h-4 w-4 text-astu-red" />;
     return <Star className="h-4 w-4 text-gray-400" />;
   };
+
+  const calculatedAvg = data.length > 0
+    ? (data.reduce((acc, curr) => acc + curr.score, 0) / data.length).toFixed(1)
+    : '0';
+
+  const displayScore = overallSatisfaction?.score || `${calculatedAvg}/10`;
+  const displayTrend = overallSatisfaction?.trend || '+0.4';
 
   return (
     <div className={`rounded-2xl p-6 shadow-sm border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200/60'}`}>
@@ -71,13 +82,13 @@ export const GraduateSatisfactionAnalytics: React.FC<GraduateSatisfactionAnalyti
         <div className="flex justify-between items-center">
           <div>
             <p className="text-sm font-semibold opacity-90 mb-1">Overall Satisfaction Score</p>
-            <p className="text-4xl font-bold">8.2/10</p>
+            <p className="text-4xl font-bold">{displayScore}</p>
           </div>
           <div className="text-right">
             <p className="text-sm font-semibold opacity-90 mb-1">Trend</p>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              <span className="text-2xl font-bold">+0.4</span>
+              <span className="text-2xl font-bold">{displayTrend}</span>
             </div>
           </div>
         </div>

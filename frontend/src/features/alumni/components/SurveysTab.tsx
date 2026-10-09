@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { surveyService } from '../../surveys/services/survey.service';
+import {
+  Search, Filter, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle,
+  RefreshCw, FileText, Layers, Check, X, ArrowRight, HelpCircle
+} from 'lucide-react';
 
 // ─── Reusable question field renderer ────────────────────────────────────────
 const QuestionField = ({
@@ -118,13 +122,18 @@ const QuestionField = ({
   </div>
 );
 
-
 export const SurveysTab = () => {
   const [assignments, setAssignments] = useState<any[]>([]);
 
   const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [loading, setLoading] = useState(true);
+
+  // Search, Status Filter & Pagination state for handling long survey lists
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED' | 'EXPIRED'>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     fetchMySurveys();
@@ -134,7 +143,7 @@ export const SurveysTab = () => {
     setLoading(true);
     try {
       const data = await surveyService.getMySurveys();
-      setAssignments(data);
+      setAssignments(data || []);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load surveys');
@@ -173,10 +182,7 @@ export const SurveysTab = () => {
     e.preventDefault();
     if (!activeAssignment) return;
 
-    // Optional: Add strict validation here if required
-
     const formattedAnswers = Object.entries(answers).map(([questionId, answerText]) => {
-      // If array (checkboxes), join by comma
       const text = Array.isArray(answerText) ? answerText.join(', ') : answerText;
       return { questionId, answerText: text };
     });
@@ -186,20 +192,54 @@ export const SurveysTab = () => {
       toast.success('Thank you! Tracer survey submitted successfully.');
       setActiveAssignment(null);
       setAnswers({});
-      fetchMySurveys(); // refresh list
+      fetchMySurveys();
     } catch (err) {
       console.error(err);
       toast.error('Failed to submit survey. Please try again.');
     }
   };
 
+  // Counts
   const completedCount = assignments.filter((s) => s.status === 'COMPLETED').length;
   const pendingCount = assignments.filter((s) => s.status === 'PENDING' || s.status === 'IN_PROGRESS').length;
+  const expiredCount = assignments.filter((s) => s.status === 'EXPIRED').length;
   const totalCount = assignments.length;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  // Filter & Search Logic
+  const filteredAssignments = assignments.filter((a) => {
+    const matchesSearch = !searchQuery ||
+      (a.survey?.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (a.survey?.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    const isCompleted = a.status === 'COMPLETED';
+    const isExpired = a.status === 'EXPIRED';
+    const isPending = a.status === 'PENDING' || a.status === 'IN_PROGRESS';
+
+    if (statusFilter === 'ALL') return true;
+    if (statusFilter === 'PENDING') return isPending;
+    if (statusFilter === 'COMPLETED') return isCompleted;
+    if (statusFilter === 'EXPIRED') return isExpired;
+
+    return true;
+  });
+
+  // Pagination Math
+  const totalPages = Math.ceil(filteredAssignments.length / itemsPerPage) || 1;
+  const currentAssignments = filteredAssignments.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   if (loading) {
-    return <div className="text-center p-8">Loading tracer studies...</div>;
+    return (
+      <div className="p-12 text-center text-xs text-gray-500 flex flex-col items-center justify-center space-y-3">
+        <RefreshCw className="w-8 h-8 animate-spin text-[#003366]" />
+        <span>Loading tracer questionnaires from ASTU database...</span>
+      </div>
+    );
   }
 
   return (
@@ -221,7 +261,7 @@ export const SurveysTab = () => {
             />
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">
-                Tracer & Accreditation Studies
+                Tracer &amp; Accreditation Studies
               </span>
               <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
                 Graduate Tracer Surveys
@@ -256,28 +296,76 @@ export const SurveysTab = () => {
 
       {/* ── Main interface: Survey list OR active survey questionnaire ── */}
       {!activeAssignment ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-5">
+          {/* Header Controls, Filter Tabs, and Search Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-2 border-b border-gray-150">
             <div>
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm font-bold material-symbols-outlined" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>assignment</span>
                 Your Tracer Questionnaires
               </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Managed tracer study assignments sent by your department and ASTU administration.
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 text-[10px] font-bold bg-[#003366]/10 text-[#003366] rounded-full">
-                {completedCount} Completed
-              </span>
-              {pendingCount > 0 && (
-                <span className="px-2.5 py-1 text-[10px] font-bold bg-red-50 text-[#CC0033] rounded-full">
-                  {pendingCount} Pending
-                </span>
-              )}
+
+            {/* Filter Tabs & Search Control */}
+            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+              
+              {/* Search Bar */}
+              <div className="relative flex-1 md:w-60">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  placeholder="Search questionnaires..."
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-[#003366] focus:bg-white transition-all"
+                />
+              </div>
+
+              {/* Status Filter Buttons */}
+              <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 text-xs font-bold">
+                <button
+                  onClick={() => { setStatusFilter('ALL'); setCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                    statusFilter === 'ALL' ? 'bg-white text-[#003366] shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  All ({totalCount})
+                </button>
+                <button
+                  onClick={() => { setStatusFilter('PENDING'); setCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                    statusFilter === 'PENDING' ? 'bg-white text-[#CC0033] shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  Pending ({pendingCount})
+                </button>
+                <button
+                  onClick={() => { setStatusFilter('COMPLETED'); setCurrentPage(1); }}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                    statusFilter === 'COMPLETED' ? 'bg-white text-[#1D9E75] shadow-xs' : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  Done ({completedCount})
+                </button>
+              </div>
+
+              {/* Refresh Button */}
+              <button
+                onClick={fetchMySurveys}
+                className="p-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-semibold cursor-pointer"
+                title="Refresh surveys list"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
+          {/* Questionnaire Items List */}
           <div className="space-y-3">
-            {assignments.map((assignment, idx) => {
+            {currentAssignments.map((assignment) => {
               const isCompleted = assignment.status === 'COMPLETED';
               const isExpired = assignment.status === 'EXPIRED';
               return (
@@ -302,13 +390,13 @@ export const SurveysTab = () => {
                           >
                             {isCompleted ? 'Completed' : isExpired ? 'Expired' : 'Pending Action'}
                           </span>
-                          <span className="text-[10px] text-gray-400 font-semibold">
-                            Deadline: {new Date(assignment.dueDate).toLocaleDateString()}
+                          <span className="text-[10px] text-gray-400 font-semibold flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-gray-400" /> Deadline: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : 'N/A'}
                           </span>
                         </div>
 
                         <h4 className="text-base font-bold text-gray-900">{assignment.survey?.title || 'Tracer Study'}</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed max-w-2xl">{assignment.survey?.description}</p>
+                        <p className="text-xs text-gray-500 leading-relaxed max-w-2xl">{assignment.survey?.description || 'Department tracer study survey questionnaire.'}</p>
                       </div>
 
                       <button
@@ -317,7 +405,7 @@ export const SurveysTab = () => {
                             handleStartSurvey(assignment);
                           }
                         }}
-                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex-shrink-0 ${
+                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex-shrink-0 cursor-pointer ${
                           isCompleted || isExpired
                             ? 'bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed'
                             : 'text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
@@ -332,14 +420,54 @@ export const SurveysTab = () => {
               );
             })}
 
-            {assignments.length === 0 && (
-              <div className="text-center py-12 px-6 rounded-2xl bg-gray-50 border border-gray-200/60">
-                <div className="text-4xl mb-3 opacity-30 material-symbols-outlined">analytics</div>
-                <p className="text-sm font-semibold text-gray-600">No tracer study questionnaires found.</p>
-                <p className="text-xs text-gray-400 mt-1">New surveys will appear here when assigned.</p>
+            {/* Empty State */}
+            {filteredAssignments.length === 0 && (
+              <div className="text-center py-12 px-6 rounded-2xl bg-gray-50 border border-gray-200/60 space-y-2">
+                <AlertCircle className="w-8 h-8 text-gray-400 mx-auto" />
+                <p className="text-sm font-semibold text-gray-700">No matching tracer study questionnaires found.</p>
+                <p className="text-xs text-gray-400 max-w-md mx-auto">
+                  {searchQuery || statusFilter !== 'ALL'
+                    ? 'Try clearing your search query or status filter to see all assigned surveys.'
+                    : 'New surveys assigned by your department head will automatically appear here.'}
+                </p>
+                {(searchQuery || statusFilter !== 'ALL') && (
+                  <button
+                    onClick={() => { setSearchQuery(''); setStatusFilter('ALL'); setCurrentPage(1); }}
+                    className="mt-2 text-xs text-[#003366] font-bold hover:underline cursor-pointer"
+                  >
+                    Reset Search &amp; Filters
+                  </button>
+                )}
               </div>
             )}
           </div>
+
+          {/* Pagination Controls when there are many questionnaires */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3">
+              <span className="text-xs text-gray-500 font-medium">
+                Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredAssignments.length)} of {filteredAssignments.length} questionnaires
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 disabled:opacity-40 hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" /> Previous
+                </button>
+                <span className="text-xs font-bold text-gray-700 px-2">Page {currentPage} of {totalPages}</span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 disabled:opacity-40 hover:bg-gray-50 flex items-center gap-1 cursor-pointer"
+                >
+                  Next <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
       ) : (
         /* ── Active Survey Question Form ── */
@@ -364,7 +492,7 @@ export const SurveysTab = () => {
               </div>
               <button
                 onClick={() => { setActiveAssignment(null); setAnswers({}); }}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors border border-white/20"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors border border-white/20 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-white text-sm">close</span>
               </button>
@@ -417,18 +545,17 @@ export const SurveysTab = () => {
               );
             })()}
 
-
             <div className="flex gap-3 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => { setActiveAssignment(null); setAnswers({}); }}
-                className="flex-1 px-5 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-semibold text-gray-700 transition-colors"
+                className="flex-1 px-5 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-semibold text-gray-700 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 px-5 py-3 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]"
+                className="flex-1 px-5 py-3 text-white font-semibold rounded-xl transition-all shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
               >
                 <span className="flex items-center justify-center gap-2">

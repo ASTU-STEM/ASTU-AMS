@@ -148,6 +148,27 @@ export class LoginUser {
     const firstName = adminProfile?.firstName || (user as any).firstName || (displayName ? displayName.split(' ')[0] : undefined);
     const lastName = adminProfile?.lastName || (user as any).lastName || (displayName ? displayName.split(' ').slice(1).join(' ') : undefined);
 
+    let userDepartment = (user as any).department;
+    if (user.role === Role.DEPARTMENT_HEAD) {
+      const headProfile = await prisma.departmentHeadProfile.findUnique({
+        where: { userId: user.id },
+        include: { department: true } as any
+      }).catch(() => null);
+
+      if ((headProfile as any)?.department?.name) {
+        userDepartment = (headProfile as any).department.name;
+      } else {
+        const email = user.email.toLowerCase();
+        if (email.includes('swe') || email.includes('software')) userDepartment = 'Software Engineering';
+        else if (email.includes('ece') || email.includes('electrical')) userDepartment = 'Electrical and Computer Engineering';
+        else if (email.includes('meg') || email.includes('mechanical')) userDepartment = 'Mechanical Engineering';
+        else if (email.includes('cve') || email.includes('civil')) userDepartment = 'Civil Engineering';
+        else if (email.includes('che') || email.includes('chemical')) userDepartment = 'Chemical Engineering';
+        else if (email.includes('geo') || email.includes('geology')) userDepartment = 'Applied Geology';
+        else userDepartment = userDepartment || 'Computer Science';
+      }
+    }
+
     return {
       user: {
         id: user.id,
@@ -157,6 +178,7 @@ export class LoginUser {
         fullName: displayName,
         firstName: firstName || undefined,
         lastName: lastName || undefined,
+        department: userDepartment || undefined,
         alumniProfile: alumniProfile ? { id: alumniProfile.id, fullName: alumniProfile.fullName } : undefined,
         employerProfile: employerProfile ? { id: employerProfile.id, companyName: employerProfile.companyName } : undefined,
       },

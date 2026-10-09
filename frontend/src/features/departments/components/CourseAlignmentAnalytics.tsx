@@ -8,8 +8,9 @@ interface CourseAlignmentAnalyticsProps {
 }
 
 export const CourseAlignmentAnalytics: React.FC<CourseAlignmentAnalyticsProps> = ({ data, darkMode = false }) => {
-  const sortedByAlignment = [...data].sort((a, b) => a.alignmentScore - b.alignmentScore);
-  const sortedByIndustry = [...data].sort((a, b) => b.industryRelevance - a.industryRelevance);
+  const safeData = Array.isArray(data) ? data : [];
+  const sortedByAlignment = [...safeData].sort((a, b) => (a?.alignmentScore || 0) - (b?.alignmentScore || 0));
+  const sortedByIndustry = [...safeData].sort((a, b) => (b?.industryRelevance || 0) - (a?.industryRelevance || 0));
 
   const getStatusColor = (status: CourseAlignment['status']) => {
     switch (status) {

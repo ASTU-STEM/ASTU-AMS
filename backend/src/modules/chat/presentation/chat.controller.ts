@@ -23,6 +23,9 @@ export class UnifiedChatController {
           },
           employerProfile: {
             select: { id: true, companyName: true, logoUrl: true, industry: true }
+          },
+          departmentHeadProfile: {
+            select: { id: true, department: { select: { name: true } } }
           }
         },
         orderBy: { createdAt: 'desc' },
@@ -54,9 +57,10 @@ export class UnifiedChatController {
           roleLabel = 'Document & Verification Services';
           secondaryInfo = 'ASTU Registrar';
         } else if (u.role === 'DEPARTMENT_HEAD') {
-          name = 'Department Head';
-          roleLabel = 'Academic Department Chair';
-          secondaryInfo = 'ASTU Faculty';
+          const deptName = u.departmentHeadProfile?.department?.name || 'Software Engineering';
+          name = `Department Head (${deptName})`;
+          roleLabel = `${deptName} Chair`;
+          secondaryInfo = `${deptName} Department`;
         }
 
         return {
@@ -154,10 +158,11 @@ export class UnifiedChatController {
           OR: [
             { id: { in: partnerIds } },
             { alumniProfile: { id: { in: partnerIds } } },
-            { employerProfile: { id: { in: partnerIds } } }
+            { employerProfile: { id: { in: partnerIds } } },
+            { departmentHeadProfile: { id: { in: partnerIds } } }
           ]
         },
-        include: { alumniProfile: { include: { department: true } }, employerProfile: true }
+        include: { alumniProfile: { include: { department: true } }, employerProfile: true, departmentHeadProfile: { include: { department: true } } }
       });
 
       const partnerMap = new Map<string, any>();
@@ -181,8 +186,9 @@ export class UnifiedChatController {
           name = 'Office of Registrar';
           roleLabel = 'Registrar Services';
         } else if (u.role === 'DEPARTMENT_HEAD') {
-          name = 'Department Head';
-          roleLabel = 'Academic Department Chair';
+          const deptName = u.departmentHeadProfile?.department?.name || 'Software Engineering';
+          name = `Department Head (${deptName})`;
+          roleLabel = `${deptName} Chair`;
         }
 
         const info = {
@@ -194,7 +200,7 @@ export class UnifiedChatController {
           email: u.email,
           role: u.role,
           roleLabel,
-          department: u.alumniProfile?.department?.name || 'Graduate Candidate',
+          department: u.alumniProfile?.department?.name || u.departmentHeadProfile?.department?.name || (u.role === 'DEPARTMENT_HEAD' ? 'Software Engineering' : 'Graduate Candidate'),
           avatar
         };
 
