@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DocumentRequest } from '../types/alumni.types';
 import toast from 'react-hot-toast';
-import { FileDown, Shield, Clock, CheckCircle2, AlertCircle, CreditCard, Lock, X, Check, ArrowLeft, RefreshCw, Upload, FileText } from 'lucide-react';
+import { FileDown, Shield, Clock, CheckCircle2, AlertCircle, CreditCard, Lock, X, Check, ArrowLeft, RefreshCw, Upload, FileText, Printer } from 'lucide-react';
 import { alumniService } from '../services/alumni.service';
 
 interface DocumentServicesTabProps {
@@ -44,6 +44,7 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
   const [paymentStep, setPaymentStep] = useState<'checkout' | 'processing' | 'success'>('checkout');
   const [chapaPayPayload, setChapaPayPayload] = useState<any | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<'telebirr' | 'cbe' | 'card'>('telebirr');
+  const [viewingDoc, setViewingDoc] = useState<DocumentRequest | null>(null);
 
   const selectedDocObj = DOC_TYPES.find(d => d.value === docType) || DOC_TYPES[0];
 
@@ -461,28 +462,14 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                       </td>
                       <td className="px-5 py-4">
                         {req.status === 'Approved' ? (
-                          <a
-                            href={
-                              req.issuedDocumentUrl
-                                ? (req.issuedDocumentUrl.startsWith('http')
-                                    ? req.issuedDocumentUrl
-                                    : `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${req.issuedDocumentUrl.startsWith('/') ? '' : '/'}${req.issuedDocumentUrl}`)
-                                : '#'
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            onClick={(e) => {
-                              if (!req.issuedDocumentUrl) {
-                                e.preventDefault();
-                                toast.success(`Downloading official verified ${req.type} from ASTU Registrar...`);
-                              }
-                            }}
+                          <button
+                            type="button"
+                            onClick={() => setViewingDoc(req)}
                             className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-emerald-700 transition-all shadow-sm cursor-pointer"
                           >
                             <FileDown className="h-3.5 w-3.5" />
-                            Download Document
-                          </a>
+                            View & Export PDF
+                          </button>
                         ) : req.status === 'Dispatched' ? (
                           <button onClick={() => toast.success('Tracking: Dispatched via EMS. Estimated delivery: 3-5 days.')} className="inline-flex items-center gap-1 rounded-md bg-violet-500 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-violet-600 transition-all shadow-sm">
                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -822,6 +809,105 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
                 </div>
               </div>
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ASTU Official Document Viewer & PDF Export Modal */}
+      {viewingDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white text-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative animate-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto">
+            {/* Top action bar */}
+            <div className="flex items-center justify-between border-b pb-4 border-slate-200">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  Official ASTU Registrar Document
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#003366] px-4 py-2 text-xs font-bold text-white hover:bg-[#002244] shadow-md transition-all cursor-pointer"
+                >
+                  <Printer className="h-4 w-4 text-[#FFCC00]" />
+                  <span>Print / Save as PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewingDoc(null)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Official Certificate Paper Container */}
+            <div className="p-6 sm:p-8 border-4 border-double border-[#003366]/30 rounded-2xl bg-gradient-to-b from-amber-50/20 via-white to-amber-50/10 text-center space-y-5 relative overflow-hidden">
+              {/* ASTU Seal Background Watermark */}
+              <img
+                src="/images/astu-seal-logo.png"
+                alt="ASTU Watermark"
+                className="absolute inset-0 m-auto h-64 w-64 object-contain opacity-[0.05] pointer-events-none"
+              />
+
+              {/* University Crest Header */}
+              <div className="space-y-2">
+                <img
+                  src="/images/astu-seal-logo.png"
+                  alt="ASTU Official Seal"
+                  className="h-20 w-20 object-contain mx-auto shadow-xs"
+                />
+                <h2 className="text-base sm:text-lg font-black text-[#003366] tracking-tight uppercase">
+                  Adama Science and Technology University
+                </h2>
+                <p className="text-[11px] font-bold text-slate-600 tracking-wide uppercase">
+                  Office of the Registrar & Directorate for Alumni Affairs
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  P.O. Box 1888, Adama, Ethiopia • verify.astu.edu.et
+                </p>
+                <div className="h-0.5 w-28 bg-[#003366] mx-auto my-2" />
+              </div>
+
+              {/* Document Title */}
+              <div className="py-2">
+                <span className="text-xs font-extrabold uppercase px-4 py-1.5 bg-[#003366] text-[#FFCC00] rounded-lg tracking-wider">
+                  {viewingDoc.type}
+                </span>
+              </div>
+
+              {/* Content Body */}
+              <div className="text-xs text-slate-700 leading-relaxed text-justify px-2 sm:px-4 space-y-3">
+                <p>
+                  This is to officially certify that the alumnus with Document Reference ID{' '}
+                  <strong className="text-[#003366] font-mono">ASTU-DOC-{viewingDoc.id}</strong> has been verified by the Office of the Registrar as a bona fide student/graduate of Adama Science and Technology University (ASTU).
+                </p>
+                <p>
+                  <strong>Purpose of Request:</strong> {viewingDoc.notes || 'Official Academic Credential Verification & Institutional Records'}
+                </p>
+                <p>
+                  All degrees and academic credentials issued by Adama Science and Technology University are accredited by the Higher Education Relevance and Quality Agency (HERQA) and the Ministry of Education of Ethiopia.
+                </p>
+              </div>
+
+              {/* Signatures & Seal */}
+              <div className="pt-6 grid grid-cols-2 gap-4 sm:gap-8 items-end border-t border-slate-200 mt-6 text-left">
+                <div className="space-y-1">
+                  <div className="text-[10px] font-mono text-slate-500">Ref: ASTU-VERIF-{viewingDoc.id}</div>
+                  <div className="text-[10px] font-mono text-slate-500">Date: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                  <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1">
+                    <Shield className="h-3 w-3" /> Digitally Sealed
+                  </div>
+                </div>
+                <div className="text-right space-y-1">
+                  <div className="h-6 border-b border-dashed border-slate-400 w-32 ml-auto" />
+                  <p className="text-[11px] font-extrabold text-[#003366]">Office of the Registrar</p>
+                  <p className="text-[9px] text-slate-500">Adama Science & Technology University</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
