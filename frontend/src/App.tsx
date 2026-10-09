@@ -12,7 +12,9 @@ import AnnouncementListPage from "./pages/AnnouncementListPage";
 import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
 import PublicGalleryPage from "./pages/PublicGalleryPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
+import AlumniCommunityPage from "./pages/AlumniCommunityPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import EventsPage from "./pages/EventsPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
@@ -26,6 +28,7 @@ import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
+import DedicatedRegistrationsPage from "./features/admin/pages/DedicatedRegistrationsPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -52,7 +55,10 @@ function AppContent() {
         <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
         <Route path="/gallery" element={<PublicGalleryPage />} />
         <Route path="/stories/:id" element={<StoryDetailPage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
+        <Route path="/workshops/:id" element={<EventDetailPage />} />
+        <Route path="/community" element={<AlumniCommunityPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />
@@ -133,6 +139,15 @@ function AppContent() {
             <ProtectedRoute
               element={<AdminRoutes />}
               allowedRoles={["SUPER_ADMIN"]}
+            />
+          }
+        />
+        <Route
+          path="/cms/registrations/full"
+          element={
+            <ProtectedRoute
+              element={<DedicatedRegistrationsPage />}
+              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE", "SUPER_ADMIN"]}
             />
           }
         />

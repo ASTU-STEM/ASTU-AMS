@@ -18,8 +18,15 @@ import {
   Plus,
   ChevronRight,
   HelpCircle,
+  GraduationCap,
+  Users,
+  ClipboardCheck,
+  Bell,
+  Briefcase,
+  FileText,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CmsSidebarProps {
   onLogout: () => void;
@@ -36,33 +43,39 @@ interface EnhancedNavItem extends AdminNavItem {
 }
 
 const navItems: EnhancedNavItem[] = [
-  { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'overview', tooltip: 'CMS overview & stats' },
-  { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'overview', tooltip: 'ASTU_AMS direct messaging hub' },
-  { label: 'All Content', path: '/cms/content', icon: Newspaper, section: 'content', tooltip: 'Pages, posts, announcements' },
-  { label: 'Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content', tooltip: 'Manage homepage content' },
-  { label: 'Community', path: '/cms/community', icon: MessageSquareText, section: 'content', tooltip: 'News, announcements & community' },
-  { label: 'Gallery', path: '/cms/gallery', icon: GalleryHorizontal, section: 'content', tooltip: 'Photo & media gallery' },
-  { label: 'Events & Workshops', path: '/cms/events', icon: CalendarDays, section: 'content', tooltip: 'Manage events & workshops' },
-  { label: 'Approvals', path: '/cms/approvals', icon: ShieldCheck, section: 'workflow', tooltip: 'Pending reviews & approvals', badge: 1 },
-  { label: 'Media Library', path: '/cms/media', icon: ImageIcon, section: 'assets', tooltip: 'All media files' },
-  { label: 'SEO', path: '/cms/seo', icon: Globe, section: 'assets', tooltip: 'SEO management' },
-  { label: 'Templates', path: '/cms/templates', icon: Sparkles, section: 'assets', tooltip: 'Reusable content templates' },
-  { label: 'Settings', path: '/cms/settings', icon: Settings, section: 'settings', tooltip: 'CMS configuration' },
+  { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'alumni-office', tooltip: 'Alumni Office overview & statistics' },
+  { label: 'Registrations', path: '/cms/registrations', icon: ClipboardCheck, section: 'alumni-office', tooltip: 'Tracer study & event registrations' },
+  { label: 'Events & Workshops', path: '/cms/events', icon: CalendarDays, section: 'alumni-office', tooltip: 'Manage alumni reunions & workshops' },
+  { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'alumni-office', tooltip: 'Internal messaging & communication' },
+  { label: 'Notifications', path: '/cms/notifications', icon: Bell, section: 'alumni-office', tooltip: 'System notifications & alerts' },
+  { label: 'Pages & Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content-management', tooltip: 'Manage homepage sections, Overview, Contact Us & institutional pages' },
+  { label: 'Partners & Employers', path: '/cms/partners', icon: Briefcase, section: 'content-management', tooltip: 'Manage /partners portal, employer benefits & logos' },
+  { label: 'Announcements', path: '/cms/content', icon: Newspaper, section: 'content-management', tooltip: 'Alumni announcements & public notices' },
+  { label: 'Community', path: '/cms/community', icon: Users, section: 'content-management', tooltip: 'Alumni community, detail pages & homepage sections' },
+  { label: 'Media & Gallery', path: '/cms/media-gallery', icon: ImageIcon, section: 'content-management', tooltip: 'Unified media library, asset uploads & campus photo gallery' },
+  { label: 'SEO', path: '/cms/seo', icon: Globe, section: 'content-management', tooltip: 'Search engine optimization & indexing' },
+  { label: 'Approvals', path: '/cms/approvals', icon: ShieldCheck, section: 'content-management', tooltip: 'Pending reviews & approvals', badge: 1 },
+  { label: 'Settings', path: '/cms/settings', icon: Settings, section: 'content-management', tooltip: 'CMS & office configurations' },
 ];
 
 const sections = [
-  { key: 'overview', label: 'Dashboard' },
-  { key: 'content', label: 'Content' },
-  { key: 'workflow', label: 'Workflow' },
-  { key: 'assets', label: 'Assets' },
-  { key: 'settings', label: 'System' },
+  { key: 'alumni-office', label: 'Alumni Office' },
+  { key: 'content-management', label: 'Content Management' },
 ];
 
 export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, collapsed = false, onToggleCollapse }: CmsSidebarProps) {
   const location = useLocation();
+  const { user } = useAuth();
 
   const getSectionItems = (sectionKey: string) =>
     navItems.filter(item => item.section === sectionKey);
+
+  const officerName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : 'Alumni Relations Officer';
+  const officerInitials = user?.firstName
+    ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ''}`.toUpperCase()
+    : 'AO';
 
   return (
     <>
@@ -84,16 +97,16 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
               {!collapsed && (
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">ASTU CMS</span>
+                    <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight">ASTU Alumni</span>
                   </div>
-                  <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500 truncate">Content Engine</p>
+                  <p className="text-[11px] font-medium text-slate-400 dark:text-slate-500 truncate">Relations & Affairs Office</p>
                 </div>
               )}
             </div>
 
             {!collapsed && (
-              <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20">
-                PRO
+              <span className="inline-flex items-center rounded-md bg-[#003366]/10 dark:bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-[#003366] dark:text-[#FFCC00] ring-1 ring-inset ring-[#003366]/20 dark:ring-amber-400/30">
+                OFFICER
               </span>
             )}
           </div>
@@ -104,7 +117,7 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#003366] dark:bg-[#004080] hover:bg-[#002855] dark:hover:bg-[#003366] px-4 py-2.5 text-xs font-semibold text-white transition-all shadow-sm shadow-[#003366]/15 group cursor-pointer"
             >
               <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
-              <span>Create Content</span>
+              <span>Broadcast Notice</span>
             </NavLink>
           )}
         </div>
@@ -181,12 +194,12 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
           {!collapsed ? (
             <div className="flex items-center justify-between rounded-xl bg-white dark:bg-slate-800/80 p-2.5 border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003366] dark:bg-[#004080] text-xs font-bold text-white shrink-0">
-                  CM
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#003366] to-[#002244] dark:from-[#004080] dark:to-[#002855] text-xs font-bold text-[#FFCC00] shrink-0 shadow-xs border border-white/10">
+                  {officerInitials}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-200">Content Manager</p>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">CMS Admin</p>
+                  <p className="truncate text-xs font-bold text-slate-800 dark:text-slate-200">{officerName}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">Alumni Affairs Officer</p>
                 </div>
               </div>
               <button
@@ -200,8 +213,8 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#003366] dark:bg-[#004080] text-xs font-bold text-white shadow-xs" title="Content Manager">
-                CM
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#003366] to-[#002244] dark:from-[#004080] dark:to-[#002855] text-xs font-bold text-[#FFCC00] shadow-xs" title={officerName}>
+                {officerInitials}
               </div>
               <button
                 type="button"
