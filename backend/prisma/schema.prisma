@@ -8,6 +8,7 @@ generator client {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   ALUMNI
   EMPLOYER
@@ -75,6 +76,7 @@ enum VerificationRequestStatus {
 enum SupportTicketStatus {
   OPEN
   IN_PROGRESS
+  PENDING_ICT_ADMIN
   RESOLVED
   CLOSED
 }
@@ -563,6 +565,7 @@ model Notification {
   title     String
   content   String
   isRead    Boolean  @default(false)
+  status    String?  @default("Sent")
   createdAt DateTime @default(now())
 }
 
@@ -711,11 +714,15 @@ model SupportTicket {
   message        String
   attachments    String[]
   status         SupportTicketStatus @default(OPEN)
-  
-  // Optional metadata from frontend
-  route          String?
-  lastErrorCode  String?
-  sessionId      String?
+
+  // Optional metadata & admin resolution response
+  route           String?
+  lastErrorCode   String?
+  sessionId       String?
+  responseNotes   String?
+  escalationNotes String?
+  assignedToRole  String?
+  resolvedByRole  String?
   
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
@@ -977,4 +984,3 @@ model HomepageConfig {
   updatedAt  DateTime @updatedAt
   createdAt  DateTime @default(now())
 }
-
