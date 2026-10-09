@@ -724,14 +724,17 @@ export default function DepartmentManagement() {
       } else if (exportFormat === 'pdf') {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
+          const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
           printWindow.document.write(`
             <html>
               <head>
                 <title>ASTU Department Roster Executive Report</title>
                 <style>
                   body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #1e293b; }
-                  h1 { color: #003580; margin-bottom: 4px; font-size: 22px; }
-                  p.sub { color: #64748b; font-size: 13px; margin-top: 0; margin-bottom: 20px; }
+                  .header { display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #003580; padding-bottom: 14px; margin-bottom: 20px; }
+                  .logo-img { height: 60px; width: 60px; object-fit: contain; }
+                  h1 { color: #003580; margin: 0 0 4px 0; font-size: 20px; font-weight: 800; }
+                  p.sub { color: #64748b; font-size: 12px; margin: 0; }
                   table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
                   th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; }
                   th { background-color: #f1f5f9; color: #0f172a; font-weight: 600; }
@@ -740,8 +743,13 @@ export default function DepartmentManagement() {
                 </style>
               </head>
               <body>
-                <h1>🎓 Adama Science and Technology University</h1>
-                <p class="sub">Department Roster & Academic Directory Executive Report — Generated ${new Date().toLocaleString()}</p>
+                <div class="header">
+                  <img src="${logoUrl}" alt="ASTU Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
+                  <div>
+                    <h1>Adama Science and Technology University</h1>
+                    <p class="sub">Department Roster & Academic Directory Executive Report — Generated ${new Date().toLocaleString()}</p>
+                  </div>
+                </div>
                 <table>
                   <thead>
                     <tr>

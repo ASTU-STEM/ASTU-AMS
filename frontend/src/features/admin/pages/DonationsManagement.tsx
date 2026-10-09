@@ -321,6 +321,8 @@ export default function DonationsManagement() {
 
     const totalRaisedSum = filteredDonors.reduce((acc, d) => acc + d.amount, 0);
 
+    const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -329,6 +331,8 @@ export default function DonationsManagement() {
         <style>
           body { font-family: 'Inter', system-ui, sans-serif; color: #0f172a; padding: 28px; margin: 0; background: #ffffff; }
           .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #003580; padding-bottom: 16px; margin-bottom: 24px; }
+          .brand-group { display: flex; align-items: center; gap: 16px; }
+          .logo-img { height: 60px; width: 60px; object-fit: contain; }
           .title-area h1 { margin: 0; font-size: 22px; color: #003580; font-weight: 900; letter-spacing: -0.5px; }
           .title-area p { margin: 4px 0 0 0; font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
           .metrics-grid { display: flex; gap: 16px; margin-bottom: 24px; }
@@ -345,9 +349,12 @@ export default function DonationsManagement() {
       </head>
       <body>
         <div class="header">
-          <div class="title-area">
-            <h1>ADAMA SCIENCE & TECHNOLOGY UNIVERSITY</h1>
-            <p>Office of Alumni Relations & Advancement • Donor Records Audit Log</p>
+          <div class="brand-group">
+            <img src="${logoUrl}" alt="ASTU Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
+            <div class="title-area">
+              <h1>ADAMA SCIENCE & TECHNOLOGY UNIVERSITY</h1>
+              <p>Office of Alumni Relations & Advancement • Donor Records Audit Log</p>
+            </div>
           </div>
           <div style="text-align: right; font-size: 11px; color: #475569;">
             <div><strong>Report Date:</strong> ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
