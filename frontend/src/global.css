@@ -513,9 +513,9 @@ a {
    ANIMATIONS
    ═══════════════════════════════════════════════════════════ */
 .reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .reveal.is-visible {
@@ -544,7 +544,7 @@ a {
     opacity: 1;
   }
   50% {
-    opacity: 0.3;
+    opacity: 1;
   }
 }
 
@@ -575,11 +575,25 @@ a {
    ═══════════════════════════════════════════════════════════ */
 
 /* Staggered reveal delays */
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
-.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-1 { transition-delay: 0.04s; }
+.reveal-delay-2 { transition-delay: 0.08s; }
+.reveal-delay-3 { transition-delay: 0.12s; }
+.reveal-delay-4 { transition-delay: 0.16s; }
+.reveal-delay-5 { transition-delay: 0.20s; }
+
+/* Animatic Spring Card Hover Effect */
+.animatic-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.animatic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -6px rgba(0, 51, 102, 0.1);
+}
+
+.animatic-node {
+  transition: transform 0.3s ease;
+}
 
 /* Floating animation */
 @keyframes float {
@@ -593,21 +607,16 @@ a {
 }
 
 .animate-float {
-  animation: float 4s ease-in-out infinite;
+  transform: none;
 }
 
 .animate-float-slow {
-  animation: float-slow 6s ease-in-out infinite;
+  transform: none;
 }
 
 /* Glow pulse */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 51, 102, 0.1); }
-  50% { box-shadow: 0 0 30px rgba(0, 51, 102, 0.2); }
-}
-
 .animate-glow {
-  animation: glow-pulse 3s ease-in-out infinite;
+  box-shadow: 0 0 15px rgba(0, 51, 102, 0.1);
 }
 
 /* Gradient text animation */
@@ -618,12 +627,10 @@ a {
 }
 
 .animate-gradient-text {
-  background: linear-gradient(135deg, #003366, #008C44, #E31E24, #003366);
-  background-size: 300% 300%;
+  background: linear-gradient(135deg, #003366, #006633);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradient-shift 6s ease infinite;
 }
 
 /* Scale on hover */
