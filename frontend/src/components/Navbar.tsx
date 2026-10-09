@@ -18,7 +18,8 @@ import { useSystemSettings } from "../context/SystemSettingsContext";
 
 interface MegaMenuItem {
   label: string;
-  sectionId: string;
+  sectionId?: string;
+  route?: string;
   description?: string;
 }
 
@@ -33,32 +34,32 @@ const megaMenus: MegaMenu[] = [
     label: "About",
     icon: FaInfoCircle,
     items: [
-      { label: "About ASTU", sectionId: "impact", description: "Mission, vision & history" },
-      { label: "Campuses", sectionId: "campuses", description: "Our campuses & facilities" },
-      { label: "Campus Life", sectionId: "campus-life", description: "Student activities & culture" },
-      { label: "Research", sectionId: "research", description: "Innovation & discoveries" },
-      { label: "Success Stories", sectionId: "success-stories", description: "Alumni achievements" },
+      { label: "About ASTU", sectionId: "impact", route: "/info/overview", description: "Mission, vision & history" },
+      { label: "Campuses", sectionId: "campuses", route: "/info/campuses", description: "Our campuses & facilities" },
+      { label: "Campus Life", sectionId: "campus-life", route: "/info/campus-life", description: "Student activities & culture" },
+      { label: "Research", sectionId: "research", route: "/info/research", description: "Innovation & discoveries" },
+      { label: "Success Stories", sectionId: "success-stories", route: "/info/alumni-stories", description: "Alumni achievements" },
     ],
   },
   {
     label: "Services",
     icon: MdDashboardCustomize,
     items: [
-      { label: "Stakeholders", sectionId: "stakeholders", description: "Partners & collaborators" },
-      { label: "Career Opportunities", sectionId: "career-opportunities", description: "Jobs & internships" },
-      { label: "Testimonials", sectionId: "testimonials", description: "What alumni say" },
+      { label: "Stakeholders", sectionId: "stakeholders", route: "/partners?tab=stakeholders", description: "Partners & collaborators" },
+      { label: "Career Opportunities", sectionId: "career-opportunities", route: "/partners?tab=employers", description: "Jobs & internships" },
+      { label: "Testimonials", sectionId: "testimonials", route: "/community", description: "What alumni say" },
     ],
   },
   {
     label: "Media",
     icon: MdCampaign,
     items: [
-      { label: "Events", sectionId: "events", description: "Upcoming gatherings" },
-      { label: "Workshops", sectionId: "workshops", description: "Skill-building sessions" },
-      { label: "News", sectionId: "news", description: "Latest updates" },
-      { label: "Announcements", sectionId: "announcements", description: "Official notices" },
-      { label: "Gallery", sectionId: "gallery", description: "Photo moments" },
-      { label: "Video Gallery", sectionId: "video-gallery", description: "Video highlights" },
+      { label: "Events", sectionId: "events", route: "/events", description: "Upcoming gatherings" },
+      { label: "Workshops", sectionId: "workshops", route: "/events", description: "Skill-building sessions" },
+      { label: "News", sectionId: "news", route: "/announcements", description: "Latest updates" },
+      { label: "Announcements", sectionId: "announcements", route: "/announcements", description: "Official notices" },
+      { label: "Gallery", route: "/gallery", description: "Photo moments" },
+      { label: "Video Gallery", route: "/info/video-gallery", description: "Video highlights" },
     ],
   },
 ];
@@ -77,10 +78,11 @@ const simpleItems: SimpleNavItem[] = [
 
 const searchItems = [
   ...megaMenus.flatMap((m) => m.items),
-  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId })),
+  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId, route: s.route })),
 ].map((item) => ({
   label: item.label,
   sectionId: item.sectionId,
+  route: item.route,
 }));
 
 function scrollToSection(sectionId: string) {
@@ -131,7 +133,13 @@ export default function Navbar() {
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
     setIsSearchOpen(false);
-    navigateToSection(item.sectionId);
+    if (item.route && !item.sectionId) {
+      navigate(item.route);
+    } else if (item.sectionId) {
+      navigateToSection(item.sectionId, item.route);
+    } else if (item.route) {
+      navigate(item.route);
+    }
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -159,13 +167,24 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const navigateToSection = (sectionId: string) => {
+  const navigateToSection = (sectionId?: string, fallbackRoute?: string) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    if (location.pathname === "/") {
-      scrollToSection(sectionId);
-    } else {
-      navigate(`/?scrollTo=${sectionId}`);
+    if (!sectionId && fallbackRoute) {
+      navigate(fallbackRoute);
+      return;
+    }
+    if (sectionId) {
+      if (location.pathname === "/") {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          scrollToSection(sectionId);
+        } else if (fallbackRoute) {
+          navigate(fallbackRoute);
+        }
+      } else {
+        navigate(`/?scrollTo=${sectionId}`);
+      }
     }
   };
 
@@ -179,10 +198,14 @@ export default function Navbar() {
     }
   };
 
-  const handleMegaItemClick = (sectionId: string) => {
+  const handleMegaItemClick = (item: MegaMenuItem) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    navigateToSection(sectionId);
+    if (item.route && !item.sectionId) {
+      navigate(item.route);
+      return;
+    }
+    navigateToSection(item.sectionId, item.route);
   };
 
   const handleMegaEnter = (label: string) => {
@@ -290,8 +313,8 @@ export default function Navbar() {
                       <div className="p-2">
                         {menu.items.map((item) => (
                           <button
-                            key={item.sectionId}
-                            onClick={() => handleMegaItemClick(item.sectionId)}
+                            key={item.label}
+                            onClick={() => handleMegaItemClick(item)}
                             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-astu-navy/5"
                           >
                             <div>
@@ -483,8 +506,8 @@ export default function Navbar() {
                     <div className="ml-8 space-y-1 pb-1">
                       {menu.items.map((item) => (
                         <button
-                          key={item.sectionId}
-                          onClick={() => handleMegaItemClick(item.sectionId)}
+                          key={item.label}
+                          onClick={() => handleMegaItemClick(item)}
                           className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-astu-navy/5 transition-all text-left"
                         >
                           {item.label}

@@ -7,7 +7,7 @@ const footerSections = [
     title: "Portal Services",
     links: [
       { label: "Alumni", href: "/info/alumni-portal" },
-      { label: "Employer", href: "/info/employer-portal" },
+      { label: "Employer Portal", href: "/partners?tab=recruitment" },
       { label: "Registrar", href: "/info/registrar-portal" },
       { label: "Department", href: "/info/department-portal" },
     ],
