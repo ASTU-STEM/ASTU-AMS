@@ -20,6 +20,8 @@ import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { DataIssuesTab } from '../components/DataIssuesTab';
+import { RegistrarPublishingTab } from '../components/RegistrarPublishingTab';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
@@ -809,8 +811,9 @@ useEffect(() => {
               },
               {
                 sectionKey: 'comm',
-                sectionLabel: 'Communication',
+                sectionLabel: 'Communication & Publishing',
                 items: [
+                  { id: 'bulletins', label: 'Announcements & Events', icon: 'campaign', badge: null, tooltip: 'Publish announcements & events (Subject to Alumni Officer approval)' },
                   { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadChatMessagesCount > 0 ? unreadChatMessagesCount : null, tooltip: unreadChatMessagesCount > 0 ? `${unreadChatMessagesCount} unread messages` : 'Direct Messaging Hub' }
                 ]
               }
@@ -1181,6 +1184,8 @@ useEffect(() => {
 
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
+                {/* Official Alumni Officer Broadcast Hero Banner */}
+                <DashboardBroadcastHero actorRole="REGISTRAR" className="mb-2" />
 
                 {/* Welcome banner */}
                 <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
@@ -1441,6 +1446,10 @@ useEffect(() => {
 
             {activeTab === 'messages' && (
               <MessagingTab darkMode={darkMode} />
+            )}
+
+            {activeTab === 'bulletins' && (
+              <RegistrarPublishingTab registrarName={registrarName} darkMode={darkMode} />
             )}
           </div>
         </div>
