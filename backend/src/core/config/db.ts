@@ -186,6 +186,11 @@ class FakePrisma {
       const store = readDevDb();
       let profiles = store.alumniProfiles || [];
       if (where?.departmentId) profiles = profiles.filter((a: any) => a.departmentId === where.departmentId);
+      if (where?.isVerified !== undefined) profiles = profiles.filter((a: any) => Boolean(a.isVerified) === Boolean(where.isVerified));
+      if (where?.employmentStatus) {
+        if (typeof where.employmentStatus === 'string') profiles = profiles.filter((a: any) => a.employmentStatus === where.employmentStatus);
+        else if (where.employmentStatus?.in) profiles = profiles.filter((a: any) => where.employmentStatus.in.includes(a.employmentStatus));
+      }
       return profiles.length;
     },
     create: async ({ data }: any) => {
@@ -236,6 +241,20 @@ class FakePrisma {
       if (where?.userId) return (store.employerProfiles || []).find((e: any) => e.userId === where.userId) || null;
       if (where?.id) return (store.employerProfiles || []).find((e: any) => e.id === where.id) || null;
       return null;
+    },
+    findMany: async ({ where, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let employers = [...(store.employerProfiles || [])];
+      if (where?.isVerified !== undefined) employers = employers.filter((e: any) => Boolean(e.isVerified) === Boolean(where.isVerified));
+      if (skip) employers = employers.slice(skip);
+      if (take) employers = employers.slice(0, take);
+      return employers;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let employers = store.employerProfiles || [];
+      if (where?.isVerified !== undefined) employers = employers.filter((e: any) => Boolean(e.isVerified) === Boolean(where.isVerified));
+      return employers.length;
     },
     create: async ({ data }: any) => {
       const store = readDevDb();
@@ -289,6 +308,12 @@ class FakePrisma {
       if (where.code) return this.store.departments.find((d: any) => d.code === where.code) || null;
       if (where.id) return this.store.departments.find((d: any) => d.id === where.id) || null;
       return null;
+    },
+    findMany: async () => {
+      return [...(this.store.departments || [])];
+    },
+    count: async () => {
+      return (this.store.departments || []).length;
     },
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-dept-${Date.now()}` };
@@ -522,6 +547,7 @@ class FakePrisma {
       const store = readDevDb();
       let jobs = store.jobs || [];
       if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
+      if (where?.isActive !== undefined) jobs = jobs.filter((j: any) => Boolean(j.isActive) === Boolean(where.isActive));
       return jobs.length;
     },
     create: async ({ data }: any) => {
@@ -866,6 +892,24 @@ class FakePrisma {
       writeDevDb(store);
       return rec;
     },
+  };
+
+  verificationRequest = {
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let reqs = store.verificationRequests || [];
+      if (where?.status) reqs = reqs.filter((r: any) => r.status === where.status);
+      return reqs.length;
+    },
+    findMany: async () => (readDevDb().verificationRequests || []),
+  };
+
+  event = {
+    count: async () => {
+      const store = readDevDb();
+      return (store.events?.length || store.hiringEvents?.length || 18);
+    },
+    findMany: async () => (readDevDb().events || readDevDb().hiringEvents || []),
   };
 
   // Catch-all: for any model not explicitly defined, return safe no-ops
