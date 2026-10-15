@@ -1,29 +1,31 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import CmsLayout from '../layouts/CmsLayout';
-import CmsDashboard from '../features/admin/pages/CmsDashboard';
-import ContentGovernance from '../features/admin/pages/ContentGovernance';
-import GalleryManagement from '../features/admin/pages/GalleryManagement';
-import EventWorkshopManagement from '../features/admin/pages/EventWorkshopManagement';
-import ContentList from '../features/admin/pages/ContentList';
-import CmsSettings from '../features/admin/pages/CmsSettings';
-import AnnouncementRegistrations from '../features/admin/pages/AnnouncementRegistrations';
-import DedicatedRegistrationsPage from '../features/admin/pages/DedicatedRegistrationsPage';
-import HomepageManagement from '../features/admin/pages/HomepageManagement';
-import CmsChatPage from '../features/admin/pages/CmsChatPage';
-import NotificationCenter from '../features/admin/pages/NotificationCenter';
-import CommunityMembersManagement from '../features/admin/pages/CommunityMembersManagement';
-import CommunityManagement from '../features/admin/pages/CommunityManagement';
-import PartnersManagement from '../features/admin/pages/PartnersManagement';
-import MediaGalleryHub from '../features/admin/pages/MediaGalleryHub';
-import MediaLibrary from '../features/admin/pages/MediaLibrary';
-import SEOManagement from '../features/admin/pages/SEOManagement';
-import ApprovalWorkflow from '../features/admin/pages/ApprovalWorkflow';
-import ContentTemplates from '../features/admin/pages/ContentTemplates';
+
+const CmsDashboard = lazy(() => import('../features/admin/pages/CmsDashboard'));
+const ContentGovernance = lazy(() => import('../features/admin/pages/ContentGovernance'));
+const GalleryManagement = lazy(() => import('../features/admin/pages/GalleryManagement'));
+const EventWorkshopManagement = lazy(() => import('../features/admin/pages/EventWorkshopManagement'));
+const ContentList = lazy(() => import('../features/admin/pages/ContentList'));
+const CmsSettings = lazy(() => import('../features/admin/pages/CmsSettings'));
+const AnnouncementRegistrations = lazy(() => import('../features/admin/pages/AnnouncementRegistrations'));
+const DedicatedRegistrationsPage = lazy(() => import('../features/admin/pages/DedicatedRegistrationsPage'));
+const HomepageManagement = lazy(() => import('../features/admin/pages/HomepageManagement'));
+const CmsChatPage = lazy(() => import('../features/admin/pages/CmsChatPage'));
+const NotificationCenter = lazy(() => import('../features/admin/pages/NotificationCenter'));
+const CommunityMembersManagement = lazy(() => import('../features/admin/pages/CommunityMembersManagement'));
+const CommunityManagement = lazy(() => import('../features/admin/pages/CommunityManagement'));
+const PartnersManagement = lazy(() => import('../features/admin/pages/PartnersManagement'));
+const MediaGalleryHub = lazy(() => import('../features/admin/pages/MediaGalleryHub'));
+const MediaLibrary = lazy(() => import('../features/admin/pages/MediaLibrary'));
+const SEOManagement = lazy(() => import('../features/admin/pages/SEOManagement'));
+const ApprovalWorkflow = lazy(() => import('../features/admin/pages/ApprovalWorkflow'));
+const ContentTemplates = lazy(() => import('../features/admin/pages/ContentTemplates'));
 
 export default function CmsRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading...</div>}>
+      <Routes>
       {/* Standalone Full Page View - Completely NO Sidebar */}
       <Route path="registrations/full" element={<DedicatedRegistrationsPage />} />
       <Route path="registrations-full" element={<DedicatedRegistrationsPage />} />
@@ -53,5 +55,6 @@ export default function CmsRoutes() {
         <Route path="settings" element={<CmsSettings />} />
       </Route>
     </Routes>
+    </Suspense>
   );
 }
