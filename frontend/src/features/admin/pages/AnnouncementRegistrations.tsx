@@ -342,7 +342,7 @@ export default function AnnouncementRegistrations() {
               className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200 cursor-pointer"
               title="Approve Registration"
             >
-              ✓ Approve
+               Approve
             </button>
             <button
               type="button"
@@ -353,7 +353,7 @@ export default function AnnouncementRegistrations() {
               className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 hover:bg-rose-200 cursor-pointer"
               title="Decline Registration"
             >
-              ✕ Decline
+               Decline
             </button>
           </div>
 
@@ -838,7 +838,7 @@ export default function AnnouncementRegistrations() {
                       : 'bg-slate-200 text-slate-700'
                   }`}
                 >
-                  {selectedRegDetail.accreditationVerified ? '✓ ETA Accreditation Verified' : 'Mark ETA Verified'}
+                  {selectedRegDetail.accreditationVerified ? ' ETA Accreditation Verified' : 'Mark ETA Verified'}
                 </button>
               </div>
             </div>

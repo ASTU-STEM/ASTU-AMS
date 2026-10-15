@@ -504,7 +504,7 @@ export default function ApprovalWorkflow() {
                               : 'bg-slate-200 text-slate-500 dark:bg-slate-700'
                           }`}
                         >
-                          {isPassed ? '✓' : stg.stage}
+                          {isPassed ? '' : stg.stage}
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className={`font-semibold ${isCurrent ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>

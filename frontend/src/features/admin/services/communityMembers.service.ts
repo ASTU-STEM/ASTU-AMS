@@ -281,7 +281,7 @@ export const communityMembersService = {
   async fetchMembersFromApi(): Promise<CommunityMember[]> {
     try {
       const res = await axios.get(`${API_URL}/community-members`);
-      if (res.data && res.data.success && Array.isArray(res.data.data)) {
+      if (res.data && res.data.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
         return res.data.data;
       }
     } catch {

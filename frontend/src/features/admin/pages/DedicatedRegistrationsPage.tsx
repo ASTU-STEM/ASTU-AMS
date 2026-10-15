@@ -518,7 +518,7 @@ export default function DedicatedRegistrationsPage() {
                             className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 hover:bg-emerald-200 cursor-pointer"
                             title="Approve Alumnus Registration"
                           >
-                            ✓ Approve
+                             Approve
                           </button>
                           <button
                             type="button"
@@ -529,7 +529,7 @@ export default function DedicatedRegistrationsPage() {
                             className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 hover:bg-rose-200 cursor-pointer"
                             title="Decline Alumnus Registration"
                           >
-                            ✕ Decline
+                             Decline
                           </button>
                         </div>
 
@@ -607,7 +607,7 @@ export default function DedicatedRegistrationsPage() {
                   selectedRegDetail.accreditationVerified ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
                 }`}
               >
-                {selectedRegDetail.accreditationVerified ? '✓ ETA Verified' : 'Mark ETA Verified'}
+                {selectedRegDetail.accreditationVerified ? ' ETA Verified' : 'Mark ETA Verified'}
               </button>
             </div>
 

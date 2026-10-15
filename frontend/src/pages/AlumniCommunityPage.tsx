@@ -199,7 +199,7 @@ export default function AlumniCommunityPage() {
         m.location.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [communityMembers, selectedCategory, searchQuery]);
 
   const handleCopyShare = (member: CommunityMember) => {
     if (navigator.clipboard) {

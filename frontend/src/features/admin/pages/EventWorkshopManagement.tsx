@@ -322,7 +322,7 @@ export default function EventWorkshopManagement() {
   });
 
   const [content, setContent] = useState<any>(() => {
-    const s = homepageCmsService.getSettings();
+    const s = (homepageCmsService.getSettings() || {}) as any;
     return {
       eventsHeaders: s.eventsHeaders || {
         eyebrow: 'Calendar',
@@ -1001,7 +1001,7 @@ export default function EventWorkshopManagement() {
                     >
                       {statusPresets.map((st) => (
                         <option key={st} value={st}>
-                          {st === 'Open' ? '🟢 Open (Registration Active)' : st === 'Approval Required' ? '🟡 Approval Required' : st === 'Closed' ? '🔴 Closed' : '⚪ Draft'}
+                          {st === 'Open' ? ' Open (Registration Active)' : st === 'Approval Required' ? ' Approval Required' : st === 'Closed' ? ' Closed' : ' Draft'}
                         </option>
                       ))}
                     </select>

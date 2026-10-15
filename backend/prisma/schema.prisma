@@ -984,3 +984,21 @@ model HomepageConfig {
   updatedAt  DateTime @updatedAt
   createdAt  DateTime @default(now())
 }
+
+model CommunityMember {
+  id       String   @id @default(uuid())
+  name     String
+  role     String   @default("")
+  org      String   @default("")
+  location String   @default("")
+  category String   @default("all")
+  degree   String   @default("")
+  gradYear String   @default("")
+  image    String   @default("")
+  bio      String   @default("")
+  quote    String?
+  badge    String?
+  active   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

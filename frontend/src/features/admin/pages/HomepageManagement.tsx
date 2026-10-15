@@ -569,7 +569,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   };
 
   // ── Save to Backend ──
-  const handleSaveAll = async (showToast = true) => {
+  const handleSaveAll = useCallback(async (showToast = true) => {
     setIsSaving(true);
     const payload: HomepageCmsConfig = {
       welcomeMessage,
@@ -630,7 +630,16 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [
+    welcomeMessage, welcomeEnabled, heroBadge, heroButtons, heroSlides,
+    impactHeaders, impactStats, portalsHeaders, portals, campusLifeHeaders,
+    campusLife, campuses, gallery, galleryHeaders, videos, industryBridge,
+    eventsHeaders, events, workshops, announcementsHeaders, announcements,
+    newsHeaders, newsItems, storiesHeaders, stories, testimonials,
+    partnersHeaders, partners, featuredEmployers, accreditation, faqHeaders,
+    faq, ctaSection, footer, sectionLinks, detailPages, partnersPage,
+    liveCommunitySection, liveCommunityPosts,
+  ]);
 
   // Keyboard shortcut Ctrl+S / Cmd+S
   useEffect(() => {
@@ -2586,7 +2595,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Checklist Points ({(partnersPage.features || []).length})</label>
                 {(partnersPage.features || []).map((feat, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-emerald-500">✓</span>
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
                     <input
                       type="text"
                       value={feat}
@@ -2932,12 +2941,14 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Filter:</span>
                   {[
-                    { id: 'all', label: `All Pages (${allSlugs.length})` },
-                    { id: 'portals', label: '🏢 Portals (4)' },
-                    { id: 'impact', label: '📊 Impact & QA (4)' },
-                    { id: 'campus', label: '🏫 Campus Life (5)' },
-                    { id: 'community', label: '🤝 Community (3)' },
-                  ].map(cat => (
+                    { id: 'all', label: `All Pages (${allSlugs.length})`, icon: Layers3 },
+                    { id: 'portals', label: 'Portals (4)', icon: Building2 },
+                    { id: 'impact', label: 'Impact & QA (4)', icon: LineChart },
+                    { id: 'campus', label: 'Campus Life (5)', icon: GraduationCap },
+                    { id: 'community', label: 'Community (3)', icon: Handshake },
+                  ].map(cat => {
+                    const CatIcon = cat.icon;
+                    return (
                     <button
                       key={cat.id}
                       type="button"
@@ -2948,9 +2959,10 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
-                      {cat.label}
+                      <span className="inline-flex items-center gap-1"><CatIcon className="h-3.5 w-3.5" /> {cat.label}</span>
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="flex gap-2">
@@ -3446,7 +3458,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             </div>
 
             <div className="space-y-0 divide-y divide-slate-100 dark:divide-slate-800">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-violet-600 pb-2 pt-1">📣 Announcement Ticker</p>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-violet-600 pb-2 pt-1"><Megaphone className="h-3.5 w-3.5" /> Announcement Ticker</p>
               <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr_1fr] gap-3 items-center py-3">
                 <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Ticker "Details" Link<span className="block text-[10px] font-normal text-slate-400">Small link at end of top bar</span></p>
                 <div><label className="text-[10px] text-slate-400 font-semibold uppercase">Button Text</label><input type="text" value={sectionLinks.tickerLinkText} onChange={e => updateSectionLink('tickerLinkText', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs" /></div>
@@ -3461,7 +3473,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 </div>
               </div>
 
-              <p className="text-[11px] font-bold uppercase tracking-widest text-blue-600 pb-2 pt-4">🚀 Portals / How It Works</p>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-blue-600 pb-2 pt-4"><Layers3 className="h-3.5 w-3.5" /> Portals / How It Works</p>
               <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr_1fr] gap-3 items-center py-3">
                 <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Get Started Button<span className="block text-[10px] font-normal text-slate-400">Big CTA below the 4-step section</span></p>
                 <div><label className="text-[10px] text-slate-400 font-semibold uppercase">Button Text</label><input type="text" value={sectionLinks.portalsGetStartedText} onChange={e => updateSectionLink('portalsGetStartedText', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs" /></div>
@@ -3476,7 +3488,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 </div>
               </div>
 
-              <p className="text-[11px] font-bold uppercase tracking-widest text-green-600 pb-2 pt-4">📅 Events Section</p>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-green-600 pb-2 pt-4"><CalendarDays className="h-3.5 w-3.5" /> Events Section</p>
               {([
                 { label: '"See All Events" Button', note: 'Header button linking to all events', textKey: 'eventsViewAllText', urlKey: 'eventsViewAllLink' },
                 { label: 'Event Card Register Button', note: 'Text on the Register button on each event card', textKey: 'eventsCardRegisterText', urlKey: 'eventsCardDetailsLink' },
@@ -3497,7 +3509,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 </div>
               ))}
 
-              <p className="text-[11px] font-bold uppercase tracking-widest text-red-600 pb-2 pt-4">📢 Announcements Section</p>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-red-600 pb-2 pt-4"><Bell className="h-3.5 w-3.5" /> Announcements Section</p>
               <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr_1fr] gap-3 items-center py-3">
                 <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">"View All" Button<span className="block text-[10px] font-normal text-slate-400">Button in the announcements card header</span></p>
                 <div><label className="text-[10px] text-slate-400 font-semibold uppercase">Button Text</label><input type="text" value={sectionLinks.announcementsViewAllText} onChange={e => updateSectionLink('announcementsViewAllText', e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs" /></div>
@@ -3512,7 +3524,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 </div>
               </div>
 
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 pb-2 pt-4">🏛️ Footer — Resources &amp; Portals Column</p>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 pb-2 pt-4"><Building2 className="h-3.5 w-3.5" /> Footer — Resources &amp; Portals Column</p>
               {([
                 { label: 'Career Portal Link', note: '1st item in Resources column', textKey: 'footerCareerPortalText', urlKey: 'footerCareerPortalLink' },
                 { label: 'Tracer Survey Hub', note: '2nd item in Resources column', textKey: 'footerTracerHubText', urlKey: 'footerTracerHubLink' },
@@ -3534,7 +3546,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 </div>
               ))}
 
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 pb-2 pt-4">🏛️ Footer — Accreditation Support Column</p>
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 pb-2 pt-4"><ShieldCheck className="h-3.5 w-3.5" /> Footer — Accreditation Support Column</p>
               {([
                 { label: 'Quality Assurance Link', note: '1st item in Accreditation column', textKey: 'footerQualityAssuranceText', urlKey: 'footerQualityAssuranceLink' },
                 { label: 'Accreditation Outcomes', note: '2nd item in Accreditation column', textKey: 'footerAccreditationOutcomesText', urlKey: 'footerAccreditationOutcomesLink' },

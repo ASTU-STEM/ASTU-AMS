@@ -285,7 +285,7 @@ function AnnouncementLivePreview({
                 : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
             }`}
           >
-            🏠 Homepage
+             Homepage
           </button>
           <button
             type="button"
@@ -296,7 +296,7 @@ function AnnouncementLivePreview({
                 : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
             }`}
           >
-            📰 Public Card
+             Public Card
           </button>
           <button
             type="button"
@@ -307,7 +307,7 @@ function AnnouncementLivePreview({
                 : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
             }`}
           >
-            📄 Detail View
+             Detail View
           </button>
         </div>
       </div>
@@ -352,7 +352,7 @@ function AnnouncementLivePreview({
                       </span>
                       {pinned && (
                         <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2">
-                          📌 PINNED
+                           PINNED
                         </span>
                       )}
                       {priorityBadge && priorityBadge !== 'Official Notice' && (
@@ -388,7 +388,7 @@ function AnnouncementLivePreview({
             </div>
 
             <p className="text-[11px] text-slate-500 italic text-center">
-              ✓ This notice will immediately appear as shown above on the ASTU public home page upon saving.
+               This notice will immediately appear as shown above on the ASTU public home page upon saving.
             </p>
           </div>
         )}
@@ -418,7 +418,7 @@ function AnnouncementLivePreview({
                     </span>
                     {pinned && (
                       <span className="rounded-lg bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 shadow-sm">
-                        📌 PINNED
+                         PINNED
                       </span>
                     )}
                     {featured && (
@@ -490,7 +490,7 @@ function AnnouncementLivePreview({
                   </span>
                   {pinned && (
                     <span className="rounded-full bg-amber-400 text-slate-900 px-2 py-0.5 text-[10px] font-bold">
-                      📌 Pinned Notice
+                       Pinned Notice
                     </span>
                   )}
                   {priorityBadge && (
@@ -2076,7 +2076,7 @@ export default function ContentList() {
         footer={
           <div className="flex items-center justify-between w-full">
             <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-              ⚡ Notice will sync immediately to ASTU Homepage & Public Announcements
+               Notice will sync immediately to ASTU Homepage & Public Announcements
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -2251,7 +2251,7 @@ export default function ContentList() {
                             : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200'
                         }`}
                       >
-                        {active ? `✓ #${tag}` : `+ #${tag}`}
+                        {active ? ` #${tag}` : `+ #${tag}`}
                       </button>
                     );
                   })}
@@ -2273,7 +2273,7 @@ export default function ContentList() {
                     onChange={(e) => setNewPinned(e.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-[#003580]"
                   />
-                  <span>📌 Pin Notice to Top of Homepage</span>
+                  <span> Pin Notice to Top of Homepage</span>
                 </label>
 
                 <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
@@ -2320,7 +2320,7 @@ export default function ContentList() {
         footer={
           <div className="flex items-center justify-between w-full">
             <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-              ⚡ Changes will update the notice live on ASTU Homepage
+               Changes will update the notice live on ASTU Homepage
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -2502,7 +2502,7 @@ export default function ContentList() {
                       onChange={(e) => setEditItem({ ...editItem, pinned: e.target.checked })}
                       className="h-4 w-4 rounded border-slate-300 text-[#003580]"
                     />
-                    <span>📌 Pin Notice to Top of Homepage</span>
+                    <span> Pin Notice to Top of Homepage</span>
                   </label>
 
                   <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">

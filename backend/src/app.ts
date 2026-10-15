@@ -62,7 +62,9 @@ import mentorshipRouter from './modules/mentorship/presentation/mentorship.route
 import jobboardRouter from './modules/jobboard/presentation/jobboard.routes';
 import supportRouter from './modules/support/presentation/support.routes';
 import adminRouter from './modules/admin/infrastructure/routes/adminRoutes';
+import cmsAdminReadRouter from './modules/admin/infrastructure/routes/cmsAdminReadRoutes';
 import contentRouter from './modules/content/presentation/content.routes';
+import communityRouter from './modules/community/presentation/community.routes';
 import chatRouter from './modules/chat/presentation/chat.routes';
 import toolsRouter from './modules/tools/presentation/tools.routes';
 
@@ -80,9 +82,11 @@ app.use('/api/ai', aiRouter);
 app.use('/api/v1/ai', aiRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/content', contentRouter);
+app.use('/api/community-members', communityRouter);
 app.use('/api/mentorship', mentorshipRouter);
 app.use('/api/jobs', jobboardRouter);
 app.use('/api/support', supportRouter);
+app.use('/api/admin', cmsAdminReadRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/tools', toolsRouter);

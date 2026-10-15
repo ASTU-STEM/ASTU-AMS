@@ -28,6 +28,7 @@ function readDevDb(): any {
       contentItems: [],
       mediaAssets: [],
       homepageConfigs: [],
+      communityMembers: [],
     };
   }
 
@@ -325,7 +326,7 @@ class FakePrisma {
       if (where?.name) return depts.find((d: any) => d.name.toLowerCase() === where.name.toLowerCase()) || null;
       return null;
     },
-findMany: async ({ orderBy }: any = {}) => {
+findMany: async ({ orderBy, include }: any = {}) => {
       const store = readDevDb();
       let depts = store.departments || [];
       if (depts.length === 0) {
@@ -341,7 +342,16 @@ findMany: async ({ orderBy }: any = {}) => {
         store.departments = depts;
         writeDevDb(store);
       }
-      return [...depts];
+      const alumniProfiles = store.alumniProfiles || [];
+      const users = store.users || [];
+      const mapped = depts.map((d: any) => {
+        const rec: any = { ...d, departmentHeadProfiles: d.departmentHeadProfiles || [], _count: { alumniProfiles: alumniProfiles.filter((a: any) => a.departmentId === d.id).length } };
+        if (include?.departmentHeadProfiles?.include?.user) {
+          rec.departmentHeadProfiles = (rec.departmentHeadProfiles || []).map((h: any) => ({ ...h, user: h.user || users.find((u: any) => u.id === h.userId) || null }));
+        }
+        return rec;
+      });
+      return mapped;
     },
     count: async () => {
       const store = readDevDb();
@@ -913,6 +923,60 @@ findMany: async ({ orderBy }: any = {}) => {
         return this.contentItem.update({ where, data: update });
       }
       return this.contentItem.create({ data: create });
+    },
+  };
+
+  communityMember = {
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let items = [...(store.communityMembers || [])];
+      if (where?.active !== undefined) items = items.filter((m: any) => Boolean(m.active) === Boolean(where.active));
+      if (where?.category) items = items.filter((m: any) => m.category === where.category);
+      return items;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const items = store.communityMembers || [];
+      if (where?.id) return items.find((m: any) => m.id === where.id) || null;
+      return null;
+    },
+    count: async () => readDevDb().communityMembers?.length || 0,
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = {
+        ...data,
+        id: data.id || `cm-${Date.now().toString().slice(-6)}`,
+        active: data.active !== false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.communityMembers) store.communityMembers = [];
+      store.communityMembers.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const idx = (store.communityMembers || []).findIndex((m: any) => m.id === where.id);
+      if (idx === -1) throw new Error('Community member not found');
+      store.communityMembers[idx] = { ...store.communityMembers[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.communityMembers[idx];
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.communityMembers || []).length;
+      store.communityMembers = (store.communityMembers || []).filter((m: any) => m.id !== where.id);
+      writeDevDb(store);
+      if (store.communityMembers.length === before) throw new Error('Community member not found');
+      return {};
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const before = (store.communityMembers || []).length;
+      if (where?.id) store.communityMembers = (store.communityMembers || []).filter((m: any) => m.id !== where.id);
+      writeDevDb(store);
+      return { count: before - (store.communityMembers?.length || 0) };
     },
   };
 

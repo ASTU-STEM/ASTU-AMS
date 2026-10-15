@@ -1240,7 +1240,7 @@ export default function NotificationCenter() {
         break;
       case 'ai_urgent':
         setPriority('Urgent');
-        setMessage(`⚠️ URGENT BROADCAST NOTICE:\n\n${message}\n\nPlease take action immediately.`);
+        setMessage(`️ URGENT BROADCAST NOTICE:\n\n${message}\n\nPlease take action immediately.`);
         toast.success('AI updated tone to Emergency Urgent Alert.');
         break;
       case 'ai_amharic':
@@ -1301,11 +1301,11 @@ export default function NotificationCenter() {
         toast.success('Inserted ASTU University Campus Banner Image.');
         break;
       case 'callout_warning':
-        insertFormatting('\n> ⚠️ IMPORTANT NOTICE: Please complete this task before the university administrative deadline.\n');
+        insertFormatting('\n> ️ IMPORTANT NOTICE: Please complete this task before the university administrative deadline.\n');
         toast.success('Inserted Warning Callout Component.');
         break;
       case 'callout_success':
-        insertFormatting('\n> ✅ CONGRATULATIONS: Your ASTU Alumni request has been approved and verified.\n');
+        insertFormatting('\n>  CONGRATULATIONS: Your ASTU Alumni request has been approved and verified.\n');
         toast.success('Inserted Success Callout Component.');
         break;
       case 'cta_button':
@@ -1314,11 +1314,11 @@ export default function NotificationCenter() {
         toast.success('Inserted Primary CTA Action Button Component.');
         break;
       case 'metric_block':
-        insertFormatting('\n📊 KEY HIGHLIGHT: Over 12,000+ ASTU Engineering Alumni Connected Worldwide.\n');
+        insertFormatting('\n KEY HIGHLIGHT: Over 12,000+ ASTU Engineering Alumni Connected Worldwide.\n');
         toast.success('Inserted Metric Highlight Component.');
         break;
       case 'signature_block':
-        insertFormatting('\n\n---\n🏛️ Official Broadcast from ASTU Alumni Relations & Career Development Office\nAdama Science and Technology University, Ethiopia');
+        insertFormatting('\n\n---\n️ Official Broadcast from ASTU Alumni Relations & Career Development Office\nAdama Science and Technology University, Ethiopia');
         toast.success('Inserted ASTU Official Seal & Signature Component.');
         break;
       case 'agenda_table':
@@ -1326,7 +1326,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Event Agenda Table Component.');
         break;
       case 'social_links':
-        insertFormatting('\n\n🔗 ASTU Official Links: [Website](https://astu.edu.et) | [LinkedIn](https://linkedin.com) | [Telegram](https://t.me/astu_official)\n');
+        insertFormatting('\n\n ASTU Official Links: [Website](https://astu.edu.et) | [LinkedIn](https://linkedin.com) | [Telegram](https://t.me/astu_official)\n');
         toast.success('Inserted Social Links Footer Component.');
         break;
       case 'code_block':
@@ -1354,7 +1354,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Interactive RSVP Button Grid Component.');
         break;
       case 'component_document_card':
-        insertFormatting('\n📄 **Attachment Document:** [Download ASTU Clearance Form (PDF)](http://localhost:5173/documents/clearance-form.pdf)\n');
+        insertFormatting('\n **Attachment Document:** [Download ASTU Clearance Form (PDF)](http://localhost:5173/documents/clearance-form.pdf)\n');
         toast.success('Inserted PDF Attachment Document Card.');
         break;
 
@@ -1568,23 +1568,23 @@ export default function NotificationCenter() {
         toast.success('Applied Ocean Blue Glassmorphism Header.');
         break;
       case 'component_map_location':
-        insertFormatting('\n📍 **Campus Location:** ASTU Main Campus, Adama Science & Technology University, Expressway Junction, Adama, Ethiopia.\n');
+        insertFormatting('\n **Campus Location:** ASTU Main Campus, Adama Science & Technology University, Expressway Junction, Adama, Ethiopia.\n');
         toast.success('Inserted Adama Campus Location Map Card.');
         break;
       case 'component_donor_badge':
-        insertFormatting('\n🏅 **ASTU Donor Honor Wall:** Recognized as a Founding Contributor to the Engineering Excellence Fund.\n');
+        insertFormatting('\n **ASTU Donor Honor Wall:** Recognized as a Founding Contributor to the Engineering Excellence Fund.\n');
         toast.success('Inserted Donor Appreciation Badge Block.');
         break;
       case 'component_verified_shield':
-        insertFormatting('\n🛡️ **ASTU VERIFIED DOCUMENT:** Verified by Registrar Digital Certificate Authority.\n');
+        insertFormatting('\n️ **ASTU VERIFIED DOCUMENT:** Verified by Registrar Digital Certificate Authority.\n');
         toast.success('Inserted Official Verification Badge.');
         break;
       case 'component_takeaways_box':
-        insertFormatting('\n📌 **KEY TAKEAWAYS:**\n1. Review requirement deadlines.\n2. Submit documentation via student portal.\n');
+        insertFormatting('\n **KEY TAKEAWAYS:**\n1. Review requirement deadlines.\n2. Submit documentation via student portal.\n');
         toast.success('Inserted Key Takeaways Box Layout.');
         break;
       case 'component_author_avatar':
-        insertFormatting('\n👤 **Sender:** Office of the Vice President for Academic & Research Affairs | ASTU\n');
+        insertFormatting('\n **Sender:** Office of the Vice President for Academic & Research Affairs | ASTU\n');
         toast.success('Inserted Admin Signature Avatar Card.');
         break;
 
@@ -1874,7 +1874,7 @@ export default function NotificationCenter() {
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#003580]/30 bg-[#003580]/5 px-3 py-1.5 text-xs font-bold text-[#003580] hover:bg-[#003580]/15 transition-all shadow-sm"
                 >
                   <Wand2 className="h-3.5 w-3.5 text-[#003580]" />
-                  🧰 More Tools & Suite (100+)
+                   More Tools & Suite (100+)
                 </button>
                 <div className="flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs">
                   <button
@@ -2007,17 +2007,17 @@ export default function NotificationCenter() {
                     }}
                     className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#003580]"
                   >
-                    <option value="All Users">🌐 All Users (System-wide Broadcast)</option>
-                    <option value="Alumni Portal (ALUMNI)">🎓 1. Alumni Portal (ALUMNI)</option>
-                    <option value="Employer Portal (EMPLOYER)">💼 2. Employer Portal (EMPLOYER)</option>
-                    <option value="Department Head Portal (DEPARTMENT_HEAD)">🏛️ 3. Department Head Portal (DEPARTMENT_HEAD)</option>
-                    <option value="Registrar Portal (REGISTRAR)">📜 4. Registrar Portal (REGISTRAR)</option>
-                    <option value="Alumni Office Portal (ALUMNI_OFFICE)">🏛️ 5. Alumni Office Portal (ALUMNI_OFFICE)</option>
-                    <option value="Super Admin Portal (SUPER_ADMIN)">⚡ 6. Super Admin & ICT Portal (SUPER_ADMIN)</option>
-                    <option value="By Department">🏢 Filter By Department</option>
-                    <option value="By Batch">📅 Filter By Graduation Batch</option>
-                    <option value="By Employment Status">💼 Filter By Employment Status</option>
-                    <option value="Specific Users">🎯 Specific User Selection</option>
+                    <option value="All Users"> All Users (System-wide Broadcast)</option>
+                    <option value="Alumni Portal (ALUMNI)"> 1. Alumni Portal (ALUMNI)</option>
+                    <option value="Employer Portal (EMPLOYER)"> 2. Employer Portal (EMPLOYER)</option>
+                    <option value="Department Head Portal (DEPARTMENT_HEAD)">️ 3. Department Head Portal (DEPARTMENT_HEAD)</option>
+                    <option value="Registrar Portal (REGISTRAR)"> 4. Registrar Portal (REGISTRAR)</option>
+                    <option value="Alumni Office Portal (ALUMNI_OFFICE)">️ 5. Alumni Office Portal (ALUMNI_OFFICE)</option>
+                    <option value="Super Admin Portal (SUPER_ADMIN)"> 6. Super Admin & ICT Portal (SUPER_ADMIN)</option>
+                    <option value="By Department"> Filter By Department</option>
+                    <option value="By Batch"> Filter By Graduation Batch</option>
+                    <option value="By Employment Status"> Filter By Employment Status</option>
+                    <option value="Specific Users"> Specific User Selection</option>
                   </select>
                 </label>
 
@@ -2519,7 +2519,7 @@ export default function NotificationCenter() {
       {/* ------------------------------------------------------------- */}
       <AdminModal
         open={moreToolsOpen}
-        title="🧰 Super Admin Broadcast Tools & Advanced Features Suite (150 Tools)"
+        title=" Super Admin Broadcast Tools & Advanced Features Suite (150 Tools)"
         onClose={() => setMoreToolsOpen(false)}
         footer={
           <div className="flex items-center justify-between w-full">

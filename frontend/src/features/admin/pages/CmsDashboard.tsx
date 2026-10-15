@@ -566,7 +566,7 @@ export default function CmsDashboard() {
             <div class="meta">
               <div><strong>Report Date:</strong> ${timestamp}</div>
               <div><strong>Officer:</strong> ${officerName}</div>
-              <div class="badge">✓ ETA & HERQA Audit Verified</div>
+              <div class="badge"> ETA & HERQA Audit Verified</div>
             </div>
           </div>
 
@@ -937,7 +937,7 @@ export default function CmsDashboard() {
                             onClick={() => handleResolveInquiry(inq.id)}
                             className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
                           >
-                            Mark as Responded ✓
+                            Mark as Responded 
                           </button>
                         </div>
                       )}

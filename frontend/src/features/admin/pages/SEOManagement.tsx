@@ -568,7 +568,7 @@ ${xmlUrls}
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Meta Title</label>
                     <span className={`text-[11px] font-bold ${titleOptimal ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {liveTitleLen}/65 chars {titleOptimal ? '✓' : '(optimal 30-65)'}
+                      {liveTitleLen}/65 chars {titleOptimal ? '' : '(optimal 30-65)'}
                     </span>
                   </div>
                   <input
@@ -584,7 +584,7 @@ ${xmlUrls}
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Meta Description</label>
                     <span className={`text-[11px] font-bold ${descOptimal ? 'text-emerald-600' : 'text-amber-600'}`}>
-                      {liveDescLen}/165 chars {descOptimal ? '✓' : '(optimal 110-165)'}
+                      {liveDescLen}/165 chars {descOptimal ? '' : '(optimal 110-165)'}
                     </span>
                   </div>
                   <textarea

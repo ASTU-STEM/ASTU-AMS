@@ -23,6 +23,7 @@ import {
   LockKeyhole,
   MessageSquareText,
   MapPin,
+  Pin,
   PlayCircle,
   Quote,
   Star,
@@ -38,7 +39,7 @@ import {
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
-import { partnerLogos } from "../components/PartnerLogos";
+import { partnerLogos, PartnerLogoBadge } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
 import storiesService from "../features/admin/services/stories.service";
@@ -247,7 +248,7 @@ const impactStats = [
     label: "Fields of Study",
     value: "5",
     detail: "Engineering, Applied Science, Tech & Research",
-    trend: "5 Faculties",
+    trend: "STEM & Applied Sciences",
     icon: BookOpen,
     action: "Explore Programs",
     target: "/info/overview",
@@ -348,24 +349,24 @@ export default function HomePage() {
         id: "HS-1",
         image: gallery1,
         tagline: "Quality Assurance & Accreditation",
-        title: "Connecting ASTU's Excellence to the Global Industry",
-        description: "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.",
+        title: "Where ASTU Talent Meets Global Industry",
+        description: "A single gateway for alumni, employers, and departments at Adama Science and Technology University — built to grow careers, connect talent with opportunity, and strengthen teaching and research.",
         active: true,
       },
       {
         id: "HS-2",
         image: gallery2,
         tagline: "Enterprise Networking & Placement",
-        title: "Empowering ASTU Graduates Through Innovation, Skills, and Modern Workplace Opportunities",
-        description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
+        title: "From Classroom Learning to Real-World Careers",
+        description: "Discover corporate partners, explore live openings, and follow graduate outcomes as they happen. We connect what students learn at ASTU with the opportunities waiting in industry.",
         active: true,
       },
       {
         id: "HS-3",
         image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
         tagline: "Academic Innovation & Tracer Feedback",
-        title: "Coordinating Strategic Tracer Studies to Identify Workforce Trends and Skill Gaps",
-        description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, supporting data-driven curriculum improvements, strengthening industry collaboration, enhancing graduate employability, and contributing to successful university accreditation and continuous quality assurance outcomes.",
+        title: "Tracer Data That Shapes Stronger Curricula",
+        description: "Tracer studies show department heads and industry partners where graduates work and which skills employers need most. That evidence drives curriculum reviews, strengthens collaboration, and supports accreditation.",
         active: true,
       }
     ];
@@ -520,7 +521,7 @@ export default function HomePage() {
   });
   const [liveWelcomeMessage, setLiveWelcomeMessage] = useState<string>(() => {
     const cfg = homepageCmsService.getSettings();
-    return cfg?.welcomeMessage || "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.";
+    return cfg?.welcomeMessage || "Welcome to the ASTU Alumni Management System — one home for graduates, employers, and departments to track careers, share opportunities, and stay connected.";
   });
   const [liveWelcomeEnabled, setLiveWelcomeEnabled] = useState<boolean>(() => {
     const cfg = homepageCmsService.getSettings();
@@ -552,7 +553,7 @@ export default function HomePage() {
     return cfg?.portalsHeaders || {
       eyebrow: "Get Started",
       title: "How ASTU-AMS Works",
-      description: "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps.",
+      description: "From sign-up to real impact — here is how the platform supports alumni, employers, and the university in four simple steps.",
       ctaText: "Get Started Today",
       ctaLink: "/login",
     };
@@ -562,7 +563,7 @@ export default function HomePage() {
     return cfg?.campusLifeHeaders || {
       eyebrow: "Explore Life At ASTU",
       title: "Campus Life, Facilities, Events, and Galleries",
-      description: "A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.",
+      description: "Explore life at ASTU — upcoming events, modern facilities, campus activities, media galleries, and the public services that connect the university with its alumni and community.",
     };
   });
   const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
@@ -631,7 +632,7 @@ export default function HomePage() {
   const [liveFooter, setLiveFooter] = useState<any>(() => {
     const cfg = homepageCmsService.getSettings();
     return cfg?.footer || {
-      aboutText: "Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.",
+      aboutText: "Bringing graduates, employers, and department heads together in one place — strengthening quality audits and improving career placement for ASTU students.",
       address: "Adama Science and Technology University, Adama, Oromia, Ethiopia",
       poBox: "P.O. Box 1888, Adama, Ethiopia",
       phone: "+251-221-110000",
@@ -1033,7 +1034,7 @@ export default function HomePage() {
     });
 
     return () => sectionObserver.disconnect();
-  }, []);
+  }, [liveNavSections]);
 
   // Sync liveCommunitySection from CMS
   useEffect(() => {
@@ -1402,7 +1403,7 @@ export default function HomePage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{liveCampusLifeHeaders?.eyebrow || "Explore Life At ASTU"}</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">{liveCampusLifeHeaders?.title || "Campus Life, Facilities, Events, and Galleries"}</h3>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              {liveCampusLifeHeaders?.description || "A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services."}
+              {liveCampusLifeHeaders?.description || "Explore life at ASTU — upcoming events, modern facilities, campus activities, media galleries, and the public services that connect the university with its alumni and community."}
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
@@ -1642,7 +1643,9 @@ export default function HomePage() {
                       className={`flex-1 rounded-xl px-3 py-2.5 text-xs font-bold transition-all cursor-pointer ${registeredTitles.includes(event.title) ? 'bg-emerald-600 text-white' : 'bg-astu-navy text-white hover:brightness-110 hover:shadow-md'}`}
                       onClick={() => handleRegisterClick({ title: event.title, kind: 'Event', date: event.date, location: event.location, id: event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') })}
                     >
-                      {registeredTitles.includes(event.title) ? '✓ Registered' : (liveEventsHeaders?.registerButtonText || liveSectionLinks.eventsCardRegisterText)}
+                      {registeredTitles.includes(event.title) ? (
+                        <span className="inline-flex items-center justify-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Registered</span>
+                      ) : (liveEventsHeaders?.registerButtonText || liveSectionLinks.eventsCardRegisterText)}
                     </button>
                     <button
                       onClick={() => navigate(event.link && event.link.startsWith('/events/') ? event.link : `/events/${event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, { state: { event } })}
@@ -1720,8 +1723,8 @@ export default function HomePage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="block text-sm font-semibold text-astu-navy group-hover:text-astu-red transition-colors line-clamp-1">{announcement.title}</span>
                         {announcement.pinned && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 shrink-0">
-                            📌 PINNED
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 shrink-0">
+                            <Pin className="h-2.5 w-2.5" /> PINNED
                           </span>
                         )}
                       </div>
@@ -2013,29 +2016,33 @@ export default function HomePage() {
           </div>
         </section>        {/* ── Partner Logos ── */}
         <span id="stakeholders" className="relative -top-24 block" />
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-4">
+        <section id="partners" className="relative mx-auto my-8 max-w-[1440px] overflow-hidden rounded-3xl border border-blue-100/80 bg-[radial-gradient(ellipse_at_top_left,rgba(219,234,254,0.78),transparent_48%),linear-gradient(135deg,#f8fbff_0%,#ffffff_52%,#f1f7ff_100%)] px-4 py-14 shadow-[0_20px_60px_rgba(0,43,102,0.08)] md:px-8 md:py-20">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full border border-blue-100/70" />
+          <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-16 h-48 w-48 rounded-full border border-blue-100/60" />
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{livePartnersHeaders?.eyebrow || "Our Partners"}</p>
             <h3 className="mt-1 text-2xl font-bold text-astu-navy md:text-3xl">{livePartnersHeaders?.title || "Partner Companies"}</h3>
             <p className="mx-auto mt-2 max-w-xl text-sm text-on-surface-variant">{livePartnersHeaders?.description || "Institutional partners supporting employability, internships, and research collaboration."}</p>
           </div>
           <div className="relative">
-            <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
+            <div className="flex w-max gap-5 animate-scroll hover:[animation-play-state:paused]">
               {[...livePartners, ...livePartners].map((partner, idx) => {
                 const LogoComponent = partnerLogos[partner.name];
+                const logoSrc = partner.logo || (LogoComponent ? `/images/partners/${({
+                  'Ethio Telecom': 'ethio-telecom.png',
+                  INSA: 'insa.png',
+                  'Ethiopian Airlines': 'ethiopian-airlines.svg',
+                  Safaricom: 'safaricom.png',
+                  Huawei: 'huawei.svg',
+                  'Commercial Bank of Ethiopia': 'cbe.png',
+                } as Record<string, string>)[partner.name]}` : undefined);
                 return (
-                  <div key={`${partner.name}-${idx}`} className="flex min-w-[160px] flex-col items-center gap-3 rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]">
-                    {partner.logo ? (
-                      <img src={partner.logo} alt={partner.name} className="h-10 max-w-[140px] object-contain" />
-                    ) : LogoComponent ? (
-                      <LogoComponent />
-                    ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy text-white text-sm font-bold shadow-md">
-                        {partner.name.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                    <span className="text-xs font-semibold text-astu-navy text-center leading-tight">{partner.name}</span>
-                  </div>
+                  <article key={`${partner.name}-${idx}`} className="group flex w-[150px] shrink-0 flex-col items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-5 shadow-[0_8px_24px_rgba(0,43,102,0.06)] backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_16px_32px_rgba(0,43,102,0.12)] sm:w-[170px]">
+                    <div className="flex h-[82px] w-full items-center justify-center">
+                      <PartnerLogoBadge name={partner.name} src={logoSrc} />
+                    </div>
+                    <span className="min-h-9 w-full px-1 text-center text-[13px] font-extrabold leading-snug tracking-[0.01em] text-[#002653] [text-wrap:balance]">{partner.name}</span>
+                  </article>
                 );
               })}
             </div>
@@ -2122,7 +2129,9 @@ export default function HomePage() {
                           className="rounded-lg bg-astu-navy px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-astu-navy/90 transition-all cursor-pointer shadow-sm hover:shadow"
                           onClick={() => handleRegisterClick({ title: ws.title, kind: 'Workshop', date: ws.date })}
                         >
-                          {isRegistered ? '✓ Registered' : 'Register'}
+                          {isRegistered ? (
+                            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5" /> Registered</span>
+                          ) : 'Register'}
                         </button>
                       </div>
                     </article>
@@ -2229,12 +2238,12 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="text-xs leading-relaxed text-slate-400">
-                Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.
+                {liveFooter?.aboutText || "Bringing graduates, employers, and department heads together in one place — strengthening quality audits and improving career placement for ASTU students."}
               </p>
               <div className="flex gap-2 pt-2">
-                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Facebook</button>
-                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Twitter</button>
-                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">LinkedIn</button>
+                <a href={liveFooter?.socialFacebook && liveFooter.socialFacebook !== "#" ? liveFooter.socialFacebook : "https://facebook.com/adamaastu"} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Facebook</a>
+                <a href={liveFooter?.socialTwitter && liveFooter.socialTwitter !== "#" ? liveFooter.socialTwitter : "https://twitter.com/adamaastu"} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Twitter</a>
+                <a href={liveFooter?.socialLinkedin && liveFooter.socialLinkedin !== "#" ? liveFooter.socialLinkedin : "https://linkedin.com/school/adama-science-and-technology-university"} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">LinkedIn</a>
               </div>
             </div>
 
@@ -2283,15 +2292,15 @@ export default function HomePage() {
               <ul className="space-y-3 text-xs text-slate-400">
                 <li className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-astu-green mt-0.5" />
-                  <span>Adama, Oromia, Ethiopia</span>
+                  <span>{liveFooter?.address || "Adama, Oromia, Ethiopia"}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-astu-green" />
-                  <span>+251-</span>
+                  <span>{liveFooter?.phone || "+251 22 110 0001"}</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-astu-green" />
-                  <a href="mailto:irccd@astu.edu.et" className="hover:text-white transition-colors">irccd@astu.edu.et</a>
+                  <a href={`mailto:${liveFooter?.email || "irccd@astu.edu.et"}`} className="hover:text-white transition-colors">{liveFooter?.email || "irccd@astu.edu.et"}</a>
                 </li>
               </ul>
             </div>
@@ -2309,7 +2318,7 @@ export default function HomePage() {
           {/* Bottom Panel: Copyright and Back to Top button */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/5 pt-8 text-xs text-slate-500 font-semibold">
             <div className="flex flex-wrap items-center gap-3">
-              <p>© {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} {liveFooter?.copyrightText || "Adama Science and Technology University. All rights reserved."}</p>
               <span>&bull;</span>
               <p className="text-astu-green">Tracer Study & ICT Coordination</p>
             </div>
