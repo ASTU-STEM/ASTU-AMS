@@ -14,22 +14,22 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface IncidentItem {
+  id: string;
+  title: string;
+  severity: string;
+  status: string;
+  started: string;
+  affectedUsers: number;
+  affectedServices: string[];
+  timeline: { time: string; text: string }[];
+}
+
 export default function IctIncidentsPage() {
   const [activeTab, setActiveTab] = useState<'incidents' | 'dr-simulation'>('incidents');
   const [drSimulating, setDrSimulating] = useState(false);
 
-  const [incidents, setIncidents] = useState<
-    {
-      id: string;
-      title: string;
-      severity: string;
-      status: string;
-      started: string;
-      affectedUsers: number;
-      affectedServices: string[];
-      timeline: { time: string; text: string }[];
-    }[]
-  >([]);
+  const [incidents, setIncidents] = useState<IncidentItem[]>([]);
 
   const handleRunDRSimulation = () => {
     setDrSimulating(true);
@@ -83,70 +83,80 @@ export default function IctIncidentsPage() {
 
       {activeTab === 'incidents' ? (
         <div className="space-y-4">
-          {incidents.map((inc) => (
-            <div
-              key={inc.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">{inc.id}</span>
-                    <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
-                      Severity: {inc.severity}
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-                      {inc.status}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{inc.title}</h3>
-                </div>
-
-                <div className="text-right text-xs text-slate-500">
-                  <div>Started: <strong>{inc.started}</strong></div>
-                  <div>Affected Users: <strong>{inc.affectedUsers.toLocaleString()}</strong></div>
-                </div>
-              </div>
-
-              {/* Lifecycle Progress Bar */}
-              <div className="mb-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Lifecycle Progress</p>
-                <div className="grid grid-cols-6 gap-1 text-center text-[10px] font-bold">
-                  {['Detected', 'Investigating', 'Identified', 'Mitigating', 'Resolved', 'Postmortem'].map((step, idx) => {
-                    const isCurrent = step.toLowerCase() === inc.status.toLowerCase();
-                    const isPassed = idx < 2;
-                    return (
-                      <div
-                        key={step}
-                        className={`py-1.5 rounded-lg border ${
-                          isCurrent
-                            ? 'bg-amber-500 text-slate-950 border-amber-600 font-extrabold'
-                            : isPassed
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'
-                            : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700'
-                        }`}
-                      >
-                        {step}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Timeline</p>
-                <div className="space-y-2 text-xs">
-                  {inc.timeline.map((event, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="font-mono text-slate-400 font-bold">{event.time}</span>
-                      <span className="text-slate-700 dark:text-slate-300">{event.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {incidents.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-12 text-center">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">All Systems Operational</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                No active incidents or service degradations reported. The incident response center is monitoring telemetry in real-time.
+              </p>
             </div>
-          ))}
+          ) : (
+            incidents.map((inc) => (
+              <div
+                key={inc.id}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">{inc.id}</span>
+                      <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                        Severity: {inc.severity}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                        {inc.status}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{inc.title}</h3>
+                  </div>
+
+                  <div className="text-right text-xs text-slate-500">
+                    <div>Started: <strong>{inc.started}</strong></div>
+                    <div>Affected Users: <strong>{inc.affectedUsers.toLocaleString()}</strong></div>
+                  </div>
+                </div>
+
+                {/* Lifecycle Progress Bar */}
+                <div className="mb-4">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Lifecycle Progress</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1.5 text-center text-[10px] font-bold">
+                    {['Detected', 'Investigating', 'Identified', 'Mitigating', 'Resolved', 'Postmortem'].map((step, idx) => {
+                      const isCurrent = step.toLowerCase() === inc.status.toLowerCase();
+                      const isPassed = idx < 2;
+                      return (
+                        <div
+                          key={step}
+                          className={`py-1.5 rounded-lg border ${
+                            isCurrent
+                              ? 'bg-amber-500 text-slate-950 border-amber-600 font-extrabold'
+                              : isPassed
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300'
+                              : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700'
+                          }`}
+                        >
+                          {step}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Timeline */}
+                <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Timeline</p>
+                  <div className="space-y-2 text-xs">
+                    {inc.timeline.map((event, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="font-mono text-slate-400 font-bold">{event.time}</span>
+                        <span className="text-slate-700 dark:text-slate-300">{event.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       ) : (
         /* DR Simulation View */

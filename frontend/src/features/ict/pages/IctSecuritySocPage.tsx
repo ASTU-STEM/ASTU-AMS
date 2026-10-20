@@ -199,7 +199,7 @@ export default function IctSecuritySocPage() {
 
       {/* Break Glass Active Banner */}
       {isElevated && (
-        <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-rose-300 flex items-center justify-between">
+        <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Flame className="w-6 h-6 text-rose-500 animate-pulse shrink-0" />
             <div>
@@ -215,7 +215,7 @@ export default function IctSecuritySocPage() {
               setIsElevated(false);
               toast.success('Elevated session revoked. Returned to standard ICT Administrator scope.');
             }}
-            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
+            className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
           >
             Revoke Elevation
           </button>
@@ -256,15 +256,15 @@ export default function IctSecuritySocPage() {
       </div>
 
       {/* OWASP Top 10 (A01–A10) Prevention Matrix Section */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-500" />
+            <Shield className="w-5 h-5 text-blue-500 shrink-0" />
             <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
               OWASP Top 10 (A01–A10) Active Security Prevention Matrix
             </h2>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span className="self-start sm:self-auto px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             10 / 10 VECTORS MITIGATED
           </span>
         </div>

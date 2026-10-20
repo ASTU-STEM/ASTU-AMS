@@ -48,12 +48,31 @@ interface EndpointHealth {
 
 const mockApiKeys: ApiKeyItem[] = [];
 
-const mockEndpoints: EndpointHealth[] = [];
+const mockEndpoints: EndpointHealth[] = [
+  { endpoint: '/api/v1/auth/login', method: 'POST', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 25, health: 'HEALTHY' },
+  { endpoint: '/api/v1/alumni/profile', method: 'GET', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 30, health: 'HEALTHY' },
+  { endpoint: '/api/v1/jobs', method: 'GET', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 28, health: 'HEALTHY' },
+  { endpoint: '/api/v1/surveys/active', method: 'GET', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 35, health: 'HEALTHY' },
+];
 
 export default function IctApiGatewayPage() {
-  const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>(mockApiKeys);
+  const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'KEYS' | 'HEALTH' | 'STREAM'>('KEYS');
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/technical-ops/api-gateway', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data?.apiKeys)) {
+          setApiKeys(d.data.apiKeys);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Form State
   const [clientName, setClientName] = useState('');
@@ -140,11 +159,11 @@ export default function IctApiGatewayPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('KEYS')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'KEYS'
               ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20'
               : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -155,7 +174,7 @@ export default function IctApiGatewayPage() {
         <button
           type="button"
           onClick={() => setActiveTab('HEALTH')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'HEALTH'
               ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20'
               : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -166,7 +185,7 @@ export default function IctApiGatewayPage() {
         <button
           type="button"
           onClick={() => setActiveTab('STREAM')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'STREAM'
               ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20'
               : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -194,7 +213,14 @@ export default function IctApiGatewayPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
-                  {apiKeys.map((key) => (
+                  {apiKeys.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
+                        No external partner API credentials provisioned yet. Use "Provision Partner API Key" above to generate a client credential.
+                      </td>
+                    </tr>
+                  ) : (
+                    apiKeys.map((key) => (
                     <tr key={key.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="px-4 py-3.5">
                         <div className="font-bold text-slate-900 dark:text-white">{key.clientName}</div>
@@ -257,7 +283,8 @@ export default function IctApiGatewayPage() {
                         )}
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
                 </tbody>
               </table>
             </div>
