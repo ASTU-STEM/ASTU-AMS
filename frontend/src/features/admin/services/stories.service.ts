@@ -118,6 +118,30 @@ Managing international suppliers for commercial aircraft programs requires high 
 ];
 
 export const storiesService = {
+  /**
+   * Normalise CMS-authored success stories (which use a looser field set than
+   * the dashboard editor) into the Dashboard `AlumniStory` shape. Returns an
+   * empty array when the CMS has no stories, so callers can fall back cleanly.
+   */
+  fromConfig(stories?: any[] | null): AlumniStory[] {
+    if (!Array.isArray(stories)) return [];
+    return stories
+      .filter((s) => s && (s.name || s.title || s.author))
+      .map((s: any, idx: number) => ({
+        id: String(s.id ?? `S-cms-${idx + 1}`),
+        name: s.name || s.author || s.title,
+        role: s.role || s.position || s.subtitle || '',
+        company: s.company,
+        graduationYear: s.graduationYear || s.classOf || s.year,
+        department: s.department,
+        text: s.text || s.excerpt || s.summary || '',
+        fullStory: s.fullStory || s.content || s.body || s.text || '',
+        image: s.image || s.photo || s.imageUrl || '',
+        featured: s.featured ?? s.active ?? true,
+        publishedAt: s.publishedAt || s.date,
+      }));
+  },
+
   getStories(): AlumniStory[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);

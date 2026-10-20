@@ -13,6 +13,7 @@ import { Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import authService from "../features/auth/services/auth.service";
 import AnnouncementPanel from "./AnnouncementPanel";
+import ThemeToggle from "./ThemeToggle";
 import astuLogo from "../assets/logos/astu-icon.jpeg";
 import { useSystemSettings } from "../context/SystemSettingsContext";
 
@@ -218,7 +219,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+    <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-black/40">
       <div className="hidden bg-astu-navy text-white md:block">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
           <div className="flex items-center gap-4 text-xs text-white/80">
@@ -309,7 +310,7 @@ export default function Navbar() {
 
                 {isOpen && (
                   <div className="absolute left-0 top-full animate-[mega-menu-fade-in_150ms_ease-out_both]">
-                    <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl min-w-[240px]">
+                    <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl min-w-[240px]">
                       <div className="p-2">
                         {menu.items.map((item) => (
                           <button
@@ -355,7 +356,7 @@ export default function Navbar() {
               type="text"
             />
             {isSearchOpen && filteredSearch.length > 0 && (
-              <div className="absolute right-0 top-11 w-64 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl animate-[mega-menu-fade-in_150ms_ease-out_both]">
+              <div className="absolute right-0 top-11 w-64 overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl animate-[mega-menu-fade-in_150ms_ease-out_both]">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}
@@ -380,6 +381,8 @@ export default function Navbar() {
             <Bell className="h-5 w-5" />
           </button>
 
+          <ThemeToggle className="text-on-surface-variant hover:text-astu-navy" />
+
           <Link
             to="/register"
             className="hidden sm:inline-flex rounded-lg bg-astu-navy px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-astu-navy/90 hover:shadow-lg"
@@ -402,9 +405,13 @@ export default function Navbar() {
       </div>
 
       {isMobileNavOpen && (
-        <div className="border-t border-outline-variant bg-white px-4 py-4 lg:hidden shadow-lg">
+        <div className="border-t border-outline-variant bg-white dark:bg-slate-900 px-4 py-4 lg:hidden shadow-lg">
           {/* Mobile Quick Action Headers */}
           <div className="mb-4 pb-4 border-b border-outline-variant/60">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-semibold text-on-surface-variant">Appearance</span>
+              <ThemeToggle showLabel className="text-on-surface-variant hover:text-astu-navy" />
+            </div>
             {!user ? (
               <div className="grid grid-cols-2 gap-2">
                 <Link
@@ -451,7 +458,7 @@ export default function Navbar() {
               />
             </div>
             {filteredSearch.length > 0 && (
-              <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-md max-h-60 overflow-y-auto">
+              <div className="mt-1 overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-900 shadow-md max-h-60 overflow-y-auto">
                 {filteredSearch.map((item) => (
                   <button
                     key={item.label}

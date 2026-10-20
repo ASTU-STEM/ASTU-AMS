@@ -39,10 +39,10 @@ const DEFAULT_CONFIG = {
     { id: "HS-2", image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1800&q=80", tagline: "Enterprise Networking & Placement", title: "Empowering ASTU Graduates in Modern Workspaces", description: "Discover corporate partners, publish practical career openings, and track your employment outcomes.", active: true },
   ],
   impactStats: [
-    { id: "IS-1", label: "Registered Alumni Members", value: "1,238", suffix: "+", icon: "Users", active: true },
-    { id: "IS-2", label: "Partner Organizations", value: "500", suffix: "+", icon: "Building2", active: true },
-    { id: "IS-3", label: "Employment Rate", value: "87", suffix: "%", icon: "LineChart", active: true },
-    { id: "IS-4", label: "Digital Requests", value: "6K", suffix: "+", icon: "FileCheck2", active: true },
+    { id: "IS-1", label: "Registered Alumni Members", value: "—", suffix: "", icon: "Users", active: true },
+    { id: "IS-2", label: "Partner Organizations", value: "—", suffix: "", icon: "Building2", active: true },
+    { id: "IS-3", label: "Employment Rate", value: "—", suffix: "", icon: "LineChart", active: true },
+    { id: "IS-4", label: "Digital Requests", value: "—", suffix: "", icon: "FileCheck2", active: true },
     { id: "IS-5", label: "Engagement Hub", value: "24/7", suffix: "", icon: "MessageSquareText", active: true },
   ],
   portals: [
@@ -54,34 +54,11 @@ const DEFAULT_CONFIG = {
   ],
   campusLife: [], campuses: [], gallery: [], videos: [], workshops: [],
   events: [],
-  newsItems: [
-    { id: "NW-1", title: "New Engineering Lab Inaugurated", date: "May 28, 2026", active: true },
-    { id: "NW-2", title: "ASTU Research Grant Winners", date: "May 25, 2026", active: true },
-    { id: "NW-3", title: "Annual Career Expo Announced", date: "May 20, 2026", active: true },
-  ],
-  announcements: [
-    { id: "AN-1", title: "ASTU Alumni Association Inspires Graduating Class!", date: "March 7, 2025", type: "Alumni Announcement", active: true },
-    { id: "AN-2", title: "ASTU hosts a five-day DAAD Alumni workshop", date: "March 7, 2025", type: "Employer Announcement", active: true },
-    { id: "AN-3", title: "Tracer Study 2026 response window is open", date: "May 31, 2026", type: "Alumni Announcement", active: true },
-  ],
-  stories: [
-    { id: "SS-1", name: "Abebe Yosef", role: "Software Engineer", text: "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.", image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=300&q=80", active: true },
-    { id: "SS-2", name: "Bekele Kebede", role: "Employer Partner", text: "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300&q=80", active: true },
-    { id: "SS-3", name: "Helina Sileshi", role: "Mentor & Alumni", text: "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80", active: true },
-  ],
-  partners: [
-    { id: "PT-1", name: "Ethio Telecom", active: true },
-    { id: "PT-2", name: "INSA", active: true },
-    { id: "PT-3", name: "Ethiopian Airlines", active: true },
-    { id: "PT-4", name: "Safaricom", active: true },
-    { id: "PT-5", name: "Huawei", active: true },
-    { id: "PT-6", name: "Commercial Bank of Ethiopia", active: true },
-  ],
-  testimonials: [
-    { id: "TT-1", quote: "ASTU-AMS gave our department the evidence we needed for skill-gap review.", by: "Department Head", active: true },
-    { id: "TT-2", quote: "The candidate search tools improved our campus recruitment cycle.", by: "Employer Partner", active: true },
-    { id: "TT-3", quote: "I found mentorship, events, and job matches without leaving the alumni portal.", by: "ASTU Alumna", active: true },
-  ],
+  newsItems: [],
+  announcements: [],
+  stories: [],
+  partners: [],
+  testimonials: [],
   faq: [
     { id: "FQ-1", question: "Who can use ASTU-AMS?", answer: "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.", active: true },
     { id: "FQ-2", question: "How are tracer studies used?", answer: "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.", active: true },
@@ -140,16 +117,16 @@ export default function LandingPage() {
     return active(config.impactStats).map((stat: any) => {
       const lower = (stat.label || '').toLowerCase();
       if (stat.id === 'IS-1' || lower.includes('alumni')) {
-        return { ...stat, value: metrics.registeredAlumni.toLocaleString() };
+        return { ...stat, value: metrics.registeredAlumniFormatted, suffix: '' };
       }
       if (stat.id === 'IS-2' || lower.includes('partner') || lower.includes('organization')) {
-        return { ...stat, value: metrics.corporatePartners.toLocaleString() };
+        return { ...stat, value: metrics.corporatePartnersFormatted, suffix: '' };
       }
       if (stat.id === 'IS-3' || lower.includes('rate') || lower.includes('employment')) {
-        return { ...stat, value: String(metrics.employmentRate) };
+        return { ...stat, value: metrics.employmentRateFormatted, suffix: '' };
       }
       if (stat.id === 'IS-4' || lower.includes('request') || lower.includes('digital')) {
-        return { ...stat, value: `${(metrics.digitalRequests / 1000).toFixed(1).replace('.0', '')}K` };
+        return { ...stat, value: metrics.digitalRequestsFormatted, suffix: '' };
       }
       return stat;
     });

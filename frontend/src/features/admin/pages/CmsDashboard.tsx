@@ -512,7 +512,7 @@ export default function CmsDashboard() {
     }
 
     const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
-    const totalAlumni = (metrics?.registeredAlumniFormatted || metrics?.registeredAlumni?.toLocaleString() || '1,238+');
+    const totalAlumni = (metrics?.registeredAlumniFormatted || metrics?.registeredAlumni?.toLocaleString() || '—');
     const activeNotices = items.filter((i) => i.status === 'Published').length;
     const pendingReviews = items.filter((i) => i.status === 'Needs Review' || i.status === 'Scheduled').length;
     const totalRegs = registrations.length || regStats.total;
@@ -720,9 +720,10 @@ export default function CmsDashboard() {
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{metrics.registeredAlumniFormatted}</span>
-            <span className="text-[11px] font-bold text-emerald-600">+12% YoY</span>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Across {metrics.fieldsOfStudy} specialized faculties</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+            {metrics.fieldsOfStudy > 0 ? `Across ${metrics.fieldsOfStudy} fields of study` : 'Live database count'}
+          </p>
         </div>
 
         {/* Card 2: ETA Tracer & Employability */}
@@ -745,7 +746,7 @@ export default function CmsDashboard() {
             </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            Audit-Ready · Employed ≤12 Mo.
+            ETA compliance & graduate employability (survey-derived)
           </p>
         </div>
 

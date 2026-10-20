@@ -6,9 +6,11 @@ interface JobDetailsModalProps {
   job: JobMatch | null;
   onClose: () => void;
   onApply: (jobId: any, coverLetter?: string) => void;
+  /** Full job list, used to derive genuinely similar postings. */
+  allJobs?: JobMatch[];
 }
 
-export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, onApply }) => {
+export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, onApply, allJobs = [] }) => {
   const [coverLetter, setCoverLetter] = useState('');
 
   if (!job) return null;
@@ -23,12 +25,13 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
     }
   };
 
-  // Similar jobs calculation
-  const similarJobs: { title: string; company: string; match: string }[] = [
-    { title: 'Senior React Developer', company: 'Chapa Financial', match: '92%' },
-    { title: 'Full Stack Engineer', company: 'Ethio Telecom', match: '88%' },
-    { title: 'Node.js Backend Developer', company: 'Safaricom', match: '85%' },
-  ];
+  // Similar jobs are derived from the real job list, ranked by the (real)
+  // skill-overlap match score. Previously this was a hardcoded demo list.
+  const similarJobs: { title: string; company: string; match: string }[] = allJobs
+    .filter((j) => j.id !== job.id)
+    .map((j) => ({ title: j.title, company: j.company, match: j.match || '' }))
+    .sort((a, b) => (parseInt(b.match, 10) || 0) - (parseInt(a.match, 10) || 0))
+    .slice(0, 3);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -44,9 +47,11 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
               <span className="px-2.5 py-0.5 bg-gradient-to-r from-[#003366] to-[#004d99] text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">
                 {job.remoteOption === 'remote' ? 'Remote' : job.remoteOption === 'hybrid' ? 'Hybrid' : 'On-Site'}
               </span>
-              <span className="px-2.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">
-                {job.match} Skills Match
-              </span>
+              {job.match && (
+                <span className="px-2.5 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[10px] font-extrabold uppercase tracking-wider rounded-full shadow-sm">
+                  {job.match} Skills Match
+                </span>
+              )}
               <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider rounded-full">
                 {job.type}
               </span>
@@ -199,6 +204,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
           )}
 
           {/* Similar Jobs */}
+          {similarJobs.length > 0 && (
           <div className="space-y-3">
             <h4 className="font-bold text-gray-900">Similar Positions</h4>
             <div className="space-y-2">
@@ -208,11 +214,12 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({ job, onClose, 
                     <p className="text-xs font-bold text-gray-900">{sj.title}</p>
                     <p className="text-[10px] text-gray-500">{sj.company}</p>
                   </div>
-                  <span className="px-2 py-0.5 bg-astu-green/10 text-astu-green text-[10px] font-bold rounded-full">{sj.match} Match</span>
+                  {sj.match && <span className="px-2 py-0.5 bg-astu-green/10 text-astu-green text-[10px] font-bold rounded-full">{sj.match} Match</span>}
                 </div>
               ))}
             </div>
           </div>
+          )}
         </div>
 
         {/* Modal Footer */}

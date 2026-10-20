@@ -162,10 +162,10 @@ export class TracerStudyService {
 
       totalTargeted += eligibleAlumni.length;
 
-      for (const alumni of eligibleAlumni) {
-        if (!alumni.userId) continue;
+      const dispatchResults = await this.processInBatches(eligibleAlumni, 25, async (alumni) => {
+        if (!alumni.userId) return false;
         const existing = await this.assignmentRepo.findBySurveyAndAlumni(template.id, alumni.id);
-        if (existing) continue;
+        if (existing) return false;
 
         const assignment = await this.assignmentRepo.create({
           surveyId: template.id,
@@ -185,7 +185,7 @@ export class TracerStudyService {
         const content = departmentObj
           ? `Your Department Head (${departmentObj.name}) has issued a department tracer study survey '${template.title}'. Available in your portal and due on ${dueDate.toISOString().split('T')[0]}.`
           : `A new tracer study survey '${template.title}' is available in your portal and due on ${dueDate.toISOString().split('T')[0]}.`;
-        
+
         await this.sendMultiChannelNotification({
           alumni,
           assignmentId: assignment.id,
@@ -196,8 +196,9 @@ export class TracerStudyService {
           dueDateStr: dueDate.toISOString().split('T')[0]
         });
 
-        dispatchedCount++;
-      }
+        return true;
+      });
+      dispatchedCount += dispatchResults.filter(Boolean).length;
     }
 
     // 2. Dispatch to Employers if targetAudience is EMPLOYERS or BOTH
@@ -471,6 +472,25 @@ export class TracerStudyService {
         await this.assignmentRepo.update(assignment.id, { status: 'EXPIRED' });
       }
     }
+  }
+
+  /**
+   * Deliver independent notifications concurrently while keeping a bounded
+   * number of SMTP/database operations in flight.
+   */
+  private async processInBatches<T, R>(
+    items: T[],
+    batchSize: number,
+    processItem: (item: T) => Promise<R>,
+  ): Promise<R[]> {
+    const results: R[] = [];
+
+    for (let index = 0; index < items.length; index += batchSize) {
+      const batch = items.slice(index, index + batchSize);
+      results.push(...await Promise.all(batch.map(processItem)));
+    }
+
+    return results;
   }
 
   /**

@@ -14,14 +14,9 @@ import toast from 'react-hot-toast';
 export default function IctFeatureFlagsPage() {
   const [environment, setEnvironment] = useState<'Production' | 'Staging' | 'Sandbox'>('Production');
 
-  const [features, setFeatures] = useState([
-    { id: 'f-1', name: 'ASTU AI & Assistant', enabled: true, rolloutPct: 100, target: 'All Users' },
-    { id: 'f-2', name: 'AI Job Matching Engine', enabled: true, rolloutPct: 25, target: '25% of Alumni' },
-    { id: 'f-3', name: 'Employer Talent Pipeline', enabled: true, rolloutPct: 100, target: 'All Employers' },
-    { id: 'f-4', name: 'Tracer Study Multi-Channel Notifications', enabled: true, rolloutPct: 100, target: 'All Batches' },
-    { id: 'f-5', name: 'SMS Mobile 2FA Verification', enabled: false, rolloutPct: 0, target: 'Disabled' },
-    { id: 'f-6', name: 'Experimental AI Root Cause Agent', enabled: true, rolloutPct: 10, target: '10% of Admins' },
-  ]);
+  const [features, setFeatures] = useState<
+    { id: string; name: string; enabled: boolean; rolloutPct: number; target: string }[]
+  >([]);
 
   const toggleFeature = (id: string) => {
     setFeatures((prev) =>

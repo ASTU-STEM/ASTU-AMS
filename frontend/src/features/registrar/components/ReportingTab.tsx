@@ -117,11 +117,34 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
     ];
   }, [graduates]);
 
+  // Accreditation readiness derived from real graduate records (no invented
+  // compliance percentages). Criteria that need survey/employer data we don't
+  // have here are surfaced as "Review Required" instead of a fake score.
+  const accreditationCriteria = useMemo(() => {
+    const total = graduates.length;
+    const pct = (n: number) => (total === 0 ? 'Pending Data' : `${Math.round((n / total) * 100)}% Compliant`);
+    const verified = graduates.filter(g => g.identityVerified).length;
+    const withCgpa = graduates.filter(g => { const v = parseFloat(g.cgpa); return !isNaN(v) && v > 0; }).length;
+    const withDept = graduates.filter(g => g.department && g.graduationYear).length;
+
+    return [
+      { code: 'Criterion 1', title: 'Students & Alumni Tracking', desc: 'Admission, academic progress, & graduate career verification', source: 'Live Database', status: pct(verified), badge: 'bg-emerald-100 text-emerald-800' },
+      { code: 'Criterion 2', title: 'Program Educational Objectives', desc: 'Consistency with institutional mission & employer demand', source: 'Tracer Survey Engine', status: total === 0 ? 'Pending Data' : 'Review Required', badge: 'bg-amber-100 text-amber-800' },
+      { code: 'Criterion 3', title: 'Student Learning Outcomes (1-7)', desc: 'Engineering design, problem solving, ethics, & communication', source: 'Department CGPA Roster', status: pct(withCgpa), badge: 'bg-emerald-100 text-emerald-800' },
+      { code: 'Criterion 4', title: 'Continuous Improvement', desc: 'Periodic review cycles using graduate tracer feedback', source: 'Survey Audit Log', status: 'Action Required', badge: 'bg-amber-100 text-amber-800' },
+      { code: 'Criterion 5', title: 'Curriculum & Credit Hours', desc: 'Math, basic sciences, engineering topics, & general education', source: 'SIS Academic Records', status: pct(withDept), badge: 'bg-emerald-100 text-emerald-800' },
+      { code: 'Criterion 8', title: 'Institutional Support', desc: 'Leadership, administrative services, & digital infrastructure', source: 'ASTU Management Hub', status: total === 0 ? 'Pending Data' : 'Review Required', badge: 'bg-amber-100 text-amber-800' },
+    ];
+  }, [graduates]);
+
   const handleExport = async (format: 'PDF' | 'Excel' | 'Stata' | 'CSV', scope: string) => {
     try {
-      const recordsToExport = graduates.length > 0 ? graduates : [
-        { studentId: 'UGR/1001/16', fullName: 'Abebe Kebede', email: 'abebe@astu.edu.et', department: 'Software Engineering', graduationYear: '2025', cgpa: '3.75', identityVerified: true, status: 'Active' }
-      ];
+      // Export exactly the records we have — never a fabricated sample row.
+      const recordsToExport = graduates;
+      if (recordsToExport.length === 0) {
+        toast.error('No graduate records available to export yet.');
+        return;
+      }
 
       let fileContent = '';
       let fileType = 'text/csv';
@@ -920,14 +943,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {[
-                    { code: 'Criterion 1', title: 'Students & Alumni Tracking', desc: 'Admission, academic progress, & graduate career verification', source: 'Live Database', status: '100% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
-                    { code: 'Criterion 2', title: 'Program Educational Objectives', desc: 'Consistency with institutional mission & employer demand', source: 'Tracer Survey Engine', status: '95% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
-                    { code: 'Criterion 3', title: 'Student Learning Outcomes (1-7)', desc: 'Engineering design, problem solving, ethics, & communication', source: 'Department CGPA Roster', status: '92% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
-                    { code: 'Criterion 4', title: 'Continuous Improvement', desc: 'Periodic review cycles using graduate tracer feedback', source: 'Survey Audit Log', status: 'Action Required', badge: 'bg-amber-100 text-amber-800' },
-                    { code: 'Criterion 5', title: 'Curriculum & Credit Hours', desc: 'Math, basic sciences, engineering topics, & general education', source: 'SIS Academic Records', status: '98% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
-                    { code: 'Criterion 8', title: 'Institutional Support', desc: 'Leadership, administrative services, & digital infrastructure', source: 'ASTU Management Hub', status: '100% Compliant', badge: 'bg-emerald-100 text-emerald-800' },
-                  ].map((crit, idx) => (
+                  {accreditationCriteria.map((crit, idx) => (
                     <tr key={idx} className="hover:bg-gray-50/60 transition-colors">
                       <td className="py-3.5 pr-2 font-bold text-astu-navy">{crit.code}</td>
                       <td className="py-3.5 pr-2">

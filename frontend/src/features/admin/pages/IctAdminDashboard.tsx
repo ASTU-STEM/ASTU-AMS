@@ -36,45 +36,36 @@ export default function IctAdminDashboard() {
   const [activeTab, setActiveTab] = useState<'telemetry' | 'security' | 'loadbalancer' | 'apigateway' | 'dbdiagnostics' | 'techcontrols'>('telemetry');
   const [loading, setLoading] = useState(false);
 
-  // Live Technical Metrics State
+  // Live Technical Metrics State — empty until API returns real host data
   const [telemetry, setTelemetry] = useState({
-    cpuUsagePct: 24,
-    cpuCount: 16,
-    cpuModel: 'Intel Xeon Scalable Enterprise CPU @ 3.20GHz',
-    memoryUsagePct: 42,
-    memoryTotalMB: 32768,
-    memoryUsedMB: 13762,
-    diskStorage: { totalGB: 500, usedGB: 142, freeGB: 358, usagePct: 28.4 },
-    networkLatencyMs: { gateway: 2.4, database: 3.8, redisCache: 0.7, mailGateway: 12.1 },
-    uptimeFormatted: '14d 6h 32m',
-    activeSessions: 38,
-    clusterNodes: [
-      { id: 'node-01', name: 'ASTU Core App Primary Node', status: 'ONLINE', load: '22%', latency: '2ms' },
-      { id: 'node-02', name: 'ASTU API Gateway Secondary', status: 'ONLINE', load: '19%', latency: '4ms' },
-      { id: 'node-03', name: 'ASTU Async Worker Queue', status: 'ONLINE', load: '14%', latency: '1ms' },
-    ],
+    cpuUsagePct: null as number | null,
+    cpuCount: null as number | null,
+    cpuModel: '—',
+    memoryUsagePct: null as number | null,
+    memoryTotalMB: null as number | null,
+    memoryUsedMB: null as number | null,
+    diskStorage: null as { totalGB: number; usedGB: number; freeGB: number; usagePct: number } | null,
+    networkLatencyMs: null as Record<string, number> | null,
+    uptimeFormatted: '—',
+    activeSessions: null as number | null,
+    registeredUsers: null as number | null,
+    clusterNodes: [] as { id: string; name: string; status: string; load: string; latency: string }[],
   });
 
   const [securityStatus, setSecurityStatus] = useState({
-    protectionMode: 'ADAPTIVE_STRICT',
-    ddosMitigationStatus: 'ACTIVE_SHIELD_ENABLED',
-    droppedPacketsLastHour: 1420,
-    rateLimitRequestsPerMin: 120,
-    currentThreatLevel: 'LOW',
-    activeIpBlacklistCount: 28,
-    activeIpWhitelistCount: 14,
-    recentThreatEvents: [
-      { id: 'evt-901', timestamp: '2 mins ago', ip: '197.156.92.14', type: 'RATE_LIMIT_EXCEEDED', action: 'TEMP_BLOCKED', detail: '340 req/min to /api/auth/login' },
-      { id: 'evt-902', timestamp: '15 mins ago', ip: '45.133.1.88', type: 'SQL_INJECTION_ATTEMPT', action: 'PERMANENT_BLACKLIST', detail: 'WAF Filter Rule #41 SQLi payload' },
-      { id: 'evt-903', timestamp: '1 hour ago', ip: '102.217.18.2', type: 'BRUTE_FORCE_PROBE', action: 'CHALLENGE_CAPTCHA', detail: '15 failed auth probes' },
-    ]
+    protectionMode: 'STANDARD',
+    ddosMitigationStatus: 'NOT_CONFIGURED',
+    droppedPacketsLastHour: 0,
+    rateLimitRequestsPerMin: 0,
+    currentThreatLevel: 'UNKNOWN',
+    activeIpBlacklistCount: 0,
+    activeIpWhitelistCount: 0,
+    recentThreatEvents: [] as { id: string; timestamp: string; ip: string; type: string; action: string; detail: string }[],
   });
 
-  const [apiKeys, setApiKeys] = useState([
-    { id: 'key-101', clientName: 'Registrar SIS Auto-Sync Client', keyPrefix: 'astu_live_reg_88a', permissions: 'READ_WRITE_STUDENTS', rateLimit: '1000/min', createdAt: '2026-01-10' },
-    { id: 'key-102', clientName: 'Career Office Mobile App Gateway', keyPrefix: 'astu_live_mob_41b', permissions: 'READ_JOBS_EVENTS', rateLimit: '500/min', createdAt: '2026-02-14' },
-    { id: 'key-103', clientName: 'Chapa Payment Gateway Webhook Listener', keyPrefix: 'astu_live_chp_99c', permissions: 'PAYMENT_VERIFY', rateLimit: '200/min', createdAt: '2026-03-01' },
-  ]);
+  const [apiKeys, setApiKeys] = useState<
+    { id: string; clientName: string; keyPrefix: string; permissions: string; rateLimit: string; createdAt: string }[]
+  >([]);
 
   const [newKeyName, setNewKeyName] = useState('');
   const [ipInput, setIpInput] = useState('');
@@ -115,7 +106,7 @@ export default function IctAdminDashboard() {
         setTelemetry(prev => ({ ...prev, ...data.data }));
       }
     } catch {
-      // fallback to mock telemetry state
+      // Keep empty state — do not invent metrics
     } finally {
       setLoading(false);
     }
@@ -123,13 +114,7 @@ export default function IctAdminDashboard() {
 
   useEffect(() => {
     fetchTechnicalData();
-    const timer = setInterval(() => {
-      setTelemetry(prev => ({
-        ...prev,
-        cpuUsagePct: Math.min(95, Math.max(12, prev.cpuUsagePct + Math.floor(Math.random() * 7 - 3))),
-        memoryUsagePct: Math.min(90, Math.max(30, prev.memoryUsagePct + Math.floor(Math.random() * 3 - 1))),
-      }));
-    }, 4000);
+    const timer = setInterval(fetchTechnicalData, 15000);
     return () => clearInterval(timer);
   }, [fetchTechnicalData]);
 
@@ -241,19 +226,26 @@ export default function IctAdminDashboard() {
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800/80 text-xs">
           <div className="flex items-center gap-2 text-slate-300">
             <Cpu className="h-4 w-4 text-indigo-400" />
-            <span>CPU Load: <strong className="text-white">{telemetry.cpuUsagePct}%</strong></span>
+            <span>CPU Load: <strong className="text-white">{telemetry.cpuUsagePct != null ? `${telemetry.cpuUsagePct}%` : '—'}</strong></span>
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <Activity className="h-4 w-4 text-emerald-400" />
-            <span>RAM Used: <strong className="text-white">{telemetry.memoryUsagePct}% ({Math.round(telemetry.memoryUsedMB/1024)}GB)</strong></span>
+            <span>
+              RAM Used:{' '}
+              <strong className="text-white">
+                {telemetry.memoryUsagePct != null && telemetry.memoryUsedMB != null
+                  ? `${telemetry.memoryUsagePct}% (${Math.round(telemetry.memoryUsedMB / 1024)}GB)`
+                  : '—'}
+              </strong>
+            </span>
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <ShieldAlert className="h-4 w-4 text-cyan-400" />
-            <span>WAF Shield: <strong className="text-emerald-400">ACTIVE STRICT</strong></span>
+            <span>Registered users: <strong className="text-white">{telemetry.registeredUsers ?? '—'}</strong></span>
           </div>
           <div className="flex items-center gap-2 text-slate-300">
             <Radio className="h-4 w-4 text-purple-400" />
-            <span>Network Latency: <strong className="text-white">{telemetry.networkLatencyMs.database}ms</strong></span>
+            <span>Uptime: <strong className="text-white">{telemetry.uptimeFormatted || '—'}</strong></span>
           </div>
         </div>
       </div>
@@ -299,15 +291,15 @@ export default function IctAdminDashboard() {
                 <Cpu className="h-5 w-5 text-indigo-600" />
               </div>
               <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-slate-900">{telemetry.cpuUsagePct}%</span>
-                <span className="text-xs font-medium text-slate-500">{telemetry.cpuCount} Cores Active</span>
+                <span className="text-3xl font-extrabold text-slate-900">{telemetry.cpuUsagePct != null ? `${telemetry.cpuUsagePct}%` : '—'}</span>
+                <span className="text-xs font-medium text-slate-500">{telemetry.cpuCount != null ? `${telemetry.cpuCount} Cores` : 'Awaiting host'}</span>
               </div>
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    telemetry.cpuUsagePct > 80 ? 'bg-rose-500' : telemetry.cpuUsagePct > 50 ? 'bg-amber-500' : 'bg-indigo-600'
+                    (telemetry.cpuUsagePct ?? 0) > 80 ? 'bg-rose-500' : (telemetry.cpuUsagePct ?? 0) > 50 ? 'bg-amber-500' : 'bg-indigo-600'
                   }`}
-                  style={{ width: `${telemetry.cpuUsagePct}%` }}
+                  style={{ width: `${telemetry.cpuUsagePct ?? 0}%` }}
                 />
               </div>
               <p className="mt-2 text-[11px] text-slate-500 truncate">{telemetry.cpuModel}</p>
@@ -320,35 +312,45 @@ export default function IctAdminDashboard() {
                 <Activity className="h-5 w-5 text-emerald-600" />
               </div>
               <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-slate-900">{telemetry.memoryUsagePct}%</span>
-                <span className="text-xs font-medium text-slate-500">{Math.round(telemetry.memoryUsedMB/1024)}GB / {Math.round(telemetry.memoryTotalMB/1024)}GB</span>
+                <span className="text-3xl font-extrabold text-slate-900">{telemetry.memoryUsagePct != null ? `${telemetry.memoryUsagePct}%` : '—'}</span>
+                <span className="text-xs font-medium text-slate-500">
+                  {telemetry.memoryUsedMB != null && telemetry.memoryTotalMB != null
+                    ? `${Math.round(telemetry.memoryUsedMB / 1024)}GB / ${Math.round(telemetry.memoryTotalMB / 1024)}GB`
+                    : '—'}
+                </span>
               </div>
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                  style={{ width: `${telemetry.memoryUsagePct}%` }}
+                  style={{ width: `${telemetry.memoryUsagePct ?? 0}%` }}
                 />
               </div>
-              <p className="mt-2 text-[11px] text-slate-500">ECC Registered DDR5 Server Memory</p>
+              <p className="mt-2 text-[11px] text-slate-500">Host memory from OS telemetry</p>
             </div>
 
             {/* Storage Metric Card */}
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Storage Volume (NVMe)</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Storage Volume</span>
                 <HardDrive className="h-5 w-5 text-blue-600" />
               </div>
               <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-3xl font-extrabold text-slate-900">{telemetry.diskStorage.usagePct}%</span>
-                <span className="text-xs font-medium text-slate-500">{telemetry.diskStorage.usedGB}GB / {telemetry.diskStorage.totalGB}GB</span>
+                <span className="text-3xl font-extrabold text-slate-900">{telemetry.diskStorage ? `${telemetry.diskStorage.usagePct}%` : '—'}</span>
+                <span className="text-xs font-medium text-slate-500">
+                  {telemetry.diskStorage
+                    ? `${telemetry.diskStorage.usedGB}GB / ${telemetry.diskStorage.totalGB}GB`
+                    : 'Not instrumented'}
+                </span>
               </div>
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-blue-600 transition-all duration-500"
-                  style={{ width: `${telemetry.diskStorage.usagePct}%` }}
+                  style={{ width: `${telemetry.diskStorage?.usagePct ?? 0}%` }}
                 />
               </div>
-              <p className="mt-2 text-[11px] text-slate-500">NVMe Array Pool • Free: {telemetry.diskStorage.freeGB}GB</p>
+              <p className="mt-2 text-[11px] text-slate-500">
+                {telemetry.diskStorage ? `Free: ${telemetry.diskStorage.freeGB}GB` : 'Disk metrics unavailable'}
+              </p>
             </div>
           </div>
 
@@ -359,29 +361,33 @@ export default function IctAdminDashboard() {
                 <h3 className="text-sm font-bold text-slate-900">ASTU Production Node Cluster</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Active web application servers and load balancer nodes</p>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" /> 3 Nodes Online
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                <CheckCircle2 className="h-4 w-4" /> {telemetry.clusterNodes.length} nodes reported
               </span>
             </div>
             <div className="divide-y divide-slate-200 text-xs">
-              {telemetry.clusterNodes.map(node => (
-                <div key={node.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-slate-50/60">
-                  <div className="flex items-center gap-3">
-                    <Server className="h-4 w-4 text-slate-400" />
-                    <div>
-                      <span className="font-bold text-slate-900">{node.name}</span>
-                      <span className="ml-2 font-mono text-[10px] text-slate-400">({node.id})</span>
+              {telemetry.clusterNodes.length === 0 ? (
+                <div className="px-6 py-10 text-center text-slate-500">No cluster nodes reported by telemetry</div>
+              ) : (
+                telemetry.clusterNodes.map(node => (
+                  <div key={node.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-slate-50/60">
+                    <div className="flex items-center gap-3">
+                      <Server className="h-4 w-4 text-slate-400" />
+                      <div>
+                        <span className="font-bold text-slate-900">{node.name}</span>
+                        <span className="ml-2 font-mono text-[10px] text-slate-400">({node.id})</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <span className="text-slate-500">Latency: <strong className="text-slate-900">{node.latency}</strong></span>
+                      <span className="text-slate-500">Load: <strong className="text-slate-900">{node.load}</strong></span>
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                        {node.status}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
-                    <span className="text-slate-500">Latency: <strong className="text-slate-900">{node.latency}</strong></span>
-                    <span className="text-slate-500">Load: <strong className="text-slate-900">{node.load}</strong></span>
-                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                      {node.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

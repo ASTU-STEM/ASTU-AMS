@@ -5,6 +5,7 @@ import { authService } from '../../auth/services/auth.service';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { useTheme } from '../../../hooks/useTheme';
 
 interface SettingsTabProps {
   preferences: AlumniPreferences;
@@ -43,12 +44,10 @@ const getEffectivePrefs = (rawPrefs?: Partial<AlumniPreferences>): AlumniPrefere
 };
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePreferences }) => {
+  const { theme, setTheme } = useTheme();
   const [prefs, setPrefs] = useState<AlumniPreferences>(() => getEffectivePrefs(preferences));
   const [digest, setDigest] = useState((preferences as any)?.digestFrequency || 'instant');
   const [donationEnabled, setDonationEnabled] = useState((preferences as any)?.donationEnabled ?? true);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return (localStorage.getItem('theme') as 'light' | 'dark') || (preferences as any)?.theme || 'light';
-  });
   const [activeSection, setActiveSection] = useState<string>('notifications');
   const [passwords, setPasswords] = useState({
     currentPassword: '',
@@ -100,9 +99,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       setPrefs(getEffectivePrefs(preferences));
       setDigest((preferences as any)?.digestFrequency || 'instant');
       setDonationEnabled((preferences as any)?.donationEnabled ?? true);
-      if ((preferences as any)?.theme) {
-        setTheme((preferences as any).theme);
-      }
     }
   }, [preferences]);
 
@@ -152,12 +148,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
     const updated = { ...prefs, digestFrequency: digest, donationEnabled, theme: newTheme } as any;
     setPrefs(updated);
     onSavePreferences(updated);

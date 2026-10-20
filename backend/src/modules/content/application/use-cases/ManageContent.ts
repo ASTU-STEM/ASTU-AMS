@@ -74,7 +74,10 @@ export class SaveHomepageConfigUseCase {
   constructor(private readonly repo: IContentRepository) {}
 
   async execute(key = 'main', data: any, updatedBy = 'CMS Admin'): Promise<HomepageConfig> {
-    return this.repo.saveHomepageConfig(key, data, updatedBy);
+    const existing = await this.repo.getHomepageConfig(key);
+    const existingData = existing && existing.data ? existing.data : {};
+    const mergedData = { ...existingData, ...data };
+    return this.repo.saveHomepageConfig(key, mergedData, updatedBy);
   }
 }
 

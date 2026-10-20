@@ -11,7 +11,6 @@ import AdminBadge from '../components/AdminBadge';
 import AdminStatCard from '../components/AdminStatCard';
 import { surveyService } from '../../surveys/services/survey.service';
 import toast from 'react-hot-toast';
-import { adminMockData } from '../api/mockData';
 import {
   ResponsiveContainer,
   PieChart,

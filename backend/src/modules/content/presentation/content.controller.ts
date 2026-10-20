@@ -215,34 +215,35 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
       prisma.department.count().catch(() => 0),
       prisma.employerProfile.count().catch(() => 0),
       prisma.job.count({ where: { isActive: true } }).catch(() => 0),
-      (prisma.event?.count ? prisma.event.count() : Promise.resolve(18)).catch(() => 18),
-      (prisma.documentRequest?.count ? prisma.documentRequest.count() : Promise.resolve(2100)).catch(() => 2100),
-      (prisma.verificationRequest?.count ? prisma.verificationRequest.count() : Promise.resolve(400)).catch(() => 400),
+      (prisma.event?.count ? prisma.event.count() : Promise.resolve(0)).catch(() => 0),
+      (prisma.documentRequest?.count ? prisma.documentRequest.count() : Promise.resolve(0)).catch(() => 0),
+      (prisma.verificationRequest?.count ? prisma.verificationRequest.count() : Promise.resolve(0)).catch(() => 0),
     ]);
 
-    const historicBatchesYears = Math.max(30, new Date().getFullYear() - 1993);
-    const employmentRate = alumniCount > 0 ? Math.round((employedAlumniCount / alumniCount) * 100) : 88;
+    const formatCount = (n: number) => (n > 0 ? `${n.toLocaleString()}+` : '0');
+    const historicBatchesYears = Math.max(0, new Date().getFullYear() - 1993);
+    const employmentRate = alumniCount > 0 ? Math.round((employedAlumniCount / alumniCount) * 100) : 0;
     const digitalRequests = (docRequestsCount || 0) + (verifRequestsCount || 0);
 
     return res.status(200).json({
       success: true,
       data: {
         registeredAlumni: alumniCount,
-        registeredAlumniFormatted: `${alumniCount.toLocaleString()}+`,
-        fieldsOfStudy: departmentCount || 5,
-        fieldsOfStudyFormatted: `${departmentCount || 5} Major Areas`,
+        registeredAlumniFormatted: formatCount(alumniCount),
+        fieldsOfStudy: departmentCount,
+        fieldsOfStudyFormatted: departmentCount > 0 ? `${departmentCount} Major Areas` : '0',
         corporatePartners: employerCount,
-        corporatePartnersFormatted: `${employerCount.toLocaleString()}+`,
+        corporatePartnersFormatted: formatCount(employerCount),
         historicBatches: historicBatchesYears,
-        historicBatchesFormatted: `${historicBatchesYears}+ Years`,
+        historicBatchesFormatted: historicBatchesYears > 0 ? `${historicBatchesYears}+ Years` : '0',
         employmentRate,
         employmentRateFormatted: `${employmentRate}%`,
         activeJobs: activeJobsCount,
-        activeJobsFormatted: `${activeJobsCount.toLocaleString()}+`,
+        activeJobsFormatted: formatCount(activeJobsCount),
         digitalRequests,
-        digitalRequestsFormatted: `${digitalRequests.toLocaleString()}+`,
-        eventsCount: eventsCount || 18,
-        eventsCountFormatted: `${(eventsCount || 18).toLocaleString()}+`,
+        digitalRequestsFormatted: formatCount(digitalRequests),
+        eventsCount: eventsCount || 0,
+        eventsCountFormatted: formatCount(eventsCount || 0),
         lastUpdated: new Date().toISOString(),
       },
     });

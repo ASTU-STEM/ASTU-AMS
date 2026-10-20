@@ -158,11 +158,11 @@ export default function SystemLogs() {
   const LOGS_PER_PAGE = 10;
 
   const [health, setHealth] = useState({
-    cpu: 18,
-    memoryUsed: 1.5,
-    memoryTotal: 8,
+    cpu: 0,
+    memoryUsed: 0,
+    memoryTotal: 0,
     sessions: 0,
-    uptime: 99.8,
+    uptime: 100,
   });
 
   const fetchLogs = useCallback(async () => {

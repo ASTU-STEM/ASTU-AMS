@@ -15,20 +15,15 @@ import toast from 'react-hot-toast';
 export default function IctIntegrationsPage() {
   const [activeTab, setActiveTab] = useState<'integrations' | 'registrar-sync' | 'data-quality'>('integrations');
 
-  const integrations = [
-    { name: 'ASTU Registrar SIS API', status: 'HEALTHY', endpoint: 'https://sis.astu.edu.et/api/v1/alumni', latency: '145ms', failuresToday: 0 },
-    { name: 'Nodemailer SMTP Email Provider', status: 'HEALTHY', endpoint: 'smtp.astu.edu.et:587', latency: '45ms', failuresToday: 2 },
-    { name: 'Ethio Telecom SMS Gateway', status: 'DOWN', endpoint: 'https://sms-gw.ethionet.et/api/send', latency: 'Timeout', failuresToday: 24 },
-    { name: 'ASTU AI Multi-Agent Engine', status: 'HEALTHY', endpoint: 'https://api.deepmind.com/v1/agents', latency: '120ms', failuresToday: 0 },
-    { name: 'Chapa Payment Gateway', status: 'HEALTHY', endpoint: 'https://api.chapa.co/v1/transaction/verify', latency: '95ms', failuresToday: 0 },
-  ];
+  const integrations: {
+    name: string;
+    status: string;
+    endpoint: string;
+    latency: string;
+    failuresToday: number;
+  }[] = [];
 
-  const dataQualityItems = [
-    { type: 'Duplicate Alumni', count: 12, fixAction: 'Merge Duplicate Profiles' },
-    { type: 'Missing Phone Number', count: 43, fixAction: 'Send Profile Update Prompt' },
-    { type: 'Invalid Email Address', count: 7, fixAction: 'Mark for Verification' },
-    { type: 'Missing Department ID', count: 2, fixAction: 'Assign via Registrar Code' },
-  ];
+  const dataQualityItems: { type: string; count: number; fixAction: string }[] = [];
 
   return (
     <div className="space-y-6">

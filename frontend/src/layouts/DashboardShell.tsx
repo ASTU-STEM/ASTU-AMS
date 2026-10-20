@@ -3,6 +3,7 @@ import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Su
 import { AppSidebar, SidebarNavItem } from './AppSidebar';
 import HelpCenter from './HelpCenter';
 import toast from 'react-hot-toast';
+import { useTheme } from '../hooks/useTheme';
 
 export interface DashboardShellProps {
   children: React.ReactNode;
@@ -46,9 +47,7 @@ export function DashboardShell({
    onSearch,
    headerChildren,
  }: DashboardShellProps) {
-   const [darkMode, setDarkMode] = useState(
-     () => localStorage.getItem('theme') === 'dark'
-   );
+  const { darkMode, toggleTheme } = useTheme();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -56,11 +55,7 @@ export function DashboardShell({
     () => localStorage.getItem(`dashboard_shell_${brand}_collapsed`) === 'true'
   );
   const [helpOpen, setHelpOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { id: 1, text: 'New system update available', unread: true, time: '2 hours ago' },
-    { id: 2, text: '3 pending approval requests', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Database backup completed', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -88,14 +83,7 @@ export function DashboardShell({
     localStorage.setItem(`dashboard_shell_${brand}_collapsed`, String(sidebarCollapsed));
   }, [brand, sidebarCollapsed]);
 
-// Sync theme
-   useEffect(() => {
-     document.documentElement.classList.remove('light', 'dark');
-     document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-   }, [darkMode]);
-
-   // Logout handler
+  // Logout handler
   const handleLocalLogout = () => {
     setMenuOpen(false);
     onLogout();
@@ -197,7 +185,7 @@ export function DashboardShell({
             <button
               type="button"
               onClick={() => {
-                setDarkMode((d) => !d);
+                toggleTheme();
                 toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
               }}
               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"

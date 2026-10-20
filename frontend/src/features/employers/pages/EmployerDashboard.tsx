@@ -28,18 +28,17 @@ import { FeedbackTab } from '../components/FeedbackTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
 import { CandidateProfileModal } from '../components/CandidateProfileModal';
+import { useTheme } from '../../../hooks/useTheme';
 
 const EmployerDashboard = () => {
   const { logout } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSearchCandidate, setSelectedSearchCandidate] = useState<CandidateApplication | null>(null);
-
-  // Theme Dark / Light mode
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   // Notifications Bell dropdown
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -185,21 +184,20 @@ const EmployerDashboard = () => {
       }
     });
 
-    return last6Months.map((m, idx) => {
-      const realCount = monthCounts[m];
-      return {
-        month: m,
-        applications: realCount > 0 ? realCount : Math.max(1, Math.round(((applications.length || 3) * (idx + 1)) / 3))
-      };
-    });
+    return last6Months.map((m) => ({
+      month: m,
+      // Real monthly count only — no synthetic ramp when there is no activity.
+      applications: monthCounts[m] || 0
+    }));
   }, [applications]);
 
   const evaluationRatingsData = React.useMemo(() => {
     if (feedbacks.length === 0) {
+      // No fabricated 3/2/1 split: with no evaluations the chart is empty.
       return [
-        { name: 'Exceeds Expectations', value: 3 },
-        { name: 'Fully Competent', value: 2 },
-        { name: 'Needs Development', value: 1 }
+        { name: 'Exceeds Expectations', value: 0 },
+        { name: 'Fully Competent', value: 0 },
+        { name: 'Needs Development', value: 0 }
       ];
     }
 
@@ -230,7 +228,7 @@ const EmployerDashboard = () => {
         id: currentId++,
         type: 'job',
         title: `Application for ${app.jobTitle}`,
-        description: `${app.alumnusName} applied with CGPA ${app.cgpa || '3.80'}. Status: ${app.status}.`,
+        description: `${app.alumnusName} applied with CGPA ${app.cgpa || '—'}. Status: ${app.status}.`,
         timestamp: app.appliedDate || 'Recently',
         unread: app.status === 'Pending'
       });
@@ -434,12 +432,6 @@ const EmployerDashboard = () => {
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
   const initials = (profile?.name || 'Company Profile').split(' ').map(n => n ? n[0] : '').filter(Boolean).join('').slice(0, 2).toUpperCase() || 'EP';
-
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
 
   // Load all data from backend on mount
   useEffect(() => {
@@ -660,7 +652,7 @@ const EmployerDashboard = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      <div className="role-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
         <style>{`
         @keyframes gradient-shift {
           0% { background-position: 0% 50%; }
@@ -1032,7 +1024,7 @@ const EmployerDashboard = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setDarkMode(!darkMode);
+                  toggleTheme();
                   toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
                 }}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"

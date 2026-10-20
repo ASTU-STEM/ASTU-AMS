@@ -25,6 +25,7 @@ import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHe
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
+import { useTheme } from '../../../hooks/useTheme';
 
 const RegistrarDashboard = () => {
    const navigate = useNavigate();
@@ -72,8 +73,7 @@ const RegistrarDashboard = () => {
    const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
 
 
-   // Theme Dark / Light mode
-   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+   const { darkMode, toggleTheme } = useTheme();
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
@@ -129,8 +129,8 @@ const RegistrarDashboard = () => {
               fullName: a.fullName,
               email: a.email || a.user?.email || 'N/A',
               department: a.department?.name || a.department || 'Software Engineering',
-              graduationYear: String(a.graduationYear || '2024'),
-              cgpa: String(a.cgpa || '0.00'),
+              graduationYear: String(a.graduationYear || '—'),
+              cgpa: String(a.cgpa || '—'),
               identityVerified: Boolean(a.isVerified),
               status: a.status === 'ACTIVE' ? 'Active' : 'Inactive',
               createdAt: a.createdAt || a.user?.createdAt || new Date().toISOString()
@@ -147,10 +147,10 @@ const RegistrarDashboard = () => {
               fullName: g.fullName,
               email: g.email || 'N/A',
               department: g.department,
-              graduationYear: String(g.graduationYear || '2024'),
-              cgpa: String(g.cgpa || '0.00'),
+              graduationYear: String(g.graduationYear || '—'),
+              cgpa: String(g.cgpa || '—'),
               identityVerified: Boolean(g.alumniProfile?.isVerified ?? true),
-              status: g.alumniProfile?.status === 'ACTIVE' ? 'Active' : 'Active',
+              status: g.alumniProfile?.status === 'ACTIVE' ? 'Active' : 'Inactive',
               createdAt: g.importedAt || g.createdAt || new Date().toISOString()
             });
           });
@@ -166,7 +166,7 @@ const RegistrarDashboard = () => {
             fullName: v.alumni?.fullName || v.fullName || 'N/A',
             email: (v.alumni?.email && v.alumni?.email !== 'N/A') ? v.alumni.email : (v.notes?.match(/Contact Email:\s*([^\s\n]+)/i)?.[1] || v.email || 'N/A'),
             department: v.alumni?.department?.name || v.department || 'General',
-            graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '2024'),
+            graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '—'),
             type: v.type || 'Alumni Registration',
             status: (v.status || 'PENDING').toUpperCase(),
             requestDate: v.requestDate || v.createdAt || new Date().toISOString(),
@@ -424,7 +424,7 @@ const RegistrarDashboard = () => {
   ];
 
   const complianceSignals = [
-    { label: 'ETA Employment KPI', value: `${Math.round((activeVerifiedCount / (activeGraduatesCount || 1)) * 84)}%`, icon: 'query_stats', tone: 'text-astu-green' },
+    { label: 'Verification Rate', value: `${activeGraduatesCount > 0 ? Math.round((activeVerifiedCount / activeGraduatesCount) * 100) : 0}%`, icon: 'query_stats', tone: 'text-astu-green' },
     { label: 'Pending Documents', value: documentRequestsCount.toString(), icon: 'pending_actions', tone: documentRequestsCount > 0 ? 'text-astu-red' : 'text-astu-green' },
     { label: 'SIS Heartbeat', value: 'Active', icon: 'database', tone: 'text-astu-navy' },
   ];
@@ -672,12 +672,6 @@ const RegistrarDashboard = () => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-
-  useEffect(() => {
     if (activeTab === 'dashboard' && normalizedSearch) {
       // keep user in dashboard unless they explicitly search
     }
@@ -715,7 +709,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
+    <div className="role-shell min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -759,9 +753,9 @@ useEffect(() => {
       )}
 
         {/* Sidebar Container */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
           {/* Sidebar Logo Header */}
-          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white">
+          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative shrink-0 flex items-center justify-center h-11 w-11">
                 <img
@@ -772,8 +766,8 @@ useEffect(() => {
               </div>
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight">ASTU Registrar</h1>
-                  <p className="text-[11px] text-[#003580] uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
+                  <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ASTU Registrar</h1>
+                  <p className="text-[11px] text-[#003580] dark:text-sky-400 uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
                 </div>
               )}
             </div>
@@ -964,7 +958,7 @@ useEffect(() => {
               <button
                 type="button"
                 onClick={() => {
-                  setDarkMode(!darkMode);
+                  toggleTheme();
                   toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
                 }}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
@@ -1072,7 +1066,7 @@ useEffect(() => {
           </header>
 
           {/* Dynamic tabs routing */}
-          <div className="flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <div className="dashboard-content flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
               <section className="space-y-6 p-4 md:p-6">
                 {/* Management Hub Hero */}

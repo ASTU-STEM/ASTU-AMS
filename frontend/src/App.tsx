@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { store } from "./store";
@@ -12,12 +12,9 @@ import AnnouncementListPage from "./pages/AnnouncementListPage";
 import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
 import PublicGalleryPage from "./pages/PublicGalleryPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
-import AlumniCommunityPage from "./pages/AlumniCommunityPage";
 import EventDetailPage from "./pages/EventDetailPage";
-import EventsPage from "./pages/EventsPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
-import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
 import VerifyNationalIdCallbackPage from "./features/auth/pages/VerifyNationalIdCallbackPage";
 import EmployerRegistrationPage from "./features/auth/pages/EmployerRegistrationPage";
@@ -28,7 +25,6 @@ import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
-import DedicatedRegistrationsPage from "./features/admin/pages/DedicatedRegistrationsPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
 import RegistrarDashboard from "./features/registrar/pages/RegistrarDashboard";
@@ -43,9 +39,31 @@ import VerificationRouteGuard from "./features/auth/components/VerificationRoute
 
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
 
+// Tags <body> for the public marketing/detail routes so the shared dark-mode
+// stylesheet can theme every public page at once. It must live *inside* the
+// <Router> because it reads the current location. "/" and "/events" render
+// HomePage, which already owns its dark palette, so they are excluded to
+// avoid overriding it with the generic public rules.
+function PublicShellClass() {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Shared dark remaps for public/auth pages. HomePage ("/", "/events") already
+    // has Tailwind `dark:` variants. Dashboards use admin/role/ict shells.
+    const isDashboard = /^\/(admin|ict|cms|alumni|employer|registrar|department)(\/|$)/.test(
+      location.pathname
+    );
+    const isHome = location.pathname === "/" || location.pathname === "/events";
+    document.body.classList.toggle("public-shell", !isDashboard && !isHome);
+  }, [location.pathname]);
+
+  return null;
+}
+
 function AppContent() {
   return (
     <Router>
+      <PublicShellClass />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
@@ -55,13 +73,10 @@ function AppContent() {
         <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
         <Route path="/gallery" element={<PublicGalleryPage />} />
         <Route path="/stories/:id" element={<StoryDetailPage />} />
-        <Route path="/events" element={<EventsPage />} />
+        <Route path="/events" element={<HomePage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/workshops/:id" element={<EventDetailPage />} />
-        <Route path="/community" element={<AlumniCommunityPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
-        <Route path="/activate-account" element={<AlumniActivationPage />} />
         <Route path="/employers" element={<EmployersPage />} />
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -98,6 +113,15 @@ function AppContent() {
           }
         />
         <Route
+          path="/alumni/jobs"
+          element={
+            <ProtectedRoute
+              element={<AlumniDashboard defaultTab="jobs" />}
+              allowedRoles={["ALUMNI"]}
+            />
+          }
+        />
+        <Route
           path="/employer/dashboard"
           element={
             <ProtectedRoute
@@ -114,6 +138,10 @@ function AppContent() {
               allowedRoles={["REGISTRAR"]}
             />
           }
+        />
+        <Route
+          path="/department"
+          element={<Navigate to="/department/dashboard" replace />}
         />
         <Route
           path="/department/dashboard"
@@ -143,15 +171,6 @@ function AppContent() {
           }
         />
         <Route
-          path="/cms/registrations/full"
-          element={
-            <ProtectedRoute
-              element={<DedicatedRegistrationsPage />}
-              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE", "SUPER_ADMIN"]}
-            />
-          }
-        />
-        <Route
           path="/cms/*"
           element={
             <ProtectedRoute
@@ -169,7 +188,20 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
+      <Toaster
+        position="top-center"
+        containerStyle={{ top: 72, zIndex: 999999 }}
+        toastOptions={{
+          duration: 2800,
+          style: {
+            zIndex: 999999,
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)",
+          },
+        }}
+      />
       <SystemSettingsProvider>
         <RegistrationProvider>
           <AppContent />

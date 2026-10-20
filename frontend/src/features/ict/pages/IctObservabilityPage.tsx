@@ -11,46 +11,19 @@ import {
 import toast from 'react-hot-toast';
 
 export default function IctObservabilityPage() {
-  const [selectedTrace, setSelectedTrace] = useState<string>('REQ-8F21A');
+  const [selectedTrace, setSelectedTrace] = useState<string>('');
 
-  const traces = [
-    {
-      id: 'REQ-8F21A',
-      endpoint: 'GET /api/alumni/dashboard',
-      user: 'Abebe Kebede (Alumni)',
-      totalDuration: '3.2s',
-      status: '200 OK',
-      timestamp: '2 mins ago',
-      spans: [
-        { layer: 'Frontend React Client', duration: '120ms', pct: 3.7, color: 'bg-blue-500' },
-        { layer: 'API Gateway', duration: '180ms', pct: 5.6, color: 'bg-violet-500' },
-        { layer: 'Auth Middleware', duration: '210ms', pct: 6.5, color: 'bg-amber-500' },
-        { layer: 'Alumni Service Layer', duration: '90ms', pct: 2.8, color: 'bg-emerald-500' },
-        { layer: 'Prisma ORM Binding', duration: '80ms', pct: 2.5, color: 'bg-cyan-500' },
-        { layer: 'PostgreSQL Database Query', duration: '2,520ms', pct: 78.9, color: 'bg-rose-500', isBottleneck: true },
-      ],
-    },
-    {
-      id: 'REQ-9102B',
-      endpoint: 'POST /api/auth/login',
-      user: 'Tolosa Abebe Badho (Super Admin)',
-      totalDuration: '142ms',
-      status: '200 OK',
-      timestamp: '5 mins ago',
-      spans: [
-        { layer: 'Frontend React Client', duration: '10ms', pct: 7, color: 'bg-blue-500' },
-        { layer: 'API Gateway', duration: '22ms', pct: 15, color: 'bg-violet-500' },
-        { layer: 'Bcrypt Hash Verification', duration: '95ms', pct: 67, color: 'bg-amber-500' },
-        { layer: 'PostgreSQL Database Query', duration: '15ms', pct: 11, color: 'bg-emerald-500' },
-      ],
-    },
-  ];
+  const traces: {
+    id: string;
+    endpoint: string;
+    user: string;
+    totalDuration: string;
+    status: string;
+    timestamp: string;
+    spans: { layer: string; duration: string; pct: number; color: string; isBottleneck?: boolean }[];
+  }[] = [];
 
-  const slowQueries = [
-    { query: 'SELECT * FROM "AlumniProfile" WHERE "fullName" ILIKE \'%Abebe%\' ORDER BY "graduationYear" DESC;', duration: '2,520ms', calls: 142, impact: 'HIGH' },
-    { query: 'SELECT "id", "role", COUNT(*) FROM "User" GROUP BY "role";', duration: '480ms', calls: 320, impact: 'MEDIUM' },
-    { query: 'SELECT * FROM "TracerSurvey" WHERE "dueDate" < NOW() AND "status" = \'ACTIVE\';', duration: '310ms', calls: 88, impact: 'LOW' },
-  ];
+  const slowQueries: { query: string; duration: string; calls: number; impact: string }[] = [];
 
   const currentTrace = traces.find((t) => t.id === selectedTrace) || traces[0];
 
@@ -68,8 +41,8 @@ export default function IctObservabilityPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800">
-            Latency P95: 183ms
+          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-slate-50 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+            Latency P95: —
           </span>
         </div>
       </div>
@@ -77,10 +50,10 @@ export default function IctObservabilityPage() {
       {/* Latency Percentiles Cards */}
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {[
-          { label: 'P50 Latency (Median)', value: '42ms', note: 'Nominal response speed' },
-          { label: 'P95 Latency (95th %)', value: '183ms', note: '95% of users under 183ms' },
-          { label: 'P99 Latency (Tail)', value: '820ms', note: 'Includes cold queries' },
-          { label: 'Active DB Pool', value: '14 / 100', note: 'Connection pool capacity' },
+          { label: 'P50 Latency (Median)', value: '—', note: 'No live percentile data' },
+          { label: 'P95 Latency (95th %)', value: '—', note: 'No live percentile data' },
+          { label: 'P99 Latency (Tail)', value: '—', note: 'No live percentile data' },
+          { label: 'Active DB Pool', value: '—', note: 'Pool metrics not instrumented' },
         ].map((m) => (
           <div key={m.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{m.label}</span>

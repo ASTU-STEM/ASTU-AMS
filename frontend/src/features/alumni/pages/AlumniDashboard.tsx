@@ -20,6 +20,8 @@ import {
 } from '../types/alumni.types';
 
 import { alumniService } from '../services/alumni.service';
+import { mediaUrl } from '../../../config';
+import { useTheme } from '../../../hooks/useTheme';
 
 import { calculateProfileCompletion } from '../utils/profileCompletion';
 const calculateCompletion = calculateProfileCompletion;
@@ -54,7 +56,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('alumni_sidebar_collapsed') === 'true');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+  const { darkMode, toggleTheme } = useTheme();
 
   const [profile, setProfile] = useState<AlumniProfile | null>(null);
   const [jobs, setJobs] = useState<JobMatch[]>([]);
@@ -120,13 +122,13 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const profileCompletion = profile ? calculateCompletion(profile) : (statsData?.profileCompletion || 0);
   const pendingSurveysCount = realPendingSurveysCount;
   const matchCount = statsData?.openJobMatches || (Array.isArray(jobs) ? jobs.filter(j => !j.applied).length : 0);
-  const connectedMentorsCount = statsData?.activeMentorships || (Array.isArray(mentors) ? mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length : 0) + 347;
+  const connectedMentorsCount = statsData?.activeMentorships ?? (Array.isArray(mentors) ? mentors.filter(m => m.status === 'CONNECTED' || m.status === 'REQUEST_PENDING').length : 0);
 
   const stats = [
     { id: 1, label: 'Profile Status', value: `${profileCompletion}%`, color: 'astu-navy', icon: 'account_circle', bgGradient: 'from-blue-50 to-indigo-50', trend: 'Complete fields to boost', trendIcon: 'trending_up', trendColor: 'astu-green' },
-    { id: 2, label: 'Job Matches', value: `${matchCount}`, color: 'astu-green', icon: 'work', bgGradient: 'from-emerald-50 to-green-50', trend: '+3 new placements', trendIcon: 'trending_up', trendColor: 'astu-green' },
+    { id: 2, label: 'Job Matches', value: `${matchCount}`, color: 'astu-green', icon: 'work', bgGradient: 'from-emerald-50 to-green-50', trend: matchCount > 0 ? 'Open matches for you' : 'No open matches', trendIcon: 'trending_up', trendColor: 'astu-green' },
     { id: 3, label: 'Pending Surveys', value: `${pendingSurveysCount}`, color: 'astu-red', icon: 'assignment', bgGradient: 'from-red-50 to-orange-50', trend: pendingSurveysCount > 0 ? 'Urgent Tracer studies' : 'All studies submitted', trendIcon: pendingSurveysCount > 0 ? 'schedule' : 'check_circle', trendColor: pendingSurveysCount > 0 ? 'astu-red' : 'astu-green' },
-    { id: 4, label: 'Network Peers', value: `${connectedMentorsCount}`, color: 'purple-600', icon: 'people', bgGradient: 'from-purple-50 to-pink-50', trend: '+28 peers connected', trendIcon: 'trending_up', trendColor: 'astu-green' },
+    { id: 4, label: 'Network Peers', value: `${connectedMentorsCount}`, color: 'purple-600', icon: 'people', bgGradient: 'from-purple-50 to-pink-50', trend: connectedMentorsCount > 0 ? 'Active connections' : 'No connections yet', trendIcon: 'trending_up', trendColor: 'astu-green' },
   ];
 
   const managementActions = [
@@ -494,12 +496,6 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(darkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
-
   useEffect(() => { setMenuOpen(false); setNotificationOpen(false); setMobileSidebarOpen(false); }, [activeTab]);
   useEffect(() => { localStorage.setItem('alumni_sidebar_collapsed', String(sidebarCollapsed)); }, [sidebarCollapsed]);
 
@@ -573,6 +569,20 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           appMap.set(app.jobId || app.job?.id, st);
         });
 
+        // Derive a real skill-overlap match score from the alumni profile
+        // instead of stamping a fabricated "92%" on every posting.
+        const alumniSkills: string[] = (Array.isArray((profileData as any)?.skills) ? (profileData as any).skills : [])
+          .map((s: any) => (typeof s === 'string' ? s : (s?.name || '')).toLowerCase())
+          .filter(Boolean);
+        const computeMatch = (skills: any): string => {
+          const jobSkills = (Array.isArray(skills) ? skills : [])
+            .map((s: any) => (typeof s === 'string' ? s : (s?.name || '')).toLowerCase())
+            .filter(Boolean);
+          if (jobSkills.length === 0 || alumniSkills.length === 0) return '';
+          const hits = jobSkills.filter((js: string) => alumniSkills.some(us => us.includes(js) || js.includes(us))).length;
+          return `${Math.round((hits / jobSkills.length) * 100)}%`;
+        };
+
         const mappedJobs: JobMatch[] = rawJobs.map((j: any) => {
           let empType = 'Full-Time';
           if (j.employmentType === 'FULL_TIME') empType = 'Full-Time';
@@ -589,7 +599,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
             type: empType,
             salary: j.salary || (j.salaryMin ? `${j.salaryMin} - ${j.salaryMax} ETB` : 'Negotiable'),
             postedDate: j.createdAt ? new Date(j.createdAt).toLocaleDateString() : 'Recent',
-            match: '92%',
+            match: computeMatch(Array.isArray(j.skillsRequired) ? j.skillsRequired : (j.skills || [])),
             description: j.description || '',
             skills: Array.isArray(j.skillsRequired) ? j.skillsRequired : (j.skills || []),
             views: j.viewsCount ?? j.viewCount ?? j._count?.views ?? j.views ?? 0,
@@ -810,7 +820,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="role-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -854,7 +864,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       )}
 
       {/* Clean White Premium Sidebar */}
-      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         {/* Sidebar Logo Header */}
         <div className="relative z-10 px-4 py-4 border-b border-slate-100">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
@@ -1044,7 +1054,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 onChange={(e) => { if (activeTab === 'dashboard' && e.target.value.trim().length > 1) setActiveTab('jobs'); }} />
             </label>
 
-            <button type="button" onClick={() => { setDarkMode(!darkMode); toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated'); }}
+            <button type="button" onClick={() => { toggleTheme(); toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated'); }}
               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5" aria-label="Toggle dark mode">
               {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -1360,7 +1370,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm space-y-3">
                         <div className="flex items-start gap-3">
                           <img
-                            src={profile?.profilePicture ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${profile.profilePicture}` : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"}
+                            src={profile?.profilePicture ? mediaUrl(profile.profilePicture) : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"}
                             alt=""
                             className="w-10 h-10 rounded-full object-cover ring-2 ring-[#003366]/30 flex-shrink-0"
                           />
@@ -2057,7 +2067,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         </main>
       </div>
 
-      <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />
+      <JobDetailsModal job={selectedJobForModal} allJobs={jobs} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />
 
       <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
       <TelebirrDonationModal

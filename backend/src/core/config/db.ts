@@ -28,7 +28,6 @@ function readDevDb(): any {
       contentItems: [],
       mediaAssets: [],
       homepageConfigs: [],
-      communityMembers: [],
     };
   }
 
@@ -39,7 +38,10 @@ function readDevDb(): any {
         const raw = JSON.parse(fs.readFileSync(CMS_CONTENT_PATH, 'utf-8'));
         if (Array.isArray(raw)) {
           const configItem = raw.find((i: any) => i.title === 'Homepage CMS Configuration');
-          if (configItem && configItem.excerpt) {
+          // Seed the homepage only once. Re-seeding on every read silently
+          // overwrites CMS edits (including uploaded hero image URLs) whenever
+          // the legacy content collection is empty.
+          if (configItem && configItem.excerpt && (!store.homepageConfigs || store.homepageConfigs.length === 0)) {
             try {
               const parsed = typeof configItem.excerpt === 'string' ? JSON.parse(configItem.excerpt) : configItem.excerpt;
               store.homepageConfigs = [{ id: 'hc-main', key: 'main', data: parsed, updatedAt: new Date().toISOString() }];
@@ -57,6 +59,20 @@ function readDevDb(): any {
         }
       }
     } catch { /* ignore fallback error */ }
+  }
+
+  // Older dev-db.json snapshots may predate newer collections; make sure every
+  // collection the fallback client touches exists so a read can never throw
+  // "Cannot read properties of undefined".
+  const COLLECTIONS = [
+    'users', 'alumniProfiles', 'employerProfiles', 'departments', 'registrarStudents',
+    'registrarSyncLogs', 'auditLogs', 'notifications', 'documentRequests',
+    'contentItems', 'mediaAssets', 'homepageConfigs', 'jobs', 'events', 'eventRSVPs',
+    'surveys', 'surveyResponses', 'mentorships', 'communityMembers',
+    'departmentHeadProfiles', 'verificationRequests', 'forumPosts', 'employerFeedbacks',
+  ];
+  for (const key of COLLECTIONS) {
+    if (!Array.isArray(store[key])) store[key] = store[key] ?? [];
   }
 
   return store;
@@ -78,8 +94,8 @@ class FakePrisma {
     Logger.info('FakePrisma: Using in-memory JSON dev database');
   }
 
-  async $disconnect() {
-    writeDevDb(this.store);
+  $disconnect() {
+    // Nothing to flush: every mutation writes straight to the JSON store.
   }
 
   user = {
@@ -102,22 +118,25 @@ class FakePrisma {
     },
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isActive: data.isActive ?? false };
-      this.store.users.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      store.users.push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.users.findIndex((u: any) => u.id === where.id || u.email === where.email);
+      const store = readDevDb();
+      const idx = store.users.findIndex((u: any) => u.id === where.id || u.email === where.email);
       if (idx === -1) throw new Error('User not found');
-      this.store.users[idx] = { ...this.store.users[idx], ...data, updatedAt: new Date().toISOString() };
-      writeDevDb(this.store);
-      return this.store.users[idx];
+      store.users[idx] = { ...store.users[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.users[idx];
     },
     delete: async ({ where }: any) => {
-      const idx = this.store.users.findIndex((u: any) => u.id === where.id);
+      const store = readDevDb();
+      const idx = store.users.findIndex((u: any) => u.id === where.id);
       if (idx === -1) throw new Error('User not found');
-      const [removed] = this.store.users.splice(idx, 1);
-      writeDevDb(this.store);
+      const [removed] = store.users.splice(idx, 1);
+      writeDevDb(store);
       return removed;
     },
   };
@@ -305,118 +324,42 @@ class FakePrisma {
   };
 
   department = {
-    findUnique: async ({ where }: any) => {
-      const store = readDevDb();
-      let depts = store.departments || [];
-      if (depts.length === 0) {
-        depts = [
-          { id: 'dept-com', name: 'Computer Science', code: 'COM', createdAt: new Date().toISOString() },
-          { id: 'dept-swe', name: 'Software Engineering', code: 'SWE', createdAt: new Date().toISOString() },
-          { id: 'dept-ece', name: 'Electrical and Computer Engineering', code: 'ECE', createdAt: new Date().toISOString() },
-          { id: 'dept-meg', name: 'Mechanical Engineering', code: 'MEG', createdAt: new Date().toISOString() },
-          { id: 'dept-cve', name: 'Civil Engineering', code: 'CVE', createdAt: new Date().toISOString() },
-          { id: 'dept-che', name: 'Chemical Engineering', code: 'CHE', createdAt: new Date().toISOString() },
-          { id: 'dept-geo', name: 'Applied Geology', code: 'GEO', createdAt: new Date().toISOString() },
-        ];
-        store.departments = depts;
-        writeDevDb(store);
-      }
+    findUnique: async ({ where }: any = {}) => {
+      const depts = this.store.departments || [];
       if (where?.code) return depts.find((d: any) => d.code === where.code) || null;
       if (where?.id) return depts.find((d: any) => d.id === where.id) || null;
-      if (where?.name) return depts.find((d: any) => d.name.toLowerCase() === where.name.toLowerCase()) || null;
+      if (where?.name) return depts.find((d: any) => (d.name || '').toLowerCase() === String(where.name).toLowerCase()) || null;
       return null;
     },
-findMany: async ({ orderBy, include }: any = {}) => {
+    findMany: async ({ orderBy, include }: any = {}) => {
       const store = readDevDb();
-      let depts = store.departments || [];
-      if (depts.length === 0) {
-        depts = [
-          { id: 'dept-com', name: 'Computer Science', code: 'COM', createdAt: new Date().toISOString() },
-          { id: 'dept-swe', name: 'Software Engineering', code: 'SWE', createdAt: new Date().toISOString() },
-          { id: 'dept-ece', name: 'Electrical and Computer Engineering', code: 'ECE', createdAt: new Date().toISOString() },
-          { id: 'dept-meg', name: 'Mechanical Engineering', code: 'MEG', createdAt: new Date().toISOString() },
-          { id: 'dept-cve', name: 'Civil Engineering', code: 'CVE', createdAt: new Date().toISOString() },
-          { id: 'dept-che', name: 'Chemical Engineering', code: 'CHE', createdAt: new Date().toISOString() },
-          { id: 'dept-geo', name: 'Applied Geology', code: 'GEO', createdAt: new Date().toISOString() },
-        ];
-        store.departments = depts;
-        writeDevDb(store);
-      }
+      const depts = store.departments || [];
       const alumniProfiles = store.alumniProfiles || [];
       const users = store.users || [];
-      const mapped = depts.map((d: any) => {
-        const rec: any = { ...d, departmentHeadProfiles: d.departmentHeadProfiles || [], _count: { alumniProfiles: alumniProfiles.filter((a: any) => a.departmentId === d.id).length } };
+      return depts.map((d: any) => {
+        const rec: any = {
+          ...d,
+          departmentHeadProfiles: d.departmentHeadProfiles || [],
+          _count: { alumniProfiles: alumniProfiles.filter((a: any) => a.departmentId === d.id).length },
+        };
         if (include?.departmentHeadProfiles?.include?.user) {
-          rec.departmentHeadProfiles = (rec.departmentHeadProfiles || []).map((h: any) => ({ ...h, user: h.user || users.find((u: any) => u.id === h.userId) || null }));
+          rec.departmentHeadProfiles = (rec.departmentHeadProfiles || []).map((h: any) => ({
+            ...h,
+            user: h.user || users.find((u: any) => u.id === h.userId) || null,
+          }));
         }
         return rec;
       });
-      return mapped;
     },
-    count: async () => {
-      const store = readDevDb();
-      return (store.departments || []).length;
-    },
+    count: async () => (readDevDb().departments || []).length,
     create: async ({ data }: any) => {
-      const store = readDevDb();
       const rec = { ...data, id: `dev-dept-${Date.now()}` };
-      store.departments = store.departments || [];
+      const store = readDevDb();
       store.departments.push(rec);
       writeDevDb(store);
       return rec;
     },
   };
-
-  departmentHeadProfile = {
-    findUnique: async ({ where, include }: any = {}) => {
-      const store = readDevDb();
-      let profile = (store.departmentHeadProfiles || []).find(
-        (p: any) => (where?.userId && p.userId === where.userId) || (where?.id && p.id === where.id)
-      );
-      if (!profile && where?.userId) {
-        const u = (store.users || []).find((usr: any) => usr.id === where.userId);
-        if (u) {
-          const email = (u.email || '').toLowerCase();
-          let deptCode = 'COM';
-          let deptName = 'Computer Science';
-          if (email.includes('swe') || email.includes('software')) {
-            deptCode = 'SWE';
-            deptName = 'Software Engineering';
-          } else if (email.includes('ece') || email.includes('electrical')) {
-            deptCode = 'ECE';
-            deptName = 'Electrical and Computer Engineering';
-          } else if (email.includes('meg') || email.includes('mechanical')) {
-            deptCode = 'MEG';
-            deptName = 'Mechanical Engineering';
-          } else if (email.includes('cve') || email.includes('civil')) {
-            deptCode = 'CVE';
-            deptName = 'Civil Engineering';
-          } else if (email.includes('che') || email.includes('chemical')) {
-            deptCode = 'CHE';
-            deptName = 'Chemical Engineering';
-          } else if (email.includes('geo') || email.includes('geology')) {
-            deptCode = 'GEO';
-            deptName = 'Applied Geology';
-          }
-          profile = {
-            id: `dev-head-${u.id}`,
-            userId: u.id,
-            department: { id: `dev-dept-${deptCode.toLowerCase()}`, name: deptName, code: deptCode }
-          };
-        }
-      }
-      if (profile && include?.department && !profile.department) {
-        const d = (store.departments || []).find((dept: any) => dept.id === profile.departmentId);
-        if (d) profile.department = d;
-      }
-      return profile;
-    },
-    findMany: async () => {
-      const store = readDevDb();
-      return store.departmentHeadProfiles || [];
-    },
-  };
-
 
   registrarStudent = {
     findUnique: async ({ where }: any) => {
@@ -432,20 +375,22 @@ findMany: async ({ orderBy, include }: any = {}) => {
     },
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-registrar-${Date.now()}`, importedAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      this.store.registrarStudents.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      store.registrarStudents.push(rec);
+      writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
-      const idx = this.store.registrarStudents.findIndex((r: any) => r.studentId === where.studentId || r.id === where.id);
+      const store = readDevDb();
+      const idx = store.registrarStudents.findIndex((r: any) => r.studentId === where.studentId || r.id === where.id);
       if (idx === -1) throw new Error('Registrar student record not found');
-      this.store.registrarStudents[idx] = {
-        ...this.store.registrarStudents[idx],
+      store.registrarStudents[idx] = {
+        ...store.registrarStudents[idx],
         ...data,
         updatedAt: new Date().toISOString(),
       };
-      writeDevDb(this.store);
-      return this.store.registrarStudents[idx];
+      writeDevDb(store);
+      return store.registrarStudents[idx];
     },
     upsert: async ({ where, create, update }: any) => {
       const existing = await this.registrarStudent.findUnique({ where });
@@ -459,8 +404,10 @@ findMany: async ({ orderBy, include }: any = {}) => {
   registrarSyncLog = {
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-sync-${Date.now()}`, syncedAt: new Date().toISOString() };
-      this.store.registrarSyncLogs.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      store.registrarSyncLogs = store.registrarSyncLogs || [];
+      store.registrarSyncLogs.push(rec);
+      writeDevDb(store);
       return rec;
     },
     findFirst: async ({ orderBy }: any = {}) => {
@@ -482,8 +429,10 @@ findMany: async ({ orderBy, include }: any = {}) => {
   auditLog = {
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-log-${Date.now()}`, createdAt: new Date().toISOString() };
-      this.store.auditLogs.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      store.auditLogs = store.auditLogs || [];
+      store.auditLogs.push(rec);
+      writeDevDb(store);
       return rec;
     },
     findMany: async ({ where }: any = {}) => {
@@ -580,9 +529,10 @@ findMany: async ({ orderBy, include }: any = {}) => {
     },
     create: async ({ data }: any) => {
       const rec = { ...data, id: `dev-doc-${Date.now()}`, createdAt: new Date().toISOString(), status: 'PENDING' };
-      if (!this.store.documentRequests) this.store.documentRequests = [];
-      this.store.documentRequests.push(rec);
-      writeDevDb(this.store);
+      const store = readDevDb();
+      if (!store.documentRequests) store.documentRequests = [];
+      store.documentRequests.push(rec);
+      writeDevDb(store);
       return rec;
     },
   };
@@ -642,7 +592,6 @@ findMany: async ({ orderBy, include }: any = {}) => {
       const store = readDevDb();
       let jobs = store.jobs || [];
       if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
-      if (where?.isActive !== undefined) jobs = jobs.filter((j: any) => Boolean(j.isActive) === Boolean(where.isActive));
       return jobs.length;
     },
     create: async ({ data }: any) => {
@@ -926,6 +875,133 @@ findMany: async ({ orderBy, include }: any = {}) => {
     },
   };
 
+  mediaAsset = {
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let items = store.mediaAssets || [];
+      if (where?.album) items = items.filter((m: any) => m.album === where.album);
+      return items;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `media-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      if (!store.mediaAssets) store.mediaAssets = [];
+      store.mediaAssets.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.mediaAssets) {
+        store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
+        writeDevDb(store);
+      }
+      return {};
+    },
+  };
+
+  homepageConfig = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const configs = store.homepageConfigs || [];
+      return configs.find((c: any) => c.key === (where?.key || 'main')) || null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      if (!store.homepageConfigs) store.homepageConfigs = [];
+      const key = where?.key || 'main';
+      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
+      if (idx !== -1) {
+        const existingData = store.homepageConfigs[idx].data || {};
+        const mergedData = update.data ? { ...existingData, ...update.data } : existingData;
+        store.homepageConfigs[idx] = {
+          ...store.homepageConfigs[idx],
+          ...update,
+          data: mergedData,
+          updatedAt: new Date().toISOString()
+        };
+        writeDevDb(store);
+        return store.homepageConfigs[idx];
+      }
+      const rec = { id: `hc-${Date.now()}`, key, ...create, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.homepageConfigs.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      if (!store.homepageConfigs) store.homepageConfigs = [];
+      const key = where?.key || 'main';
+      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
+      if (idx !== -1) {
+        const existingData = store.homepageConfigs[idx].data || {};
+        const mergedData = data.data ? { ...existingData, ...data.data } : (data && typeof data === 'object' ? { ...existingData, ...data } : existingData);
+        store.homepageConfigs[idx] = {
+          ...store.homepageConfigs[idx],
+          ...data,
+          data: mergedData,
+          updatedAt: new Date().toISOString()
+        };
+        writeDevDb(store);
+        return store.homepageConfigs[idx];
+      }
+      const rec = { id: `hc-${Date.now()}`, key, ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.homepageConfigs.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+  };
+
+  // Catch-all: for any model not explicitly defined, return safe no-ops
+  [key: string]: any;
+
+  departmentHeadProfile = {
+    findUnique: async ({ where, include }: any = {}) => {
+      const store = readDevDb();
+      let profile = (store.departmentHeadProfiles || []).find(
+        (p: any) => (where?.userId && p.userId === where.userId) || (where?.id && p.id === where.id)
+      );
+      if (!profile && where?.userId) {
+        const u = (store.users || []).find((usr: any) => usr.id === where.userId);
+        if (u) {
+          const email = (u.email || '').toLowerCase();
+          let deptCode = 'COM';
+          let deptName = 'Computer Science';
+          if (email.includes('swe') || email.includes('software')) {
+            deptCode = 'SWE';
+            deptName = 'Software Engineering';
+          } else if (email.includes('ece') || email.includes('electrical')) {
+            deptCode = 'ECE';
+            deptName = 'Electrical and Computer Engineering';
+          } else if (email.includes('meg') || email.includes('mechanical')) {
+            deptCode = 'MEG';
+            deptName = 'Mechanical Engineering';
+          } else if (email.includes('cve') || email.includes('civil')) {
+            deptCode = 'CVE';
+            deptName = 'Civil Engineering';
+          } else if (email.includes('che') || email.includes('chemical')) {
+            deptCode = 'CHE';
+            deptName = 'Chemical Engineering';
+          } else if (email.includes('geo') || email.includes('geology')) {
+            deptCode = 'GEO';
+            deptName = 'Applied Geology';
+          }
+          profile = {
+            id: `dev-head-${u.id}`,
+            userId: u.id,
+            department: { id: `dev-dept-${deptCode.toLowerCase()}`, name: deptName, code: deptCode },
+          };
+        }
+      }
+      if (profile && include?.department && !profile.department) {
+        const d = (store.departments || []).find((dept: any) => dept.id === profile.departmentId);
+        if (d) profile = { ...profile, department: d };
+      }
+      return profile;
+    },
+    findMany: async () => readDevDb().departmentHeadProfiles || [],
+  };
+
   communityMember = {
     findMany: async ({ where }: any = {}) => {
       const store = readDevDb();
@@ -935,12 +1011,11 @@ findMany: async ({ orderBy, include }: any = {}) => {
       return items;
     },
     findUnique: async ({ where }: any = {}) => {
-      const store = readDevDb();
-      const items = store.communityMembers || [];
+      const items = readDevDb().communityMembers || [];
       if (where?.id) return items.find((m: any) => m.id === where.id) || null;
       return null;
     },
-    count: async () => readDevDb().communityMembers?.length || 0,
+    count: async () => (readDevDb().communityMembers || []).length,
     create: async ({ data }: any) => {
       const store = readDevDb();
       const rec = {
@@ -980,89 +1055,115 @@ findMany: async ({ orderBy, include }: any = {}) => {
     },
   };
 
-  mediaAsset = {
-    findMany: async ({ where }: any = {}) => {
-      const store = readDevDb();
-      let items = store.mediaAssets || [];
-      if (where?.album) items = items.filter((m: any) => m.album === where.album);
-      return items;
+  verificationRequest = {
+    count: async ({ where }: any = {}) => {
+      let reqs = readDevDb().verificationRequests || [];
+      if (where?.status) reqs = reqs.filter((r: any) => r.status === where.status);
+      return reqs.length;
     },
-    create: async ({ data }: any) => {
-      const store = readDevDb();
-      const rec = { ...data, id: data.id || `media-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      if (!store.mediaAssets) store.mediaAssets = [];
-      store.mediaAssets.unshift(rec);
-      writeDevDb(store);
-      return rec;
-    },
-    delete: async ({ where }: any = {}) => {
-      const store = readDevDb();
-      if (store.mediaAssets) {
-        store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
-        writeDevDb(store);
-      }
-      return {};
-    },
+    findMany: async () => readDevDb().verificationRequests || [],
   };
 
-  homepageConfig = {
+  event = {
     findUnique: async ({ where }: any = {}) => {
       const store = readDevDb();
-      const configs = store.homepageConfigs || [];
-      return configs.find((c: any) => c.key === (where?.key || 'main')) || null;
+      const events = store.events || store.hiringEvents || [];
+      if (where?.id) return events.find((e: any) => e.id === where.id) || null;
+      return null;
     },
-    upsert: async ({ where, create, update }: any) => {
+    findMany: async ({ where, orderBy }: any = {}) => {
       const store = readDevDb();
-      if (!store.homepageConfigs) store.homepageConfigs = [];
-      const key = where?.key || 'main';
-      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
-      if (idx !== -1) {
-        store.homepageConfigs[idx] = { ...store.homepageConfigs[idx], ...update, updatedAt: new Date().toISOString() };
-        writeDevDb(store);
-        return store.homepageConfigs[idx];
+      let events = [...(store.events || store.hiringEvents || [])];
+      if (where?.type) events = events.filter((e: any) => e.type === where.type);
+      if (orderBy?.date === 'asc') {
+        events.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      } else if (orderBy?.date === 'desc') {
+        events.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
       }
-      const rec = { id: `hc-${Date.now()}`, key, ...create, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      store.homepageConfigs.push(rec);
+      return events;
+    },
+    count: async () => (readDevDb().events || readDevDb().hiringEvents || []).length,
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `dev-event-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.events = store.events || [];
+      store.events.push(rec);
       writeDevDb(store);
       return rec;
     },
     update: async ({ where, data }: any) => {
       const store = readDevDb();
-      if (!store.homepageConfigs) store.homepageConfigs = [];
-      const key = where?.key || 'main';
-      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
-      if (idx !== -1) {
-        store.homepageConfigs[idx] = { ...store.homepageConfigs[idx], ...data, updatedAt: new Date().toISOString() };
-        writeDevDb(store);
-        return store.homepageConfigs[idx];
+      const events = store.events || [];
+      const idx = events.findIndex((e: any) => e.id === where?.id);
+      if (idx === -1) throw new Error('Event not found');
+      events[idx] = { ...events[idx], ...data, updatedAt: new Date().toISOString() };
+      store.events = events;
+      writeDevDb(store);
+      return events[idx];
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      const before = (store.events || []).length;
+      store.events = (store.events || []).filter((e: any) => e.id !== where?.id);
+      writeDevDb(store);
+      if (store.events.length === before) throw new Error('Event not found');
+      return {};
+    },
+  };
+
+  eventRSVP = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const key = where?.eventId_alumniId;
+      const rsvps = store.eventRSVPs || [];
+      if (key) return rsvps.find((r: any) => r.eventId === key.eventId && r.alumniId === key.alumniId) || null;
+      if (where?.id) return rsvps.find((r: any) => r.id === where.id) || null;
+      return null;
+    },
+    findMany: async ({ where, include }: any = {}) => {
+      const store = readDevDb();
+      let rsvps = [...(store.eventRSVPs || [])];
+      if (where?.eventId) rsvps = rsvps.filter((r: any) => r.eventId === where.eventId);
+      if (where?.status) rsvps = rsvps.filter((r: any) => r.status === where.status);
+      if (include?.alumni) {
+        const profiles = store.alumniProfiles || [];
+        const departments = store.departments || [];
+        rsvps = rsvps.map((r: any) => {
+          const alumni = profiles.find((a: any) => a.id === r.alumniId || a.userId === r.alumniId) || null;
+          if (!alumni) return { ...r, alumni: null };
+          const department = departments.find((d: any) => d.id === alumni.departmentId) || null;
+          return {
+            ...r,
+            alumni: {
+              fullName: alumni.fullName,
+              profilePicture: alumni.profilePicture,
+              department: department ? { name: department.name } : null,
+            },
+          };
+        });
       }
-      const rec = { id: `hc-${Date.now()}`, key, ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      store.homepageConfigs.push(rec);
+      return rsvps;
+    },
+    count: async ({ where }: any = {}) => (await this.eventRSVP.findMany({ where })).length,
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `dev-rsvp-${Date.now()}`, createdAt: new Date().toISOString() };
+      store.eventRSVPs = store.eventRSVPs || [];
+      store.eventRSVPs.push(rec);
       writeDevDb(store);
       return rec;
     },
-  };
-
-  verificationRequest = {
-    count: async ({ where }: any = {}) => {
+    update: async ({ where, data }: any) => {
       const store = readDevDb();
-      let reqs = store.verificationRequests || [];
-      if (where?.status) reqs = reqs.filter((r: any) => r.status === where.status);
-      return reqs.length;
+      const rsvps = store.eventRSVPs || [];
+      const idx = rsvps.findIndex((r: any) => r.id === where?.id);
+      if (idx === -1) throw new Error('RSVP not found');
+      rsvps[idx] = { ...rsvps[idx], ...data, updatedAt: new Date().toISOString() };
+      store.eventRSVPs = rsvps;
+      writeDevDb(store);
+      return rsvps[idx];
     },
-    findMany: async () => (readDevDb().verificationRequests || []),
   };
-
-  event = {
-    count: async () => {
-      const store = readDevDb();
-      return (store.events?.length || store.hiringEvents?.length || 18);
-    },
-    findMany: async () => (readDevDb().events || readDevDb().hiringEvents || []),
-  };
-
-  // Catch-all: for any model not explicitly defined, return safe no-ops
-  [key: string]: any;
 
   async $transaction(cb: any) {
     if (typeof cb === 'function') return cb(this);

@@ -38,114 +38,7 @@ interface LogItem {
   afterState?: Record<string, any>;
 }
 
-const mockLogs: LogItem[] = [
-  {
-    id: 'LOG-88421',
-    timestamp: '2026-09-13 21:14:02',
-    portal: 'ICT',
-    category: 'SECURITY',
-    severity: 'CRITICAL',
-    action: 'BREAK_GLASS_ELEVATION',
-    actor: 'System Admin',
-    actorEmail: 'admin@astust.edu.et',
-    ipAddress: '197.156.90.12',
-    details: 'Break Glass emergency privilege elevation invoked for 30 minutes. Reason: High database latency diagnosis.',
-    beforeState: { role: 'ICT_ADMIN', elevatedPermissions: false, sessionDuration: '1h' },
-    afterState: { role: 'ICT_ADMIN', elevatedPermissions: true, sessionDuration: '30m', elevatedAt: '2026-09-13T21:14:02Z' },
-  },
-  {
-    id: 'LOG-88420',
-    timestamp: '2026-09-13 21:05:44',
-    portal: 'SUPER_ADMIN',
-    category: 'MUTATION',
-    severity: 'WARN',
-    action: 'USER_ROLE_CHANGE',
-    actor: 'Executive Admin',
-    actorEmail: 'admin@astust.edu.et',
-    ipAddress: '197.156.90.12',
-    details: 'User account role changed from ADMIN to SUPER_ADMIN',
-    beforeState: { id: 'usr-9012', email: 'admin@astust.edu.et', role: 'ADMIN', permissions: ['manage_users'] },
-    afterState: { id: 'usr-9012', email: 'admin@astust.edu.et', role: 'SUPER_ADMIN', permissions: ['ALL_PERMISSIONS'] },
-  },
-  {
-    id: 'LOG-88419',
-    timestamp: '2026-09-13 20:52:11',
-    portal: 'REGISTRAR',
-    category: 'TASK',
-    severity: 'INFO',
-    action: 'SIS_BATCH_GRADUATE_SYNC',
-    actor: 'SIS Integration Worker',
-    actorEmail: 'system-worker@astu.edu.et',
-    ipAddress: '10.0.4.15',
-    details: 'Automated background sync imported 450 new graduate records from ASTU Main Registrar DB.',
-    beforeState: { importedCount: 14200, lastSyncStatus: 'IDLE' },
-    afterState: { importedCount: 14650, lastSyncStatus: 'SUCCESS', syncedRecords: 450 },
-  },
-  {
-    id: 'LOG-88418',
-    timestamp: '2026-09-13 20:30:19',
-    portal: 'ALUMNI',
-    category: 'AUTH',
-    severity: 'INFO',
-    action: 'USER_LOGIN_SUCCESS',
-    actor: 'Abebe Bikila',
-    actorEmail: 'abebe.b@alumni.astu.edu.et',
-    ipAddress: '197.156.88.22',
-    details: 'Alumni user successfully authenticated via standard MFA password flow.',
-  },
-  {
-    id: 'LOG-88417',
-    timestamp: '2026-09-13 20:12:05',
-    portal: 'EMPLOYER',
-    category: 'MUTATION',
-    severity: 'INFO',
-    action: 'JOB_POSTING_CREATED',
-    actor: 'Ethio Telecom HR',
-    actorEmail: 'careers@ethiotelecom.et',
-    ipAddress: '213.55.76.10',
-    details: 'New job posting published: Senior Fullstack Engineer (Adama Campus preferred)',
-    beforeState: { jobCount: 14 },
-    afterState: { jobCount: 15, lastPostedJobId: 'job-9941', status: 'ACTIVE' },
-  },
-  {
-    id: 'LOG-88416',
-    timestamp: '2026-09-13 19:45:30',
-    portal: 'DEPT_HEAD',
-    category: 'MUTATION',
-    severity: 'INFO',
-    action: 'TRACER_SURVEY_DISPATCHED',
-    actor: 'Dr. Alemu Tadesse (CSE)',
-    actorEmail: 'alemu.t@astu.edu.et',
-    ipAddress: '10.0.12.89',
-    details: 'Dispatched 2024 Computer Science & Engineering Graduate Exit Tracer Survey to 180 alumni.',
-    beforeState: { surveyStatus: 'DRAFT', targetAlumni: 0 },
-    afterState: { surveyStatus: 'DISPATCHED', targetAlumni: 180, dispatchedAt: '2026-09-13T19:45:30Z' },
-  },
-  {
-    id: 'LOG-88415',
-    timestamp: '2026-09-13 19:10:00',
-    portal: 'ICT',
-    category: 'SECURITY',
-    severity: 'WARN',
-    action: 'WAF_IP_BLACKLISTED',
-    actor: 'Automated Threat Mitigation',
-    actorEmail: 'waf@astu.edu.et',
-    ipAddress: '45.133.1.88',
-    details: 'IP 45.133.1.88 automatically blocked due to 12 SQL injection signatures detected.',
-  },
-  {
-    id: 'LOG-88414',
-    timestamp: '2026-09-13 18:30:00',
-    portal: 'SUPER_ADMIN',
-    category: 'SYSTEM',
-    severity: 'INFO',
-    action: 'DATABASE_BACKUP_COMPLETED',
-    actor: 'Cron Backup Service',
-    actorEmail: 'backup-cron@astu.edu.et',
-    ipAddress: '127.0.0.1',
-    details: 'Postgres DB full backup completed. Archive size: 1.42 GB encrypted with AES-256.',
-  },
-];
+const mockLogs: LogItem[] = [];
 
 function PaginationFooter({
   currentPage,
@@ -199,12 +92,40 @@ function PaginationFooter({
 }
 
 export default function IctUniversalLogsPage() {
-  const [logs] = useState<LogItem[]>(mockLogs);
+  const [logs, setLogs] = useState<LogItem[]>([]);
   const [selectedPortal, setSelectedPortal] = useState<string>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDiffLog, setSelectedDiffLog] = useState<LogItem | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/system-logs', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data?.logs)) {
+          const mapped: LogItem[] = d.data.logs.map((item: any, idx: number) => ({
+            id: item.id || `LOG-${idx + 1}`,
+            timestamp: item.timestamp || item.createdAt || new Date().toISOString(),
+            portal: (item.portal || item.role || 'ICT').toUpperCase() as any,
+            category: (item.category || 'SYSTEM').toUpperCase() as any,
+            severity: (item.severity || 'INFO').toUpperCase() as any,
+            action: item.action || 'SYSTEM_EVENT',
+            actor: item.userName || item.actor || 'System',
+            actorEmail: item.userEmail || item.actorEmail || 'system@astu.edu.et',
+            ipAddress: item.ipAddress || '127.0.0.1',
+            details: item.details || item.description || '',
+            beforeState: item.beforeState,
+            afterState: item.afterState,
+          }));
+          setLogs(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);

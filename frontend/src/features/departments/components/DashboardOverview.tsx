@@ -139,8 +139,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode =
 
   const handleExport = () => {
     setExportDept(dashboardData?.department?.name || filters.department || user?.department || 'Software Engineering');
-    setExportYear(filters.academicYear || '2024');
-    setExportTracer(filters.tracerPeriod || '6-month');
+    setExportYear(filters.academicYear || '—');
+    setExportTracer(filters.tracerPeriod || '—');
     setIsExportModalOpen(true);
   };
 

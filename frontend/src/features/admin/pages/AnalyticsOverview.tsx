@@ -1741,7 +1741,7 @@ export default function AnalyticsOverview() {
   }, [ext]);
 
   const activeSystemHealthAndAI = useMemo(() => ext.systemHealthAndAI || {
-    systemOperationalHealthScore: 99.8,
+    systemOperationalHealthScore: 0,
     totalSupportTickets: 0,
     resolvedSupportTickets: 0,
     openSupportTickets: 0,

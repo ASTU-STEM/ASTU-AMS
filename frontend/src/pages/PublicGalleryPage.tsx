@@ -20,6 +20,7 @@ import {
 import Navbar from '../components/Navbar';
 import ChatBot from '../components/ChatBot';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
+import { mediaUrl } from '../config';
 import gallerySettingsService, {
   GalleryPageSettings,
 } from '../features/admin/services/gallerySettings.service';
@@ -123,7 +124,18 @@ export default function PublicGalleryPage() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<GalleryPageSettings>(() => gallerySettingsService.getSettings());
 
-  const loadMedia = () => {
+  const loadMedia = (): GalleryItem[] => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.gallery?.length) {
+      return cmsConfig.gallery
+        .filter((item: any) => item.active !== false)
+        .map((item: any) => ({
+          ...item,
+          type: item.type === 'Video' ? 'Video' : 'Photo',
+          album: item.album || 'Campus Gallery',
+        }));
+    }
+
     try {
       const stored = localStorage.getItem('astu_ams_cms_gallery_items');
       if (stored) {
@@ -133,11 +145,6 @@ export default function PublicGalleryPage() {
         }
       }
     } catch {}
-
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.gallery?.length) {
-      return cmsConfig.gallery;
-    }
 
     return defaultGalleryItems;
   };
@@ -155,6 +162,14 @@ export default function PublicGalleryPage() {
     window.addEventListener('astu-cms-gallery-changed', syncMedia);
     window.addEventListener('astu-cms-homepage-updated', syncMedia);
     window.addEventListener('astu-cms-gallery-settings-changed', syncSettings);
+
+    // The public gallery must use the shared backend configuration, rather
+    // than a potentially stale gallery cache from a previous browser session.
+    homepageCmsService.fetchFromApi().then((cmsConfig) => {
+      if (cmsConfig?.gallery?.length) {
+        syncMedia();
+      }
+    });
 
     return () => {
       window.removeEventListener('astu-cms-gallery-changed', syncMedia);
@@ -188,7 +203,7 @@ export default function PublicGalleryPage() {
       {/* Header Banner (Fully Controlled by CMS Admin) */}
       <div
         className="relative overflow-hidden text-white py-12 px-4 sm:px-6 transition-all"
-        style={{ backgroundColor: settings.bannerBgColor || '#003580' }}
+        style={{ backgroundColor: settings.bannerBgColor || '#003366' }}
       >
         {settings.showBannerImage && settings.bannerImage && (
           <div className="absolute inset-0 z-0">
@@ -197,7 +212,7 @@ export default function PublicGalleryPage() {
               alt="Gallery Banner"
               className="h-full w-full object-cover object-center opacity-25"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-[#003580]/85 to-[#003580]/90" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-astu-navy/85 to-astu-navy/90" />
           </div>
         )}
 
@@ -225,7 +240,7 @@ export default function PublicGalleryPage() {
             </div>
 
             <div className="hidden lg:flex items-center gap-3 self-end rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur-md border border-white/15 text-xs text-slate-200">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+              <CheckCircle2 className="h-5 w-5 text-astu-green" />
               <div>
                 <p className="font-bold text-white">Verified ASTU Archive</p>
                 <p className="text-[10px] text-slate-300">Managed by Directorate of Communication</p>
@@ -247,7 +262,7 @@ export default function PublicGalleryPage() {
                 onClick={() => setSelectedAlbum(album)}
                 className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                   selectedAlbum === album
-                    ? 'bg-[#003580] text-white shadow-xs'
+                    ? 'bg-astu-navy text-white shadow-xs'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -264,7 +279,7 @@ export default function PublicGalleryPage() {
                   key={type}
                   onClick={() => setSelectedType(type)}
                   className={`rounded-lg px-2.5 py-1 font-semibold transition-all cursor-pointer ${
-                    selectedType === type ? 'bg-[#003580] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200'
+                    selectedType === type ? 'bg-astu-navy text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   {type}
@@ -278,7 +293,7 @@ export default function PublicGalleryPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={settings.searchPlaceholder || 'Search gallery...'}
-                className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
+                className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10"
               />
             </div>
           </div>
@@ -290,11 +305,11 @@ export default function PublicGalleryPage() {
             <article
               key={item.id}
               onClick={() => setActiveModalItem(item)}
-              className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[#003580]/40"
+              className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-astu-navy/40"
             >
               <div className="relative h-56 w-full overflow-hidden bg-slate-900">
                 <img
-                  src={item.src || item.image || '/images/astu-building.jpg'}
+                  src={mediaUrl(item.src || item.image) || '/images/astu-building.jpg'}
                   alt={item.title}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
@@ -321,7 +336,7 @@ export default function PublicGalleryPage() {
               </div>
 
               <div className="p-4">
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#003580] transition-colors line-clamp-1">
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-astu-navy transition-colors line-clamp-1">
                   {item.title}
                 </h3>
                 <div className="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2.5">
@@ -354,7 +369,7 @@ export default function PublicGalleryPage() {
                 setSelectedType('All');
                 setSearch('');
               }}
-              className="mt-4 rounded-xl bg-[#003580] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#002855]"
+              className="mt-4 rounded-xl bg-astu-navy px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#001a41]"
             >
               Reset Filters
             </button>
@@ -374,7 +389,7 @@ export default function PublicGalleryPage() {
           >
             <div className="flex items-center justify-between border-b border-slate-100 p-4">
               <div>
-                <span className="rounded-md bg-[#003580]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#003580]">
+                <span className="rounded-md bg-astu-navy/10 px-2 py-0.5 text-[10px] font-bold uppercase text-astu-navy">
                   {activeModalItem.album}
                 </span>
                 <h3 className="mt-1 text-base font-bold text-slate-900">{activeModalItem.title}</h3>
@@ -389,7 +404,7 @@ export default function PublicGalleryPage() {
 
             <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
               <img
-                src={activeModalItem.src || activeModalItem.image || '/images/astu-building.jpg'}
+                src={mediaUrl(activeModalItem.src || activeModalItem.image) || '/images/astu-building.jpg'}
                 alt={activeModalItem.title}
                 className="max-h-[70vh] w-auto object-contain"
                 onError={(e) => {
@@ -417,7 +432,7 @@ export default function PublicGalleryPage() {
               </div>
               <button
                 onClick={() => setActiveModalItem(null)}
-                className="rounded-lg bg-[#003580] px-4 py-1.5 text-xs font-semibold text-white shadow-xs"
+                className="rounded-lg bg-astu-navy px-4 py-1.5 text-xs font-semibold text-white shadow-xs"
               >
                 Close Preview
               </button>

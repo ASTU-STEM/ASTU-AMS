@@ -19,11 +19,9 @@ export default function IctPoliciesSessionsPage() {
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [activeBroadcast, setActiveBroadcast] = useState<string | null>(null);
 
-  const [sessions, setSessions] = useState([
-    { id: 'sess-1', user: 'Tolosa Abebe Badho (Super Admin)', ip: '197.156.92.14', device: 'Chrome / Windows 11', status: 'Active Now' },
-    { id: 'sess-2', user: 'ICT System Administrator', ip: '102.217.18.2', device: 'Firefox / macOS', status: 'Active 12m ago' },
-    { id: 'sess-3', user: 'Abebe Assefa (Registrar Admin)', ip: '197.156.90.1', device: 'Chrome / Windows 10', status: 'Active 1h ago' },
-  ]);
+  const [sessions, setSessions] = useState<
+    { id: string; user: string; ip: string; device: string; status: string }[]
+  >([]);
 
   const handlePublishBroadcast = (e: React.FormEvent) => {
     e.preventDefault();

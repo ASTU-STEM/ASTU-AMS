@@ -2,7 +2,10 @@ import axios from 'axios';
 import { defaultDetailPages, DetailPageItem } from './detailPages.data';
 
 const STORAGE_KEY = 'astu_ams_homepage_cms_config';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const getAuthToken = () =>
+  localStorage.getItem('authToken') || localStorage.getItem('token') || localStorage.getItem('accessToken');
 
 export interface HeroSlide {
   id: string;
@@ -292,7 +295,7 @@ export const defaultPartnersPageConfig: PartnersPageConfig = {
   heroBackgroundImage: '',
   benefitsEyebrow: 'MUTUAL VALUE & TALENT ACCESS',
   benefitsTitle: 'Why Partner with ASTU?',
-  benefitsSubtitle: 'Join 500+ leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.',
+  benefitsSubtitle: 'Join leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.',
   benefits: [
     {
       id: 'B-1',
@@ -344,7 +347,7 @@ export const defaultPartnersPageConfig: PartnersPageConfig = {
   featuresSubtitle: 'Our dedicated employer platform provides institutions with robust tools to streamline talent sourcing and collaborate on institutional excellence.',
   features: [
     'TIN-verified enterprise employer accounts with high trust scores',
-    'Direct access to 1,238+ verified ASTU alumni and graduating seniors',
+    'Direct access to verified ASTU alumni and graduating seniors',
     'Curriculum-aligned technical skill matching and automated recommendations',
     'Accreditation-ready reporting and longitudinal tracer feedback loops',
     'Priority coordination for campus recruitment days and tech expos',
@@ -355,10 +358,10 @@ export const defaultPartnersPageConfig: PartnersPageConfig = {
   ctaCardButtonText: 'Register as Partner',
   ctaCardButtonLink: '/employers/register',
   stats: [
-    { id: 'S-1', value: '1,238+', label: 'Verified Alumni' },
-    { id: 'S-2', value: '500+', label: 'Partner Organizations' },
-    { id: 'S-3', value: '87%', label: 'Employment Rate' },
-    { id: 'S-4', value: '5', label: 'Engineering & Science Schools' },
+    { id: 'S-1', value: '', label: 'Verified Alumni' },
+    { id: 'S-2', value: '', label: 'Partner Organizations' },
+    { id: 'S-3', value: '', label: 'Employment Rate' },
+    { id: 'S-4', value: '', label: 'Engineering & Science Schools' },
   ],
   bottomCtaTitle: 'Start Building Your High-Impact Talent Pipeline Today',
   bottomCtaDescription: 'Join ASTU\'s corporate partner network and connect directly with Ethiopia\'s premier engineering, applied science, and technology graduates.',
@@ -367,15 +370,15 @@ export const defaultPartnersPageConfig: PartnersPageConfig = {
   stakeholdersTitle: 'Strategic Alliances & Industry Consortia',
   stakeholdersSubtitle: 'Active cooperation frameworks with government agencies, multinational tech enterprises, and international research organizations.',
   stakeholderTracks: [
-    { id: 'ST-1', title: 'Enterprise & Corporate Alliances', desc: 'Over 500 enterprise partners collaborating with ASTU on talent pipelines, industrial internships, and technology initiatives.', badge: 'Corporate Tier', active: true },
+    { id: 'ST-1', title: 'Enterprise & Corporate Alliances', desc: 'Enterprise partners collaborating with ASTU on talent pipelines, industrial internships, and technology initiatives.', badge: 'Corporate Tier', active: true },
     { id: 'ST-2', title: 'Academic & Research Consortia', desc: 'Partnering with German Academic Exchange Service (DAAD), regional universities, and national research institutes on applied engineering grants.', badge: 'International Consortia', active: true },
     { id: 'ST-3', title: 'Curriculum & ETA Competency Alignment', desc: 'Stakeholder advisory boards meet regularly to evaluate industry skill trends, feeding data from graduate tracer surveys directly into university curriculum reforms.', badge: 'Accreditation Readiness', active: true },
-    { id: 'ST-4', title: 'Applied Laboratories & Joint Innovation', desc: '12+ specialized engineering laboratories and research centers equipped to prototype and test regional solutions alongside enterprise sponsors.', badge: 'Innovation Hub', active: true },
+    { id: 'ST-4', title: 'Applied Laboratories & Joint Innovation', desc: 'Specialized engineering laboratories and research centers equipped to prototype and test regional solutions alongside enterprise sponsors.', badge: 'Innovation Hub', active: true },
   ],
   recruitmentTitle: 'Recruitment Framework & Talent Engine',
   recruitmentSubtitle: 'Accelerate graduate hiring and evaluate verified competency metrics through the AMS platform.',
   recruitmentTracks: [
-    { id: 'RT-1', title: 'Direct Opportunity Publishing', desc: 'Publish vacancies, internships, and graduate trainee programs directly to verified graduates across 5 fields of study.', badge: 'Job Board', active: true },
+    { id: 'RT-1', title: 'Direct Opportunity Publishing', desc: 'Publish vacancies, internships, and graduate trainee programs directly to verified graduates across ASTU fields of study.', badge: 'Job Board', active: true },
     { id: 'RT-2', title: 'Smart Candidate Search & Filters', desc: 'Filter verified candidates by GPA, graduation year, engineering department, and technical skills.', badge: 'Candidate Match', active: true },
     { id: 'RT-3', title: 'Employer Competency Feedback', desc: 'Submit structured employer feedback regarding graduate competencies to directly influence ASTU curriculum development.', badge: 'Quality Loop', active: true },
     { id: 'RT-4', title: 'On-Campus Career Expos & Interviews', desc: 'Coordinate interview suites, campus recruitment expos, and graduate tech talk days directly with ASTU leadership.', badge: 'Campus Days', active: true },
@@ -406,120 +409,8 @@ export interface Partner {
   featured?: boolean;
 }
 
-export const defaultPartnersList: Partner[] = [
-  {
-    id: 'PT-1',
-    name: 'Ethio Telecom',
-    logo: '/images/partners/ethio-telecom.png',
-    active: true,
-    industry: 'Telecom, Cloud & Fintech',
-    location: 'Addis Ababa & Regional Hubs',
-    openings: '14+ Graduate Engineering Tracks',
-    partnershipType: 'Strategic',
-    website: 'https://www.ethiotelecom.et',
-    description: 'National telecommunications provider collaborating with ASTU on enterprise cloud engineering, fiber optics, and Telebirr fintech integration.',
-    contactEmail: 'careers@ethiotelecom.et',
-    featured: true,
-  },
-  {
-    id: 'PT-2',
-    name: 'Ethiopian Airlines',
-    logo: '/images/partners/ethiopian-airlines.svg',
-    active: true,
-    industry: 'Aviation & Systems Engineering',
-    location: 'Bole, Addis Ababa',
-    openings: '8 Aviation Cadet & Internship Tracks',
-    partnershipType: 'Strategic',
-    website: 'https://www.ethiopianairlines.com',
-    description: 'Africa’s leading aviation group partnering on avionics, maintenance engineering, software systems, and aeronautical training.',
-    contactEmail: 'recruitment@ethiopianairlines.com',
-    featured: true,
-  },
-  {
-    id: 'PT-3',
-    name: 'INSA',
-    logo: '/images/partners/insa.png',
-    active: true,
-    industry: 'Cybersecurity & Cryptography',
-    location: 'Addis Ababa',
-    openings: '6 Advanced Research Placements',
-    partnershipType: 'Research',
-    website: 'https://www.insa.gov.et',
-    description: 'Information Network Security Administration spearheading joint cryptographic research and national cyber defense internships.',
-    contactEmail: 'info@insa.gov.et',
-    featured: true,
-  },
-  {
-    id: 'PT-4',
-    name: 'Huawei',
-    logo: '/images/partners/huawei.svg',
-    active: true,
-    industry: 'ICT Infrastructure & 5G',
-    location: 'Addis Ababa & Regional Hubs',
-    openings: '11 ICT Academy Certification Paths',
-    partnershipType: 'Technology',
-    website: 'https://www.huawei.com',
-    description: 'Global tech leader hosting the Huawei ICT Academy at ASTU, providing hands-on 5G networking and cloud training.',
-    contactEmail: 'ethiopia_recruitment@huawei.com',
-    featured: true,
-  },
-  {
-    id: 'PT-5',
-    name: 'Safaricom',
-    logo: '/images/partners/safaricom.png',
-    active: true,
-    industry: 'Mobile Telephony & Digital Services',
-    location: 'Ethiopia Network Hubs',
-    openings: '12 Digital Engineering Roles',
-    partnershipType: 'Recruitment',
-    website: 'https://safaricom.et',
-    description: 'Next-generation telecommunications operator offering fast-track graduate development in mobile network and software architecture.',
-    contactEmail: 'talent@safaricom.et',
-    featured: true,
-  },
-  {
-    id: 'PT-6',
-    name: 'Commercial Bank of Ethiopia',
-    logo: '/images/partners/cbe.png',
-    active: true,
-    industry: 'Fintech & Banking Systems',
-    location: 'Ethiopia Nationwide',
-    openings: '20+ IT & Security Openings',
-    partnershipType: 'Recruitment',
-    website: 'https://www.combanketh.et',
-    description: 'Ethiopia’s premier financial institution recruiting ASTU computer science and engineering graduates for core banking platforms.',
-    contactEmail: 'jobs@cbe.com.et',
-    featured: true,
-  },
-  {
-    id: 'PT-7',
-    name: 'DAAD (German Academic Exchange)',
-    logo: '',
-    active: true,
-    industry: 'International Academic & Research Consortia',
-    location: 'Germany / East Africa',
-    openings: 'Joint Research & Exchange Fellowships',
-    partnershipType: 'Research',
-    website: 'https://www.daad.de',
-    description: 'Facilitating collaborative engineering workshops, sustainable water research, and postgraduate scholarship opportunities.',
-    contactEmail: 'alumni@daad-ethiopia.org',
-    featured: false,
-  },
-  {
-    id: 'PT-8',
-    name: 'Meta Finetec PLC',
-    logo: '',
-    active: true,
-    industry: 'Applied Enterprise Software',
-    location: 'Addis Ababa',
-    openings: '5 Full-Stack Developer Roles',
-    partnershipType: 'Internship',
-    website: 'https://metafinetec.com',
-    description: 'Innovative software house providing senior engineering students with real-world agile development and microservices experience.',
-    contactEmail: 'hr@metafinetec.com',
-    featured: false,
-  },
-];
+/** Partners come from CMS / API only — no demo directory. */
+export const defaultPartnersList: Partner[] = [];
 
 export interface FeaturedEmployerItem {
   id: string;
@@ -754,6 +645,40 @@ export interface HomepageCmsConfig {
   employerFeedback?: any;
   mentorshipStats?: any;
   industryBridge?: any;
+  // Authored homepage blocks. They are optional so a CMS config that predates
+  // them (or a partial save) still loads — the page falls back to defaults.
+  impactSection?: {
+    enabled?: boolean;
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+    ctaLabel?: string;
+    ctaRoute?: string;
+  };
+  careerCta?: {
+    enabled?: boolean;
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    buttonLabel?: string;
+    route?: string;
+  };
+  bottomCta?: {
+    enabled?: boolean;
+    title?: string;
+    description?: string;
+    primaryLabel?: string;
+    primaryRoute?: string;
+    secondaryLabel?: string;
+    secondaryRoute?: string;
+  };
+  researchHighlights?: {
+    enabled?: boolean;
+    title?: string;
+    description?: string;
+    stats?: Array<{ icon?: any; value?: string; label?: string }>;
+  };
   ctaSection?: {
     enabled: boolean;
     title: string;
@@ -848,7 +773,7 @@ export const homepageCmsService = {
     }
     window.dispatchEvent(new Event('astu-cms-homepage-updated'));
 
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = getAuthToken();
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     try {
@@ -880,7 +805,7 @@ export const homepageCmsService = {
   },
 
   async fetchFromApi(): Promise<HomepageCmsConfig | null> {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = getAuthToken();
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     // 1. Try dedicated endpoint first
@@ -944,7 +869,7 @@ export const homepageCmsService = {
   },
 
   async uploadMedia(file: File, album = 'General', altText = ''): Promise<{ url: string; id?: string }> {
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = getAuthToken();
     const formData = new FormData();
     formData.append('file', file);
     formData.append('album', album);

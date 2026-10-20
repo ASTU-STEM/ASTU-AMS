@@ -5,11 +5,11 @@ export default function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface p-6">
-      <div className="max-w-md rounded-2xl border border-outline-variant bg-white p-8 text-center shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-surface dark:bg-slate-950 p-6">
+      <div className="max-w-md rounded-2xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-900 p-8 text-center shadow-sm dark:shadow-black/40">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-red">404</p>
-        <h1 className="mt-2 text-3xl font-bold text-astu-navy">Page Not Found</h1>
-        <p className="mt-3 text-sm text-on-surface-variant">
+        <h1 className="mt-2 text-3xl font-bold text-astu-navy dark:text-white">Page Not Found</h1>
+        <p className="mt-3 text-sm text-on-surface-variant dark:text-slate-400">
           The page you requested does not exist in this ASTU-AMS build.
         </p>
         <button

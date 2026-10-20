@@ -21,13 +21,13 @@ export default function IctArchitecturePage() {
   const [loadingCopilot, setLoadingCopilot] = useState(false);
 
   const architectureNodes = [
-    { id: 'node-1', name: 'ASTU-AMS Frontend', type: 'Vite React App', status: 'HEALTHY', latency: '2ms', detail: 'Edge UI Delivery & State Management' },
-    { id: 'node-2', name: 'API Gateway Server', type: 'Express API Server', status: 'HEALTHY', latency: '18ms', detail: 'JWT Middleware, Rate Limiters & Router' },
-    { id: 'node-3', name: 'ASTU AI Multi-Agent Engine', type: 'LangChain / Graph', status: 'HEALTHY', latency: '120ms', detail: 'Tracer Analytics & Root Cause Agent' },
-    { id: 'node-4', name: 'Prisma ORM Client', type: 'Database Abstraction', status: 'HEALTHY', latency: '3.8ms', detail: 'Type-safe SQL query generator' },
-    { id: 'node-5', name: 'Redis Cache & Queue', type: 'In-Memory Cache', status: 'HEALTHY', latency: '0.7ms', detail: 'Session tokens & async tracer queues' },
-    { id: 'node-6', name: 'PostgreSQL Database', type: 'Neon Postgres DB', status: 'HEALTHY', latency: '3.8ms', detail: 'Primary relational data store' },
-    { id: 'node-7', name: 'External Integrations Gateway', type: 'SIS / Mail / SMS', status: 'DEGRADED', latency: '145ms', detail: 'Registrar API, SMTP & Ethio Telecom SMS' },
+    { id: 'node-1', name: 'ASTU-AMS Frontend', type: 'Vite React App', status: 'HEALTHY', latency: 'Nominal', detail: 'Edge UI Delivery & State Management' },
+    { id: 'node-2', name: 'API Gateway Server', type: 'Express API Server', status: 'HEALTHY', latency: 'Nominal', detail: 'JWT Middleware, Rate Limiters & Router' },
+    { id: 'node-3', name: 'ASTU AI Multi-Agent Engine', type: 'LangChain / Graph', status: 'HEALTHY', latency: 'Nominal', detail: 'Tracer Analytics & Root Cause Agent' },
+    { id: 'node-4', name: 'Prisma ORM Client', type: 'Database Abstraction', status: 'HEALTHY', latency: 'Nominal', detail: 'Type-safe SQL query generator' },
+    { id: 'node-5', name: 'Redis Cache & Queue', type: 'In-Memory Cache', status: 'HEALTHY', latency: 'Nominal', detail: 'Session tokens & async tracer queues' },
+    { id: 'node-6', name: 'PostgreSQL Database', type: 'Neon Postgres DB', status: 'HEALTHY', latency: 'Nominal', detail: 'Primary relational data store' },
+    { id: 'node-7', name: 'External Integrations Gateway', type: 'SIS / Mail / SMS', status: 'HEALTHY', latency: 'Nominal', detail: 'Registrar API, SMTP & Ethio Telecom SMS' },
   ];
 
   const handleCopilotSubmit = (e: React.FormEvent) => {
@@ -41,11 +41,11 @@ export default function IctArchitecturePage() {
     setTimeout(() => {
       let ans = `🤖 ASTU AI: I analyzed telemetry and traces for "${userQ}". `;
       if (userQ.toLowerCase().includes('slow') || userQ.toLowerCase().includes('latency')) {
-        ans += 'The primary latency bottleneck is the Registrar SIS API endpoint (P95 response time 145ms) and a PostgreSQL query on AlumniProfile. Target index recommendation: CREATE INDEX idx_alumni_search ON "AlumniProfile"("fullName", "graduationYear").';
+        ans += 'System latency across all internal services is nominal. Database and cache layers are performing within standard thresholds.';
       } else if (userQ.toLowerCase().includes('failed') || userQ.toLowerCase().includes('error')) {
-        ans += 'Today there were 7 total 4xx errors (invalid credentials) and 24 failed SMS delivery attempts due to Ethio Telecom SMS C gateway timeout. Rerouted to email backup.';
+        ans += 'No fatal service errors or gateway timeouts detected in current telemetry window.';
       } else {
-        ans += 'All 15 core ASTU-AMS services are operating within normal SLA thresholds. Health score is 98.7%. Zero active security breaches detected.';
+        ans += 'All core ASTU-AMS architectural nodes are online and operational. Zero active security breaches detected.';
       }
       setCopilotResponse(ans);
       setLoadingCopilot(false);
@@ -112,7 +112,7 @@ export default function IctArchitecturePage() {
         </div>
 
         {copilotResponse && (
-          <div className="rounded-xl bg-slate-950 border border-blue-500/30 p-4 text-xs font-medium leading-relaxed text-blue-100 space-y-2">
+          <div className="rounded-xl bg-slate-950 border border-blue-500/40 p-4 text-xs font-medium leading-relaxed text-slate-100 space-y-2">
             <div>{copilotResponse}</div>
           </div>
         )}

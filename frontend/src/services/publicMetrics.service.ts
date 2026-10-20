@@ -21,23 +21,24 @@ export interface PublicMetrics {
   lastUpdated?: string;
 }
 
-const DEFAULT_METRICS: PublicMetrics = {
-  registeredAlumni: 1238,
-  registeredAlumniFormatted: '1,238+',
-  fieldsOfStudy: 5,
-  fieldsOfStudyFormatted: '5 Major Areas',
-  corporatePartners: 500,
-  corporatePartnersFormatted: '500+',
-  historicBatches: 33,
-  historicBatchesFormatted: '33+ Years',
-  employmentRate: 88,
-  employmentRateFormatted: '88%',
-  activeJobs: 142,
-  activeJobsFormatted: '142+',
-  digitalRequests: 2500,
-  digitalRequestsFormatted: '2,500+',
-  eventsCount: 18,
-  eventsCountFormatted: '18+',
+/** Neutral placeholders — never ship demo marketing numbers. */
+export const EMPTY_METRICS: PublicMetrics = {
+  registeredAlumni: 0,
+  registeredAlumniFormatted: '—',
+  fieldsOfStudy: 0,
+  fieldsOfStudyFormatted: '—',
+  corporatePartners: 0,
+  corporatePartnersFormatted: '—',
+  historicBatches: 0,
+  historicBatchesFormatted: '—',
+  employmentRate: 0,
+  employmentRateFormatted: '—',
+  activeJobs: 0,
+  activeJobsFormatted: '—',
+  digitalRequests: 0,
+  digitalRequestsFormatted: '—',
+  eventsCount: 0,
+  eventsCountFormatted: '—',
 };
 
 let cachedMetrics: PublicMetrics | null = null;
@@ -57,10 +58,10 @@ export const fetchPublicMetrics = async (force = false): Promise<PublicMetrics> 
       lastFetchTime = now;
       return cachedMetrics as PublicMetrics;
     }
-    return cachedMetrics || DEFAULT_METRICS;
+    return cachedMetrics || EMPTY_METRICS;
   } catch (error) {
     console.error('Failed to fetch public live metrics from backend:', error);
-    return cachedMetrics || DEFAULT_METRICS;
+    return cachedMetrics || EMPTY_METRICS;
   }
 };
 
@@ -73,7 +74,7 @@ export const triggerMetricsRefresh = () => {
 };
 
 export const usePublicMetrics = () => {
-  const [metrics, setMetrics] = useState<PublicMetrics>(cachedMetrics || DEFAULT_METRICS);
+  const [metrics, setMetrics] = useState<PublicMetrics>(cachedMetrics || EMPTY_METRICS);
   const [loading, setLoading] = useState<boolean>(!cachedMetrics);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,12 +94,10 @@ export const usePublicMetrics = () => {
   useEffect(() => {
     loadData(Boolean(cachedMetrics));
 
-    // Handle broadcast events when records are modified in CMS or DB
     const handleUpdate = () => loadData(true);
     window.addEventListener('astu-metrics-updated', handleUpdate);
     window.addEventListener('focus', handleUpdate);
 
-    // Periodically poll every 30 seconds for live database increments
     const interval = setInterval(() => {
       loadData(true);
     }, 30000);

@@ -101,3 +101,42 @@
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555b72;
 }
+
+/* Notification bell shake when there are unread items */
+@keyframes bell_shake {
+  0%, 100% { transform: rotate(0); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-13deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(6deg); }
+  60% { transform: rotate(-4deg); }
+  70% { transform: rotate(2deg); }
+  80% { transform: rotate(0); }
+}
+
+/* Event carousel slide animations */
+@keyframes card-fade-slide {
+  from {
+    opacity: 0.9;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card-slide {
+  animation: card-fade-slide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes curved-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1deg); }
+}
+
+.animate-curved-float {
+  animation: curved-float 6s ease-in-out infinite;
+}
+

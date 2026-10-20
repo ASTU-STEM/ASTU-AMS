@@ -225,19 +225,19 @@ export default function JobsManagement() {
     hiredChannelData: any[];
     hiredEmployerData: any[];
   }>({
-    totalHired: 11,
-    jobBoardHired: 1,
-    nonJobBoardHired: 10,
+    totalHired: 0,
+    jobBoardHired: 0,
+    nonJobBoardHired: 0,
     astuHired: 0,
-    externalHired: 11,
+    externalHired: 0,
     astuJobBoardHired: 0,
-    externalJobBoardHired: 1,
+    externalJobBoardHired: 0,
     hiredChannelData: [
-      { name: 'System Job Board Hired', value: 1, fill: '#003580' },
-      { name: 'External / Direct Hired', value: 10, fill: '#1D9E75' },
+      { name: 'System Job Board Hired', value: 0, fill: '#003580' },
+      { name: 'External / Direct Hired', value: 0, fill: '#1D9E75' },
     ],
     hiredEmployerData: [
-      { name: 'External Corporate Hires', value: 11, fill: '#E8A020' },
+      { name: 'External Corporate Hires', value: 0, fill: '#E8A020' },
       { name: 'University (ASTU) Hires', value: 0, fill: '#003580' },
     ]
   });

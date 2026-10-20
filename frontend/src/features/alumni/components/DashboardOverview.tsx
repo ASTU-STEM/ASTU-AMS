@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, DonationCampaign } from '../types/alumni.types';
 import toast from 'react-hot-toast';
-import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { alumniService } from '../services/alumni.service';
 import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
@@ -44,7 +43,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [tempRole, setTempRole] = useState(profile.currentRole);
   const [tempCompany, setTempCompany] = useState(profile.company);
-  const [tempSalary, setTempSalary] = useState(profile.salaryRange || '30,001 - 60,000 ETB');
+  const [tempSalary, setTempSalary] = useState(profile.salaryRange || '—');
   const [timelineFilter, setTimelineFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED'>('ALL');
 
   const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
@@ -79,7 +78,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       year: '2024',
       title: 'BSc degree in Computer Science and Engineering',
       company: 'Adama Science and Technology University',
-      description: `Graduated with Great Distinction (CGPA: ${profile.cgpa || '3.78'}). Focused on Software Systems.`,
+      description: `Graduated with Great Distinction (CGPA: ${profile.cgpa || '—'}). Focused on Software Systems.`,
       type: 'academic'
     },
     {
@@ -532,7 +531,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{job.title}</h4>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${job.applied ? 'bg-blue-100 text-blue-800' : 'bg-astu-green/15 text-astu-green'}`}>
-                          {job.applied ? 'Applied' : `${job.match} Match`}
+                          {job.applied ? 'Applied' : (job.match ? `${job.match} Match` : 'Recommended')}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 font-medium mb-2">{job.company}</p>
@@ -605,50 +604,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       </div>
 
-      {/* Analytics Charts Row */}
+      {/* Analytics Charts Row — only render when real series are available */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <AnalyticsChart
-          type="area"
-          title="Employment Rate Trend"
-          subtitle="Graduate employment rates over recent years"
-          data={[
-            { year: '2020', rate: 72 },
-            { year: '2021', rate: 76 },
-            { year: '2022', rate: 79 },
-            { year: '2023', rate: 83 },
-            { year: '2024', rate: 87 },
-            { year: '2025', rate: 91 },
-          ]}
-          xKey="year"
-          series={[{ key: 'rate', label: 'Employment %' }]}
-          height={220}
-        />
-        <AnalyticsChart
-          type="pie"
-          title="Skills Distribution"
-          subtitle="Top skills reported by alumni"
-          data={[
-            { name: 'Software Engineering', value: 340 },
-            { name: 'Data Science', value: 180 },
-            { name: 'DevOps & Cloud', value: 120 },
-            { name: 'Electrical Eng.', value: 95 },
-            { name: 'Civil Eng.', value: 75 },
-          ]}
-          xKey="name"
-          series={[{ key: 'value', label: 'Alumni Count' }]}
-          height={220}
-        />
+        <div className="rounded-[10px] border border-gray-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <h3 className="text-sm font-semibold text-gray-900">Employment Rate Trend</h3>
+          <p className="mt-1 text-xs text-gray-500">No employment analytics available yet for your cohort.</p>
+          <p className="mt-8 text-center text-sm text-gray-400">—</p>
+        </div>
+        <div className="rounded-[10px] border border-gray-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <h3 className="text-sm font-semibold text-gray-900">Skills Distribution</h3>
+          <p className="mt-1 text-xs text-gray-500">Skills insights will appear once alumni skill data is collected.</p>
+          <p className="mt-8 text-center text-sm text-gray-400">—</p>
+        </div>
       </div>
 
       {/* Activity Timeline */}
       <ActivityTimeline
-        activities={[
-          { id: 1, type: 'job', title: 'New job match: Senior React Developer', description: 'Chapa Financial Technologies posted a role matching your profile.', timestamp: '2h ago', unread: true },
-          { id: 2, type: 'survey', title: 'Tracer Survey reminder', description: '12-month tracer survey is due by June 30, 2026.', timestamp: '1d ago', unread: true },
-          { id: 3, type: 'event', title: 'ASTU Alumni Meetup 2026', description: 'Annual networking event at ASTU Main Campus on July 15.', timestamp: '3d ago' },
-          { id: 4, type: 'document', title: 'Transcript request approved', description: 'Your official transcript has been digitally signed.', timestamp: '5d ago' },
-          { id: 5, type: 'message', title: 'Message from HR Manager', description: 'Hilina Sileshi sent you a message about the developer opening.', timestamp: '1w ago' },
-        ] as ActivityEntry[]}
+        activities={[] as ActivityEntry[]}
         onViewAll={() => onTabChange('messages')}
       />
 

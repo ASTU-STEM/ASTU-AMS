@@ -4,6 +4,85 @@ import process from 'process';
 
 const prisma = new PrismaClient();
 
+type SeedResponse = {
+  alumniId: string;
+  answers: string[];
+};
+
+function getSampleAlumniId(alumni: Map<string, { id: string }>, email: string): string {
+  const profile = alumni.get(email);
+  if (!profile) {
+    throw new Error(`Required sample alumni profile was not created: ${email}`);
+  }
+  return profile.id;
+}
+
+/**
+ * Insert or refresh a sample response without creating a second assignment for
+ * the same alumni/survey pair when the seed is run again.
+ */
+async function seedSurveyResponses(
+  surveyId: string,
+  questions: Array<{ id: string }>,
+  records: SeedResponse[],
+) {
+  for (const record of records) {
+    const now = new Date();
+    const dueDate = new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000);
+    const existingAssignment = await prisma.surveyAssignment.findFirst({
+      where: { surveyId, alumniId: record.alumniId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const assignment = existingAssignment
+      ? await prisma.surveyAssignment.update({
+        where: { id: existingAssignment.id },
+        data: { status: 'COMPLETED', dueDate, completedAt: now },
+      })
+      : await prisma.surveyAssignment.create({
+        data: {
+          surveyId,
+          alumniId: record.alumniId,
+          status: 'COMPLETED',
+          dueDate,
+          completedAt: now,
+        },
+      });
+
+    const existingResponse = await prisma.surveyResponse.findUnique({
+      where: { assignmentId: assignment.id },
+    });
+    const response = existingResponse
+      ? await prisma.surveyResponse.update({
+        where: { id: existingResponse.id },
+        data: { isDraft: false, submittedAt: now },
+      })
+      : await prisma.surveyResponse.create({
+        data: {
+          surveyId,
+          alumniId: record.alumniId,
+          assignmentId: assignment.id,
+          isDraft: false,
+          submittedAt: now,
+        },
+      });
+
+    await prisma.surveyAssignment.update({
+      where: { id: assignment.id },
+      data: { responseId: response.id },
+    });
+
+    await prisma.surveyAnswer.deleteMany({ where: { responseId: response.id } });
+    await prisma.surveyAnswer.createMany({
+      data: questions.map((question, index) => ({
+        responseId: response.id,
+        questionId: question.id,
+        answerText: record.answers[index],
+      })),
+    });
+  }
+}
+
 async function main() {
   console.log('🌱 Start seeding ASTU-AMS database...');
 
@@ -57,8 +136,8 @@ async function main() {
       firstName: 'Tolosa Abebe',
       lastName: 'Badho',
       department: 'Executive Directorate',
-    }
-  }).catch(() => null);
+    },
+  });
 
   // Standard Admin / ICT Technical Admin Account
   const ictAdmin = await prisma.user.upsert({
@@ -80,8 +159,8 @@ async function main() {
       firstName: 'ICT System',
       lastName: 'Administrator',
       department: 'ICT Directorate',
-    }
-  }).catch(() => null);
+    },
+  });
 
   // Registrar Account
   await prisma.user.upsert({
@@ -158,95 +237,129 @@ async function main() {
 
   // Post mock Job listing
   console.log('Creating mock job posting...');
-  await prisma.job.create({
-    data: {
+  const sampleJob = {
+    description: 'We are seeking talented ASTU Software Engineering graduates to join our digital team. Experience with React, Node.js, and PostgreSQL is required.',
+    salary: '25,000 - 35,000 ETB',
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    experienceRequired: 0,
+    skillsRequired: ['React', 'Node.js', 'PostgreSQL', 'TypeScript'],
+    location: 'Addis Ababa / Remote',
+    employmentType: 'FULL_TIME',
+    isActive: true,
+  };
+  const existingSampleJob = await prisma.job.findFirst({
+    where: {
       employerId: safaricomProfile.id,
       title: 'Junior Software Engineer (Fullstack)',
-      description: 'We are seeking talented ASTU Software Engineering graduates to join our digital team. Experience with React, Node.js, and PostgreSQL is required.',
-      salary: '25,000 - 35,000 ETB',
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      experienceRequired: 0,
-      skillsRequired: ['React', 'Node.js', 'PostgreSQL', 'TypeScript'],
-      location: 'Addis Ababa / Remote',
-      employmentType: 'FULL_TIME',
-      isActive: true,
     },
+    orderBy: { createdAt: 'asc' },
   });
+  if (existingSampleJob) {
+    await prisma.job.update({ where: { id: existingSampleJob.id }, data: sampleJob });
+  } else {
+    await prisma.job.create({
+      data: {
+        employerId: safaricomProfile.id,
+        title: 'Junior Software Engineer (Fullstack)',
+        ...sampleJob,
+      },
+    });
+  }
 
   // 4. Create Survey Templates
   console.log('Creating Tracer Study Survey templates...');
   
-  // 6-Month Tracer Survey
-  const survey6m = await prisma.survey.create({
-    data: {
-      title: '6-Month Graduate Tracer Study',
-      description: 'Required by Quality Assurance & Education Training Authority (ETA) to assess early career outcomes.',
-      type: 'SIX_MONTH',
-      isActive: true,
+  const sixMonthSurveyData = {
+    description: 'Required by Quality Assurance & Education Training Authority (ETA) to assess early career outcomes.',
+    type: 'SIX_MONTH' as const,
+    isActive: true,
+  };
+  const existingSurvey6m = await prisma.survey.findFirst({
+    where: { title: '6-Month Graduate Tracer Study' },
+    orderBy: { createdAt: 'asc' },
+  });
+  const survey6m = existingSurvey6m
+    ? await prisma.survey.update({ where: { id: existingSurvey6m.id }, data: sixMonthSurveyData })
+    : await prisma.survey.create({
+      data: { title: '6-Month Graduate Tracer Study', ...sixMonthSurveyData },
+    });
+
+  const sixMonthQuestions = [
+    {
+      questionText: 'What is your current employment status?',
+      questionType: 'SELECT' as const,
+      options: ['Employed', 'Self-employed', 'Continuing education', 'Unemployed'],
+      order: 1,
     },
-  });
-
-  await prisma.surveyQuestion.createMany({
-    data: [
-      {
-        surveyId: survey6m.id,
-        questionText: 'What is your current employment status?',
-        questionType: 'SELECT',
-        options: ['Employed', 'Self-employed', 'Continuing education', 'Unemployed'],
-        order: 1,
-      },
-      {
-        surveyId: survey6m.id,
-        questionText: 'How long did it take you to find a job after graduation?',
-        questionType: 'SELECT',
-        options: ['0-3 Months', '4-6 Months', '7-12 Months', 'More than 1 year', 'Not applicable'],
-        order: 2,
-      },
-      {
-        surveyId: survey6m.id,
-        questionText: 'What is your current monthly gross salary in ETB?',
-        questionType: 'SELECT',
-        options: ['Under 10,000', '10,000 - 20,000', '20,001 - 35,000', '35,001 - 50,000', 'Above 50,000'],
-        order: 3,
-      },
-    ],
-  });
-
-  // 12-Month Tracer Survey
-  const survey12m = await prisma.survey.create({
-    data: {
-      title: '12-Month Longitudinal Tracer Study',
-      description: 'Measures alignment of academic curriculum with your professional role in the industry.',
-      type: 'TWELVE_MONTH',
-      isActive: true,
+    {
+      questionText: 'How long did it take you to find a job after graduation?',
+      questionType: 'SELECT' as const,
+      options: ['0-3 Months', '4-6 Months', '7-12 Months', 'More than 1 year', 'Not applicable'],
+      order: 2,
     },
-  });
+    {
+      questionText: 'What is your current monthly gross salary in ETB?',
+      questionType: 'SELECT' as const,
+      options: ['Under 10,000', '10,000 - 20,000', '20,001 - 35,000', '35,001 - 50,000', 'Above 50,000'],
+      order: 3,
+    },
+  ];
+  const questions6m = [];
+  for (const question of sixMonthQuestions) {
+    const existingQuestion = await prisma.surveyQuestion.findFirst({
+      where: { surveyId: survey6m.id, order: question.order },
+      orderBy: { createdAt: 'asc' },
+    });
+    questions6m.push(existingQuestion
+      ? await prisma.surveyQuestion.update({ where: { id: existingQuestion.id }, data: question })
+      : await prisma.surveyQuestion.create({ data: { surveyId: survey6m.id, ...question } }));
+  }
 
-  await prisma.surveyQuestion.createMany({
-    data: [
-      {
-        surveyId: survey12m.id,
-        questionText: 'How relevant was your field of study to your current job?',
-        questionType: 'SELECT',
-        options: ['Highly Relevant', 'Somewhat Relevant', 'Unrelated'],
-        order: 1,
-      },
-      {
-        surveyId: survey12m.id,
-        questionText: 'Rate the quality of hands-on practical/lab training at ASTU:',
-        questionType: 'RATING',
-        options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-        order: 2,
-      },
-      {
-        surveyId: survey12m.id,
-        questionText: 'Which technologies or skills did you find missing in the ASTU curriculum?',
-        questionType: 'TEXT',
-        options: [],
-        order: 3,
-      },
-    ],
+  const twelveMonthSurveyData = {
+    description: 'Measures alignment of academic curriculum with your professional role in the industry.',
+    type: 'TWELVE_MONTH' as const,
+    isActive: true,
+  };
+  const existingSurvey12m = await prisma.survey.findFirst({
+    where: { title: '12-Month Longitudinal Tracer Study' },
+    orderBy: { createdAt: 'asc' },
   });
+  const survey12m = existingSurvey12m
+    ? await prisma.survey.update({ where: { id: existingSurvey12m.id }, data: twelveMonthSurveyData })
+    : await prisma.survey.create({
+      data: { title: '12-Month Longitudinal Tracer Study', ...twelveMonthSurveyData },
+    });
+
+  const twelveMonthQuestions = [
+    {
+      questionText: 'How relevant was your field of study to your current job?',
+      questionType: 'SELECT' as const,
+      options: ['Highly Relevant', 'Somewhat Relevant', 'Unrelated'],
+      order: 1,
+    },
+    {
+      questionText: 'Rate the quality of hands-on practical/lab training at ASTU:',
+      questionType: 'RATING' as const,
+      options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+      order: 2,
+    },
+    {
+      questionText: 'Which technologies or skills did you find missing in the ASTU curriculum?',
+      questionType: 'TEXT' as const,
+      options: [],
+      order: 3,
+    },
+  ];
+  const questions12m = [];
+  for (const question of twelveMonthQuestions) {
+    const existingQuestion = await prisma.surveyQuestion.findFirst({
+      where: { surveyId: survey12m.id, order: question.order },
+      orderBy: { createdAt: 'asc' },
+    });
+    questions12m.push(existingQuestion
+      ? await prisma.surveyQuestion.update({ where: { id: existingQuestion.id }, data: question })
+      : await prisma.surveyQuestion.create({ data: { surveyId: survey12m.id, ...question } }));
+  }
   // 5. Create Mock Alumni Users and Profiles
   console.log('Creating mock alumni profiles...');
   const alumniPassword = await bcrypt.hash('alumni123', 10);
@@ -314,16 +427,38 @@ async function main() {
     },
   ];
 
-  const createdAlumni: any[] = [];
+  const createdAlumni = new Map<string, { id: string }>();
 
   for (const item of alumniData) {
+    const alumniUser = await prisma.user.upsert({
+      where: { email: item.email },
+      update: { role: Role.ALUMNI, isActive: true },
+      create: {
+        email: item.email,
+        password: alumniPassword,
+        role: Role.ALUMNI,
+        isActive: true,
+      },
+    });
+
     const profile = await prisma.alumniProfile.upsert({
       where: { studentId: item.studentId },
       update: {
+        userId: alumniUser.id,
+        fullName: item.fullName,
+        email: item.email,
+        cgpa: item.cgpa,
+        graduationYear: item.graduationYear,
+        gender: item.gender,
+        departmentId: item.deptId,
         status: 'INACTIVE',
         isVerified: false,
+        employmentStatus: item.employmentStatus,
+        salary: item.salary,
+        skills: item.skills,
       },
       create: {
+        userId: alumniUser.id,
         studentId: item.studentId,
         fullName: item.fullName,
         email: item.email,
@@ -339,18 +474,18 @@ async function main() {
       },
     });
 
-    createdAlumni.push({ ...profile, email: item.email });
+    createdAlumni.set(item.email, profile);
   }
 
   // 6. Create Work Experiences
   console.log('Creating work experiences...');
-  const alice = createdAlumni.find(a => a.email === 'alice@alumni.com');
-  const charlie = createdAlumni.find(a => a.email === 'charlie@alumni.com');
-  const evan = createdAlumni.find(a => a.email === 'evan@alumni.com');
+  const alice = getSampleAlumniId(createdAlumni, 'alice@alumni.com');
+  const charlie = getSampleAlumniId(createdAlumni, 'charlie@alumni.com');
+  const evan = getSampleAlumniId(createdAlumni, 'evan@alumni.com');
 
-  await prisma.workExperience.create({
-    data: {
-      alumniId: alice.id,
+  const workExperiences = [
+    {
+      alumniId: alice,
       companyName: 'Safaricom Ethiopia',
       position: 'Junior Fullstack Engineer',
       industry: 'Telecommunications',
@@ -359,11 +494,8 @@ async function main() {
       isCurrent: true,
       startDate: new Date('2024-09-01'),
     },
-  });
-
-  await prisma.workExperience.create({
-    data: {
-      alumniId: charlie.id,
+    {
+      alumniId: charlie,
       companyName: 'Ethio Telecom',
       position: 'Network Engineer',
       industry: 'Telecommunications',
@@ -372,11 +504,8 @@ async function main() {
       isCurrent: true,
       startDate: new Date('2023-10-01'),
     },
-  });
-
-  await prisma.workExperience.create({
-    data: {
-      alumniId: evan.id,
+    {
+      alumniId: evan,
       companyName: 'Sunshine Construction',
       position: 'Site Engineer',
       industry: 'Construction',
@@ -385,137 +514,81 @@ async function main() {
       isCurrent: true,
       startDate: new Date('2023-11-15'),
     },
-  });
+  ];
+
+  for (const experience of workExperiences) {
+    const existingExperience = await prisma.workExperience.findFirst({
+      where: {
+        alumniId: experience.alumniId,
+        companyName: experience.companyName,
+        position: experience.position,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    if (existingExperience) {
+      await prisma.workExperience.update({
+        where: { id: existingExperience.id },
+        data: experience,
+      });
+    } else {
+      await prisma.workExperience.create({ data: experience });
+    }
+  }
 
   // 7. Create Employer Feedback
   console.log('Creating employer feedbacks...');
-  await prisma.employerFeedback.create({
-    data: {
-      employerId: safaricomProfile.id,
-      alumniId: alice.id,
-      technicalSkill: 9,
-      communicationSkill: 8,
-      leadershipSkill: 7,
-      teamworkSkill: 9,
-      problemSolvingSkill: 8,
-      innovationSkill: 8,
-      feedbackText: 'Alice integrates well into our engineering team and delivers high-quality React features.',
-    },
+  const feedbackData = {
+    technicalSkill: 9,
+    communicationSkill: 8,
+    leadershipSkill: 7,
+    teamworkSkill: 9,
+    problemSolvingSkill: 8,
+    innovationSkill: 8,
+    feedbackText: 'Alice integrates well into our engineering team and delivers high-quality React features.',
+  };
+  const existingFeedback = await prisma.employerFeedback.findFirst({
+    where: { employerId: safaricomProfile.id, alumniId: alice },
+    orderBy: { createdAt: 'asc' },
   });
+  if (existingFeedback) {
+    await prisma.employerFeedback.update({ where: { id: existingFeedback.id }, data: feedbackData });
+  } else {
+    await prisma.employerFeedback.create({
+      data: { employerId: safaricomProfile.id, alumniId: alice, ...feedbackData },
+    });
+  }
 
   // 8. Create Survey Responses
   console.log('Creating survey assignments and responses...');
-  const questions6m = await prisma.surveyQuestion.findMany({
-    where: { surveyId: survey6m.id },
-    orderBy: { order: 'asc' },
-  });
-
-  const questions12m = await prisma.surveyQuestion.findMany({
-    where: { surveyId: survey12m.id },
-    orderBy: { order: 'asc' },
-  });
-
   // 6-Month Responses
   const responseAlumni6m = [
     {
-      alumni: createdAlumni.find(a => a.email === 'alice@alumni.com'),
+      alumniId: alice,
       answers: ['Employed', '0-3 Months', '20,001 - 35,000'],
     },
     {
-      alumni: createdAlumni.find(a => a.email === 'bob@alumni.com'),
+      alumniId: getSampleAlumniId(createdAlumni, 'bob@alumni.com'),
       answers: ['Self-employed', '0-3 Months', '10,000 - 20,000'],
     },
     {
-      alumni: createdAlumni.find(a => a.email === 'diana@alumni.com'),
+      alumniId: getSampleAlumniId(createdAlumni, 'diana@alumni.com'),
       answers: ['Unemployed', 'Not applicable', 'Under 10,000'],
     },
   ];
-
-  for (const record of responseAlumni6m) {
-    const assignment = await prisma.surveyAssignment.create({
-      data: {
-        surveyId: survey6m.id,
-        alumniId: record.alumni.id,
-        status: 'COMPLETED',
-        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-        completedAt: new Date(),
-      },
-    });
-
-    const response = await prisma.surveyResponse.create({
-      data: {
-        surveyId: survey6m.id,
-        alumniId: record.alumni.id,
-        assignmentId: assignment.id,
-        isDraft: false,
-        submittedAt: new Date(),
-      },
-    });
-
-    await prisma.surveyAssignment.update({
-      where: { id: assignment.id },
-      data: { responseId: response.id },
-    });
-
-    for (let i = 0; i < questions6m.length; i++) {
-      await prisma.surveyAnswer.create({
-        data: {
-          responseId: response.id,
-          questionId: questions6m[i].id,
-          answerText: record.answers[i],
-        },
-      });
-    }
-  }
+  await seedSurveyResponses(survey6m.id, questions6m, responseAlumni6m);
 
   // 12-Month Responses
   const responseAlumni12m = [
     {
-      alumni: createdAlumni.find(a => a.email === 'charlie@alumni.com'),
+      alumniId: charlie,
       answers: ['Highly Relevant', '8', 'Cloud Computing, DevOps'],
     },
     {
-      alumni: createdAlumni.find(a => a.email === 'evan@alumni.com'),
+      alumniId: evan,
       answers: ['Highly Relevant', '7', 'BIM Software, Project Management'],
     },
   ];
-
-  for (const record of responseAlumni12m) {
-    const assignment = await prisma.surveyAssignment.create({
-      data: {
-        surveyId: survey12m.id,
-        alumniId: record.alumni.id,
-        status: 'COMPLETED',
-        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-        completedAt: new Date(),
-      },
-    });
-
-    const response = await prisma.surveyResponse.create({
-      data: {
-        surveyId: survey12m.id,
-        alumniId: record.alumni.id,
-        assignmentId: assignment.id,
-        isDraft: false,
-        submittedAt: new Date(),
-      },
-    });
-
-    await prisma.surveyAssignment.update({
-      where: { id: assignment.id },
-      data: { responseId: response.id },
-    });
-
-    for (let i = 0; i < questions12m.length; i++) {
-      await prisma.surveyAnswer.create({
-        data: {
-          responseId: response.id,
-          questionId: questions12m[i].id,
-          answerText: record.answers[i],
-        },
-      });
-    }
-  }
+  await seedSurveyResponses(survey12m.id, questions12m, responseAlumni12m);
 
   console.log('🌱 Seeding completed successfully!');
 }

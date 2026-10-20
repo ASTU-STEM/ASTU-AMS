@@ -13,9 +13,11 @@ export class ManageTechnicalOps {
     const uptimeSeconds = os.uptime();
     const loadAvg = os.loadavg();
 
-    // Calculated active database pool and node status
-    const dbUserCount = await prisma.user.count().catch(() => 0);
-    const activeSessions = Math.min(dbUserCount, 42);
+    const registeredUsers = await prisma.user.count().catch(() => 0);
+    const loadPct = Math.min(
+      100,
+      Math.round(((loadAvg[0] || 0) / Math.max(cpuCount, 1)) * 100)
+    );
 
     return {
       serverTime: new Date().toISOString(),
@@ -24,33 +26,20 @@ export class ManageTechnicalOps {
       uptimeSeconds,
       uptimeFormatted: `${Math.floor(uptimeSeconds / 86400)}d ${Math.floor((uptimeSeconds % 86400) / 3600)}h ${Math.floor((uptimeSeconds % 3600) / 60)}m`,
       cpuCount,
-      cpuModel: cpus[0]?.model || 'Intel Xeon Scalable Enterprise',
+      cpuModel: cpus[0]?.model || 'Unknown CPU',
       cpuLoadAvg: loadAvg,
-      cpuUsagePct: Math.min(98, Math.round((loadAvg[0] || 0.45) * 22 + 12)),
+      cpuUsagePct: loadPct,
       memoryTotalMB: Math.round(totalMem / (1024 * 1024)),
       memoryUsedMB: Math.round(usedMem / (1024 * 1024)),
       memoryFreeMB: Math.round(freeMem / (1024 * 1024)),
       memoryUsagePct,
-      diskStorage: {
-        totalGB: 500,
-        usedGB: 142,
-        freeGB: 358,
-        usagePct: 28.4,
-      },
-      networkLatencyMs: {
-        gateway: 2.4,
-        database: 4.1,
-        redisCache: 0.8,
-        mailGateway: 14.2,
-      },
-      clusterNodes: [
-        { id: 'node-01', name: 'ASTU Web App Primary', status: 'ONLINE', load: '18%', latency: '3ms' },
-        { id: 'node-02', name: 'ASTU API Gateway Secondary', status: 'ONLINE', load: '24%', latency: '4ms' },
-        { id: 'node-03', name: 'ASTU Async Worker Queue', status: 'ONLINE', load: '11%', latency: '2ms' },
-      ],
-      activeDbConnections: 14,
-      maxDbConnections: 100,
-      activeSessions,
+      diskStorage: null,
+      networkLatencyMs: null,
+      clusterNodes: [],
+      activeDbConnections: null,
+      maxDbConnections: null,
+      registeredUsers,
+      activeSessions: null,
     };
   }
 

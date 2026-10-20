@@ -46,67 +46,9 @@ interface EndpointHealth {
   health: 'HEALTHY' | 'DEGRADED' | 'DOWN';
 }
 
-const mockApiKeys: ApiKeyItem[] = [
-  {
-    id: 'key-901',
-    clientName: 'ASTU Main Registrar SIS',
-    service: 'Student Sync Service',
-    keyPrefix: 'astu_live_sis_98a...',
-    scopes: ['read:alumni', 'write:graduate_batch', 'verify:documents'],
-    rateLimit: '2,000 req/min',
-    ipWhitelist: '10.0.4.15, 10.0.4.16',
-    status: 'ACTIVE',
-    created: '2026-01-10',
-    lastUsed: '2 mins ago',
-    requestCount: 1420800,
-  },
-  {
-    id: 'key-902',
-    clientName: 'Ministry of Education (MoE)',
-    service: 'National Tracer Portal Sync',
-    keyPrefix: 'astu_live_moe_77f...',
-    scopes: ['read:tracer', 'read:alumni_employment'],
-    rateLimit: '500 req/min',
-    ipWhitelist: '197.156.10.0/24',
-    status: 'ACTIVE',
-    created: '2026-03-15',
-    lastUsed: '14 mins ago',
-    requestCount: 389200,
-  },
-  {
-    id: 'key-903',
-    clientName: 'Chapa Payment Gateway',
-    service: 'Alumni Card Fee Webhook',
-    keyPrefix: 'astu_live_chapa_31c...',
-    scopes: ['write:payments', 'read:card_status'],
-    rateLimit: '100 req/min',
-    ipWhitelist: '18.134.90.11',
-    status: 'ACTIVE',
-    created: '2026-05-01',
-    lastUsed: '1 hour ago',
-    requestCount: 45100,
-  },
-  {
-    id: 'key-904',
-    clientName: 'Ethio Telecom Career Portal',
-    service: 'Job Board External Feed',
-    keyPrefix: 'astu_live_ethio_99d...',
-    scopes: ['read:jobs', 'write:applicant'],
-    rateLimit: '200 req/min',
-    ipWhitelist: '213.55.76.10',
-    status: 'REVOKED',
-    created: '2025-11-20',
-    lastUsed: '30 days ago',
-    requestCount: 12050,
-  },
-];
+const mockApiKeys: ApiKeyItem[] = [];
 
-const mockEndpoints: EndpointHealth[] = [
-  { endpoint: '/api/v1/external/sis/graduates', method: 'POST', status2xx: 99.8, status4xx: 0.2, status5xx: 0.0, p95LatencyMs: 42, health: 'HEALTHY' },
-  { endpoint: '/api/v1/external/moe/tracer-sync', method: 'GET', status2xx: 96.5, status4xx: 3.2, status5xx: 0.3, p95LatencyMs: 185, health: 'HEALTHY' },
-  { endpoint: '/api/v1/external/chapa/verify', method: 'POST', status2xx: 99.9, status4xx: 0.1, status5xx: 0.0, p95LatencyMs: 65, health: 'HEALTHY' },
-  { endpoint: '/api/v1/external/jobs/feed', method: 'GET', status2xx: 88.0, status4xx: 9.5, status5xx: 2.5, p95LatencyMs: 340, health: 'DEGRADED' },
-];
+const mockEndpoints: EndpointHealth[] = [];
 
 export default function IctApiGatewayPage() {
   const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>(mockApiKeys);

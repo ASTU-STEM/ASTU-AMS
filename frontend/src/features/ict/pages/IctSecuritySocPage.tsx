@@ -117,20 +117,33 @@ const owaspTop10List: OwaspItem[] = [
 ];
 
 export default function IctSecuritySocPage() {
-  const [threatLevel] = useState<'LOW' | 'MODERATE' | 'HIGH'>('MODERATE');
+  const [threatLevel, setThreatLevel] = useState<'LOW' | 'MODERATE' | 'HIGH'>('LOW');
   const [breakGlassOpen, setBreakGlassOpen] = useState(false);
   const [dangerousModalOpen, setDangerousModalOpen] = useState(false);
   const [isElevated, setIsElevated] = useState(false);
   const [elevatedReason, setElevatedReason] = useState('');
   const [expandedOwaspCode, setExpandedOwaspCode] = useState<string | null>('A01:2021');
   const [isScanning, setIsScanning] = useState(false);
-  const [securityScore, setSecurityScore] = useState(96);
+  const [securityScore, setSecurityScore] = useState(100);
+  const [failedLoginsCount, setFailedLoginsCount] = useState(0);
 
-  const [blacklistedIps, setBlacklistedIps] = useState([
-    { ip: '197.156.92.14', reason: '340 req/min rate limit exceeded', added: '2 hours ago', count: 48 },
-    { ip: '45.133.1.88', reason: 'WAF Filter SQLi Payload attempt', added: 'Yesterday', count: 12 },
-    { ip: '102.217.18.2', reason: 'Brute force probe on /api/auth/login', added: '3 days ago', count: 15 },
-  ]);
+  const [blacklistedIps, setBlacklistedIps] = useState<Array<{ ip: string; reason: string; added: string; count: number }>>([]);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch('/api/admin/technical-ops/security', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data) {
+          if (d.data.currentThreatLevel) setThreatLevel(d.data.currentThreatLevel);
+          if (Array.isArray(d.data.blacklistedIps)) setBlacklistedIps(d.data.blacklistedIps);
+          if (d.data.failedLogins24h !== undefined) setFailedLoginsCount(d.data.failedLogins24h);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleBreakGlassElevate = (reason: string) => {
     setIsElevated(true);
@@ -231,7 +244,7 @@ export default function IctSecuritySocPage() {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Failed Logins (24h)</span>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">127</p>
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">{failedLoginsCount}</p>
           <p className="mt-1 text-xs text-slate-500 font-medium">Brute-force probes blocked</p>
         </div>
 
@@ -350,31 +363,39 @@ export default function IctSecuritySocPage() {
         </div>
 
         <div className="space-y-3">
-          {blacklistedIps.map((item) => (
-            <div
-              key={item.ip}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40"
-            >
-              <div className="space-y-0.5">
-                <span className="font-mono text-sm font-bold text-rose-600 dark:text-rose-400">{item.ip}</span>
-                <p className="text-xs text-slate-600 dark:text-slate-300">{item.reason}</p>
-              </div>
-
-              <div className="flex items-center gap-4 text-xs text-slate-500">
-                <span>Blocked: <strong>{item.added}</strong></span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBlacklistedIps(prev => prev.filter(i => i.ip !== item.ip));
-                    toast.success(`Unblocked IP ${item.ip}`);
-                  }}
-                  className="font-bold text-blue-600 hover:underline cursor-pointer dark:text-blue-400"
-                >
-                  Unblock
-                </button>
-              </div>
+          {blacklistedIps.length === 0 ? (
+            <div className="py-8 text-center text-slate-500">
+              <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-2" />
+              <p className="font-semibold text-slate-700 dark:text-slate-300">No Blacklisted IPs</p>
+              <p className="text-xs text-slate-400 mt-1">All inbound client traffic is currently within acceptable rate and security thresholds.</p>
             </div>
-          ))}
+          ) : (
+            blacklistedIps.map((item) => (
+              <div
+                key={item.ip}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40"
+              >
+                <div className="space-y-0.5">
+                  <span className="font-mono text-sm font-bold text-rose-600 dark:text-rose-400">{item.ip}</span>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">{item.reason}</p>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-slate-500">
+                  <span>Blocked: <strong>{item.added}</strong></span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBlacklistedIps(prev => prev.filter(i => i.ip !== item.ip));
+                      toast.success(`Unblocked IP ${item.ip}`);
+                    }}
+                    className="font-bold text-blue-600 hover:underline cursor-pointer dark:text-blue-400"
+                  >
+                    Unblock
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

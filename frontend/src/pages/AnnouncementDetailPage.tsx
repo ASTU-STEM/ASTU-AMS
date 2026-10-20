@@ -28,6 +28,7 @@ export default function AnnouncementDetailPage() {
   const [item, setItem] = useState<ContentCardItem | null>(null);
   const [related, setRelated] = useState<ContentCardItem[]>([]);
   const [copied, setCopied] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -36,6 +37,7 @@ export default function AnnouncementDetailPage() {
     const loadItem = () => {
       const found = contentService.getItemByIdOrSlug(id);
       if (found) {
+        setNotFound(false);
         setItem(found);
         const allItems = contentService.getItems();
         setRelated(
@@ -44,29 +46,11 @@ export default function AnnouncementDetailPage() {
             .slice(0, 5)
         );
       } else {
-        // Fallback object if item not found directly
-        const fallbackTitle = decodeURIComponent(id).replace(/-/g, ' ');
-        setItem({
-          id,
-          title: fallbackTitle,
-          type: 'announcement',
-          status: 'Published',
-          excerpt:
-            'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
-          content:
-            'Adama Science and Technology University (ASTU) hereby releases this official notice for the information of alumni, students, partner employers, academic departments, and stakeholders.\n\nASTU graduates across disciplines continue to pioneer national technological advancements. The university alumni network supports career development, industry tracer research, and institutional giving.',
-          author: 'Content Manager',
-          updatedAt: 'May 28, 2026',
-          publishedAt: 'May 28, 2026',
-          views: 1240,
-          tags: ['alumni', 'community', 'networking'],
-          pinned: true,
-          featured: true,
-          language: 'EN',
-          image: '/images/astu-building.jpg',
-        });
-        const allItems = contentService.getItems();
-        setRelated(allItems.slice(0, 5));
+        // Do not fabricate a notice for an unknown slug — that made any deep
+        // link render a fake article with invented dates and view counts.
+        setItem(null);
+        setRelated([]);
+        setNotFound(true);
       }
     };
 
@@ -92,6 +76,29 @@ export default function AnnouncementDetailPage() {
       toast.success('Notice ready to share');
     }
   };
+
+  if (notFound) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#f8fafc] font-sans text-slate-800">
+        <Navbar />
+        <div className="flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-[#003580]">
+            <FileText className="h-8 w-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Notice not found</h1>
+          <p className="mt-2 max-w-md text-sm text-slate-600">
+            This announcement may have been unpublished or removed. Browse the notice board for the latest updates.
+          </p>
+          <button
+            onClick={() => navigate('/announcements')}
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#003580] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to announcements
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!item) {
     return (

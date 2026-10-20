@@ -16,9 +16,9 @@ import { ExportCenter } from '../components/ExportCenter';
 import { AccreditationReports } from '../components/AccreditationReports';
 import { DepartmentSurveyCenter } from '../components/DepartmentSurveyCenter';
 import { TelegramChat } from '../../../components/TelegramChat';
+import { useTheme } from '../../../hooks/useTheme';
 
 // Data
-import { mockEmploymentData, mockSkillGapData, mockEmployerFeedback, mockTracerSurveyData, mockCurriculumInsights, mockExportReports } from '../services/mockDepartmentData';
 
 interface SearchItem {
     id: string;
@@ -56,88 +56,15 @@ const searchDataset: SearchItem[] = [
     { id: 'p-export', title: 'Export Reports & Download Center', subtitle: 'PDF, Excel, CSV, and JSON executive export packs', category: 'Pages & Reports', targetTab: 'export', icon: 'download' },
     { id: 'p-messages', title: 'Direct Messages & ASTU Hub', subtitle: 'Real-time chat with graduates, recruiters, and admins', category: 'Pages & Reports', targetTab: 'messages', icon: 'chat' },
 
-    // Alumni & Telemetry
-    { id: 'a-abebe', title: 'Abebe Kebede Tracer & Outcome Record', subtitle: 'Batch 2024 • Software Engineer at Safaricom • Verified DB Record', category: 'Alumni & Telemetry', targetTab: 'accreditation', icon: 'person' },
-    { id: 'a-kitile', title: 'Kitile Woldesenbet Jaleta Audit Record', subtitle: 'Batch 2024 • 100% ABET Compliant Audit Record', category: 'Alumni & Telemetry', targetTab: 'accreditation', icon: 'person' },
-    { id: 'a-alice', title: 'Alice Johnson Tracer Record', subtitle: 'Batch 2023 • Software Engineering Alumni • Survey Completed', category: 'Alumni & Telemetry', targetTab: 'tracer-reports', icon: 'person' },
-    { id: 'a-bob', title: 'Bob Smith Employment Record', subtitle: 'Batch 2023 • DevOps Specialist at Ethio Telecom', category: 'Alumni & Telemetry', targetTab: 'employment-analytics', icon: 'person' },
-    { id: 'a-girma', title: 'Girma Worku Demissie Telemetry Record', subtitle: 'Batch 2024 • Cyber Security Analyst at INSA', category: 'Alumni & Telemetry', targetTab: 'employment-analytics', icon: 'person' },
-
-    // Evidence & KPIs
-    { id: 'e-abet', title: 'ABET Readiness Rate (89%)', subtitle: 'Calculated readiness score for ABET accreditation inspection', category: 'Evidence & KPIs', targetTab: 'accreditation', icon: 'verified' },
-    { id: 'e-survey', title: 'Survey Completion Rate (78%)', subtitle: 'Percentage of graduates who completed tracer study', category: 'Evidence & KPIs', targetTab: 'tracer-reports', icon: 'trending_up' },
-    { id: 'e-align', title: 'Course Alignment Rate (85%)', subtitle: 'Percentage of department courses aligned with industry demand', category: 'Evidence & KPIs', targetTab: 'curriculum', icon: 'menu_book' },
-    { id: 'e-skills', title: 'Critical Skill Gaps (DevOps, Cloud, Security)', subtitle: 'Top 3 employer missing skill categories in database', category: 'Evidence & KPIs', targetTab: 'skill-gap', icon: 'school' },
-    { id: 'e-salary', title: 'Average Salary (ETB 23,400)', subtitle: 'Average salary of employed department graduates', category: 'Evidence & KPIs', targetTab: 'employment-analytics', icon: 'payments' },
+    // Evidence & KPIs — labels only, no fabricated percentages
+    { id: 'e-abet', title: 'ABET Readiness', subtitle: 'Accreditation readiness evidence for inspection', category: 'Evidence & KPIs', targetTab: 'accreditation', icon: 'verified' },
+    { id: 'e-survey', title: 'Survey Completion', subtitle: 'Tracer study completion for department graduates', category: 'Evidence & KPIs', targetTab: 'tracer-reports', icon: 'trending_up' },
+    { id: 'e-align', title: 'Course Alignment', subtitle: 'Curriculum alignment with industry demand', category: 'Evidence & KPIs', targetTab: 'curriculum', icon: 'menu_book' },
+    { id: 'e-skills', title: 'Skill Gaps', subtitle: 'Employer-reported missing skill categories', category: 'Evidence & KPIs', targetTab: 'skill-gap', icon: 'school' },
+    { id: 'e-salary', title: 'Employment Outcomes', subtitle: 'Salary and placement outcomes for graduates', category: 'Evidence & KPIs', targetTab: 'employment-analytics', icon: 'payments' },
 ];
 
-const initialNotifications: NotificationItem[] = [
-    {
-        id: 1,
-        title: 'New Tracer Survey Responses Received',
-        text: '14 new verified tracer survey responses received from 2024 Software Engineering graduates.',
-        category: 'Tracer',
-        priority: 'high',
-        time: '2 hours ago',
-        unread: true,
-        targetTab: 'tracer-reports',
-        actionLabel: 'Inspect Tracer Survey Reports',
-        source: 'ASTU Alumni Telemetry Engine',
-        details: 'Graduates from Batch 2024 completed post-graduation tracer surveys. Response rate increased to 78%, exceeding ABET accreditation threshold.'
-    },
-    {
-        id: 2,
-        title: 'Employer Feedback Rating Submitted',
-        text: 'Safaricom Telecommunications & INSA submitted employer competency ratings.',
-        category: 'Employer',
-        priority: 'medium',
-        time: '5 hours ago',
-        unread: true,
-        targetTab: 'employer-feedback',
-        actionLabel: 'Review Employer Feedback',
-        source: 'ASTU Corporate Employer Portal',
-        details: 'Verified employer evaluations report 8.5/10 average technical competence across Software Engineering graduates.'
-    },
-    {
-        id: 3,
-        title: 'Accreditation Audit Evidence Complete',
-        text: '14 evidence audit records verified in database for ABET inspection.',
-        category: 'Accreditation',
-        priority: 'high',
-        time: '1 day ago',
-        unread: true,
-        targetTab: 'accreditation',
-        actionLabel: 'Open Accreditation Reports',
-        source: 'Academic Quality Assurance Committee',
-        details: 'All graduate telemetry, employer evaluations, and curriculum matrices meet ABET readiness criteria with 89% readiness score.'
-    },
-    {
-        id: 4,
-        title: 'Curriculum Course Proposal Generated',
-        text: 'New course recommendation: DevOps & Cloud Architecture Specialization.',
-        category: 'Curriculum',
-        priority: 'medium',
-        time: '2 days ago',
-        unread: false,
-        targetTab: 'curriculum',
-        actionLabel: 'Open Curriculum Intelligence',
-        source: 'Curriculum Review Board',
-        details: 'Fills top employer skill gap reported in verified corporate evaluations. Recommends adding 3 lab modules to senior syllabus.'
-    },
-    {
-        id: 5,
-        title: 'Critical Skill Gap Alert',
-        text: 'Cloud & Infrastructure skills flagged as high demand by tech employers.',
-        category: 'Skill Gap',
-        priority: 'high',
-        time: '3 days ago',
-        unread: false,
-        targetTab: 'skill-gap',
-        actionLabel: 'View Skill Gap Analysis',
-        source: 'Industry Analytics Engine',
-        details: 'Employer evaluations indicate growing demand for Docker, Kubernetes, and AWS Cloud practitioner competencies.'
-    }
-];
+const initialNotifications: NotificationItem[] = [];
 
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
@@ -145,7 +72,7 @@ const DepartmentDashboard = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('department_sidebar_collapsed') === 'true');
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('dashboard');
-    const [darkMode, setDarkMode] = useState(() => localStorage.getItem('department_dark_mode') === 'true');
+    const { darkMode, toggleTheme } = useTheme();
     const [showNotifications, setShowNotifications] = useState(false);
     const [helpOpen, setHelpOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -197,15 +124,6 @@ const DepartmentDashboard = () => {
     React.useEffect(() => {
         localStorage.setItem('department_sidebar_collapsed', String(sidebarCollapsed));
     }, [sidebarCollapsed]);
-
-    React.useEffect(() => {
-        localStorage.setItem('department_dark_mode', String(darkMode));
-        if (darkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [darkMode]);
 
     React.useEffect(() => {
         setMobileSidebarOpen(false);
@@ -305,7 +223,7 @@ const DepartmentDashboard = () => {
 
     return (
         <>
-            <div className={`min-h-screen font-sans antialiased transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-[#f4f6fa] text-slate-800'
+            <div className={`role-shell min-h-screen font-sans antialiased transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-[#f4f6fa] text-slate-800'
                 }`}>
 
                 {mobileSidebarOpen && (
@@ -598,7 +516,7 @@ const DepartmentDashboard = () => {
                             {/* Dark Mode Toggle Switch */}
                             <button
                                 onClick={() => {
-                                    setDarkMode(!darkMode);
+                                    toggleTheme();
                                     toast.success(!darkMode ? 'Premium Dark Theme activated!' : 'Light Theme activated!');
                                 }}
                                 className={`p-2 rounded-full hover:bg-gray-100/10 transition-colors flex items-center justify-center ${darkMode ? 'text-amber-400' : 'text-slate-600'
@@ -724,7 +642,7 @@ const DepartmentDashboard = () => {
                     </header>
 
                     {/* Dynamic Inner Tab View */}
-                    <div className="flex-grow p-4 sm:p-6 md:p-8">
+                    <div className="dashboard-content flex-grow p-4 sm:p-6 md:p-8">
                         {renderSection()}
                     </div>
 

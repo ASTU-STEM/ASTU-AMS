@@ -28,6 +28,17 @@ export interface ApiEvent {
   date: string;
   location: string;
   type: string;
+  // Optional presentation metadata: the events table does not store all of
+  // these, but CMS-authored / legacy rows may, and the homepage maps them
+  // defensively rather than assuming they are absent.
+  slug?: string;
+  image?: string;
+  coverImage?: string;
+  bannerUrl?: string;
+  capacity?: number;
+  category?: string;
+  tags?: string[];
+  registered?: boolean;
   createdBy?: string;
   rsvps?: any[];
   createdAt?: string;

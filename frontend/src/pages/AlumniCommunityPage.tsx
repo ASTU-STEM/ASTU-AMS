@@ -38,28 +38,28 @@ const DEFAULT_REGIONAL_CHAPTERS = [
   {
     name: 'Central Ethiopia & Addis Ababa',
     hub: 'Addis Ababa',
-    members: '640+ Alumni',
+    members: 'Active Chapter',
     focus: 'Aviation, Telecom, Financial Technology, and Federal Ministries',
     contact: 'irccd@astu.edu.et',
   },
   {
     name: 'Main Campus & Rift Valley Hub',
     hub: 'Adama',
-    members: '320+ Alumni',
+    members: 'Active Chapter',
     focus: 'Research Incubators, Precision Manufacturing & Water Works',
     contact: 'alumni@astu.edu.et',
   },
   {
     name: 'North America Chapter',
     hub: 'United States & Canada',
-    members: '160+ Alumni',
-    focus: 'Aerospace (Boeing), Cloud Computing, and US Academic Chairs',
+    members: 'Active Chapter',
+    focus: 'Aerospace, Cloud Computing, and Academic Leadership',
     contact: 'alumni-na@astu.edu.et',
   },
   {
     name: 'European Union Chapter',
     hub: 'Germany, UK & Scandinavia',
-    members: '110+ Alumni',
+    members: 'Active Chapter',
     focus: 'DAAD Research Exchange, Industrial Operations & Consulting',
     contact: 'alumni-eu@astu.edu.et',
   },
@@ -100,9 +100,8 @@ export default function AlumniCommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeModalMember, setActiveModalMember] = useState<CommunityMember | null>(null);
-  const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>(() =>
-    communityMembersService.getMembers().filter(m => m.active !== false)
-  );
+  const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
+  const [membersLoading, setMembersLoading] = useState(true);
 
   const { metrics } = usePublicMetrics();
 
@@ -119,10 +118,10 @@ export default function AlumniCommunityPage() {
     title: 'Your Networks Around the World',
     subtitle: 'With establishment spanning nearly three decades, Adama Science and Technology University boasts alumni excelling in global aviation, high-tech ventures, sovereign public policy, academic research chairs, and civil infrastructure worldwide.',
     stats: [
-      { label: 'Registered Alumni', value: '1,238+', sub: 'Globally Verified' },
-      { label: 'Fields of Study', value: '5 Major Areas', sub: 'Engineering & Tech' },
-      { label: 'Corporate Partners', value: '500+ Enterprises', sub: 'Talent Collaborators' },
-      { label: 'Historic Batches', value: '30+ Years', sub: 'Since 1993 Establishment' },
+      { label: 'Registered Alumni', value: '—', sub: 'Globally Verified' },
+      { label: 'Fields of Study', value: '—', sub: 'Engineering & Tech' },
+      { label: 'Corporate Partners', value: '—', sub: 'Talent Collaborators' },
+      { label: 'Historic Batches', value: '—', sub: 'Since 1993 Establishment' },
     ],
   });
   const [regionalChapters, setRegionalChapters] = useState(DEFAULT_REGIONAL_CHAPTERS);
@@ -131,9 +130,9 @@ export default function AlumniCommunityPage() {
     title: 'ASTU Alumni Carnival 2026',
     description: 'Celebrating nearly three decades of ASTU heritage! Taking place on April 25 and 26, 2026 at the ASTU Main Campus in Adama. A homecoming uniting graduates, university leadership, academic researchers, and enterprise partners.',
     features: [
-      '1,200+ Expected Attendees',
       'Enterprise Career Expo',
       'Research & Startup Showcase',
+      'Alumni Networking Sessions',
     ],
     primaryButtonText: 'Register for Homecoming',
     primaryButtonLink: '/register',
@@ -143,6 +142,15 @@ export default function AlumniCommunityPage() {
   const [communityPillars, setCommunityPillars] = useState(DEFAULT_COMMUNITY_PILLARS);
 
   useEffect(() => {
+    let mounted = true;
+    communityMembersService.fetchMembersFromApi().then((members) => {
+      if (!mounted) return;
+      setCommunityMembers(members.filter((m) => m.active !== false));
+      setMembersLoading(false);
+    }).catch(() => {
+      if (mounted) setMembersLoading(false);
+    });
+
     const handleSync = () => {
       setCommunityMembers(communityMembersService.getMembers().filter(m => m.active !== false));
     };
@@ -163,14 +171,29 @@ export default function AlumniCommunityPage() {
     };
     window.addEventListener('astu-cms-community-members-changed', handleSync);
     window.addEventListener('astu-cms-homepage-changed', handleCmsSync);
+    window.addEventListener('astu-cms-homepage-updated', handleCmsSync);
     return () => {
+      mounted = false;
       window.removeEventListener('astu-cms-community-members-changed', handleSync);
       window.removeEventListener('astu-cms-homepage-changed', handleCmsSync);
+      window.removeEventListener('astu-cms-homepage-updated', handleCmsSync);
     };
   }, []);
 
   // Load CMS data
   useEffect(() => {
+    homepageCmsService.fetchFromApi().then((config) => {
+      if (!config) return;
+      if (config.communityPageHero) setCommunityPageHero(config.communityPageHero);
+      if (Array.isArray(config.regionalChapters) && config.regionalChapters.length) {
+        setRegionalChapters(config.regionalChapters);
+      }
+      if (config.eventBanner) setEventBanner(config.eventBanner);
+      if (Array.isArray(config.communityPillars) && config.communityPillars.length) {
+        setCommunityPillars(config.communityPillars);
+      }
+    });
+
     const config = homepageCmsService.getSettings();
     if (config?.communityPageHero) {
       setCommunityPageHero(config.communityPageHero);
@@ -213,12 +236,12 @@ export default function AlumniCommunityPage() {
       <Navbar />
 
       {/* ── Modern Hero Section ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-[#003366] to-[#001f3f] text-white py-16 md:py-24">
-        {/* Background Decorative Mesh & Glow */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] text-white py-16 md:py-24">
+        {/* Soft brand glows — navy + green only */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-astu-green/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-astu-red/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-white/3 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-astu-blue-light/10 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-white/[0.03] blur-3xl" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
@@ -347,20 +370,32 @@ export default function AlumniCommunityPage() {
           </p>
         </div>
 
-        {filteredMembers.length === 0 ? (
+        {membersLoading ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center max-w-md mx-auto text-sm text-slate-500">
+            Loading community leaders…
+          </div>
+        ) : filteredMembers.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center max-w-md mx-auto">
             <Users className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-800">No members matched your search</h3>
-            <p className="mt-1 text-xs text-slate-500">Try changing your search term or switching to another category.</p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
-              className="mt-4 rounded-lg bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:brightness-110"
-            >
-              Reset Filters
-            </button>
+            <h3 className="text-base font-bold text-slate-800">
+              {communityMembers.length === 0 ? 'No community leaders published yet' : 'No members matched your search'}
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">
+              {communityMembers.length === 0
+                ? 'Leaders will appear here once published through the CMS community directory.'
+                : 'Try changing your search term or switching to another category.'}
+            </p>
+            {communityMembers.length > 0 && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                }}
+                className="mt-4 rounded-lg bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:brightness-110"
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -377,7 +412,7 @@ export default function AlumniCommunityPage() {
                         {member.badge}
                       </span>
                     ) : (
-                      <span className="rounded-md bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                      <span className="rounded-md bg-astu-green/10 px-2.5 py-0.5 text-[10px] font-bold text-astu-green">
                         Class of {member.gradYear}
                       </span>
                     )}
@@ -402,7 +437,7 @@ export default function AlumniCommunityPage() {
                             'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
                         }}
                       />
-                      <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white" title="Verified Alumni">
+                      <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-astu-green text-white ring-2 ring-white" title="Verified Alumni">
                         <CheckCircle2 className="h-3 w-3" />
                       </span>
                     </div>
@@ -464,11 +499,11 @@ export default function AlumniCommunityPage() {
       </section>
 
       {/* ── Regional Chapters & Global Reach ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-[#003366] to-[#001f3f] text-white py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] text-white py-16 md:py-24">
         {/* Background Decorative Mesh & Glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-astu-green/10 blur-3xl" />
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-astu-red/10 blur-3xl" />
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-astu-blue-light/10 blur-3xl" />
           <Globe className="h-[620px] w-[620px] absolute -right-28 -bottom-28 text-white/5 pointer-events-none" />
         </div>
 
@@ -493,7 +528,7 @@ export default function AlumniCommunityPage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="rounded-lg bg-astu-green/20 border border-astu-green/30 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
+                    <span className="rounded-lg bg-astu-green/20 border border-astu-green/30 px-2.5 py-1 text-[11px] font-bold text-astu-green">
                       {chap.members}
                     </span>
                     <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center text-slate-300">
@@ -508,7 +543,7 @@ export default function AlumniCommunityPage() {
                 </div>
                 <a
                   href={`mailto:${chap.contact}`}
-                  className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-astu-green hover:text-emerald-300 transition-colors cursor-pointer"
+                  className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-astu-green hover:brightness-125 transition-colors cursor-pointer"
                 >
                   <Mail className="h-3.5 w-3.5" /> Contact Chapter Lead
                 </a>
@@ -520,7 +555,7 @@ export default function AlumniCommunityPage() {
 
       {/* ── Alumni Homecoming & Carnival 2026 Highlight ── */}
       <section className="mx-auto max-w-[1440px] px-4 md:px-8 py-14">
-        <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-astu-navy via-[#003366] to-[#004080] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-astu-green">
@@ -652,7 +687,7 @@ export default function AlumniCommunityPage() {
               </div>
 
               {activeModalMember.quote && (
-                <div className="border-l-4 border-astu-green bg-emerald-50/50 p-3 rounded-r-xl italic text-slate-700">
+                <div className="border-l-4 border-astu-green bg-astu-green/5 p-3 rounded-r-xl italic text-slate-700">
                   "{activeModalMember.quote}"
                 </div>
               )}

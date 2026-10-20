@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, Users, Briefcase, BarChart3, ShieldCheck } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -36,19 +37,22 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
   ];
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface dark:bg-slate-950">
       {/* Top Navigation */}
-      <header className="border-b border-outline-variant bg-white/95 backdrop-blur">
+      <header className="border-b border-outline-variant dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
           <Link to="/" className="flex items-center gap-2">
             <div className="rounded-full bg-astu-navy p-2 text-white">
               <GraduationCap className="h-4 w-4" />
             </div>
-            <span className="text-sm font-bold text-astu-navy">ASTU AMS</span>
+            <span className="text-sm font-bold text-astu-navy dark:text-sky-300">ASTU AMS</span>
           </Link>
-          <Link to="/" className="text-sm font-semibold text-on-surface-variant hover:text-astu-navy">
-            Back to Home
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="text-on-surface-variant hover:text-astu-navy dark:text-slate-300 dark:hover:text-sky-300" />
+            <Link to="/" className="text-sm font-semibold text-on-surface-variant hover:text-astu-navy dark:text-slate-400 dark:hover:text-sky-300">
+              Back to Home
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -104,7 +108,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
         </div>
 
         {/* Right Side - Auth Form */}
-        <div className={`flex w-full items-center justify-center bg-surface p-4 ${rightWidth} sm:p-8 lg:p-12`}>
+        <div className={`flex w-full items-center justify-center bg-surface dark:bg-slate-950 p-4 ${rightWidth} sm:p-8 lg:p-12`}>
           <div className={`w-full ${maxWidth}`}>
             {/* Logo */}
             {showLogo && (
@@ -122,12 +126,12 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
 
             {/* Title and Subtitle */}
             <div className="text-center mb-6">
-              <h1 className="text-2xl sm:text-3xl font-bold text-astu-navy mb-1.5">{title}</h1>
-              <p className="text-xs sm:text-sm text-on-surface-variant px-2">{subtitle}</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-astu-navy dark:text-white mb-1.5">{title}</h1>
+              <p className="text-xs sm:text-sm text-on-surface-variant dark:text-slate-400 px-2">{subtitle}</p>
             </div>
 
             {/* Auth Card */}
-            <div className="rounded-xl border border-outline-variant bg-white p-5 sm:p-8 shadow-sm">
+            <div className="rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-900 p-5 sm:p-8 shadow-sm dark:shadow-black/40">
               {children}
             </div>
           </div>

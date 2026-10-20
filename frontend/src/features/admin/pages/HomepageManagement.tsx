@@ -94,6 +94,7 @@ import homepageCmsService, {
 } from '../services/homepageCms.service';
 import { defaultDetailPages, DetailPageItem, DetailPageSection } from '../services/detailPages.data';
 import { usePublicMetrics } from '../../../services/publicMetrics.service';
+import { mediaUrl } from '../../../config';
 
 /* ─── Category Types ─── */
 type CmsCategory =
@@ -858,7 +859,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                   >
                     <div className="relative w-full sm:w-44 h-28 rounded-lg overflow-hidden shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700">
                       <img
-                        src={slide.image}
+                        src={mediaUrl(slide.image)}
                         alt={slide.title}
                         className="w-full h-full object-cover"
                         onError={e => { (e.target as HTMLImageElement).src = '/images/astu-seal-logo.png'; }}
@@ -1929,7 +1930,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stat 1: Alumni Members</label>
                   <input
                     type="text"
-                    value={liveCommunitySection?.stats?.[0]?.value || '1,238+'}
+                    value={liveCommunitySection?.stats?.[0]?.value || '—'}
                     onChange={e => updateCommunitySectionStats(0, { value: e.target.value })}
                     className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-bold text-slate-900 dark:text-white"
                   />
@@ -1938,7 +1939,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stat 2: Fields of Study</label>
                   <input
                     type="text"
-                    value={liveCommunitySection?.stats?.[1]?.value || '5'}
+                    value={liveCommunitySection?.stats?.[1]?.value || '—'}
                     onChange={e => updateCommunitySectionStats(1, { value: e.target.value })}
                     className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-bold text-slate-900 dark:text-white"
                   />
@@ -1947,7 +1948,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stat 3: Global Partners</label>
                   <input
                     type="text"
-                    value={liveCommunitySection?.stats?.[2]?.value || '500+'}
+                    value={liveCommunitySection?.stats?.[2]?.value || '—'}
                     onChange={e => updateCommunitySectionStats(2, { value: e.target.value })}
                     className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-bold text-slate-900 dark:text-white"
                   />
@@ -3590,6 +3591,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             label="Slide Image"
             value={itemData.image || ''}
             onChange={url => setModalState(p => ({ ...p, itemData: { ...p.itemData, image: url } }))}
+            album="Hero Banners"
           />
           <div>
             <label className="text-xs font-bold text-slate-700">Tagline Eyebrow</label>

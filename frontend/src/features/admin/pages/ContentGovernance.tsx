@@ -61,17 +61,6 @@ interface CommunityPost {
   date: string;
 }
 
-const initialAnnouncements: Announcement[] = [
-  { id: 'A-001', title: '2026 Tracer Study Wave Opens', audience: 'Alumni', status: 'Pinned', attachment: 'PDF', owner: 'Alumni Office', updated: '2 hours ago', views: 1240 },
-  { id: 'A-002', title: 'Campus Career Fair Safety Notice', audience: 'Emergency', status: 'Published', attachment: 'None', owner: 'Security Center', updated: '1 day ago', views: 3892 },
-  { id: 'A-003', title: 'Employer Partnership Roundtable', audience: 'Employer', status: 'Scheduled', attachment: 'PDF', owner: 'Industry Liaison', updated: 'Jun 8, 2026', views: 0 },
-  { id: 'A-004', title: 'Department KPI Review Week', audience: 'Department', status: 'Draft', attachment: 'None', owner: 'Academic Affairs', updated: 'Yesterday', views: 0 },
-  { id: 'A-005', title: 'Alumni Mentorship Program Launch', audience: 'Alumni', status: 'Published', attachment: 'PDF', owner: 'Alumni Office', updated: '3 days ago', views: 876 },
-  { id: 'A-006', title: 'System Maintenance Weekend Notice', audience: 'Internal', status: 'Scheduled', attachment: 'None', owner: 'ICT Directorate', updated: 'Jun 10, 2026', views: 0 },
-  { id: 'A-007', title: 'Research Grant Application Deadline', audience: 'Department', status: 'Needs Review', attachment: 'PDF', owner: 'Research Directorate', updated: '5 hours ago', views: 0 },
-  { id: 'A-008', title: 'Public Holiday Notice', audience: 'Public', status: 'Published', attachment: 'None', owner: 'Admin Office', updated: '1 week ago', views: 5601 },
-];
-
 const initialCommunity: CommunityPost[] = [
   { id: 'P-001', title: 'Graduate startup hiring interns', author: 'Helina Sileshi', reports: 0, action: 'Feature post', approved: true, pinned: false, date: '2 hours ago' },
   { id: 'P-002', title: 'Unverified certificate link shared', author: 'Community Member', reports: 4, action: 'Review report', approved: false, pinned: false, date: '1 day ago' },
@@ -129,10 +118,8 @@ export default function ContentGovernance() {
       .filter((i) => i.type === 'announcement' || i.tags?.includes('announcement') || i.tags?.includes('notice'))
       .map(mapCmsToAnnouncement);
 
-    if (announcementsFromCms.length > 0) {
-      return announcementsFromCms;
-    }
-    return initialAnnouncements;
+    // No static fallback: the CMS is the single source of truth.
+    return announcementsFromCms;
   }, []);
 
   const [announcements, setAnnouncements] = useState<Announcement[]>(loadAnnouncements);

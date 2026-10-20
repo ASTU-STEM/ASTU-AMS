@@ -9,6 +9,8 @@ import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import { notificationService } from '../features/notifications/services/notification.service';
+import { useTheme } from '../hooks/useTheme';
+import { sidebarContentMarginClass } from './sidebarShared';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -64,7 +66,7 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
 };
 
 export default function AdminLayout() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'));
+  const { theme, toggleTheme } = useTheme();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -125,12 +127,6 @@ export default function AdminLayout() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && !target.closest('[data-admin-menu]')) {
@@ -154,10 +150,6 @@ export default function AdminLayout() {
     logout();
     toast.success('Logged out successfully');
     navigate('/login');
-  };
-
-  const toggleTheme = () => {
-    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   };
 
   const [realNotifications, setRealNotifications] = useState<any[]>([]);
@@ -199,12 +191,7 @@ export default function AdminLayout() {
     }
   };
 
-  const displayNotifications = realNotifications.length > 0 ? realNotifications : [
-    { id: '1', tone: '#1D9E75', title: 'Survey Dispatched', text: 'Survey Wave 3 sent to 2024 alumni batch', time: '6 min ago', isRead: false },
-    { id: '2', tone: '#003580', title: 'Employer Registration', text: 'New employer Safaricom registration approved', time: '18 min ago', isRead: false },
-    { id: '3', tone: '#E8A020', title: 'SIS Batch Sync', text: 'CSV import completed: 245 alumni records', time: '1 hour ago', isRead: false },
-    { id: '4', tone: '#E24B4A', title: 'Security Alert', text: 'Two failed login attempts blocked', time: '3 hours ago', isRead: false },
-  ];
+  const displayNotifications = realNotifications;
 
   const menu = (
     <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
@@ -290,9 +277,7 @@ export default function AdminLayout() {
         onOpenAiAssistant={() => setAiAssistantOpen(true)}
       />
 
-       <div
-         className={`min-h-screen transition-[margin-left] duration-[250ms] ease-in-out ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}`}
-       >
+       <div className={sidebarContentMarginClass(sidebarCollapsed)}>
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
           style={{
@@ -382,33 +367,37 @@ export default function AdminLayout() {
                     )}
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-1 p-1">
-                    {displayNotifications.map((item: any, idx: number) => {
-                      const isUnread = !item.isRead && !item.read;
-                      return (
-                        <div
-                          key={item.id || idx}
-                          onClick={() => {
-                            if (item.id) notificationService.markAsRead(item.id).catch(() => {});
-                            setRealNotifications((prev) => prev.map((n) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
-                            setUnreadCount((prev) => Math.max(0, prev - 1));
-                          }}
-                          className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
-                        >
-                          <span
-                            className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
-                            style={{ backgroundColor: item.tone || (isUnread ? '#003580' : '#94A3B8') }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            {item.title && <p className="text-xs font-extrabold text-slate-900">{item.title}</p>}
-                            <p className="text-xs font-medium text-slate-700 leading-snug">{item.message || item.text || item.content}</p>
-                            <p className="mt-1 text-[10px] font-semibold text-slate-400">
-                              {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.time || 'Recently'}
-                            </p>
+                    {displayNotifications.length === 0 ? (
+                      <p className="px-3 py-8 text-center text-sm text-slate-500">No notifications yet</p>
+                    ) : (
+                      displayNotifications.map((item: any, idx: number) => {
+                        const isUnread = !item.isRead && !item.read;
+                        return (
+                          <div
+                            key={item.id || idx}
+                            onClick={() => {
+                              if (item.id) notificationService.markAsRead(item.id).catch(() => {});
+                              setRealNotifications((prev) => prev.map((n) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
+                              setUnreadCount((prev) => Math.max(0, prev - 1));
+                            }}
+                            className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                          >
+                            <span
+                              className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: item.tone || (isUnread ? '#003580' : '#94A3B8') }}
+                            />
+                            <div className="min-w-0 flex-1">
+                              {item.title && <p className="text-xs font-extrabold text-slate-900">{item.title}</p>}
+                              <p className="text-xs font-medium text-slate-700 leading-snug">{item.message || item.text || item.content}</p>
+                              <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                                {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.time || 'Recently'}
+                              </p>
+                            </div>
+                            {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0 mt-1.5" />}
                           </div>
-                          {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0 mt-1.5" />}
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
                   <div className="border-t border-slate-100 px-3 py-2.5 text-center">
                     <button

@@ -44,7 +44,6 @@ import Navbar from "../components/Navbar";
 import homepageCmsService, {
   HomepageCmsConfig,
   Partner,
-  defaultPartnersList,
 } from "../features/admin/services/homepageCms.service";
 import { defaultDetailPages, DetailPageItem } from "../features/admin/services/detailPages.data";
 import storiesService, { AlumniStory } from "../features/admin/services/stories.service";
@@ -103,7 +102,7 @@ export default function PublicInfoPage() {
   const [alumniStories, setAlumniStories] = useState<AlumniStory[]>(() => storiesService.getStories());
   const [partnersList, setPartnersList] = useState<Partner[]>(() => {
     const s = homepageCmsService.getSettings();
-    return s?.partners && s.partners.length > 0 ? s.partners : defaultPartnersList;
+    return Array.isArray(s?.partners) ? s.partners.filter((p) => p.active !== false) : [];
   });
 
   // CMS Live Customizer and Modal states
@@ -232,13 +231,40 @@ export default function PublicInfoPage() {
       .replace(/1,238/g, metrics.registeredAlumni.toLocaleString())
       .replace(/500\+/g, metrics.corporatePartnersFormatted)
       .replace(/87%/g, metrics.employmentRateFormatted)
-      .replace(/6,000\+/g, metrics.digitalRequestsFormatted);
+      .replace(/94%/g, metrics.employmentRateFormatted)
+      .replace(/6,000\+/g, metrics.digitalRequestsFormatted)
+      .replace(/24,000\+/g, metrics.registeredAlumniFormatted)
+      .replace(/12\+/g, String(metrics.fieldsOfStudy || '—'));
   };
+
+  const liveStats = (basePage.stats || []).map((stat) => {
+    const lower = `${stat.label || ''} ${stat.id || ''}`.toLowerCase();
+    if (lower.includes('alumni') || lower.includes('candidate') || lower.includes('verified')) {
+      return { ...stat, value: metrics.registeredAlumniFormatted };
+    }
+    if (lower.includes('partner') || lower.includes('enterprise') || lower.includes('allies') || lower.includes('companies')) {
+      return { ...stat, value: metrics.corporatePartnersFormatted };
+    }
+    if (lower.includes('employment') || lower.includes('placement') || lower.includes('rate')) {
+      return { ...stat, value: metrics.employmentRateFormatted };
+    }
+    if (lower.includes('job') || lower.includes('opening')) {
+      return { ...stat, value: metrics.activeJobsFormatted };
+    }
+    if (lower.includes('field') || lower.includes('lab') || lower.includes('department')) {
+      return { ...stat, value: String(metrics.fieldsOfStudy || '—') };
+    }
+    if (lower.includes('request') || lower.includes('digital')) {
+      return { ...stat, value: metrics.digitalRequestsFormatted };
+    }
+    return { ...stat, value: liveReplacer(stat.value) };
+  });
 
   const page: DetailPageItem = {
     ...basePage,
     title: liveReplacer(basePage.title),
     subtitle: liveReplacer(basePage.subtitle),
+    stats: liveStats,
     sections: basePage.sections.map((s: any) => ({
       ...s,
       heading: liveReplacer(s.heading),
@@ -279,7 +305,7 @@ export default function PublicInfoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 antialiased selection:bg-[#003580] selection:text-white">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 antialiased selection:bg-astu-navy selection:text-white">
       <Navbar />
 
       {/* Floating CMS Edit & Live Customizer Trigger for Admins */}
@@ -291,7 +317,7 @@ export default function PublicInfoPage() {
             className="inline-flex items-center gap-2 rounded-full bg-[#003366] hover:bg-[#002244] text-white px-5 py-3 text-xs font-bold shadow-2xl transition-all cursor-pointer ring-4 ring-amber-400/30 hover:scale-105"
             title="Open Live Preview CMS customizer sidebar"
           >
-            <Sparkles className="h-4 w-4 text-amber-300" />
+            <Sparkles className="h-4 w-4 text-astu-green" />
             <span>{customizerOpen ? "Close Customizer" : "Customize Page (Live Preview)"}</span>
           </button>
           <button
@@ -334,7 +360,7 @@ export default function PublicInfoPage() {
 
       <main>
         {/* ── HERO SECTION ── */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] text-white">
+        <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] text-white">
           {/* Subtle background image overlay */}
           <div className="absolute inset-0 opacity-20 mix-blend-overlay">
             <img
@@ -387,8 +413,8 @@ export default function PublicInfoPage() {
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <div className="mb-4 inline-flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/10 p-2.5 backdrop-blur-md">
-                  <IconComponent className="h-5 w-5 text-emerald-400" />
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                  <IconComponent className="h-5 w-5 text-astu-green" />
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-astu-green">
                     {page.badge || "ASTU Institutional Resource"}
                   </span>
                 </div>
@@ -407,7 +433,7 @@ export default function PublicInfoPage() {
                     <button
                       type="button"
                       onClick={() => navigate("/employers/register")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-red-500 hover:scale-105 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-astu-green px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:brightness-110 hover:scale-105 cursor-pointer"
                     >
                       <Briefcase className="h-4 w-4" />
                       <span>Register as Employer</span>
@@ -424,7 +450,7 @@ export default function PublicInfoPage() {
                   <>
                     <a
                       href="#inquiry-form"
-                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#003580] shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-astu-navy shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
                     >
                       <MessageSquare className="h-4 w-4" />
                       <span>Send Direct Message</span>
@@ -443,7 +469,7 @@ export default function PublicInfoPage() {
                     <button
                       type="button"
                       onClick={() => navigate("/login")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#003580] shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-astu-navy shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
                     >
                       <GraduationCap className="h-4 w-4" />
                       <span>Portal Login</span>
@@ -486,15 +512,15 @@ export default function PublicInfoPage() {
               <div className="space-y-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight text-[#002b66]">
+                    <h2 className="text-2xl font-black tracking-tight text-astu-navy">
                       Featured Alumni Spotlights
                     </h2>
                     <p className="text-xs text-slate-500">
                       Real journeys of ASTU graduates excelling across industries worldwide. Managed via CMS.
                     </p>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#003580]">
-                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                  <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-astu-navy">
+                    <ShieldCheck className="h-3.5 w-3.5 text-astu-green" />
                     {alumniStories.length} Verified Stories
                   </span>
                 </div>
@@ -503,7 +529,7 @@ export default function PublicInfoPage() {
                   {alumniStories.map((story) => (
                     <article
                       key={story.id}
-                      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#003580]/40 hover:shadow-lg"
+                      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-lg"
                     >
                       <div>
                         <div className="flex items-start gap-4 mb-4">
@@ -517,7 +543,7 @@ export default function PublicInfoPage() {
                               }}
                             />
                           ) : (
-                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[#003580]/10 text-xl font-bold text-[#003580]">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-astu-navy/10 text-xl font-bold text-astu-navy">
                               {story.name.slice(0, 2).toUpperCase()}
                             </div>
                           )}
@@ -528,10 +554,10 @@ export default function PublicInfoPage() {
                                 <Sparkles className="h-3 w-3 text-amber-500" /> Featured
                               </span>
                             )}
-                            <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-[#003580] transition-colors">
+                            <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-astu-navy transition-colors">
                               {story.name}
                             </h3>
-                            <p className="line-clamp-1 text-xs font-semibold text-[#003580]">
+                            <p className="line-clamp-1 text-xs font-semibold text-astu-navy">
                               {story.role}
                             </p>
                             {story.company && (
@@ -563,7 +589,7 @@ export default function PublicInfoPage() {
                       <div className="mt-5 border-t border-slate-100 pt-4">
                         <Link
                           to={`/stories/${story.id}`}
-                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all shadow-2xs"
+                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-astu-navy group-hover:bg-astu-navy group-hover:text-white transition-all shadow-2xs"
                         >
                           <span>Read Full Success Story</span>
                           <ChevronRight className="h-4 w-4" />
@@ -582,7 +608,7 @@ export default function PublicInfoPage() {
                 <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-10 shadow-md">
                   <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
                     <div className={page.sections[0].image ? "lg:col-span-7" : "lg:col-span-12"}>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#003580] border border-blue-200/60 mb-3">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-astu-navy border border-blue-200/60 mb-3">
                         <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                         {page.sections[0].badge || "Platform Foundation & Executive Summary"}
                       </span>
@@ -597,7 +623,7 @@ export default function PublicInfoPage() {
                         {page.sections[0].linkUrl ? (
                           <a
                             href={page.sections[0].linkUrl}
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#002b66] transition-all"
+                            className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#001a41] transition-all"
                           >
                             <span>{page.sections[0].linkText || "Learn More"}</span>
                             <ArrowRight className="h-3.5 w-3.5" />
@@ -606,7 +632,7 @@ export default function PublicInfoPage() {
                           <button
                             type="button"
                             onClick={() => navigate("/login")}
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#002b66] transition-all cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#001a41] transition-all cursor-pointer"
                           >
                             <span>Access AMS Portal</span>
                             <ArrowRight className="h-3.5 w-3.5" />
@@ -645,7 +671,7 @@ export default function PublicInfoPage() {
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-3">
                   <div>
-                    <h3 className="text-xl font-black text-[#002b66]">Strategic Pillars & Capabilities</h3>
+                    <h3 className="text-xl font-black text-astu-navy">Strategic Pillars & Capabilities</h3>
                     <p className="text-xs text-slate-500">
                       Core institutional mechanisms, system architecture, and accreditation mandates.
                     </p>
@@ -662,7 +688,7 @@ export default function PublicInfoPage() {
                     return (
                       <article
                         key={section.id || section.heading + idx}
-                        className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#003580]/40 hover:shadow-lg"
+                        className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-lg"
                       >
                         <div>
                           {section.image && (
@@ -672,7 +698,7 @@ export default function PublicInfoPage() {
                           )}
 
                           <div className="flex items-center justify-between mb-4">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-[#003580] ring-1 ring-blue-500/10 group-hover:bg-[#003580] group-hover:text-white transition-colors">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-astu-navy ring-1 ring-blue-500/10 group-hover:bg-astu-navy group-hover:text-white transition-colors">
                               <SectionIcon className="h-5 w-5" />
                             </div>
                             <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
@@ -680,7 +706,7 @@ export default function PublicInfoPage() {
                             </span>
                           </div>
 
-                          <h4 className="text-base font-bold text-slate-900 group-hover:text-[#003580] transition-colors">
+                          <h4 className="text-base font-bold text-slate-900 group-hover:text-astu-navy transition-colors">
                             {section.heading}
                           </h4>
                           <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-line">
@@ -692,7 +718,7 @@ export default function PublicInfoPage() {
                           {section.linkUrl ? (
                             <a
                               href={section.linkUrl}
-                              className="inline-flex items-center gap-1 font-bold text-[#003580] hover:underline"
+                              className="inline-flex items-center gap-1 font-bold text-astu-navy hover:underline"
                             >
                               <span>{section.linkText || "View Details"}</span>
                               <ChevronRight className="h-3 w-3" />
@@ -702,7 +728,7 @@ export default function PublicInfoPage() {
                               Section {idx + 2}
                             </span>
                           )}
-                          <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[11px]">
+                          <span className="inline-flex items-center gap-1 font-bold text-astu-green text-[11px]">
                             <span>Verified</span>
                             <CheckCircle2 className="h-3 w-3" />
                           </span>
@@ -722,7 +748,7 @@ export default function PublicInfoPage() {
                   { value: metrics.employmentRateFormatted, label: "Employment Tracked", desc: "Longitudinal survey data" },
                 ].map((stat, i) => (
                   <div key={i} className="rounded-2xl border border-slate-200/80 bg-white p-5 text-center shadow-xs">
-                    <p className="text-2xl sm:text-3xl font-black text-[#003580]">{stat.value}</p>
+                    <p className="text-2xl sm:text-3xl font-black text-astu-navy">{stat.value}</p>
                     <p className="text-xs font-bold text-slate-800 mt-1">{stat.label}</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">{stat.desc}</p>
                   </div>
@@ -736,7 +762,7 @@ export default function PublicInfoPage() {
                 {/* Left Column: Official Contact Channels */}
                 <div className="lg:col-span-7 space-y-6">
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight text-[#002b66]">
+                    <h2 className="text-2xl font-black tracking-tight text-astu-navy">
                       Institutional Contact Directory
                     </h2>
                     <p className="text-xs text-slate-500 mt-1">
@@ -774,11 +800,11 @@ export default function PublicInfoPage() {
                       return (
                         <div
                           key={sec.id || idx}
-                          className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between hover:border-[#003580]/30 transition-all"
+                          className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between hover:border-astu-navy/30 transition-all"
                         >
                           <div>
                             <div className="flex items-center gap-3 mb-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#003580]">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-astu-navy">
                                 <Icon className="h-5 w-5" />
                               </div>
                               <div>
@@ -801,7 +827,7 @@ export default function PublicInfoPage() {
                                 href={sec.linkUrl || actionHref}
                                 target={actionHref.startsWith("http") ? "_blank" : undefined}
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] hover:underline"
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:underline"
                               >
                                 <span>{sec.linkText || actionText || "Open"}</span>
                                 <ExternalLink className="h-3 w-3" />
@@ -818,7 +844,7 @@ export default function PublicInfoPage() {
                 <div id="inquiry-form" className="lg:col-span-5">
                   <div className="rounded-3xl border border-slate-200/90 bg-white p-7 sm:p-8 shadow-md">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-green/10 text-astu-green">
                         <MessageSquare className="h-4 w-4" />
                       </div>
                       <h3 className="text-lg font-black text-slate-900">Send an Official Inquiry</h3>
@@ -828,16 +854,16 @@ export default function PublicInfoPage() {
                     </p>
 
                     {inquirySent ? (
-                      <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-6 text-center space-y-3">
-                        <CheckCircle2 className="h-10 w-10 text-emerald-600 mx-auto" />
-                        <h4 className="text-sm font-bold text-emerald-900">Inquiry Dispatched Successfully</h4>
-                        <p className="text-xs text-emerald-700">
+                      <div className="rounded-2xl bg-astu-green/10 border border-astu-green/20 p-6 text-center space-y-3">
+                        <CheckCircle2 className="h-10 w-10 text-astu-green mx-auto" />
+                        <h4 className="text-sm font-bold text-astu-navy">Inquiry Dispatched Successfully</h4>
+                        <p className="text-xs text-astu-green">
                           Thank you for contacting ASTU. Your message has been routed to the respective institutional department.
                         </p>
                         <button
                           type="button"
                           onClick={() => setInquirySent(false)}
-                          className="mt-2 text-xs font-bold text-emerald-800 underline cursor-pointer"
+                          className="mt-2 text-xs font-bold text-astu-green underline cursor-pointer"
                         >
                           Send another inquiry
                         </button>
@@ -852,7 +878,7 @@ export default function PublicInfoPage() {
                             placeholder="e.g. Dr. Abebe Bikila"
                             value={inquiryForm.name}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, name: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
                           />
                         </div>
 
@@ -865,7 +891,7 @@ export default function PublicInfoPage() {
                               placeholder="name@example.com"
                               value={inquiryForm.email}
                               onChange={(e) => setInquiryForm((prev) => ({ ...prev, email: e.target.value }))}
-                              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
                             />
                           </div>
                           <div>
@@ -875,7 +901,7 @@ export default function PublicInfoPage() {
                               placeholder="+251-9..."
                               value={inquiryForm.phone}
                               onChange={(e) => setInquiryForm((prev) => ({ ...prev, phone: e.target.value }))}
-                              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
                             />
                           </div>
                         </div>
@@ -885,7 +911,7 @@ export default function PublicInfoPage() {
                           <select
                             value={inquiryForm.category}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, category: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
                           >
                             <option value="Alumni">ASTU Alum / Graduate</option>
                             <option value="Employer">Corporate Employer / Recruiter</option>
@@ -902,7 +928,7 @@ export default function PublicInfoPage() {
                             placeholder="e.g. Tracer survey clarification or transcript verification"
                             value={inquiryForm.subject}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, subject: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
                           />
                         </div>
 
@@ -914,14 +940,14 @@ export default function PublicInfoPage() {
                             placeholder="Type your detailed inquiry or feedback here..."
                             value={inquiryForm.message}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, message: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#003580]/20 resize-none"
+                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20 resize-none"
                           />
                         </div>
 
                         <button
                           type="submit"
                           disabled={isSubmittingInquiry}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#003580] hover:bg-[#002255] text-white py-3 text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-60"
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-astu-navy hover:bg-[#001a41] text-white py-3 text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-60"
                         >
                           <Send className="h-3.5 w-3.5" />
                           <span>{isSubmittingInquiry ? "Sending Inquiry..." : "Submit Inquiry to Directorate"}</span>
@@ -1013,8 +1039,8 @@ export default function PublicInfoPage() {
                             </div>
 
                             <div className="flex flex-col items-end gap-1.5">
-                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                                <ShieldCheck className="h-3 w-3 text-emerald-600" />
+                              <span className="inline-flex items-center gap-1 rounded-full bg-astu-green/10 px-2.5 py-0.5 text-[10px] font-bold text-astu-green">
+                                <ShieldCheck className="h-3 w-3 text-astu-green" />
                                 Verified
                               </span>
                               {company.featured && (
@@ -1091,7 +1117,7 @@ export default function PublicInfoPage() {
 
                       <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                         <span className="font-semibold text-slate-400 text-[11px]">Track {idx + 1}</span>
-                        <span className="inline-flex items-center gap-1 text-emerald-600 font-bold text-[11px]">
+                        <span className="inline-flex items-center gap-1 text-astu-green font-bold text-[11px]">
                           <CheckCircle2 className="h-3 w-3" />
                           <span>Accredited</span>
                         </span>
@@ -1120,9 +1146,9 @@ export default function PublicInfoPage() {
               )}
 
               {/* Corporate CTA */}
-              <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-r from-slate-900 via-[#002244] to-[#003366] p-8 sm:p-12 text-white shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+              <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-r from-astu-navy via-primary-container to-[#001a41] p-8 sm:p-12 text-white shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
                 <div className="max-w-xl">
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-amber-300">
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-astu-green">
                     Institutional Partnership
                   </span>
                   <h3 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight">
@@ -1138,7 +1164,7 @@ export default function PublicInfoPage() {
                   <button
                     type="button"
                     onClick={() => navigate('/employers/register')}
-                    className="rounded-xl bg-red-600 px-6 py-3 text-xs font-bold text-white hover:bg-red-500 shadow-md transition-all cursor-pointer"
+                    className="rounded-xl bg-astu-green px-6 py-3 text-xs font-bold text-white hover:brightness-110 shadow-md transition-all cursor-pointer"
                   >
                     Register as Corporate Partner
                   </button>
@@ -1281,7 +1307,7 @@ export default function PublicInfoPage() {
                   return (
                     <article
                       key={section.id || section.heading + index}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#003580]/40 hover:shadow-lg hover:shadow-slate-200/60"
+                      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-lg hover:shadow-slate-200/60"
                     >
                       <div>
                         {section.image && (
@@ -1291,7 +1317,7 @@ export default function PublicInfoPage() {
                         )}
 
                         <div className="mb-5 flex items-center justify-between">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-[#003580] ring-1 ring-blue-500/10 group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-astu-navy ring-1 ring-blue-500/10 group-hover:bg-astu-navy group-hover:text-white transition-colors duration-200">
                             <SectionIcon className="h-6 w-6" />
                           </div>
                           {section.badge && (
@@ -1301,7 +1327,7 @@ export default function PublicInfoPage() {
                           )}
                         </div>
 
-                        <h2 className="text-lg font-bold text-slate-900 group-hover:text-[#003580] transition-colors">
+                        <h2 className="text-lg font-bold text-slate-900 group-hover:text-astu-navy transition-colors">
                           {section.heading}
                         </h2>
                         <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-line">
@@ -1313,7 +1339,7 @@ export default function PublicInfoPage() {
                         {section.linkUrl ? (
                           <a
                             href={section.linkUrl}
-                            className="inline-flex items-center gap-1 font-bold text-[#003580] hover:underline"
+                            className="inline-flex items-center gap-1 font-bold text-astu-navy hover:underline"
                           >
                             <span>{section.linkText || "View Portal"}</span>
                             <ChevronRight className="h-3 w-3" />
@@ -1321,9 +1347,9 @@ export default function PublicInfoPage() {
                         ) : (
                           <span className="font-semibold text-slate-400">Section {index + 1}</span>
                         )}
-                        <span className="inline-flex items-center gap-1 font-bold text-[#003580] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="inline-flex items-center gap-1 font-bold text-astu-navy opacity-0 group-hover:opacity-100 transition-opacity">
                           <span>Verified</span>
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-astu-green" />
                         </span>
                       </div>
                     </article>
@@ -1332,7 +1358,7 @@ export default function PublicInfoPage() {
               </div>
 
               {/* Quick Institutional Action Banner */}
-              <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-slate-900 to-[#002b66] p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+              <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-astu-navy to-[#001a41] p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div>
                   <h3 className="text-xl font-black text-white">Need Further Institutional Assistance?</h3>
                   <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-xl">
@@ -1343,7 +1369,7 @@ export default function PublicInfoPage() {
                   <button
                     type="button"
                     onClick={() => navigate("/partners")}
-                    className="rounded-xl bg-red-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-red-500 transition-all cursor-pointer shadow-md"
+                    className="rounded-xl bg-astu-green px-5 py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all cursor-pointer shadow-md"
                   >
                     Partner Office
                   </button>

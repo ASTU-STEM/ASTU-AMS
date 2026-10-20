@@ -3,15 +3,16 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./global.css";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider, applyTheme, readStoredTheme } from "./hooks/useTheme";
 
-const savedTheme = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
-document.documentElement.classList.remove('light', 'dark');
-document.documentElement.classList.add(savedTheme);
+applyTheme(readStoredTheme());
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

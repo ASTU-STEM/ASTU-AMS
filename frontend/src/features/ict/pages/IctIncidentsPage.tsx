@@ -18,48 +18,18 @@ export default function IctIncidentsPage() {
   const [activeTab, setActiveTab] = useState<'incidents' | 'dr-simulation'>('incidents');
   const [drSimulating, setDrSimulating] = useState(false);
 
-  const [incidents, setIncidents] = useState([
+  const [incidents, setIncidents] = useState<
     {
-      id: 'INC-2026-0042',
-      title: 'Registrar SIS Integration API Response Degradation',
-      severity: 'Critical',
-      status: 'Investigating',
-      started: '14:32 Today',
-      affectedUsers: 4281,
-      affectedServices: ['Registrar API', 'Alumni Sync Engine'],
-      timeline: [
-        { time: '14:32', text: 'Auto-detected: Registrar API latency exceeded 1,200ms threshold.' },
-        { time: '14:35', text: 'ICT Admin started investigation and enabled diagnostic trace.' },
-        { time: '14:40', text: 'Identified connection bottleneck at Registrar SIS gateway.' },
-      ],
-    },
-    {
-      id: 'INC-2026-0039',
-      title: 'SMS Provider Gateway Intermittent Timeout',
-      severity: 'High',
-      status: 'Mitigating',
-      started: '11:15 Today',
-      affectedUsers: 142,
-      affectedServices: ['SMS Service', '2FA Mobile OTP'],
-      timeline: [
-        { time: '11:15', text: 'SMS gateway dropped 24 consecutive delivery attempts.' },
-        { time: '11:20', text: 'Rerouted 2FA mobile OTP to email backup channel.' },
-      ],
-    },
-    {
-      id: 'INC-2026-0035',
-      title: 'PostgreSQL Read-Replica Lag During Batch Import',
-      severity: 'Medium',
-      status: 'Resolved',
-      started: 'Yesterday 18:00',
-      affectedUsers: 0,
-      affectedServices: ['Database Read-Replica'],
-      timeline: [
-        { time: '18:00', text: 'Replication delay reached 45 seconds.' },
-        { time: '18:15', text: 'Auto-healed: Replica caught up after batch import finished.' },
-      ],
-    },
-  ]);
+      id: string;
+      title: string;
+      severity: string;
+      status: string;
+      started: string;
+      affectedUsers: number;
+      affectedServices: string[];
+      timeline: { time: string; text: string }[];
+    }[]
+  >([]);
 
   const handleRunDRSimulation = () => {
     setDrSimulating(true);
