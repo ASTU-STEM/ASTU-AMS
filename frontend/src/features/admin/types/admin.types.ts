@@ -35,12 +35,15 @@ export interface AdminTableColumn<T> {
 }
 
 export interface AdminModalProps {
-  open: boolean;
+  open?: boolean;
+  isOpen?: boolean;
   title: string;
+  subtitle?: string;
   children: ReactNode;
   onClose: () => void;
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: string;
   closeOnBackdrop?: boolean;
 }
 

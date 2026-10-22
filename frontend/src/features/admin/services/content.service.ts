@@ -474,6 +474,25 @@ export const contentService = {
     }
     return this.getItems();
   },
+  async getPublicDonationCampaigns(params?: { category?: string; status?: string }): Promise<any[]> {
+    try {
+      const res = await axios.get(`${API_URL}/content/donations/campaigns`, { params });
+      if (res.data?.success && Array.isArray(res.data?.data)) {
+        return res.data.data;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  },
+  async recordPublicDonation(data: { campaignId: string; amount: number; donorName?: string }): Promise<any> {
+    try {
+      const res = await axios.post(`${API_URL}/content/donations/public-donate`, data);
+      return res.data;
+    } catch (err: any) {
+      return { success: false, message: err.response?.data?.message || 'Failed to submit donation' };
+    }
+  },
 };
 
 export default contentService;

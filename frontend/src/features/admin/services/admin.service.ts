@@ -503,7 +503,15 @@ export const adminService = {
     }
   },
 
-  async createDonationCampaign(data: { title: string; description?: string; targetAmount: number; category?: string }): Promise<ApiResult<any>> {
+  async createDonationCampaign(data: {
+    title: string;
+    description?: string;
+    targetAmount: number;
+    category?: string;
+    status?: string;
+    raised?: number;
+    donorCount?: number;
+  }): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.post<{ success: boolean; data: any }>('/admin/donations/campaigns', data);
       return { ok: true, data: response.data.data };
