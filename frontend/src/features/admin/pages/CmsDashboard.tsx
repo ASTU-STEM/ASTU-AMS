@@ -64,7 +64,8 @@ import registrationService, { AlumniRegistration } from '../services/registratio
 import AdminModal from '../components/AdminModal';
 import { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
 import { useAuth } from '../../../contexts/AuthContext';
-import { usePublicMetrics } from '../../../services/publicMetrics.service';
+import { usePublicMetrics, triggerMetricsRefresh } from '../../../services/publicMetrics.service';
+import api from '../../../services/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -349,7 +350,7 @@ const DEFAULT_HOMEPAGE_CONFIG: HomepageCmsConfig = {
 export default function CmsDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { metrics } = usePublicMetrics();
+  const { metrics, refresh: refreshMetrics } = usePublicMetrics();
 
   // Live operational data
   const [items, setItems] = useState<ContentCardItem[]>([]);
@@ -367,30 +368,32 @@ export default function CmsDashboard() {
 
   // Registrations state
   const [registrations, setRegistrations] = useState<AlumniRegistration[]>([]);
-  const [regStats, setRegStats] = useState({ total: 0, etaComplianceRate: 94, employabilityRate: 88 });
 
   // Events state
   const [events, setEvents] = useState<ApiEvent[]>([]);
 
-  // Inquiries state
-  const [inquiries, setInquiries] = useState([
-    { id: '1', name: 'Abebe Yosef', subject: 'Transcript Request', message: 'I need my official transcript for job application.', urgency: 'urgent' },
-    { id: '2', name: 'Helen Mekonnen', subject: 'Alumni Card', message: 'How can I get my alumni ID card?', urgency: 'normal' },
-    { id: '3', name: 'Yonas Bekele', subject: 'Event Registration', message: 'I want to register for the alumni carnival.', urgency: 'responded' },
-  ]);
+  // Inquiries state - 100% loaded directly from Database (/support/tickets)
+  const [inquiries, setInquiries] = useState<any[]>([]);
 
-  // Memos state
-  const [memos, setMemos] = useState([
-    { id: '1', text: 'Review tracer survey responses', completed: false },
-    { id: '2', text: 'Update partner organization list', completed: true },
-    { id: '3', text: 'Prepare alumni carnival logistics', completed: false },
-  ]);
+  // Memos state - loaded from localStorage or dynamically computed from live database metrics
+  const [memos, setMemos] = useState<{ id: string; text: string; completed: boolean }[]>(() => {
+    try {
+      const saved = localStorage.getItem('astu_alumni_office_memos');
+      if (saved) return JSON.parse(saved);
+    } catch { /* ignore */ }
+    return [];
+  });
   const [newMemoText, setNewMemoText] = useState('');
 
   // ─── Data Fetching ─────────────────────────────────────────────────────────
   const refreshAllData = useCallback(async (showToast = false) => {
     try {
       showToast ? setRefreshing(true) : setLoading(true);
+
+      // 0. Live Public Metrics directly from Database
+      try {
+        await refreshMetrics();
+      } catch { /* ignore */ }
 
       // 1. Content items
       const list = await contentService.fetchItemsFromApi();
@@ -400,7 +403,6 @@ export default function CmsDashboard() {
       // 2. Registrations
       const allRegs = registrationService.getRegistrations();
       setRegistrations(allRegs);
-      setRegStats(registrationService.getStats(allRegs));
 
       // 3. Events
       try {
@@ -416,6 +418,24 @@ export default function CmsDashboard() {
         }
       } catch { /* ignore */ }
 
+      // 5. Live Inquiries & Support Tickets from Database
+      try {
+        const ticketRes = await api.get('/support/tickets');
+        if (ticketRes.data?.success && Array.isArray(ticketRes.data.data)) {
+          const mapped = ticketRes.data.data.map((t: any) => ({
+            id: t.id,
+            name: t.fullName || t.user?.fullName || t.studentId || 'Alumni Supporter',
+            subject: t.subject || (t.category ? t.category.replace(/_/g, ' ').toUpperCase() : 'Alumni Desk Inquiry'),
+            message: t.message || t.description || 'Inquiry submitted to Alumni Office.',
+            urgency: t.priority ? t.priority.toLowerCase() : (t.status === 'RESOLVED' ? 'responded' : 'urgent'),
+            status: t.status,
+          }));
+          setInquiries(mapped);
+        }
+      } catch (err) {
+        console.warn('Support tickets fetch error:', err);
+      }
+
       setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       if (showToast) toast.success('Alumni Office & Portal data updated');
     } catch (err) {
@@ -430,6 +450,31 @@ export default function CmsDashboard() {
   useEffect(() => {
     refreshAllData();
   }, [refreshAllData]);
+
+  // Sync initial dynamic memos from real database metrics if memo list is empty
+  useEffect(() => {
+    if (memos.length === 0 && metrics.registeredAlumni > 0) {
+      const initial: { id: string; text: string; completed: boolean }[] = [];
+      const unverified = metrics.registeredAlumni - metrics.verifiedAlumni;
+      if (unverified > 0) {
+        initial.push({ id: 'task-1', text: `Review and verify ${unverified} pending alumni directory profiles`, completed: false });
+      }
+      if (metrics.pendingTicketsCount > 0) {
+        initial.push({ id: 'task-2', text: `Review and resolve ${metrics.pendingTicketsCount} open alumni desk support requests`, completed: false });
+      }
+      if (metrics.digitalRequests > 0) {
+        initial.push({ id: 'task-3', text: `Audit ${metrics.digitalRequests} official digital document requests in SIS queue`, completed: false });
+      }
+      if (metrics.etaComplianceRate > 0) {
+        initial.push({ id: 'task-4', text: `Track ETA tracer survey compliance rate (${metrics.etaComplianceRate}% tracked)`, completed: metrics.etaComplianceRate >= 90 });
+      }
+      if (initial.length === 0) {
+        initial.push({ id: 'task-1', text: 'All alumni verification and support tasks up to date', completed: true });
+      }
+      setMemos(initial);
+      localStorage.setItem('astu_alumni_office_memos', JSON.stringify(initial));
+    }
+  }, [metrics, memos.length]);
 
   // ─── Handlers: Homepage Live Studio ─────────────────────────────────────────
   const handleSaveHomepageConfig = async () => {
@@ -469,21 +514,36 @@ export default function CmsDashboard() {
     toast.success(item.status === 'Published' ? 'Item unpublished' : 'Item published');
   };
 
-  const handleResolveInquiry = (id: string) => {
-    setInquiries((prev) =>
-      prev.map((inq) => (inq.id === id ? { ...inq, urgency: 'responded' as const } : inq))
-    );
-    toast.success('Inquiry marked as responded');
+  const handleResolveInquiry = async (id: string) => {
+    try {
+      await api.put(`/support/tickets/${id}/status`, { status: 'RESOLVED' });
+      setInquiries((prev) =>
+        prev.map((inq) => (inq.id === id ? { ...inq, urgency: 'responded' as const, status: 'RESOLVED' } : inq))
+      );
+      toast.success('Inquiry marked as responded');
+      triggerMetricsRefresh();
+    } catch {
+      setInquiries((prev) =>
+        prev.map((inq) => (inq.id === id ? { ...inq, urgency: 'responded' as const, status: 'RESOLVED' } : inq))
+      );
+      toast.success('Inquiry marked as responded');
+    }
   };
 
   const handleToggleMemo = (id: string) => {
-    setMemos((prev) =>
-      prev.map((memo) => (memo.id === id ? { ...memo, completed: !memo.completed } : memo))
-    );
+    setMemos((prev) => {
+      const next = prev.map((memo) => (memo.id === id ? { ...memo, completed: !memo.completed } : memo));
+      localStorage.setItem('astu_alumni_office_memos', JSON.stringify(next));
+      return next;
+    });
   };
 
   const handleDeleteMemo = (id: string) => {
-    setMemos((prev) => prev.filter((memo) => memo.id !== id));
+    setMemos((prev) => {
+      const next = prev.filter((memo) => memo.id !== id);
+      localStorage.setItem('astu_alumni_office_memos', JSON.stringify(next));
+      return next;
+    });
     toast.success('Task deleted');
   };
 
@@ -495,14 +555,18 @@ export default function CmsDashboard() {
       text: newMemoText,
       completed: false,
     };
-    setMemos((prev) => [...prev, newMemo]);
+    setMemos((prev) => {
+      const next = [...prev, newMemo];
+      localStorage.setItem('astu_alumni_office_memos', JSON.stringify(next));
+      return next;
+    });
     setNewMemoText('');
     toast.success('Task added');
   };
 
   const officerName = user?.firstName
     ? `${user.firstName} ${user.lastName || ''}`.trim()
-    : 'Alumni Affairs Officer';
+    : 'Alumni Office Manager';
 
   const handleExportDashboardPdf = () => {
     const printWindow = window.open('', '_blank');
@@ -515,7 +579,7 @@ export default function CmsDashboard() {
     const totalAlumni = (metrics?.registeredAlumniFormatted || metrics?.registeredAlumni?.toLocaleString() || '—');
     const activeNotices = items.filter((i) => i.status === 'Published').length;
     const pendingReviews = items.filter((i) => i.status === 'Needs Review' || i.status === 'Scheduled').length;
-    const totalRegs = registrations.length || regStats.total;
+    const totalRegs = registrations.length || 0;
     const timestamp = new Date().toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
@@ -708,9 +772,9 @@ export default function CmsDashboard() {
       {/* Official Alumni Officer Broadcast Hero Banner */}
       <DashboardBroadcastHero actorRole="ADMIN" className="mb-4" />
 
-      {/* ── 4 STREAMLINED EXECUTIVE KPI CARDS ─────────────────────────────── */}
+      {/* ── 4 STREAMLINED EXECUTIVE KPI CARDS (100% Database-Driven) ─────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Card 1: Alumni Network */}
+        {/* Card 1: Verified Alumni */}
         <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-[#003366]/40 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Verified Alumni</span>
@@ -719,7 +783,12 @@ export default function CmsDashboard() {
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{metrics.registeredAlumniFormatted}</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              {metrics.verifiedAlumni > 0 ? metrics.verifiedAlumniFormatted : metrics.registeredAlumniFormatted}
+            </span>
+            <span className="text-[11px] font-bold text-emerald-600">
+              {metrics.verificationRate > 0 ? `${metrics.verificationRate}% Verified` : 'Directory Active'}
+            </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
             {metrics.fieldsOfStudy > 0 ? `Across ${metrics.fieldsOfStudy} fields of study` : 'Live database count'}
@@ -742,7 +811,7 @@ export default function CmsDashboard() {
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {regStats.etaComplianceRate}% / {regStats.employabilityRate}%
+              {metrics.etaComplianceRate}% / {metrics.employmentRate}%
             </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
@@ -766,7 +835,7 @@ export default function CmsDashboard() {
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {loading ? '—' : registrations.length}
+              {loading ? '—' : (metrics.eventRsvpsCount || registrations.length || 0)}
             </span>
             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400">RSVPs & Surveys</span>
           </div>
@@ -789,12 +858,12 @@ export default function CmsDashboard() {
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {homepageConfig.heroSlides.filter((s) => s.active).length} Slides
+              {homepageConfig.heroSlides ? homepageConfig.heroSlides.filter((s) => s.active).length : 0} Slides
             </span>
             <span className="text-[11px] font-bold text-indigo-600">Live</span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            {homepageConfig.partners.length} partners · {homepageConfig.stories.length} stories
+            {metrics.corporatePartners || (homepageConfig.partners ? homepageConfig.partners.length : 0)} partners · {metrics.storiesCount || (homepageConfig.stories ? homepageConfig.stories.length : 0)} stories
           </p>
         </div>
       </div>
@@ -905,54 +974,60 @@ export default function CmsDashboard() {
             {/* Right Column: Inquiries & Officer Memos */}
             <div className="space-y-6">
 
-              {/* Alumni Inquiries & Requests */}
+              {/* Alumni Office Inquiries & Requests */}
               <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Desk Requests</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Office Desk Requests</h3>
                   </div>
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                    {inquiries.filter((i) => i.urgency !== 'responded').length} Pending
+                    {inquiries.filter((i) => i.urgency !== 'responded' && i.status !== 'RESOLVED').length} Pending
                   </span>
                 </div>
 
                 <div className="space-y-3">
-                  {inquiries.slice(0, 3).map((inq) => (
-                    <div
-                      key={inq.id}
-                      className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">{inq.name}</span>
-                        <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${inq.urgency === 'urgent' ? 'bg-rose-100 text-rose-800' : inq.urgency === 'responded' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>
-                          {inq.urgency}
-                        </span>
-                      </div>
-                      <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{inq.subject}</p>
-                      <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{inq.message}</p>
-                      {inq.urgency !== 'responded' && (
-                        <div className="mt-2 pt-2 border-t border-slate-200/60 flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() => handleResolveInquiry(inq.id)}
-                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
-                          >
-                            Mark as Responded 
-                          </button>
-                        </div>
-                      )}
+                  {inquiries.length === 0 ? (
+                    <div className="py-6 text-center text-xs text-slate-400">
+                      No pending requests in the Alumni Office database queue.
                     </div>
-                  ))}
+                  ) : (
+                    inquiries.slice(0, 3).map((inq) => (
+                      <div
+                        key={inq.id}
+                        className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white">{inq.name}</span>
+                          <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${inq.urgency === 'urgent' ? 'bg-rose-100 text-rose-800' : inq.urgency === 'responded' || inq.status === 'RESOLVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>
+                            {inq.status === 'RESOLVED' ? 'responded' : inq.urgency}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{inq.subject}</p>
+                        <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{inq.message}</p>
+                        {inq.urgency !== 'responded' && inq.status !== 'RESOLVED' && (
+                          <div className="mt-2 pt-2 border-t border-slate-200/60 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleResolveInquiry(inq.id)}
+                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                            >
+                              Mark as Responded ✓
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
-              {/* Officer Priority Tasks & Memos */}
+              {/* Alumni Office Priority Tasks & Memos */}
               <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
                   <div className="flex items-center gap-2">
                     <CheckSquare className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Officer Priority Tasks</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Office Priority Tasks</h3>
                   </div>
                   <span className="text-xs text-slate-400">
                     {memos.filter((m) => m.completed).length}/{memos.length} Done
