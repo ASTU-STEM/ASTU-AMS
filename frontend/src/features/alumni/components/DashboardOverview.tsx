@@ -725,21 +725,24 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {donationCampaigns.slice(0, 3).map((campaign) => {
-            const progress = Math.round((campaign.raised / campaign.goal) * 100);
+            const raisedNum = typeof campaign.raised === 'object' && campaign.raised ? Number((campaign.raised as any).increment || 0) : Number(campaign.raised || 0);
+            const goalNum = typeof campaign.goal === 'object' && campaign.goal ? Number((campaign.goal as any).increment || 0) : Number(campaign.goal || 1);
+            const donorCountNum = typeof campaign.donorCount === 'object' && campaign.donorCount ? Number((campaign.donorCount as any).increment || 0) : Number(campaign.donorCount || 0);
+            const progress = Math.round((raisedNum / Math.max(1, goalNum)) * 100);
             return (
               <div key={campaign.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[9px] font-bold rounded-full uppercase">
                     {campaign.category}
                   </span>
-                  <span className="text-[10px] text-gray-400">{campaign.donorCount} donors</span>
+                  <span className="text-[10px] text-gray-400">{donorCountNum} donors</span>
                 </div>
                 <h4 className="text-sm font-bold text-gray-900 mb-1">{campaign.title}</h4>
                 <p className="text-[11px] text-gray-500 leading-relaxed mb-3 line-clamp-2">{campaign.description}</p>
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-astu-navy">{campaign.raised.toLocaleString()} ETB</span>
-                    <span className="text-gray-400">of {campaign.goal.toLocaleString()} ETB</span>
+                    <span className="font-bold text-astu-navy">{raisedNum.toLocaleString()} ETB</span>
+                    <span className="text-gray-400">of {goalNum.toLocaleString()} ETB</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-gradient-to-r from-astu-navy to-astu-green transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>

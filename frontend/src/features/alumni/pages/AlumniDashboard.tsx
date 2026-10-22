@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, X, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
@@ -47,12 +47,22 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  const location = useLocation();
+
   const [activeTab, setActiveTab] = useState<string>(() => {
     if (defaultTab) return defaultTab;
     if (window.location.pathname.endsWith('/tools')) return 'tools';
     const params = new URLSearchParams(window.location.search);
     return params.get('tab') || 'dashboard';
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('alumni_sidebar_collapsed') === 'true');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -2037,17 +2047,17 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                       <div key={campaign.id || idx} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
                         <div className="flex items-center justify-between mb-3">
                           <span className="px-2 py-0.5 bg-[#003366]/10 text-[#003366] text-[9px] font-bold rounded-full uppercase">{campaign.category || 'Fund'}</span>
-                          <span className="text-[10px] text-[var(--text-secondary)]">{campaign.donorCount || 0} donors</span>
+                          <span className="text-[10px] text-[var(--text-secondary)]">{typeof campaign.donorCount === 'object' && campaign.donorCount ? ((campaign.donorCount as any).increment || 0) : (campaign.donorCount || 0)} donors</span>
                         </div>
                         <h3 className="text-sm font-bold text-[var(--text-primary)]">{campaign.title}</h3>
                         <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{campaign.description || campaign.desc}</p>
                         <div className="mt-4">
                           <div className="flex items-center justify-between text-xs mb-1.5">
-                            <span className="font-bold text-[#003366]">{campaign.raised} ETB</span>
-                            <span className="text-[var(--text-muted)]">of {campaign.targetAmount || campaign.goal} ETB</span>
+                            <span className="font-bold text-[#003366]">{Number(typeof campaign.raised === 'object' && campaign.raised ? (campaign.raised as any).increment : (campaign.raised || 0)).toLocaleString()} ETB</span>
+                            <span className="text-[var(--text-muted)]">of {Number(typeof campaign.targetAmount === 'object' && campaign.targetAmount ? (campaign.targetAmount as any).increment : (campaign.targetAmount || campaign.goal || 0)).toLocaleString()} ETB</span>
                           </div>
                           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${Math.min(100, Math.round(((campaign.raised || 0) / (campaign.targetAmount || 1)) * 100))}%` }}></div>
+                            <div className="h-full rounded-full bg-gradient-to-r from-[#003366] to-[#1d9e75] transition-all" style={{ width: `${Math.min(100, Math.round(((Number(typeof campaign.raised === 'object' && campaign.raised ? (campaign.raised as any).increment : campaign.raised) || 0) / (Number(typeof campaign.targetAmount === 'object' && campaign.targetAmount ? (campaign.targetAmount as any).increment : (campaign.targetAmount || campaign.goal)) || 1)) * 100))}%` }}></div>
                           </div>
                         </div>
                         <button
