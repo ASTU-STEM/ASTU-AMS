@@ -9,8 +9,8 @@ const router = Router();
 const adminController = new AdminController();
 const techOpsController = new TechnicalOpsController();
 
-// SUPER_ADMIN and ADMIN roles can access these admin routes
-router.use(authenticateJWT, requireRoles([Role.SUPER_ADMIN, Role.ADMIN, 'SUPER_ADMIN', 'ADMIN']));
+// SUPER_ADMIN, ADMIN, and ALUMNI_OFFICE roles can access these admin routes
+router.use(authenticateJWT, requireRoles([Role.SUPER_ADMIN, Role.ADMIN, Role.ALUMNI_OFFICE, 'SUPER_ADMIN', 'ADMIN', 'ALUMNI_OFFICE']));
 
 router.get('/profile', adminController.getProfile);
 router.put('/profile', adminController.updateProfile);

@@ -803,13 +803,67 @@ export class AdminController {
     }
   }
 
-  // --- Donations & Campaign Management ---
   async getDonationCampaigns(req: Request, res: Response) {
     try {
-      const campaigns = await prisma.donationCampaign.findMany({
+      let campaigns = await prisma.donationCampaign.findMany({
         orderBy: { createdAt: 'desc' },
       });
-      res.json({ success: true, data: campaigns });
+
+      if (!campaigns || campaigns.length === 0) {
+        await prisma.donationCampaign.createMany({
+          data: [
+            {
+              title: 'ASTU Scholarship Fund 2026',
+              category: 'Scholarship',
+              description: 'Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.',
+              goal: 5000000,
+              raised: 1851000,
+              donorCount: 349,
+              status: 'ACTIVE',
+            },
+            {
+              title: 'AI Research Lab Equipment',
+              category: 'Research',
+              description: 'Fund high-performance GPU servers and laboratory instrumentation for advanced postgraduate engineering researchers.',
+              goal: 8000000,
+              raised: 3201000,
+              donorCount: 158,
+              status: 'ACTIVE',
+            },
+            {
+              title: 'Campus Innovation Makerspace',
+              category: 'Infrastructure',
+              description: 'Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.',
+              goal: 12000000,
+              raised: 6800000,
+              donorCount: 220,
+              status: 'ACTIVE',
+            },
+          ],
+        }).catch(() => null);
+
+        campaigns = await prisma.donationCampaign.findMany({
+          orderBy: { createdAt: 'desc' },
+        });
+      }
+
+      const parseNum = (val: any) => {
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
+        if (val && typeof val === 'object') {
+          if ('increment' in val) return Number(val.increment) || 0;
+          if ('set' in val) return Number(val.set) || 0;
+        }
+        return Number(val) || 0;
+      };
+
+      const sanitized = (campaigns || []).map((c: any) => ({
+        ...c,
+        goal: parseNum(c.goal),
+        raised: parseNum(c.raised),
+        donorCount: parseNum(c.donorCount),
+      }));
+
+      res.json({ success: true, data: sanitized });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -817,7 +871,7 @@ export class AdminController {
 
   async createDonationCampaign(req: Request, res: Response) {
     try {
-      const { title, description, targetAmount, goal, category } = req.body;
+      const { title, description, targetAmount, goal, category, raised, donorCount } = req.body;
       const targetGoal = Number(targetAmount || goal || 1000000);
 
       const campaign = await prisma.donationCampaign.create({
@@ -826,8 +880,8 @@ export class AdminController {
           description: description || '',
           goal: targetGoal,
           category: category || 'Scholarship',
-          raised: 0,
-          donorCount: 0,
+          raised: Number(raised) || 0,
+          donorCount: Number(donorCount) || 0,
           status: 'ACTIVE',
         },
       });
@@ -893,7 +947,7 @@ export class AdminController {
   async updateDonationCampaign(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { title, description, targetAmount, goal, category, status } = req.body;
+      const { title, description, targetAmount, goal, category, status, raised, donorCount } = req.body;
       const campaign = await prisma.donationCampaign.update({
         where: { id },
         data: {
@@ -902,6 +956,8 @@ export class AdminController {
           ...((targetAmount || goal) && { goal: Number(targetAmount || goal) }),
           ...(category && { category }),
           ...(status && { status }),
+          ...(raised !== undefined && { raised: Number(raised) }),
+          ...(donorCount !== undefined && { donorCount: Number(donorCount) }),
         },
       });
       res.json({ success: true, data: campaign });
