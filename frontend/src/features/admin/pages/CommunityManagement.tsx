@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Plus,
   Search,
@@ -21,6 +21,11 @@ import {
   Building2,
   CheckCircle2,
   Sparkles,
+  LayoutGrid,
+  List,
+  Download,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
@@ -255,6 +260,56 @@ export default function CommunityManagement() {
       m.org.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // View mode & pagination for member roster
+  const [memberViewMode, setMemberViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('astu_ams_community_view_mode') as 'grid' | 'list') || 'grid';
+  });
+  const [memberPage, setMemberPage] = useState(1);
+  const [memberPageSize, setMemberPageSize] = useState<number | 'all'>(8);
+
+  const handleMemberViewModeChange = (mode: 'grid' | 'list') => {
+    setMemberViewMode(mode);
+    localStorage.setItem('astu_ams_community_view_mode', mode);
+  };
+
+  useEffect(() => {
+    setMemberPage(1);
+  }, [search, categoryFilter]);
+
+  const totalMemberPages = memberPageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredMembers.length / (typeof memberPageSize === 'number' ? memberPageSize : 8)));
+  const paginatedMembers = useMemo(() => {
+    if (memberPageSize === 'all') return filteredMembers;
+    const start = (memberPage - 1) * memberPageSize;
+    return filteredMembers.slice(start, start + memberPageSize);
+  }, [filteredMembers, memberPage, memberPageSize]);
+
+  const exportMembersCsv = () => {
+    if (!filteredMembers.length) {
+      toast.error('No community members to export');
+      return;
+    }
+    const headers = ['ID', 'Name', 'Category', 'Role', 'Organization', 'Active', 'Badge', 'Bio'];
+    const rows = filteredMembers.map((m) => [
+      m.id,
+      `"${(m.name || '').replace(/"/g, '""')}"`,
+      m.category,
+      `"${(m.role || '').replace(/"/g, '""')}"`,
+      `"${(m.org || '').replace(/"/g, '""')}"`,
+      m.active ? 'Active' : 'Inactive',
+      `"${(m.badge || '').replace(/"/g, '""')}"`,
+      `"${(m.bio || '').replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `astu_community_leaders_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${filteredMembers.length} community leaders to CSV`);
+  };
 
   // Member CRUD handlers
   const handleAddMember = () => {
@@ -524,20 +579,66 @@ export default function CommunityManagement() {
           {/* ── TAB 1: ALUMNI ROSTER ── */}
           {activeTab === 'members' && (
             <div className="space-y-4 rounded-2xl bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Users className="h-4 w-4 text-[#003366] dark:text-sky-400" />
-                    <span>Alumni Leaders Roster ({members.length})</span>
+                    <span>Alumni Leaders Roster ({filteredMembers.length})</span>
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">Manage individual featured alumni leaders</p>
                 </div>
-                <button
-                  onClick={handleAddMember}
-                  className="px-3.5 py-2 rounded-xl bg-[#003366] text-white hover:bg-[#002855] text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <Plus className="h-4 w-4" /> Add Community Member
-                </button>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* View Mode Toggle */}
+                  <div className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5 shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => handleMemberViewModeChange('grid')}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        memberViewMode === 'grid'
+                          ? 'bg-white dark:bg-slate-900 text-[#003366] dark:text-sky-400 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      }`}
+                      title="Grid View (Cards)"
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Cards</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMemberViewModeChange('list')}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        memberViewMode === 'list'
+                          ? 'bg-white dark:bg-slate-900 text-[#003366] dark:text-sky-400 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      }`}
+                      title="List View (Table)"
+                    >
+                      <List className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">List Form</span>
+                    </button>
+                  </div>
+
+                  {/* CSV Export */}
+                  <button
+                    type="button"
+                    onClick={exportMembersCsv}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                    title="Export CSV"
+                  >
+                    <Download className="h-3.5 w-3.5 text-slate-500" />
+                    <span className="hidden sm:inline">Export</span>
+                  </button>
+
+                  {/* Add Member Button */}
+                  <button
+                    onClick={handleAddMember}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#003366] text-white hover:bg-[#002855] text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Add Member</span>
+                  </button>
+                </div>
               </div>
 
               {/* Filters */}
@@ -555,7 +656,7 @@ export default function CommunityManagement() {
                     </button>
                   ))}
                 </div>
-                <div className="relative w-full sm:w-48">
+                <div className="relative w-full sm:w-56">
                   <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
                   <input
                     type="text"
@@ -567,39 +668,160 @@ export default function CommunityManagement() {
                 </div>
               </div>
 
-              {/* Roster Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[520px] overflow-y-auto pr-1">
-                {filteredMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:border-slate-300 transition-all flex flex-col justify-between"
-                  >
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={member.image || '/images/default-avatar.png'}
-                        alt={member.name}
-                        className="h-11 w-11 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{member.name}</h4>
-                        <p className="text-[11px] text-[#003366] dark:text-sky-400 font-medium truncate">{member.role}</p>
-                        <p className="text-[10px] text-slate-400 truncate">{member.org}</p>
+              {/* Roster Presentation: Grid vs List Form */}
+              {paginatedMembers.length === 0 ? (
+                <div className="text-center py-10 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <Users className="h-9 w-9 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-600 dark:text-slate-400">No community leaders match your filter</p>
+                </div>
+              ) : memberViewMode === 'grid' ? (
+                /* Roster Cards (Grid) */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[300px]">
+                  {paginatedMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:border-slate-300 transition-all flex flex-col justify-between"
+                    >
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={member.image || '/images/default-avatar.png'}
+                          alt={member.name}
+                          className="h-11 w-11 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/default-avatar.png';
+                          }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{member.name}</h4>
+                          <p className="text-[11px] text-[#003366] dark:text-sky-400 font-medium truncate">{member.role}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{member.org}</p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
-                      <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                        {member.category}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => handleViewMember(member)} className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white"><Eye className="h-3.5 w-3.5" /></button>
-                        <button onClick={() => handleEditMember(member)} className="p-1 text-blue-600 dark:text-sky-400"><Edit3 className="h-3.5 w-3.5" /></button>
-                        <button onClick={() => handleDeleteMember(member.id)} className="p-1 text-rose-600 dark:text-rose-400"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
+                        <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                          {member.category}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleViewMember(member)} className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer" title="View"><Eye className="h-3.5 w-3.5" /></button>
+                          <button onClick={() => handleEditMember(member)} className="p-1 text-blue-600 dark:text-sky-400 cursor-pointer" title="Edit"><Edit3 className="h-3.5 w-3.5" /></button>
+                          <button onClick={() => handleDeleteMember(member.id)} className="p-1 text-rose-600 dark:text-rose-400 cursor-pointer" title="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              ) : (
+                /* Roster Table (List Form) */
+                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                  <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                    <thead className="bg-slate-100/80 dark:bg-slate-800/80 uppercase text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wider border-b border-slate-200 dark:border-slate-700">
+                      <tr>
+                        <th className="py-2.5 px-3">Leader</th>
+                        <th className="py-2.5 px-3">Role & Org</th>
+                        <th className="py-2.5 px-3">Category</th>
+                        <th className="py-2.5 px-3">Status</th>
+                        <th className="py-2.5 px-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {paginatedMembers.map((member) => (
+                        <tr key={member.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                          <td className="py-2 px-3">
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={member.image || '/images/default-avatar.png'}
+                                alt={member.name}
+                                className="h-7 w-7 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/images/default-avatar.png';
+                                }}
+                              />
+                              <span className="font-bold text-slate-900 dark:text-white truncate">{member.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-2 px-3">
+                            <div className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 truncate">{member.role}</div>
+                            <div className="text-[10px] text-slate-400 truncate">{member.org}</div>
+                          </td>
+                          <td className="py-2 px-3">
+                            <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
+                              {member.category}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3">
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                              member.active
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+                                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                            }`}>
+                              {member.active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="py-2 px-3 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1">
+                              <button onClick={() => handleViewMember(member)} className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer" title="View"><Eye className="h-3.5 w-3.5" /></button>
+                              <button onClick={() => handleEditMember(member)} className="p-1 text-blue-600 dark:text-sky-400 cursor-pointer" title="Edit"><Edit3 className="h-3.5 w-3.5" /></button>
+                              <button onClick={() => handleDeleteMember(member.id)} className="p-1 text-rose-600 dark:text-rose-400 cursor-pointer" title="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Pagination Controls */}
+              {filteredMembers.length > 0 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <span>Rows:</span>
+                    <select
+                      value={memberPageSize}
+                      onChange={(e) => {
+                        const val = e.target.value === 'all' ? 'all' : Number(e.target.value);
+                        setMemberPageSize(val);
+                        setMemberPage(1);
+                      }}
+                      className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold"
+                    >
+                      <option value={8}>8</option>
+                      <option value={16}>16</option>
+                      <option value={24}>24</option>
+                      <option value={50}>50</option>
+                      <option value="all">All</option>
+                    </select>
+                    <span>
+                      {memberPageSize === 'all'
+                        ? `All ${filteredMembers.length} records`
+                        : `${Math.min((memberPage - 1) * (typeof memberPageSize === 'number' ? memberPageSize : 8) + 1, filteredMembers.length)}–${Math.min(memberPage * (typeof memberPageSize === 'number' ? memberPageSize : 8), filteredMembers.length)} of ${filteredMembers.length}`}
+                    </span>
                   </div>
-                ))}
-              </div>
+
+                  {memberPageSize !== 'all' && totalMemberPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setMemberPage((p) => Math.max(1, p - 1))}
+                        disabled={memberPage === 1}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer disabled:cursor-not-allowed text-xs font-semibold"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5 inline mr-0.5" /> Prev
+                      </button>
+                      <span className="px-2 font-bold text-slate-700 dark:text-slate-300">
+                        {memberPage} / {totalMemberPages}
+                      </span>
+                      <button
+                        onClick={() => setMemberPage((p) => Math.min(totalMemberPages, p + 1))}
+                        disabled={memberPage === totalMemberPages}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer disabled:cursor-not-allowed text-xs font-semibold"
+                      >
+                        Next <ChevronRight className="h-3.5 w-3.5 inline ml-0.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
