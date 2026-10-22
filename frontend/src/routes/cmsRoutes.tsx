@@ -21,6 +21,12 @@ const MediaLibrary = lazy(() => import('../features/admin/pages/MediaLibrary'));
 const SEOManagement = lazy(() => import('../features/admin/pages/SEOManagement'));
 const ApprovalWorkflow = lazy(() => import('../features/admin/pages/ApprovalWorkflow'));
 const ContentTemplates = lazy(() => import('../features/admin/pages/ContentTemplates'));
+const DonationsManagement = lazy(() => import('../features/admin/pages/DonationsManagement'));
+const JobsManagement = lazy(() => import('../features/admin/pages/JobsManagement'));
+const SurveyManagement = lazy(() => import('../features/admin/pages/SurveyManagement'));
+const ReportsCenter = lazy(() => import('../features/admin/pages/ReportsCenter'));
+const AnalyticsOverview = lazy(() => import('../features/admin/pages/AnalyticsOverview'));
+const UserManagement = lazy(() => import('../features/admin/pages/UserManagement'));
 
 export default function CmsRoutes() {
   return (
@@ -34,8 +40,17 @@ export default function CmsRoutes() {
       <Route element={<CmsLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<CmsDashboard />} />
+        <Route path="surveys" element={<SurveyManagement />} />
+        <Route path="tracer-studies" element={<SurveyManagement />} />
+        <Route path="analytics" element={<AnalyticsOverview />} />
+        <Route path="reports" element={<ReportsCenter />} />
+        <Route path="alumni-directory" element={<UserManagement />} />
+        <Route path="users" element={<UserManagement />} />
         <Route path="registrations" element={<AnnouncementRegistrations />} />
         <Route path="events" element={<EventWorkshopManagement />} />
+        <Route path="jobs" element={<JobsManagement />} />
+        <Route path="careers" element={<JobsManagement />} />
+        <Route path="donations" element={<DonationsManagement />} />
         <Route path="homepage" element={<HomepageManagement />} />
         <Route path="content" element={<ContentList />} />
         <Route path="announcements" element={<ContentList />} />

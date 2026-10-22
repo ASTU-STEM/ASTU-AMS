@@ -13,6 +13,9 @@ import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
 import PublicGalleryPage from "./pages/PublicGalleryPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import EventsPage from "./pages/EventsPage";
+import DonationsPage from "./pages/DonationsPage";
+import AlumniCommunityPage from "./pages/AlumniCommunityPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
@@ -75,6 +78,10 @@ function AppContent() {
         <Route path="/stories/:id" element={<StoryDetailPage />} />
         <Route path="/events" element={<HomePage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
+        <Route path="/workshops/:id" element={<EventDetailPage />} />
+        <Route path="/donations" element={<DonationsPage />} />
+        <Route path="/info/donations" element={<DonationsPage />} />
+        <Route path="/community" element={<AlumniCommunityPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/employers" element={<EmployersPage />} />
