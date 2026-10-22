@@ -8,6 +8,7 @@ import { MdPhone, MdPerson, MdMoney } from "react-icons/md";
 import { CreditCard, Lock, CheckCircle2, Check, ArrowLeft, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { alumniService } from "../features/alumni/services/alumni.service";
+import contentService from "../features/admin/services/content.service";
 
 interface DonationCampaign {
   id?: string;
@@ -96,7 +97,14 @@ export default function TelebirrDonationModal({
       try {
         await alumniService.makeDonation(campaignId, numericAmount, txRef);
       } catch (e) {
-        console.warn("Local donation update notice", e);
+        console.warn("Local donation update notice, updating public database campaign:", e);
+        try {
+          await contentService.recordPublicDonation({
+            campaignId,
+            amount: numericAmount,
+            donorName,
+          });
+        } catch (_) {}
       }
 
       setStep("success");
