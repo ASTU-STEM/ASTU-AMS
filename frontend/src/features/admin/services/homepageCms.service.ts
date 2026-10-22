@@ -679,6 +679,21 @@ export interface HomepageCmsConfig {
     description?: string;
     stats?: Array<{ icon?: any; value?: string; label?: string }>;
   };
+  givingSection?: {
+    title: string;
+    subtitle: string;
+    buttonText: string;
+    secondaryButtonText?: string;
+    commitmentEyebrow?: string;
+    commitmentTitle?: string;
+    commitmentSubtitle?: string;
+    commitmentCard1Title?: string;
+    commitmentCard1Desc?: string;
+    commitmentCard2Title?: string;
+    commitmentCard2Desc?: string;
+    commitmentCard3Title?: string;
+    commitmentCard3Desc?: string;
+  };
   ctaSection?: {
     enabled: boolean;
     title: string;
