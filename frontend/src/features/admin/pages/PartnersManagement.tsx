@@ -30,6 +30,7 @@ import {
   X,
   MapPin,
   Mail,
+  ChevronLeft,
   ChevronRight,
   Maximize2,
   Minimize2,
@@ -82,6 +83,28 @@ export default function PartnersManagement() {
     const s = homepageCmsService.getSettings();
     return s?.partners && s.partners.length > 0 ? s.partners : defaultPartnersList;
   });
+
+  // High-Volume Partner Companies Directory Search & Pagination (500+ records)
+  const [partnerSearchQuery, setPartnerSearchQuery] = useState('');
+  const [partnerPage, setPartnerPage] = useState(1);
+  const partnersPerPage = 12;
+
+  const filteredPartners = React.useMemo(() => {
+    const q = partnerSearchQuery.trim().toLowerCase();
+    if (!q) return partners;
+    return partners.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.industry || '').toLowerCase().includes(q) ||
+        (p.location || '').toLowerCase().includes(q)
+    );
+  }, [partners, partnerSearchQuery]);
+
+  const totalPartnerPages = Math.ceil(filteredPartners.length / partnersPerPage) || 1;
+  const paginatedPartners = React.useMemo(() => {
+    const s = (partnerPage - 1) * partnersPerPage;
+    return filteredPartners.slice(s, s + partnersPerPage);
+  }, [filteredPartners, partnerPage]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -722,8 +745,35 @@ export default function PartnersManagement() {
                   </button>
                 </div>
 
+                {/* Directory Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search 500+ corporate partners..."
+                    value={partnerSearchQuery}
+                    onChange={(e) => {
+                      setPartnerSearchQuery(e.target.value);
+                      setPartnerPage(1);
+                    }}
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 py-1.5 pl-8 pr-7 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#003366]"
+                  />
+                  {partnerSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPartnerSearchQuery('');
+                        setPartnerPage(1);
+                      }}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+
                 <div className="space-y-2">
-                  {partners.map((company) => (
+                  {paginatedPartners.map((company) => (
                     <div
                       key={company.id}
                       className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 hover:border-[#003366]/40 transition-all dark:border-slate-700 dark:bg-slate-800"
@@ -777,7 +827,44 @@ export default function PartnersManagement() {
                       </div>
                     </div>
                   ))}
+
+                  {paginatedPartners.length === 0 && (
+                    <div className="py-8 text-center text-xs text-slate-400">
+                      No organizations found matching "{partnerSearchQuery}".
+                    </div>
+                  )}
                 </div>
+
+                {/* Directory Pagination Controls */}
+                {totalPartnerPages > 1 && (
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500">
+                    <span>
+                      {(partnerPage - 1) * partnersPerPage + 1}–{Math.min(partnerPage * partnersPerPage, filteredPartners.length)} of {filteredPartners.length.toLocaleString()}
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPartnerPage((p) => Math.max(1, p - 1))}
+                        disabled={partnerPage === 1}
+                        className="p-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 disabled:opacity-30 cursor-pointer"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <span className="font-bold text-slate-700 dark:text-slate-300 px-1">
+                        {partnerPage} / {totalPartnerPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setPartnerPage((p) => Math.min(totalPartnerPages, p + 1))}
+                        disabled={partnerPage === totalPartnerPages}
+                        className="p-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 disabled:opacity-30 cursor-pointer"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

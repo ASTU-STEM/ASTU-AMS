@@ -29,6 +29,7 @@ import {
   Check,
   RotateCcw,
   ShieldCheck,
+  ChevronLeft,
   ChevronRight,
   GraduationCap,
   UserCheck,
@@ -793,6 +794,20 @@ export default function ContentList() {
     });
   }, [items, statusTab, typeFilter, search]);
 
+  // High-Volume Content Pagination
+  const [contentPage, setContentPage] = useState(1);
+  const [contentPageSize, setContentPageSize] = useState(12);
+
+  useEffect(() => {
+    setContentPage(1);
+  }, [statusTab, typeFilter, search]);
+
+  const totalContentPages = Math.ceil(filtered.length / contentPageSize) || 1;
+  const paginatedContent = useMemo(() => {
+    const s = (contentPage - 1) * contentPageSize;
+    return filtered.slice(s, s + contentPageSize);
+  }, [filtered, contentPage, contentPageSize]);
+
   const counts = useMemo(() => {
     const result: Record<string, number> = { all: items.length };
     for (const tab of STATUS_TABS) {
@@ -1251,7 +1266,7 @@ export default function ContentList() {
           {/* Cards or Table */}
           {view === 'grid' ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((item) => (
+              {paginatedContent.map((item) => (
                 <ContentCard
                   key={item.id}
                   item={item}
@@ -1304,7 +1319,7 @@ export default function ContentList() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filtered.map((item) => (
+                  {paginatedContent.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="px-4 py-3">
                         <input
@@ -1388,6 +1403,60 @@ export default function ContentList() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* High-Volume Pagination Controls */}
+          {totalContentPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-500">
+              <div className="flex items-center gap-2">
+                <span>
+                  Showing <strong>{(contentPage - 1) * contentPageSize + 1}</strong> to{' '}
+                  <strong>{Math.min(contentPage * contentPageSize, filtered.length)}</strong> of{' '}
+                  <strong>{filtered.length.toLocaleString()}</strong> announcements
+                </span>
+                <span className="text-slate-300">|</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Per page:</span>
+                  <select
+                    value={contentPageSize}
+                    onChange={(e) => {
+                      setContentPageSize(Number(e.target.value));
+                      setContentPage(1);
+                    }}
+                    className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none"
+                  >
+                    <option value={12}>12</option>
+                    <option value={24}>24</option>
+                    <option value={48}>48</option>
+                    <option value={96}>96</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setContentPage((p) => Math.max(1, p - 1))}
+                  disabled={contentPage === 1}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 cursor-pointer"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                <span className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 font-extrabold text-slate-800 dark:text-white">
+                  Page {contentPage} of {totalContentPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setContentPage((p) => Math.min(totalContentPages, p + 1))}
+                  disabled={contentPage === totalContentPages}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 cursor-pointer"
+                  title="Next Page"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           )}
 

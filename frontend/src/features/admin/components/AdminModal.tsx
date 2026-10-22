@@ -12,15 +12,20 @@ const sizeClasses: Record<NonNullable<AdminModalProps['size']>, string> = {
 
 export default function AdminModal({
   open,
+  isOpen,
   title,
+  subtitle,
   children,
   onClose,
   footer,
   size = 'md',
+  maxWidth,
   closeOnBackdrop = true,
 }: AdminModalProps) {
+  const isModalOpen = Boolean(open ?? isOpen);
+
   useEffect(() => {
-    if (!open) return;
+    if (!isModalOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -52,9 +57,9 @@ export default function AdminModal({
       });
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [isModalOpen, onClose]);
 
-  if (!open) return null;
+  if (!isModalOpen) return null;
 
   const modalContent = (
     <div
@@ -75,7 +80,7 @@ export default function AdminModal({
       <div
         className={[
           'modal-panel my-auto flex max-h-[92vh] w-full flex-col overflow-hidden rounded-[16px] border border-slate-300/80 bg-white dark:border-slate-700 dark:bg-slate-900 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.7)]',
-          sizeClasses[size],
+          maxWidth || sizeClasses[size],
         ].join(' ')}
       >
         {/* Executive Header Banner with ASTU Seal Logo */}
@@ -102,8 +107,8 @@ export default function AdminModal({
                     ASTU System
                   </span>
                 </div>
-                <p className="text-[11px] font-medium text-blue-100/80 mt-0.5">
-                  Adama Science & Technology University • Control Center
+                <p className="text-[11px] font-medium text-blue-100/80 mt-0.5 truncate max-w-xl">
+                  {subtitle || 'Adama Science & Technology University • Control Center'}
                 </p>
               </div>
             </div>

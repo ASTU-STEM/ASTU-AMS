@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CalendarDays, ChevronDown, ChevronRight, ClipboardList,
+  CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ClipboardList,
   Eye, FilePlus2, GripVertical, MoreHorizontal, Plus,
   Send, Sparkles, Trash2, X, BarChart as BarChartIcon,
   Calendar, Edit2, Play, Search, Filter, RefreshCw, Mail,
-  Users, CheckCircle, Clock, AlertTriangle, AlertCircle, TrendingUp, GraduationCap
+  Users, CheckCircle, Clock, AlertTriangle, AlertCircle, TrendingUp, GraduationCap, Download
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
@@ -134,6 +134,35 @@ export default function SurveyManagement() {
   const [batchFilter, setBatchFilter] = useState<string>('ALL');
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+
+  // High-Volume Tracer Survey Assignments Pagination & Export
+  const [wavePage, setWavePage] = useState(1);
+  const [wavePageSize, setWavePageSize] = useState(15);
+  const [waveJumpInput, setWaveJumpInput] = useState('');
+
+  const exportAssignmentsToCsv = (itemsToExport: any[]) => {
+    const headers = ['Alumni Name', 'Email', 'Student ID', 'Batch', 'Survey Title', 'Department', 'Status', 'Assigned Date', 'Due Date'];
+    const rows = itemsToExport.map((item) => [
+      `"${item.alumni?.fullName || ''}"`,
+      `"${item.alumni?.email || ''}"`,
+      `"${item.alumni?.studentId || ''}"`,
+      item.alumni?.graduationYear || '',
+      `"${item.survey?.title || ''}"`,
+      `"${item.alumni?.department?.name || ''}"`,
+      item.status || '',
+      item.assignedAt ? new Date(item.assignedAt).toISOString().slice(0, 10) : '',
+      item.dueDate ? new Date(item.dueDate).toISOString().slice(0, 10) : '',
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `tracer-assignments-batch-${batchFilter}-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Exported ${itemsToExport.length} survey assignment(s) to CSV!`);
+  };
 
   // Survey Details Responses State
   const [selectedSurveyResponses, setSelectedSurveyResponses] = useState<any[]>([]);
@@ -851,6 +880,32 @@ export default function SurveyManagement() {
                         <option value="EXPIRED">Expired</option>
                       </select>
                     </div>
+
+                    {/* Export CSV */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const filtered = assignments.filter((item) => {
+                          const name = item.alumni?.fullName || '';
+                          const email = item.alumni?.email || '';
+                          const studentId = item.alumni?.studentId || '';
+                          const surveyTitle = item.survey?.title || '';
+                          const matchesSearch =
+                            name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            surveyTitle.toLowerCase().includes(searchQuery.toLowerCase());
+                          const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                          const matchesBatch = batchFilter === 'ALL' || String(item.alumni?.graduationYear) === batchFilter;
+                          return matchesSearch && matchesStatus && matchesBatch;
+                        });
+                        exportAssignmentsToCsv(filtered);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm cursor-pointer"
+                      title="Export filtered assignments to CSV"
+                    >
+                      <Download className="h-3.5 w-3.5 text-[#003580]" /> Export CSV
+                    </button>
                   </div>
                 </div>
 
@@ -895,7 +950,10 @@ export default function SurveyManagement() {
                           );
                         }
 
-                        return filtered.map((item, idx) => {
+                        const startIdx = (wavePage - 1) * wavePageSize;
+                        const pageItems = filtered.slice(startIdx, startIdx + wavePageSize);
+
+                        return pageItems.map((item, idx) => {
                           const assignedDate = new Date(item.assignedAt).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'short',
@@ -961,6 +1019,78 @@ export default function SurveyManagement() {
                     </tbody>
                   </table>
                 </div>
+
+                {/* High-Volume Pagination Footer for Assignments */}
+                {(() => {
+                  const filtered = assignments.filter((item) => {
+                    const name = item.alumni?.fullName || '';
+                    const email = item.alumni?.email || '';
+                    const studentId = item.alumni?.studentId || '';
+                    const surveyTitle = item.survey?.title || '';
+                    const matchesSearch =
+                      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      surveyTitle.toLowerCase().includes(searchQuery.toLowerCase());
+                    const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                    const matchesBatch = batchFilter === 'ALL' || String(item.alumni?.graduationYear) === batchFilter;
+                    return matchesSearch && matchesStatus && matchesBatch;
+                  });
+
+                  const totalPages = Math.ceil(filtered.length / wavePageSize) || 1;
+
+                  if (filtered.length <= wavePageSize && totalPages <= 1) return null;
+
+                  return (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 p-4 text-xs text-slate-500 bg-slate-50/50">
+                      <div className="flex items-center gap-3">
+                        <span>
+                          Showing <strong>{(wavePage - 1) * wavePageSize + 1}</strong> to{' '}
+                          <strong>{Math.min(wavePage * wavePageSize, filtered.length)}</strong> of{' '}
+                          <strong>{filtered.length.toLocaleString()}</strong> assignments
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-slate-400">Rows:</span>
+                          <select
+                            value={wavePageSize}
+                            onChange={(e) => {
+                              setWavePageSize(Number(e.target.value));
+                              setWavePage(1);
+                            }}
+                            className="rounded border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold text-slate-700 outline-none"
+                          >
+                            <option value={15}>15</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setWavePage((p) => Math.max(1, p - 1))}
+                          disabled={wavePage === 1}
+                          className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="font-semibold text-slate-800 px-2">
+                          Page {wavePage} of {totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setWavePage((p) => Math.min(totalPages, p + 1))}
+                          disabled={wavePage === totalPages}
+                          className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
+                        >
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </section>
             </>
           )}

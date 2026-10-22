@@ -25,6 +25,7 @@ import {
   Save,
   ShieldCheck,
   Star,
+  Heart,
   Trash2,
   Trophy,
   Upload,
@@ -62,7 +63,7 @@ import {
   Columns,
   Layout,
 } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
@@ -107,6 +108,7 @@ type CmsCategory =
   | 'community'
   | 'partners-portal'
   | 'accreditation-faq'
+  | 'giving-campaigns'
   | 'detail-pages'
   | 'footer-cta';
 
@@ -118,8 +120,9 @@ const CATEGORIES: { id: CmsCategory; label: string; icon: React.ComponentType<{ 
   { id: 'gallery', label: '5. Campus Moments (Gallery)', icon: ImageIcon, desc: 'Campus moments photo grid, album tags & gallery spotlight' },
   { id: 'events-news', label: '6. Events & Notices', icon: CalendarDays, desc: 'Alumni events, workshops, announcements & official bulletins' },
   { id: 'partners-portal', label: '7. Partner Companies', icon: Briefcase, desc: 'Corporate partners, recruitment tracks & enterprise logos' },
-  { id: 'accreditation-faq', label: '8. Accreditation & FAQ', icon: ShieldCheck, desc: 'Quality assurance banner, tracer studies & frequently asked questions' },
-  { id: 'footer-cta', label: '9. CTA Banner & Footer', icon: MapPin, desc: 'Bottom CTA banner, official addresses, support contacts & directory' },
+  { id: 'giving-campaigns', label: '8. Giving & Research Funds', icon: Heart, desc: 'Homepage giving header, research funds directory & donation portal' },
+  { id: 'accreditation-faq', label: '9. Accreditation & FAQ', icon: ShieldCheck, desc: 'Quality assurance banner, tracer studies & frequently asked questions' },
+  { id: 'footer-cta', label: '10. CTA Banner & Footer', icon: MapPin, desc: 'Bottom CTA banner, official addresses, support contacts & directory' },
   { id: 'detail-pages', label: 'Linked Sub-Pages', icon: FileText, desc: 'Manage 22+ institutional sub-pages linked from homepage (Overview, Contact, etc.)' },
 ];
 
@@ -352,6 +355,13 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   const [partners, setPartners] = useState<Partner[]>(initialPartners);
   const [featuredEmployers, setFeaturedEmployers] = useState<FeaturedEmployerItem[]>(initialFeaturedEmployers);
 
+  /* ── 8. Homepage Giving & Research Funds Section ── */
+  const [givingSection, setGivingSection] = useState({
+    title: 'Support Future Innovators & Campus Research',
+    subtitle: 'Active campaigns organized by the ASTU Alumni & Advancement Office. 100% of your tax-deductible gift directly funds undergraduate scholarships, research labs, student welfare, and campus innovation.',
+    buttonText: 'Explore All Causes',
+  });
+
   /* ── 6.5. Homepage Community Section ── */
   const [liveCommunitySection, setLiveCommunitySection] = useState({
     title: 'ASTU Alumni Community',
@@ -544,6 +554,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         }
         if (cfg.liveCommunitySection) setLiveCommunitySection(cfg.liveCommunitySection);
         if (Array.isArray(cfg.liveCommunityPosts) && cfg.liveCommunityPosts.length) setLiveCommunityPosts(cfg.liveCommunityPosts);
+        if (cfg.givingSection) setGivingSection(cfg.givingSection);
       }
       setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       setHasUnsavedChanges(false);
@@ -606,6 +617,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
       faqHeaders,
       faq,
       ctaSection,
+      givingSection,
       footer,
       sectionLinks,
       detailPages,
@@ -2714,7 +2726,80 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         );
 
       /* ══════════════════════════════════════════════════════════════════════
-         7. ACCREDITATION & FAQ
+         8. GIVING & RESEARCH FUNDS
+      ══════════════════════════════════════════════════════════════════════ */
+      case 'giving-campaigns':
+        return (
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Giving &amp; Research Campaigns Section</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Customize the section title and description displayed on the homepage above the active causes.</p>
+                </div>
+                <Link
+                  to="/cms/donations"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-xs font-bold transition-all shadow-xs shrink-0"
+                >
+                  <Heart className="h-3.5 w-3.5 fill-[#FFCC00] text-[#FFCC00]" />
+                  Open Donations Desk
+                </Link>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Title</label>
+                  <input
+                    type="text"
+                    value={givingSection.title}
+                    onChange={e => { setGivingSection({ ...givingSection, title: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:border-astu-navy"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Subtitle / Description</label>
+                  <textarea
+                    rows={3}
+                    value={givingSection.subtitle}
+                    onChange={e => { setGivingSection({ ...givingSection, subtitle: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:border-astu-navy resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Action Button Text</label>
+                  <input
+                    type="text"
+                    value={givingSection.buttonText}
+                    onChange={e => { setGivingSection({ ...givingSection, buttonText: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full sm:w-1/2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 focus:border-astu-navy"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Campaign Management Info Box */}
+            <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 dark:bg-emerald-950/20 p-5 flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="font-bold text-slate-900 dark:text-white">Active Causes Database Synchronization</p>
+                <p className="mt-1">
+                  Individual fundraising campaigns (scholarship funds, AI lab gear, campus makerspace) are stored in the PostgreSQL database and managed live from the <strong>Donations &amp; Giving Desk</strong>. Any changes or new campaigns created there automatically sync to this homepage section.
+                </p>
+                <div className="mt-3">
+                  <Link
+                    to="/cms/donations"
+                    className="inline-flex items-center gap-1.5 text-xs font-black text-[#003366] dark:text-sky-400 hover:underline"
+                  >
+                    Manage Campaigns, Goals &amp; Donors in Donations Desk &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      /* ══════════════════════════════════════════════════════════════════════
+         9. ACCREDITATION & FAQ
       ══════════════════════════════════════════════════════════════════════ */
       case 'accreditation-faq':
         return (
