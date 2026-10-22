@@ -4,6 +4,10 @@ import api from './api';
 export interface PublicMetrics {
   registeredAlumni: number;
   registeredAlumniFormatted: string;
+  verifiedAlumni?: number;
+  verifiedAlumniFormatted?: string;
+  verificationRate?: number;
+  verificationRateFormatted?: string;
   fieldsOfStudy: number;
   fieldsOfStudyFormatted: string;
   corporatePartners: number;
@@ -12,12 +16,18 @@ export interface PublicMetrics {
   historicBatchesFormatted: string;
   employmentRate: number;
   employmentRateFormatted: string;
+  etaComplianceRate?: number;
+  etaComplianceRateFormatted?: string;
   activeJobs: number;
   activeJobsFormatted: string;
   digitalRequests: number;
   digitalRequestsFormatted: string;
   eventsCount: number;
   eventsCountFormatted: string;
+  eventRsvpsCount?: number;
+  storiesCount?: number;
+  bulletinsCount?: number;
+  pendingTicketsCount?: number;
   lastUpdated?: string;
 }
 
@@ -25,6 +35,10 @@ export interface PublicMetrics {
 export const EMPTY_METRICS: PublicMetrics = {
   registeredAlumni: 0,
   registeredAlumniFormatted: '—',
+  verifiedAlumni: 0,
+  verifiedAlumniFormatted: '—',
+  verificationRate: 0,
+  verificationRateFormatted: '—',
   fieldsOfStudy: 0,
   fieldsOfStudyFormatted: '—',
   corporatePartners: 0,
@@ -33,12 +47,18 @@ export const EMPTY_METRICS: PublicMetrics = {
   historicBatchesFormatted: '—',
   employmentRate: 0,
   employmentRateFormatted: '—',
+  etaComplianceRate: 0,
+  etaComplianceRateFormatted: '—',
   activeJobs: 0,
   activeJobsFormatted: '—',
   digitalRequests: 0,
   digitalRequestsFormatted: '—',
   eventsCount: 0,
   eventsCountFormatted: '—',
+  eventRsvpsCount: 0,
+  storiesCount: 0,
+  bulletinsCount: 0,
+  pendingTicketsCount: 0,
 };
 
 let cachedMetrics: PublicMetrics | null = null;
