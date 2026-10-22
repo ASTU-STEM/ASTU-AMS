@@ -21,7 +21,27 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // If a modifying request succeeds, notify components to refresh public & live metrics immediately
+    const method = response.config?.method?.toLowerCase();
+    if (method && ['post', 'put', 'patch', 'delete'].includes(method)) {
+      const url = response.config?.url || '';
+      if (
+        url.includes('/alumni') ||
+        url.includes('/users') ||
+        url.includes('/admin') ||
+        url.includes('/content') ||
+        url.includes('/support') ||
+        url.includes('/events') ||
+        url.includes('/departments')
+      ) {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('astu-metrics-updated'));
+        }
+      }
+    }
+    return response;
+  },
   async error => {
     const originalRequest = error.config;
 

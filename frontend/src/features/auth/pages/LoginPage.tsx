@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import toast from 'react-hot-toast';
 import AuthLayout from '../../../layouts/AuthLayout';
@@ -39,7 +39,14 @@ export default function LoginPage() {
     rememberMe: false,
   };
 
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
+
   const handleLoginSuccess = (role: string) => {
+    if (redirectUrl && (role === 'ALUMNI' || redirectUrl.startsWith('/'))) {
+      navigate(redirectUrl);
+      return;
+    }
     const route = roleRoutes[role] || '/';
     navigate(route);
   };

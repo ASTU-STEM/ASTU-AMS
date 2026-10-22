@@ -46,6 +46,7 @@ const megaMenus: MegaMenu[] = [
     label: "Services",
     icon: MdDashboardCustomize,
     items: [
+      { label: "Giving & Donations", sectionId: "giving", route: "/donations", description: "Support student scholarships & research" },
       { label: "Stakeholders", sectionId: "stakeholders", route: "/partners?tab=stakeholders", description: "Partners & collaborators" },
       { label: "Career Opportunities", sectionId: "career-opportunities", route: "/partners?tab=employers", description: "Jobs & internships" },
       { label: "Testimonials", sectionId: "testimonials", route: "/community", description: "What alumni say" },

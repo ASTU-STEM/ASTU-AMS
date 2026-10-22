@@ -1056,7 +1056,23 @@ export class AlumniController {
         });
         campaigns = await prisma.donationCampaign.findMany({ orderBy: { createdAt: 'asc' } });
       }
-      return sendSuccess(res, 'Donation campaigns fetched', campaigns);
+      const parseNum = (val: any) => {
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
+        if (val && typeof val === 'object') {
+          if ('increment' in val) return Number(val.increment) || 0;
+          if ('set' in val) return Number(val.set) || 0;
+        }
+        return Number(val) || 0;
+      };
+
+      const sanitized = (campaigns || []).map((c: any) => ({
+        ...c,
+        goal: parseNum(c.goal),
+        raised: parseNum(c.raised),
+        donorCount: parseNum(c.donorCount),
+      }));
+
+      return sendSuccess(res, 'Donation campaigns fetched', sanitized);
     } catch (err) { next(err); }
   }
 

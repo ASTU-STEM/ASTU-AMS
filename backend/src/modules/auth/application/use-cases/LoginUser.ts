@@ -33,6 +33,9 @@ export class LoginUser {
       });
       if (profile?.user) {
         user = profile.user;
+      } else {
+        // Also allow shorthand username lookup (e.g. 'admin' -> 'admin@astu.edu.et')
+        user = await this.userRepository.findByEmail(`${identifier.toLowerCase()}@astu.edu.et`);
       }
     }
 
