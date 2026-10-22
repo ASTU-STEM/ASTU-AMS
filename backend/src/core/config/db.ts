@@ -136,6 +136,17 @@ class FakePrisma {
       const idx = store.users.findIndex((u: any) => u.id === where.id);
       if (idx === -1) throw new Error('User not found');
       const [removed] = store.users.splice(idx, 1);
+      // Cascade delete related alumniProfile and employerProfile records
+      if (store.alumniProfiles) {
+        store.alumniProfiles = store.alumniProfiles.filter(
+          (a: any) => a.userId !== where.id && a.id !== where.id
+        );
+      }
+      if (store.employerProfiles) {
+        store.employerProfiles = store.employerProfiles.filter(
+          (e: any) => e.userId !== where.id && e.id !== where.id
+        );
+      }
       writeDevDb(store);
       return removed;
     },
@@ -252,6 +263,22 @@ class FakePrisma {
         writeDevDb(store);
       }
       return { count: 1 };
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.alumniProfiles) {
+        const idx = store.alumniProfiles.findIndex((a: any) =>
+          (where?.id !== undefined && (a.id === where.id || a.userId === where.id)) ||
+          (where?.userId !== undefined && a.userId === where.userId) ||
+          (where?.studentId !== undefined && a.studentId === where.studentId)
+        );
+        if (idx !== -1) {
+          const [removed] = store.alumniProfiles.splice(idx, 1);
+          writeDevDb(store);
+          return removed;
+        }
+      }
+      return {};
     },
   };
 
@@ -1177,42 +1204,121 @@ let initialized = false;
 let fallback: any = null;
 let usingFallback = false;
 
+function applyPrismaUpdate(target: any, data: any): any {
+  if (!data || typeof data !== 'object') return target;
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+      const v = val as any;
+      if ('increment' in v) {
+        target[key] = (Number(target[key]) || 0) + Number(v.increment);
+        continue;
+      }
+      if ('decrement' in v) {
+        target[key] = (Number(target[key]) || 0) - Number(v.decrement);
+        continue;
+      }
+      if ('multiply' in v) {
+        target[key] = (Number(target[key]) || 0) * Number(v.multiply);
+        continue;
+      }
+      if ('divide' in v) {
+        target[key] = (Number(target[key]) || 0) / Number(v.divide);
+        continue;
+      }
+      if ('set' in v) {
+        target[key] = v.set;
+        continue;
+      }
+    }
+    target[key] = val;
+  }
+  return target;
+}
+
+function sanitizePrismaCreate(data: any): any {
+  if (!data || typeof data !== 'object') return data;
+  const res: any = {};
+  for (const [key, val] of Object.entries(data)) {
+    if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+      const v = val as any;
+      if ('increment' in v) {
+        res[key] = Number(v.increment) || 0;
+        continue;
+      }
+      if ('decrement' in v) {
+        res[key] = -(Number(v.decrement) || 0);
+        continue;
+      }
+      if ('set' in v) {
+        res[key] = v.set;
+        continue;
+      }
+    }
+    res[key] = val;
+  }
+  return res;
+}
+
+function sanitizeItemForRead(item: any): any {
+  if (!item || typeof item !== 'object') return item;
+  for (const key of Object.keys(item)) {
+    const val = item[key];
+    if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+      if ('increment' in val) {
+        item[key] = Number(val.increment) || 0;
+      } else if ('decrement' in val) {
+        item[key] = -(Number(val.decrement) || 0);
+      } else if ('set' in val) {
+        item[key] = val.set;
+      }
+    }
+  }
+  return item;
+}
+
 const createSafeModel = (name: string) => {
   const store: any[] = [];
   return {
     findMany: async ({ where }: any = {}) => {
-      if (!where || Object.keys(where).length === 0) return store;
-      return store.filter((item: any) => {
-        return Object.entries(where).every(([k, v]) => item[k] === v);
-      });
+      let results = store;
+      if (where && Object.keys(where).length > 0) {
+        results = store.filter((item: any) => {
+          return Object.entries(where).every(([k, v]) => item[k] === v);
+        });
+      }
+      return results.map((item: any) => sanitizeItemForRead(item));
     },
     findUnique: async ({ where }: any = {}) => {
       if (!where) return null;
-      return store.find((item: any) => {
+      const found = store.find((item: any) => {
         return Object.entries(where).every(([k, v]) => item[k] === v);
-      }) || null;
+      });
+      return found ? sanitizeItemForRead(found) : null;
     },
     findFirst: async ({ where }: any = {}) => {
-      if (!where || Object.keys(where).length === 0) return store[0] || null;
-      return store.find((item: any) => {
+      if (!where || Object.keys(where).length === 0) return store[0] ? sanitizeItemForRead(store[0]) : null;
+      const found = store.find((item: any) => {
         return Object.entries(where).every(([k, v]) => item[k] === v);
-      }) || null;
+      });
+      return found ? sanitizeItemForRead(found) : null;
     },
     count: async ({ where }: any = {}) => {
       if (!where || Object.keys(where).length === 0) return store.length;
       return store.filter((item: any) => Object.entries(where).every(([k, v]) => item[k] === v)).length;
     },
     create: async ({ data }: any) => {
-      const id = data?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      const rec = { id, ...data };
+      const sanitized = sanitizePrismaCreate(data);
+      const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const rec = { id, ...sanitized };
       store.push(rec);
-      return rec;
+      return sanitizeItemForRead(rec);
     },
     createMany: async ({ data }: any = {}) => {
       const items = Array.isArray(data) ? data : [data];
       const created = items.map((item: any) => {
-        const id = item?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-        const rec = { id, ...item };
+        const sanitized = sanitizePrismaCreate(item);
+        const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        const rec = { id, ...sanitized };
         store.push(rec);
         return rec;
       });
@@ -1225,8 +1331,8 @@ const createSafeModel = (name: string) => {
         item = { id, ...where };
         store.push(item);
       }
-      Object.assign(item, data);
-      return item;
+      applyPrismaUpdate(item, data);
+      return sanitizeItemForRead(item);
     },
     delete: async ({ where }: any = {}) => {
       const idx = store.findIndex((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
@@ -1238,16 +1344,17 @@ const createSafeModel = (name: string) => {
     upsert: async ({ where, create, update }: any) => {
       let item = store.find((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
       if (item) {
-        Object.assign(item, update);
-        return item;
+        applyPrismaUpdate(item, update);
+        return sanitizeItemForRead(item);
       }
-      const rec = { id: `dev-${name}-${Date.now()}`, ...create };
+      const sanitized = sanitizePrismaCreate(create);
+      const rec = { id: `dev-${name}-${Date.now()}`, ...sanitized };
       store.push(rec);
-      return rec;
+      return sanitizeItemForRead(rec);
     },
     updateMany: async ({ where, data }: any = {}) => {
       const items = store.filter((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
-      items.forEach(i => Object.assign(i, data));
+      items.forEach(i => applyPrismaUpdate(i, data));
       return { count: items.length };
     },
     deleteMany: async () => ({ count: 0 }),

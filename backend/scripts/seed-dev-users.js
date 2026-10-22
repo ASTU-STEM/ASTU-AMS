@@ -9,6 +9,24 @@ const defaultPasswordHash = bcrypt.hashSync('astu_ams_pass123', 10);
 
 const users = [
   {
+    id: 'user-super-admin-1',
+    email: 'superadmin@astu.edu.et',
+    password: defaultPasswordHash,
+    role: 'SUPER_ADMIN',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'user-super-admin-2',
+    email: 'admin@astust.edu.et',
+    password: defaultPasswordHash,
+    role: 'SUPER_ADMIN',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
     id: 'user-admin-1',
     email: 'admin@astu.edu.et',
     password: defaultPasswordHash,
