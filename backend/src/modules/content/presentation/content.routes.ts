@@ -16,6 +16,8 @@ import {
   getMediaAssetsController,
   deleteMediaAssetController,
   getPublicMetricsController,
+  getPublicDonationCampaignsController,
+  recordPublicDonationController,
 } from './content.controller';
 
 const router = Router();
@@ -54,6 +56,8 @@ const upload = multer({
 // ─── Public Endpoints (Accessible by Landing Page & Directory) ───
 router.get('/public-metrics', optionalAuthenticateJWT, getPublicMetricsController);
 router.get('/homepage/config', optionalAuthenticateJWT, getHomepageConfigController);
+router.get('/donations/campaigns', optionalAuthenticateJWT, getPublicDonationCampaignsController);
+router.post('/donations/public-donate', optionalAuthenticateJWT, recordPublicDonationController);
 router.get('/media', optionalAuthenticateJWT, getMediaAssetsController);
 router.get('/', optionalAuthenticateJWT, getContentController);
 router.get('/:id', optionalAuthenticateJWT, getContentByIdOrSlugController);
