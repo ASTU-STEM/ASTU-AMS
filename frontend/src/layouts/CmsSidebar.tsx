@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
+  BarChart3,
   Bell,
   Briefcase,
+  Building2,
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
+  FileBarChart,
   FileText,
   Globe,
+  HeartHandshake,
   Image as ImageIcon,
   Layers3,
   LayoutDashboard,
@@ -47,12 +52,17 @@ interface EnhancedNavItem extends AdminNavItem {
 
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'alumni-office', tooltip: 'Alumni Office overview & statistics' },
+  { label: 'Tracer Surveys', path: '/cms/surveys', icon: ClipboardList, section: 'alumni-office', tooltip: 'Longitudinal tracer study engine & cohorts' },
+  { label: 'Analytics & Insights', path: '/cms/analytics', icon: BarChart3, section: 'alumni-office', tooltip: 'Employment rate, time-to-hire & skill gaps' },
+  { label: 'Reports Center', path: '/cms/reports', icon: FileBarChart, section: 'alumni-office', tooltip: 'Official ETA & accreditation export dossiers' },
   { label: 'Registrations', path: '/cms/registrations', icon: ClipboardCheck, section: 'alumni-office', tooltip: 'Tracer study & event registrations' },
   { label: 'Events & Workshops', path: '/cms/events', icon: CalendarDays, section: 'alumni-office', tooltip: 'Manage alumni reunions & workshops' },
+  { label: 'Jobs & Careers', path: '/cms/jobs', icon: Briefcase, section: 'alumni-office', tooltip: 'Job board moderation & placement tracking' },
+  { label: 'Donations & Giving', path: '/cms/donations', icon: HeartHandshake, section: 'alumni-office', tooltip: 'Fundraising causes, Telebirr/Chapa campaigns & donor tracking' },
   { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'alumni-office', tooltip: 'Internal messaging & communication' },
   { label: 'Notifications', path: '/cms/notifications', icon: Bell, section: 'alumni-office', tooltip: 'System notifications & alerts' },
   { label: 'Pages & Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content-management', tooltip: 'Manage homepage sections, Overview, Contact Us & institutional pages' },
-  { label: 'Partners & Employers', path: '/cms/partners', icon: Briefcase, section: 'content-management', tooltip: 'Manage /partners portal, employer benefits & logos' },
+  { label: 'Partners & Employers', path: '/cms/partners', icon: Building2, section: 'content-management', tooltip: 'Manage /partners portal, employer benefits & logos' },
   { label: 'Announcements', path: '/cms/content', icon: Newspaper, section: 'content-management', tooltip: 'Alumni announcements & public notices' },
   { label: 'Community', path: '/cms/community', icon: Users, section: 'content-management', tooltip: 'Alumni community, detail pages & homepage sections' },
   { label: 'Community Members', path: '/cms/community-members', icon: Users, section: 'content-management', tooltip: 'Executive committee & community member records' },
@@ -106,7 +116,7 @@ export default function CmsSidebar({
 
   const officerName = user?.firstName
     ? `${user.firstName} ${user.lastName || ''}`.trim()
-    : 'Alumni Relations Officer';
+    : 'Alumni Office Officer';
   const officerInitials = user?.firstName
     ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ''}`.toUpperCase()
     : 'AO';

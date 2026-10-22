@@ -42,8 +42,16 @@ class CmsRouteBoundary extends React.Component<
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/cms/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Dashboard' }] },
+  '/cms/alumni-directory': { title: 'Alumni Directory', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Alumni Directory' }] },
+  '/cms/users': { title: 'User Management', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Users' }] },
+  '/cms/surveys': { title: 'Tracer Studies & Surveys', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Tracer Surveys' }] },
+  '/cms/tracer-studies': { title: 'Tracer Studies & Surveys', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Tracer Surveys' }] },
+  '/cms/analytics': { title: 'Analytics & Insights', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Analytics' }] },
+  '/cms/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Reports' }] },
   '/cms/registrations': { title: 'Registrations', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Registrations' }] },
   '/cms/events': { title: 'Events & Workshops', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Events' }] },
+  '/cms/jobs': { title: 'Jobs & Placement Hub', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] },
+  '/cms/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Donations & Giving' }] },
   '/cms/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'Content Management' }, { label: 'Homepage' }] },
   '/cms/partners': { title: 'Partners & Employers', breadcrumb: [{ label: 'Content Management' }, { label: 'Partners & Employers' }] },
   '/cms/institutional-pages': { title: 'Institutional Pages Manager', breadcrumb: [{ label: 'Content Management' }, { label: 'Institutional Pages' }] },
@@ -59,7 +67,13 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
 };
 
 const searchSuggestions = [
+  { label: 'Search verified alumni directory', path: '/cms/alumni-directory' },
+  { label: 'Schedule & monitor tracer surveys', path: '/cms/surveys' },
+  { label: 'View employment analytics & skill gaps', path: '/cms/analytics' },
+  { label: 'Generate ETA accreditation reports', path: '/cms/reports' },
   { label: 'View registrations & roster', path: '/cms/registrations' },
+  { label: 'Moderate jobs & career listings', path: '/cms/jobs' },
+  { label: 'Fundraising campaigns & donors', path: '/cms/donations' },
   { label: 'Manage homepage content', path: '/cms/homepage' },
   { label: 'Create announcement', path: '/cms/content' },
   { label: 'Manage events & workshops', path: '/cms/events' },
@@ -342,7 +356,7 @@ export default function CmsLayout() {
                     {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'AO'}
                   </div>
                   <div className="hidden text-left sm:block">
-                    <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'Alumni Affairs Officer'}</div>
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'Alumni Office Officer'}</div>
                     <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
