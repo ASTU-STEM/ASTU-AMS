@@ -42,10 +42,14 @@ import {
   Pause,
   Play,
   Share2,
+  Heart,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
+import TelebirrDonationModal from "../components/TelebirrDonationModal";
 import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
@@ -338,11 +342,75 @@ export default function HomePage() {
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [liveEvents, setLiveEvents] = useState<any[]>([]);
-  const [liveWorkshops, setLiveWorkshops] = useState<any[]>([]);
-  const [liveNews, setLiveNews] = useState<any[]>([]);
-  const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>([]);
-  const [liveStories, setLiveStories] = useState<any[]>([]);
+  const [liveEvents, setLiveEvents] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.events?.length) {
+      const active = cmsConfig.events.filter((e: any) => e.active);
+      if (active.length) return active;
+    }
+    return [];
+  });
+  const [liveWorkshops, setLiveWorkshops] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.workshops?.length) {
+      const active = cmsConfig.workshops.filter((w: any) => w.active);
+      if (active.length) return active;
+    }
+    return [];
+  });
+  const [liveNews, setLiveNews] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.newsItems?.length) {
+      const active = cmsConfig.newsItems.filter((n: any) => n.active);
+      if (active.length) return active;
+    }
+    const published = contentService.getPublishedNews();
+    return published.length ? published : [
+      { title: "New Engineering Lab Inaugurated", date: "May 28, 2026" },
+      { title: "ASTU Research Grant Winners", date: "May 25, 2026" },
+      { title: "Annual Career Expo Announced", date: "May 20, 2026" }
+    ];
+  });
+  const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>(() => {
+    const published = contentService.getPublishedAnnouncements();
+    if (published && published.length > 0) return published;
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.announcements?.length) {
+      const active = cmsConfig.announcements.filter((a: any) => a.active);
+      if (active.length) return active;
+    }
+    return [];
+  });
+  const [liveStories, setLiveStories] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.stories?.length) {
+      const active = cmsConfig.stories.filter((s: any) => s.active);
+      if (active.length) return active;
+    }
+    return storiesService.getStories();
+  });
+  const [donationCampaigns, setDonationCampaigns] = useState<any[]>([]);
+  const [selectedDonationCampaign, setSelectedDonationCampaign] = useState<any | null>(null);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [isDonationAuthModalOpen, setIsDonationAuthModalOpen] = useState(false);
+
+  const handleDonateClick = (campaign: any) => {
+    setSelectedDonationCampaign(campaign);
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    let user: any = null;
+    try {
+      user = storedUser ? JSON.parse(storedUser) : null;
+    } catch {}
+
+    if (token && (user?.role === 'ALUMNI' || !user?.role)) {
+      navigate('/alumni/dashboard?tab=donations');
+    } else {
+      setIsDonationAuthModalOpen(true);
+    }
+  };
+  const [homeDonationCategory, setHomeDonationCategory] = useState('ALL');
+  const [showAllHomeDonations, setShowAllHomeDonations] = useState(false);
   const [liveSlides, setLiveSlides] = useState<any[]>(() => {
     const cmsConfig = homepageCmsService.getSettings();
     if (cmsConfig?.heroSlides?.length) {
@@ -457,6 +525,156 @@ export default function HomePage() {
   const [bottomCta, setBottomCta] = useState<any>(() => homepageCmsService.getSettings()?.bottomCta || null);
   const [researchHighlights, setResearchHighlights] = useState<any>(() => homepageCmsService.getSettings()?.researchHighlights || null);
   const [footerConfig, setFooterConfig] = useState<FooterCmsConfig>(() => footerCmsService.getSettings());
+  const [liveWelcomeMessage, setLiveWelcomeMessage] = useState<string>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.welcomeMessage || "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.";
+  });
+  const [liveWelcomeEnabled, setLiveWelcomeEnabled] = useState<boolean>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.welcomeEnabled !== false;
+  });
+  const [liveHeroBadge, setLiveHeroBadge] = useState<string>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.heroBadge || "ASTU Alumni Management System";
+  });
+  const [liveHeroButtons, setLiveHeroButtons] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.heroButtons || {
+      primaryText: "Alumni Portal",
+      primaryLink: "/info/alumni-portal",
+      secondaryText: "Employer Partnership",
+      secondaryLink: "/info/employer-portal",
+    };
+  });
+  const [liveImpactHeaders, setLiveImpactHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.impactHeaders || {
+      eyebrow: "ASTU IMPACT AT A GLANCE",
+      title: "Connecting Academia to Industry",
+      description: "Building a stronger connection between ASTU graduates, employers, research and career opportunities.",
+    };
+  });
+  const [livePortalsHeaders, setLivePortalsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.portalsHeaders || {
+      eyebrow: "Get Started",
+      title: "How ASTU-AMS Works",
+      description: "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps.",
+      ctaText: "Get Started Today",
+      ctaLink: "/login",
+    };
+  });
+  const [liveCampusLifeHeaders, setLiveCampusLifeHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.campusLifeHeaders || {
+      eyebrow: "Explore Life At ASTU",
+      title: "Campus Life, Facilities, Events, and Galleries",
+      description: "A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.",
+    };
+  });
+  const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.eventsHeaders || {
+      eyebrow: "Events & Workshops",
+      title: "Upcoming Alumni Events",
+      description: "Networking, learning, and professional growth opportunities.",
+      viewAllText: "See All Events →",
+      viewAllLink: "/events",
+    };
+  });
+  const [liveAnnouncementsHeaders, setLiveAnnouncementsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.announcementsHeaders || {
+      eyebrow: "Announcements",
+      title: "Official Notices",
+      subscribeTitle: "Subscribe to official updates",
+      subscribeDesc: "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.",
+    };
+  });
+  const [livePartnersHeaders, setLivePartnersHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.partnersHeaders || {
+      eyebrow: "Our Partners",
+      title: "Partner Companies",
+      description: "Institutional partners supporting employability, internships, and research collaboration.",
+    };
+  });
+  const [liveFaqHeaders, setLiveFaqHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.faqHeaders || {
+      eyebrow: "FAQ",
+      title: "Frequently Asked Questions",
+      description: "Common questions about ASTU-AMS, tracer studies, and alumni services.",
+    };
+  });
+  const [liveAccreditation, setLiveAccreditation] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.accreditation || {
+      eyebrow: "Quality Assurance",
+      title: "Data-Driven Accreditation & Excellence",
+      description: "ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required by accreditation agencies and university management.",
+      point1Title: "Global Accreditation",
+      point1Desc: "Build transparent, audited institutional reports.",
+      point2Title: "Market Alignment",
+      point2Desc: "Align curriculum with industry expectations.",
+      buttonText: "View Impact Numbers",
+      buttonLink: "/info/impact-numbers",
+      image1: '/images/campus-2.jpeg',
+      image2: '/images/campus-2.jpeg',
+    };
+  });
+  const [liveCtaSection, setLiveCtaSection] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.ctaSection || {
+      enabled: true,
+      title: "Ready to Join ASTU-AMS?",
+      description: "Connect with fellow alumni, discover career opportunities, and contribute to university excellence.",
+      primaryCtaText: "Alumni Portal",
+      primaryCtaLink: "/login",
+      secondaryCtaText: "Employer Portal",
+      secondaryCtaLink: "/login",
+    };
+  });
+  const [liveFooter, setLiveFooter] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.footer || {
+      aboutText: "Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.",
+      address: "Adama Science and Technology University, Adama, Oromia, Ethiopia",
+      poBox: "P.O. Box 1888, Adama, Ethiopia",
+      phone: "+251-221-110000",
+      email: "irccd@astu.edu.et",
+      officeHours: "Monday to Friday, 8:00 AM – 5:00 PM (EAT)",
+      socialFacebook: "https://facebook.com/adamaastu",
+      socialTelegram: "https://t.me/Adama_STU_Almuni",
+      socialTwitter: "#",
+      socialLinkedin: "#",
+      copyrightText: "Adama Science and Technology University. All rights reserved.",
+    };
+  });
+  const defaultSectionLinks = {
+    about: true,
+    impact: true,
+    portals: true,
+    campusLife: true,
+    events: true,
+    stories: true,
+    announcements: true,
+    partners: true,
+    giving: true,
+  };
+  const [liveSectionLinks, setLiveSectionLinks] = useState<typeof defaultSectionLinks>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.sectionLinks ? { ...defaultSectionLinks, ...cfg.sectionLinks } : defaultSectionLinks;
+  });
+  const [liveGivingSection, setLiveGivingSection] = useState(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.givingSection || {
+      title: "Support Future Innovators & Campus Research",
+      subtitle: "Active campaigns organized by the ASTU Alumni & Advancement Office. 100% of your tax-deductible gift directly funds undergraduate scholarships, research labs, student welfare, and campus innovation.",
+      buttonText: "Explore All Causes",
+    };
+  });
+
 
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
   const [showAllNotices, setShowAllNotices] = useState(false);
@@ -1049,19 +1267,40 @@ location: e.location || 'Location to be confirmed',
       } catch {
         // Keep CMS / empty state — do not inject demo events
       }
+
+      // Sync active Donation Campaigns published by Alumni Office / CMS
+      try {
+        const campaigns = await contentService.getPublicDonationCampaigns();
+        if (isMounted && campaigns && campaigns.length > 0) {
+          setDonationCampaigns(campaigns);
+        }
+      } catch {
+        /* fallback handled gracefully */
+      }
+
+      const cfg = homepageCmsService.getSettings();
+      if (isMounted && cfg?.givingSection) {
+        setLiveGivingSection(cfg.givingSection);
+      }
     };
 
     syncContent();
+    const onFooterUpdated = () => setFooterConfig(footerCmsService.getSettings());
     window.addEventListener('astu-cms-content-changed', syncContent);
     window.addEventListener('astu-cms-events-changed', syncContent);
+    window.addEventListener('astu-cms-donations-changed', syncContent);
     window.addEventListener('astu-cms-homepage-updated', syncContent);
-    const onFooterUpdated = () => setFooterConfig(footerCmsService.getSettings());
+    window.addEventListener('astu-cms-gallery-changed', syncContent);
+    window.addEventListener('astu-cms-gallery-settings-changed', syncContent);
     window.addEventListener('astu-cms-footer-updated', onFooterUpdated);
     return () => {
       isMounted = false;
       window.removeEventListener('astu-cms-content-changed', syncContent);
       window.removeEventListener('astu-cms-events-changed', syncContent);
+      window.removeEventListener('astu-cms-donations-changed', syncContent);
       window.removeEventListener('astu-cms-homepage-updated', syncContent);
+      window.removeEventListener('astu-cms-gallery-changed', syncContent);
+      window.removeEventListener('astu-cms-gallery-settings-changed', syncContent);
       window.removeEventListener('astu-cms-footer-updated', onFooterUpdated);
     };
   }, []);
@@ -2219,6 +2458,377 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
+        {/* ── Giving & Endowment Campaigns Section ── */}
+        <section id="giving" className="relative py-16 md:py-24 bg-gradient-to-b from-white via-slate-50/80 to-white overflow-hidden border-t border-slate-100">
+          {/* Subtle brand ambient glows */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute -top-40 right-10 w-96 h-96 rounded-full bg-[#003366]/5 blur-3xl" />
+            <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#008C44]/5 blur-3xl" />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
+            <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="max-w-2xl space-y-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#003366]/10 text-[#003366] text-xs font-black uppercase tracking-wider">
+                  <Heart className="h-3.5 w-3.5 fill-[#E31E24] text-[#E31E24]" />
+                  ASTU Alumni Giving
+                </span>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                  {liveGivingSection?.title || 'Support Future Innovators & Campus Research'}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                  {liveGivingSection?.subtitle || '100% of your tax-deductible contribution directly funds merit scholarships, cutting-edge postgraduate laboratories, student incubators, and emergency support.'}
+                </p>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/donations')}
+                  className="px-5 py-2.5 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Heart className="h-4 w-4 fill-[#FFCC00] text-[#FFCC00]" /> {liveGivingSection?.buttonText || 'Explore All Causes'}
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Category Filter Bar */}
+            {(() => {
+              const allAvailable = (donationCampaigns.length > 0 ? donationCampaigns : [
+                {
+                  id: "fallback-c-1",
+                  title: "ASTU Scholarship Fund 2026",
+                  category: "Scholarship",
+                  description: "Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.",
+                  goal: 5000000,
+                  raised: 1851000,
+                  donorCount: 349,
+                  status: "ACTIVE"
+                },
+                {
+                  id: "fallback-c-2",
+                  title: "AI Research Lab Equipment",
+                  category: "Research",
+                  description: "Fund high-performance GPU servers and laboratory instrumentation for advanced postgraduate engineering researchers.",
+                  goal: 8000000,
+                  raised: 3201000,
+                  donorCount: 158,
+                  status: "ACTIVE"
+                },
+                {
+                  id: "fallback-c-3",
+                  title: "Campus Innovation Makerspace",
+                  category: "Infrastructure",
+                  description: "Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.",
+                  goal: 12000000,
+                  raised: 6800000,
+                  donorCount: 220,
+                  status: "ACTIVE"
+                }
+              ]).filter((c: any) => c.status === 'ACTIVE' || !c.status);
+
+              const homeCategories = ['ALL', 'Scholarship', 'Research', 'Infrastructure', 'Innovation'];
+              const filteredList = allAvailable.filter(
+                (c: any) => homeDonationCategory === 'ALL' || c.category === homeDonationCategory
+              );
+              // Controlled display limit: default 3 cards, max 6 on expand
+              const displayedCards = showAllHomeDonations ? filteredList.slice(0, 6) : filteredList.slice(0, 3);
+
+              // ASTU Brand category pill scheme
+              const categoryStyles: Record<string, { bg: string; text: string; border: string }> = {
+                Scholarship: { bg: 'bg-blue-50', text: 'text-[#003366]', border: 'border-blue-200' },
+                Research: { bg: 'bg-emerald-50', text: 'text-[#008C44]', border: 'border-emerald-200' },
+                Infrastructure: { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200' },
+                Innovation: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
+                'Student Welfare': { bg: 'bg-rose-50', text: 'text-[#E31E24]', border: 'border-rose-200' },
+                'Emergency Fund': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+              };
+
+              return (
+                <div className="space-y-6">
+                  {/* Category Pills & Count */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-xs">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider mr-1">Focus Area:</span>
+                      {homeCategories.map((cat) => {
+                        const isActive = homeDonationCategory === cat;
+                        return (
+                          <button
+                            key={cat}
+                            onClick={() => setHomeDonationCategory(cat)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer ${
+                              isActive
+                                ? 'bg-[#003366] text-white shadow-sm'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            {cat === 'ALL' ? 'All Active Causes' : cat}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="text-xs font-bold text-slate-500">
+                      Showing <span className="text-slate-900 font-extrabold">{displayedCards.length}</span> of {allAvailable.length} active campaigns
+                    </div>
+                  </div>
+
+                  {/* Campaign Cards Grid */}
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {displayedCards.map((c: any, idx: number) => {
+                      const goal = c.goal || c.targetAmount || 1000000;
+                      const raised = c.raised || 0;
+                      const percent = Math.min(100, Math.round((raised / (goal || 1)) * 100));
+                      const donors = c.donorCount || 0;
+                      const category = c.category || 'Initiative';
+                      const catStyle = categoryStyles[category] || { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
+
+                      return (
+                        <article
+                          key={c.id || idx}
+                          className="reveal group flex flex-col justify-between rounded-3xl bg-white border border-slate-200/90 p-6 md:p-7 shadow-[0_4px_24px_rgba(0,51,102,0.06)] hover:shadow-[0_16px_40px_rgba(0,51,102,0.12)] hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden"
+                        >
+                          {/* Authentic ASTU Tri-color Accent Bar */}
+                          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#003366] via-[#008C44] to-[#FFCC00]" />
+
+                          <div>
+                            {/* Header tags */}
+                            <div className="flex items-center justify-between gap-2 mb-4">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}>
+                                {category}
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-500">
+                                <Users className="h-3 w-3 text-slate-400" /> {donors} {donors === 1 ? 'Donor' : 'Donors'}
+                              </span>
+                            </div>
+
+                            {/* Title & Description */}
+                            <h3 className="text-lg md:text-xl font-black text-slate-900 group-hover:text-[#003366] transition-colors line-clamp-2 leading-snug">
+                              {c.title}
+                            </h3>
+                            <p className="mt-2.5 text-xs md:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                              {c.description || 'Support ASTU causes and make a lasting impact for future generations of engineers and researchers.'}
+                            </p>
+                          </div>
+
+                          {/* Progress Bar & Amount */}
+                          <div className="mt-6 pt-5 border-t border-slate-100">
+                            <div className="flex items-baseline justify-between mb-2">
+                              <div>
+                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Raised</span>
+                                <span className="text-base font-black text-[#003366]">
+                                  {raised.toLocaleString()} <span className="text-[10px] text-slate-400 font-extrabold">ETB</span>
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Goal</span>
+                                <span className="text-xs font-bold text-slate-600">
+                                  {goal.toLocaleString()} ETB
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Progress bar container */}
+                            <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-[#003366] via-blue-700 to-[#008C44] transition-all duration-1000 shadow-xs"
+                                style={{ width: `${Math.max(5, percent)}%` }}
+                              />
+                            </div>
+                            <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400 font-bold">
+                              <span>{percent}% Funded</span>
+                              <span className="text-[#008C44] font-extrabold">Active Cause</span>
+                            </div>
+
+                            {/* Accepted methods badge */}
+                            <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 border border-slate-100">
+                              <span className="text-[10px] font-bold text-slate-500">Fast Pay</span>
+                              <span className="text-[10px] font-extrabold text-slate-700 flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                Telebirr • Chapa • CBE Birr
+                              </span>
+                            </div>
+
+                            {/* CTA Button */}
+                            <button
+                              onClick={() => handleDonateClick(c)}
+                              className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#003366] to-[#002759] hover:from-[#002244] hover:to-[#001a33] text-white font-black text-xs md:text-sm py-3 px-4 shadow-md hover:shadow-lg hover:shadow-[#003366]/20 transition-all duration-200 hover:scale-[1.01] cursor-pointer"
+                            >
+                              <Heart className="h-4 w-4 fill-[#FFCC00] text-[#FFCC00]" />
+                              Support This Cause
+                            </button>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+
+                  {/* Empty state for selected category */}
+                  {displayedCards.length === 0 && (
+                    <div className="py-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-6 space-y-2">
+                      <Heart className="mx-auto h-8 w-8 text-slate-300" />
+                      <p className="text-xs font-bold text-slate-700">No campaigns found in this category.</p>
+                      <button
+                        onClick={() => setHomeDonationCategory('ALL')}
+                        className="text-xs text-[#003366] font-extrabold hover:underline"
+                      >
+                        Show All Causes
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Smart Bottom Controls: Show More / View Full Directory */}
+                  <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    {filteredList.length > 3 && (
+                      <button
+                        onClick={() => setShowAllHomeDonations(!showAllHomeDonations)}
+                        className="px-6 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-extrabold transition-all shadow-xs cursor-pointer"
+                      >
+                        {showAllHomeDonations ? 'Show Less' : `Show More (${filteredList.length - 3} More Causes)`}
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => navigate('/donations')}
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#003366] hover:bg-[#002759] text-white text-xs font-extrabold shadow-md hover:shadow-lg transition-all cursor-pointer"
+                    >
+                      <span>Explore All {allAvailable.length} Causes in Giving Portal</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </section>
+
+        {/* ── Community Section ── */}
+        {(() => {
+          const liveCommunitySection = {
+            title: 'ASTU Alumni Community',
+            subtitle: 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'
+          };
+          const dynamicCommunityStats = [
+            { label: 'Registered Alumni', value: '18,500+' },
+            { label: 'Fields of Study', value: '42' },
+            { label: 'Global Chapters', value: '12' }
+          ];
+          const liveCommunityPosts = [
+            {
+              name: 'Dr. Fitsum Kebede',
+              role: 'Alumni Ambassador, Europe Chapter',
+              degree: 'BSc Electrical Engineering, 2012',
+              text: 'ASTU gave us the engineering discipline and rigor to compete globally.',
+              image: '/images/campus-2.jpeg'
+            },
+            {
+              name: 'Sara Mohammed',
+              role: 'Tech Lead & Founder',
+              degree: 'BSc Software Engineering, 2016',
+              text: 'The network and mentorship I gained through the alumni association were pivotal to starting my company.',
+              image: '/images/campus-3.jpeg'
+            },
+            {
+              name: 'Abebe Bekele',
+              role: 'Senior Project Engineer',
+              degree: 'BSc Civil Engineering, 2010',
+              text: 'Giving back to current students through workshops and campus visits has been deeply fulfilling.',
+              image: '/images/campus-1.jpeg'
+            }
+          ];
+
+          return (
+            <section id="community" className="relative py-16 md:py-20 overflow-hidden bg-gradient-to-br from-astu-navy via-[#003366] to-[#002244]">
+              {/* Background decorative */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-astu-green/5 blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-astu-red/5 blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5">
+                  <Users className="h-[400px] w-[400px] text-white" />
+                </div>
+              </div>
+              <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
+                <div className="mb-12 text-center reveal">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-astu-green">
+                    <Globe className="h-3.5 w-3.5" /> {liveCommunitySection?.title || 'ASTU Alumni Community'}
+                  </span>
+                  <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
+                    Your Networks <span className="text-astu-green">Around the World</span>
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-300 leading-relaxed">
+                    {liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
+                  </p>
+                </div>
+
+                {/* Community Stats */}
+                <div className="grid grid-cols-3 gap-4 mb-12 max-w-2xl mx-auto reveal">
+                  {dynamicCommunityStats.map((stat, idx) => {
+                    const Icon = idx === 0 ? Users : idx === 1 ? BookOpen : Globe;
+                    return (
+                      <div key={stat.label} className={`reveal reveal-delay-${idx + 1} rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 text-center hover:bg-white/10 transition-all hover:-translate-y-1`}>
+                        <Icon className="h-6 w-6 text-astu-green mx-auto mb-2" />
+                        <p className="text-2xl font-black text-white">{stat.value}</p>
+                        <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-0.5">{stat.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Community Testimonials */}
+                <div id="testimonials" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 scroll-mt-24">
+                  {liveCommunityPosts.map((post: any, idx: number) => (
+                    <article
+                      key={post.name}
+                      className={`reveal reveal-delay-${(idx % 3) + 1} group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.15)]`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <Quote className="h-6 w-6 text-astu-green/60" />
+                          {post.degree && (
+                            <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                              {post.degree}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm leading-relaxed text-slate-200 italic">"{post.text}"</p>
+                      </div>
+                      <div className="mt-5 flex items-center gap-3 pt-4 border-t border-white/10">
+                        <img
+                          src={post.image}
+                          alt={post.name}
+                          className="h-12 w-12 rounded-full object-cover border-2 border-astu-green/60 shrink-0 shadow-md bg-white/10"
+                          onError={handleImageError}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-white truncate">{post.name}</p>
+                          <p className="text-[11px] text-astu-green font-medium truncate">{post.role}</p>
+                          {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Join CTA */}
+                <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
+                  <button
+                    onClick={() => navigate('/register')}
+                    className="inline-flex items-center gap-2 rounded-xl bg-astu-green px-8 py-3.5 text-sm font-bold text-white hover:brightness-110 transition-all hover:scale-105 shadow-lg hover:shadow-astu-green/25 btn-magnetic"
+                  >
+                    <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
+                  </button>
+                  <button
+                    onClick={() => navigate('/community')}
+                    className="inline-flex items-center gap-2 rounded-xl border-2 border-white/30 px-8 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all hover:scale-105"
+                  >
+                    <Globe className="h-4 w-4" /> Explore Community
+                  </button>
+                </div>
+              </div>
+            </section>
+          );
+        })()}
+
 
 
         <section id="research" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
@@ -3330,6 +3940,114 @@ location: e.location || 'Location to be confirmed',
         </div>
       )}
 
+      {/* Alumni Donation Routing / Authentication Modal */}
+      {isDonationAuthModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl border border-slate-100 transition-all">
+            {/* Top decorative gradient bar */}
+            <div className="h-2 w-full bg-gradient-to-r from-[#003366] via-[#008C44] to-[#FFCC00]" />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setIsDonationAuthModalOpen(false)}
+              className="absolute top-5 right-5 h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="p-6 md:p-8">
+              {/* Header Badge & Title */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#003366]/10 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[#003366] mb-3">
+                <Heart className="h-3.5 w-3.5 fill-[#E31E24] text-[#E31E24]" />
+                ASTU Alumni Giving
+              </div>
+
+              <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                Support ASTU's Future
+              </h3>
+
+              {selectedDonationCampaign && (
+                <div className="mt-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#008C44]">
+                      Selected Campaign
+                    </span>
+                    <p className="text-xs md:text-sm font-bold text-slate-800 truncate">
+                      {selectedDonationCampaign.title}
+                    </p>
+                  </div>
+                  <span className="shrink-0 px-2.5 py-1 rounded-lg bg-[#003366]/10 text-[#003366] text-[10px] font-black uppercase">
+                    {selectedDonationCampaign.category || 'Initiative'}
+                  </span>
+                </div>
+              )}
+
+              <p className="mt-3 text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
+                Contributions are managed through the verified ASTU Alumni Portal. Please choose how you'd like to proceed:
+              </p>
+
+              {/* Options Cards */}
+              <div className="mt-6 space-y-3.5">
+                {/* Option 1: Registered Alumni -> Login */}
+                <div
+                  onClick={() => {
+                    setIsDonationAuthModalOpen(false);
+                    navigate('/login?redirect=/alumni/dashboard?tab=donations');
+                  }}
+                  className="group relative flex items-start gap-4 p-4 rounded-2xl border-2 border-slate-200 hover:border-[#003366] bg-white hover:bg-slate-50/80 transition-all cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="h-11 w-11 rounded-xl bg-[#003366]/10 text-[#003366] group-hover:bg-[#003366] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                    <LogIn className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-black text-slate-900 group-hover:text-[#003366] transition-colors">
+                        I am a Registered Alumni
+                      </h4>
+                      <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-[#003366] group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
+                      Sign in with your student ID or email to access your Giving dashboard directly.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Option 2: New Alumni -> Register */}
+                <div
+                  onClick={() => {
+                    setIsDonationAuthModalOpen(false);
+                    navigate('/register');
+                  }}
+                  className="group relative flex items-start gap-4 p-4 rounded-2xl border-2 border-emerald-200/90 hover:border-emerald-600 bg-emerald-50/30 hover:bg-emerald-50/70 transition-all cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="h-11 w-11 rounded-xl bg-emerald-100 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                    <UserPlus className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
+                        I am a New Alumni
+                      </h4>
+                      <ArrowRight className="h-4 w-4 text-emerald-600 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-xs text-slate-600 font-medium mt-0.5 leading-relaxed">
+                      Register your student graduation records to activate your alumni network account first.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Notice */}
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-semibold">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                Verified ASTU Alumni Advancement &amp; Giving Portal
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Show All News Directory Modal */}
       {showAllNewsModal && (
         <div
@@ -3434,6 +4152,19 @@ location: e.location || 'Location to be confirmed',
           </div>
         </div>
       )}
+      {/* Public Donation Modal for Telebirr / Chapa / CBE Birr */}
+      <TelebirrDonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        campaign={selectedDonationCampaign}
+        onSuccess={() => {
+          contentService.getPublicDonationCampaigns().then((campaigns) => {
+            if (campaigns && campaigns.length) {
+              setDonationCampaigns(campaigns);
+            }
+          }).catch(() => {});
+        }}
+      />
 
       <ChatBot />
     </div>
