@@ -17,6 +17,11 @@ export interface AlumniRegistration {
   accreditationVerified: boolean;
   notes?: string;
   eventCustomAnswers?: Record<string, string>;
+  // Registrar SIS standard graduate fields
+  cgpa?: string | number;
+  gender?: string;
+  nationality?: string;
+  dateOfBirth?: string;
 }
 
 export interface RegistrationFormConfig {
@@ -66,6 +71,10 @@ const INITIAL_REGISTRATIONS: AlumniRegistration[] = [
     registeredAt: '2026-06-02 09:15 AM',
     status: 'Confirmed',
     accreditationVerified: true,
+    cgpa: '3.82',
+    gender: 'Male',
+    nationality: 'Ethiopian',
+    dateOfBirth: '1999-04-12',
     notes: 'Verified against Registrar database record.',
   },
   {
@@ -85,6 +94,10 @@ const INITIAL_REGISTRATIONS: AlumniRegistration[] = [
     registeredAt: '2026-06-02 10:40 AM',
     status: 'Confirmed',
     accreditationVerified: true,
+    cgpa: '3.91',
+    gender: 'Female',
+    nationality: 'Ethiopian',
+    dateOfBirth: '1998-11-20',
     notes: 'Submitted full 24-month longitudinal survey.',
   },
   {
@@ -104,6 +117,10 @@ const INITIAL_REGISTRATIONS: AlumniRegistration[] = [
     registeredAt: '2026-06-03 02:10 PM',
     status: 'Confirmed',
     accreditationVerified: true,
+    cgpa: '3.75',
+    gender: 'Male',
+    nationality: 'Ethiopian',
+    dateOfBirth: '1996-08-15',
     notes: 'Employer partner representative and alumnus.',
   },
   {
@@ -347,6 +364,10 @@ export const registrationService = {
       'Phone',
       'Graduation Class',
       'Department',
+      'CGPA',
+      'Gender',
+      'Nationality',
+      'Date of Birth',
       'Current Employer',
       'Job Title',
       'Employment Status',
@@ -366,6 +387,10 @@ export const registrationService = {
       `"${r.phone}"`,
       `"${r.classYear}"`,
       `"${r.department}"`,
+      `"${r.cgpa || 'N/A'}"`,
+      `"${r.gender || 'N/A'}"`,
+      `"${r.nationality || 'Ethiopian'}"`,
+      `"${r.dateOfBirth || 'N/A'}"`,
       `"${r.currentEmployer.replace(/"/g, '""')}"`,
       `"${r.jobTitle.replace(/"/g, '""')}"`,
       `"${r.employmentStatus}"`,

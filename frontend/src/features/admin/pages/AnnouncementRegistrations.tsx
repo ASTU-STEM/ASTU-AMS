@@ -4,6 +4,11 @@ import {
   ArrowLeft,
   Building2,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  CheckSquare,
   Download,
   Edit3,
   ExternalLink,
@@ -23,6 +28,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Square,
   Trash2,
   User,
   UserCheck,
@@ -75,6 +81,10 @@ export default function AnnouncementRegistrations() {
   const [jobTitle, setJobTitle] = useState('');
   const [employmentStatus, setEmploymentStatus] = useState<AlumniRegistration['employmentStatus']>('Employed Full-time');
   const [salaryRange, setSalaryRange] = useState('35,000 - 50,000 ETB');
+  const [cgpa, setCgpa] = useState('3.50');
+  const [gender, setGender] = useState('Male');
+  const [nationality, setNationality] = useState('Ethiopian');
+  const [dateOfBirth, setDateOfBirth] = useState('2001-05-15');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -145,6 +155,80 @@ export default function AnnouncementRegistrations() {
     });
   }, [activeList, statusFilter, deptFilter, employmentFilter, searchQuery]);
 
+  // ── High-Volume Pagination State (Smoothly handles 1,000+ to 100,000+ rows) ──
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [jumpPageInput, setJumpPageInput] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  // Automatically reset to page 1 and clear selections when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+    setSelectedIds([]);
+  }, [selectedContentId, statusFilter, deptFilter, employmentFilter, searchQuery]);
+
+  const totalPages = Math.ceil(filteredRegistrations.length / pageSize) || 1;
+
+  const paginatedRegistrations = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredRegistrations.slice(startIndex, startIndex + pageSize);
+  }, [filteredRegistrations, currentPage, pageSize]);
+
+  // Bulk actions handlers
+  const handleToggleSelectAll = () => {
+    const pageIds = paginatedRegistrations.map((r) => r.id);
+    const isAllSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+    if (isAllSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
+
+  const handleToggleSelectOne = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkApprove = () => {
+    if (selectedIds.length === 0) return;
+    selectedIds.forEach((id) => registrationService.approveRegistration(id));
+    toast.success(`Approved ${selectedIds.length} registrations in bulk!`);
+    setSelectedIds([]);
+  };
+
+  const handleBulkDecline = () => {
+    if (selectedIds.length === 0) return;
+    selectedIds.forEach((id) => registrationService.declineRegistration(id));
+    toast.success(`Declined ${selectedIds.length} registrations`);
+    setSelectedIds([]);
+  };
+
+  const handleBulkVerifyEta = () => {
+    if (selectedIds.length === 0) return;
+    selectedIds.forEach((id) => {
+      const reg = registrations.find((r) => r.id === id);
+      if (reg && !reg.accreditationVerified) {
+        registrationService.toggleEtaVerified(id);
+      }
+    });
+    toast.success(`Accredited ${selectedIds.length} alumni for ETA audit`);
+    setSelectedIds([]);
+  };
+
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const p = parseInt(jumpPageInput, 10);
+    if (!isNaN(p) && p >= 1 && p <= totalPages) {
+      setCurrentPage(p);
+      setJumpPageInput('');
+    } else {
+      toast.error(`Please enter a page between 1 and ${totalPages}`);
+    }
+  };
+
   // Handlers
   const handleUpdateStatus = (id: string, status: AlumniRegistration['status']) => {
     registrationService.updateRegistrationStatus(id, status);
@@ -197,6 +281,10 @@ export default function AnnouncementRegistrations() {
         jobTitle: jobTitle.trim() || 'Graduate Member',
         employmentStatus,
         salaryRange,
+        cgpa: cgpa.trim() || '3.50',
+        gender,
+        nationality: nationality.trim() || 'Ethiopian',
+        dateOfBirth: dateOfBirth || undefined,
         status: 'Confirmed',
         accreditationVerified: true,
         notes: notes.trim() || 'Registered directly by Alumni Directorate Office.',
@@ -208,9 +296,13 @@ export default function AnnouncementRegistrations() {
       setPhone('');
       setCurrentEmployer('');
       setJobTitle('');
+      setCgpa('3.50');
+      setGender('Male');
+      setNationality('Ethiopian');
+      setDateOfBirth('2001-05-15');
       setNotes('');
       setAddModalOpen(false);
-      toast.success('Alumnus registered successfully!');
+      toast.success('Alumnus registered successfully with Registrar-aligned graduate format!');
     } finally {
       setSubmitting(false);
     }
@@ -235,8 +327,26 @@ export default function AnnouncementRegistrations() {
     <tr
       key={reg.id}
       onClick={() => setSelectedRegDetail(reg)}
-      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors cursor-pointer ${
+        selectedIds.includes(reg.id) ? 'bg-blue-50/40 dark:bg-sky-950/20' : ''
+      }`}
     >
+      {/* Checkbox */}
+      <td className="py-3 px-3 w-9" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          onClick={(e) => handleToggleSelectOne(reg.id, e)}
+          className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer p-0.5"
+          title={selectedIds.includes(reg.id) ? 'Deselect row' : 'Select row'}
+        >
+          {selectedIds.includes(reg.id) ? (
+            <CheckSquare className="h-4 w-4 text-[#003366] dark:text-sky-400" />
+          ) : (
+            <Square className="h-4 w-4 text-slate-300 dark:text-slate-600" />
+          )}
+        </button>
+      </td>
+
       {/* Alumnus info */}
       <td className="py-3 px-4">
         <div>
@@ -532,8 +642,8 @@ export default function AnnouncementRegistrations() {
           >
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Consolidated</span>
-              <span className="rounded-full bg-astu-navy text-white px-2 py-0.2 text-[10px] font-bold">
-                {registrations.length}
+              <span className="rounded-full bg-astu-navy text-white px-2 py-0.5 text-[10px] font-bold">
+                {registrations.length.toLocaleString()}
               </span>
             </div>
             <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">All Registered Members</h4>
@@ -543,7 +653,10 @@ export default function AnnouncementRegistrations() {
           {contentItems.map((item) => {
             const count = registrations.filter((r) => r.contentId === item.id).length;
             const isSelected = selectedContentId === item.id;
-            const capacity = item.registrationCapacity || 500;
+            const baseCapacity = item.registrationCapacity || 500;
+            const capacity = count > baseCapacity ? Math.max(baseCapacity, Math.ceil(count / 100) * 100) : baseCapacity;
+            const isOverCapacity = count > baseCapacity;
+            const waitlistCount = isOverCapacity ? count - baseCapacity : 0;
             const percent = Math.min(100, Math.round((count / capacity) * 100));
 
             return (
@@ -561,19 +674,26 @@ export default function AnnouncementRegistrations() {
                     <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 truncate max-w-[120px]">
                       {item.registrationType || item.type}
                     </span>
-                    <span className="rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.2 text-[10px] font-bold">
-                      {count} / {capacity}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <span className="rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 text-[10px] font-bold">
+                        {count.toLocaleString()} / {capacity.toLocaleString()}
+                      </span>
+                      {waitlistCount > 0 && (
+                        <span className="rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 px-1.5 py-0.5 text-[9px] font-bold" title={`${waitlistCount} registrants waitlisted due to capacity`}>
+                          +{waitlistCount} Waitlist
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">{item.title}</h4>
                 </div>
 
                 <div className="mt-2.5 space-y-1">
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-astu-navy dark:bg-sky-400 h-full rounded-full" style={{ width: `${percent}%` }} />
+                    <div className={`h-full rounded-full ${isOverCapacity ? 'bg-amber-500' : 'bg-astu-navy dark:bg-sky-400'}`} style={{ width: `${percent}%` }} />
                   </div>
                   <div className="flex items-center justify-between text-[9px] text-slate-400">
-                    <span>{percent}% Filled</span>
+                    <span>{percent}% {isOverCapacity ? 'Capacity Reached' : 'Filled'}</span>
                     {item.registrationDeadline && <span>Deadline: {item.registrationDeadline}</span>}
                   </div>
                 </div>
@@ -629,9 +749,11 @@ export default function AnnouncementRegistrations() {
             >
               <option value="all">All Statuses</option>
               <option value="Confirmed">Confirmed</option>
+              <option value="Pending Approval">Pending Approval</option>
               <option value="Pending Verification">Pending Verification</option>
               <option value="Attended">Attended</option>
               <option value="Waitlisted">Waitlisted</option>
+              <option value="Rejected">Rejected</option>
             </select>
 
             <select
@@ -674,6 +796,50 @@ export default function AnnouncementRegistrations() {
               </button>
             )}
           </div>
+
+          {/* Bulk Operations Action Bar when items are selected */}
+          {selectedIds.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-blue-50/90 dark:bg-sky-950/50 border border-blue-200 dark:border-sky-800 text-xs animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-[#003366] dark:text-sky-300">
+                  {selectedIds.length} {selectedIds.length === 1 ? 'member' : 'members'} selected
+                </span>
+                <span className="text-slate-400">·</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds([])}
+                  className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline font-semibold cursor-pointer"
+                >
+                  Clear Selection
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleBulkApprove}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer shadow-2xs"
+                >
+                  ✓ Approve ({selectedIds.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkVerifyEta}
+                  className="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs cursor-pointer shadow-2xs inline-flex items-center gap-1"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Audit Verify ETA
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkDecline}
+                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-2xs"
+                >
+                  ✕ Decline
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Table Content */}
@@ -681,6 +847,26 @@ export default function AnnouncementRegistrations() {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <th className="py-3 px-3 w-9">
+                  <button
+                    type="button"
+                    onClick={handleToggleSelectAll}
+                    className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer p-0.5"
+                    title={
+                      paginatedRegistrations.length > 0 &&
+                      paginatedRegistrations.every((r) => selectedIds.includes(r.id))
+                        ? 'Deselect page'
+                        : 'Select all on this page'
+                    }
+                  >
+                    {paginatedRegistrations.length > 0 &&
+                    paginatedRegistrations.every((r) => selectedIds.includes(r.id)) ? (
+                      <CheckSquare className="h-4 w-4 text-[#003366] dark:text-sky-400" />
+                    ) : (
+                      <Square className="h-4 w-4 text-slate-300 dark:text-slate-600" />
+                    )}
+                  </button>
+                </th>
                 <th className="py-3 px-4">Alumnus & Student ID</th>
                 <th className="py-3 px-4">Registered Event / Campaign</th>
                 <th className="py-3 px-4">Department & Class</th>
@@ -694,35 +880,123 @@ export default function AnnouncementRegistrations() {
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
                     <RefreshCw className="mx-auto h-6 w-6 animate-spin text-astu-navy dark:text-sky-400 mb-2" />
                     Loading registered alumni records…
                   </td>
                 </tr>
               ) : filteredRegistrations.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
                     <Users className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600 mb-2" />
                     <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No registrations found</p>
                     <p className="text-xs text-slate-400 mt-1">Try adjusting your filters or register an alumnus manually.</p>
                   </td>
                 </tr>
               ) : (
-                filteredRegistrations.map((reg) => renderTableRow(reg))
+                paginatedRegistrations.map((reg) => renderTableRow(reg))
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-3.5 px-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500">
-          <span>Showing {filteredRegistrations.length} of {activeList.length} alumni registrations</span>
-          <button
-            onClick={handleExport}
-            className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-sky-400 hover:underline cursor-pointer"
-          >
-            <Download className="h-3 w-3" /> Export Roster to CSV
-          </button>
+        {/* High-Volume Pagination Toolbar Footer */}
+        <div className="flex flex-col sm:flex-row items-center justify-between p-3 px-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-xs text-slate-500 gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span>
+              Showing <strong className="text-slate-900 dark:text-white">{filteredRegistrations.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> to{' '}
+              <strong className="text-slate-900 dark:text-white">
+                {Math.min(currentPage * pageSize, filteredRegistrations.length).toLocaleString()}
+              </strong>{' '}
+              of <strong className="text-slate-900 dark:text-white">{filteredRegistrations.length.toLocaleString()}</strong> registered members
+            </span>
+
+            <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-700 pl-3">
+              <span className="text-[10px] font-bold uppercase text-slate-400">Rows per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={250}>250</option>
+              </select>
+            </div>
+
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-sky-400 hover:underline cursor-pointer border-l border-slate-200 dark:border-slate-700 pl-3"
+              title="Download entire filtered roster as CSV spreadsheet"
+            >
+              <Download className="h-3.5 w-3.5" /> Export All ({filteredRegistrations.length.toLocaleString()}) to CSV
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="First Page"
+            >
+              <ChevronsLeft className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="Previous Page"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+
+            <span className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-extrabold text-slate-900 dark:text-white text-xs">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="Next Page"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="Last Page"
+            >
+              <ChevronsRight className="h-3.5 w-3.5" />
+            </button>
+
+            {totalPages > 3 && (
+              <form onSubmit={handleJumpToPage} className="flex items-center gap-1 ml-1 border-l border-slate-200 dark:border-slate-700 pl-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  placeholder="Go to"
+                  value={jumpPageInput}
+                  onChange={(e) => setJumpPageInput(e.target.value)}
+                  className="w-14 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-1.5 py-1 text-xs text-center font-bold focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-bold cursor-pointer"
+                >
+                  Go
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
 
@@ -883,6 +1157,27 @@ export default function AnnouncementRegistrations() {
               <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Salary Benchmark</span>
                 <p className="font-semibold text-slate-800 dark:text-slate-200">{selectedRegDetail.salaryRange || 'N/A'}</p>
+              </div>
+
+              {/* Registrar Academic & Demographic Information */}
+              <div className="p-3 rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50/40 dark:bg-sky-950/20 space-y-1">
+                <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 uppercase">Academic CGPA</span>
+                <p className="font-bold text-sky-900 dark:text-sky-100">{selectedRegDetail.cgpa ? `${selectedRegDetail.cgpa} / 4.00` : '3.50 (Standard)'}</p>
+              </div>
+
+              <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Gender</span>
+                <p className="font-semibold text-slate-800 dark:text-slate-200">{selectedRegDetail.gender || 'Not Specified'}</p>
+              </div>
+
+              <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Nationality</span>
+                <p className="font-semibold text-slate-800 dark:text-slate-200">{selectedRegDetail.nationality || 'Ethiopian'}</p>
+              </div>
+
+              <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Date of Birth</span>
+                <p className="font-semibold text-slate-800 dark:text-slate-200">{selectedRegDetail.dateOfBirth || 'On File'}</p>
               </div>
             </div>
 
@@ -1149,6 +1444,55 @@ export default function AnnouncementRegistrations() {
                 placeholder="Class of 2023"
                 value={classYear}
                 onChange={(e) => setClassYear(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Cumulative GPA (CGPA)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="1.0"
+                max="4.0"
+                placeholder="e.g. 3.50"
+                value={cgpa}
+                onChange={(e) => setCgpa(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Gender</label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nationality</label>
+              <input
+                type="text"
+                placeholder="Ethiopian"
+                value={nationality}
+                onChange={(e) => setNationality(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Date of Birth</label>
+              <input
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none"
               />
             </div>

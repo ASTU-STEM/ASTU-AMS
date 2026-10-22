@@ -4,6 +4,10 @@ import {
   ArrowLeft,
   Building2,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Download,
   Edit3,
   ExternalLink,
@@ -127,6 +131,33 @@ export default function DedicatedRegistrationsPage() {
       return matchStatus && matchDept && matchEmployment && matchSearch;
     });
   }, [activeList, statusFilter, deptFilter, employmentFilter, searchQuery]);
+
+  // High-Volume Pagination State (1,000+ members)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [jumpPageInput, setJumpPageInput] = useState('');
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedContentId, statusFilter, deptFilter, employmentFilter, searchQuery]);
+
+  const totalPages = Math.ceil(filteredRegistrations.length / pageSize) || 1;
+
+  const paginatedRegistrations = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredRegistrations.slice(startIndex, startIndex + pageSize);
+  }, [filteredRegistrations, currentPage, pageSize]);
+
+  const handleJumpToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const p = parseInt(jumpPageInput, 10);
+    if (!isNaN(p) && p >= 1 && p <= totalPages) {
+      setCurrentPage(p);
+      setJumpPageInput('');
+    } else {
+      toast.error(`Enter a page between 1 and ${totalPages}`);
+    }
+  };
 
   // Handlers
   const handleUpdateStatus = (id: string, status: AlumniRegistration['status']) => {
@@ -441,7 +472,7 @@ export default function DedicatedRegistrationsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredRegistrations.map((reg) => (
+                paginatedRegistrations.map((reg) => (
                   <tr
                     key={reg.id}
                     onClick={() => setSelectedRegDetail(reg)}
@@ -572,16 +603,83 @@ export default function DedicatedRegistrationsPage() {
           </table>
         </div>
 
-        {/* Footer */}
+        {/* Footer with High-Volume Pagination */}
         <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-          <span>Showing {filteredRegistrations.length} of {activeList.length} registered members</span>
-          <div className="flex items-center gap-3">
-            <button onClick={handleExportPdf} className="font-bold text-rose-600 dark:text-rose-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
-              <FileText className="h-3.5 w-3.5" /> Export PDF Audit Report
+          <div className="flex flex-wrap items-center gap-3">
+            <span>
+              Showing <strong className="text-slate-900 dark:text-white">{filteredRegistrations.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> to{' '}
+              <strong className="text-slate-900 dark:text-white">
+                {Math.min(currentPage * pageSize, filteredRegistrations.length).toLocaleString()}
+              </strong>{' '}
+              of <strong className="text-slate-900 dark:text-white">{filteredRegistrations.length.toLocaleString()}</strong> registered members
+            </span>
+
+            <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-700 pl-3">
+              <span className="text-[10px] font-bold uppercase text-slate-400">Rows per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={250}>250</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="First Page"
+            >
+              <ChevronsLeft className="h-3.5 w-3.5" />
             </button>
-            <button onClick={handleExportCsv} className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
-              <FileSpreadsheet className="h-3.5 w-3.5" /> Export CSV Roster
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="Previous Page"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
             </button>
+
+            <span className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-extrabold text-slate-900 dark:text-white text-xs">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="Next Page"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+              title="Last Page"
+            >
+              <ChevronsRight className="h-3.5 w-3.5" />
+            </button>
+
+            <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-3 ml-1">
+              <button onClick={handleExportPdf} className="font-bold text-rose-600 dark:text-rose-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
+                <FileText className="h-3.5 w-3.5" /> PDF
+              </button>
+              <button onClick={handleExportCsv} className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
+                <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
+              </button>
+            </div>
           </div>
         </div>
       </div>
