@@ -47,6 +47,7 @@ import {
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
+import { useTheme } from "../hooks/useTheme";
 import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
@@ -600,13 +601,14 @@ const getNewsCategoryMeta = (item: any) => {
 };
 
 const EmptySection = ({ message }: { message: string }) => (
-  <div className="rounded-xl border border-dashed border-outline-variant dark:border-slate-600 bg-white/60 dark:bg-slate-800/40 px-6 py-10 text-center">
-    <p className="text-sm text-on-surface-variant dark:text-slate-400">{message}</p>
+  <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 px-6 py-10 text-center">
+    <p className="text-sm text-slate-500 dark:text-slate-400">{message}</p>
   </div>
 );
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
 
   const [activeSection, setActiveSection] = useState("home");
   const [user, setUser] = useState<any>(null);
@@ -1574,7 +1576,7 @@ location: e.location || 'Location to be confirmed',
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
-    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
       <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20">
@@ -1744,7 +1746,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-12 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Get Started</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">How ASTU-AMS Works</h3>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               From registration to real impact — here's how our platform empowers alumni,
               employers, and the university community in four simple steps.
             </p>
@@ -1761,7 +1763,7 @@ location: e.location || 'Location to be confirmed',
                 return (
                   <article
                     key={item.id || item.step || item.title || idx}
-                    className={`reveal reveal-delay-${(idx % 4) + 1} group relative rounded-2xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_24px_rgba(0,51,102,0.12)]`}
+                    className={`reveal reveal-delay-${(idx % 4) + 1} group relative rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_24px_rgba(0,51,102,0.12)]`}
                   >
                     <div className="mb-5 flex items-center gap-3">
                       <div
@@ -1769,7 +1771,7 @@ location: e.location || 'Location to be confirmed',
                       >
                         {item.step || idx + 1}
                       </div>
-                      <div className={`rounded-lg p-2.5 ${item.iconBg || 'bg-astu-navy/10 text-astu-navy'} transition-colors`}>
+                      <div className={`rounded-lg p-2.5 ${item.iconBg || 'bg-astu-navy/10 text-astu-navy dark:bg-sky-500/10 dark:text-sky-400'} transition-colors`}>
                         <Icon className="h-5 w-5" />
                       </div>
                     </div>
@@ -1777,14 +1779,14 @@ location: e.location || 'Location to be confirmed',
                     <h4 className="mb-2 text-lg font-bold text-astu-navy dark:text-white">
                       {item.title}
                     </h4>
-                    <p className="text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
+                    <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">
                       {descText}
                     </p>
 
                     {item.cta && (
                       <button
                         onClick={() => navigate(item.route || '/login')}
-                        className="mt-3 text-xs font-semibold text-[#003580] dark:text-amber-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        className="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
                       >
                         {item.cta} <ArrowRight className="h-3 w-3" />
                       </button>
@@ -1801,7 +1803,7 @@ location: e.location || 'Location to be confirmed',
 
           <div className="mt-10 flex justify-center reveal">
             <button
-              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy px-7 py-3 text-sm font-bold text-white shadow-md transition-all hover:brightness-110 hover:shadow-lg hover:scale-105"
+              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy dark:bg-blue-600 px-7 py-3 text-sm font-bold text-white shadow-md transition-all hover:brightness-110 hover:shadow-lg hover:scale-105"
               onClick={() => navigate("/login")}
             >
               Get Started Today
@@ -1818,7 +1820,7 @@ location: e.location || 'Location to be confirmed',
             <h3 className="mt-2 text-3xl font-bold animate-gradient-text dark:text-white">
               {displayImpactSection?.title || welcomeMessage || 'ASTU Alumni Impact'}
             </h3>
-            <p className="mt-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+            <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
               {displayImpactSection?.description ||
                 welcomeMessage ||
                 'Graduate outcomes and employer feedback managed through the ASTU content system feed directly into curriculum updates.'}
@@ -1826,8 +1828,8 @@ location: e.location || 'Location to be confirmed',
             <div className="mt-6 grid grid-cols-2 gap-4">
               {liveStats.slice(0, 2).map((stat: any) => (
                 <div key={stat.title || stat.label || stat.id}>
-                  <p className="text-3xl font-bold text-astu-navy dark:text-amber-400">{stat.value}{stat.suffix || ''}</p>
-                  <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant dark:text-slate-400">{stat.title || stat.label}</p>
+                  <p className="text-3xl font-bold text-astu-navy dark:text-blue-400">{stat.value}{stat.suffix || ''}</p>
+                  <p className="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{stat.title || stat.label}</p>
                 </div>
               ))}
             </div>
@@ -1862,7 +1864,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Explore Life At ASTU</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Campus Life, Facilities, Events, and Galleries</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               Discover events, facilities, campus activities, media galleries, and student services that define life at Adama Science and Technology University.
             </p>
           </div>
@@ -1873,12 +1875,12 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               displayCampusLife.map((card, idx) => (
-              <article key={card.id || card.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+              <article key={card.id || card.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={card.image || FALLBACK_IMAGE} alt={card.title} className="h-52 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-5">
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-astu-red">{card.campus}</p>
                   <h4 className="mt-2 text-lg font-semibold text-astu-navy dark:text-white">{card.title}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">{card.description}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{card.description}</p>
                   {card.action && (
                     <button
                       onClick={() => {
@@ -1888,7 +1890,7 @@ location: e.location || 'Location to be confirmed',
                           navigate('/gallery');
                         }
                       }}
-                      className="mt-4 rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 btn-magnetic cursor-pointer transition-colors"
+                      className="mt-4 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 btn-magnetic cursor-pointer transition-colors"
                     >
                       {card.action}
                     </button>
@@ -1908,7 +1910,7 @@ location: e.location || 'Location to be confirmed',
             </div>
             <button
               onClick={() => navigate('/gallery')}
-              className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800 cursor-pointer transition-colors"
+              className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
             >
               View all
             </button>
@@ -1920,11 +1922,11 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               displayCampuses.map((campus, idx) => (
-              <article key={campus.id || campus.name || idx} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+              <article key={campus.id || campus.name || idx} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={campus.image || FALLBACK_IMAGE} alt={campus.name} className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-4">
                   <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{campus.name}</h4>
-                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400">{campus.description}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{campus.description}</p>
                   <button
                     onClick={() => navigate('/gallery')}
                     className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic cursor-pointer"
@@ -1942,7 +1944,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Photo Gallery</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               Campus life, events, and institutional moments from Adama Science and Technology University.
             </p>
           </div>
@@ -1953,7 +1955,7 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               displayGallery.map((item, idx) => (
-              <article key={item.id || item.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+              <article key={item.id || item.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={item.src || item.image || FALLBACK_IMAGE} alt={item.title} className="h-48 w-full object-cover transition-all duration-700 hover:scale-110 sm:h-56 md:h-64" onError={handleImageError} />
                 <div className="p-3 md:p-4">
                   <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{item.title}</h4>
@@ -1966,7 +1968,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mt-8 text-center">
             <button
               onClick={() => navigate('/gallery')}
-              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:brightness-110 shadow-md hover:shadow-lg transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy dark:bg-blue-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:brightness-110 shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
               Explore Full Gallery & Albums <ExternalLink className="h-4 w-4 text-[#FFD700]" />
             </button>
@@ -1978,11 +1980,11 @@ location: e.location || 'Location to be confirmed',
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
               <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white sm:text-3xl">Video Gallery</h3>
-              <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400">Workshop recordings, graduation moments, and research showcases.</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Workshop recordings, graduation moments, and research showcases.</p>
             </div>
             <button
               onClick={() => navigate('/gallery')}
-              className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800 cursor-pointer transition-colors"
+              className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
             >
               View Media Library
             </button>
@@ -1994,7 +1996,7 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               displayVideos.map((video: any, idx: number) => (
-                <article key={video.id || video.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+                <article key={video.id || video.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                   <div className="relative">
                     <img
                       src={video.thumbnail || video.image || video.cover || cmsFeatureImages.primary}
@@ -2017,7 +2019,7 @@ location: e.location || 'Location to be confirmed',
                   <div className="p-4">
                     <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{video.title}</h4>
                     {video.description && (
-                      <p className="mt-1 line-clamp-2 text-xs text-on-surface-variant dark:text-slate-400">{video.description}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-400">{video.description}</p>
                     )}
                   </div>
                 </article>
@@ -2127,7 +2129,7 @@ location: e.location || 'Location to be confirmed',
                 </h3>
 
                 {/* Subtitle matching user screenshot */}
-                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
+                <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
                   Join campus career expos, technical workshops, and alumni reunions.
                 </p>
               </div>
@@ -2135,7 +2137,7 @@ location: e.location || 'Location to be confirmed',
               {/* Action Button: See All Events → */}
               <div className="flex flex-wrap items-center gap-3">
                 <button
-                  className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-astu-navy/20 transition-all duration-200 hover:bg-astu-navy/90 hover:shadow-lg hover:shadow-astu-navy/30 active:scale-95 group"
+                  className="inline-flex items-center gap-2 rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-astu-navy/20 dark:shadow-blue-900/30 transition-all duration-200 hover:bg-astu-navy/90 dark:hover:bg-blue-500 hover:shadow-lg active:scale-95 group"
                   onClick={() => setShowAllEventsModal(true)}
                 >
                   <span>See All Events</span>
@@ -2145,7 +2147,7 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Filter Tabs & Carousel Navigation Controls Bar */}
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-700/60 pb-5">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-800 pb-5">
               {/* Curved Pill Filter Tabs */}
               <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 w-fit">
                 {[
@@ -2162,7 +2164,7 @@ location: e.location || 'Location to be confirmed',
                     }}
                     className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
                       eventFilterTab === tab.id
-                        ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
+                        ? 'bg-astu-navy text-white shadow-sm dark:bg-blue-600'
                         : 'text-slate-600 hover:text-astu-navy dark:text-slate-300 dark:hover:text-white'
                     }`}
                   >
@@ -2182,7 +2184,7 @@ location: e.location || 'Location to be confirmed',
                     setEventSlideIndex((prev) => (prev - 1 + totalPages) % totalPages);
                   }}
                   aria-label="Previous Events Slide"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-sky-400 dark:hover:text-sky-300 hover:scale-105 active:scale-95"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-blue-400 dark:hover:text-blue-300 hover:scale-105 active:scale-95"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -2192,7 +2194,7 @@ location: e.location || 'Location to be confirmed',
                     setEventSlideIndex((prev) => (prev + 1) % totalPages);
                   }}
                   aria-label="Next Events Slide"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-sky-400 dark:hover:text-sky-300 hover:scale-105 active:scale-95"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-blue-400 dark:hover:text-blue-300 hover:scale-105 active:scale-95"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
@@ -2206,7 +2208,7 @@ location: e.location || 'Location to be confirmed',
                 .map((event, idx) => (
                   <article
                     key={event.id + '-' + idx}
-                    className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300"
+                    className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300"
                   >
                     {/* Top Image Frame with Smooth Curved Top */}
                     <div className="relative h-52 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
@@ -2233,7 +2235,7 @@ location: e.location || 'Location to be confirmed',
                       )}
 
                       {/* Bottom Image Curved Wave Accent */}
-                      <div className="pointer-events-none absolute -bottom-1 left-0 right-0 h-4 text-white dark:text-slate-800">
+                      <div className="pointer-events-none absolute -bottom-1 left-0 right-0 h-4 text-white dark:text-slate-900">
                         <svg viewBox="0 0 500 20" preserveAspectRatio="none" className="h-full w-full fill-current">
                           <path d="M0,0 C150,20 350,20 500,0 L500,20 L0,20 Z" />
                         </svg>
@@ -2246,13 +2248,13 @@ location: e.location || 'Location to be confirmed',
                         {/* Title */}
                         <h4
                           onClick={() => setSelectedEventModal(event)}
-                          className="text-base sm:text-lg font-bold text-astu-navy dark:text-white line-clamp-1 hover:text-astu-red dark:hover:text-amber-400 transition-colors cursor-pointer"
+                          className="text-base sm:text-lg font-bold text-astu-navy dark:text-white line-clamp-1 hover:text-astu-red dark:hover:text-blue-400 transition-colors cursor-pointer"
                         >
                           {event.title}
                         </h4>
 
                         {/* Date & Location Chips */}
-                        <div className="mt-3 flex flex-col gap-1.5 text-xs text-on-surface-variant dark:text-slate-300">
+                        <div className="mt-3 flex flex-col gap-1.5 text-xs text-slate-600 dark:text-slate-300">
                           <p className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-200">
                             <CalendarDays className="h-4 w-4 text-astu-red shrink-0" />
                             <span>{event.date}</span>
@@ -2271,12 +2273,12 @@ location: e.location || 'Location to be confirmed',
                       </div>
 
                       {/* Action Buttons: Register | View Details (Matching Screenshot) */}
-                      <div className="mt-5 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                      <div className="mt-5 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <button
                           className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 ${
                             registeredTitles.includes(event.title)
                               ? 'bg-emerald-600 text-white cursor-default shadow-emerald-600/20'
-                              : 'bg-astu-navy text-white hover:bg-astu-navy/90 hover:shadow-md hover:shadow-astu-navy/20 dark:bg-sky-600 dark:hover:bg-sky-500'
+                              : 'bg-astu-navy text-white hover:bg-astu-navy/90 hover:shadow-md hover:shadow-astu-navy/20 dark:bg-blue-600 dark:hover:bg-blue-500'
                           }`}
                           onClick={() => handleRegisterClick({ title: event.title, kind: event.kind, date: event.date, location: event.location, id: event.id })}
                         >
@@ -2285,7 +2287,7 @@ location: e.location || 'Location to be confirmed',
 
                         <button
                           onClick={() => setSelectedEventModal(event)}
-                          className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                         >
                           View Details
                         </button>
@@ -2360,7 +2362,7 @@ location: e.location || 'Location to be confirmed',
                 </h3>
 
                 {/* Subtitle */}
-                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
+                <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
                   University updates, academic notices, and alumni network news.
                 </p>
               </div>
@@ -2368,7 +2370,7 @@ location: e.location || 'Location to be confirmed',
               {/* Action Button: See All News → */}
               <div className="flex flex-wrap items-center gap-3">
                 <button
-                  className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-astu-navy/20 transition-all duration-200 hover:bg-astu-navy/90 hover:shadow-lg hover:shadow-astu-navy/30 active:scale-95 group"
+                  className="inline-flex items-center gap-2 rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-astu-navy/20 dark:shadow-blue-900/30 transition-all duration-200 hover:bg-astu-navy/90 dark:hover:bg-blue-500 hover:shadow-lg active:scale-95 group"
                   onClick={() => setShowAllNewsModal(true)}
                 >
                   <span>See All News</span>
@@ -2378,7 +2380,7 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Slider Controls Bar with Auto-play Progress Timer */}
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-700/60 pb-5">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-800 pb-5">
               {/* Timer Progress Indicator & Status */}
               <div className="flex items-center gap-3">
                 <button
@@ -2422,14 +2424,14 @@ location: e.location || 'Location to be confirmed',
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleNewsSlideChange(newsSlideIndex - 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 disabled:opacity-40"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 disabled:opacity-40"
                     aria-label="Previous slide"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleNewsSlideChange(newsSlideIndex + 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 disabled:opacity-40"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 disabled:opacity-40"
                     aria-label="Next slide"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -2448,7 +2450,7 @@ location: e.location || 'Location to be confirmed',
                     <article
                       key={news.id || `news-${newsSlideIndex}-${idx}`}
                       onClick={() => setSelectedNewsModal(news)}
-                      className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 p-6 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+                      className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300 cursor-pointer"
                     >
                       {/* Top Category Badge & Pill */}
                       <div className="flex items-center justify-between gap-2 mb-4">
@@ -2463,7 +2465,7 @@ location: e.location || 'Location to be confirmed',
 
                       {/* Middle: Title & Excerpt */}
                       <div className="flex-1">
-                        <h4 className="text-base sm:text-lg font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug">
+                        <h4 className="text-base sm:text-lg font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                           {news.title}
                         </h4>
                         <p className="mt-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
@@ -2472,7 +2474,7 @@ location: e.location || 'Location to be confirmed',
                       </div>
 
                       {/* Bottom: Date, Read Time & Action */}
-                      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-3 text-xs">
+                      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 text-xs">
                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-medium">
                           <CalendarDays className="h-3.5 w-3.5 text-astu-red dark:text-rose-400 shrink-0" />
                           <span>{news.date || 'Recent'}</span>
@@ -2483,7 +2485,7 @@ location: e.location || 'Location to be confirmed',
                             e.stopPropagation();
                             setSelectedNewsModal(news);
                           }}
-                          className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-amber-400 group-hover:translate-x-1 transition-transform"
+                          className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-blue-400 group-hover:translate-x-1 transition-transform"
                         >
                           <span>Read More</span>
                           <ArrowRight className="h-3.5 w-3.5" />
@@ -2523,11 +2525,11 @@ location: e.location || 'Location to be confirmed',
 
         <section id="announcements" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 lg:grid-cols-[1fr_390px]">
-            <article className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 md:p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between">
+            <article className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 md:p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between">
               <div>
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/15">
                       <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-7 w-7" />
                     </span>
                     <div>
@@ -2538,7 +2540,7 @@ location: e.location || 'Location to be confirmed',
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowAllNotices(true)}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                       title="Search notices"
                     >
                       <Search className="h-3.5 w-3.5" />
@@ -2546,31 +2548,31 @@ location: e.location || 'Location to be confirmed',
                     </button>
                     <button
                       onClick={() => navigate('/announcements')}
-                      className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     >
                       View all
                     </button>
                   </div>
                 </div>
 
-                <div className="divide-y divide-outline-variant dark:divide-slate-700">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {displayAnnouncements.slice(0, 5).map((announcement, idx) => (
                     <button
                       key={announcement.title + idx}
                       onClick={() => setSelectedNotice(announcement)}
-                      className="flex w-full items-center justify-between gap-3 py-4 text-left hover:bg-surface-container-low/60 dark:hover:bg-slate-700/50 rounded-lg px-2 transition-all cursor-pointer group"
+                      className="flex w-full items-center justify-between gap-3 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-lg px-2 transition-all cursor-pointer group"
                     >
                       <div className="flex items-start gap-3 min-w-0 flex-1">
                         <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
                         <div className="min-w-0 flex-1">
-                          <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors line-clamp-2">
+                          <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                             {announcement.title}
                           </span>
                           <div className="mt-1.5 flex flex-wrap items-center gap-2">
                             <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getAnnouncementBadgeStyle(announcement.type)}`}>
                               {announcement.type}
                             </span>
-                            <span className="inline-flex items-center gap-1 text-[11px] text-on-surface-variant dark:text-slate-400">
+                            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
                               <Clock className="h-3 w-3 shrink-0 opacity-70" />
                               {announcement.date}
                             </span>
@@ -2584,7 +2586,7 @@ location: e.location || 'Location to be confirmed',
               </div>
             </article>
 
-            <aside className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-gradient-to-br from-[#002855] via-astu-navy to-[#05162a] p-5 md:p-6 text-white shadow-lg flex flex-col justify-between h-full">
+            <aside className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-[#002855] via-astu-navy to-[#05162a] p-5 md:p-6 text-white shadow-lg flex flex-col justify-between h-full">
               <div>
                 <div className="flex items-center justify-between">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-astu-green shadow-inner">
@@ -2689,7 +2691,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Alumni Success Stories</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
             </p>
           </div>
@@ -2702,14 +2704,14 @@ location: e.location || 'Location to be confirmed',
               displayStories.slice(0, 3).map((story, idx) => (
                 <article
                   key={story.id || idx}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between`}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between`}
                 >
                   <div>
                     {story.image ? (
                       <img
                         src={story.image}
                         alt=""
-                        className="h-40 w-full rounded-xl object-cover mb-3 bg-slate-100 dark:bg-slate-700"
+                        className="h-40 w-full rounded-xl object-cover mb-3 bg-slate-100 dark:bg-slate-800"
                         onError={(e) => {
                           const img = e.currentTarget;
                           img.onerror = null;
@@ -2718,13 +2720,13 @@ location: e.location || 'Location to be confirmed',
                       />
                     ) : null}
                     <h4 className="font-semibold text-astu-navy dark:text-white">{story.name}</h4>
-                    <p className="text-xs text-on-surface-variant dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {[story.role, story.company].filter(Boolean).join(' · ')}
                     </p>
-                    <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400 line-clamp-3">{story.text}</p>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 line-clamp-3">{story.text}</p>
                   </div>
                   <button
-                    className="mt-4 text-xs font-semibold text-[#003580] dark:text-amber-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
+                    className="mt-4 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
                     onClick={() =>
                       navigate(
                         `/stories/${story.id || String(story.name || '')
@@ -2773,10 +2775,10 @@ location: e.location || 'Location to be confirmed',
               {(displayResearchHighlights?.stats?.length ? displayResearchHighlights.stats : []).map((item: any, idx: number) => {
                 const Icon = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || BookOpen);
                 return (
-                  <article key={item.label || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                    <Icon className="h-6 w-6 text-astu-navy dark:text-amber-400" />
+                  <article key={item.label || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+                    <Icon className="h-6 w-6 text-astu-navy dark:text-blue-400" />
                     <p className="mt-4 text-2xl font-bold text-astu-navy dark:text-white">{item.value || '—'}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-on-surface-variant dark:text-slate-400">{item.label}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{item.label}</p>
                   </article>
                 );
               })}
@@ -2793,7 +2795,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Partners</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Partner Organisations</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
           <div className="relative">
             {displayPartners.length === 0 ? (
@@ -2806,7 +2808,7 @@ location: e.location || 'Location to be confirmed',
                 return (
                   <div
                     key={`${partner.name}-${idx}`}
-                    className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40"
+                    className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40"
                   >
                     {logoUrl ? (
                       <img src={logoUrl} alt={partner.name} className="h-14 w-14 object-contain" onError={handleImageError} />
@@ -2830,7 +2832,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Community Voices</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">What Our Community Says</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               Reflections from alumni, employers, and partners connected through the ASTU network.
             </p>
           </div>
@@ -2841,9 +2843,9 @@ location: e.location || 'Location to be confirmed',
               </div>
             ) : (
               displayTestimonials.map((item: any, idx: number) => (
-              <article key={item.id || item.by || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+              <article key={item.id || item.by || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <Quote className="h-6 w-6 text-astu-red" />
-                <p className="mt-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-300">{item.quote}</p>
+                <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.quote}</p>
                 <p className="mt-4 text-sm font-semibold text-astu-navy dark:text-white">{item.by}</p>
               </article>
               ))
@@ -2855,7 +2857,7 @@ location: e.location || 'Location to be confirmed',
           <div className="mb-10 text-center reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">FAQ</p>
             <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Frequently Asked Questions</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               Common questions about ASTU-AMS, tracer studies, and alumni services.
             </p>
           </div>
@@ -2864,12 +2866,12 @@ location: e.location || 'Location to be confirmed',
               <EmptySection message="Frequently asked questions will appear here once published by the university content team." />
             ) : (
               displayFaq.map((item, idx) => (
-              <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-astu-navy dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors [&::-webkit-details-marker]:hidden">
+              <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
+                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors [&::-webkit-details-marker]:hidden">
                   <span>{item.question}</span>
                   <HelpCircle className="h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 group-open:rotate-180" />
                 </summary>
-                <div className="border-t border-outline-variant dark:border-slate-700 px-5 py-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                <div className="border-t border-slate-100 dark:border-slate-800 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                   {item.answer}
                 </div>
               </details>
@@ -2879,7 +2881,7 @@ location: e.location || 'Location to be confirmed',
         </section>
 
         <section id="career-opportunities" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)] dark:shadow-slate-900/40">
+          <div className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)] dark:shadow-slate-900/40">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">
@@ -2888,7 +2890,7 @@ location: e.location || 'Location to be confirmed',
                 <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white">
                   {careerCta?.title || 'Jobs, internships, AI matching, and candidate shortlisting'}
                 </h3>
-                <p className="mt-2 max-w-3xl text-sm text-on-surface-variant dark:text-slate-400">
+                <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-400">
                   {careerCta?.description ||
                     'Employers can post bulk jobs, manage talent pools, shortlist candidates, schedule interviews, and join job fairs.'}
                 </p>
@@ -2906,20 +2908,20 @@ location: e.location || 'Location to be confirmed',
 
         {tracerSpotlight && (
           <section id="tracer-spotlight" className="mx-auto max-w-[1440px] px-4 pb-12 md:px-8">
-            <div className="reveal rounded-xl border border-astu-navy/20 dark:border-astu-navy/40 bg-gradient-to-r from-[#003580]/5 dark:from-astu-navy/20 to-white dark:to-slate-900 p-6 shadow-sm">
+            <div className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-r from-blue-50/50 dark:from-slate-900 via-white dark:via-slate-900 to-slate-50/50 dark:to-slate-900 p-6 shadow-sm">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">Tracer Study</p>
                   <h3 className="mt-2 text-xl font-bold text-astu-navy dark:text-white">{tracerSpotlight.title}</h3>
-                  <p className="mt-2 max-w-3xl text-sm text-on-surface-variant dark:text-slate-400">{tracerSpotlight.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-on-surface-variant dark:text-slate-400">
+                  <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-400">{tracerSpotlight.description}</p>
+                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
                     {tracerSpotlight.targetBatch && <span>Batch: <strong className="dark:text-slate-200">{tracerSpotlight.targetBatch}</strong></span>}
                     {tracerSpotlight.responseRate && <span>Response rate: <strong className="dark:text-slate-200">{tracerSpotlight.responseRate}</strong></span>}
                     {tracerSpotlight.deadline && <span>Deadline: <strong className="dark:text-slate-200">{tracerSpotlight.deadline}</strong></span>}
                   </div>
                 </div>
                 <button
-                  className="rounded-md bg-astu-navy px-5 py-3 text-sm font-semibold text-white hover:brightness-110"
+                  className="rounded-md bg-astu-navy dark:bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:brightness-110"
                   onClick={() => navigate('/login')}
                 >
                   Complete Tracer Survey
@@ -3151,10 +3153,10 @@ location: e.location || 'Location to be confirmed',
       {/* Notice Detail Modal */}
       {selectedNotice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-2xl">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
             <button
               onClick={() => setSelectedNotice(null)}
-              className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
+              className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
             >
               <X className="h-5 w-5" />
             </button>
@@ -3166,11 +3168,11 @@ location: e.location || 'Location to be confirmed',
                 <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getAnnouncementBadgeStyle(selectedNotice.type || '')}`}>
                   {selectedNotice.type || 'Official Announcement'}
                 </span>
-                <p className="mt-0.5 text-xs text-on-surface-variant dark:text-slate-400">{selectedNotice.date}</p>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{selectedNotice.date}</p>
               </div>
             </div>
             <h3 className="mt-4 text-xl font-bold text-astu-navy dark:text-white">{selectedNotice.title}</h3>
-            <div className="mt-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/50 p-4">
+            <div className="mt-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
               <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line">
                 {selectedNotice.excerpt || selectedNotice.description || selectedNotice.content || "Full official announcement details and documentation from ASTU-AMS Administration."}
               </p>
@@ -3182,7 +3184,7 @@ location: e.location || 'Location to be confirmed',
                   setSelectedNotice(null);
                   navigate(`/announcements/${slug}`);
                 }}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#003580] dark:text-sky-400 hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
               >
                 <span>Read Full Article</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -3190,7 +3192,7 @@ location: e.location || 'Location to be confirmed',
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedNotice(null)}
-                  className="rounded-lg border border-outline-variant dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-600 cursor-pointer"
+                  className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                 >
                   Close
                 </button>
@@ -3199,7 +3201,7 @@ location: e.location || 'Location to be confirmed',
                     setSelectedNotice(null);
                     navigate('/login');
                   }}
-                  className="rounded-lg bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
+                  className="rounded-lg bg-astu-navy dark:bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
                 >
                   Access Portal
                 </button>
@@ -3212,15 +3214,15 @@ location: e.location || 'Location to be confirmed',
       {/* View All Notices Modal */}
       {showAllNotices && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-outline-variant dark:border-slate-700 pb-4">
+          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30 text-astu-navy dark:text-amber-400">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/20 text-astu-navy dark:text-sky-400">
                   <Bell className="h-5 w-5" />
                 </span>
                 <div>
                   <h3 className="text-xl font-bold text-astu-navy dark:text-white">Official Notices & Announcements</h3>
-                  <p className="text-xs text-on-surface-variant dark:text-slate-400">All public university announcements and official directives.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">All public university announcements and official directives.</p>
                 </div>
               </div>
               <button
@@ -3228,7 +3230,7 @@ location: e.location || 'Location to be confirmed',
                   setShowAllNotices(false);
                   setNoticeSearch('');
                 }}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -3241,11 +3243,11 @@ location: e.location || 'Location to be confirmed',
                 value={noticeSearch}
                 onChange={(e) => setNoticeSearch(e.target.value)}
                 placeholder="Search notices by keyword..."
-                className="w-full rounded-lg border border-outline-variant dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-9 pr-3 text-sm text-astu-navy dark:text-white outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:bg-white dark:focus:bg-slate-800"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
-            <div className="mt-4 flex-1 overflow-y-auto divide-y divide-outline-variant dark:divide-slate-700 pr-1">
+            <div className="mt-4 flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
               {displayAnnouncements
                 .filter(n => !noticeSearch || n.title.toLowerCase().includes(noticeSearch.toLowerCase()) || (n.excerpt && n.excerpt.toLowerCase().includes(noticeSearch.toLowerCase())))
                 .map((announcement, idx) => (
@@ -3255,15 +3257,15 @@ location: e.location || 'Location to be confirmed',
                       setShowAllNotices(false);
                       setSelectedNotice(announcement);
                     }}
-                    className="flex w-full items-start gap-3.5 py-3.5 px-2 text-left hover:bg-surface-container-low/80 dark:hover:bg-slate-700/50 rounded-xl transition-all cursor-pointer group"
+                    className="flex w-full items-start gap-3.5 py-3.5 px-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer group"
                   >
                     <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors">{announcement.title}</span>
+                        <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors">{announcement.title}</span>
                         <span className="shrink-0 text-[10px] font-bold text-slate-400 dark:text-slate-500">{announcement.date}</span>
                       </div>
-                      <span className="mt-1 block text-xs text-on-surface-variant dark:text-slate-400">{announcement.type}</span>
+                      <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{announcement.type}</span>
                       {announcement.excerpt && (
                         <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{announcement.excerpt}</p>
                       )}
@@ -3272,13 +3274,13 @@ location: e.location || 'Location to be confirmed',
                 ))}
             </div>
 
-            <div className="mt-4 border-t border-outline-variant dark:border-slate-700 pt-3 flex justify-end">
+            <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-end">
               <button
                 onClick={() => {
                   setShowAllNotices(false);
                   setNoticeSearch('');
                 }}
-                className="rounded-lg bg-astu-navy px-5 py-2 text-xs font-semibold text-white hover:brightness-110"
+                className="rounded-lg bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:brightness-110"
               >
                 Close List
               </button>
@@ -3290,20 +3292,20 @@ location: e.location || 'Location to be confirmed',
       {/* RSVP & Full Event Registration Modal */}
       {rsvpModalItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-md animate-fade-in" onClick={() => setRsvpModalItem(null)}>
-          <div className="relative max-w-lg w-full rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-lg w-full rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {!confirmedQrPass ? (
               <>
-                <div className="flex items-center justify-between border-b dark:border-slate-700 pb-3 border-slate-100">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
-                    <span className="rounded-md bg-astu-navy px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">{rsvpModalItem.kind} Registration</span>
+                    <span className="rounded-md bg-astu-navy dark:bg-blue-600 px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">{rsvpModalItem.kind} Registration</span>
                     <h3 className="mt-1.5 text-lg font-bold text-astu-navy dark:text-white">{rsvpModalItem.title}</h3>
                   </div>
-                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200">
+                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3.5 text-xs space-y-1 border border-slate-100 dark:border-slate-700">
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-xs space-y-1 border border-slate-200/80 dark:border-slate-700/80">
                   <p className="text-slate-600 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-white">Scheduled Date:</span> {rsvpModalItem.date}</p>
                   {rsvpModalItem.location && <p className="text-slate-600 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-white">Venue / Location:</span> {rsvpModalItem.location}</p>}
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium pt-1">Free Admission • A registration reference is generated after you submit</p>
@@ -3318,7 +3320,7 @@ location: e.location || 'Location to be confirmed',
                         value={rsvpName}
                         onChange={(e) => setRsvpName(e.target.value)}
                         placeholder="e.g. Dr. Abebe Yosef"
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
                       />
                     </div>
                     <div>
@@ -3328,7 +3330,7 @@ location: e.location || 'Location to be confirmed',
                         value={rsvpEmail}
                         onChange={(e) => setRsvpEmail(e.target.value)}
                         placeholder="e.g. abebe@astu.edu.et"
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
                       />
                     </div>
                   </div>
@@ -3341,7 +3343,7 @@ location: e.location || 'Location to be confirmed',
                         value={rsvpPhone}
                         onChange={(e) => setRsvpPhone(e.target.value)}
                         placeholder="e.g. +251 911 234 567"
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
                       />
                     </div>
                     <div>
@@ -3349,7 +3351,7 @@ location: e.location || 'Location to be confirmed',
                       <select
                         value={rsvpRole}
                         onChange={(e) => setRsvpRole(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
                       >
                         <option value="Alumni">ASTU Alumni</option>
                         <option value="Student">Graduating Senior Student</option>
@@ -3366,7 +3368,7 @@ location: e.location || 'Location to be confirmed',
                       value={rsvpAffiliation}
                       onChange={(e) => setRsvpAffiliation(e.target.value)}
                       placeholder="e.g. School of Electrical Engineering & Computing"
-                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
                     />
                   </div>
 
@@ -3377,16 +3379,16 @@ location: e.location || 'Location to be confirmed',
                       value={rsvpNotes}
                       onChange={(e) => setRsvpNotes(e.target.value)}
                       placeholder="e.g. Wheelchair access / Vegetarian meal"
-                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
-                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-slate-200 dark:border-slate-600 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
                     Cancel
                   </button>
-                  <button onClick={confirmRsvpRegistration} className="rounded-lg bg-[#003580] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
+                  <button onClick={confirmRsvpRegistration} className="rounded-lg bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
                     Complete & Confirm RSVP
                   </button>
                 </div>
@@ -3402,7 +3404,7 @@ location: e.location || 'Location to be confirmed',
                   <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Participant: {rsvpName} ({rsvpEmail})</p>
                 </div>
 
-                <div className="mx-auto w-48 h-48 rounded-xl border-2 border-slate-200 dark:border-slate-600 p-3 bg-white dark:bg-slate-100 flex items-center justify-center shadow-inner">
+                <div className="mx-auto w-48 h-48 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-3 bg-white dark:bg-slate-100 flex items-center justify-center shadow-inner">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(confirmedQrPass)}`}
                     alt="Entry Ticket Code"
@@ -3417,7 +3419,7 @@ location: e.location || 'Location to be confirmed',
 
                 <button
                   onClick={() => setRsvpModalItem(null)}
-                  className="w-full rounded-xl bg-slate-900 dark:bg-slate-700 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-600"
+                  className="w-full rounded-xl bg-astu-navy dark:bg-blue-600 py-2.5 text-xs font-semibold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500"
                 >
                   Done & Close
                 </button>
@@ -3434,7 +3436,7 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setSelectedEventModal(null)}
         >
           <div
-            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col"
+            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Banner Image with Curved Bottom */}
@@ -3475,7 +3477,7 @@ location: e.location || 'Location to be confirmed',
             <div className="p-6 overflow-y-auto space-y-5">
               {/* Event Meta Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-red/10 text-astu-red">
                     <CalendarDays className="h-5 w-5" />
                   </div>
@@ -3487,7 +3489,7 @@ location: e.location || 'Location to be confirmed',
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/20 text-astu-navy dark:text-sky-400">
                     <MapPin className="h-5 w-5" />
                   </div>
@@ -3500,7 +3502,7 @@ location: e.location || 'Location to be confirmed',
                 </div>
 
                 {selectedEventModal.speaker && (
-                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
+                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
                       <CircleUserRound className="h-5 w-5" />
                     </div>
@@ -3513,7 +3515,7 @@ location: e.location || 'Location to be confirmed',
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
                     <Users className="h-5 w-5" />
                   </div>
@@ -3537,7 +3539,7 @@ location: e.location || 'Location to be confirmed',
               </div>
 
               {/* Agenda Highlights */}
-              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-slate-900/40 border border-blue-100 dark:border-slate-700/50">
+              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-slate-800/50 border border-blue-100 dark:border-slate-700/80">
                 <h5 className="text-xs font-bold text-astu-navy dark:text-sky-400 uppercase tracking-wider mb-2">
                   Session Highlights
                 </h5>
@@ -3559,10 +3561,10 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Modal Action Footer */}
-            <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/80">
               <button
                 onClick={() => setSelectedEventModal(null)}
-                className="rounded-xl border border-slate-200 dark:border-slate-700 px-5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                className="rounded-xl border border-slate-200 dark:border-slate-700 px-5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 Close
               </button>
@@ -3582,7 +3584,7 @@ location: e.location || 'Location to be confirmed',
                 className={`rounded-xl px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all duration-200 ${
                   registeredTitles.includes(selectedEventModal.title)
                     ? 'bg-emerald-600 cursor-default'
-                    : 'bg-astu-navy hover:bg-astu-navy/90 hover:shadow-lg dark:bg-sky-600 dark:hover:bg-sky-500'
+                    : 'bg-astu-navy hover:bg-astu-navy/90 hover:shadow-lg dark:bg-blue-600 dark:hover:bg-blue-500'
                 }`}
               >
                 {registeredTitles.includes(selectedEventModal.title) ? '✓ Registered' : 'Register for Event'}
@@ -3599,11 +3601,11 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setShowAllEventsModal(false)}
         >
           <div
-            className="relative max-w-4xl w-full rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col"
+            className="relative max-w-4xl w-full rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/80">
               <div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400">
                   <CalendarDays className="h-3 w-3" />
@@ -3622,14 +3624,14 @@ location: e.location || 'Location to be confirmed',
                   setShowAllEventsModal(false);
                   setAllEventsSearch('');
                 }}
-                className="self-end sm:self-auto rounded-full p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                className="self-end sm:self-auto rounded-full p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Search & Filter Toolbar */}
-            <div className="p-4 border-b border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-800 flex flex-col sm:flex-row gap-3">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -3637,7 +3639,7 @@ location: e.location || 'Location to be confirmed',
                   value={allEventsSearch}
                   onChange={(e) => setAllEventsSearch(e.target.value)}
                   placeholder="Search events by title, keyword, or venue..."
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-astu-navy dark:focus:border-sky-400"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
 
@@ -3653,8 +3655,8 @@ location: e.location || 'Location to be confirmed',
                     onClick={() => setEventFilterTab(tab.id as any)}
                     className={`rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all ${
                       eventFilterTab === tab.id
-                        ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300'
+                        ? 'bg-astu-navy text-white shadow-sm dark:bg-blue-600'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
                     }`}
                   >
                     {tab.label}
@@ -3679,7 +3681,7 @@ location: e.location || 'Location to be confirmed',
                 .map((event, idx) => (
                   <div
                     key={event.id + '-all-' + idx}
-                    className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all group"
+                    className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all group"
                   >
                     <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
                       <img
@@ -3708,7 +3710,7 @@ location: e.location || 'Location to be confirmed',
                         </p>
                       </div>
 
-                      <div className="mt-4 flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                      <div className="mt-4 flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                         <button
                           onClick={() => {
                             setShowAllEventsModal(false);
@@ -3723,7 +3725,7 @@ location: e.location || 'Location to be confirmed',
                           className={`flex-1 rounded-lg py-1.5 text-xs font-bold text-white transition-all ${
                             registeredTitles.includes(event.title)
                               ? 'bg-emerald-600'
-                              : 'bg-astu-navy hover:bg-astu-navy/90 dark:bg-sky-600'
+                              : 'bg-astu-navy hover:bg-astu-navy/90 dark:bg-blue-600 dark:hover:bg-blue-500'
                           }`}
                         >
                           {registeredTitles.includes(event.title) ? '✓ Registered' : 'Register'}
@@ -3733,7 +3735,7 @@ location: e.location || 'Location to be confirmed',
                             setShowAllEventsModal(false);
                             setSelectedEventModal(event);
                           }}
-                          className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                          className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                         >
                           Details
                         </button>
@@ -3744,13 +3746,13 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
               <button
                 onClick={() => {
                   setShowAllEventsModal(false);
                   setAllEventsSearch('');
                 }}
-                className="rounded-xl bg-astu-navy px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90"
+                className="rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500"
               >
                 Close Directory
               </button>
@@ -3766,7 +3768,7 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setSelectedNewsModal(null)}
         >
           <div
-            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col animate-modal-enter"
+            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col animate-modal-enter"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header Bar with Gradient */}
@@ -3814,26 +3816,26 @@ location: e.location || 'Location to be confirmed',
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/60 p-4">
+              <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4">
                 <h5 className="text-xs font-bold uppercase tracking-wider text-astu-navy dark:text-white mb-2">
                   Key Guidance & Inquiries
                 </h5>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   For questions regarding this release, contact the university coordination office at{' '}
-                  <span className="font-semibold text-astu-navy dark:text-amber-400">irccd@astu.edu.et</span> or phone{' '}
-                  <span className="font-semibold text-astu-navy dark:text-amber-400">+251-221-110000</span>.
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">irccd@astu.edu.et</span> or phone{' '}
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">+251-221-110000</span>.
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     navigator.clipboard?.writeText(window.location.href);
                     toast.success('Announcement link copied to clipboard!');
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                 >
                   <Share2 className="h-4 w-4" />
                   <span>Share Notice</span>
@@ -3845,14 +3847,14 @@ location: e.location || 'Location to be confirmed',
                       const slug = selectedNewsModal.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
                       navigate(`/announcements/${slug}`);
                     }}
-                    className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-xl bg-astu-navy dark:bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500 transition-all shadow-sm"
                   >
                     <span>Full Notice Page</span>
                     <ExternalLink className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => setSelectedNewsModal(null)}
-                    className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                    className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                   >
                     Close
                   </button>
@@ -3870,11 +3872,11 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setShowAllNewsModal(false)}
         >
           <div
-            className="relative max-w-4xl w-full rounded-[2.5rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col animate-modal-enter"
+            className="relative max-w-4xl w-full rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col animate-modal-enter"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-astu-red">
                   Official Directory
@@ -3888,14 +3890,14 @@ location: e.location || 'Location to be confirmed',
                   setShowAllNewsModal(false);
                   setNewsSearchQuery('');
                 }}
-                className="rounded-full bg-slate-100 dark:bg-slate-700 p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all"
+                className="rounded-full bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Search Input */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/50">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
@@ -3903,7 +3905,7 @@ location: e.location || 'Location to be confirmed',
                   placeholder="Search all announcements by title or keyword..."
                   value={newsSearchQuery}
                   onChange={(e) => setNewsSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/20"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -3925,7 +3927,7 @@ location: e.location || 'Location to be confirmed',
                         setShowAllNewsModal(false);
                         setSelectedNewsModal(n);
                       }}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 hover:border-astu-navy/30 dark:hover:border-sky-500/30 hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-all cursor-pointer group"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-all cursor-pointer group"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1.5">
@@ -3934,7 +3936,7 @@ location: e.location || 'Location to be confirmed',
                           </span>
                           <span className="text-[11px] text-slate-400">{n.date || 'Recent'}</span>
                         </div>
-                        <h4 className="text-sm font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors truncate">
+                        <h4 className="text-sm font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors truncate">
                           {n.title}
                         </h4>
                         {n.excerpt && (
@@ -3943,7 +3945,7 @@ location: e.location || 'Location to be confirmed',
                           </p>
                         )}
                       </div>
-                      <button className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-astu-navy dark:text-amber-400 group-hover:translate-x-1 transition-transform">
+                      <button className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-astu-navy dark:text-blue-400 group-hover:translate-x-1 transition-transform">
                         <span>Read</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>
@@ -3953,13 +3955,13 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
               <button
                 onClick={() => {
                   setShowAllNewsModal(false);
                   setNewsSearchQuery('');
                 }}
-                className="rounded-xl bg-astu-navy px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90"
+                className="rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500"
               >
                 Close Directory
               </button>
